@@ -1429,6 +1429,780 @@
 
   </style>
 
+
+  <!-- ═══════════════════════════════════════════════════════════
+       NEARBITE — DEFINITIVE PREMIUM UPGRADE v3
+       Pass 3 of 3: Full-system visual polish + body elevation
+  ═══════════════════════════════════════════════════════════ -->
+
+  <!-- Inter font — superior legibility at small sizes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+
+    /* ═══════════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════════ */
+    :root {
+      --nb-orange:        #FC8019;
+      --nb-orange-glow:   rgba(252,128,25,0.28);
+      --nb-orange-soft:   rgba(252,128,25,0.10);
+      --nb-gold:          #FFD325;
+      --nb-purple:        #5b2e91;
+      --nb-green:         #1ba672;
+      --nb-green-glow:    rgba(27,166,114,0.22);
+
+      --nb-bg:            #f2f3f7;
+      --nb-surface:       #ffffff;
+      --nb-border:        rgba(0,0,0,0.07);
+      --nb-text-1:        #111827;
+      --nb-text-2:        #6b7280;
+      --nb-text-3:        #9ca3af;
+
+      --nb-shadow-xs:     0 1px 3px rgba(0,0,0,0.07);
+      --nb-shadow-sm:     0 2px 8px rgba(0,0,0,0.08);
+      --nb-shadow-md:     0 4px 18px rgba(0,0,0,0.10);
+      --nb-shadow-lg:     0 8px 32px rgba(0,0,0,0.13);
+      --nb-shadow-xl:     0 16px 48px rgba(0,0,0,0.16);
+
+      --nb-ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+      --nb-ease-out:      cubic-bezier(0.4, 0, 0.2, 1);
+      --nb-ease-in-out:   cubic-bezier(0.45, 0, 0.55, 1);
+
+      --nb-radius-sm:     12px;
+      --nb-radius-md:     16px;
+      --nb-radius-lg:     20px;
+      --nb-radius-xl:     24px;
+      --nb-radius-pill:   999px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FONT SYSTEM — Inter replaces Poppins everywhere
+    ═══════════════════════════════════════════════ */
+    body,
+    .search-text,
+    .banner-cta,
+    #cart-summary,
+    .ftab,
+    .sec-title,
+    .nav-item,
+    .vr-name,
+    .rc-name,
+    .prod-name,
+    .loc-name,
+    .store-title {
+      font-family: 'Inter', 'Poppins', sans-serif !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       BODY + PAGE CHROME
+    ═══════════════════════════════════════════════ */
+    body {
+      background: #eef0f5 !important;
+      /* Very subtle warm noise texture via repeating-conic */
+    }
+
+    /* Page-level entrance: stagger body content below header */
+    body > *:not(header):not(nav):not(#cart-bar) {
+      animation: pageFadeIn 0.5s var(--nb-ease-out) both;
+    }
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+    body > *:nth-child(2) { animation-delay: 0.08s; }
+    body > *:nth-child(3) { animation-delay: 0.14s; }
+    body > *:nth-child(4) { animation-delay: 0.20s; }
+    body > *:nth-child(5) { animation-delay: 0.26s; }
+
+    /* ═══════════════════════════════════════════════
+       SECTION CARDS — elevated white panels
+    ═══════════════════════════════════════════════ */
+    .section-card {
+      background: var(--nb-surface) !important;
+      border-radius: 0 !important;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.8),
+        0 -1px 0 rgba(0,0,0,0.04) !important;
+      margin-bottom: 6px !important;
+    }
+
+    .sec-title {
+      font-size: 17px !important;
+      font-weight: 800 !important;
+      color: var(--nb-text-1) !important;
+      letter-spacing: -0.5px !important;
+    }
+
+    .sec-see-all {
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      color: var(--nb-orange) !important;
+      background: var(--nb-orange-soft) !important;
+      padding: 4px 10px !important;
+      border-radius: var(--nb-radius-pill) !important;
+      transition: background 0.18s var(--nb-ease-out), transform 0.18s var(--nb-ease-spring) !important;
+    }
+    .sec-see-all:active {
+      transform: scale(0.94) !important;
+      background: rgba(252,128,25,0.18) !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FILTER TABS — refined pill system
+    ═══════════════════════════════════════════════ */
+    .filter-bar {
+      background: var(--nb-surface) !important;
+      padding: 14px 16px !important;
+    }
+    .filter-tabs {
+      display: flex !important;
+      border: 1.5px solid #eaecf0 !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      background: #f9fafb !important;
+    }
+    .ftab {
+      padding: 11px 6px !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      color: var(--nb-text-2) !important;
+      transition: color 0.18s ease, background 0.18s ease !important;
+      letter-spacing: -0.1px !important;
+    }
+    .ftab.active {
+      color: var(--nb-orange) !important;
+      background: #fff8f2 !important;
+      border-radius: 11px !important;
+    }
+    .ftab + .ftab { border-left: 1.5px solid #eaecf0 !important; }
+
+    /* ═══════════════════════════════════════════════
+       CATEGORY CIRCLES — premium interactive rings
+    ═══════════════════════════════════════════════ */
+    .cat-item {
+      width: 80px !important;
+      gap: 8px !important;
+      transition: transform 0.2s var(--nb-ease-spring) !important;
+      will-change: transform;
+    }
+    .cat-item:active { transform: scale(0.88) !important; }
+
+    .cat-ring {
+      width: 68px !important;
+      height: 68px !important;
+      border-radius: 50% !important;
+      background: #f8f9fc !important;
+      border: 2px solid rgba(0,0,0,0.06) !important;
+      box-shadow: var(--nb-shadow-sm), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+      overflow: hidden !important;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s var(--nb-ease-spring) !important;
+      will-change: transform;
+    }
+    /* Hover on non-touch devices */
+    @media (hover: hover) {
+      .cat-item:hover .cat-ring {
+        border-color: var(--nb-orange) !important;
+        box-shadow: 0 0 0 4px var(--nb-orange-soft), var(--nb-shadow-md) !important;
+        transform: scale(1.07) !important;
+      }
+    }
+    .cat-item:active .cat-ring {
+      border-color: var(--nb-orange) !important;
+      box-shadow: 0 0 0 3px var(--nb-orange-soft) !important;
+      transform: scale(0.92) !important;
+    }
+
+    .cat-ring img {
+      padding: 7px !important;
+      transition: transform 0.3s var(--nb-ease-spring) !important;
+    }
+    @media (hover: hover) {
+      .cat-item:hover .cat-ring img { transform: scale(1.12) !important; }
+    }
+
+    .cat-name {
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      color: #374151 !important;
+      letter-spacing: -0.1px !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       HORIZONTAL RESTAURANT CARDS — depth system
+    ═══════════════════════════════════════════════ */
+    .rest-card-h {
+      width: 170px !important;
+      border-radius: 18px !important;
+      border: 1px solid rgba(0,0,0,0.05) !important;
+      box-shadow: var(--nb-shadow-md) !important;
+      transition:
+        transform 0.22s var(--nb-ease-spring),
+        box-shadow 0.22s var(--nb-ease-out) !important;
+      will-change: transform;
+      overflow: hidden !important;
+    }
+    @media (hover: hover) {
+      .rest-card-h:hover {
+        transform: translateY(-5px) scale(1.01) !important;
+        box-shadow: var(--nb-shadow-xl) !important;
+      }
+    }
+    .rest-card-h:active {
+      transform: scale(0.96) !important;
+      box-shadow: var(--nb-shadow-sm) !important;
+    }
+
+    /* Image zoom on hover */
+    .rc-img-wrap { overflow: hidden !important; }
+    .rc-img-wrap img {
+      transition: transform 0.4s var(--nb-ease-in-out) !important;
+      will-change: transform;
+    }
+    @media (hover: hover) {
+      .rest-card-h:hover .rc-img-wrap img {
+        transform: scale(1.06) !important;
+      }
+    }
+
+    .rc-name {
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: var(--nb-text-1) !important;
+      letter-spacing: -0.2px !important;
+    }
+    .rc-meta {
+      font-size: 11px !important;
+      color: var(--nb-text-2) !important;
+      font-weight: 600 !important;
+    }
+    .rc-star { color: var(--nb-green) !important; }
+    .rc-cuisine {
+      font-size: 11px !important;
+      color: var(--nb-text-3) !important;
+    }
+
+    /* Heart button glass effect */
+    .rc-heart {
+      width: 30px !important;
+      height: 30px !important;
+      background: rgba(255,255,255,0.95) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+      transition: transform 0.18s var(--nb-ease-spring) !important;
+    }
+    .rc-heart:active { transform: scale(0.85) !important; }
+
+    /* ═══════════════════════════════════════════════
+       VERTICAL RESTAURANT CARDS — flagship elevation
+    ═══════════════════════════════════════════════ */
+    .vrest-section {
+      background: var(--nb-surface) !important;
+      padding: 20px 14px 12px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .vr {
+      border-radius: 20px !important;
+      border: 1px solid rgba(0,0,0,0.05) !important;
+      box-shadow: var(--nb-shadow-md) !important;
+      margin-bottom: 18px !important;
+      transition:
+        transform 0.22s var(--nb-ease-spring),
+        box-shadow 0.22s var(--nb-ease-out) !important;
+      will-change: transform;
+      overflow: hidden !important;
+    }
+    @media (hover: hover) {
+      .vr:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: var(--nb-shadow-xl) !important;
+      }
+      .vr:hover .vr-img img { transform: scale(1.04) !important; }
+    }
+    .vr:active {
+      transform: scale(0.985) !important;
+      box-shadow: var(--nb-shadow-sm) !important;
+    }
+
+    .vr-img { height: 195px !important; overflow: hidden !important; }
+    .vr-img img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      transition: transform 0.5s var(--nb-ease-in-out) !important;
+      will-change: transform;
+    }
+
+    /* Richer gradient overlay on card image */
+    .vr-offer {
+      background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.82) 0%,
+        rgba(0,0,0,0.30) 50%,
+        transparent 100%
+      ) !important;
+      padding: 36px 14px 12px !important;
+      font-size: 11.5px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.1px !important;
+    }
+
+    .vr-heart {
+      width: 32px !important;
+      height: 32px !important;
+      background: rgba(255,255,255,0.95) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
+      transition: transform 0.18s var(--nb-ease-spring) !important;
+    }
+    .vr-heart:active { transform: scale(0.82) !important; }
+
+    .vr-body { padding: 13px 14px 15px !important; }
+
+    .vr-name {
+      font-size: 16px !important;
+      font-weight: 800 !important;
+      color: var(--nb-text-1) !important;
+      letter-spacing: -0.4px !important;
+    }
+
+    /* Rating pill — green tinted */
+    .vr-rating {
+      background: #ecfdf5 !important;
+      border: 1.5px solid rgba(27,166,114,0.2) !important;
+      border-radius: 9px !important;
+      padding: 4px 9px !important;
+      box-shadow: none !important;
+    }
+    .vr-rating .star-icon { color: var(--nb-green) !important; font-size: 10px !important; }
+    .vr-rating .rating-num { font-size: 12px !important; font-weight: 800 !important; color: #064e3b !important; }
+    .vr-rating .rating-divider { background: rgba(27,166,114,0.25) !important; }
+    .vr-rating .rating-count { color: #065f46 !important; font-weight: 600 !important; font-size: 10px !important; }
+
+    .vr-cuisine {
+      font-size: 12px !important;
+      color: var(--nb-text-3) !important;
+      font-weight: 500 !important;
+      margin-bottom: 11px !important;
+    }
+
+    .vr-meta {
+      font-size: 12px !important;
+      color: var(--nb-text-2) !important;
+      font-weight: 600 !important;
+      padding-top: 10px !important;
+      border-top: 1px dashed #e5e7eb !important;
+    }
+    .vr-meta i { color: var(--nb-orange) !important; }
+
+    /* ═══════════════════════════════════════════════
+       99 STORE CARD — upgraded blue depth
+    ═══════════════════════════════════════════════ */
+    .store-card {
+      background: linear-gradient(145deg, #f0f4ff 0%, #fafbff 60%, #fff 100%) !important;
+      border-radius: 22px !important;
+      border: 1.5px solid #dde8ff !important;
+      padding: 16px !important;
+      margin: 0 14px 8px !important;
+      box-shadow: 0 4px 20px rgba(37,99,235,0.08) !important;
+    }
+
+    .store-icon-wrap {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.35) !important;
+    }
+
+    .store-title {
+      font-size: 17px !important;
+      font-weight: 900 !important;
+      letter-spacing: -0.4px !important;
+    }
+
+    .store-see-all {
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      padding: 7px 13px !important;
+      border-radius: var(--nb-radius-sm) !important;
+      box-shadow: var(--nb-shadow-xs) !important;
+      transition: transform 0.18s var(--nb-ease-spring), box-shadow 0.18s ease !important;
+    }
+    .store-see-all:active {
+      transform: scale(0.95) !important;
+      box-shadow: none !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       PRODUCT CARDS — 99 store items
+    ═══════════════════════════════════════════════ */
+    .prod-card {
+      border-radius: 20px !important;
+      border: 1px solid rgba(0,0,0,0.05) !important;
+      box-shadow: var(--nb-shadow-sm) !important;
+      transition:
+        transform 0.2s var(--nb-ease-spring),
+        box-shadow 0.2s ease !important;
+      will-change: transform;
+    }
+    @media (hover: hover) {
+      .prod-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: var(--nb-shadow-lg) !important;
+      }
+    }
+    .prod-card:active {
+      transform: scale(0.96) !important;
+      box-shadow: var(--nb-shadow-xs) !important;
+    }
+
+    .prod-img-wrap img {
+      border-radius: 14px !important;
+      transition: transform 0.3s var(--nb-ease-spring) !important;
+      background: #f3f4f6 !important;
+    }
+    @media (hover: hover) {
+      .prod-card:hover .prod-img-wrap img {
+        transform: scale(1.08) !important;
+      }
+    }
+
+    .prod-price-tag {
+      background: linear-gradient(135deg, #FFC107, #FF9800) !important;
+      color: #3d1f00 !important;
+      font-weight: 900 !important;
+      border: 2.5px solid #fff !important;
+      box-shadow: 0 3px 10px rgba(255,152,0,0.32) !important;
+    }
+
+    .prod-name {
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: var(--nb-text-1) !important;
+      letter-spacing: -0.2px !important;
+    }
+
+    .prod-add-btn {
+      background: #eff6ff !important;
+      color: #1d4ed8 !important;
+      border-radius: 10px !important;
+      border: 1.5px solid #bfdbfe !important;
+      font-weight: 800 !important;
+      font-size: 11px !important;
+      transition: all 0.18s var(--nb-ease-spring) !important;
+    }
+    .prod-add-btn:active {
+      transform: scale(0.94) !important;
+      background: #dbeafe !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FREE CASH BANNER — cinematic deep blue
+    ═══════════════════════════════════════════════ */
+    .cash-banner {
+      background: linear-gradient(
+        140deg,
+        #0f0a2e 0%,
+        #1c1148 30%,
+        #2f1f72 60%,
+        #1a3b70 100%
+      ) !important;
+      /* Animated shimmer across the banner */
+      background-size: 200% 200% !important;
+      animation: cashBannerShift 8s ease infinite !important;
+      padding: 32px 20px !important;
+      margin-bottom: 6px !important;
+    }
+    @keyframes cashBannerShift {
+      0%   { background-position: 0%   0%;   }
+      50%  { background-position: 100% 100%; }
+      100% { background-position: 0%   0%;   }
+    }
+
+    /* Stars / sparkles in the cash banner using text */
+    .cash-banner::before {
+      content: '✦   ·   ✧   ·   ✦';
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      color: rgba(255,255,255,0.18);
+      letter-spacing: 6px;
+      pointer-events: none;
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    .cash-text {
+      font-size: 17px !important;
+      font-weight: 800 !important;
+      line-height: 1.5 !important;
+      letter-spacing: -0.2px !important;
+    }
+    .cash-text .hi { color: #FFC72C !important; }
+
+    /* Gold coin — richer radial + rotation wiggle */
+    .cash-coin {
+      background: radial-gradient(
+        circle at 32% 28%,
+        #FFF0A0 0%,
+        #FFD700 30%,
+        #F0A500 65%,
+        #7A4900 100%
+      ) !important;
+      box-shadow:
+        0 8px 28px rgba(255,215,0,0.55),
+        inset 0 3px 8px rgba(255,255,255,0.35),
+        inset 0 -4px 8px rgba(0,0,0,0.2) !important;
+      animation: coinWiggle 5s ease-in-out infinite !important;
+      will-change: transform;
+    }
+    @keyframes coinWiggle {
+      0%,  100% { transform: rotate(0deg)  scale(1);    }
+      20%        { transform: rotate(6deg)  scale(1.04); }
+      40%        { transform: rotate(-5deg) scale(1.02); }
+      60%        { transform: rotate(4deg)  scale(1.03); }
+      80%        { transform: rotate(-3deg) scale(1.01); }
+    }
+    .coin-free {
+      font-size: 9.5px !important;
+      font-weight: 900 !important;
+      letter-spacing: 1.8px !important;
+      color: rgba(255,255,255,0.95) !important;
+    }
+    .coin-amt {
+      font-size: 23px !important;
+      font-weight: 900 !important;
+      color: #fff !important;
+      letter-spacing: -0.5px !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SKELETON — premium shimmer quality upgrade
+    ═══════════════════════════════════════════════ */
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        #ececf0 0%,
+        #e4e4ea 20%,
+        #f4f4f8 40%,
+        #e4e4ea 60%,
+        #ececf0 80%,
+        #ececf0 100%
+      ) !important;
+      background-size: 300% 100% !important;
+      animation: skelPremium 1.8s ease-in-out infinite !important;
+      border-radius: 16px !important;
+    }
+    @keyframes skelPremium {
+      0%   { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       CART BAR — cinematic dark float
+    ═══════════════════════════════════════════════ */
+    #cart-bar {
+      background: linear-gradient(
+        135deg,
+        #111827 0%,
+        #1f2937 50%,
+        #111827 100%
+      ) !important;
+      border-radius: 20px !important;
+      padding: 14px 18px !important;
+      box-shadow:
+        0 12px 40px rgba(0,0,0,0.38),
+        0 2px 8px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.07) !important;
+      border: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    #cart-bar.visible {
+      animation: cartRise 0.35s var(--nb-ease-spring) both !important;
+    }
+    @keyframes cartRise {
+      from { transform: translateY(18px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* Cart icon badge area */
+    #cart-bar > div > div:first-child {
+      background: rgba(252,128,25,0.18) !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(252,128,25,0.25) !important;
+    }
+
+    /* Cart CTA button */
+    #cart-bar button:last-child {
+      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
+      border: none !important;
+      border-radius: 14px !important;
+      padding: 10px 18px !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.2px !important;
+      box-shadow:
+        0 4px 16px rgba(252,128,25,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.18) !important;
+      transition:
+        transform 0.18s var(--nb-ease-spring),
+        box-shadow 0.18s ease !important;
+      will-change: transform;
+    }
+    #cart-bar button:last-child:hover {
+      transform: scale(1.04) !important;
+      box-shadow:
+        0 6px 22px rgba(252,128,25,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.18) !important;
+    }
+    #cart-bar button:last-child:active {
+      transform: scale(0.95) !important;
+      box-shadow: 0 2px 8px rgba(252,128,25,0.3) !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       BOTTOM NAV — frosted glass premium dock
+    ═══════════════════════════════════════════════ */
+    .bottom-nav {
+      height: 66px !important;
+      background: rgba(255,255,255,0.96) !important;
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border-top: 1px solid rgba(0,0,0,0.05) !important;
+      box-shadow:
+        0 -1px 0 rgba(255,255,255,0.6),
+        0 -8px 30px rgba(0,0,0,0.07) !important;
+    }
+
+    .nav-item {
+      font-size: 10px !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.1px !important;
+      color: #9ca3af !important;
+      transition:
+        color 0.2s ease,
+        transform 0.2s var(--nb-ease-spring) !important;
+    }
+    .nav-item:active { transform: scale(0.88) !important; }
+    .nav-item.active { color: var(--nb-orange) !important; }
+
+    /* Active nav glow indicator */
+    .nav-item.active::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 6px !important;
+      width: 5px !important;
+      height: 5px !important;
+      background: var(--nb-orange) !important;
+      border-radius: 50% !important;
+      box-shadow: 0 0 0 3px var(--nb-orange-soft) !important;
+      animation: navDotPop 0.3s var(--nb-ease-spring) both !important;
+    }
+    @keyframes navDotPop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* Food circle upgrade */
+    .nav-food-circle {
+      width: 44px !important;
+      height: 44px !important;
+      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
+      border-radius: 50% !important;
+      box-shadow:
+        0 4px 16px rgba(252,128,25,0.42),
+        inset 0 1px 0 rgba(255,255,255,0.2) !important;
+      transition: transform 0.2s var(--nb-ease-spring), box-shadow 0.2s ease !important;
+    }
+    .nav-item:active .nav-food-circle {
+      transform: scale(0.9) !important;
+      box-shadow: 0 2px 8px rgba(252,128,25,0.3) !important;
+    }
+
+    /* NEW badge pulsing glow */
+    .nav-new-badge {
+      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
+      border-radius: 5px !important;
+      font-size: 7px !important;
+      font-weight: 900 !important;
+      padding: 2px 5px !important;
+      animation: badgeGlow 2s ease-in-out infinite !important;
+    }
+    @keyframes badgeGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(252,128,25,0.5); }
+      50%       { box-shadow: 0 0 0 4px rgba(252,128,25,0); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       TAP UTILITY — spring upgrade
+    ═══════════════════════════════════════════════ */
+    .tap {
+      transition:
+        transform 0.18s var(--nb-ease-spring),
+        opacity 0.18s ease !important;
+    }
+    .tap:active {
+      transform: scale(0.94) !important;
+      opacity: 0.88 !important;
+    }
+
+    /* ═══════════════════════════════════════════════
+       RESTAURANT LIST — stagger refinement
+    ═══════════════════════════════════════════════ */
+    .vr { animation: cardSlideUp 0.4s var(--nb-ease-out) both !important; }
+    @keyframes cardSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+    /* Tighter stagger: JS renders them so use nth-child */
+    #restaurant-list .vr:nth-child(1) { animation-delay: 0.05s !important; }
+    #restaurant-list .vr:nth-child(2) { animation-delay: 0.12s !important; }
+    #restaurant-list .vr:nth-child(3) { animation-delay: 0.19s !important; }
+    #restaurant-list .vr:nth-child(4) { animation-delay: 0.26s !important; }
+    #restaurant-list .vr:nth-child(5) { animation-delay: 0.33s !important; }
+
+    /* ═══════════════════════════════════════════════
+       SCROLLBAR — custom thin style
+    ═══════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 3px; height: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 999px; }
+
+    /* ═══════════════════════════════════════════════
+       PERFORMANCE GUARD — GPU layers for new elements
+    ═══════════════════════════════════════════════ */
+    .vr,
+    .rest-card-h,
+    .prod-card,
+    .cat-item,
+    .cat-ring,
+    .cash-coin,
+    #cart-bar,
+    .bottom-nav {
+      will-change: transform;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SELECTION COLOUR
+    ═══════════════════════════════════════════════ */
+    ::selection {
+      background: rgba(252,128,25,0.2);
+      color: #1a1a1a;
+    }
+
+  </style>
+
 </head>
 
 <body>
