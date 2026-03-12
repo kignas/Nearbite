@@ -874,6 +874,561 @@
     .vr:nth-child(4) { animation-delay: 0.18s; }
     .vr:nth-child(5) { animation-delay: 0.24s; }
   </style>
+
+  <!-- ══════════════════════════════════════════════════════════
+       NEARBITE — PREMIUM HEADER UPGRADE v2
+       All rules scoped to .hero-header and its children.
+       Zero layout changes. GPU-only animations.
+  ══════════════════════════════════════════════════════════ -->
+  <style>
+
+    /* ─────────────────────────────────────────────────────────
+       1. ANIMATED GRADIENT BACKGROUND
+       Replaces static gradient with a living, breathing glow.
+       background-size + animation = subtle warmth shift.
+    ───────────────────────────────────────────────────────── */
+    .hero-header {
+      /* Rich 3-stop animated gold — replaces flat gradient */
+      background: linear-gradient(
+        155deg,
+        #FFE03A 0%,
+        #FFCA00 40%,
+        #FF9E00 75%,
+        #FFD325 100%
+      ) !important;
+      background-size: 250% 250% !important;
+      animation: headerGradientDrift 9s ease infinite !important;
+
+      /* Deeper radius for premium look */
+      border-bottom-left-radius: 32px !important;
+      border-bottom-right-radius: 32px !important;
+
+      /* Richer layered shadow */
+      box-shadow:
+        0 8px 32px rgba(245, 175, 0, 0.42),
+        0 2px 8px  rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255,255,255,0.45) !important;
+
+      /* Smooth scroll-state transition */
+      transition:
+        box-shadow 0.3s ease,
+        border-radius 0.3s ease !important;
+
+      /* Isolation so pseudo-elements don't leak */
+      isolation: isolate;
+      overflow: visible;
+    }
+
+    @keyframes headerGradientDrift {
+      0%   { background-position: 0%   40%; }
+      33%  { background-position: 80%  0%;  }
+      66%  { background-position: 100% 80%; }
+      100% { background-position: 0%   40%; }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       2. SOFT AMBIENT GLOW — pseudo layer behind the header
+       Uses ::before as a glow orb, not ::after (which is
+       already used for the white scroll-overlay).
+    ───────────────────────────────────────────────────────── */
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 15%;
+      right: 15%;
+      height: 48px;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(255, 220, 40, 0.55) 0%,
+        transparent 70%
+      );
+      filter: blur(12px);
+      z-index: 0;
+      pointer-events: none;
+      border-radius: 50%;
+      will-change: opacity;
+      transition: opacity 0.3s ease;
+    }
+    .hero-header.scrolled::before { opacity: 0; }
+
+    /* ─────────────────────────────────────────────────────────
+       3. SCROLLED STATE — cleaner white card with soft shadow
+    ───────────────────────────────────────────────────────── */
+    .hero-header.scrolled {
+      background: rgba(255, 255, 255, 0.97) !important;
+      background-size: 100% 100% !important;
+      animation: none !important;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.05),
+        0 4px 24px rgba(0,0,0,0.09) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       4. LOCATION ROW — premium typography + micro-motion
+    ───────────────────────────────────────────────────────── */
+    .loc-name {
+      font-size: 16px !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.4px !important;
+      color: #1a1a1a !important;
+      /* Soft text shadow for depth on yellow bg */
+      text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .loc-sub {
+      font-size: 11.5px !important;
+      color: rgba(0,0,0,0.48) !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.1px;
+    }
+    .loc-arrow {
+      font-size: 14px !important;
+      color: #1a1a1a !important;
+      /* Floating pin pulse every 4s */
+      animation: pinPulse 4s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes pinPulse {
+      0%,  100% { transform: rotate(-45deg) scale(1);    }
+      50%        { transform: rotate(-45deg) scale(1.18); }
+    }
+    .hero-header.scrolled .loc-arrow { animation: none; }
+
+    .loc-chevron {
+      font-size: 10px !important;
+      color: rgba(0,0,0,0.4) !important;
+      transition: transform 0.2s ease;
+    }
+    .loc-left.tap:active .loc-chevron { transform: rotate(180deg); }
+
+    /* ─────────────────────────────────────────────────────────
+       5. BUY ONE BUTTON — elevated glass pill
+    ───────────────────────────────────────────────────────── */
+    .btn-buyone {
+      background: rgba(255,255,255,0.92) !important;
+      border: 1px solid rgba(255,255,255,0.6) !important;
+      border-radius: 24px !important;
+      height: 40px !important;
+      padding: 0 15px !important;
+      box-shadow:
+        0 3px 14px rgba(0,0,0,0.13),
+        inset 0 1px 0 rgba(255,255,255,0.8) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
+                  box-shadow 0.18s ease !important;
+      will-change: transform;
+    }
+    .btn-buyone:hover {
+      transform: translateY(-2px) scale(1.03) !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+    }
+    .btn-buyone:active {
+      transform: scale(0.95) !important;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.1) !important;
+    }
+    .buyone-bot {
+      color: #FC8019 !important;
+      font-weight: 900 !important;
+      font-size: 16px !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       6. PROFILE BUTTON — floating orb with glow ring
+    ───────────────────────────────────────────────────────── */
+    .btn-profile {
+      width: 40px !important;
+      height: 40px !important;
+      background: rgba(0,0,0,0.20) !important;
+      border-radius: 50% !important;
+      border: 1.5px solid rgba(255,255,255,0.35) !important;
+      box-shadow:
+        0 3px 12px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        0 0 0 0 rgba(255,255,255,0) !important;
+      transition:
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease,
+        background 0.2s ease !important;
+      will-change: transform;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .btn-profile:hover {
+      transform: translateY(-2px) scale(1.08) !important;
+      background: rgba(0,0,0,0.28) !important;
+      box-shadow:
+        0 6px 18px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 0 0 4px rgba(255,255,255,0.18) !important;
+    }
+    .btn-profile:active {
+      transform: scale(0.92) translateY(1px) !important;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.14) !important;
+    }
+    .btn-profile i {
+      font-size: 16px !important;
+      color: #1a1a1a !important;
+      transition: transform 0.2s ease;
+    }
+    .btn-profile:hover i { transform: scale(1.1); }
+
+    /* Scrolled-state profile adjustments */
+    .hero-header.scrolled .btn-profile {
+      background: #f5f5f5 !important;
+      border-color: #e8e8e8 !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.09) !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       7. SEARCH BAR — glassmorphic floating card
+    ───────────────────────────────────────────────────────── */
+    .search-box {
+      background: rgba(255,255,255,0.88) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border-radius: 18px !important;
+      height: 52px !important;
+      border: 1px solid rgba(255,255,255,0.7) !important;
+      box-shadow:
+        0 4px 20px rgba(0,0,0,0.10),
+        0 1px 4px  rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.9) !important;
+      transition:
+        transform 0.2s cubic-bezier(0.34,1.2,0.64,1),
+        box-shadow 0.2s ease,
+        background 0.2s ease !important;
+      will-change: transform;
+    }
+    .search-box:hover {
+      transform: translateY(-1px) scale(1.008) !important;
+      box-shadow:
+        0 8px 28px rgba(0,0,0,0.12),
+        0 2px 6px  rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.9) !important;
+    }
+    .search-box:active {
+      transform: scale(0.985) !important;
+      box-shadow:
+        0 2px 12px rgba(0,0,0,0.09),
+        inset 0 1px 0 rgba(255,255,255,0.85) !important;
+    }
+
+    /* Search icon — bounce on tap */
+    .search-icon {
+      font-size: 16px !important;
+      color: #aaa !important;
+      transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease !important;
+      will-change: transform;
+    }
+    .search-box:active .search-icon {
+      transform: scale(0.85) !important;
+      color: #FC8019 !important;
+    }
+    .search-box:hover .search-icon { color: #888 !important; }
+
+    /* Mic icon pulse */
+    .search-mic {
+      font-size: 17px !important;
+      color: #FC8019 !important;
+      animation: micHeartbeat 3.5s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes micHeartbeat {
+      0%,  90%, 100% { transform: scale(1);    opacity: 1;    }
+      95%             { transform: scale(1.22); opacity: 0.85; }
+    }
+
+    /* Divider */
+    .search-divider {
+      width: 1px !important;
+      height: 18px !important;
+      background: rgba(0,0,0,0.09) !important;
+    }
+
+    /* Placeholder text */
+    .search-text {
+      font-size: 13.5px !important;
+      color: rgba(0,0,0,0.38) !important;
+      font-weight: 500 !important;
+    }
+
+    /* Scrolled: opaque white */
+    .hero-header.scrolled .search-box {
+      background: #ffffff !important;
+      backdrop-filter: none !important;
+      border: 1px solid #efefef !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       8. VEG TOGGLE BOX — glass pill with glow
+    ───────────────────────────────────────────────────────── */
+    .veg-box {
+      background: rgba(255,255,255,0.88) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border-radius: 18px !important;
+      border: 1px solid rgba(255,255,255,0.7) !important;
+      box-shadow:
+        0 4px 20px rgba(0,0,0,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.9) !important;
+      transition:
+        transform 0.18s cubic-bezier(0.34,1.3,0.64,1),
+        box-shadow 0.18s ease !important;
+      will-change: transform;
+    }
+    .veg-box:active {
+      transform: scale(0.94) !important;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.08) !important;
+    }
+    .hero-header.scrolled .veg-box {
+      background: #ffffff !important;
+      backdrop-filter: none !important;
+      border: 1px solid #efefef !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+    }
+
+    /* Toggle track */
+    .veg-track {
+      width: 34px !important;
+      height: 18px !important;
+      background: #d1d5db !important;
+      border-radius: 999px !important;
+      transition: background 0.28s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.28s ease !important;
+    }
+    .veg-track.on {
+      background: #22c55e !important;
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.22), 0 2px 8px rgba(34,197,94,0.35) !important;
+    }
+
+    /* Toggle thumb — spring motion */
+    .veg-thumb {
+      top: 2px !important;
+      left: 2px !important;
+      width: 14px !important;
+      height: 14px !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.22) !important;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      will-change: transform;
+    }
+    .veg-track.on .veg-thumb {
+      transform: translateX(16px) !important;
+    }
+
+    .veg-label-txt {
+      font-size: 9px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.8px !important;
+      color: #2a2a2a !important;
+    }
+    /* When veg ON — label turns green */
+    .veg-track.on ~ * .veg-label-txt,
+    .veg-box:has(.veg-track.on) .veg-label-txt {
+      color: #16a34a !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       9. COMPACT SCROLL LOCATION PILL
+    ───────────────────────────────────────────────────────── */
+    .scroll-loc-pill {
+      gap: 6px !important;
+      padding: 2px 0 !important;
+    }
+    .scroll-loc-dot {
+      width: 8px !important;
+      height: 8px !important;
+      background: #FC8019 !important;
+      box-shadow: 0 0 0 3px rgba(252,128,25,0.2) !important;
+      animation: dotRipple 2.5s ease-in-out infinite;
+    }
+    @keyframes dotRipple {
+      0%,  100% { box-shadow: 0 0 0 0px rgba(252,128,25,0.4); }
+      50%        { box-shadow: 0 0 0 5px rgba(252,128,25,0);   }
+    }
+    .scroll-loc-text {
+      font-size: 12.5px !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.2px !important;
+      color: #1a1a1a !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       10. PROMO BANNER SECTION — depth + shimmer
+    ───────────────────────────────────────────────────────── */
+    .banner-wrap {
+      /* Extra bottom padding for visual breathing room */
+      padding-bottom: 24px !important;
+    }
+
+    .banner-eyebrow {
+      font-size: 10px !important;
+      font-weight: 800 !important;
+      color: rgba(0,0,0,0.42) !important;
+      letter-spacing: 2px !important;
+    }
+
+    .banner-title {
+      font-size: 31px !important;
+      font-weight: 900 !important;
+      color: #4a2080 !important;
+      /* Subtle text shimmer */
+      background: linear-gradient(135deg, #5b2e91 0%, #7c3aed 50%, #4a2080 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% auto;
+      animation: titleShimmer 5s linear infinite;
+      will-change: background-position;
+    }
+    @keyframes titleShimmer {
+      0%   { background-position: 0%   center; }
+      100% { background-position: 200% center; }
+    }
+    /* Keep the underline ::after working (text-fill can hide it) */
+    .banner-title::after {
+      background: #6d28d9 !important;
+      opacity: 0.4 !important;
+    }
+
+    /* CTA button — premium glow */
+    .banner-cta {
+      background: linear-gradient(135deg, #6d28d9 0%, #5b2e91 100%) !important;
+      border-radius: 12px !important;
+      padding: 10px 20px !important;
+      box-shadow:
+        0 4px 18px rgba(91,46,145,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.15) !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.3px !important;
+      transition:
+        transform 0.18s cubic-bezier(0.34,1.4,0.64,1),
+        box-shadow 0.18s ease !important;
+      will-change: transform;
+    }
+    .banner-cta:hover {
+      transform: translateY(-2px) scale(1.04) !important;
+      box-shadow: 0 8px 24px rgba(91,46,145,0.55), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+    }
+    .banner-cta:active {
+      transform: scale(0.96) !important;
+      box-shadow: 0 2px 10px rgba(91,46,145,0.3) !important;
+    }
+
+    /* Train box — subtle glow border */
+    .train-box {
+      border: 1.5px solid rgba(236,165,21,0.65) !important;
+      background: rgba(236,165,21,0.06) !important;
+      border-radius: 16px !important;
+      box-shadow:
+        0 0 0 0 rgba(236,165,21,0),
+        inset 0 1px 0 rgba(255,255,255,0.12) !important;
+      animation: trainBorderPulse 4s ease-in-out infinite;
+    }
+    @keyframes trainBorderPulse {
+      0%,  100% { box-shadow: 0 0 8px rgba(236,165,21,0.12); }
+      50%        { box-shadow: 0 0 20px rgba(236,165,21,0.28); }
+    }
+
+    .train-chip {
+      background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+      border-radius: 6px !important;
+      letter-spacing: 0.6px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+    }
+
+    /* Food image — float animation */
+    .banner-food-img {
+      filter:
+        drop-shadow(0 10px 22px rgba(0,0,0,0.25))
+        drop-shadow(0 2px 6px rgba(0,0,0,0.12)) !important;
+      animation: foodFloat 3.5s ease-in-out infinite;
+      will-change: transform;
+      transform-origin: bottom center;
+    }
+    @keyframes foodFloat {
+      0%,  100% { transform: translateY(0px) rotate(0deg);    }
+      40%        { transform: translateY(-7px) rotate(1.5deg); }
+      70%        { transform: translateY(-4px) rotate(-1deg);  }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       11. HEADER SEPARATOR GLOW LINE
+       Adds a luminous line at the bottom of the yellow header.
+    ───────────────────────────────────────────────────────── */
+    .hero-header:not(.scrolled)::after {
+      /* Override the white-overlay ::after for yellow mode:
+         show a subtle warm bottom glow instead. */
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0) 0%,
+        rgba(255,195,0,0.12) 100%
+      ) !important;
+      opacity: 1 !important;
+      height: 8px !important;
+      top: auto !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      border-radius: 0 0 32px 32px !important;
+      z-index: 2 !important;
+    }
+    .hero-header.scrolled::after {
+      background: #fff !important;
+      height: 100% !important;
+      bottom: auto !important;
+      top: 0 !important;
+      opacity: 1 !important;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       12. HEADER ENTRANCE ANIMATION
+       The whole header gracefully drops in on page load.
+    ───────────────────────────────────────────────────────── */
+    .hero-header {
+      animation:
+        headerGradientDrift 9s ease infinite,
+        headerEntrance 0.6s cubic-bezier(0.34,1.3,0.64,1) both !important;
+    }
+    .hero-header.scrolled {
+      animation: none !important;
+    }
+    @keyframes headerEntrance {
+      from {
+        transform: translateY(-12px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       13. PERFORMANCE GUARD
+       All animated elements use GPU-composited props only.
+    ───────────────────────────────────────────────────────── */
+    .hero-header,
+    .search-box,
+    .veg-box,
+    .btn-profile,
+    .btn-buyone,
+    .banner-food-img,
+    .banner-cta,
+    .veg-thumb {
+      will-change: transform;
+      transform: translateZ(0); /* promote to GPU layer */
+      -webkit-transform: translateZ(0);
+    }
+
+  </style>
+
 </head>
 
 <body>
