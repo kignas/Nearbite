@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Menu – Nearbite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ── Nearbite Enhancement Layer ── -->
+  <style>
+    body { background: #f6f7fb; }
+    
+    /* Sticky top bar improvement */
+    .sticky.top-0.bg-white.z-50 {
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Restaurant info card enhancement */
+    .bg-white.rounded-3xl {
+      transition: box-shadow 0.2s ease;
+    }
+    
+    /* Rating badge */
+    #res-rating {
+      background: linear-gradient(135deg, #16a34a, #15803d) !important;
+      border-radius: 9px !important;
+      padding: 5px 10px !important;
+      box-shadow: 0 2px 8px rgba(22,163,74,0.3) !important;
+      font-size: 12px !important;
+    }
+    
+    /* Add button container improvement */
+    [id^="btn-container-"] {
+      border: 1.5px solid #e8eaee !important;
+      border-radius: 12px !important;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1) !important;
+      transition: box-shadow 0.2s ease;
+    }
+    [id^="btn-container-"]:hover {
+      box-shadow: 0 4px 16px rgba(252,128,25,0.2) !important;
+    }
+    
+    /* ADD button styling */
+    .add-btn-single {
+      color: #FC8019 !important;
+      font-weight: 800 !important;
+      font-size: 13px !important;
+      letter-spacing: 0.5px;
+    }
+    .add-btn-single:active { transform: scale(0.92) !important; }
+    
+    .add-btn-wrap button { color: #FC8019 !important; font-weight: 800 !important; font-size: 18px !important; }
+    .add-btn-wrap span { color: #FC8019 !important; font-weight: 800 !important; background: #fff4eb !important; }
+    
+    /* Menu item animations */
+    .animate-slide-up {
+      animation: slideUpItem 0.3s ease both;
+    }
+    @keyframes slideUpItem {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Offer banner */
+    #res-offer-banner .flex {
+      background: #fff8f4;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(252,128,25,0.15);
+    }
+    
+    /* Cart bar CTA */
+    #cart-bar button:last-child {
+      background: #FC8019 !important;
+      border: none !important;
+      padding: 10px 18px !important;
+      border-radius: 14px !important;
+      box-shadow: 0 4px 14px rgba(252,128,25,0.35) !important;
+    }
+    #cart-bar button:last-child:active { transform: scale(0.95) !important; }
+    
+    /* Cart bar base */
+    #cart-bar {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+      border-radius: 20px !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+    }
+    
+    /* Image lazy load fade */
+    img { loading: lazy; transition: opacity 0.3s ease; }
+  </style>
+</head>
+<body class="bg-[#f8f8f8]" style="padding-bottom: 140px;">
+
+<!-- ── Sticky Top Bar ── -->
+<div class="sticky top-0 bg-white z-50 px-4 py-4 flex justify-between items-center shadow-sm">
+  <button onclick="history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200 transition-colors">
+    <i class="fa-solid fa-chevron-left text-gray-700 text-sm"></i>
+  </button>
+  <div class="flex gap-3">
+    <button class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100" onclick="window.location.href='search.html'">
+      <i class="fa-solid fa-magnifying-glass text-gray-700 text-sm"></i>
+    </button>
+    <button class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100">
+      <i class="fa-solid fa-share-nodes text-gray-700 text-sm"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ── Restaurant Info Card ── -->
+<div class="px-4 mt-4">
+  <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+    <div class="flex justify-between items-start">
+      <div class="flex-1 pr-3">
+        <h1 id="res-name" class="text-[22px] font-black text-gray-900 leading-tight">Loading...</h1>
+        <p id="res-cuisine" class="text-[12px] text-gray-400 font-semibold mt-0.5"></p>
+        <div class="flex items-center gap-2 mt-2 flex-wrap">
+          <span id="res-rating" class="bg-green-600 text-white text-[11px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
+            <i class="fa-solid fa-star text-[9px]"></i> –
+          </span>
+          <span class="text-gray-300 text-xs">•</span>
+          <span id="res-time" class="text-[13px] font-bold text-gray-600">–</span>
+          <span class="text-gray-300 text-xs">•</span>
+          <span id="res-distance" class="text-[13px] font-bold text-gray-600">–</span>
+        </div>
+      </div>
+      <button class="w-9 h-9 border border-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+        <i class="fa-regular fa-heart text-gray-400 text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Offer Banner -->
+    <div id="res-offer-banner" class="mt-4 pt-4 border-t border-dashed border-gray-200 hidden">
+      <div class="flex items-center gap-2 text-[12px] font-bold text-orange-600">
+        <i class="fa-solid fa-tag text-orange-500"></i>
+        <span id="res-offer-text"></span>
+      </div>
+    </div>
+
+    <!-- Delivery Info -->
+    <div class="mt-3 flex items-center gap-2 text-[11px] font-semibold text-gray-500">
+      <i class="fa-solid fa-motorcycle text-orange-500"></i>
+      <span>FREE DELIVERY ABOVE ₹149</span>
+      <span class="text-gray-200">·</span>
+      <i class="fa-regular fa-clock text-blue-400"></i>
+      <span>On time delivery</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Menu List ── -->
+<div class="px-4 mt-6">
+  <!-- Skeleton loader -->
+  <div id="menu-skeleton">
+    <div class="skeleton h-5 w-40 rounded mb-6"></div>
+    <div class="flex justify-between py-8 border-b border-gray-100">
+      <div class="flex-1 pr-4 space-y-2">
+        <div class="skeleton h-4 w-32 rounded"></div>
+        <div class="skeleton h-3 w-24 rounded"></div>
+        <div class="skeleton h-3 w-full rounded"></div>
+        <div class="skeleton h-3 w-3/4 rounded"></div>
+      </div>
+      <div class="skeleton w-32 h-32 rounded-2xl flex-shrink-0"></div>
+    </div>
+    <div class="flex justify-between py-8 border-b border-gray-100">
+      <div class="flex-1 pr-4 space-y-2">
+        <div class="skeleton h-4 w-36 rounded"></div>
+        <div class="skeleton h-3 w-20 rounded"></div>
+        <div class="skeleton h-3 w-full rounded"></div>
+      </div>
+      <div class="skeleton w-32 h-32 rounded-2xl flex-shrink-0"></div>
+    </div>
+  </div>
+
+  <div id="menu-container" class="hidden">
+    <h2 class="text-[18px] font-black text-gray-900 mb-2">
+      Recommended <span id="menu-count" class="text-gray-400 text-[14px] font-bold"></span>
+    </h2>
+    <div id="menu-list" class="divide-y divide-gray-100"></div>
+  </div>
+</div>
+
+<!-- ── Cart Bar (single, no duplicate) ── -->
+<div id="cart-bar">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+      <i class="fa-solid fa-bag-shopping text-white text-sm"></i>
+    </div>
+    <div>
+      <p id="cart-summary" class="text-[13px] font-black text-white tracking-tight leading-none">0 ITEMS | ₹0</p>
+      <p class="text-[9px] text-white/70 font-semibold mt-0.5">Extra charges may apply</p>
+    </div>
+  </div>
+  <button onclick="window.location.href='cart.html'"
+          class="flex items-center gap-1.5 text-white font-black text-[12px] bg-white/15 px-4 py-2 rounded-xl border border-white/20 active:bg-white/25 transition-colors">
+    VIEW CART <i class="fa-solid fa-chevron-right text-[10px]"></i>
+  </button>
+</div>
+
+<script src="home.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const resId = parseInt(params.get('id'));
+  const restaurant = restaurants.find(r => r.id === resId);
+
+  // Populate restaurant info
+  if (restaurant) {
+    document.title = restaurant.name + ' – Nearbite';
+    document.getElementById('res-name').innerText     = restaurant.name;
+    document.getElementById('res-cuisine').innerText  = restaurant.cuisine || '';
+    document.getElementById('res-rating').innerHTML   = '<i class="fa-solid fa-star text-[9px]"></i> ' + restaurant.rating;
+    document.getElementById('res-time').innerText     = restaurant.time;
+    document.getElementById('res-distance').innerText = restaurant.distance;
+
+    if (restaurant.offer) {
+      const banner = document.getElementById('res-offer-banner');
+      document.getElementById('res-offer-text').innerText = restaurant.offer;
+      banner.classList.remove('hidden');
+    }
+
+    // Render menu
+    const menuList = document.getElementById('menu-list');
+    const menuCount = document.getElementById('menu-count');
+    menuCount.innerText = '(' + restaurant.menu.length + ')';
+
+    menuList.innerHTML = restaurant.menu.map((item, idx) => {
+      const key = item.name.replace(/\s+/g, '');
+      const inCart = cart[item.name];
+      const qty = inCart ? inCart.quantity : 0;
+
+      return `
+        <div class="flex justify-between items-start py-6 animate-slide-up" style="animation-delay:${idx * 0.05}s">
+          <div class="flex-1 pr-4">
+            <div class="veg-dot ${item.isVeg ? 'veg' : 'nonveg'} mb-2"><div class="dot"></div></div>
+            <h3 class="font-bold text-[16px] text-gray-900 leading-snug">${item.name}</h3>
+            <p class="font-black text-[15px] text-gray-800 mt-0.5">₹${item.price}</p>
+            <p class="text-[12px] text-gray-400 font-medium mt-1.5 leading-relaxed line-clamp-2">
+              ${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}
+            </p>
+          </div>
+          <div class="relative w-28 h-28 flex-shrink-0">
+            <img src="${item.img}" alt="${item.name}"
+                 class="w-full h-full object-cover rounded-2xl shadow-sm bg-gray-100"
+                 onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
+            <div id="btn-container-${key}"
+                 class="absolute -bottom-3 left-1/2 -translate-x-1/2 min-w-[88px] h-9 bg-white border border-gray-200 rounded-xl shadow-md flex items-center justify-center overflow-hidden">
+              ${qty > 0
+                ? `<div class="add-btn-wrap" style="width:100%;height:100%;">
+                     <button onclick="updateCart('${item.name}',-1,${item.price},${resId})">−</button>
+                     <span>${qty}</span>
+                     <button onclick="updateCart('${item.name}',1,${item.price},${resId})">+</button>
+                   </div>`
+                : `<button class="add-btn-single" onclick="updateCart('${item.name}',1,${item.price},${resId})">ADD</button>`
+              }
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Hide skeleton, show menu
+    document.getElementById('menu-skeleton').style.display = 'none';
+    document.getElementById('menu-container').classList.remove('hidden');
+  } else {
+    document.getElementById('menu-skeleton').style.display = 'none';
+    document.getElementById('menu-container').innerHTML =
+      '<div class="text-center py-16"><i class="fa-solid fa-utensils text-gray-200 text-5xl mb-4"></i><p class="text-gray-500 font-bold">Restaurant not found</p><button onclick="history.back()" class="mt-6 bg-orange-500 text-white font-bold px-6 py-2.5 rounded-xl">Go Back</button></div>';
+    document.getElementById('menu-container').classList.remove('hidden');
+  }
+
+  renderCartBar();
+});
+</script>
+</body>
+</html>

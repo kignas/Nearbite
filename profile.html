@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Profile – Nearbite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body { background: #f6f7fb; }
+    
+    /* Profile header gradient improvement */
+    .bg-gradient-to-br.from-\[#8B0000\] {
+      background: linear-gradient(145deg, #9b2335 0%, #c0392b 50%, #e74c3c 100%) !important;
+    }
+    
+    /* Avatar ring */
+    .w-16.h-16.bg-white\/20 {
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 4px 16px rgba(0,0,0,0.2) !important;
+    }
+    
+    /* Cards */
+    .bg-white.rounded-\[22px\] {
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07) !important;
+      transition: transform 0.2s ease;
+    }
+    
+    /* Quick action icons */
+    .w-10.h-10.bg-orange-50.rounded-xl { transition: transform 0.2s ease; }
+    .cursor-pointer:active .w-10.h-10.bg-orange-50.rounded-xl { transform: scale(0.9); }
+    
+    /* Menu items hover */
+    .flex.items-center.justify-between.py-4 {
+      transition: background 0.15s ease;
+    }
+    .flex.items-center.justify-between.py-4:active { background: #f8f8fb; }
+    
+    /* ONE card special treatment */
+    .text-orange-500.font-black.text-\[18px\] { letter-spacing: -0.5px; }
+    
+    img { loading: lazy; }
+  </style>
+</head>
+<body class="bg-[#f8f9fa] pb-24">
+
+<!-- ── Top Profile Card ── -->
+<div class="bg-gradient-to-br from-[#8B0000] to-[#C0392B] pt-10 pb-20 px-5 rounded-b-[36px] relative overflow-hidden">
+  <!-- Decorative circles -->
+  <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>
+  <div class="absolute bottom-0 left-0 w-28 h-28 bg-white/5 rounded-full translate-y-10 -translate-x-10"></div>
+
+  <div class="relative z-10">
+    <div class="flex justify-between items-center mb-8">
+      <button onclick="window.history.back()" class="w-9 h-9 bg-white/15 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
+        <i class="fa-solid fa-arrow-left text-white text-sm"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <button class="bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-white border border-white/20">
+          Help
+        </button>
+        <button class="w-9 h-9 bg-white/15 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
+          <i class="fa-solid fa-ellipsis-vertical text-white text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Avatar + Name -->
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30">
+        <i class="fa-solid fa-user text-white text-2xl"></i>
+      </div>
+      <div>
+        <h1 class="text-[24px] font-black text-white leading-tight">Your Name</h1>
+        <p class="text-[13px] text-white/70 font-medium mt-0.5">Add your phone number</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Content (overlaps header) ── -->
+<div class="px-4 -mt-10 relative z-10 space-y-4">
+
+  <!-- Nearbite ONE membership card -->
+  <div class="bg-white rounded-[22px] p-4 shadow-sm border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform">
+    <div class="flex justify-between items-center">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-orange-500 font-black text-[18px] tracking-tight">nearbite</span>
+          <span class="text-red-500 font-black text-[10px] italic">one</span>
+          <span class="bg-red-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">Join Now</span>
+        </div>
+        <p class="font-black text-gray-800 text-[13px] leading-snug">Unlimited free deliveries &amp; extra discounts</p>
+        <p class="text-[11px] text-gray-400 font-medium mt-0.5">Unlock exclusive Nearbite benefits</p>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-sm"></i>
+    </div>
+  </div>
+
+  <!-- Quick Actions Grid -->
+  <div class="grid grid-cols-4 gap-3">
+    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
+      <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+        <i class="fa-solid fa-location-dot text-orange-500 text-base"></i>
+      </div>
+      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">Saved<br>Address</span>
+    </div>
+    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
+      <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+        <i class="fa-solid fa-wallet text-blue-500 text-base"></i>
+      </div>
+      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">Payment<br>Modes</span>
+    </div>
+    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
+      <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+        <i class="fa-solid fa-money-bill-transfer text-green-500 text-base"></i>
+      </div>
+      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">My<br>Refunds</span>
+    </div>
+    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
+      <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+        <i class="fa-solid fa-credit-card text-purple-500 text-base"></i>
+      </div>
+      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">Nearbite<br>Wallet</span>
+    </div>
+  </div>
+
+  <!-- Menu List -->
+  <div class="bg-white rounded-[22px] shadow-sm border border-gray-50 overflow-hidden">
+
+    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-ticket text-orange-500 text-sm"></i>
+        </div>
+        <span class="text-[13px] font-bold text-gray-800">My Vouchers</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+    </div>
+
+    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="fa-regular fa-file-lines text-blue-500 text-sm"></i>
+        </div>
+        <span class="text-[13px] font-bold text-gray-800">Account Statements</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+    </div>
+
+    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="fa-regular fa-heart text-red-500 text-sm"></i>
+        </div>
+        <span class="text-[13px] font-bold text-gray-800">Favourites</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+    </div>
+
+    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 bg-yellow-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-crown text-yellow-500 text-sm"></i>
+        </div>
+        <span class="text-[13px] font-bold text-gray-800">Partner Rewards</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+    </div>
+
+    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-graduation-cap text-green-500 text-sm"></i>
+        </div>
+        <span class="text-[13px] font-bold text-gray-800">Student Rewards</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+    </div>
+
+    <div class="flex items-center justify-between py-4 px-4 cursor-pointer active:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-comment-dots text-gray-500 text-sm"></i>
+        </div>
+        <span class="text-[13px] font-bold text-gray-800">Contact Preferences</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+    </div>
+  </div>
+
+  <!-- Past Orders -->
+  <div class="bg-white rounded-[22px] shadow-sm border border-gray-50 p-5">
+    <h3 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6">Past Orders</h3>
+    <div class="flex flex-col items-center text-center py-4">
+      <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-4">
+        <i class="fa-solid fa-bag-shopping text-orange-300 text-3xl"></i>
+      </div>
+      <h4 class="text-[15px] font-black text-gray-800 mb-1">No orders yet</h4>
+      <p class="text-[12px] text-gray-400 font-medium leading-relaxed mb-6">
+        Order food from restaurants near you<br>and track all your orders here
+      </p>
+      <button onclick="window.location.href='index.html'"
+              class="bg-orange-500 text-white font-black text-[13px] px-8 py-3 rounded-2xl shadow-md shadow-orange-200 active:scale-95 transition-transform">
+        Explore Nearbite
+      </button>
+    </div>
+  </div>
+
+  <div class="text-center py-4">
+    <p class="text-[10px] font-semibold text-gray-300">Nearbite v1.0.0 · Made with ❤ in Maynaguri</p>
+  </div>
+
+</div>
+
+<!-- ── Bottom Navigation ── -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="under99.html" class="nav-item">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    <span>₹99 Store</span>
+  </a>
+  <a href="search.html" class="nav-item">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <span>Search</span>
+  </a>
+  <a href="orders.html" class="nav-item">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    <span>Orders</span>
+  </a>
+  <a href="profile.html" class="nav-item active">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    <span>Profile</span>
+  </a>
+</nav>
+
+</body>
+</html>

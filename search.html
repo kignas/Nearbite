@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Search – Nearbite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body { background: #fff; }
+    
+    /* Search bar focus glow */
+    .focus-within\:ring-2:focus-within {
+      box-shadow: 0 0 0 2px rgba(252,128,25,0.3) !important;
+    }
+    
+    /* Category circles in search */
+    .w-20.h-20.rounded-full {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    [onclick]:active .w-20.h-20.rounded-full {
+      transform: scale(0.92);
+    }
+    
+    /* Result items */
+    .flex.items-center.gap-4.py-5 {
+      transition: background 0.15s ease;
+      border-radius: 14px;
+      margin: 0 -8px;
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+    }
+    .flex.items-center.gap-4.py-5:active { background: #f8f8fb; }
+    
+    /* Result images */
+    .w-20.h-20.rounded-2xl.object-cover { transition: transform 0.2s ease; }
+    
+    /* Rating badge in results */
+    .bg-green-600.text-white {
+      background: linear-gradient(135deg, #16a34a, #15803d) !important;
+      border-radius: 8px !important;
+    }
+    
+    img { loading: lazy; }
+  </style>
+</head>
+<body class="bg-white pb-20">
+
+<!-- ── Sticky Search Bar ── -->
+<div class="sticky top-0 bg-white z-50 px-4 pt-5 pb-4 border-b border-gray-100">
+  <div class="flex items-center gap-3 bg-gray-100 rounded-2xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-orange-400 transition-all">
+    <button onclick="window.history.back()" class="flex-shrink-0">
+      <i class="fa-solid fa-chevron-left text-orange-500 text-base"></i>
+    </button>
+    <input type="text" id="search-input"
+           placeholder="Search restaurants or dishes..."
+           autofocus
+           class="flex-1 bg-transparent outline-none text-gray-800 text-[15px] font-semibold placeholder-gray-400">
+    <button id="clear-btn" onclick="clearSearch()" class="hidden flex-shrink-0">
+      <i class="fa-solid fa-xmark text-gray-400 text-base"></i>
+    </button>
+    <i class="fa-solid fa-microphone text-orange-500 text-base flex-shrink-0"></i>
+  </div>
+</div>
+
+<!-- ── What's on your mind (shown when empty) ── -->
+<div id="mind-section" class="px-5 pt-6 pb-4">
+  <h3 class="text-[11px] font-black text-gray-400 tracking-[0.18em] uppercase mb-8">What's on your mind?</h3>
+  <div class="grid grid-cols-3 gap-y-8 gap-x-4">
+
+    <div onclick="quickSearch('Biryani')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
+      <div class="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png" class="w-full h-full object-contain p-1"
+             onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=100&auto=format&fit=crop&q=80'">
+      </div>
+      <span class="text-[12px] font-bold text-gray-700">Biryani</span>
+    </div>
+
+    <div onclick="quickSearch('Pizza')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
+      <div class="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center overflow-hidden">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029856/PC_Creative%20refresh/3D_folders/food/pizza.png" class="w-full h-full object-contain p-1"
+             onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&auto=format&fit=crop&q=80'">
+      </div>
+      <span class="text-[12px] font-bold text-gray-700">Pizzas</span>
+    </div>
+
+    <div onclick="quickSearch('Burger')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
+      <div class="w-20 h-20 rounded-full bg-yellow-50 flex items-center justify-center overflow-hidden">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029845/PC_Creative%20refresh/3D_folders/food/burger.png" class="w-full h-full object-contain p-1"
+             onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100&auto=format&fit=crop&q=80'">
+      </div>
+      <span class="text-[12px] font-bold text-gray-700">Burgers</span>
+    </div>
+
+    <div onclick="quickSearch('Momo')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
+      <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center overflow-hidden">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029852/PC_Creative%20refresh/3D_folders/food/momo.png" class="w-full h-full object-contain p-1"
+             onerror="this.src='https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=100&auto=format&fit=crop&q=80'">
+      </div>
+      <span class="text-[12px] font-bold text-gray-700">Momos</span>
+    </div>
+
+    <div onclick="quickSearch('Noodles')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
+      <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center overflow-hidden">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029858/PC_Creative%20refresh/3D_folders/food/noodles.png" class="w-full h-full object-contain p-1"
+             onerror="this.src='https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=100&auto=format&fit=crop&q=80'">
+      </div>
+      <span class="text-[12px] font-bold text-gray-700">Noodles</span>
+    </div>
+
+    <div onclick="quickSearch('Sweets')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
+      <div class="w-20 h-20 rounded-full bg-pink-50 flex items-center justify-center overflow-hidden">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029852/PC_Creative%20refresh/3D_folders/food/momo.png" class="w-full h-full object-contain p-1"
+             onerror="this.src='https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=100&auto=format&fit=crop&q=80'">
+      </div>
+      <span class="text-[12px] font-bold text-gray-700">Sweets</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Search Results ── -->
+<div id="results-section" class="px-5 pt-4 hidden">
+  <p id="results-count" class="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-4">– results</p>
+  <div id="results-list" class="flex flex-col divide-y divide-gray-50"></div>
+</div>
+
+<!-- ── Bottom Navigation ── -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="under99.html" class="nav-item">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    <span>₹99 Store</span>
+  </a>
+  <a href="search.html" class="nav-item active">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <span>Search</span>
+  </a>
+  <a href="orders.html" class="nav-item">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    <span>Orders</span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<!-- Load home.js first so restaurants data is available on this page too -->
+<script src="home.js"></script>
+<script>
+  const searchInput   = document.getElementById('search-input');
+  const mindSection   = document.getElementById('mind-section');
+  const resultsSection= document.getElementById('results-section');
+  const resultsList   = document.getElementById('results-list');
+  const resultsCount  = document.getElementById('results-count');
+  const clearBtn      = document.getElementById('clear-btn');
+
+  searchInput.addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    clearBtn.classList.toggle('hidden', q.length === 0);
+    if (q.length > 0) {
+      mindSection.classList.add('hidden');
+      resultsSection.classList.remove('hidden');
+      doSearch(q);
+    } else {
+      clearSearch();
+    }
+  });
+
+  function doSearch(q) {
+    const matched = restaurants.filter(res => {
+      return res.name.toLowerCase().includes(q) ||
+             (res.cuisine && res.cuisine.toLowerCase().includes(q)) ||
+             res.menu.some(item => item.name.toLowerCase().includes(q));
+    });
+
+    resultsCount.innerText = matched.length + ' restaurant' + (matched.length !== 1 ? 's' : '') + ' found';
+
+    if (matched.length === 0) {
+      resultsList.innerHTML = `
+        <div class="text-center py-16 px-4">
+          <i class="fa-solid fa-magnifying-glass text-gray-200 text-5xl mb-4"></i>
+          <p class="font-black text-gray-700 text-[16px]">No results for "${searchInput.value}"</p>
+          <p class="text-gray-400 text-[12px] mt-1">Try searching for something else</p>
+        </div>`;
+      return;
+    }
+
+    resultsList.innerHTML = matched.map(res => {
+      const matchedDishes = res.menu
+        .filter(item => item.name.toLowerCase().includes(q))
+        .slice(0, 3)
+        .map(i => i.name)
+        .join(', ');
+
+      return `
+        <a href="restaurant.html?id=${res.id}"
+           class="flex items-center gap-4 py-4 active:bg-gray-50 transition-colors rounded-xl -mx-1 px-1">
+          <div class="relative w-20 h-20 flex-shrink-0">
+            <img src="${res.image}" alt="${res.name}"
+                 class="w-full h-full object-cover rounded-2xl shadow-sm"
+                 onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&auto=format&fit=crop&q=80'">
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <h4 class="font-black text-[15px] text-gray-900 leading-tight truncate">${res.name}</h4>
+              <div class="flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0">
+                <i class="fa-solid fa-star text-[8px]"></i> ${res.rating}
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-400 font-semibold mt-0.5">${res.time} · ${res.distance}</p>
+            ${matchedDishes
+              ? `<p class="text-[11px] text-orange-500 font-bold mt-1 truncate">
+                   <i class="fa-solid fa-utensils text-[9px]"></i> ${matchedDishes}
+                 </p>`
+              : `<p class="text-[11px] text-gray-400 mt-1 truncate italic">${res.cuisine}</p>`
+            }
+          </div>
+        </a>`;
+    }).join('');
+  }
+
+  function clearSearch() {
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    mindSection.classList.remove('hidden');
+    resultsSection.classList.add('hidden');
+  }
+
+  function quickSearch(term) {
+    searchInput.value = term;
+    clearBtn.classList.remove('hidden');
+    mindSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    doSearch(term.toLowerCase());
+  }
+</script>
+</body>
+</html>
