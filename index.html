@@ -15,10 +15,11 @@
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: #f5f5f5;
+      background: #f6f7fb;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
       padding-bottom: 80px;
+      margin: 0;
     }
 
     /* ─── Utilities ─── */
@@ -28,895 +29,42 @@
     .tap:active { transform: scale(0.96); opacity: 0.85; }
 
     /* ══════════════════════════════════════════
-       HERO HEADER
+       FULL PAGE SKELETON LOADER
     ══════════════════════════════════════════ */
-    /* ── Hero header shell — only GPU-friendly props transition ── */
-    .hero-header {
-      background: linear-gradient(175deg, #FFD325 0%, #F5BC00 100%);
-      border-bottom-left-radius: 28px;
-      border-bottom-right-radius: 28px;
-      padding: 16px 16px 0 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 6px 24px rgba(245,188,0,0.35);
-      /* Only animate compositor-only properties */
-      will-change: background, box-shadow;
-      transition:
-        background 0.28s ease,
-        box-shadow 0.28s ease;
-    }
-    .hero-header.scrolled {
-      background: #ffffff;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
-    }
-
-    /* ── White overlay fades in over yellow — no layout change ── */
-    .hero-header::after {
-      content: '';
-      position: absolute;
+    #global-skeleton {
+      position: fixed;
       inset: 0;
-      background: #fff;
-      border-radius: inherit;
-      opacity: 0;
-      pointer-events: none;
-      will-change: opacity;
-      transition: opacity 0.28s ease;
-      z-index: 0;
-    }
-    .hero-header.scrolled::after { opacity: 1; }
-
-    /* All inner content sits above the overlay */
-    .hero-header > * { position: relative; z-index: 1; }
-
-    /* ── Collapsible rows: GPU transform+opacity ONLY ── */
-    /* Outer clip container — height fixed, no transition */
-    .loc-row-clip {
-      overflow: hidden;
-      height: 58px; /* exact measured height */
-    }
-    /* Location row */
-    .loc-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-      will-change: transform, opacity;
-      transition: transform 0.28s ease, opacity 0.2s ease;
-    }
-    .hero-header.scrolled .loc-row {
-      transform: translateY(-62px);
-      opacity: 0;
-    }
-
-    /* Clip containers — height set by JS, overflow hidden, NO CSS transition on height */
-    .loc-row-clip,
-    .banner-clip {
-      overflow: hidden;
-      /* height is set directly by JS — instant, no jank */
-    }
-    .scroll-loc-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 8px;
-      opacity: 0;
-      transform: translateY(4px);
-      will-change: transform, opacity;
-      transition: transform 0.22s ease, opacity 0.22s ease;
-      pointer-events: none;
-    }
-    .hero-header.scrolled .scroll-loc-pill {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    .scroll-loc-dot {
-      width: 7px; height: 7px;
-      background: #FC8019;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .scroll-loc-text {
-      font-size: 12px; font-weight: 700; color: #1a1a1a;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
-    }
-    .scroll-loc-chevron { font-size: 9px; color: #999; }
-    .loc-left {
-      flex: 1;
-      min-width: 0;
-      padding-right: 12px;
-    }
-    .loc-name-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .loc-arrow { font-size: 15px; color: #1a1a1a; flex-shrink: 0; }
-    .loc-name {
-      font-size: 17px;
-      font-weight: 800;
-      color: #1a1a1a;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
-    }
-    .loc-chevron { font-size: 12px; color: #333; flex-shrink: 0; }
-    .loc-sub {
-      font-size: 12px;
-      color: rgba(0,0,0,0.5);
-      font-weight: 500;
-      margin-top: 2px;
-      padding-left: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 220px;
-    }
-
-    .loc-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    /* BUY ONE pill — FIX: was missing proper border + shadow */
-    .btn-buyone {
-      background: #fff;
-      border: 1px solid rgba(0,0,0,0.06);
-      border-radius: 22px;
-      height: 38px;
-      padding: 0 13px;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-      cursor: pointer;
-    }
-    .buyone-top { font-size: 9px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1; }
-    .buyone-bot { font-size: 15px; font-weight: 900; color: #FC8019; line-height: 1; }
-    /* profile btn */
-    .btn-profile {
-      width: 38px; height: 38px;
-      background: rgba(0,0,0,0.18);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      text-decoration: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
-    }
-    .btn-profile i { font-size: 17px; color: #1a1a1a; }
-
-    /* Search row — no layout transitions, only visual */
-    .search-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .hero-header.scrolled .search-box {
-      box-shadow: 0 1px 6px rgba(0,0,0,0.09);
-      border: 1px solid #ebebeb;
-    }
-    .hero-header.scrolled .veg-box {
-      box-shadow: 0 1px 6px rgba(0,0,0,0.09);
-      border: 1px solid #ebebeb;
-    }
-    /* FIX: search box was clipping placeholder text */
-    .search-box {
-      flex: 1;
-      background: #fff;
-      border-radius: 16px;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      gap: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      cursor: pointer;
-      overflow: hidden;
-    }
-    .search-icon { font-size: 17px; color: #aaa; flex-shrink: 0; }
-    .search-text {
-      flex: 1;
-      font-size: 14px;
-      color: #aaa;
-      font-weight: 500;
-      transition: opacity 0.3s;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'Poppins', sans-serif;
-    }
-    .search-divider { width: 1px; height: 20px; background: #e5e5e5; flex-shrink: 0; }
-    .search-mic { font-size: 18px; color: #FC8019; flex-shrink: 0; }
-
-    /* VEG toggle box */
-    .veg-box {
-      background: #fff;
-      border-radius: 16px;
-      width: 60px;
-      height: 52px;
+      background: #f6f7fb;
+      z-index: 9999;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      cursor: pointer;
-      flex-shrink: 0;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
     }
-    .veg-label-txt { font-size: 9px; font-weight: 800; color: #333; letter-spacing: 0.5px; }
-    .veg-track {
-      width: 32px; height: 16px;
-      background: #d1d5db;
-      border-radius: 999px;
-      position: relative;
-      transition: background 0.25s;
+    .skel-pulse {
+      background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+      background-size: 200% 100%;
+      animation: skelLoading 1.5s infinite linear;
     }
-    .veg-track.on { background: #22c55e; }
-    .veg-thumb {
-      position: absolute;
-      top: 2px; left: 2px;
-      width: 12px; height: 12px;
-      background: #fff;
-      border-radius: 50%;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-      transition: transform 0.25s;
-      display: flex; align-items: center; justify-content: center;
+    @keyframes skelLoading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
-    .veg-track.on .veg-thumb { transform: translateX(16px); }
-    /* inner veg square dot */
-    .veg-inner {
-      width: 6px; height: 6px;
-      border: 1px solid #16a34a;
-      border-radius: 1.5px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .veg-inner-dot { width: 3px; height: 3px; background: #16a34a; border-radius: 50%; }
-    .veg-track.on .veg-inner { border-color: #fff; }
-    .veg-track.on .veg-inner-dot { background: #fff; }
-
-    /* ─── Banner ─── */
-    /* Outer clip — fixed height, invisible overflow, NO transition */
-    .banner-clip {
-      overflow: hidden;
-      height: 160px; /* fixed measured height */
-    }
-    .hero-header.scrolled .banner-clip {
-      height: 0;
-    }
-    .banner-wrap {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      min-height: 120px;
-      padding-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-      opacity: 1;
-      will-change: transform, opacity;
-      transition: transform 0.28s ease, opacity 0.2s ease;
-    }
-    .hero-header.scrolled .banner-wrap {
-      transform: translateY(-20px);
-      opacity: 0;
-    }
-    .banner-left { flex: 1; padding-right: 8px; z-index: 2; }
-    .banner-eyebrow {
-      font-size: 10.5px;
-      font-weight: 800;
-      color: rgba(0,0,0,0.55);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 4px;
-    }
-    /* FIX: purple drip text — removed broken ::after, made it clean */
-    .banner-title {
-      font-size: 30px;
-      font-weight: 900;
-      font-style: italic;
-      color: #5b2e91;
-      line-height: 1.05;
-      margin-bottom: 14px;
-      /* drip underline via text-decoration + custom */
-      position: relative;
-      display: inline-block;
-    }
-    .banner-title::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 72%;
-      height: 3px;
-      background: #5b2e91;
-      border-radius: 2px;
-      opacity: 0.35;
-    }
-    .banner-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #5b2e91;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 9px 18px;
-      border-radius: 10px;
-      letter-spacing: 0.2px;
-      box-shadow: 0 4px 14px rgba(91,46,145,0.4);
-      font-family: 'Poppins', sans-serif;
-    }
-    .banner-right {
-      width: 160px;
-      flex-shrink: 0;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-    /* FIX: train ticket frame was broken — rebuilt cleanly */
-    .train-chip {
-      background: #1a1a1a;
-      color: #fff;
-      font-size: 8px;
-      font-weight: 700;
-      padding: 4px 9px;
-      border-radius: 5px;
-      letter-spacing: 0.5px;
-      align-self: flex-start;
-      margin-bottom: 6px;
-      margin-right: 10px;
-    }
-    .train-box {
-      width: 150px;
-      height: 62px;
-      border: 2px solid rgba(236,165,21,0.7);
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px;
-      position: relative;
-      overflow: hidden;
-      background: rgba(236,165,21,0.07);
-    }
-    .train-line { height: 2px; background: rgba(236,165,21,0.45); border-radius: 1px; }
-    .train-code {
-      position: absolute;
-      right: 8px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 10px;
-      font-weight: 800;
-      color: rgba(236,165,21,0.8);
-      letter-spacing: 1px;
-    }
-    /* FIX: food image was clipping below header */
-    .banner-food-img {
-      position: absolute;
-      right: -8px;
-      bottom: -8px;
-      width: 135px;
-      object-fit: contain;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
-      z-index: 3;
-    }
-
 
     /* ══════════════════════════════════════════
-       BODY SECTIONS
+       HERO HEADER (Static & Natural Scroll)
     ══════════════════════════════════════════ */
-
-    /* ─── Filter tabs ─── */
-    .filter-bar {
-      background: #fff;
-      padding: 14px 16px;
-      margin-bottom: 8px;
-    }
-    .filter-tabs {
-      display: flex;
-      border: 1.5px solid #e8e8e8;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .ftab {
-      flex: 1;
-      text-align: center;
-      padding: 10px 6px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #888;
-      background: transparent;
-      border: none;
-      font-family: 'Poppins', sans-serif;
-      cursor: pointer;
-      transition: color 0.15s, background 0.15s;
-    }
-    .ftab.active { color: #FC8019; background: #fff7f0; }
-    .ftab + .ftab { border-left: 1.5px solid #e8e8e8; }
-
-    /* ─── Section base ─── */
-    .section-card { background: #fff; margin-bottom: 8px; padding: 18px 0 8px; }
-    .sec-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      margin-bottom: 14px;
-    }
-    .sec-title { font-size: 16px; font-weight: 800; color: #1a1a1a; }
-    .sec-see-all {
-      font-size: 12px;
-      font-weight: 700;
-      color: #FC8019;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ─── Category circles ─── */
-    .cat-scroll {
-      display: flex;
-      overflow-x: auto;
-      padding: 0 16px 6px;
-      gap: 0;
-    }
-    .cat-scroll::-webkit-scrollbar { display: none; }
-    .cat-item {
-      flex-shrink: 0;
-      width: 82px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 7px;
-      cursor: pointer;
-      transition: transform 0.13s;
-    }
-    .cat-item:active { transform: scale(0.92); }
-    /* FIX: category images were cut off — added proper border */
-    .cat-ring {
-      width: 70px; height: 70px;
-      border-radius: 50%;
-      background: #f6f6f6;
-      border: 2.5px solid #f0f0f0;
-      overflow: hidden;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .cat-item:active .cat-ring { border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252,128,25,0.15); }
-    .cat-ring img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-    .cat-name { font-size: 11.5px; font-weight: 600; color: #333; text-align: center; }
-
-    /* ─── Horizontal restaurant cards ─── */
-    .h-scroll {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding: 0 16px 12px;
-    }
-    .h-scroll::-webkit-scrollbar { display: none; }
-
-    .rest-card-h {
-      flex-shrink: 0;
-      width: 168px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #fff;
-      border: 1px solid #efefef;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-      text-decoration: none;
-      display: block;
-      transition: transform 0.13s;
-    }
-    .rest-card-h:active { transform: scale(0.97); }
-    .rc-img-wrap { width: 100%; height: 112px; position: relative; overflow: hidden; }
-    .rc-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .rc-offer {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.72), transparent);
-      padding: 22px 8px 7px;
-      font-size: 10px; font-weight: 800; color: #fff;
-      letter-spacing: 0.2px;
-    }
-    /* FIX: heart button was unstyled */
-    .rc-heart {
-      position: absolute;
-      top: 8px; right: 8px;
-      width: 28px; height: 28px;
-      background: rgba(255,255,255,0.92);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-    }
-    .rc-heart i { font-size: 12px; color: #bbb; }
-    .rc-body { padding: 9px 10px 11px; }
-    .rc-name { font-size: 13px; font-weight: 800; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
-    .rc-meta { font-size: 11px; font-weight: 600; color: #555; display: flex; align-items: center; gap: 4px; margin-bottom: 1px; }
-    .rc-star { color: #48c479; font-size: 12px; }
-    .rc-cuisine { font-size: 11px; color: #aaa; font-weight: 500; }
-
-    /* ─── Free Cash Banner ─── */
-    .cash-banner {
-      background: linear-gradient(135deg, #1c1148 0%, #2f1f72 55%, #1a3b70 100%);
-      padding: 28px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-    /* wavy edges */
-    .cash-banner::before {
-      content: '';
-      position: absolute;
-      top: -12px; left: -4%; right: -4%;
-      height: 26px;
-      background: #f5f5f5;
-      border-radius: 0 0 60% 60%;
-    }
-    .cash-banner::after {
-      content: '';
-      position: absolute;
-      bottom: -12px; left: -4%; right: -4%;
-      height: 26px;
-      background: #f5f5f5;
-      border-radius: 60% 60% 0 0;
-    }
-    .cash-text { font-size: 17px; font-weight: 800; color: #fff; line-height: 1.45; z-index: 1; }
-    .cash-text .hi { color: #FFC72C; }
-    /* FIX: coin was plain div — styled as 3D gold coin */
-    .cash-coin {
-      width: 84px; height: 84px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #FFE566 0%, #F0A500 55%, #9A6200 100%);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      box-shadow: 0 6px 24px rgba(255,215,0,0.5), inset 0 2px 8px rgba(255,255,255,0.3), inset 0 -3px 6px rgba(0,0,0,0.2);
-      z-index: 1;
-      position: relative;
-    }
-    .cash-coin::before {
-      content: '';
-      position: absolute;
-      inset: 6px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,0.25);
-    }
-    .coin-free { font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.9); letter-spacing: 1.5px; }
-    .coin-amt { font-size: 22px; font-weight: 900; color: #fff; line-height: 1; }
-
-    /* ─── 99 Store ─── */
-    .store-card {
-      background: linear-gradient(135deg, #eef4ff 0%, #f8fbff 60%, #fff 100%);
-      border-radius: 24px;
-      border: 1px solid #dde8ff;
-      padding: 16px;
-      margin: 0 16px 8px;
-    }
-    .store-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .store-icon-wrap {
-      width: 38px; height: 38px;
-      background: #2563eb;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
-    }
-    .store-title { font-size: 17px; font-weight: 900; color: #002b5b; }
-    .store-pro { background: #3b82f6; color: #fff; font-size: 7px; font-weight: 900; padding: 2px 5px; border-radius: 4px; letter-spacing: 1px; text-transform: uppercase; }
-    .store-sub { font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
-    .store-see-all {
-      font-size: 11px; font-weight: 800; color: #2563eb;
-      background: #fff; padding: 6px 12px; border-radius: 10px;
-      border: 1px solid #dde8ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      text-decoration: none; display: flex; align-items: center; gap: 4px;
-      white-space: nowrap;
-    }
-
-    /* FIX: product card was missing restaurant name */
-    .prod-card {
-      flex-shrink: 0;
-      width: 150px;
-      background: #fff;
-      border-radius: 20px;
-      padding: 10px;
-      border: 1px solid #f0f0f0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      text-decoration: none;
-      display: block;
-      transition: transform 0.13s;
-    }
-    .prod-card:active { transform: scale(0.97); }
-    .prod-img-wrap { position: relative; margin-bottom: 10px; }
-    .prod-img-wrap img { width: 100%; height: 110px; object-fit: contain; background: #f8f9fa; border-radius: 14px; padding: 6px; }
-    .prod-price-tag {
-      position: absolute;
-      bottom: -8px; right: 6px;
-      background: #FFC107;
-      color: #422200;
-      font-size: 11px; font-weight: 900;
-      padding: 2px 8px;
-      border-radius: 8px;
-      border: 2.5px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-    }
-    .prod-veg-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
-    .veg-dot { width: 12px; height: 12px; border-radius: 2px; border: 1.5px solid; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .veg-dot .dot { width: 6px; height: 6px; border-radius: 50%; }
-    .veg-dot.veg { border-color: #16a34a; }
-    .veg-dot.veg .dot { background: #16a34a; }
-    .veg-dot.nonveg { border-color: #dc2626; }
-    .veg-dot.nonveg .dot { background: #dc2626; }
-    .veg-tag-txt { font-size: 8px; font-weight: 800; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
-    .prod-name { font-size: 13px; font-weight: 800; color: #1a1a1a; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    /* FIX: restaurant sub-name was missing */
-    .prod-rest { font-size: 10px; font-weight: 500; color: #aaa; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prod-add-btn { width: 100%; padding: 6px 0; background: #eff6ff; color: #2563eb; border-radius: 10px; font-size: 10px; font-weight: 800; text-align: center; border: 1px solid #dbeafe; }
-
-    /* ─── Vertical Restaurant list ─── */
-    .vrest-section { background: #fff; padding: 18px 16px 8px; margin-bottom: 8px; }
-    /* FIX: restaurant cards had no proper bottom border/shadow definition */
-    .vr {
-      border-radius: 18px;
-      overflow: hidden;
-      background: #fff;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 14px rgba(0,0,0,0.08);
-      text-decoration: none;
-      display: block;
-      transition: transform 0.13s;
-      border: 1px solid #f0f0f0;
-    }
-    .vr:active { transform: scale(0.99); }
-    .vr-img { width: 100%; height: 190px; position: relative; }
-    .vr-img img { width: 100%; height: 100%; object-fit: cover; }
-    .vr-offer {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-      padding: 32px 12px 10px;
-      font-size: 11px; font-weight: 800; color: #fff;
-    }
-    .vr-heart {
-      position: absolute; top: 10px; right: 10px;
-      width: 30px; height: 30px;
-      background: rgba(255,255,255,0.92);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-    }
-    .vr-heart i { font-size: 13px; color: #ccc; }
-    .vr-body { padding: 12px 14px 14px; }
-    .vr-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; }
-    .vr-name { font-size: 16px; font-weight: 800; color: #1a1a1a; }
-    .vr-rating {
-      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
-      background: #fff;
-      border: 1.5px solid #e8e8e8;
-      border-radius: 8px;
-      padding: 3px 9px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    }
-    .vr-rating .star-icon { font-size: 11px; color: #1ba672; }
-    .vr-rating .rating-num { font-size: 12px; font-weight: 800; color: #1a1a1a; line-height: 1; }
-    .vr-rating .rating-divider { width: 1px; height: 11px; background: #e0e0e0; margin: 0 1px; }
-    .vr-rating .rating-count { font-size: 10px; font-weight: 600; color: #888; line-height: 1; }
-    .vr-cuisine { font-size: 12px; color: #aaa; font-weight: 500; margin-bottom: 10px; }
-    .vr-meta {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 12px; color: #777; font-weight: 600;
-      padding-top: 10px;
-      border-top: 1px dashed #ebebeb;
-    }
-    .vr-meta i { color: #FC8019; font-size: 11px; }
-    .vr-sep { color: #ddd; }
-
-    /* ─── Skeleton ─── */
-    .skeleton {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: skel 1.4s infinite;
-      border-radius: 18px;
-    }
-    @keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-    /* ─── Cart Bar ─── */
-    #cart-bar {
-      position: fixed;
-      bottom: 76px; left: 16px; right: 16px;
-      background: #1a1a1a;
-      border-radius: 18px;
-      padding: 13px 16px;
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 80;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-    }
-    #cart-bar.visible { display: flex; }
-
-    /* ─── Bottom Nav ─── */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: 68px;
-      background: #fff;
-      border-top: 1px solid #f0f0f0;
-      display: flex;
-      align-items: stretch;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-      z-index: 100;
-    }
-    .nav-item {
-      flex: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 4px;
-      font-size: 10px; font-weight: 600;
-      color: #aaa;
-      text-decoration: none;
-      transition: color 0.15s;
-      cursor: pointer;
-      position: relative;
-    }
-    .nav-item svg { width: 22px; height: 22px; }
-    /* FIX: active state was only black — now orange */
-    .nav-item.active { color: #FC8019; }
-    .nav-item.active svg { stroke: #FC8019; }
-    /* food nav icon in orange circle */
-    .nav-food-circle {
-      width: 44px; height: 44px;
-      background: #FC8019;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 12px rgba(252,128,25,0.45);
-      margin-bottom: 2px;
-    }
-    .nav-food-circle svg { width: 22px; height: 22px; color: #fff; stroke: #fff; }
-    /* NEW badge */
-    .nav-new-badge {
-      position: absolute;
-      top: 8px; right: 10px;
-      background: #FC8019;
-      color: #fff;
-      font-size: 7px; font-weight: 800;
-      padding: 1px 5px;
-      border-radius: 4px;
-      letter-spacing: 0.4px;
-    }
-  </style>
-
-  <!-- ── Nearbite Enhancement Layer ── -->
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* ── Enhanced image loading ── */
-    img { loading: lazy; }
-    
-    /* ── Card entrance animations ── */
-    .vr {
-      animation: cardFadeUp 0.35s ease both;
-    }
-    @keyframes cardFadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* ── Rating badge — green pill style ── */
-    .vr-rating {
-      background: #edfaf3 !important;
-      border: 1.5px solid rgba(27,166,114,0.2) !important;
-      border-radius: 9px !important;
-    }
-    .vr-rating .star-icon { color: #1ba672 !important; }
-    .vr-rating .rating-num { color: #1a5c3e !important; }
-    .vr-rating .rating-count { color: #5a9a7a !important; }
-    
-    /* ── Improved cart bar CTA button ── */
-    #cart-bar button:last-child {
-      background: #FC8019 !important;
-      border: none !important;
-      padding: 10px 18px !important;
-      border-radius: 14px !important;
-      box-shadow: 0 4px 14px rgba(252,128,25,0.35) !important;
-      font-size: 12px !important;
-    }
-    #cart-bar button:last-child:active {
-      transform: scale(0.95) !important;
-      box-shadow: 0 2px 8px rgba(252,128,25,0.2) !important;
-    }
-    
-    /* ── Enhanced section titles ── */
-    .sec-title { letter-spacing: -0.3px !important; }
-    
-    /* ── Category item hover on desktop ── */
-    @media (hover: hover) {
-      .cat-item:hover .cat-ring {
-        border-color: #FC8019;
-        box-shadow: 0 0 0 3px rgba(252,128,25,0.15);
-        transform: scale(1.05);
-      }
-    }
-    
-    /* ── Body background improvement ── */
-    body { background: #f6f7fb !important; }
-    
-    /* ── Section card subtle shadow ── */
-    .section-card {
-      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-    }
-    
-    /* ── Smooth nav transitions ── */
-    .nav-item { transition: color 0.2s ease; }
-    
-    /* ── Enhance search box focus state ── */
-    .search-box { transition: box-shadow 0.2s ease !important; }
-    
-    /* ── Better rest card hover on desktop ── */
-    @media (hover: hover) {
-      .vr:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 32px rgba(0,0,0,0.12);
-      }
-      .rest-card-h:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.13);
-      }
-    }
-    
-    /* ── Staggered restaurant card animations ── */
-    .vr:nth-child(1) { animation-delay: 0s; }
-    .vr:nth-child(2) { animation-delay: 0.06s; }
-    .vr:nth-child(3) { animation-delay: 0.12s; }
-    .vr:nth-child(4) { animation-delay: 0.18s; }
-    .vr:nth-child(5) { animation-delay: 0.24s; }
-  </style>
-
-  <!-- ══════════════════════════════════════════════════════════
-       NEARBITE — PREMIUM HEADER UPGRADE v2
-       All rules scoped to .hero-header and its children.
-       Zero layout changes. GPU-only animations.
-  ══════════════════════════════════════════════════════════ -->
-  <style>
-
-    /* ─────────────────────────────────────────────────────────
-       1. ANIMATED GRADIENT BACKGROUND
-       Replaces static gradient with a living, breathing glow.
-       background-size + animation = subtle warmth shift.
-    ───────────────────────────────────────────────────────── */
     .hero-header {
-      /* Rich 3-stop animated gold — replaces flat gradient */
-      background: linear-gradient(
-        155deg,
-        #FFE03A 0%,
-        #FFCA00 40%,
-        #FF9E00 75%,
-        #FFD325 100%
-      ) !important;
-      background-size: 250% 250% !important;
-      animation: headerGradientDrift 9s ease infinite !important;
-
-      /* Deeper radius for premium look */
-      border-bottom-left-radius: 32px !important;
-      border-bottom-right-radius: 32px !important;
-
-      /* Richer layered shadow */
-      box-shadow:
-        0 8px 32px rgba(245, 175, 0, 0.42),
-        0 2px 8px  rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255,255,255,0.45) !important;
-
-      /* Smooth scroll-state transition */
-      transition:
-        box-shadow 0.3s ease,
-        border-radius 0.3s ease !important;
-
-      /* Isolation so pseudo-elements don't leak */
+      background: linear-gradient(155deg, #FFE03A 0%, #FFCA00 40%, #FF9E00 75%, #FFD325 100%);
+      background-size: 250% 250%;
+      animation: headerGradientDrift 9s ease infinite;
+      border-bottom-left-radius: 36px;
+      border-bottom-right-radius: 36px;
+      padding: 16px 16px 0 16px;
+      position: relative; /* Fixed: Removed sticky to allow natural scroll */
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(245, 175, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.04);
       isolation: isolate;
-      overflow: visible;
+      overflow: hidden;
     }
 
     @keyframes headerGradientDrift {
@@ -926,1325 +74,258 @@
       100% { background-position: 0%   40%; }
     }
 
-    /* ─────────────────────────────────────────────────────────
-       2. SOFT AMBIENT GLOW — pseudo layer behind the header
-       Uses ::before as a glow orb, not ::after (which is
-       already used for the white scroll-overlay).
-    ───────────────────────────────────────────────────────── */
     .hero-header::before {
-      content: '';
-      position: absolute;
-      top: -18px;
-      left: 15%;
-      right: 15%;
-      height: 48px;
-      background: radial-gradient(
-        ellipse at center,
-        rgba(255, 220, 40, 0.55) 0%,
-        transparent 70%
-      );
-      filter: blur(12px);
-      z-index: 0;
-      pointer-events: none;
-      border-radius: 50%;
-      will-change: opacity;
-      transition: opacity 0.3s ease;
-    }
-    .hero-header.scrolled::before { opacity: 0; }
-
-    /* ─────────────────────────────────────────────────────────
-       3. SCROLLED STATE — cleaner white card with soft shadow
-    ───────────────────────────────────────────────────────── */
-    .hero-header.scrolled {
-      background: rgba(255, 255, 255, 0.97) !important;
-      background-size: 100% 100% !important;
-      animation: none !important;
-      border-bottom-left-radius: 0 !important;
-      border-bottom-right-radius: 0 !important;
-      box-shadow:
-        0 1px 0 rgba(0,0,0,0.05),
-        0 4px 24px rgba(0,0,0,0.09) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
+      content: ''; position: absolute; top: -18px; left: 15%; right: 15%; height: 48px;
+      background: radial-gradient(ellipse at center, rgba(255, 220, 40, 0.55) 0%, transparent 70%);
+      filter: blur(12px); z-index: 0; pointer-events: none; border-radius: 50%;
     }
 
-    /* ─────────────────────────────────────────────────────────
-       4. LOCATION ROW — premium typography + micro-motion
-    ───────────────────────────────────────────────────────── */
-    .loc-name {
-      font-size: 16px !important;
-      font-weight: 800 !important;
-      letter-spacing: -0.4px !important;
-      color: #1a1a1a !important;
-      /* Soft text shadow for depth on yellow bg */
-      text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    }
-    .loc-sub {
-      font-size: 11.5px !important;
-      color: rgba(0,0,0,0.48) !important;
-      font-weight: 500 !important;
-      letter-spacing: 0.1px;
-    }
-    .loc-arrow {
-      font-size: 14px !important;
-      color: #1a1a1a !important;
-      /* Floating pin pulse every 4s */
-      animation: pinPulse 4s ease-in-out infinite;
-      will-change: transform;
-    }
-    @keyframes pinPulse {
-      0%,  100% { transform: rotate(-45deg) scale(1);    }
-      50%        { transform: rotate(-45deg) scale(1.18); }
-    }
-    .hero-header.scrolled .loc-arrow { animation: none; }
+    .hero-header > * { position: relative; z-index: 1; }
 
-    .loc-chevron {
-      font-size: 10px !important;
-      color: rgba(0,0,0,0.4) !important;
-      transition: transform 0.2s ease;
-    }
-    .loc-left.tap:active .loc-chevron { transform: rotate(180deg); }
+    .loc-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .loc-left { flex: 1; min-width: 0; padding-right: 12px; }
+    .loc-name-row { display: flex; align-items: center; gap: 6px; }
+    .loc-arrow { font-size: 15px; color: #1a1a1a; flex-shrink: 0; }
+    .loc-name { font-size: 17px; font-weight: 800; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; text-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+    .loc-chevron { font-size: 12px; color: rgba(0,0,0,0.4); flex-shrink: 0; }
+    .loc-sub { font-size: 11.5px; color: rgba(0,0,0,0.48); font-weight: 500; margin-top: 2px; padding-left: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    
+    .loc-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-buyone { background: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.6); border-radius: 24px; height: 38px; padding: 0 13px; display: flex; align-items: center; gap: 3px; box-shadow: 0 3px 14px rgba(0,0,0,0.13), inset 0 1px 0 rgba(255,255,255,0.8); cursor: pointer; backdrop-filter: blur(8px); }
+    .buyone-top { font-size: 9px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1; }
+    .buyone-bot { font-size: 15px; font-weight: 900; color: #FC8019; line-height: 1; }
+    .btn-profile { width: 38px; height: 38px; background: rgba(0,0,0,0.20); border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 3px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25); backdrop-filter: blur(4px); }
+    .btn-profile i { font-size: 17px; color: #1a1a1a; }
 
-    /* ─────────────────────────────────────────────────────────
-       5. BUY ONE BUTTON — elevated glass pill
-    ───────────────────────────────────────────────────────── */
-    .btn-buyone {
-      background: rgba(255,255,255,0.92) !important;
-      border: 1px solid rgba(255,255,255,0.6) !important;
-      border-radius: 24px !important;
-      height: 40px !important;
-      padding: 0 15px !important;
-      box-shadow:
-        0 3px 14px rgba(0,0,0,0.13),
-        inset 0 1px 0 rgba(255,255,255,0.8) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
-                  box-shadow 0.18s ease !important;
-      will-change: transform;
-    }
-    .btn-buyone:hover {
-      transform: translateY(-2px) scale(1.03) !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.8) !important;
-    }
-    .btn-buyone:active {
-      transform: scale(0.95) !important;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.1) !important;
-    }
-    .buyone-bot {
-      color: #FC8019 !important;
-      font-weight: 900 !important;
-      font-size: 16px !important;
-    }
+    .search-row { display: flex; gap: 10px; margin-bottom: 8px; }
+    .search-box { flex: 1; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-radius: 16px; height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 10px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1); cursor: pointer; overflow: hidden; }
+    .search-icon { font-size: 17px; color: #aaa; flex-shrink: 0; }
+    .search-text { flex: 1; font-size: 14px; color: rgba(0,0,0,0.38); font-weight: 500; transition: opacity 0.3s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .search-divider { width: 1px; height: 18px; background: rgba(0,0,0,0.09); flex-shrink: 0; }
+    .search-mic { font-size: 18px; color: #FC8019; flex-shrink: 0; animation: micHeartbeat 3.5s ease-in-out infinite; }
+    @keyframes micHeartbeat { 0%, 90%, 100% { transform: scale(1); opacity: 1; } 95% { transform: scale(1.22); opacity: 0.85; } }
 
-    /* ─────────────────────────────────────────────────────────
-       6. PROFILE BUTTON — floating orb with glow ring
-    ───────────────────────────────────────────────────────── */
-    .btn-profile {
-      width: 40px !important;
-      height: 40px !important;
-      background: rgba(0,0,0,0.20) !important;
-      border-radius: 50% !important;
-      border: 1.5px solid rgba(255,255,255,0.35) !important;
-      box-shadow:
-        0 3px 12px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,0.25),
-        0 0 0 0 rgba(255,255,255,0) !important;
-      transition:
-        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-        box-shadow 0.2s ease,
-        background 0.2s ease !important;
-      will-change: transform;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-    }
-    .btn-profile:hover {
-      transform: translateY(-2px) scale(1.08) !important;
-      background: rgba(0,0,0,0.28) !important;
-      box-shadow:
-        0 6px 18px rgba(0,0,0,0.22),
-        inset 0 1px 0 rgba(255,255,255,0.3),
-        0 0 0 4px rgba(255,255,255,0.18) !important;
-    }
-    .btn-profile:active {
-      transform: scale(0.92) translateY(1px) !important;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.14) !important;
-    }
-    .btn-profile i {
-      font-size: 16px !important;
-      color: #1a1a1a !important;
-      transition: transform 0.2s ease;
-    }
-    .btn-profile:hover i { transform: scale(1.1); }
+    .veg-box { background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-radius: 16px; width: 60px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1); cursor: pointer; flex-shrink: 0; }
+    .veg-label-txt { font-size: 9px; font-weight: 900; letter-spacing: 0.8px; color: #2a2a2a; }
+    .veg-track { width: 32px; height: 16px; background: #d1d5db; border-radius: 999px; position: relative; transition: background 0.25s; }
+    .veg-track.on { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.22), 0 2px 8px rgba(34,197,94,0.35); }
+    .veg-track.on ~ * .veg-label-txt, .veg-box:has(.veg-track.on) .veg-label-txt { color: #16a34a; }
+    .veg-thumb { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: #fff; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; justify-content: center; }
+    .veg-track.on .veg-thumb { transform: translateX(16px); }
+    .veg-inner { width: 6px; height: 6px; border: 1px solid #16a34a; border-radius: 1.5px; display: flex; align-items: center; justify-content: center; }
+    .veg-inner-dot { width: 3px; height: 3px; background: #16a34a; border-radius: 50%; }
+    .veg-track.on .veg-inner { border-color: #fff; }
+    .veg-track.on .veg-inner-dot { background: #fff; }
 
-    /* Scrolled-state profile adjustments */
-    .hero-header.scrolled .btn-profile {
-      background: #f5f5f5 !important;
-      border-color: #e8e8e8 !important;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.09) !important;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       7. SEARCH BAR — glassmorphic floating card
-    ───────────────────────────────────────────────────────── */
-    .search-box {
-      background: rgba(255,255,255,0.88) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-      border-radius: 18px !important;
-      height: 52px !important;
-      border: 1px solid rgba(255,255,255,0.7) !important;
-      box-shadow:
-        0 4px 20px rgba(0,0,0,0.10),
-        0 1px 4px  rgba(0,0,0,0.06),
-        inset 0 1px 0 rgba(255,255,255,0.9) !important;
-      transition:
-        transform 0.2s cubic-bezier(0.34,1.2,0.64,1),
-        box-shadow 0.2s ease,
-        background 0.2s ease !important;
-      will-change: transform;
-    }
-    .search-box:hover {
-      transform: translateY(-1px) scale(1.008) !important;
-      box-shadow:
-        0 8px 28px rgba(0,0,0,0.12),
-        0 2px 6px  rgba(0,0,0,0.06),
-        inset 0 1px 0 rgba(255,255,255,0.9) !important;
-    }
-    .search-box:active {
-      transform: scale(0.985) !important;
-      box-shadow:
-        0 2px 12px rgba(0,0,0,0.09),
-        inset 0 1px 0 rgba(255,255,255,0.85) !important;
-    }
-
-    /* Search icon — bounce on tap */
-    .search-icon {
-      font-size: 16px !important;
-      color: #aaa !important;
-      transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), color 0.18s ease !important;
-      will-change: transform;
-    }
-    .search-box:active .search-icon {
-      transform: scale(0.85) !important;
-      color: #FC8019 !important;
-    }
-    .search-box:hover .search-icon { color: #888 !important; }
-
-    /* Mic icon pulse */
-    .search-mic {
-      font-size: 17px !important;
-      color: #FC8019 !important;
-      animation: micHeartbeat 3.5s ease-in-out infinite;
-      will-change: transform;
-    }
-    @keyframes micHeartbeat {
-      0%,  90%, 100% { transform: scale(1);    opacity: 1;    }
-      95%             { transform: scale(1.22); opacity: 0.85; }
-    }
-
-    /* Divider */
-    .search-divider {
-      width: 1px !important;
-      height: 18px !important;
-      background: rgba(0,0,0,0.09) !important;
-    }
-
-    /* Placeholder text */
-    .search-text {
-      font-size: 13.5px !important;
-      color: rgba(0,0,0,0.38) !important;
-      font-weight: 500 !important;
-    }
-
-    /* Scrolled: opaque white */
-    .hero-header.scrolled .search-box {
-      background: #ffffff !important;
-      backdrop-filter: none !important;
-      border: 1px solid #efefef !important;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       8. VEG TOGGLE BOX — glass pill with glow
-    ───────────────────────────────────────────────────────── */
-    .veg-box {
-      background: rgba(255,255,255,0.88) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-      border-radius: 18px !important;
-      border: 1px solid rgba(255,255,255,0.7) !important;
-      box-shadow:
-        0 4px 20px rgba(0,0,0,0.10),
-        inset 0 1px 0 rgba(255,255,255,0.9) !important;
-      transition:
-        transform 0.18s cubic-bezier(0.34,1.3,0.64,1),
-        box-shadow 0.18s ease !important;
-      will-change: transform;
-    }
-    .veg-box:active {
-      transform: scale(0.94) !important;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.08) !important;
-    }
-    .hero-header.scrolled .veg-box {
-      background: #ffffff !important;
-      backdrop-filter: none !important;
-      border: 1px solid #efefef !important;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
-    }
-
-    /* Toggle track */
-    .veg-track {
-      width: 34px !important;
-      height: 18px !important;
-      background: #d1d5db !important;
-      border-radius: 999px !important;
-      transition: background 0.28s cubic-bezier(0.4,0,0.2,1),
-                  box-shadow 0.28s ease !important;
-    }
-    .veg-track.on {
-      background: #22c55e !important;
-      box-shadow: 0 0 0 3px rgba(34,197,94,0.22), 0 2px 8px rgba(34,197,94,0.35) !important;
-    }
-
-    /* Toggle thumb — spring motion */
-    .veg-thumb {
-      top: 2px !important;
-      left: 2px !important;
-      width: 14px !important;
-      height: 14px !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.22) !important;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-      will-change: transform;
-    }
-    .veg-track.on .veg-thumb {
-      transform: translateX(16px) !important;
-    }
-
-    .veg-label-txt {
-      font-size: 9px !important;
-      font-weight: 900 !important;
-      letter-spacing: 0.8px !important;
-      color: #2a2a2a !important;
-    }
-    /* When veg ON — label turns green */
-    .veg-track.on ~ * .veg-label-txt,
-    .veg-box:has(.veg-track.on) .veg-label-txt {
-      color: #16a34a !important;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       9. COMPACT SCROLL LOCATION PILL
-    ───────────────────────────────────────────────────────── */
-    .scroll-loc-pill {
-      gap: 6px !important;
-      padding: 2px 0 !important;
-    }
-    .scroll-loc-dot {
-      width: 8px !important;
-      height: 8px !important;
-      background: #FC8019 !important;
-      box-shadow: 0 0 0 3px rgba(252,128,25,0.2) !important;
-      animation: dotRipple 2.5s ease-in-out infinite;
-    }
-    @keyframes dotRipple {
-      0%,  100% { box-shadow: 0 0 0 0px rgba(252,128,25,0.4); }
-      50%        { box-shadow: 0 0 0 5px rgba(252,128,25,0);   }
-    }
-    .scroll-loc-text {
-      font-size: 12.5px !important;
-      font-weight: 800 !important;
-      letter-spacing: -0.2px !important;
-      color: #1a1a1a !important;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       10. PROMO BANNER SECTION — depth + shimmer
-    ───────────────────────────────────────────────────────── */
+    /* ─── Ultra Premium Animated Banner ─── */
     .banner-wrap {
-      /* Extra bottom padding for visual breathing room */
-      padding-bottom: 24px !important;
-    }
-
-    .banner-eyebrow {
-      font-size: 10px !important;
-      font-weight: 800 !important;
-      color: rgba(0,0,0,0.42) !important;
-      letter-spacing: 2px !important;
-    }
-
-    .banner-title {
-      font-size: 31px !important;
-      font-weight: 900 !important;
-      color: #4a2080 !important;
-      /* Subtle text shimmer */
-      background: linear-gradient(135deg, #5b2e91 0%, #7c3aed 50%, #4a2080 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      background-size: 200% auto;
-      animation: titleShimmer 5s linear infinite;
-      will-change: background-position;
-    }
-    @keyframes titleShimmer {
-      0%   { background-position: 0%   center; }
-      100% { background-position: 200% center; }
-    }
-    /* Keep the underline ::after working (text-fill can hide it) */
-    .banner-title::after {
-      background: #6d28d9 !important;
-      opacity: 0.4 !important;
-    }
-
-    /* CTA button — premium glow */
-    .banner-cta {
-      background: linear-gradient(135deg, #6d28d9 0%, #5b2e91 100%) !important;
-      border-radius: 12px !important;
-      padding: 10px 20px !important;
-      box-shadow:
-        0 4px 18px rgba(91,46,145,0.45),
-        inset 0 1px 0 rgba(255,255,255,0.15) !important;
-      font-size: 12px !important;
-      font-weight: 800 !important;
-      letter-spacing: 0.3px !important;
-      transition:
-        transform 0.18s cubic-bezier(0.34,1.4,0.64,1),
-        box-shadow 0.18s ease !important;
-      will-change: transform;
-    }
-    .banner-cta:hover {
-      transform: translateY(-2px) scale(1.04) !important;
-      box-shadow: 0 8px 24px rgba(91,46,145,0.55), inset 0 1px 0 rgba(255,255,255,0.15) !important;
-    }
-    .banner-cta:active {
-      transform: scale(0.96) !important;
-      box-shadow: 0 2px 10px rgba(91,46,145,0.3) !important;
-    }
-
-    /* Train box — subtle glow border */
-    .train-box {
-      border: 1.5px solid rgba(236,165,21,0.65) !important;
-      background: rgba(236,165,21,0.06) !important;
-      border-radius: 16px !important;
-      box-shadow:
-        0 0 0 0 rgba(236,165,21,0),
-        inset 0 1px 0 rgba(255,255,255,0.12) !important;
-      animation: trainBorderPulse 4s ease-in-out infinite;
-    }
-    @keyframes trainBorderPulse {
-      0%,  100% { box-shadow: 0 0 8px rgba(236,165,21,0.12); }
-      50%        { box-shadow: 0 0 20px rgba(236,165,21,0.28); }
-    }
-
-    .train-chip {
-      background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
-      border-radius: 6px !important;
-      letter-spacing: 0.6px !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
-    }
-
-    /* Food image — float animation */
-    .banner-food-img {
-      filter:
-        drop-shadow(0 10px 22px rgba(0,0,0,0.25))
-        drop-shadow(0 2px 6px rgba(0,0,0,0.12)) !important;
-      animation: foodFloat 3.5s ease-in-out infinite;
-      will-change: transform;
-      transform-origin: bottom center;
-    }
-    @keyframes foodFloat {
-      0%,  100% { transform: translateY(0px) rotate(0deg);    }
-      40%        { transform: translateY(-7px) rotate(1.5deg); }
-      70%        { transform: translateY(-4px) rotate(-1deg);  }
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       11. HEADER SEPARATOR GLOW LINE
-       Adds a luminous line at the bottom of the yellow header.
-    ───────────────────────────────────────────────────────── */
-    .hero-header:not(.scrolled)::after {
-      /* Override the white-overlay ::after for yellow mode:
-         show a subtle warm bottom glow instead. */
-      background: linear-gradient(
-        to bottom,
-        rgba(255,255,255,0) 0%,
-        rgba(255,195,0,0.12) 100%
-      ) !important;
-      opacity: 1 !important;
-      height: 8px !important;
-      top: auto !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      border-radius: 0 0 32px 32px !important;
-      z-index: 2 !important;
-    }
-    .hero-header.scrolled::after {
-      background: #fff !important;
-      height: 100% !important;
-      bottom: auto !important;
-      top: 0 !important;
-      opacity: 1 !important;
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       12. HEADER ENTRANCE ANIMATION
-       The whole header gracefully drops in on page load.
-    ───────────────────────────────────────────────────────── */
-    .hero-header {
-      animation:
-        headerGradientDrift 9s ease infinite,
-        headerEntrance 0.6s cubic-bezier(0.34,1.3,0.64,1) both !important;
-    }
-    .hero-header.scrolled {
-      animation: none !important;
-    }
-    @keyframes headerEntrance {
-      from {
-        transform: translateY(-12px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       13. PERFORMANCE GUARD
-       All animated elements use GPU-composited props only.
-    ───────────────────────────────────────────────────────── */
-    .hero-header,
-    .search-box,
-    .veg-box,
-    .btn-profile,
-    .btn-buyone,
-    .banner-food-img,
-    .banner-cta,
-    .veg-thumb {
-      will-change: transform;
-      transform: translateZ(0); /* promote to GPU layer */
-      -webkit-transform: translateZ(0);
-    }
-
-  </style>
-
-
-  <!-- ═══════════════════════════════════════════════════════════
-       NEARBITE — DEFINITIVE PREMIUM UPGRADE v3
-       Pass 3 of 3: Full-system visual polish + body elevation
-  ═══════════════════════════════════════════════════════════ -->
-
-  <!-- Inter font — superior legibility at small sizes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <style>
-
-    /* ═══════════════════════════════════════════════
-       DESIGN TOKENS
-    ═══════════════════════════════════════════════ */
-    :root {
-      --nb-orange:        #FC8019;
-      --nb-orange-glow:   rgba(252,128,25,0.28);
-      --nb-orange-soft:   rgba(252,128,25,0.10);
-      --nb-gold:          #FFD325;
-      --nb-purple:        #5b2e91;
-      --nb-green:         #1ba672;
-      --nb-green-glow:    rgba(27,166,114,0.22);
-
-      --nb-bg:            #f2f3f7;
-      --nb-surface:       #ffffff;
-      --nb-border:        rgba(0,0,0,0.07);
-      --nb-text-1:        #111827;
-      --nb-text-2:        #6b7280;
-      --nb-text-3:        #9ca3af;
-
-      --nb-shadow-xs:     0 1px 3px rgba(0,0,0,0.07);
-      --nb-shadow-sm:     0 2px 8px rgba(0,0,0,0.08);
-      --nb-shadow-md:     0 4px 18px rgba(0,0,0,0.10);
-      --nb-shadow-lg:     0 8px 32px rgba(0,0,0,0.13);
-      --nb-shadow-xl:     0 16px 48px rgba(0,0,0,0.16);
-
-      --nb-ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
-      --nb-ease-out:      cubic-bezier(0.4, 0, 0.2, 1);
-      --nb-ease-in-out:   cubic-bezier(0.45, 0, 0.55, 1);
-
-      --nb-radius-sm:     12px;
-      --nb-radius-md:     16px;
-      --nb-radius-lg:     20px;
-      --nb-radius-xl:     24px;
-      --nb-radius-pill:   999px;
-    }
-
-    /* ═══════════════════════════════════════════════
-       FONT SYSTEM — Inter replaces Poppins everywhere
-    ═══════════════════════════════════════════════ */
-    body,
-    .search-text,
-    .banner-cta,
-    #cart-summary,
-    .ftab,
-    .sec-title,
-    .nav-item,
-    .vr-name,
-    .rc-name,
-    .prod-name,
-    .loc-name,
-    .store-title {
-      font-family: 'Inter', 'Poppins', sans-serif !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       BODY + PAGE CHROME
-    ═══════════════════════════════════════════════ */
-    body {
-      background: #eef0f5 !important;
-      /* Very subtle warm noise texture via repeating-conic */
-    }
-
-    /* Page-level entrance: stagger body content below header */
-    body > *:not(header):not(nav):not(#cart-bar) {
-      animation: pageFadeIn 0.5s var(--nb-ease-out) both;
-    }
-    @keyframes pageFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0);   }
-    }
-    body > *:nth-child(2) { animation-delay: 0.08s; }
-    body > *:nth-child(3) { animation-delay: 0.14s; }
-    body > *:nth-child(4) { animation-delay: 0.20s; }
-    body > *:nth-child(5) { animation-delay: 0.26s; }
-
-    /* ═══════════════════════════════════════════════
-       SECTION CARDS — elevated white panels
-    ═══════════════════════════════════════════════ */
-    .section-card {
-      background: var(--nb-surface) !important;
-      border-radius: 0 !important;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.8),
-        0 -1px 0 rgba(0,0,0,0.04) !important;
-      margin-bottom: 6px !important;
-    }
-
-    .sec-title {
-      font-size: 17px !important;
-      font-weight: 800 !important;
-      color: var(--nb-text-1) !important;
-      letter-spacing: -0.5px !important;
-    }
-
-    .sec-see-all {
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      color: var(--nb-orange) !important;
-      background: var(--nb-orange-soft) !important;
-      padding: 4px 10px !important;
-      border-radius: var(--nb-radius-pill) !important;
-      transition: background 0.18s var(--nb-ease-out), transform 0.18s var(--nb-ease-spring) !important;
-    }
-    .sec-see-all:active {
-      transform: scale(0.94) !important;
-      background: rgba(252,128,25,0.18) !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       FILTER TABS — refined pill system
-    ═══════════════════════════════════════════════ */
-    .filter-bar {
-      background: var(--nb-surface) !important;
-      padding: 14px 16px !important;
-    }
-    .filter-tabs {
-      display: flex !important;
-      border: 1.5px solid #eaecf0 !important;
-      border-radius: 14px !important;
-      overflow: hidden !important;
-      background: #f9fafb !important;
-    }
-    .ftab {
-      padding: 11px 6px !important;
-      font-size: 12.5px !important;
-      font-weight: 700 !important;
-      color: var(--nb-text-2) !important;
-      transition: color 0.18s ease, background 0.18s ease !important;
-      letter-spacing: -0.1px !important;
-    }
-    .ftab.active {
-      color: var(--nb-orange) !important;
-      background: #fff8f2 !important;
-      border-radius: 11px !important;
-    }
-    .ftab + .ftab { border-left: 1.5px solid #eaecf0 !important; }
-
-    /* ═══════════════════════════════════════════════
-       CATEGORY CIRCLES — premium interactive rings
-    ═══════════════════════════════════════════════ */
-    .cat-item {
-      width: 80px !important;
-      gap: 8px !important;
-      transition: transform 0.2s var(--nb-ease-spring) !important;
-      will-change: transform;
-    }
-    .cat-item:active { transform: scale(0.88) !important; }
-
-    .cat-ring {
-      width: 68px !important;
-      height: 68px !important;
-      border-radius: 50% !important;
-      background: #f8f9fc !important;
-      border: 2px solid rgba(0,0,0,0.06) !important;
-      box-shadow: var(--nb-shadow-sm), inset 0 1px 0 rgba(255,255,255,0.9) !important;
-      overflow: hidden !important;
-      transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s var(--nb-ease-spring) !important;
-      will-change: transform;
-    }
-    /* Hover on non-touch devices */
-    @media (hover: hover) {
-      .cat-item:hover .cat-ring {
-        border-color: var(--nb-orange) !important;
-        box-shadow: 0 0 0 4px var(--nb-orange-soft), var(--nb-shadow-md) !important;
-        transform: scale(1.07) !important;
-      }
-    }
-    .cat-item:active .cat-ring {
-      border-color: var(--nb-orange) !important;
-      box-shadow: 0 0 0 3px var(--nb-orange-soft) !important;
-      transform: scale(0.92) !important;
-    }
-
-    .cat-ring img {
-      padding: 7px !important;
-      transition: transform 0.3s var(--nb-ease-spring) !important;
-    }
-    @media (hover: hover) {
-      .cat-item:hover .cat-ring img { transform: scale(1.12) !important; }
-    }
-
-    .cat-name {
-      font-size: 11px !important;
-      font-weight: 700 !important;
-      color: #374151 !important;
-      letter-spacing: -0.1px !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       HORIZONTAL RESTAURANT CARDS — depth system
-    ═══════════════════════════════════════════════ */
-    .rest-card-h {
-      width: 170px !important;
-      border-radius: 18px !important;
-      border: 1px solid rgba(0,0,0,0.05) !important;
-      box-shadow: var(--nb-shadow-md) !important;
-      transition:
-        transform 0.22s var(--nb-ease-spring),
-        box-shadow 0.22s var(--nb-ease-out) !important;
-      will-change: transform;
-      overflow: hidden !important;
-    }
-    @media (hover: hover) {
-      .rest-card-h:hover {
-        transform: translateY(-5px) scale(1.01) !important;
-        box-shadow: var(--nb-shadow-xl) !important;
-      }
-    }
-    .rest-card-h:active {
-      transform: scale(0.96) !important;
-      box-shadow: var(--nb-shadow-sm) !important;
-    }
-
-    /* Image zoom on hover */
-    .rc-img-wrap { overflow: hidden !important; }
-    .rc-img-wrap img {
-      transition: transform 0.4s var(--nb-ease-in-out) !important;
-      will-change: transform;
-    }
-    @media (hover: hover) {
-      .rest-card-h:hover .rc-img-wrap img {
-        transform: scale(1.06) !important;
-      }
-    }
-
-    .rc-name {
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      color: var(--nb-text-1) !important;
-      letter-spacing: -0.2px !important;
-    }
-    .rc-meta {
-      font-size: 11px !important;
-      color: var(--nb-text-2) !important;
-      font-weight: 600 !important;
-    }
-    .rc-star { color: var(--nb-green) !important; }
-    .rc-cuisine {
-      font-size: 11px !important;
-      color: var(--nb-text-3) !important;
-    }
-
-    /* Heart button glass effect */
-    .rc-heart {
-      width: 30px !important;
-      height: 30px !important;
-      background: rgba(255,255,255,0.95) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
-      transition: transform 0.18s var(--nb-ease-spring) !important;
-    }
-    .rc-heart:active { transform: scale(0.85) !important; }
-
-    /* ═══════════════════════════════════════════════
-       VERTICAL RESTAURANT CARDS — flagship elevation
-    ═══════════════════════════════════════════════ */
-    .vrest-section {
-      background: var(--nb-surface) !important;
-      padding: 20px 14px 12px !important;
-      margin-bottom: 6px !important;
-    }
-
-    .vr {
-      border-radius: 20px !important;
-      border: 1px solid rgba(0,0,0,0.05) !important;
-      box-shadow: var(--nb-shadow-md) !important;
-      margin-bottom: 18px !important;
-      transition:
-        transform 0.22s var(--nb-ease-spring),
-        box-shadow 0.22s var(--nb-ease-out) !important;
-      will-change: transform;
-      overflow: hidden !important;
-    }
-    @media (hover: hover) {
-      .vr:hover {
-        transform: translateY(-4px) !important;
-        box-shadow: var(--nb-shadow-xl) !important;
-      }
-      .vr:hover .vr-img img { transform: scale(1.04) !important; }
-    }
-    .vr:active {
-      transform: scale(0.985) !important;
-      box-shadow: var(--nb-shadow-sm) !important;
-    }
-
-    .vr-img { height: 195px !important; overflow: hidden !important; }
-    .vr-img img {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover !important;
-      transition: transform 0.5s var(--nb-ease-in-out) !important;
-      will-change: transform;
-    }
-
-    /* Richer gradient overlay on card image */
-    .vr-offer {
-      background: linear-gradient(
-        to top,
-        rgba(0,0,0,0.82) 0%,
-        rgba(0,0,0,0.30) 50%,
-        transparent 100%
-      ) !important;
-      padding: 36px 14px 12px !important;
-      font-size: 11.5px !important;
-      font-weight: 800 !important;
-      letter-spacing: 0.1px !important;
-    }
-
-    .vr-heart {
-      width: 32px !important;
-      height: 32px !important;
-      background: rgba(255,255,255,0.95) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
-      transition: transform 0.18s var(--nb-ease-spring) !important;
-    }
-    .vr-heart:active { transform: scale(0.82) !important; }
-
-    .vr-body { padding: 13px 14px 15px !important; }
-
-    .vr-name {
-      font-size: 16px !important;
-      font-weight: 800 !important;
-      color: var(--nb-text-1) !important;
-      letter-spacing: -0.4px !important;
-    }
-
-    /* Rating pill — green tinted */
-    .vr-rating {
-      background: #ecfdf5 !important;
-      border: 1.5px solid rgba(27,166,114,0.2) !important;
-      border-radius: 9px !important;
-      padding: 4px 9px !important;
-      box-shadow: none !important;
-    }
-    .vr-rating .star-icon { color: var(--nb-green) !important; font-size: 10px !important; }
-    .vr-rating .rating-num { font-size: 12px !important; font-weight: 800 !important; color: #064e3b !important; }
-    .vr-rating .rating-divider { background: rgba(27,166,114,0.25) !important; }
-    .vr-rating .rating-count { color: #065f46 !important; font-weight: 600 !important; font-size: 10px !important; }
-
-    .vr-cuisine {
-      font-size: 12px !important;
-      color: var(--nb-text-3) !important;
-      font-weight: 500 !important;
-      margin-bottom: 11px !important;
-    }
-
-    .vr-meta {
-      font-size: 12px !important;
-      color: var(--nb-text-2) !important;
-      font-weight: 600 !important;
-      padding-top: 10px !important;
-      border-top: 1px dashed #e5e7eb !important;
-    }
-    .vr-meta i { color: var(--nb-orange) !important; }
-
-    /* ═══════════════════════════════════════════════
-       99 STORE CARD — upgraded blue depth
-    ═══════════════════════════════════════════════ */
-    .store-card {
-      background: linear-gradient(145deg, #f0f4ff 0%, #fafbff 60%, #fff 100%) !important;
-      border-radius: 22px !important;
-      border: 1.5px solid #dde8ff !important;
-      padding: 16px !important;
-      margin: 0 14px 8px !important;
-      box-shadow: 0 4px 20px rgba(37,99,235,0.08) !important;
-    }
-
-    .store-icon-wrap {
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-      border-radius: 12px !important;
-      box-shadow: 0 4px 14px rgba(37,99,235,0.35) !important;
-    }
-
-    .store-title {
-      font-size: 17px !important;
-      font-weight: 900 !important;
-      letter-spacing: -0.4px !important;
-    }
-
-    .store-see-all {
-      font-size: 11px !important;
-      font-weight: 800 !important;
-      padding: 7px 13px !important;
-      border-radius: var(--nb-radius-sm) !important;
-      box-shadow: var(--nb-shadow-xs) !important;
-      transition: transform 0.18s var(--nb-ease-spring), box-shadow 0.18s ease !important;
-    }
-    .store-see-all:active {
-      transform: scale(0.95) !important;
-      box-shadow: none !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       PRODUCT CARDS — 99 store items
-    ═══════════════════════════════════════════════ */
-    .prod-card {
-      border-radius: 20px !important;
-      border: 1px solid rgba(0,0,0,0.05) !important;
-      box-shadow: var(--nb-shadow-sm) !important;
-      transition:
-        transform 0.2s var(--nb-ease-spring),
-        box-shadow 0.2s ease !important;
-      will-change: transform;
-    }
-    @media (hover: hover) {
-      .prod-card:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: var(--nb-shadow-lg) !important;
-      }
-    }
-    .prod-card:active {
-      transform: scale(0.96) !important;
-      box-shadow: var(--nb-shadow-xs) !important;
-    }
-
-    .prod-img-wrap img {
-      border-radius: 14px !important;
-      transition: transform 0.3s var(--nb-ease-spring) !important;
-      background: #f3f4f6 !important;
-    }
-    @media (hover: hover) {
-      .prod-card:hover .prod-img-wrap img {
-        transform: scale(1.08) !important;
-      }
-    }
-
-    .prod-price-tag {
-      background: linear-gradient(135deg, #FFC107, #FF9800) !important;
-      color: #3d1f00 !important;
-      font-weight: 900 !important;
-      border: 2.5px solid #fff !important;
-      box-shadow: 0 3px 10px rgba(255,152,0,0.32) !important;
-    }
-
-    .prod-name {
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      color: var(--nb-text-1) !important;
-      letter-spacing: -0.2px !important;
-    }
-
-    .prod-add-btn {
-      background: #eff6ff !important;
-      color: #1d4ed8 !important;
-      border-radius: 10px !important;
-      border: 1.5px solid #bfdbfe !important;
-      font-weight: 800 !important;
-      font-size: 11px !important;
-      transition: all 0.18s var(--nb-ease-spring) !important;
-    }
-    .prod-add-btn:active {
-      transform: scale(0.94) !important;
-      background: #dbeafe !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       FREE CASH BANNER — cinematic deep blue
-    ═══════════════════════════════════════════════ */
-    .cash-banner {
-      background: linear-gradient(
-        140deg,
-        #0f0a2e 0%,
-        #1c1148 30%,
-        #2f1f72 60%,
-        #1a3b70 100%
-      ) !important;
-      /* Animated shimmer across the banner */
-      background-size: 200% 200% !important;
-      animation: cashBannerShift 8s ease infinite !important;
-      padding: 32px 20px !important;
-      margin-bottom: 6px !important;
-    }
-    @keyframes cashBannerShift {
-      0%   { background-position: 0%   0%;   }
-      50%  { background-position: 100% 100%; }
-      100% { background-position: 0%   0%;   }
-    }
-
-    /* Stars / sparkles in the cash banner using text */
-    .cash-banner::before {
-      content: '✦   ·   ✧   ·   ✦';
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 8px;
-      color: rgba(255,255,255,0.18);
-      letter-spacing: 6px;
-      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 110px;
+      padding-top: 8px; 
+      padding-bottom: 24px;
+      position: relative;
+    }
+    .pb-headline {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 2px;
       z-index: 2;
-      white-space: nowrap;
-    }
-
-    .cash-text {
-      font-size: 17px !important;
-      font-weight: 800 !important;
-      line-height: 1.5 !important;
-      letter-spacing: -0.2px !important;
-    }
-    .cash-text .hi { color: #FFC72C !important; }
-
-    /* Gold coin — richer radial + rotation wiggle */
-    .cash-coin {
-      background: radial-gradient(
-        circle at 32% 28%,
-        #FFF0A0 0%,
-        #FFD700 30%,
-        #F0A500 65%,
-        #7A4900 100%
-      ) !important;
-      box-shadow:
-        0 8px 28px rgba(255,215,0,0.55),
-        inset 0 3px 8px rgba(255,255,255,0.35),
-        inset 0 -4px 8px rgba(0,0,0,0.2) !important;
-      animation: coinWiggle 5s ease-in-out infinite !important;
-      will-change: transform;
-    }
-    @keyframes coinWiggle {
-      0%,  100% { transform: rotate(0deg)  scale(1);    }
-      20%        { transform: rotate(6deg)  scale(1.04); }
-      40%        { transform: rotate(-5deg) scale(1.02); }
-      60%        { transform: rotate(4deg)  scale(1.03); }
-      80%        { transform: rotate(-3deg) scale(1.01); }
-    }
-    .coin-free {
-      font-size: 9.5px !important;
-      font-weight: 900 !important;
-      letter-spacing: 1.8px !important;
-      color: rgba(255,255,255,0.95) !important;
-    }
-    .coin-amt {
-      font-size: 23px !important;
-      font-weight: 900 !important;
-      color: #fff !important;
-      letter-spacing: -0.5px !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       SKELETON — premium shimmer quality upgrade
-    ═══════════════════════════════════════════════ */
-    .skeleton {
-      background: linear-gradient(
-        90deg,
-        #ececf0 0%,
-        #e4e4ea 20%,
-        #f4f4f8 40%,
-        #e4e4ea 60%,
-        #ececf0 80%,
-        #ececf0 100%
-      ) !important;
-      background-size: 300% 100% !important;
-      animation: skelPremium 1.8s ease-in-out infinite !important;
-      border-radius: 16px !important;
-    }
-    @keyframes skelPremium {
-      0%   { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
-    }
-
-    /* ═══════════════════════════════════════════════
-       CART BAR — cinematic dark float
-    ═══════════════════════════════════════════════ */
-    #cart-bar {
-      background: linear-gradient(
-        135deg,
-        #111827 0%,
-        #1f2937 50%,
-        #111827 100%
-      ) !important;
-      border-radius: 20px !important;
-      padding: 14px 18px !important;
-      box-shadow:
-        0 12px 40px rgba(0,0,0,0.38),
-        0 2px 8px rgba(0,0,0,0.20),
-        inset 0 1px 0 rgba(255,255,255,0.07) !important;
-      border: 1px solid rgba(255,255,255,0.06) !important;
-    }
-    #cart-bar.visible {
-      animation: cartRise 0.35s var(--nb-ease-spring) both !important;
-    }
-    @keyframes cartRise {
-      from { transform: translateY(18px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-
-    /* Cart icon badge area */
-    #cart-bar > div > div:first-child {
-      background: rgba(252,128,25,0.18) !important;
-      border-radius: 12px !important;
-      border: 1px solid rgba(252,128,25,0.25) !important;
-    }
-
-    /* Cart CTA button */
-    #cart-bar button:last-child {
-      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
-      border: none !important;
-      border-radius: 14px !important;
-      padding: 10px 18px !important;
-      font-size: 12px !important;
-      font-weight: 800 !important;
-      letter-spacing: 0.2px !important;
-      box-shadow:
-        0 4px 16px rgba(252,128,25,0.45),
-        inset 0 1px 0 rgba(255,255,255,0.18) !important;
-      transition:
-        transform 0.18s var(--nb-ease-spring),
-        box-shadow 0.18s ease !important;
-      will-change: transform;
-    }
-    #cart-bar button:last-child:hover {
-      transform: scale(1.04) !important;
-      box-shadow:
-        0 6px 22px rgba(252,128,25,0.55),
-        inset 0 1px 0 rgba(255,255,255,0.18) !important;
-    }
-    #cart-bar button:last-child:active {
-      transform: scale(0.95) !important;
-      box-shadow: 0 2px 8px rgba(252,128,25,0.3) !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       BOTTOM NAV — frosted glass premium dock
-    ═══════════════════════════════════════════════ */
-    .bottom-nav {
-      height: 66px !important;
-      background: rgba(255,255,255,0.96) !important;
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-      border-top: 1px solid rgba(0,0,0,0.05) !important;
-      box-shadow:
-        0 -1px 0 rgba(255,255,255,0.6),
-        0 -8px 30px rgba(0,0,0,0.07) !important;
-    }
-
-    .nav-item {
-      font-size: 10px !important;
-      font-weight: 700 !important;
-      letter-spacing: -0.1px !important;
-      color: #9ca3af !important;
-      transition:
-        color 0.2s ease,
-        transform 0.2s var(--nb-ease-spring) !important;
-    }
-    .nav-item:active { transform: scale(0.88) !important; }
-    .nav-item.active { color: var(--nb-orange) !important; }
-
-    /* Active nav glow indicator */
-    .nav-item.active::before {
-      content: '' !important;
-      position: absolute !important;
-      top: 6px !important;
-      width: 5px !important;
-      height: 5px !important;
-      background: var(--nb-orange) !important;
-      border-radius: 50% !important;
-      box-shadow: 0 0 0 3px var(--nb-orange-soft) !important;
-      animation: navDotPop 0.3s var(--nb-ease-spring) both !important;
-    }
-    @keyframes navDotPop {
-      from { transform: scale(0); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-
-    /* Food circle upgrade */
-    .nav-food-circle {
-      width: 44px !important;
-      height: 44px !important;
-      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
-      border-radius: 50% !important;
-      box-shadow:
-        0 4px 16px rgba(252,128,25,0.42),
-        inset 0 1px 0 rgba(255,255,255,0.2) !important;
-      transition: transform 0.2s var(--nb-ease-spring), box-shadow 0.2s ease !important;
-    }
-    .nav-item:active .nav-food-circle {
-      transform: scale(0.9) !important;
-      box-shadow: 0 2px 8px rgba(252,128,25,0.3) !important;
-    }
-
-    /* NEW badge pulsing glow */
-    .nav-new-badge {
-      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
-      border-radius: 5px !important;
-      font-size: 7px !important;
-      font-weight: 900 !important;
-      padding: 2px 5px !important;
-      animation: badgeGlow 2s ease-in-out infinite !important;
-    }
-    @keyframes badgeGlow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(252,128,25,0.5); }
-      50%       { box-shadow: 0 0 0 4px rgba(252,128,25,0); }
-    }
-
-    /* ═══════════════════════════════════════════════
-       TAP UTILITY — spring upgrade
-    ═══════════════════════════════════════════════ */
-    .tap {
-      transition:
-        transform 0.18s var(--nb-ease-spring),
-        opacity 0.18s ease !important;
-    }
-    .tap:active {
-      transform: scale(0.94) !important;
-      opacity: 0.88 !important;
-    }
-
-    /* ═══════════════════════════════════════════════
-       RESTAURANT LIST — stagger refinement
-    ═══════════════════════════════════════════════ */
-    .vr { animation: cardSlideUp 0.4s var(--nb-ease-out) both !important; }
-    @keyframes cardSlideUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0);    }
-    }
-    /* Tighter stagger: JS renders them so use nth-child */
-    #restaurant-list .vr:nth-child(1) { animation-delay: 0.05s !important; }
-    #restaurant-list .vr:nth-child(2) { animation-delay: 0.12s !important; }
-    #restaurant-list .vr:nth-child(3) { animation-delay: 0.19s !important; }
-    #restaurant-list .vr:nth-child(4) { animation-delay: 0.26s !important; }
-    #restaurant-list .vr:nth-child(5) { animation-delay: 0.33s !important; }
-
-    /* ═══════════════════════════════════════════════
-       SCROLLBAR — custom thin style
-    ═══════════════════════════════════════════════ */
-    ::-webkit-scrollbar { width: 3px; height: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 999px; }
-
-    /* ═══════════════════════════════════════════════
-       PERFORMANCE GUARD — GPU layers for new elements
-    ═══════════════════════════════════════════════ */
-    .vr,
-    .rest-card-h,
-    .prod-card,
-    .cat-item,
-    .cat-ring,
-    .cash-coin,
-    #cart-bar,
-    .bottom-nav {
-      will-change: transform;
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
-    /* ═══════════════════════════════════════════════
-       SELECTION COLOUR
-    ═══════════════════════════════════════════════ */
-    ::selection {
-      background: rgba(252,128,25,0.2);
       color: #1a1a1a;
+      filter: drop-shadow(0 2px 6px rgba(255,255,255,0.4));
     }
+    .pb-dynamic-row {
+      display: inline-flex;
+      align-items: center;
+      height: 40px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #D23F00;
+      margin-bottom: 8px;
+      z-index: 2;
+      position: relative;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+    }
+    .pb-static-text { color: #4a2080; margin-right: 8px; line-height: 40px; }
+    .pb-scroller { display: flex; flex-direction: column; text-align: left; animation: pbScroll 12s infinite cubic-bezier(0.85, 0, 0.15, 1); }
+    .pb-scroller span { height: 40px; line-height: 40px; display: flex; align-items: center; white-space: nowrap; text-shadow: 0 2px 4px rgba(210, 63, 0, 0.2); }
+    
+    @keyframes pbScroll {
+      0%, 12%   { transform: translateY(0); }
+      16%, 28%  { transform: translateY(-40px); }
+      32%, 44%  { transform: translateY(-80px); }
+      48%, 60%  { transform: translateY(-120px); }
+      64%, 76%  { transform: translateY(-160px); }
+      80%, 92%  { transform: translateY(-200px); }
+      96%, 100% { transform: translateY(-240px); }
+    }
+    .pb-footer-line { font-size: 10.5px; font-weight: 800; color: rgba(0,0,0,0.55); letter-spacing: 2.5px; text-transform: uppercase; z-index: 2; }
+    .pb-particle { position: absolute; opacity: 0.15; z-index: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); animation: pbFloat 5s infinite ease-in-out alternate; }
+    .pb-p1 { top: 5%; left: 8%; font-size: 28px; animation-delay: 0s; }
+    .pb-p2 { top: 30%; right: 10%; font-size: 34px; animation-delay: -1.5s; }
+    .pb-p3 { bottom: 20%; left: 22%; font-size: 24px; animation-delay: -3s; }
+    .pb-p4 { top: -5%; right: 28%; font-size: 22px; animation-delay: -2s; }
+    @keyframes pbFloat { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-14px) rotate(12deg); } }
 
+    /* ══════════════════════════════════════════
+       BODY SECTIONS
+    ══════════════════════════════════════════ */
+    .section-card { background: #fff; margin-bottom: 8px; padding: 18px 0 8px; border-radius: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.03); }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; margin-bottom: 14px; }
+    .sec-title { font-size: 17px; font-weight: 900; color: #1a1a1a; letter-spacing: -0.3px; }
+
+    .cat-scroll { display: flex; overflow-x: auto; padding: 0 16px 6px; gap: 0; }
+    .cat-item { flex-shrink: 0; width: 82px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: transform 0.13s; }
+    .cat-item:active { transform: scale(0.92); }
+    
+    .cat-item:active .cat-ring { border-color: #FC8019; box-shadow: 0 0 0 3px rgba(252,128,25,0.15); }
+    .cat-ring img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+    .cat-name { font-size: 11.5px; font-weight: 600; color: #333; text-align: center; }
+
+    /* ─── Premium 99 Store Redesign ─── */
+    .store-card {
+      background: linear-gradient(135deg, #f0f4ff 0%, #fdfdff 50%, #ffffff 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(37,99,235,0.15);
+      padding: 16px;
+      margin: 0 16px 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(37,99,235,0.04);
+    }
+    .store-card::after {
+      content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
+      background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .store-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; position: relative; z-index: 2; }
+    .store-icon-wrap { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.3); border: 1.5px solid rgba(255,255,255,0.5); }
+    .store-title { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; }
+    .store-pro { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
+    .store-sub { font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.2px; margin-top: 2px; }
+    .store-see-all { font-size: 11px; font-weight: 800; color: #2563eb; background: #fff; padding: 8px 14px; border-radius: 12px; border: 1px solid #dde8ff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-decoration: none; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: transform 0.15s; }
+    .store-see-all:active { transform: scale(0.95); }
+
+    .h-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 0 0 8px 0; position: relative; z-index: 2; }
+    
+    .prod-card { flex-shrink: 0; width: 156px; background: #fff; border-radius: 20px; padding: 10px; border: 1px solid #f1f5f9; box-shadow: 0 6px 20px rgba(0,0,0,0.04); text-decoration: none; display: block; transition: transform 0.15s; }
+    .prod-card:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .prod-img-wrap { position: relative; margin-bottom: 12px; }
+    .prod-img-wrap img { width: 100%; height: 116px; object-fit: cover; background: #f8fafc; border-radius: 14px; }
+    .prod-price-tag { position: absolute; bottom: -10px; right: 8px; background: linear-gradient(to right, #FFD700, #F5BC00); color: #422200; font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 10px; border: 2.5px solid #fff; box-shadow: 0 4px 10px rgba(245,188,0,0.3); letter-spacing: 0.5px; }
+    .prod-veg-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+    .veg-dot { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .veg-dot .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .veg-dot.veg { border-color: #16a34a; } .veg-dot.veg .dot { background: #16a34a; }
+    .veg-dot.nonveg { border-color: #dc2626; } .veg-dot.nonveg .dot { background: #dc2626; }
+    .veg-tag-txt { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .prod-name { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prod-rest { font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prod-add-btn { width: 100%; padding: 8px 0; background: #fff; color: #16a34a; border-radius: 12px; font-size: 12px; font-weight: 800; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: background 0.15s; }
+    .prod-card:active .prod-add-btn { background: #f0fdf4; border-color: #bbf7d0; }
+
+    /* ─── Restaurants List ─── */
+    .vrest-section { background: #fff; padding: 18px 16px 8px; border-radius: 20px 20px 0 0; }
+    .vr { border-radius: 20px; overflow: hidden; background: #fff; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-decoration: none; display: block; border: 1px solid #f1f5f9; transition: transform 0.15s; }
+    .vr:active { transform: scale(0.98); }
+    .vr-img { width: 100%; height: 200px; position: relative; }
+    .vr-img img { width: 100%; height: 100%; object-fit: cover; }
+    .vr-offer { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 36px 14px 12px; font-size: 13px; font-weight: 900; color: #fff; letter-spacing: -0.2px; }
+    .vr-heart { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: rgba(255,255,255,0.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .vr-heart i { font-size: 14px; color: #94a3b8; }
+    .vr-body { padding: 14px 16px 16px; }
+    .vr-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .vr-name { font-size: 17px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
+    .vr-rating { display: flex; align-items: center; gap: 4px; flex-shrink: 0; background: #f0fdf4; border: 1.5px solid rgba(22,163,74,0.2); border-radius: 10px; padding: 4px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+    .vr-rating .star-icon { font-size: 11px; color: #16a34a; }
+    .vr-rating .rating-num { font-size: 13px; font-weight: 900; color: #14532d; line-height: 1; }
+    .vr-rating .rating-divider { width: 1px; height: 12px; background: #bbf7d0; margin: 0 2px; }
+    .vr-rating .rating-count { font-size: 10px; font-weight: 700; color: #166534; line-height: 1; }
+    .vr-cuisine { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
+    .vr-meta { display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: #475569; font-weight: 700; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
+    .vr-meta i { color: #FC8019; font-size: 12px; }
+    .vr-sep { color: #cbd5e1; font-weight: 900; }
+
+    /* ─── Bottom Nav ─── */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch; box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; color: #94a3b8; text-decoration: none; transition: color 0.2s ease; cursor: pointer; position: relative; }
+    .nav-item svg { width: 24px; height: 24px; }
+    .nav-item.active { color: #FC8019; }
+    .nav-item.active svg { stroke: #FC8019; }
+    .nav-food-circle { width: 46px; height: 46px; background: #FC8019; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(252,128,25,0.4); margin-bottom: 2px; }
+    .nav-food-circle svg { width: 22px; height: 22px; color: #fff; stroke: #fff; }
+    .nav-new-badge { position: absolute; top: 6px; right: 10px; background: #ef4444; color: #fff; font-size: 7px; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(239,68,68,0.4); }
+    .cat-ring{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+}
+
+.cat-ring img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:50%;
+}
   </style>
-
 </head>
 
 <body>
 
-<!-- ══════════════════════════════════════════
-     HERO HEADER
-══════════════════════════════════════════ -->
-<header id="hero" class="hero-header">
+<div id="global-skeleton">
+  <div class="skel-pulse" style="height: 240px; border-radius: 0 0 36px 36px; margin-bottom: 20px;"></div>
+  
+  <div style="padding: 0 16px;">
+    <div class="skel-pulse" style="width: 160px; height: 20px; border-radius: 10px; margin-bottom: 16px;"></div>
+    <div style="display: flex; gap: 14px; margin-bottom: 30px; overflow: hidden;">
+      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
+      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
+      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
+      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
+      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
+    </div>
 
-  <!-- Location row clip (fixed height, no transition — just clips) -->
-  <div class="loc-row-clip">
-    <div class="loc-row">
-      <div class="loc-left tap">
-        <div class="loc-name-row">
-          <i class="fa-solid fa-location-arrow loc-arrow" style="transform: rotate(-45deg)"></i>
-          <span class="loc-name">Kolkata Railway Station...</span>
-          <i class="fa-solid fa-chevron-down loc-chevron"></i>
+    <div class="skel-pulse" style="height: 230px; border-radius: 24px; margin-bottom: 24px;"></div>
+
+   <div class="skel-pulse" style="width: 180px; height: 20px; border-radius: 10px; margin-bottom: 16px;"></div>
+    <div class="skel-pulse" style="height: 200px; border-radius: 20px; margin-bottom: 20px;"></div>
+    <div class="skel-pulse" style="height: 200px; border-radius: 20px; margin-bottom: 20px;"></div>
+  </div>
+</div>
+
+<header id="hero" class="hero-header">
+  <div class="loc-row">
+    <div class="loc-left tap">
+      <div class="loc-name-row">
+        <i class="fa-solid fa-location-arrow loc-arrow" style="transform: rotate(-45deg)"></i>
+        <span class="loc-name">Maynaguri Puran Bazer..</span>
+        <i class="fa-solid fa-chevron-down loc-chevron"></i>
+      </div>
+      <p class="loc-sub">Delivery Across Maynaguri Under 15 Km</p>
+    </div>
+    <div class="loc-right">
+      <button class="btn-buyone tap" onclick="window.location.href='under99.html'">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <span class="buyone-top">Buy</span>
+          <span class="buyone-bot">one</span>
         </div>
-        <p class="loc-sub">Belgachia, Kolkata, West Bengal, India</p>
-      </div>
-      <div class="loc-right">
-        <button class="btn-buyone tap" onclick="window.location.href='under99.html'">
-          <div style="display:flex;flex-direction:column;align-items:center">
-            <span class="buyone-top">Buy</span>
-            <span class="buyone-bot">one</span>
-          </div>
-        </button>
-        <a href="profile.html" class="btn-profile tap">
-          <i class="fa-solid fa-user"></i>
-        </a>
-      </div>
+      </button>
+      <a href="profile.html" class="btn-profile tap">
+        <i class="fa-solid fa-user"></i>
+      </a>
     </div>
   </div>
 
-  <!-- Compact location pill — fades in when scrolled -->
-  <div class="scroll-loc-pill">
-    <div class="scroll-loc-dot"></div>
-    <span class="scroll-loc-text">Maynaguri Pura Bazar</span>
-    <i class="fa-solid fa-chevron-down scroll-loc-chevron"></i>
-  </div>
-
-  <!-- Search row -->
   <div class="search-row">
     <div class="search-box tap" onclick="window.location.href='search.html'">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -2262,256 +343,169 @@
     </div>
   </div>
 
-  <!-- Promo Banner clip (instant height collapse — no transition) -->
-  <div class="banner-clip">
-    <div class="banner-wrap">
-      <div class="banner-left">
-        <p class="banner-eyebrow">Now Serving At</p>
-        <h2 class="banner-title">150+ STATIONS.</h2>
-        <button class="banner-cta tap" onclick="window.location.href='under99.html'">
-          Enter PNR
-          <i class="fa-solid fa-angles-right" style="font-size:11px"></i>
-        </button>
-      </div>
+  <div class="banner-wrap">
+    <div class="pb-particle pb-p1">🍔</div>
+    <div class="pb-particle pb-p2">🍕</div>
+    <div class="pb-particle pb-p3">🥟</div>
+    <div class="pb-particle pb-p4">🍟</div>
 
-      <div class="banner-right">
-        <div class="train-chip">SEARCH "TRAIN" ON APP</div>
-        <div class="train-box">
-          <div class="train-line"></div>
-          <div class="train-line"></div>
-          <span class="train-code">SW2526</span>
-        </div>
-        <img
-          src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_200,h_200,c_fit/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png"
-          alt="Food"
-          class="banner-food-img" loading="lazy"
-          onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&auto=format&fit=crop&q=80'"
-        >
+    <h2 class="pb-headline">Discover Amazing Food</h2>
+
+    <div class="pb-dynamic-row">
+      <span class="pb-static-text">Craving</span>
+      <div class="pb-scroller">
+        <span>Hot Biryani?</span>
+        <span>Fresh Pizza?</span>
+        <span>Crispy Momos?</span>
+        <span>Juicy Burgers?</span>
+        <span>Street Food?</span>
+        <span>Sweet Desserts?</span>
+        <span>Hot Biryani?</span>
       </div>
     </div>
-  </div>
 
+    <div class="pb-footer-line">
+      Biryani • Pizza • Burgers • Momos • Rolls
+    </div>
+  </div>
 </header>
 
-
-
-<!-- ══════════════════════════════════════════
-     WHAT'S ON YOUR MIND
-══════════════════════════════════════════ -->
 <div class="section-card">
   <div class="sec-head">
     <span class="sec-title">What's on your mind?</span>
   </div>
   <div class="cat-scroll no-scrollbar">
-
     <div class="cat-item" onclick="goCategory('Momos')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029852/PC_Creative%20refresh/3D_folders/food/momo.png" alt="Momos" onerror="this.src='https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=120'"></div>
+      <div class="cat-ring"><img src="assets/momo1.jpg"></div>
       <span class="cat-name">Momos</span>
     </div>
     <div class="cat-item" onclick="goCategory('Noodles')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029858/PC_Creative%20refresh/3D_folders/food/noodles.png" alt="Noodles" onerror="this.src='https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=120'"></div>
+      <div class="cat-ring"><img src="assets/noodles.png"></div>
       <span class="cat-name">Noodles</span>
     </div>
     <div class="cat-item" onclick="goCategory('Pizza')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029856/PC_Creative%20refresh/3D_folders/food/pizza.png" alt="Pizzas" onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=120'"></div>
+      <div class="cat-ring"><img src="assets/pizaa1.png"></div>
       <span class="cat-name">Pizzas</span>
     </div>
     <div class="cat-item" onclick="goCategory('Biryani')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png" alt="Biryani" onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=120'"></div>
+      <div class="cat-ring"><img src="assets/b1.png"></div>
       <span class="cat-name">Biryani</span>
     </div>
     <div class="cat-item" onclick="goCategory('Rolls')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029858/PC_Creative%20refresh/3D_folders/food/roll.png" alt="Rolls" onerror="this.src='https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=120'"></div>
+      <div class="cat-ring"><img src="assets/rolls.png"></div>
       <span class="cat-name">Rolls</span>
     </div>
     <div class="cat-item" onclick="goCategory('Burger')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029845/PC_Creative%20refresh/3D_folders/food/burger.png" alt="Burgers" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=120'"></div>
+      <div class="cat-ring"><img src="assets/burgers1.png"></div>
       <span class="cat-name">Burgers</span>
     </div>
-    <div class="cat-item" onclick="goCategory('Dosa')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029850/PC_Creative%20refresh/3D_folders/food/dosa.png" alt="South Indian" onerror="this.src='https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=120'"></div>
-      <span class="cat-name">South Indian</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Chinese')">
-      <div class="cat-ring"><img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029852/PC_Creative%20refresh/3D_folders/food/momo.png" alt="Chinese" onerror="this.src='https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=120'"></div>
-      <span class="cat-name">Chinese</span>
-    </div>
-
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     99 STORE
-══════════════════════════════════════════ -->
-<div class="section-card" style="padding: 18px 0 18px;">
-  <div class="store-card">
-    <div class="store-head">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="store-icon-wrap">
-          <i class="fa-solid fa-store" style="color:#fff;font-size:14px"></i>
-        </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span class="store-title">99 Store</span>
-            <span class="store-pro">PRO</span>
-          </div>
-          <p class="store-sub">Meals at ₹99 + Free Delivery</p>
-        </div>
+<div class="store-card">
+  <div class="store-head">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="store-icon-wrap">
+        <i class="fa-solid fa-store" style="color:#fff;font-size:16px"></i>
       </div>
-      <a href="under99.html" class="store-see-all tap">
-        See All <i class="fa-solid fa-arrow-right-long" style="font-size:10px"></i>
-      </a>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="store-title">99 Store</span>
+          <span class="store-pro">PRO</span>
+        </div>
+        <p class="store-sub">Meals at ₹99 + Free Delivery</p>
+      </div>
     </div>
+    <a href="under99.html" class="store-see-all tap">
+      See All <i class="fa-solid fa-arrow-right-long" style="font-size:10px"></i>
+    </a>
+  </div>
 
-    <div class="h-scroll" style="padding:0 0 4px 0; gap:12px;">
-
-      <a href="under99.html" class="prod-card">
-        <div class="prod-img-wrap">
-          <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029850/PC_Creative%20refresh/3D_folders/food/dosa.png" alt="Masala Dosa"
-               onerror="this.src='https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=200&auto=format&fit=crop&q=80'">
-          <div class="prod-price-tag">₹69</div>
-        </div>
-        <div class="prod-veg-row">
-          <div class="veg-dot veg"><div class="dot"></div></div>
-          <span class="veg-tag-txt">Veg</span>
-        </div>
-        <div class="prod-name">Masala Dosa</div>
-        <div class="prod-rest">Pizza Restaurant</div>
-        <div class="prod-add-btn">ADD +</div>
-      </a>
-
-      <a href="under99.html" class="prod-card">
-        <div class="prod-img-wrap">
-          <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029858/PC_Creative%20refresh/3D_folders/food/roll.png" alt="Egg Chicken Roll"
-               onerror="this.src='https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=200&auto=format&fit=crop&q=80'">
-          <div class="prod-price-tag">₹89</div>
-        </div>
-        <div class="prod-veg-row">
-          <div class="veg-dot nonveg"><div class="dot"></div></div>
-          <span class="veg-tag-txt">Non-Veg</span>
-        </div>
-        <div class="prod-name">Egg Chicken Roll</div>
-        <div class="prod-rest">Wow! Momo</div>
-        <div class="prod-add-btn">ADD +</div>
-      </a>
-
-      <a href="under99.html" class="prod-card">
-        <div class="prod-img-wrap">
-          <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029845/PC_Creative%20refresh/3D_folders/food/burger.png" alt="Veg Burger"
-               onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80'">
-          <div class="prod-price-tag">₹79</div>
-        </div>
-        <div class="prod-veg-row">
-          <div class="veg-dot veg"><div class="dot"></div></div>
-          <span class="veg-tag-txt">Veg</span>
-        </div>
-        <div class="prod-name">Veg Burger</div>
-        <div class="prod-rest">Burger King</div>
-        <div class="prod-add-btn">ADD +</div>
-      </a>
-
-      <a href="under99.html" class="prod-card">
-        <div class="prod-img-wrap">
-          <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png" alt="Chicken Biryani"
-               onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&auto=format&fit=crop&q=80'">
-          <div class="prod-price-tag">₹99</div>
-        </div>
-        <div class="prod-veg-row">
-          <div class="veg-dot nonveg"><div class="dot"></div></div>
-          <span class="veg-tag-txt">Non-Veg</span>
-        </div>
-        <div class="prod-name">Chicken Biryani</div>
-        <div class="prod-rest">Biryani Zone</div>
-        <div class="prod-add-btn">ADD +</div>
-      </a>
-
-    </div>
+  <div class="h-scroll no-scrollbar">
+    <a href="under99.html" class="prod-card">
+      <div class="prod-img-wrap">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029850/PC_Creative%20refresh/3D_folders/food/dosa.png" alt="Masala Dosa" onerror="this.src='https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=200&auto=format&fit=crop&q=80'">
+        <div class="prod-price-tag">₹69</div>
+      </div>
+      <div class="prod-veg-row"><div class="veg-dot veg"><div class="dot"></div></div><span class="veg-tag-txt">Veg</span></div>
+      <div class="prod-name">Masala Dosa</div>
+      <div class="prod-rest">Pizza Restaurant</div>
+      <div class="prod-add-btn">ADD +</div>
+    </a>
+    <a href="under99.html" class="prod-card">
+      <div class="prod-img-wrap">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029858/PC_Creative%20refresh/3D_folders/food/roll.png" alt="Egg Chicken Roll" onerror="this.src='https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=200&auto=format&fit=crop&q=80'">
+        <div class="prod-price-tag">₹89</div>
+      </div>
+      <div class="prod-veg-row"><div class="veg-dot nonveg"><div class="dot"></div></div><span class="veg-tag-txt">Non-Veg</span></div>
+      <div class="prod-name">Egg Chicken Roll</div>
+      <div class="prod-rest">Wow! Momo</div>
+      <div class="prod-add-btn">ADD +</div>
+    </a>
+    <a href="under99.html" class="prod-card">
+      <div class="prod-img-wrap">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029845/PC_Creative%20refresh/3D_folders/food/burger.png" alt="Veg Burger" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80'">
+        <div class="prod-price-tag">₹79</div>
+      </div>
+      <div class="prod-veg-row"><div class="veg-dot veg"><div class="dot"></div></div><span class="veg-tag-txt">Veg</span></div>
+      <div class="prod-name">Veg Burger</div>
+      <div class="prod-rest">Burger King</div>
+      <div class="prod-add-btn">ADD +</div>
+    </a>
+    <a href="under99.html" class="prod-card">
+      <div class="prod-img-wrap">
+        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png" alt="Chicken Biryani" onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&auto=format&fit=crop&q=80'">
+        <div class="prod-price-tag">₹99</div>
+      </div>
+      <div class="prod-veg-row"><div class="veg-dot nonveg"><div class="dot"></div></div><span class="veg-tag-txt">Non-Veg</span></div>
+      <div class="prod-name">Chicken Biryani</div>
+      <div class="prod-rest">Biryani Zone</div>
+      <div class="prod-add-btn">ADD +</div>
+    </a>
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     RESTAURANTS TO EXPLORE
-══════════════════════════════════════════ -->
 <div class="vrest-section">
-  <div class="sec-head" style="padding:0;margin-bottom:16px">
+  <div class="sec-head" style="padding:0;margin-bottom:20px">
     <span class="sec-title">Restaurants to explore</span>
   </div>
-
-  <div id="restaurant-skeleton">
-    <div class="skeleton" style="height:230px;margin-bottom:20px"></div>
-    <div class="skeleton" style="height:230px;margin-bottom:20px"></div>
-  </div>
-
   <div id="restaurant-list"></div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     CART BAR
-══════════════════════════════════════════ -->
-<div id="cart-bar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center">
-      <i class="fa-solid fa-bag-shopping" style="color:#fff;font-size:14px"></i>
-    </div>
-    <div>
-      <p id="cart-summary" style="font-size:13px;font-weight:800;color:#fff;line-height:1;font-family:Poppins,sans-serif">0 ITEMS | ₹0</p>
-      <p style="font-size:9px;color:rgba(255,255,255,0.6);font-weight:600;margin-top:2px">Extra charges may apply</p>
-    </div>
-  </div>
-  <button onclick="window.location.href='cart.html'"
-          style="display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;font-weight:800;background:rgba(255,255,255,0.12);padding:9px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);cursor:pointer;font-family:Poppins,sans-serif">
-    VIEW CART <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
-  </button>
-</div>
-
-
-<!-- ══════════════════════════════════════════
-     BOTTOM NAVIGATION
-══════════════════════════════════════════ -->
 <nav class="bottom-nav">
-
-  <a href="index.html" class="nav-item" style="color:#aaa">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-    </svg>
-    <span>Home</span>
-  </a>
-
-  <!-- FIX: Food nav item had no orange circle -->
-  <a href="under99.html" class="nav-item" style="color:#FC8019">
+  <a href="index.html" class="nav-item" style="color:#FC8019">
     <div class="nav-food-circle">
-      <svg fill="currentColor" viewBox="0 0 24 24">
-        <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/>
-      </svg>
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
     </div>
     <span style="color:#FC8019">Food</span>
   </a>
-
-  <a href="under99.html" class="nav-item" style="color:#aaa">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-    </svg>
-    <span>99 store</span>
+  <a href="under99.html" class="nav-item" style="color:#94a3b8">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    <spanstyle="color:#FC8019">99 store</span>
   </a>
-
-  <!-- FIX: EatRight was missing, only 4 items now properly laid out -->
-  <a href="profile.html" class="nav-item" style="color:#aaa">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-    </svg>
-    <span>EatRight</span>
+  <a href="orders.html" class="nav-item" style="color:#94a3b8">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+    <span>Orders</span>
     <span class="nav-new-badge">NEW</span>
   </a>
-
 </nav>
-
-
 <script src="home.js"></script>
 <script>
-  // ── 1. Dynamic search placeholder ──────────────────────────────
+  // ── Skeleton Loader Removal ──
+  window.addEventListener('load', () => {
+    // Artificial 600ms delay to simulate loading for effect
+    setTimeout(() => {
+      const skel = document.getElementById('global-skeleton');
+      if (skel) {
+        skel.style.opacity = '0';
+        skel.style.visibility = 'hidden';
+        setTimeout(() => skel.remove(), 500);
+      }
+      displayRestaurants(false);
+    }, 600);
+  });
+
+  // ── Dynamic search placeholder ──
   const phrases = ["Search for 'Biryani'", "Search for 'Pizza'", "Search for 'Momos'", "Search for 'Burger'", "Search for 'Sweets'", "Search for 'EatRight'"];
   let pIdx = 0;
   const placeholder = document.getElementById('search-placeholder');
@@ -2525,17 +519,16 @@
     }, 300);
   }, 2800);
 
-  // ── 2. Category navigation ──────────────────────────────────────
+  // ── Category navigation ──
   function goCategory(type) {
     window.location.href = 'category.html?type=' + encodeURIComponent(type);
   }
 
-  // ── 3. VEG filter toggle ────────────────────────────────────────
+  // ── VEG filter toggle ──
   let vegOnly = false;
   function toggleVegFilter() {
     vegOnly = !vegOnly;
     const track = document.getElementById('veg-track');
-    const thumb = document.getElementById('veg-thumb');
     if (vegOnly) {
       track.classList.add('on');
     } else {
@@ -2544,24 +537,21 @@
     if (typeof displayRestaurants === 'function') displayRestaurants(vegOnly);
   }
 
-  // ── 4. Restaurant render (called by home.js) ────────────────────
+  // ── Restaurant render ──
   function displayRestaurants(filterVeg) {
     const list = document.getElementById('restaurant-list');
-    const skel = document.getElementById('restaurant-skeleton');
     if (!list || typeof restaurants === 'undefined') return;
 
     let data = filterVeg
       ? restaurants.filter(r => r.menu && r.menu.every(i => i.isVeg))
       : restaurants;
 
-    if (skel) skel.style.display = 'none';
-
-    list.innerHTML = data.map(res => `
-      <a href="restaurant.html?id=${res.id}" class="vr">
+    list.innerHTML = data.map((res, i) => `
+      <a href="restaurant.html?id=${res.id}" class="vr" style="animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s; opacity: 0; transform: translateY(20px);">
         <div class="vr-img">
           <img src="${res.image}" alt="${res.name}"
                onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'">
-          <div class="vr-heart"><i class="fa-regular fa-heart"></i></div>
+          <div class="vr-heart"><i class="fa-solid fa-heart"></i></div>
           <div class="vr-offer">${res.offer}</div>
         </div>
         <div class="vr-body">
@@ -2576,7 +566,7 @@
           </div>
           <div class="vr-cuisine">${res.cuisine}</div>
           <div class="vr-meta">
-            <i class="fa-regular fa-clock"></i> ${res.time}
+            <i class="fa-solid fa-clock"></i> ${res.time}
             <span class="vr-sep">•</span>
             <i class="fa-solid fa-location-dot"></i> ${res.distance}
           </div>
@@ -2584,63 +574,12 @@
       </a>
     `).join('');
   }
-
-  // ── 5. 60fps Swiggy-style header scroll morph ───────────────────
-  (function() {
-    const hero    = document.getElementById('hero');
-    const locClip = hero.querySelector('.loc-row-clip');
-    const banClip = hero.querySelector('.banner-clip');
-
-    // Measure real heights once on load
-    let LOC_H = 0, BAN_H = 0;
-    function measureHeights() {
-      hero.classList.remove('scrolled');
-      locClip.style.height = 'auto';
-      banClip.style.height = 'auto';
-      LOC_H = locClip.scrollHeight;
-      BAN_H = banClip.scrollHeight;
-      locClip.style.height = LOC_H + 'px';
-      banClip.style.height = BAN_H + 'px';
-      // Re-apply scrolled state if needed
-      if (window.scrollY > 30) applyScrolled(true);
-    }
-
-    function applyScrolled(isScrolled) {
-      if (isScrolled) {
-        hero.classList.add('scrolled');
-        // Instant layout collapse — no CSS transition on height
-        locClip.style.height = '0px';
-        banClip.style.height = '0px';
-      } else {
-        hero.classList.remove('scrolled');
-        locClip.style.height = LOC_H + 'px';
-        banClip.style.height = BAN_H + 'px';
-      }
-    }
-
-    const THRESHOLD = 28;
-    let wasScrolled = false;
-    let ticking = false;
-
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const isScrolled = window.scrollY > THRESHOLD;
-        if (isScrolled !== wasScrolled) {
-          wasScrolled = isScrolled;
-          applyScrolled(isScrolled);
-        }
-        ticking = false;
-      });
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', measureHeights, { passive: true });
-    window.addEventListener('load', measureHeights);
-  })();
-
-  window.addEventListener('load', () => setTimeout(() => displayRestaurants(false), 350));
 </script>
+<style>
+  @keyframes cardFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
 </body>
 </html>

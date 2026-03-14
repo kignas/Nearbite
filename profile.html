@@ -6,240 +6,751 @@
   <title>Profile – Nearbite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
 
   <style>
-    body { background: #f6f7fb; }
-    
-    /* Profile header gradient improvement */
-    .bg-gradient-to-br.from-\[#8B0000\] {
-      background: linear-gradient(145deg, #9b2335 0%, #c0392b 50%, #e74c3c 100%) !important;
+    :root {
+      --brand:   #FC8019;
+      --dark-red:#8B0000;
+      --red:     #C0392B;
+      --green:   #16a34a;
+      --text-1:  #111827;
+      --text-2:  #374151;
+      --text-3:  #6b7280;
+      --bg:      #F2F3F5;
+      --surface: #ffffff;
+      --border:  #F0F2F5;
+      --ease:    cubic-bezier(0.4,0,0.2,1);
     }
-    
-    /* Avatar ring */
-    .w-16.h-16.bg-white\/20 {
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 4px 16px rgba(0,0,0,0.2) !important;
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 88px;
     }
-    
-    /* Cards */
-    .bg-white.rounded-\[22px\] {
-      box-shadow: 0 2px 16px rgba(0,0,0,0.07) !important;
-      transition: transform 0.2s ease;
+
+    .tap { cursor: pointer; transition: transform 0.13s var(--ease); }
+    .tap:active { transform: scale(0.96); }
+
+    /* ════════════════════════════
+       HERO HEADER
+    ════════════════════════════ */
+    .profile-hero {
+      background: linear-gradient(145deg, #7B0000 0%, #B02020 55%, #C0392B 100%);
+      padding: 52px 18px 72px;
+      border-bottom-left-radius: 32px;
+      border-bottom-right-radius: 32px;
+      position: relative;
+      overflow: hidden;
     }
-    
-    /* Quick action icons */
-    .w-10.h-10.bg-orange-50.rounded-xl { transition: transform 0.2s ease; }
-    .cursor-pointer:active .w-10.h-10.bg-orange-50.rounded-xl { transform: scale(0.9); }
-    
-    /* Menu items hover */
-    .flex.items-center.justify-between.py-4 {
-      transition: background 0.15s ease;
+    /* Decorative circles — no blur, just CSS */
+    .profile-hero .dc1 { position:absolute; top:-60px; right:-50px; width:180px; height:180px; background:rgba(255,255,255,0.07); border-radius:50%; pointer-events:none; }
+    .profile-hero .dc2 { position:absolute; bottom:-40px; left:-40px; width:120px; height:120px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none; }
+    .profile-hero .dc3 { position:absolute; top:35%; right:15%; width:52px; height:52px; background:rgba(255,255,255,0.06); border-radius:50%; pointer-events:none; }
+
+    .hero-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; position: relative; z-index: 2;
     }
-    .flex.items-center.justify-between.py-4:active { background: #f8f8fb; }
-    
-    /* ONE card special treatment */
-    .text-orange-500.font-black.text-\[18px\] { letter-spacing: -0.5px; }
-    
-    img { loading: lazy; }
+    .btn-back {
+      width:36px; height:36px; background:rgba(255,255,255,0.15);
+      border-radius:50%; border:1.5px solid rgba(255,255,255,0.2);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .btn-back:active { transform:scale(0.90); }
+    .btn-back i { font-size:14px; color:#fff; }
+    .hero-actions { display:flex; align-items:center; gap:8px; }
+    .btn-help {
+      background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.2);
+      border-radius:50px; padding:6px 14px;
+      font-size:12px; font-weight:700; color:#fff;
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .btn-help:active { transform:scale(0.93); }
+    .btn-more {
+      width:36px; height:36px; background:rgba(255,255,255,0.15);
+      border-radius:50%; border:1.5px solid rgba(255,255,255,0.2);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .btn-more:active { transform:scale(0.90); }
+    .btn-more i { font-size:14px; color:#fff; }
+
+    /* Avatar row */
+    .avatar-row {
+      display:flex; align-items:center; gap:14px;
+      position:relative; z-index:2;
+    }
+    .avatar-wrap { position:relative; flex-shrink:0; }
+    .avatar-circle {
+      width:68px; height:68px; border-radius:50%;
+      background:rgba(255,255,255,0.18);
+      border:2.5px solid rgba(255,255,255,0.3);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .avatar-circle i { font-size:28px; color:rgba(255,255,255,0.9); }
+    .avatar-edit {
+      position:absolute; bottom:0; right:0;
+      width:22px; height:22px; background:#FC8019;
+      border-radius:50%; border:2px solid #C0392B;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .avatar-edit i { font-size:9px; color:#fff; }
+    .avatar-info { flex:1; min-width:0; }
+    .avatar-name {
+      font-family:'Syne', sans-serif;
+      font-size:22px; font-weight:800; color:#fff;
+      letter-spacing:-0.5px; line-height:1.1; margin-bottom:3px;
+    }
+    .avatar-phone {
+      font-size:12px; color:rgba(255,255,255,0.6); font-weight:500;
+    }
+    .btn-edit-profile {
+      background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.25);
+      border-radius:50px; padding:5px 12px;
+      font-size:11px; font-weight:700; color:#fff;
+      cursor:pointer; transition:transform 0.13s var(--ease); white-space:nowrap;
+    }
+    .btn-edit-profile:active { transform:scale(0.93); }
+
+    /* ════════════════════════════
+       CONTENT STACK
+    ════════════════════════════ */
+    .content-stack {
+      padding: 0 14px;
+      margin-top: -48px;
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      background:#fff; border-radius:20px;
+      padding:16px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.07);
+      display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr;
+      align-items:center;
+    }
+    .stat-divider { background:#F0F2F5; height:36px; }
+    .stat-item { display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .stat-val {
+      font-family:'Syne', sans-serif;
+      font-size:20px; font-weight:800; color:var(--text-1); letter-spacing:-0.5px; line-height:1;
+    }
+    .stat-val.orange { color:var(--brand); }
+    .stat-val.green  { color:var(--green); }
+    .stat-label { font-size:10px; font-weight:600; color:var(--text-3); }
+
+    /* ── Card base ── */
+    .card {
+      background:var(--surface); border-radius:20px;
+      box-shadow:0 1px 6px rgba(0,0,0,0.05);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+    .card-title {
+      font-size:10px; font-weight:800; color:var(--text-3);
+      text-transform:uppercase; letter-spacing:1.5px;
+      padding:16px 16px 0;
+      margin-bottom:12px;
+    }
+
+    /* ── ONE membership ── */
+    .one-card {
+      background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+      border-radius:20px; padding:16px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.15);
+      position:relative; overflow:hidden;
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .one-card:active { transform:scale(0.98); }
+    .one-card .dc { position:absolute; right:-30px; top:-30px; width:120px; height:120px; background:rgba(252,128,25,0.08); border-radius:50%; pointer-events:none; }
+    .one-card .dc2 { right:20px; top:auto; bottom:-40px; width:80px; height:80px; background:rgba(255,255,255,0.04); }
+    .one-row { display:flex; justify-content:space-between; align-items:center; }
+    .one-brand { display:flex; align-items:baseline; gap:4px; margin-bottom:6px; }
+    .one-n { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; color:#FC8019; }
+    .one-tag { font-size:8px; font-weight:900; background:#FC8019; color:#fff; padding:2px 7px; border-radius:4px; letter-spacing:1px; text-transform:uppercase; align-self:center; }
+    .one-title { font-size:13px; font-weight:700; color:#fff; line-height:1.35; margin-bottom:2px; }
+    .one-sub { font-size:10.5px; color:rgba(255,255,255,0.45); font-weight:500; }
+    .one-cta {
+      background:#FC8019; color:#fff; font-size:11px; font-weight:800;
+      padding:8px 16px; border-radius:12px; border:none; cursor:pointer;
+      white-space:nowrap; transition:transform 0.12s var(--ease);
+    }
+    .one-cta:active { transform:scale(0.93); }
+
+    /* ── Quick actions ── */
+    .quick-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+      padding:14px;
+    }
+    .quick-item {
+      background:#fff; border-radius:16px; padding:12px 6px;
+      display:flex; flex-direction:column; align-items:center; gap:7px;
+      box-shadow:0 1px 5px rgba(0,0,0,0.05); border:1px solid var(--border);
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .quick-item:active { transform:scale(0.91); }
+    .quick-icon {
+      width:38px; height:38px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center; font-size:16px;
+    }
+    .quick-icon.orange { background:#fff4ec; color:#FC8019; }
+    .quick-icon.blue   { background:#eff6ff; color:#3b82f6; }
+    .quick-icon.green  { background:#f0fdf4; color:#16a34a; }
+    .quick-icon.purple { background:#faf5ff; color:#9333ea; }
+    .quick-label { font-size:9px; font-weight:700; color:var(--text-2); text-align:center; line-height:1.3; }
+
+    /* ── Menu row ── */
+    .menu-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:13px 16px; cursor:pointer;
+      transition:background 0.12s;
+      border-bottom:1px solid var(--border);
+    }
+    .menu-row:last-child { border-bottom:none; }
+    .menu-row:active { background:#fafafa; }
+    .menu-left { display:flex; align-items:center; gap:12px; }
+    .menu-icon {
+      width:34px; height:34px; border-radius:11px;
+      display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
+    }
+    .menu-icon.orange  { background:#fff4ec; color:#FC8019; }
+    .menu-icon.blue    { background:#eff6ff; color:#3b82f6; }
+    .menu-icon.red     { background:#fef2f2; color:#ef4444; }
+    .menu-icon.yellow  { background:#fffbeb; color:#f59e0b; }
+    .menu-icon.green   { background:#f0fdf4; color:#16a34a; }
+    .menu-icon.gray    { background:#f9fafb; color:#6b7280; }
+    .menu-icon.purple  { background:#faf5ff; color:#9333ea; }
+    .menu-icon.teal    { background:#f0fdfa; color:#0d9488; }
+    .menu-text { font-size:13px; font-weight:700; color:var(--text-1); }
+    .menu-sub  { font-size:10.5px; color:var(--text-3); font-weight:500; margin-top:1px; }
+    .menu-right { display:flex; align-items:center; gap:8px; }
+    .menu-badge {
+      background:#ef4444; color:#fff; font-size:7.5px; font-weight:900;
+      padding:2px 7px; border-radius:6px; letter-spacing:0.5px;
+    }
+    .menu-badge.green { background:#16a34a; }
+    .menu-badge.orange { background:#FC8019; }
+    .menu-chevron { font-size:11px; color:#d1d5db; }
+
+    /* Toggle switch */
+    .toggle-track {
+      width:40px; height:22px; background:#e5e7eb; border-radius:999px;
+      position:relative; cursor:pointer; transition:background 0.22s;
+      flex-shrink:0;
+    }
+    .toggle-track.on { background:#FC8019; }
+    .toggle-thumb {
+      position:absolute; top:2px; left:2px; width:18px; height:18px;
+      background:#fff; border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,0.18);
+      transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .toggle-track.on .toggle-thumb { transform:translateX(18px); }
+
+    /* ── Order card ── */
+    .order-card {
+      border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .order-card:active { transform:scale(0.99); }
+    .order-img { width:100%; height:110px; object-fit:cover; display:block; background:#f5f5f5; }
+    .order-body { padding:12px; }
+    .order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+    .order-name { font-size:14px; font-weight:800; color:var(--text-1); letter-spacing:-0.3px; }
+    .order-status {
+      font-size:9.5px; font-weight:800; padding:3px 8px; border-radius:6px;
+      text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .order-status.delivered { background:#f0fdf4; color:#16a34a; }
+    .order-status.cancelled { background:#fef2f2; color:#ef4444; }
+    .order-items { font-size:11.5px; color:var(--text-3); font-weight:500; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .order-meta { display:flex; justify-content:space-between; align-items:center; }
+    .order-date { font-size:10.5px; color:var(--text-3); font-weight:600; }
+    .order-amount { font-size:13px; font-weight:800; color:var(--text-1); }
+    .order-actions { display:flex; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+    .order-btn {
+      flex:1; padding:8px 0; border-radius:10px; font-size:12px; font-weight:800;
+      text-align:center; cursor:pointer; border:none; transition:transform 0.12s var(--ease);
+    }
+    .order-btn:active { transform:scale(0.95); }
+    .order-btn.primary { background:#FC8019; color:#fff; }
+    .order-btn.secondary { background:#f3f4f6; color:var(--text-2); }
+
+    /* ── Referral card ── */
+    .referral-card {
+      background:linear-gradient(135deg,#fff8f0 0%,#fff4e8 100%);
+      border:1.5px solid rgba(252,128,25,0.2);
+      border-radius:20px; padding:16px;
+      position:relative; overflow:hidden;
+      cursor:pointer; transition:transform 0.13s var(--ease);
+    }
+    .referral-card:active { transform:scale(0.98); }
+    .referral-card .rdeco { position:absolute; right:-20px; top:-20px; width:100px; height:100px; background:rgba(252,128,25,0.06); border-radius:50%; pointer-events:none; }
+    .ref-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+    .ref-icon { width:40px; height:40px; background:#FC8019; border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(252,128,25,0.28); }
+    .ref-title { font-size:15px; font-weight:800; color:var(--text-1); margin-bottom:2px; }
+    .ref-sub { font-size:11.5px; color:var(--text-3); font-weight:500; line-height:1.4; }
+    .ref-code-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
+    .ref-code {
+      flex:1; background:#fff; border:1.5px dashed rgba(252,128,25,0.4);
+      border-radius:10px; padding:8px 12px;
+      font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
+      color:#FC8019; letter-spacing:2px;
+    }
+    .ref-copy {
+      background:#FC8019; color:#fff; font-size:11.5px; font-weight:800;
+      padding:9px 16px; border-radius:10px; cursor:pointer; border:none;
+      transition:transform 0.12s var(--ease);
+    }
+    .ref-copy:active { transform:scale(0.93); }
+
+    /* ── Settings section ── */
+    .section-label {
+      font-size:10px; font-weight:800; color:var(--text-3);
+      text-transform:uppercase; letter-spacing:1.5px;
+      padding: 6px 4px 8px;
+    }
+
+    /* ── Logout button ── */
+    .logout-btn {
+      background:#fff; border-radius:16px; padding:14px 16px;
+      display:flex; align-items:center; gap:12px;
+      box-shadow:0 1px 6px rgba(0,0,0,0.04); border:1px solid var(--border);
+      cursor:pointer; transition:transform 0.13s var(--ease);
+      width:100%;
+    }
+    .logout-btn:active { transform:scale(0.98); }
+    .logout-icon { width:34px; height:34px; background:#fef2f2; border-radius:11px; display:flex; align-items:center; justify-content:center; }
+    .logout-text { font-size:13.5px; font-weight:800; color:#ef4444; }
+
+    /* ── Footer ── */
+    .app-footer { text-align:center; padding:12px 0 4px; }
+    .app-footer p { font-size:10px; font-weight:600; color:#c4c7cd; }
+    .footer-links { display:flex; justify-content:center; gap:16px; margin-top:6px; }
+    .footer-links a { font-size:10px; font-weight:700; color:#9ca3af; text-decoration:none; }
+
+    /* ════════════════════════════
+       BOTTOM NAV
+    ════════════════════════════ */
+    .bottom-nav {
+      position:fixed; bottom:0; left:0; right:0; height:68px;
+      background:#fff; border-top:1px solid rgba(0,0,0,0.06);
+      display:flex; align-items:stretch;
+      box-shadow:0 -2px 16px rgba(0,0,0,0.06); z-index:400;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .nav-item {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:3px; font-size:9.5px; font-weight:700; color:#94a3b8;
+      text-decoration:none; cursor:pointer; position:relative;
+    }
+    .nav-item svg { width:22px; height:22px; }
+    .nav-item.active { color:#FC8019; }
+    .nav-item.active svg { stroke:#FC8019; }
   </style>
 </head>
-<body class="bg-[#f8f9fa] pb-24">
+<body>
 
-<!-- ── Top Profile Card ── -->
-<div class="bg-gradient-to-br from-[#8B0000] to-[#C0392B] pt-10 pb-20 px-5 rounded-b-[36px] relative overflow-hidden">
-  <!-- Decorative circles -->
-  <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-10 translate-x-10"></div>
-  <div class="absolute bottom-0 left-0 w-28 h-28 bg-white/5 rounded-full translate-y-10 -translate-x-10"></div>
+<!-- ════════════════════════════
+     HERO
+════════════════════════════ -->
+<div class="profile-hero">
+  <div class="dc1"></div>
+  <div class="dc2"></div>
+  <div class="dc3"></div>
 
-  <div class="relative z-10">
-    <div class="flex justify-between items-center mb-8">
-      <button onclick="window.history.back()" class="w-9 h-9 bg-white/15 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
-        <i class="fa-solid fa-arrow-left text-white text-sm"></i>
-      </button>
-      <div class="flex items-center gap-3">
-        <button class="bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-white border border-white/20">
-          Help
-        </button>
-        <button class="w-9 h-9 bg-white/15 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
-          <i class="fa-solid fa-ellipsis-vertical text-white text-sm"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Avatar + Name -->
-    <div class="flex items-center gap-4">
-      <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30">
-        <i class="fa-solid fa-user text-white text-2xl"></i>
-      </div>
-      <div>
-        <h1 class="text-[24px] font-black text-white leading-tight">Your Name</h1>
-        <p class="text-[13px] text-white/70 font-medium mt-0.5">Add your phone number</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Content (overlaps header) ── -->
-<div class="px-4 -mt-10 relative z-10 space-y-4">
-
-  <!-- Nearbite ONE membership card -->
-  <div class="bg-white rounded-[22px] p-4 shadow-sm border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform">
-    <div class="flex justify-between items-center">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-orange-500 font-black text-[18px] tracking-tight">nearbite</span>
-          <span class="text-red-500 font-black text-[10px] italic">one</span>
-          <span class="bg-red-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">Join Now</span>
-        </div>
-        <p class="font-black text-gray-800 text-[13px] leading-snug">Unlimited free deliveries &amp; extra discounts</p>
-        <p class="text-[11px] text-gray-400 font-medium mt-0.5">Unlock exclusive Nearbite benefits</p>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-sm"></i>
-    </div>
-  </div>
-
-  <!-- Quick Actions Grid -->
-  <div class="grid grid-cols-4 gap-3">
-    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
-      <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-        <i class="fa-solid fa-location-dot text-orange-500 text-base"></i>
-      </div>
-      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">Saved<br>Address</span>
-    </div>
-    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
-      <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-        <i class="fa-solid fa-wallet text-blue-500 text-base"></i>
-      </div>
-      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">Payment<br>Modes</span>
-    </div>
-    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
-      <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
-        <i class="fa-solid fa-money-bill-transfer text-green-500 text-base"></i>
-      </div>
-      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">My<br>Refunds</span>
-    </div>
-    <div class="bg-white rounded-[18px] p-3 flex flex-col items-center gap-2 shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-transform">
-      <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
-        <i class="fa-solid fa-credit-card text-purple-500 text-base"></i>
-      </div>
-      <span class="text-[9px] font-bold text-gray-600 text-center leading-tight">Nearbite<br>Wallet</span>
-    </div>
-  </div>
-
-  <!-- Menu List -->
-  <div class="bg-white rounded-[22px] shadow-sm border border-gray-50 overflow-hidden">
-
-    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
-      <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-ticket text-orange-500 text-sm"></i>
-        </div>
-        <span class="text-[13px] font-bold text-gray-800">My Vouchers</span>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-    </div>
-
-    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
-      <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <i class="fa-regular fa-file-lines text-blue-500 text-sm"></i>
-        </div>
-        <span class="text-[13px] font-bold text-gray-800">Account Statements</span>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-    </div>
-
-    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
-      <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <i class="fa-regular fa-heart text-red-500 text-sm"></i>
-        </div>
-        <span class="text-[13px] font-bold text-gray-800">Favourites</span>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-    </div>
-
-    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
-      <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 bg-yellow-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-crown text-yellow-500 text-sm"></i>
-        </div>
-        <span class="text-[13px] font-bold text-gray-800">Partner Rewards</span>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-    </div>
-
-    <div class="flex items-center justify-between py-4 px-4 border-b border-gray-50 cursor-pointer active:bg-gray-50 transition-colors">
-      <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-graduation-cap text-green-500 text-sm"></i>
-        </div>
-        <span class="text-[13px] font-bold text-gray-800">Student Rewards</span>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-    </div>
-
-    <div class="flex items-center justify-between py-4 px-4 cursor-pointer active:bg-gray-50 transition-colors">
-      <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-comment-dots text-gray-500 text-sm"></i>
-        </div>
-        <span class="text-[13px] font-bold text-gray-800">Contact Preferences</span>
-      </div>
-      <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-    </div>
-  </div>
-
-  <!-- Past Orders -->
-  <div class="bg-white rounded-[22px] shadow-sm border border-gray-50 p-5">
-    <h3 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6">Past Orders</h3>
-    <div class="flex flex-col items-center text-center py-4">
-      <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-        <i class="fa-solid fa-bag-shopping text-orange-300 text-3xl"></i>
-      </div>
-      <h4 class="text-[15px] font-black text-gray-800 mb-1">No orders yet</h4>
-      <p class="text-[12px] text-gray-400 font-medium leading-relaxed mb-6">
-        Order food from restaurants near you<br>and track all your orders here
-      </p>
-      <button onclick="window.location.href='index.html'"
-              class="bg-orange-500 text-white font-black text-[13px] px-8 py-3 rounded-2xl shadow-md shadow-orange-200 active:scale-95 transition-transform">
-        Explore Nearbite
+  <!-- Top bar -->
+  <div class="hero-topbar">
+    <button class="btn-back tap" onclick="window.history.back()">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="hero-actions">
+      <button class="btn-help tap">Help</button>
+      <button class="btn-more tap">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
     </div>
   </div>
 
-  <div class="text-center py-4">
-    <p class="text-[10px] font-semibold text-gray-300">Nearbite v1.0.0 · Made with ❤ in Maynaguri</p>
+  <!-- Avatar + info -->
+  <div class="avatar-row">
+    <div class="avatar-wrap">
+      <div class="avatar-circle">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div class="avatar-edit">
+        <i class="fa-solid fa-pen"></i>
+      </div>
+    </div>
+    <div class="avatar-info">
+      <div class="avatar-name">Your Name</div>
+      <div class="avatar-phone">Add your phone number</div>
+    </div>
+    <button class="btn-edit-profile tap">Edit Profile</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CONTENT
+════════════════════════════ -->
+<div class="content-stack">
+
+  <!-- ── Stats bar ── -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-val orange">0</span>
+      <span class="stat-label">Orders</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-val green">₹0</span>
+      <span class="stat-label">Saved</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-val">0</span>
+      <span class="stat-label">Points</span>
+    </div>
+  </div>
+
+  <!-- ── Nearbite ONE membership ── -->
+  <div class="one-card tap">
+    <div class="dc"></div>
+    <div class="dc2"></div>
+    <div class="one-row">
+      <div>
+        <div class="one-brand">
+          <span class="one-n">nearbite</span>
+          <span class="one-tag">ONE</span>
+        </div>
+        <div class="one-title">Unlimited free deliveries<br>&amp; exclusive discounts</div>
+        <div class="one-sub">Starting ₹99/month</div>
+      </div>
+      <button class="one-cta">Join Now</button>
+    </div>
+  </div>
+
+  <!-- ── Quick actions ── -->
+  <div class="card" style="padding:0;">
+    <div class="quick-grid">
+      <div class="quick-item tap">
+        <div class="quick-icon orange"><i class="fa-solid fa-location-dot"></i></div>
+        <span class="quick-label">Saved<br>Address</span>
+      </div>
+      <div class="quick-item tap">
+        <div class="quick-icon blue"><i class="fa-solid fa-wallet"></i></div>
+        <span class="quick-label">Payment<br>Modes</span>
+      </div>
+      <div class="quick-item tap">
+        <div class="quick-icon green"><i class="fa-solid fa-money-bill-transfer"></i></div>
+        <span class="quick-label">My<br>Refunds</span>
+      </div>
+      <div class="quick-item tap">
+        <div class="quick-icon purple"><i class="fa-solid fa-credit-card"></i></div>
+        <span class="quick-label">Nearbite<br>Wallet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Orders section ── -->
+  <div class="section-label">Your Orders</div>
+
+  <!-- Past orders list -->
+  <div class="card" style="padding:14px; display:flex; flex-direction:column; gap:12px;" id="orders-section">
+
+    <!-- Sample order card 1 -->
+    <div class="order-card">
+      <img class="order-img" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80" alt="Order">
+      <div class="order-body">
+        <div class="order-top">
+          <div class="order-name">Pizza Palace</div>
+          <span class="order-status delivered">Delivered</span>
+        </div>
+        <div class="order-items">Margherita Pizza, Garlic Bread, Coke</div>
+        <div class="order-meta">
+          <span class="order-date">14 Jun, 8:32 PM</span>
+          <span class="order-amount">₹349</span>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn secondary tap">Rate Order</button>
+          <button class="order-btn primary tap">Reorder</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sample order card 2 -->
+    <div class="order-card">
+      <img class="order-img" src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80" alt="Order">
+      <div class="order-body">
+        <div class="order-top">
+          <div class="order-name">Biryani Zone</div>
+          <span class="order-status delivered">Delivered</span>
+        </div>
+        <div class="order-items">Chicken Biryani × 2, Raita</div>
+        <div class="order-meta">
+          <span class="order-date">10 Jun, 1:14 PM</span>
+          <span class="order-amount">₹438</span>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn secondary tap">Rate Order</button>
+          <button class="order-btn primary tap">Reorder</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sample order card 3 — cancelled -->
+    <div class="order-card">
+      <img class="order-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80" alt="Order">
+      <div class="order-body">
+        <div class="order-top">
+          <div class="order-name">Burger King</div>
+          <span class="order-status cancelled">Cancelled</span>
+        </div>
+        <div class="order-items">Whopper Meal, Fries, Pepsi</div>
+        <div class="order-meta">
+          <span class="order-date">5 Jun, 6:45 PM</span>
+          <span class="order-amount">₹289</span>
+        </div>
+        <div class="order-actions">
+          <button class="order-btn secondary tap">Get Help</button>
+          <button class="order-btn primary tap">Reorder</button>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="window.location.href='orders.html'"
+      style="width:100%;padding:12px;background:#f9fafb;border:1.5px dashed #e5e7eb;border-radius:14px;font-size:12.5px;font-weight:800;color:#6b7280;cursor:pointer;transition:transform 0.12s;"
+      class="tap">
+      View All Orders →
+    </button>
+  </div>
+
+  <!-- ── Referral card ── -->
+  <div class="referral-card">
+    <div class="rdeco"></div>
+    <div class="ref-top">
+      <div>
+        <div class="ref-title">Invite Friends, Earn ₹100</div>
+        <div class="ref-sub">Both you and your friend get<br>₹100 off on first order</div>
+      </div>
+      <div class="ref-icon">
+        <i class="fa-solid fa-gift" style="color:#fff;font-size:18px;"></i>
+      </div>
+    </div>
+    <div class="ref-code-row">
+      <div class="ref-code">NEAR100</div>
+      <button class="ref-copy tap" onclick="copyCode()">
+        <i class="fa-regular fa-copy" style="margin-right:4px;"></i> Copy
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Account ── -->
+  <div class="section-label">Account</div>
+  <div class="card">
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon orange"><i class="fa-solid fa-ticket"></i></div>
+        <div>
+          <div class="menu-text">My Vouchers</div>
+          <div class="menu-sub">2 active vouchers</div>
+        </div>
+      </div>
+      <div class="menu-right">
+        <span class="menu-badge orange">2</span>
+        <i class="fa-solid fa-chevron-right menu-chevron"></i>
+      </div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon blue"><i class="fa-regular fa-file-lines"></i></div>
+        <div><div class="menu-text">Account Statements</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon red"><i class="fa-regular fa-heart"></i></div>
+        <div><div class="menu-text">Favourites</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon yellow"><i class="fa-solid fa-crown"></i></div>
+        <div><div class="menu-text">Partner Rewards</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon green"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div><div class="menu-text">Student Rewards</div></div>
+      </div>
+      <div class="menu-right">
+        <span class="menu-badge green">NEW</span>
+        <i class="fa-solid fa-chevron-right menu-chevron"></i>
+      </div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon teal"><i class="fa-solid fa-tag"></i></div>
+        <div><div class="menu-text">Apply Coupon</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+  </div>
+
+  <!-- ── Settings ── -->
+  <div class="section-label">Settings</div>
+  <div class="card">
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon gray"><i class="fa-solid fa-bell"></i></div>
+        <div><div class="menu-text">Notifications</div></div>
+      </div>
+      <div class="menu-right">
+        <div class="toggle-track on" id="notif-toggle" onclick="toggleSwitch(this)">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon gray"><i class="fa-solid fa-location-crosshairs"></i></div>
+        <div><div class="menu-text">Location Access</div></div>
+      </div>
+      <div class="menu-right">
+        <div class="toggle-track on" id="loc-toggle" onclick="toggleSwitch(this)">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon gray"><i class="fa-solid fa-language"></i></div>
+        <div>
+          <div class="menu-text">Language</div>
+          <div class="menu-sub">English</div>
+        </div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon gray"><i class="fa-solid fa-comment-dots"></i></div>
+        <div><div class="menu-text">Contact Preferences</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon purple"><i class="fa-solid fa-shield-halved"></i></div>
+        <div><div class="menu-text">Privacy &amp; Security</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+  </div>
+
+  <!-- ── Support ── -->
+  <div class="section-label">Support</div>
+  <div class="card">
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon blue"><i class="fa-solid fa-headset"></i></div>
+        <div><div class="menu-text">Customer Support</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon orange"><i class="fa-regular fa-star"></i></div>
+        <div><div class="menu-text">Rate the App</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon gray"><i class="fa-solid fa-file-contract"></i></div>
+        <div><div class="menu-text">Terms &amp; Conditions</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+    <div class="menu-row tap">
+      <div class="menu-left">
+        <div class="menu-icon gray"><i class="fa-solid fa-lock"></i></div>
+        <div><div class="menu-text">Privacy Policy</div></div>
+      </div>
+      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
+    </div>
+  </div>
+
+  <!-- ── Logout ── -->
+  <button class="logout-btn tap">
+    <div class="logout-icon">
+      <i class="fa-solid fa-right-from-bracket" style="color:#ef4444;font-size:15px;"></i>
+    </div>
+    <span class="logout-text">Log Out</span>
+  </button>
+
+  <!-- ── Footer ── -->
+  <div class="app-footer">
+    <p>Nearbite v1.0.0 · Made with ❤ in Maynaguri</p>
+    <div class="footer-links">
+      <a href="#">Terms</a>
+      <a href="#">Privacy</a>
+      <a href="#">About</a>
+      <a href="#">Careers</a>
+    </div>
   </div>
 
 </div>
 
-<!-- ── Bottom Navigation ── -->
+<!-- ════════════════════════════
+     BOTTOM NAV
+════════════════════════════ -->
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-    <span>Home</span>
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item" style="color:#FC8019">
+    <div class="nav-food-circle">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
+    </div>
+    <span style="color:#FC8019">Food</span>
   </a>
-  <a href="under99.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <span>₹99 Store</span>
+  <a href="under99.html" class="nav-item" style="color:#94a3b8">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    <spanstyle="color:#FC8019">99 store</span>
   </a>
-  <a href="search.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-    <span>Search</span>
-  </a>
-  <a href="orders.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+  <a href="orders.html" class="nav-item" style="color:#94a3b8">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
     <span>Orders</span>
-  </a>
-  <a href="profile.html" class="nav-item active">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-    <span>Profile</span>
+    <span class="nav-new-badge">NEW</span>
   </a>
 </nav>
 
+<script>
+  /* Toggle switches */
+  function toggleSwitch(el) {
+    el.classList.toggle('on');
+  }
+
+  /* Copy referral code */
+  function copyCode() {
+    navigator.clipboard && navigator.clipboard.writeText('NEAR100');
+    const btn = document.querySelector('.ref-copy');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px;"></i> Copied!';
+    btn.style.background = '#16a34a';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+  }
+</script>
 </body>
 </html>

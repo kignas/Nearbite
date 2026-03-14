@@ -7,200 +7,239 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-
-  <!-- ── Nearbite Enhancement Layer ── -->
   <style>
-    body { background: #f6f7fb; }
-    
-    /* Sticky top bar improvement */
-    .sticky.top-0.bg-white.z-50 {
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
-      backdrop-filter: blur(10px);
+    body { background: #f4f4f6; padding-bottom: 130px; }
+
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 13px 16px;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    
-    /* Restaurant info card enhancement */
-    .bg-white.rounded-3xl {
-      transition: box-shadow 0.2s ease;
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #f3f3f5; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s, transform 0.12s;
     }
-    
-    /* Rating badge */
-    #res-rating {
-      background: linear-gradient(135deg, #16a34a, #15803d) !important;
-      border-radius: 9px !important;
-      padding: 5px 10px !important;
-      box-shadow: 0 2px 8px rgba(22,163,74,0.3) !important;
-      font-size: 12px !important;
+    .icon-btn:active { transform: scale(0.92); background: #eaeaed; }
+    .icon-btn i { font-size: 13px; color: #333; }
+    .top-actions { display: flex; gap: 10px; }
+
+    /* Info card */
+    .res-card {
+      margin: 14px 14px 0;
+      background: #fff; border-radius: 24px; overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.05);
     }
-    
-    /* Add button container improvement */
-    [id^="btn-container-"] {
-      border: 1.5px solid #e8eaee !important;
-      border-radius: 12px !important;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.1) !important;
-      transition: box-shadow 0.2s ease;
+    .res-card-body { padding: 18px 18px 0; }
+    .res-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .res-name { font-size: 21px; font-weight: 900; color: #111; line-height: 1.2; }
+    .res-cuisine { font-size: 12px; color: #bbb; font-weight: 600; margin-top: 3px; }
+    .heart-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid #f0f0f0; background: #fafafa;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; cursor: pointer;
     }
-    [id^="btn-container-"]:hover {
-      box-shadow: 0 4px 16px rgba(252,128,25,0.2) !important;
+    .heart-btn i { font-size: 14px; color: #ccc; }
+
+    .res-meta-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .rating-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #fff; border: 1.5px solid #e8e8e8;
+      border-radius: 10px; padding: 4px 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.06);
     }
-    
-    /* ADD button styling */
-    .add-btn-single {
-      color: #FC8019 !important;
-      font-weight: 800 !important;
-      font-size: 13px !important;
-      letter-spacing: 0.5px;
+    .rating-star { color: #1ba672; font-size: 11px; }
+    .rating-num  { font-size: 13px; font-weight: 800; color: #111; }
+    .rating-divider { width: 1px; height: 12px; background: #e2e2e2; }
+    .rating-count   { font-size: 11px; font-weight: 600; color: #aaa; }
+    .meta-dot { color: #ddd; }
+    .meta-chip { font-size: 12px; font-weight: 700; color: #555; display: flex; align-items: center; gap: 5px; }
+    .meta-chip i { color: #FC8019; font-size: 11px; }
+
+    .offer-strip {
+      margin: 14px 0 0; padding: 11px 14px;
+      background: #fff9f2; border-radius: 14px;
+      border: 1.5px solid #ffe5cc;
+      display: none; align-items: center; gap: 10px;
     }
-    .add-btn-single:active { transform: scale(0.92) !important; }
-    
-    .add-btn-wrap button { color: #FC8019 !important; font-weight: 800 !important; font-size: 18px !important; }
-    .add-btn-wrap span { color: #FC8019 !important; font-weight: 800 !important; background: #fff4eb !important; }
-    
-    /* Menu item animations */
-    .animate-slide-up {
-      animation: slideUpItem 0.3s ease both;
+    .offer-icon {
+      width: 30px; height: 30px; background: #FC8019;
+      border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    @keyframes slideUpItem {
+    .offer-icon i { font-size: 13px; color: #fff; }
+    .offer-text { font-size: 12px; font-weight: 800; color: #b85e00; }
+
+    .delivery-strip {
+      padding: 12px 18px; margin-top: 14px;
+      border-top: 1.5px dashed #f2f2f2;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .del-chip { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #777; }
+    .del-chip .orange { color: #FC8019; }
+    .del-chip .blue   { color: #60a5fa; }
+    .del-sep  { width: 1px; height: 14px; background: #eee; }
+
+    /* Menu */
+    .menu-section { padding: 0 14px; margin-top: 22px; }
+    .menu-heading { font-size: 17px; font-weight: 900; color: #111; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .menu-count { font-size: 13px; font-weight: 700; color: #ccc; }
+
+    .menu-item {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 20px 0; border-bottom: 1px solid #f0f0f2; gap: 14px;
+      animation: fadeSlideUp 0.32s ease both;
+    }
+    @keyframes fadeSlideUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    
-    /* Offer banner */
-    #res-offer-banner .flex {
-      background: #fff8f4;
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(252,128,25,0.15);
+    .menu-item-left { flex: 1; min-width: 0; }
+    .item-name  { font-size: 15px; font-weight: 800; color: #111; line-height: 1.25; margin-bottom: 3px; }
+    .item-price { font-size: 15px; font-weight: 900; color: #111; margin-bottom: 7px; }
+    .item-desc  {
+      font-size: 12px; color: #bbb; font-weight: 500; line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    
-    /* Cart bar CTA */
-    #cart-bar button:last-child {
-      background: #FC8019 !important;
-      border: none !important;
-      padding: 10px 18px !important;
-      border-radius: 14px !important;
-      box-shadow: 0 4px 14px rgba(252,128,25,0.35) !important;
+
+    /* Image + floating btn */
+    .menu-item-img-wrap { position: relative; width: 110px; flex-shrink: 0; padding-bottom: 16px; }
+    .menu-item-img-wrap img {
+      width: 110px; height: 110px; object-fit: cover;
+      border-radius: 18px; display: block; background: #f0f0f0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
-    #cart-bar button:last-child:active { transform: scale(0.95) !important; }
-    
-    /* Cart bar base */
-    #cart-bar {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
-      border-radius: 20px !important;
-      border: 1px solid rgba(255,255,255,0.08) !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+    .item-btn-wrap {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      min-width: 90px; height: 34px;
+      background: #fff; border: 1.5px solid #efefef; border-radius: 11px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; z-index: 5;
     }
-    
-    /* Image lazy load fade */
-    img { loading: lazy; transition: opacity 0.3s ease; }
+    .item-add-single {
+      width: 100%; height: 100%; background: transparent; border: none;
+      font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800;
+      color: #FC8019; letter-spacing: 0.6px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .item-add-single:active { background: #fff8f2; }
+    .item-stepper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .stepper-minus, .stepper-plus {
+      width: 34px; height: 100%; background: transparent; border: none;
+      font-size: 17px; font-weight: 700; color: #FC8019; cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s;
+    }
+    .stepper-minus:active, .stepper-plus:active { background: #fff8f2; }
+    .stepper-count { font-size: 13px; font-weight: 900; color: #111; min-width: 18px; text-align: center; pointer-events: none; }
+
+    /* Skeleton */
+    .skel-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid #f0f0f2; gap: 14px; }
+    .skel-left { flex: 1; display: flex; flex-direction: column; gap: 9px; }
   </style>
 </head>
-<body class="bg-[#f8f8f8]" style="padding-bottom: 140px;">
+<body>
 
-<!-- ── Sticky Top Bar ── -->
-<div class="sticky top-0 bg-white z-50 px-4 py-4 flex justify-between items-center shadow-sm">
-  <button onclick="history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200 transition-colors">
-    <i class="fa-solid fa-chevron-left text-gray-700 text-sm"></i>
-  </button>
-  <div class="flex gap-3">
-    <button class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100" onclick="window.location.href='search.html'">
-      <i class="fa-solid fa-magnifying-glass text-gray-700 text-sm"></i>
-    </button>
-    <button class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100">
-      <i class="fa-solid fa-share-nodes text-gray-700 text-sm"></i>
-    </button>
+<div class="top-bar">
+  <button class="icon-btn" onclick="history.back()"><i class="fa-solid fa-chevron-left"></i></button>
+  <div class="top-actions">
+    <button class="icon-btn" onclick="window.location.href='search.html'"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <button class="icon-btn"><i class="fa-solid fa-share-nodes"></i></button>
   </div>
 </div>
 
-<!-- ── Restaurant Info Card ── -->
-<div class="px-4 mt-4">
-  <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-    <div class="flex justify-between items-start">
-      <div class="flex-1 pr-3">
-        <h1 id="res-name" class="text-[22px] font-black text-gray-900 leading-tight">Loading...</h1>
-        <p id="res-cuisine" class="text-[12px] text-gray-400 font-semibold mt-0.5"></p>
-        <div class="flex items-center gap-2 mt-2 flex-wrap">
-          <span id="res-rating" class="bg-green-600 text-white text-[11px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
-            <i class="fa-solid fa-star text-[9px]"></i> –
-          </span>
-          <span class="text-gray-300 text-xs">•</span>
-          <span id="res-time" class="text-[13px] font-bold text-gray-600">–</span>
-          <span class="text-gray-300 text-xs">•</span>
-          <span id="res-distance" class="text-[13px] font-bold text-gray-600">–</span>
-        </div>
+<div class="res-card">
+  <div class="res-card-body">
+    <div class="res-header">
+      <div>
+        <h1 id="res-name" class="res-name">Loading…</h1>
+        <p id="res-cuisine" class="res-cuisine"></p>
       </div>
-      <button class="w-9 h-9 border border-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-        <i class="fa-regular fa-heart text-gray-400 text-sm"></i>
-      </button>
+      <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
     </div>
-
-    <!-- Offer Banner -->
-    <div id="res-offer-banner" class="mt-4 pt-4 border-t border-dashed border-gray-200 hidden">
-      <div class="flex items-center gap-2 text-[12px] font-bold text-orange-600">
-        <i class="fa-solid fa-tag text-orange-500"></i>
-        <span id="res-offer-text"></span>
+    <div class="res-meta-row">
+      <div class="rating-pill">
+        <i class="fa-solid fa-star rating-star"></i>
+        <span id="res-rating-num" class="rating-num">–</span>
+        <div class="rating-divider"></div>
+        <span class="rating-count">1K+ ratings</span>
       </div>
+      <span class="meta-dot">•</span>
+      <span id="res-time" class="meta-chip"><i class="fa-regular fa-clock"></i> –</span>
+      <span class="meta-dot">•</span>
+      <span id="res-distance" class="meta-chip"><i class="fa-solid fa-location-dot"></i> –</span>
     </div>
-
-    <!-- Delivery Info -->
-    <div class="mt-3 flex items-center gap-2 text-[11px] font-semibold text-gray-500">
-      <i class="fa-solid fa-motorcycle text-orange-500"></i>
-      <span>FREE DELIVERY ABOVE ₹149</span>
-      <span class="text-gray-200">·</span>
-      <i class="fa-regular fa-clock text-blue-400"></i>
-      <span>On time delivery</span>
+    <div id="res-offer-banner" class="offer-strip">
+      <div class="offer-icon"><i class="fa-solid fa-tag"></i></div>
+      <span id="res-offer-text" class="offer-text"></span>
     </div>
+  </div>
+  <div class="delivery-strip">
+    <div class="del-chip"><i class="fa-solid fa-motorcycle orange"></i> FREE delivery above ₹149</div>
+    <div class="del-sep"></div>
+    <div class="del-chip"><i class="fa-regular fa-clock blue"></i> On-time delivery</div>
   </div>
 </div>
 
-<!-- ── Menu List ── -->
-<div class="px-4 mt-6">
-  <!-- Skeleton loader -->
+<div class="menu-section">
   <div id="menu-skeleton">
-    <div class="skeleton h-5 w-40 rounded mb-6"></div>
-    <div class="flex justify-between py-8 border-b border-gray-100">
-      <div class="flex-1 pr-4 space-y-2">
-        <div class="skeleton h-4 w-32 rounded"></div>
-        <div class="skeleton h-3 w-24 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
-        <div class="skeleton h-3 w-3/4 rounded"></div>
+    <div style="height:20px;width:130px;border-radius:8px;margin-bottom:18px;" class="skeleton"></div>
+    <div class="skel-item">
+      <div class="skel-left">
+        <div class="skeleton" style="height:14px;width:36px;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;width:58%;"></div>
+        <div class="skeleton" style="height:14px;width:42px;"></div>
+        <div class="skeleton" style="height:12px;width:90%;"></div>
+        <div class="skeleton" style="height:12px;width:70%;"></div>
       </div>
-      <div class="skeleton w-32 h-32 rounded-2xl flex-shrink-0"></div>
+      <div class="skeleton" style="width:110px;height:110px;border-radius:18px;flex-shrink:0;"></div>
     </div>
-    <div class="flex justify-between py-8 border-b border-gray-100">
-      <div class="flex-1 pr-4 space-y-2">
-        <div class="skeleton h-4 w-36 rounded"></div>
-        <div class="skeleton h-3 w-20 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
+    <div class="skel-item">
+      <div class="skel-left">
+        <div class="skeleton" style="height:14px;width:36px;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;width:50%;"></div>
+        <div class="skeleton" style="height:14px;width:42px;"></div>
+        <div class="skeleton" style="height:12px;width:80%;"></div>
       </div>
-      <div class="skeleton w-32 h-32 rounded-2xl flex-shrink-0"></div>
+      <div class="skeleton" style="width:110px;height:110px;border-radius:18px;flex-shrink:0;"></div>
+    </div>
+    <div class="skel-item">
+      <div class="skel-left">
+        <div class="skeleton" style="height:14px;width:36px;border-radius:4px;"></div>
+        <div class="skeleton" style="height:16px;width:65%;"></div>
+        <div class="skeleton" style="height:14px;width:42px;"></div>
+        <div class="skeleton" style="height:12px;width:75%;"></div>
+      </div>
+      <div class="skeleton" style="width:110px;height:110px;border-radius:18px;flex-shrink:0;"></div>
     </div>
   </div>
 
-  <div id="menu-container" class="hidden">
-    <h2 class="text-[18px] font-black text-gray-900 mb-2">
-      Recommended <span id="menu-count" class="text-gray-400 text-[14px] font-bold"></span>
-    </h2>
-    <div id="menu-list" class="divide-y divide-gray-100"></div>
+  <div id="menu-container" style="display:none">
+    <div class="menu-heading">Recommended <span id="menu-count" class="menu-count"></span></div>
+    <div id="menu-list"></div>
   </div>
 </div>
 
-<!-- ── Cart Bar (single, no duplicate) ── -->
+<!-- Premium Cart Bar -->
 <div id="cart-bar">
-  <div class="flex items-center gap-3">
-    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-      <i class="fa-solid fa-bag-shopping text-white text-sm"></i>
-    </div>
-    <div>
-      <p id="cart-summary" class="text-[13px] font-black text-white tracking-tight leading-none">0 ITEMS | ₹0</p>
-      <p class="text-[9px] text-white/70 font-semibold mt-0.5">Extra charges may apply</p>
+  <div class="cart-inner-left">
+    <div class="cart-bag-wrap"><i class="fa-solid fa-bag-shopping"></i></div>
+    <div class="cart-text-wrap">
+      <p id="cart-summary" class="cart-summary-text">0 ITEMS | ₹0</p>
+      <p class="cart-sub-text"><i class="fa-solid fa-bolt-lightning"></i> Extra charges may apply</p>
     </div>
   </div>
-  <button onclick="window.location.href='cart.html'"
-          class="flex items-center gap-1.5 text-white font-black text-[12px] bg-white/15 px-4 py-2 rounded-xl border border-white/20 active:bg-white/25 transition-colors">
-    VIEW CART <i class="fa-solid fa-chevron-right text-[10px]"></i>
+  <button class="cart-cta-btn" onclick="window.location.href='cart.html'">
+    VIEW CART <i class="fa-solid fa-chevron-right"></i>
   </button>
 </div>
 
@@ -208,72 +247,90 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
-  const resId = parseInt(params.get('id'));
+  const resId  = parseInt(params.get('id'));
   const restaurant = restaurants.find(r => r.id === resId);
 
-  // Populate restaurant info
+  function makeBtnHTML(itemName, qty, price, rId) {
+    if (qty > 0) {
+      return `<div class="item-stepper">
+        <button class="stepper-minus" onclick="updateCart('${itemName}',-1,${price},${rId})">−</button>
+        <span class="stepper-count">${qty}</span>
+        <button class="stepper-plus" onclick="updateCart('${itemName}',1,${price},${rId})">+</button>
+      </div>`;
+    }
+    return `<button class="item-add-single" onclick="updateCart('${itemName}',1,${price},${rId})">ADD</button>`;
+  }
+
   if (restaurant) {
     document.title = restaurant.name + ' – Nearbite';
-    document.getElementById('res-name').innerText     = restaurant.name;
-    document.getElementById('res-cuisine').innerText  = restaurant.cuisine || '';
-    document.getElementById('res-rating').innerHTML   = '<i class="fa-solid fa-star text-[9px]"></i> ' + restaurant.rating;
-    document.getElementById('res-time').innerText     = restaurant.time;
-    document.getElementById('res-distance').innerText = restaurant.distance;
+    document.getElementById('res-name').innerText      = restaurant.name;
+    document.getElementById('res-cuisine').innerText   = restaurant.cuisine || '';
+    document.getElementById('res-rating-num').innerText= restaurant.rating;
+    document.getElementById('res-time').innerHTML      = '<i class="fa-regular fa-clock"></i> ' + restaurant.time;
+    document.getElementById('res-distance').innerHTML  = '<i class="fa-solid fa-location-dot"></i> ' + restaurant.distance;
 
     if (restaurant.offer) {
       const banner = document.getElementById('res-offer-banner');
       document.getElementById('res-offer-text').innerText = restaurant.offer;
-      banner.classList.remove('hidden');
+      banner.style.display = 'flex';
     }
 
-    // Render menu
-    const menuList = document.getElementById('menu-list');
-    const menuCount = document.getElementById('menu-count');
-    menuCount.innerText = '(' + restaurant.menu.length + ')';
+    const menuList  = document.getElementById('menu-list');
+    document.getElementById('menu-count').innerText = '(' + restaurant.menu.length + ')';
 
     menuList.innerHTML = restaurant.menu.map((item, idx) => {
       const key = item.name.replace(/\s+/g, '');
-      const inCart = cart[item.name];
-      const qty = inCart ? inCart.quantity : 0;
-
+      const qty = cart[item.name] ? cart[item.name].quantity : 0;
       return `
-        <div class="flex justify-between items-start py-6 animate-slide-up" style="animation-delay:${idx * 0.05}s">
-          <div class="flex-1 pr-4">
-            <div class="veg-dot ${item.isVeg ? 'veg' : 'nonveg'} mb-2"><div class="dot"></div></div>
-            <h3 class="font-bold text-[16px] text-gray-900 leading-snug">${item.name}</h3>
-            <p class="font-black text-[15px] text-gray-800 mt-0.5">₹${item.price}</p>
-            <p class="text-[12px] text-gray-400 font-medium mt-1.5 leading-relaxed line-clamp-2">
-              ${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}
-            </p>
+        <div class="menu-item animate-slide-up" style="animation-delay:${idx*0.04}s">
+          <div class="menu-item-left">
+            <div class="veg-dot ${item.isVeg?'veg':'nonveg'}" style="margin-bottom:8px"><div class="dot"></div></div>
+            <h3 class="item-name">${item.name}</h3>
+            <p class="item-price">₹${item.price}</p>
+            <p class="item-desc">${item.desc || 'Premium quality '+item.name+' prepared with authentic ingredients.'}</p>
           </div>
-          <div class="relative w-28 h-28 flex-shrink-0">
+          <div class="menu-item-img-wrap">
             <img src="${item.img}" alt="${item.name}"
-                 class="w-full h-full object-cover rounded-2xl shadow-sm bg-gray-100"
                  onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
-            <div id="btn-container-${key}"
-                 class="absolute -bottom-3 left-1/2 -translate-x-1/2 min-w-[88px] h-9 bg-white border border-gray-200 rounded-xl shadow-md flex items-center justify-center overflow-hidden">
-              ${qty > 0
-                ? `<div class="add-btn-wrap" style="width:100%;height:100%;">
-                     <button onclick="updateCart('${item.name}',-1,${item.price},${resId})">−</button>
-                     <span>${qty}</span>
-                     <button onclick="updateCart('${item.name}',1,${item.price},${resId})">+</button>
-                   </div>`
-                : `<button class="add-btn-single" onclick="updateCart('${item.name}',1,${item.price},${resId})">ADD</button>`
-              }
+            <div id="btn-container-${key}" class="item-btn-wrap">
+              ${makeBtnHTML(item.name, qty, item.price, resId)}
             </div>
           </div>
         </div>`;
     }).join('');
 
-    // Hide skeleton, show menu
     document.getElementById('menu-skeleton').style.display = 'none';
-    document.getElementById('menu-container').classList.remove('hidden');
+    document.getElementById('menu-container').style.display = 'block';
   } else {
     document.getElementById('menu-skeleton').style.display = 'none';
-    document.getElementById('menu-container').innerHTML =
-      '<div class="text-center py-16"><i class="fa-solid fa-utensils text-gray-200 text-5xl mb-4"></i><p class="text-gray-500 font-bold">Restaurant not found</p><button onclick="history.back()" class="mt-6 bg-orange-500 text-white font-bold px-6 py-2.5 rounded-xl">Go Back</button></div>';
-    document.getElementById('menu-container').classList.remove('hidden');
+    document.getElementById('menu-container').style.display = 'block';
+    document.getElementById('menu-container').innerHTML = `
+      <div style="text-align:center;padding:60px 20px">
+        <i class="fa-solid fa-utensils" style="font-size:48px;color:#e0e0e0;display:block;margin-bottom:16px"></i>
+        <p style="font-size:17px;font-weight:800;color:#555">Restaurant not found</p>
+        <button onclick="history.back()"
+          style="margin-top:20px;background:#FC8019;color:#fff;font-family:Poppins,sans-serif;font-weight:800;font-size:13px;border:none;padding:12px 24px;border-radius:14px;cursor:pointer">
+          Go Back
+        </button>
+      </div>`;
   }
+
+  // Override updateCart to use page-local button structure
+  window.updateCart = function(itemName, change, price, rId) {
+    if (!cart[itemName]) cart[itemName] = { quantity: 0, price, resId: rId };
+    cart[itemName].quantity += change;
+    if (cart[itemName].quantity <= 0) delete cart[itemName];
+
+    const key = itemName.replace(/\s+/g, '');
+    const container = document.getElementById('btn-container-' + key);
+    if (container) {
+      const qty = cart[itemName] ? cart[itemName].quantity : 0;
+      container.innerHTML = makeBtnHTML(itemName, qty, price, rId);
+    }
+
+    localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+    renderCartBar();
+  };
 
   renderCartBar();
 });

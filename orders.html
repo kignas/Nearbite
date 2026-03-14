@@ -10,54 +10,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-
-  <style>
-    body { background: #f6f7fb; }
-    
-    /* Header improvement */
-    header.sticky {
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
-    }
-    
-    /* Search input */
-    input[type="text"] {
-      background: #fff !important;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-    }
-    input[type="text"]:focus {
-      border-color: #FC8019 !important;
-      box-shadow: 0 2px 10px rgba(252,128,25,0.15) !important;
-    }
-    
-    /* Track section card */
-    #track-section .bg-white {
-      box-shadow: 0 4px 20px rgba(252,128,25,0.1) !important;
-      border: 1.5px solid rgba(252,128,25,0.2) !important;
-    }
-    
-    /* Checkout button */
-    #track-section button.bg-orange-500 {
-      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
-      box-shadow: 0 4px 16px rgba(252,128,25,0.35) !important;
-      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    }
-    #track-section button.bg-orange-500:active {
-      transform: scale(0.98) !important;
-      box-shadow: 0 2px 10px rgba(252,128,25,0.2) !important;
-    }
-    
-    /* Empty state */
-    #empty-orders .bg-white {
-      box-shadow: 0 2px 16px rgba(0,0,0,0.07) !important;
-    }
-    #empty-orders button.bg-orange-500 {
-      background: linear-gradient(135deg, #FC8019, #e06a0a) !important;
-      box-shadow: 0 4px 16px rgba(252,128,25,0.35) !important;
-    }
-    
-    img { loading: lazy; }
-  </style>
 </head>
 <body class="bg-gray-50 pb-24">
 
@@ -142,32 +94,22 @@
 ══════════════════════════════════════════ -->
 <nav class="bottom-nav">
 
-  <!-- FIX: Food nav item had no orange circle -->
+<nav class="bottom-nav">
   <a href="index.html" class="nav-item" style="color:#FC8019">
     <div class="nav-food-circle">
-      <svg fill="currentColor" viewBox="0 0 24 24">
-        <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/>
-      </svg>
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
     </div>
     <span style="color:#FC8019">Food</span>
   </a>
-
-  <a href="under99.html" class="nav-item" style="color:#aaa">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-    </svg>
-    <span>99 store</span>
+  <a href="under99.html" class="nav-item" style="color:#94a3b8">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    <spanstyle="color:#FC8019">99 store</span>
   </a>
-
-  <!-- FIX: EatRight was missing, only 4 items now properly laid out -->
-  <a href="orders.html" class="nav-item" style="color:#aaa">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-    </svg>
-    <span>Order</span>
+  <a href="orders.html" class="nav-item" style="color:#94a3b8">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+    <span>Orders</span>
     <span class="nav-new-badge">NEW</span>
   </a>
-
 </nav>
 
 <script>

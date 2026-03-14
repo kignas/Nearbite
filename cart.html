@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cart – Nearbite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#f8f8f8] pb-32">
+
+<!-- ── Header ── -->
+<div class="sticky top-0 bg-white z-50 px-5 py-4 border-b border-gray-100 shadow-sm flex justify-between items-center">
+  <div class="flex items-center gap-3">
+    <button onclick="history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200">
+      <i class="fa-solid fa-chevron-left text-gray-700 text-sm"></i>
+    </button>
+    <div>
+      <h1 class="font-black text-[17px] text-gray-900">Your Cart</h1>
+      <p id="cart-restaurant-name" class="text-[11px] text-gray-400 font-medium"></p>
+    </div>
+  </div>
+  <button onclick="clearCart()" class="text-[11px] font-bold text-red-400 px-3 py-1.5 rounded-xl border border-red-100 active:bg-red-50 transition-colors">
+    Clear
+  </button>
+</div>
+
+<!-- ── Cart Items ── -->
+<div id="cart-content" class="px-4 pt-5">
+  <div id="empty-cart" class="hidden text-center py-20">
+    <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-5">
+      <i class="fa-solid fa-bag-shopping text-orange-300 text-4xl"></i>
+    </div>
+    <h4 class="font-black text-[17px] text-gray-900 mb-2">Your cart is empty</h4>
+    <p class="text-[13px] text-gray-400 font-medium mb-7">Add items from a restaurant to get started</p>
+    <button onclick="window.location.href='index.html'"
+            class="bg-orange-500 text-white font-black text-[14px] px-8 py-3.5 rounded-2xl shadow-md shadow-orange-100 active:scale-95 transition-transform">
+      Explore Restaurants
+    </button>
+  </div>
+
+  <div id="cart-items-list" class="space-y-3 hidden"></div>
+</div>
+
+<!-- ── Bill Summary (shown when cart has items) ── -->
+<div id="bill-section" class="hidden px-4 mt-4">
+  <div class="bg-white rounded-[22px] p-5 shadow-sm border border-gray-100">
+    <h3 class="font-black text-[14px] text-gray-900 mb-4 flex items-center gap-2">
+      <i class="fa-solid fa-receipt text-orange-500 text-sm"></i> Bill Summary
+    </h3>
+    <div class="space-y-2.5 text-[13px]">
+      <div class="flex justify-between">
+        <span class="text-gray-500 font-medium">Item Total</span>
+        <span id="bill-subtotal" class="font-bold text-gray-800">₹0</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500 font-medium">Delivery Fee</span>
+        <span class="font-bold text-green-600">FREE</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-500 font-medium">Platform Fee</span>
+        <span class="font-bold text-gray-800">₹5</span>
+      </div>
+      <div class="border-t border-dashed border-gray-100 pt-3 flex justify-between">
+        <span class="font-black text-gray-900 text-[14px]">To Pay</span>
+        <span id="bill-total" class="font-black text-gray-900 text-[15px]">₹5</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Checkout Footer ── -->
+<div id="checkout-footer" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+  <button onclick="placeOrder()"
+          class="w-full bg-orange-500 text-white font-black text-[15px] py-4 rounded-2xl shadow-md shadow-orange-200 active:scale-[0.98] transition-transform flex justify-between items-center px-5">
+    <span>PLACE ORDER</span>
+    <span id="checkout-total" class="font-black">₹0</span>
+  </button>
+</div>
+
+<script src="home.js"></script>
+<script>
+  function renderCart() {
+    const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    const items = Object.entries(savedCart);
+    const emptyEl = document.getElementById('empty-cart');
+    const listEl  = document.getElementById('cart-items-list');
+    const billEl  = document.getElementById('bill-section');
+    const footerEl = document.getElementById('checkout-footer');
+
+    if (items.length === 0) {
+      emptyEl.classList.remove('hidden');
+      listEl.classList.add('hidden');
+      billEl.classList.add('hidden');
+      footerEl.classList.add('hidden');
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    listEl.classList.remove('hidden');
+    billEl.classList.remove('hidden');
+    footerEl.classList.remove('hidden');
+
+    const subtotal = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
+    const total = subtotal + 5;
+
+    // Set restaurant name
+    const resData = JSON.parse(localStorage.getItem('restaurantData')) || [];
+    const resId = items[0][1].resId;
+    const res = resData.find(r => r.id === resId);
+    const nameEl = document.getElementById('cart-restaurant-name');
+    if (nameEl && res) nameEl.innerText = res.name;
+
+    listEl.innerHTML = items.map(([name, info]) => `
+      <div class="bg-white rounded-2xl px-4 py-4 flex items-center justify-between shadow-sm border border-gray-50">
+        <div class="flex-1 min-w-0 pr-3">
+          <p class="font-bold text-[14px] text-gray-900 truncate">${name}</p>
+          <p class="text-[13px] font-black text-gray-700 mt-0.5">₹${info.price} each</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="add-btn-wrap">
+            <button onclick="cartAdjust('${name}', -1, ${info.price}, ${info.resId})">−</button>
+            <span>${info.quantity}</span>
+            <button onclick="cartAdjust('${name}', 1, ${info.price}, ${info.resId})">+</button>
+          </div>
+          <span class="font-black text-[14px] text-gray-900 w-16 text-right">₹${info.quantity * info.price}</span>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
+    document.getElementById('bill-total').innerText    = '₹' + total;
+    document.getElementById('checkout-total').innerText = '₹' + total;
+  }
+
+  function cartAdjust(name, change, price, resId) {
+    const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    if (!savedCart[name]) return;
+    savedCart[name].quantity += change;
+    if (savedCart[name].quantity <= 0) delete savedCart[name];
+    localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
+    renderCart();
+  }
+
+  function clearCart() {
+    localStorage.removeItem('nearbite_cart');
+    renderCart();
+  }
+
+  function placeOrder() {
+    alert('Order placed! This feature needs a backend to process real orders.');
+  }
+
+  document.addEventListener('DOMContentLoaded', renderCart);
+</script>
+</body>
+</html>
