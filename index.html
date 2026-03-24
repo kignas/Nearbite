@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Nearbite – Food Near You</title>
+  <title>– Food Near You</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -15,11 +15,11 @@
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: #f6f7fb;
+      background: #fff;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
       padding-bottom: 80px;
-      margin: 0;
+      margin: 1;
     }
 
     /* ─── Utilities ─── */
@@ -57,14 +57,16 @@
       background: linear-gradient(155deg, #FFE03A 0%, #FFCA00 40%, #FF9E00 75%, #FFD325 100%);
       background-size: 250% 250%;
       animation: headerGradientDrift 9s ease infinite;
-      border-bottom-left-radius: 36px;
-      border-bottom-right-radius: 36px;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
       padding: 16px 16px 0 16px;
-      position: relative; /* Fixed: Removed sticky to allow natural scroll */
+      position: relative;
       z-index: 100;
-      box-shadow: 0 8px 24px rgba(245, 175, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.04);
+      /* Removed heavy shadow to eliminate floating look */
+      box-shadow: none; 
       isolation: isolate;
       overflow: hidden;
+      margin-bottom: 4px; 
     }
 
     @keyframes headerGradientDrift {
@@ -189,7 +191,7 @@
 
     /* ─── Premium 99 Store Redesign ─── */
     .store-card {
-      background: linear-gradient(135deg, #f0f4ff 0%, #fdfdff 50%, #ffffff 100%);
+      background: linear-gradient(135deg, #f0f4ff 0%, #fff 50%, #ffffff 100%);
       border-radius: 24px;
       border: 1px solid rgba(37,99,235,0.15);
       padding: 16px;
@@ -204,7 +206,7 @@
       border-radius: 50%; pointer-events: none;
     }
     .store-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; position: relative; z-index: 2; }
-    .store-icon-wrap { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.3); border: 1.5px solid rgba(255,255,255,0.5); }
+    .store-icon-wrap { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6 0%, #FF9E00 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.3); border: 1.5px solid rgba(255,255,255,0.5); }
     .store-title { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; }
     .store-pro { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
     .store-sub { font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.2px; margin-top: 2px; }
@@ -260,23 +262,158 @@
     .nav-food-circle { width: 46px; height: 46px; background: #FC8019; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(252,128,25,0.4); margin-bottom: 2px; }
     .nav-food-circle svg { width: 22px; height: 22px; color: #fff; stroke: #fff; }
     .nav-new-badge { position: absolute; top: 6px; right: 10px; background: #ef4444; color: #fff; font-size: 7px; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(239,68,68,0.4); }
-    .cat-ring{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#fff;
+    
+/* =========================================
+   PREMIUM "WHAT'S ON YOUR MIND" SECTION
+========================================= */
+
+.section-card {
+  padding: 10px 0 0 0; /* 16px top, 0 right, 0 bottom, 0 left */
+  background: #fff;
+  font-family: inherit;
 }
 
-.cat-ring img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  border-radius:50%;
+
+/* 1. Refined Premium Header */
+.sec-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px; 
+  padding: 0 16px;
 }
+
+.sec-title {
+  font-size: 13px; /* Slightly smaller */
+  font-weight: 800;
+  color: #7A808D; /* Lighter, elegant grey to match EatClub */
+  text-transform: uppercase;
+  letter-spacing: 1.2px; /* Wider spacing feels more premium */
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.sec-head::after {
+  content: "";
+  flex-grow: 1;
+  height: 1px; 
+  background-color: #E2E8EC; /* Softer, thinner line */
+}
+
+
+.cat-scroll {
+  display: grid;
+  grid-template-rows: repeat(2, auto); 
+  grid-auto-flow: column; 
+  grid-auto-columns: 24vw; /* Slightly tightened the columns */
+  justify-content: start; 
+  /* CRITICAL FIX: 12px vertical gap kills the "trench", 12px horizontal keeps them close */
+  gap: 12px 12px; 
+  padding: 0 16px 16px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; 
+  scroll-behavior: smooth;
+}
+
+
+
+
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 3. Tighter Item Cards */
+.cat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; 
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* The "Release" Animation: A bouncy spring effect when they let go */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+  will-change: transform; /* Hardware acceleration */
+}
+
+/* 4. Maximized Images & Clean Shadows */
+.cat-ring {
+  width: 24vw;
+  height: 24vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background: transparent; 
+}
+
+.cat-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.25) translateZ(0); 
+  will-change: transform;
+  /* Notice: I deleted the transition from here! We only animate the parent now. */
+}
+
+
+/* 4. Richer Typography */
+.cat-name {
+  font-size: 13px;
+  font-weight: 700; 
+  color: #3e4152; /* A slightly darker, richer grey to ground the images visually */
+  text-align: center;
+  line-height: 1.1;
+}
+.cat-item:active {
+  /* Shrinks the entire card (image + text) natively */
+  transform: scale(0.92);
+  opacity: 0.75; /* Slight fade makes it feel like an iOS/Android native button */
+  
+  /* The "Press" Animation: Extremely fast down-state */
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+}
+    /* ─── Bottom Nav Base & Scroll Animation ─── */
+    .bottom-nav { 
+      position: fixed; bottom: 0; left: 0; right: 0; height: 68px; 
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); 
+      border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch; 
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 100; 
+      padding-bottom: env(safe-area-inset-bottom);
+      
+      /* CRITICAL: Smooth slide animation */
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+
+    /* Slides the bar off the bottom of the screen */
+    .bottom-nav-hidden {
+      transform: translateY(100%);
+    }
+
+    /* ─── Premium Icon Tap Bounce Animation ─── */
+    .nav-item svg, .nav-food-circle {
+      /* The springy bounce when you release your finger */
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      will-change: transform;
+    }
+
+    /* The quick 'squish' when you press down */
+    .nav-item:active svg {
+      transform: scale(0.75);
+      transition: transform 0.1s ease-out;
+    }
+    
+    .nav-item:active .nav-food-circle {
+      transform: scale(0.85);
+      transition: transform 0.1s ease-out;
+    }
+
+
   </style>
 </head>
 
@@ -308,7 +445,7 @@
     <div class="loc-left tap">
       <div class="loc-name-row">
         <i class="fa-solid fa-location-arrow loc-arrow" style="transform: rotate(-45deg)"></i>
-        <span class="loc-name">Maynaguri Puran Bazer..</span>
+        <span class="loc-name">Maynaguri..</span>
         <i class="fa-solid fa-chevron-down loc-chevron"></i>
       </div>
       <p class="loc-sub">Delivery Across Maynaguri Under 15 Km</p>
@@ -374,33 +511,58 @@
   <div class="sec-head">
     <span class="sec-title">What's on your mind?</span>
   </div>
+  
   <div class="cat-scroll no-scrollbar">
     <div class="cat-item" onclick="goCategory('Momos')">
-      <div class="cat-ring"><img src="assets/momo1.jpg"></div>
+      <div class="cat-ring"><img src="assets/momomain.png" alt="Momos" loading="lazy"></div>
       <span class="cat-name">Momos</span>
     </div>
     <div class="cat-item" onclick="goCategory('Noodles')">
-      <div class="cat-ring"><img src="assets/noodles.png"></div>
-      <span class="cat-name">Noodles</span>
+      <div class="cat-ring"><img src="assets/chowmin.png" alt="Noodles" loading="lazy"></div>
+      <span class="cat-name">Chowmin</span>
     </div>
     <div class="cat-item" onclick="goCategory('Pizza')">
-      <div class="cat-ring"><img src="assets/pizaa1.png"></div>
+      <div class="cat-ring"><img src="assets/pizaamain.png" alt="Pizzas" loading="lazy"></div>
       <span class="cat-name">Pizzas</span>
     </div>
     <div class="cat-item" onclick="goCategory('Biryani')">
-      <div class="cat-ring"><img src="assets/b1.png"></div>
+      <div class="cat-ring"><img src="assets/biriyani main.png" alt="Biryani" loading="lazy"></div>
       <span class="cat-name">Biryani</span>
     </div>
     <div class="cat-item" onclick="goCategory('Rolls')">
-      <div class="cat-ring"><img src="assets/rolls.png"></div>
+      <div class="cat-ring"><img src="assets/rollsmain.png" alt="Rolls" loading="lazy"></div>
       <span class="cat-name">Rolls</span>
     </div>
-    <div class="cat-item" onclick="goCategory('Burger')">
-      <div class="cat-ring"><img src="assets/burgers1.png"></div>
-      <span class="cat-name">Burgers</span>
+    <div class="cat-item" onclick="goCategory('Fried Rice')">
+      <div class="cat-ring"><img src="assets/fried rice.png" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">Fried rice</span>
     </div>
+    <div class="cat-item" onclick="goCategory('Burger')">
+      <div class="cat-ring"><img src="assets/sweets.png" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">Sweets</span>
+    </div>
+    <div class="cat-item" onclick="goCategory('Puchka')">
+      <div class="cat-ring"><img src="assets/puchka.png" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">Puchka</span>
+    </div>
+    <div class="cat-item" onclick="goCategory('icecream')">
+      <div class="cat-ring"><img src="assets/icecream.png" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">icecream</span>
+    </div>
+    <div class="cat-item" onclick="goCategory('cakes')">
+      <div class="cat-ring"><img src="assets/cakes.png" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">cakes</span>
+    </div>
+     <div class="cat-item" onclick="goCategory('samosa')">
+      <div class="cat-ring"><img src="assets/samosa.png" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">samosa</span>
+     </div>
+      <div class="cat-item" onclick="goCategory('dosa')">
+      <div class="cat-ring"><img src="assets/dosa.jpjsg" alt="Burgers" loading="lazy"></div>
+      <span class="cat-name">dosa</span>
   </div>
 </div>
+
 
 <div class="store-card">
   <div class="store-head">
@@ -482,11 +644,11 @@
   <a href="under99.html" class="nav-item" style="color:#94a3b8">
     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
     <spanstyle="color:#FC8019">99 store</span>
+    <span class="nav-new-badge">NEW</span>
   </a>
   <a href="orders.html" class="nav-item" style="color:#94a3b8">
     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
     <span>Orders</span>
-    <span class="nav-new-badge">NEW</span>
   </a>
 </nav>
 <script src="home.js"></script>
@@ -574,12 +736,50 @@
       </a>
     `).join('');
   }
+
+  // ── Zomato Smart Scroll Logic (BOTTOM NAV ONLY) ──
+  const bottomNav = document.querySelector('.bottom-nav'); 
+  let lastScrollTop = 0;
+  const scrollThreshold = 15; 
+
+  window.addEventListener('scroll', () => {
+    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Ignore tiny movements
+    if (Math.abs(lastScrollTop - currentScroll) <= scrollThreshold) return;
+
+    // Hide bottom nav on scroll down, Show on scroll up
+    if (currentScroll > lastScrollTop && currentScroll > 180) {
+      if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); 
+    } else {
+      if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); 
+    }
+    
+    lastScrollTop = currentScroll;
+  }, { passive: true }); 
 </script>
+
 <style>
   @keyframes cardFadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  
+  /* Reverted Hero Header: Natural scrolling, zero lag */
+  .hero-header {
+    position: relative !important;
+    top: auto;
+    z-index: 100 !important;
+    /* Removed all transform transitions so the GPU does no work here */
+  }
+  
+  /* Make sure body padding is reset to normal */
+  body {
+    padding-top: 0 !important;
+  }
+  
+  /* Kept the bottom nav slide class */
+  .bottom-nav-hidden { transform: translateY(100%); }
 </style>
 </body>
 </html>

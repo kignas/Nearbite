@@ -3,158 +3,308 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cart – Nearbite</title>
+  <title>Checkout – Nearbite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="bg-[#f8f8f8] pb-32">
 
-<!-- ── Header ── -->
-<div class="sticky top-0 bg-white z-50 px-5 py-4 border-b border-gray-100 shadow-sm flex justify-between items-center">
-  <div class="flex items-center gap-3">
-    <button onclick="history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200">
-      <i class="fa-solid fa-chevron-left text-gray-700 text-sm"></i>
-    </button>
-    <div>
-      <h1 class="font-black text-[17px] text-gray-900">Your Cart</h1>
-      <p id="cart-restaurant-name" class="text-[11px] text-gray-400 font-medium"></p>
-    </div>
-  </div>
-  <button onclick="clearCart()" class="text-[11px] font-bold text-red-400 px-3 py-1.5 rounded-xl border border-red-100 active:bg-red-50 transition-colors">
-    Clear
-  </button>
-</div>
-
-<!-- ── Cart Items ── -->
-<div id="cart-content" class="px-4 pt-5">
-  <div id="empty-cart" class="hidden text-center py-20">
-    <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-5">
-      <i class="fa-solid fa-bag-shopping text-orange-300 text-4xl"></i>
-    </div>
-    <h4 class="font-black text-[17px] text-gray-900 mb-2">Your cart is empty</h4>
-    <p class="text-[13px] text-gray-400 font-medium mb-7">Add items from a restaurant to get started</p>
-    <button onclick="window.location.href='index.html'"
-            class="bg-orange-500 text-white font-black text-[14px] px-8 py-3.5 rounded-2xl shadow-md shadow-orange-100 active:scale-95 transition-transform">
-      Explore Restaurants
-    </button>
-  </div>
-
-  <div id="cart-items-list" class="space-y-3 hidden"></div>
-</div>
-
-<!-- ── Bill Summary (shown when cart has items) ── -->
-<div id="bill-section" class="hidden px-4 mt-4">
-  <div class="bg-white rounded-[22px] p-5 shadow-sm border border-gray-100">
-    <h3 class="font-black text-[14px] text-gray-900 mb-4 flex items-center gap-2">
-      <i class="fa-solid fa-receipt text-orange-500 text-sm"></i> Bill Summary
-    </h3>
-    <div class="space-y-2.5 text-[13px]">
-      <div class="flex justify-between">
-        <span class="text-gray-500 font-medium">Item Total</span>
-        <span id="bill-subtotal" class="font-bold text-gray-800">₹0</span>
-      </div>
-      <div class="flex justify-between">
-        <span class="text-gray-500 font-medium">Delivery Fee</span>
-        <span class="font-bold text-green-600">FREE</span>
-      </div>
-      <div class="flex justify-between">
-        <span class="text-gray-500 font-medium">Platform Fee</span>
-        <span class="font-bold text-gray-800">₹5</span>
-      </div>
-      <div class="border-t border-dashed border-gray-100 pt-3 flex justify-between">
-        <span class="font-black text-gray-900 text-[14px]">To Pay</span>
-        <span id="bill-total" class="font-black text-gray-900 text-[15px]">₹5</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Checkout Footer ── -->
-<div id="checkout-footer" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-  <button onclick="placeOrder()"
-          class="w-full bg-orange-500 text-white font-black text-[15px] py-4 rounded-2xl shadow-md shadow-orange-200 active:scale-[0.98] transition-transform flex justify-between items-center px-5">
-    <span>PLACE ORDER</span>
-    <span id="checkout-total" class="font-black">₹0</span>
-  </button>
-</div>
-
-<script src="home.js"></script>
-<script>
-  function renderCart() {
-    const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-    const items = Object.entries(savedCart);
-    const emptyEl = document.getElementById('empty-cart');
-    const listEl  = document.getElementById('cart-items-list');
-    const billEl  = document.getElementById('bill-section');
-    const footerEl = document.getElementById('checkout-footer');
-
-    if (items.length === 0) {
-      emptyEl.classList.remove('hidden');
-      listEl.classList.add('hidden');
-      billEl.classList.add('hidden');
-      footerEl.classList.add('hidden');
-      return;
+  <style>
+    :root {
+      --brand:   #FC8019;
+      --text-1:  #111827;
+      --text-2:  #374151;
+      --text-3:  #6b7280;
+      --bg:      #f2f3f5;
+      --border:  #e5e7eb;
+      --surface: #ffffff;
+      --ease:    cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    emptyEl.classList.add('hidden');
-    listEl.classList.remove('hidden');
-    billEl.classList.remove('hidden');
-    footerEl.classList.remove('hidden');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    const subtotal = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
-    const total = subtotal + 5;
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: 140px; /* Increased space for the new thicker footer */
+      margin: 0;
+    }
 
-    // Set restaurant name
-    const resData = JSON.parse(localStorage.getItem('restaurantData')) || [];
-    const resId = items[0][1].resId;
-    const res = resData.find(r => r.id === resId);
-    const nameEl = document.getElementById('cart-restaurant-name');
-    if (nameEl && res) nameEl.innerText = res.name;
+    .tap { cursor: pointer; transition: transform 0.1s var(--ease); }
+    .tap:active { transform: scale(0.96); }
 
-    listEl.innerHTML = items.map(([name, info]) => `
-      <div class="bg-white rounded-2xl px-4 py-4 flex items-center justify-between shadow-sm border border-gray-50">
-        <div class="flex-1 min-w-0 pr-3">
-          <p class="font-bold text-[14px] text-gray-900 truncate">${name}</p>
-          <p class="text-[13px] font-black text-gray-700 mt-0.5">₹${info.price} each</p>
+    /* ── Header ── */
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--surface); padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .btn-back {
+      width: 36px; height: 36px; background: #f9fafb;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); font-size: 14px; color: var(--text-1);
+    }
+    /* FIX: Removed 'Syne' font, adjusted sizing for a clean, premium look */
+    .header-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.1; color: var(--text-1); }
+    .header-sub { font-size: 11px; color: var(--text-3); font-weight: 600; }
+    .btn-clear {
+      font-size: 12px; font-weight: 700; color: #ef4444; background: #fef2f2;
+      padding: 6px 12px; border-radius: 8px; border: none;
+    }
+
+    /* ── Address Block ── */
+    .section-block {
+      background: var(--surface);
+      margin: 12px 16px; border-radius: 20px;
+      padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+    .address-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .address-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; }
+    .btn-change { font-size: 12px; font-weight: 800; color: var(--brand); text-decoration: none; }
+    .address-text { font-size: 12px; color: var(--text-3); font-weight: 500; line-height: 1.5; padding-left: 24px; }
+
+    /* ── Cart Items ── */
+    .cart-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 0; border-bottom: 1px dashed var(--border);
+    }
+    .cart-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-info { flex: 1; padding-right: 12px; }
+    .item-icon { width: 12px; height: 12px; border: 1px solid #16a34a; display: inline-flex; align-items: center; justify-content: center; margin-right: 6px; border-radius: 2px; }
+    .item-icon::after { content: ''; width: 6px; height: 6px; background: #16a34a; border-radius: 50%; }
+    .item-name { font-size: 14px; font-weight: 700; color: var(--text-1); display: inline; }
+    .item-price { font-size: 12px; font-weight: 800; color: var(--text-2); margin-top: 4px; }
+    
+    /* Native Add/Minus Button */
+    .counter-btn {
+      display: flex; align-items: center; background: #fff4ec;
+      border: 1px solid rgba(252, 128, 25, 0.3); border-radius: 8px;
+      overflow: hidden; box-shadow: 0 2px 4px rgba(252, 128, 25, 0.05);
+    }
+    .counter-btn button {
+      width: 28px; height: 32px; background: transparent; border: none;
+      color: var(--brand); font-size: 16px; font-weight: 800;
+    }
+    .counter-btn span {
+      width: 24px; text-align: center; font-size: 13px; font-weight: 800; color: var(--brand);
+    }
+    .item-total { width: 50px; text-align: right; font-size: 14px; font-weight: 800; }
+
+    /* ── Bill Summary ── */
+    .bill-title { font-size: 13px; font-weight: 800; color: var(--text-1); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .bill-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+    .bill-label { color: var(--text-3); font-weight: 500; }
+    .bill-val { font-weight: 700; color: var(--text-1); }
+    .bill-val.free { color: #16a34a; }
+    .bill-total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px; padding-top: 12px; border-top: 1.5px dashed var(--border);
+    }
+    .total-label { font-size: 15px; font-weight: 800; color: var(--text-1); }
+    .total-val { font-size: 16px; font-weight: 900; color: var(--text-1); }
+
+    /* ── Empty State ── */
+    .empty-state { text-align: center; padding: 60px 20px; display: none; }
+    .empty-img { width: 120px; opacity: 0.5; margin-bottom: 16px; }
+    .empty-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .empty-sub { font-size: 13px; color: var(--text-3); font-weight: 500; margin-bottom: 24px; }
+    .btn-explore { background: var(--brand); color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-size: 15px; font-weight: 800; }
+
+    /* ── Fixed Footer with UPI Payment ── */
+    .checkout-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface); padding: 12px 20px 20px;
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+      display: flex; flex-direction: column; gap: 12px; z-index: 100;
+    }
+    /* FIX: New UPI Payment Card */
+    .payment-method {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 700; color: var(--text-1);
+      background: #f9fafb; padding: 12px 16px; border-radius: 12px;
+      border: 1.5px solid var(--border);
+    }
+    .upi-icon {
+      background: #f3e8ff; color: #9333ea;
+      width: 26px; height: 26px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+    
+    .btn-checkout {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--brand); color: #fff; border: none;
+      padding: 16px 20px; border-radius: 16px; width: 100%;
+      box-shadow: 0 4px 14px rgba(252, 128, 25, 0.3);
+    }
+    .btn-checkout-text { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
+    .btn-checkout-val { font-size: 16px; font-weight: 900; }
+
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <button class="btn-back tap" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+      <div>
+        <div class="header-title">Checkout</div>
+        <div class="header-sub" id="cart-restaurant-name">Loading...</div>
+      </div>
+    </div>
+    <button class="btn-clear tap" onclick="clearCart()">Clear</button>
+  </div>
+
+  <div id="cart-has-items">
+    
+    <div class="section-block tap" onclick="window.location.href='address.html'">
+      <div class="address-top">
+        <div class="address-title">
+          <i class="fa-solid fa-location-dot" style="color:var(--brand);"></i> Delivering to Home
         </div>
-        <div class="flex items-center gap-3">
-          <div class="add-btn-wrap">
-            <button onclick="cartAdjust('${name}', -1, ${info.price}, ${info.resId})">−</button>
-            <span>${info.quantity}</span>
-            <button onclick="cartAdjust('${name}', 1, ${info.price}, ${info.resId})">+</button>
+        <a href="address.html" class="btn-change tap">CHANGE</a>
+      </div>
+      <div class="address-text">Flat 204, Green Gate, Maynaguri, Jalpaiguri District, West Bengal, 735224</div>
+    </div>
+
+    <div class="section-block" id="cart-items-list">
+      </div>
+
+    <div class="section-block">
+      <div class="bill-title"><i class="fa-solid fa-receipt" style="color:var(--text-3); margin-right:6px;"></i> Bill Summary</div>
+      <div class="bill-row">
+        <span class="bill-label">Item Total</span>
+        <span class="bill-val" id="bill-subtotal">₹0</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Delivery Fee</span>
+        <span class="bill-val free">FREE</span>
+      </div>
+      <div class="bill-row">
+        <span class="bill-label">Platform Fee</span>
+        <span class="bill-val">₹5</span>
+      </div>
+      <div class="bill-total-row">
+        <span class="total-label">To Pay</span>
+        <span class="total-val" id="bill-total">₹0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" id="empty-cart">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055183.png" alt="Empty Cart" class="empty-img">
+    <div class="empty-title">Your cart is empty</div>
+    <div class="empty-sub">Add items from a restaurant to start your order.</div>
+    <button class="btn-explore tap" onclick="window.location.href='index.html'">Explore Restaurants</button>
+  </div>
+
+  <div class="checkout-footer" id="checkout-footer">
+    
+    <div class="payment-method tap">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
+        <span>Pay via UPI (GPay, PhonePe)</span>
+      </div>
+      <span style="color:var(--brand); font-size:11px; font-weight:800;">CHANGE</span>
+    </div>
+
+    <button class="btn-checkout tap" onclick="placeOrder()">
+      <span class="btn-checkout-text">PLACE ORDER <i class="fa-solid fa-caret-right" style="margin-left:4px;"></i></span>
+      <span class="btn-checkout-val" id="checkout-total">₹0</span>
+    </button>
+  </div>
+
+  <script>
+    function renderCart() {
+      // Mock data if local storage is empty for preview purposes
+      let savedCart = JSON.parse(localStorage.getItem('nearbite_cart'));
+      
+      // If no cart exists, add some dummy data just to see the beautiful UI
+      if (!savedCart || Object.keys(savedCart).length === 0) {
+        savedCart = {
+          "Dhokar Dalna": { price: 90, quantity: 1, resId: 1 },
+          "Luchi (4 pcs)": { price: 40, quantity: 2, resId: 1 }
+        };
+      }
+
+      const items = Object.entries(savedCart);
+      const emptyEl = document.getElementById('empty-cart');
+      const hasItemsEl = document.getElementById('cart-has-items');
+      const listEl  = document.getElementById('cart-items-list');
+      const footerEl = document.getElementById('checkout-footer');
+
+      if (items.length === 0) {
+        emptyEl.style.display = 'block';
+        hasItemsEl.style.display = 'none';
+        footerEl.style.display = 'none';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      hasItemsEl.style.display = 'block';
+      footerEl.style.display = 'flex';
+
+      const subtotal = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
+      const total = subtotal + 5;
+
+      document.getElementById('cart-restaurant-name').innerText = "Ruby's Swader Prantik";
+
+      listEl.innerHTML = items.map(([name, info]) => `
+        <div class="cart-item">
+          <div class="item-info">
+            <div class="item-icon"></div>
+            <div class="item-name">${name}</div>
+            <div class="item-price">₹${info.price}</div>
           </div>
-          <span class="font-black text-[14px] text-gray-900 w-16 text-right">₹${info.quantity * info.price}</span>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="counter-btn tap">
+              <button onclick="cartAdjust('${name}', -1)">−</button>
+              <span>${info.quantity}</span>
+              <button onclick="cartAdjust('${name}', 1)">+</button>
+            </div>
+            <div class="item-total">₹${info.quantity * info.price}</div>
+          </div>
         </div>
-      </div>`).join('');
+      `).join('');
 
-    document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
-    document.getElementById('bill-total').innerText    = '₹' + total;
-    document.getElementById('checkout-total').innerText = '₹' + total;
-  }
+      document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
+      document.getElementById('bill-total').innerText    = '₹' + total;
+      document.getElementById('checkout-total').innerText = '₹' + total;
+    }
 
-  function cartAdjust(name, change, price, resId) {
-    const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-    if (!savedCart[name]) return;
-    savedCart[name].quantity += change;
-    if (savedCart[name].quantity <= 0) delete savedCart[name];
-    localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
-    renderCart();
-  }
+    function cartAdjust(name, change) {
+      let savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+      
+      if (!savedCart[name]) {
+         savedCart = {
+          "Dhokar Dalna": { price: 90, quantity: 1, resId: 1 },
+          "Luchi (4 pcs)": { price: 40, quantity: 2, resId: 1 }
+        };
+      }
 
-  function clearCart() {
-    localStorage.removeItem('nearbite_cart');
-    renderCart();
-  }
+      if (savedCart[name]) {
+        savedCart[name].quantity += change;
+        if (savedCart[name].quantity <= 0) delete savedCart[name];
+        localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
+        renderCart();
+      }
+    }
 
-  function placeOrder() {
-    alert('Order placed! This feature needs a backend to process real orders.');
-  }
+    function clearCart() {
+      localStorage.removeItem('nearbite_cart');
+      localStorage.setItem('nearbite_cart', JSON.stringify({})); 
+      renderCart();
+    }
 
-  document.addEventListener('DOMContentLoaded', renderCart);
-</script>
+    function placeOrder() {
+      alert('Order placed! Redirecting to tracking...');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCart);
+  </script>
 </body>
 </html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Add Address – Nearbite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <style>
+    :root {
+      --brand:   #FC8019;
+      --text-1:  #1c1c1c;
+      --text-2:  #4f4f4f;
+      --text-3:  #9e9e9e;
+      --border:  #e0e0e0;
+      --bg:      #ffffff;
+      --input:   #f9fafb;
+      --ease:    cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg); color: var(--text-1);
+      -webkit-tap-highlight-color: transparent;
+      margin: 0; padding: 0; overflow: hidden; 
+      height: 100vh; display: flex; flex-direction: column;
+    }
+
+    .tap { cursor: pointer; transition: transform 0.1s var(--ease); }
+    .tap:active { transform: scale(0.96); }
+
+    /* ── Map Container ── */
+    .map-section { position: relative; flex: 1; width: 100%; background: #e5e5e5; }
+    
+    /* Leaflet forces its own z-index, so we keep this basic */
+    #map { width: 100%; height: 100%; z-index: 1; }
+    
+    /* Hide the Leaflet attribution for a cleaner app look */
+    .leaflet-control-attribution { display: none !important; }
+
+    /* ── Floating UI on Map ── */
+    .top-bar {
+      position: absolute; top: 16px; left: 16px; right: 16px;
+      display: flex; align-items: center; gap: 12px; z-index: 400;
+    }
+    .btn-back {
+      width: 44px; height: 44px; background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 16px; color: var(--text-1);
+    }
+    .search-bar {
+      flex: 1; height: 44px; background: #fff; border-radius: 22px;
+      display: flex; align-items: center; padding: 0 16px; gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: var(--text-2); font-weight: 600; font-size: 14px;
+    }
+
+    .btn-gps {
+      position: absolute; bottom: 24px; right: 16px; z-index: 400;
+      width: 44px; height: 44px; background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 18px; color: var(--brand);
+    }
+
+    /* ── Center Map Pin (The Swiggy/Uber Effect) ── */
+    .center-pin-container {
+      position: absolute; top: 50%; left: 50%; z-index: 400;
+      pointer-events: none; /* Let touches pass through to the map */
+    }
+    .center-pin {
+      transform: translate(-50%, -100%); /* Centers the point on the exact pixel */
+      display: flex; flex-direction: column; align-items: center;
+      transition: transform 0.2s var(--ease);
+    }
+    .center-pin.is-dragging {
+      /* Lifts the pin when the user is moving the map */
+      transform: translate(-50%, -125%);
+    }
+    .pin-bubble {
+      background: #1c1c1c; color: #fff; padding: 6px 12px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; margin-bottom: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .pin-icon {
+      font-size: 40px; color: var(--brand); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+    }
+    /* The tiny shadow directly underneath the pin */
+    .pin-shadow {
+      width: 10px; height: 4px; background: rgba(0,0,0,0.2); border-radius: 50%;
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      transition: all 0.2s var(--ease);
+    }
+    .center-pin.is-dragging .pin-shadow { width: 6px; background: rgba(0,0,0,0.1); }
+
+    /* ── Bottom Sheet (Dynamic) ── */
+    .bottom-sheet {
+      position: relative; z-index: 400; background: #fff; border-radius: 24px 24px 0 0;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+      transition: height 0.4s var(--ease);
+      height: 220px; 
+    }
+    .drag-handle { width: 36px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 12px auto 16px; }
+
+    /* ── View Container ── */
+    .view-slider { display: flex; width: 200vw; transition: transform 0.4s var(--ease); flex: 1; }
+    .view-pane {
+      width: 100vw; flex-shrink: 0; padding: 0 24px 24px; display: flex; flex-direction: column; overflow-y: auto;
+    }
+
+    /* ── Step 1: Confirm Location ── */
+    .loc-header { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .loc-sub { font-size: 13px; color: var(--text-2); font-weight: 500; margin-bottom: 24px; line-height: 1.4; }
+    .btn-primary {
+      width: 100%; background: var(--brand); color: #fff; font-size: 16px; font-weight: 800; padding: 16px;
+      border-radius: 14px; border: none; box-shadow: 0 4px 14px rgba(252,128,25,0.25); margin-top: auto;
+    }
+
+    /* ── Step 2: Full Address Form ── */
+    .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .btn-back-form { background: none; border: none; font-size: 18px; color: var(--text-1); padding: 0; }
+    .form-title { font-size: 18px; font-weight: 800; }
+    
+    .input-group { margin-bottom: 16px; }
+    .input-label { display: block; font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .input-field {
+      width: 100%; background: var(--input); border: 1.5px solid transparent; border-radius: 12px; padding: 14px 16px;
+      font-size: 14px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-1); transition: 0.2s;
+    }
+    .input-field:focus { background: #fff; border-color: var(--brand); outline: none; box-shadow: 0 4px 12px rgba(252,128,25,0.08); }
+    .input-field::placeholder { color: #a1a1aa; font-weight: 500; }
+
+    /* Save As Tags */
+    .tag-row { display: flex; gap: 10px; margin-bottom: 24px; }
+    .save-tag {
+      padding: 10px 16px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 12px; font-weight: 700;
+      color: var(--text-2); background: #fff; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+    }
+    .save-tag.active { border-color: var(--brand); background: #fff4ec; color: var(--brand); }
+  </style>
+</head>
+<body>
+
+  <div class="map-section">
+    <div id="map"></div>
+    
+    <div class="top-bar">
+      <button class="btn-back tap" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="search-bar tap">
+        <i class="fa-solid fa-magnifying-glass" style="color:#FC8019;"></i>
+        Search "Maynaguri"
+      </div>
+    </div>
+
+    <button class="btn-gps tap" onclick="centerOnGPS()"><i class="fa-solid fa-crosshairs"></i></button>
+
+    <div class="center-pin-container">
+      <div class="center-pin" id="centerPin">
+        <div class="pin-bubble">Order here</div>
+        <i class="fa-solid fa-location-dot pin-icon"></i>
+        <div class="pin-shadow"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-sheet" id="bottomSheet">
+    <div class="drag-handle"></div>
+
+    <div class="view-slider" id="slider">
+      <div class="view-pane">
+        <div class="loc-header"><i class="fa-solid fa-location-crosshairs" style="color:#FC8019; font-size:16px; margin-right:6px;"></i> Maynaguri</div>
+        <div class="loc-sub">Jalpaiguri District, West Bengal, 735224</div>
+        <button class="btn-primary tap" onclick="openDetailsForm()">Enter complete address</button>
+      </div>
+
+      <div class="view-pane">
+        <div class="form-header">
+          <button class="btn-back-form tap" onclick="closeDetailsForm()"><i class="fa-solid fa-arrow-left"></i></button>
+          <div class="form-title">Enter Address Details</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Save address as</label>
+          <div class="tag-row">
+            <div class="save-tag active tap" onclick="selectTag(this, 'Home')"><i class="fa-solid fa-house"></i> Home</div>
+            <div class="save-tag tap" onclick="selectTag(this, 'Work')"><i class="fa-solid fa-briefcase"></i> Work</div>
+            <div class="save-tag tap" onclick="selectTag(this, 'Other')"><i class="fa-solid fa-location-dot"></i> Other</div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <input type="text" class="input-field" id="houseInput" placeholder="House / Flat / Block No." oninput="checkForm()">
+        </div>
+        <div class="input-group">
+          <input type="text" class="input-field" id="areaInput" placeholder="Apartment / Road / Area">
+        </div>
+        <div class="input-group" style="margin-bottom: 32px;">
+          <input type="text" class="input-field" id="directionsInput" placeholder="Directions to reach (Optional)">
+        </div>
+
+        <button class="btn-primary tap" id="saveBtn" disabled onclick="saveAddress()">Save Address</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <script>
+    /* =========================================
+       1. LEAFLET MAP INITIALIZATION 
+       ========================================= */
+    // Set initial coordinates for Maynaguri [Latitude, Longitude]
+    const maynaguriCoords = [26.5613, 88.8225]; 
+    
+    // Initialize map, turn off default zoom buttons for a native app look
+    const map = L.map('map', {
+      zoomControl: false 
+    }).setView(maynaguriCoords, 16);
+
+    // Add OpenStreetMap tiles (Free, highly detailed)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    /* =========================================
+       2. MAP DRAG ANIMATIONS & DATA LOGIC
+       ========================================= */
+    const centerPin = document.getElementById('centerPin');
+    let currentLat = maynaguriCoords[0];
+    let currentLng = maynaguriCoords[1];
+
+    // When user starts dragging the map
+    map.on('movestart', function() {
+      centerPin.classList.add('is-dragging'); // Lifts the pin
+    });
+
+    // When user stops dragging the map
+    map.on('moveend', function() {
+      centerPin.classList.remove('is-dragging'); // Drops the pin
+      
+      // GET THE EXACT COORDINATES OF THE CENTER OF THE SCREEN
+      const center = map.getCenter();
+      currentLat = center.lat;
+      currentLng = center.lng;
+      
+      console.log(`Pin dropped at -> Lat: ${currentLat}, Lng: ${currentLng}`);
+    });
+
+    // GPS Button Logic
+    function centerOnGPS() {
+      // For now, just re-centers on Maynaguri default. 
+      // Later you can hook this to navigator.geolocation.getCurrentPosition()
+      map.flyTo(maynaguriCoords, 16, { animate: true, duration: 1 });
+    }
+
+    /* =========================================
+       3. BOTTOM SHEET UI LOGIC
+       ========================================= */
+    const bottomSheet = document.getElementById('bottomSheet');
+    const slider = document.getElementById('slider');
+    const houseInput = document.getElementById('houseInput');
+    const areaInput = document.getElementById('areaInput');
+    const directionsInput = document.getElementById('directionsInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const tags = document.querySelectorAll('.save-tag');
+    let selectedTag = "Home";
+
+    function openDetailsForm() {
+      bottomSheet.style.height = '75vh';
+      slider.style.transform = 'translateX(-100vw)';
+    }
+
+    function closeDetailsForm() {
+      bottomSheet.style.height = '220px';
+      slider.style.transform = 'translateX(0)';
+      document.activeElement.blur(); 
+    }
+
+    function selectTag(clickedElement, tagName) {
+      tags.forEach(tag => tag.classList.remove('active'));
+      clickedElement.classList.add('active');
+      selectedTag = tagName;
+    }
+
+    function checkForm() {
+      saveBtn.disabled = houseInput.value.trim().length === 0;
+    }
+
+    function saveAddress() {
+      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+      
+      // THIS IS THE DATA WE WILL SEND TO CONVEX LATER!
+      const addressData = {
+        lat: currentLat,
+        lng: currentLng,
+        house: houseInput.value,
+        area: areaInput.value,
+        directions: directionsInput.value,
+        tag: selectedTag
+      };
+      
+      console.log("Saving to Backend:", addressData);
+
+      setTimeout(() => {
+        window.location.href = 'profile.html';
+      }, 800);
+    }
+  </script>
+</body>
+</html>

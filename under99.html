@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>₹99 Store – Nearbite</title>
+  <title>₹99 Store – </title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -118,7 +118,7 @@
     /* Price badge on image */
     .price-badge {
       position: absolute; bottom: 10px; right: 10px;
-      background: yellowgreen;
+      background: #FC8019;
       color: black;
       font-size: 12px; font-weight: 900;
       padding: 4px 9px; border-radius: 9px;
@@ -184,6 +184,43 @@
     .empty-state i { font-size: 44px; color: #e0e0e0; margin-bottom: 14px; display: block; }
     .empty-state h3 { font-size: 16px; font-weight: 800; color: #555; }
     .empty-state p  { font-size: 12px; color: #bbb; margin-top: 6px; font-weight: 500; }
+    
+    /* ─── Bottom Nav Base & Scroll Animation ─── */
+    .bottom-nav { 
+      position: fixed; bottom: 0; left: 0; right: 0; height: 68px; 
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); 
+      border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch; 
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 100; 
+      padding-bottom: env(safe-area-inset-bottom);
+      
+      /* CRITICAL: Smooth slide animation */
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+
+    /* Slides the bar off the bottom of the screen */
+    .bottom-nav-hidden {
+      transform: translateY(100%);
+    }
+
+    /* ─── Premium Icon Tap Bounce Animation ─── */
+    .nav-item svg, .nav-food-circle {
+      /* The springy bounce when you release your finger */
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      will-change: transform;
+    }
+
+    /* The quick 'squish' when you press down */
+    .nav-item:active svg {
+      transform: scale(0.75);
+      transition: transform 0.1s ease-out;
+    }
+    
+    .nav-item:active .nav-food-circle {
+      transform: scale(0.85);
+      transition: transform 0.1s ease-out;
+    }
+
   </style>
 </head>
 <body>
@@ -196,7 +233,7 @@
       <div class="header-title-wrap">
         <div class="header-title-row">
           <h1 class="header-title">₹99 Store</h1>
-          <span class="official-badge">OFFICIAL</span>
+          <span class="official-badge">PRO</span>
         </div>
         <p class="header-sub">Quality Guaranteed · Free Delivery</p>
       </div>
@@ -398,6 +435,49 @@ window.toggleVeg = function() {
   if (sw) sw.classList.toggle('on', vegOnly99);
   renderItems();
 };
+
+  // ── Zomato Smart Scroll Logic (BOTTOM NAV ONLY) ──
+  const bottomNav = document.querySelector('.bottom-nav'); 
+  let lastScrollTop = 0;
+  const scrollThreshold = 15; 
+
+  window.addEventListener('scroll', () => {
+    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Ignore tiny movements
+    if (Math.abs(lastScrollTop - currentScroll) <= scrollThreshold) return;
+
+    // Hide bottom nav on scroll down, Show on scroll up
+    if (currentScroll > lastScrollTop && currentScroll > 180) {
+      if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); 
+    } else {
+      if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); 
+    }
+    
+    lastScrollTop = currentScroll;
+  }, { passive: true }); 
 </script>
+<style>
+  @keyframes cardFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Reverted Hero Header: Natural scrolling, zero lag */
+  .hero-header {
+    position: relative !important;
+    top: auto;
+    z-index: 100 !important;
+    /* Removed all transform transitions so the GPU does no work here */
+  }
+  
+  /* Make sure body padding is reset to normal */
+  body {
+    padding-top: 0 !important;
+  }
+  
+  /* Kept the bottom nav slide class */
+  .bottom-nav-hidden { transform: translateY(100%); }
+</style>
 </body>
 </html>
