@@ -37,9 +37,15 @@ function displayRestaurants(restaurants) {
     return;
   }
 
-  container.innerHTML =
-    restaurants.map(r => `
-    
+  if (!restaurants || restaurants.length === 0) {
+    container.innerHTML =
+      "<p>No restaurants found</p>";
+    return;
+  }
+
+  container.innerHTML = restaurants.map(r => {
+
+    return `
       <div class="restaurant-card">
 
         <img 
@@ -52,23 +58,24 @@ function displayRestaurants(restaurants) {
           <h3>${r.name}</h3>
 
           <p>
-            ⭐ ${r.rating}
-            • ${r.time}
-            • ${r.distance}
+            ⭐ ${r.rating || "4.0"}
+            • ${r.time || "30 mins"}
+            • ${r.distance || "2 km"}
           </p>
 
           <p>
-            ${r.cuisineDisplay}
+            ${r.cuisineDisplay || ""}
           </p>
 
           <p>
-            ${r.offer}
+            ${r.offer || ""}
           </p>
 
         </div>
 
       </div>
+    `;
 
-    `).join("");
+  }).join("");
 
 }
