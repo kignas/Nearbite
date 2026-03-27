@@ -7,23 +7,27 @@ document.addEventListener('DOMContentLoaded', () =>
 
 
 async function loadRestaurants() {
-
   try {
 
     const response = await fetch(
-"https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants"
+      "https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants"
     );
 
-    const data = await response.json();
+    const result = await response.json();
 
-    displayRestaurants(data.data);
+    console.log("API Response:", result);
+
+    // SAFE handling
+    const restaurants =
+      result.data || result.restaurants || [];
+
+    displayRestaurants(restaurants);
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Load error:", error);
 
   }
-
 }
 
 function displayRestaurants(restaurants) {
