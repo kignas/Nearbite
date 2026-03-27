@@ -255,7 +255,29 @@ function displayRestaurants() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  displayRestaurants();
-  renderCartBar();
+document.addEventListener('DOMContentLoaded', () =>
+{
+ loadRestaurants();
+ renderCartBar();
 });
+
+
+async function loadRestaurants() {
+
+  try {
+
+    const response = await fetch(
+"https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants"
+    );
+
+    const data = await response.json();
+
+    displayRestaurants(data.data);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+}
