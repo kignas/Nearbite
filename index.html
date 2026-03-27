@@ -29,26 +29,117 @@
     .tap:active { transform: scale(0.96); opacity: 0.85; }
 
     /* ══════════════════════════════════════════
-       FULL PAGE SKELETON LOADER
+       PREMIUM SKELETON — pixel-matched to real layout
     ══════════════════════════════════════════ */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    /* Base shimmer tile */
+    .sk {
+      display: block;
+      background: linear-gradient(90deg, #ececef 25%, #f6f6f9 50%, #ececef 75%);
+      background-size: 1200px 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: 10px;
+    }
+    /* stagger helpers */
+    .sk.d1{animation-delay:.08s}.sk.d2{animation-delay:.16s}
+    .sk.d3{animation-delay:.24s}.sk.d4{animation-delay:.32s}.sk.d5{animation-delay:.40s}
+
     #global-skeleton {
-      position: fixed;
-      inset: 0;
-      background: #f6f7fb;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
+      position: fixed; inset: 0; z-index: 9999;
+      background: #f4f4f6;
+      overflow-y: auto; overflow-x: hidden;
+      padding-bottom: 80px;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
     }
-    .skel-pulse {
-      background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
-      background-size: 200% 100%;
-      animation: skelLoading 1.5s infinite linear;
+    #global-skeleton.sk-hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* ── HERO: warm yellow shimmer, exact height/radius match ── */
+    .sk-hero {
+      height: 310px; /* loc-row 60 + search-row 52 + banner 110 + padding */
+      border-radius: 0 0 28px 28px;
+      background: linear-gradient(90deg, #f2e0b0 25%, #fdf5d8 50%, #f2e0b0 75%);
+      background-size: 1200px 100%;
+      animation: shimmer 1.5s infinite linear;
+      margin-bottom: 8px;
+      position: relative; overflow: hidden;
     }
-    @keyframes skelLoading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+    /* loc row inside hero */
+    .sk-hero .sk-loc-name  { position:absolute; top:20px; left:44px; width:120px; height:15px; background:rgba(0,0,0,.12); border-radius:7px; animation:none; }
+    .sk-hero .sk-loc-sub   { position:absolute; top:40px; left:16px; width:200px; height:11px; background:rgba(0,0,0,.08); border-radius:5px; animation:none; }
+    /* right buttons */
+    .sk-hero .sk-buyone    { position:absolute; top:14px; right:54px; width:44px; height:38px; background:rgba(255,255,255,.45); border-radius:20px; animation:none; }
+    .sk-hero .sk-avatar    { position:absolute; top:14px; right:8px;  width:38px; height:38px; background:rgba(0,0,0,.12); border-radius:50%; animation:none; }
+    /* search bar row */
+    .sk-hero .sk-search    { position:absolute; top:72px; left:16px; right:80px; height:52px; background:rgba(255,255,255,.55); border-radius:16px; animation:none; }
+    .sk-hero .sk-vegbtn    { position:absolute; top:72px; right:16px; width:60px; height:52px; background:rgba(255,255,255,.55); border-radius:16px; animation:none; }
+    /* banner text lines */
+    .sk-hero .sk-ban1 { position:absolute; top:148px; left:50%; transform:translateX(-50%); width:200px; height:24px; background:rgba(0,0,0,.10); border-radius:10px; animation:none; }
+    .sk-hero .sk-ban2 { position:absolute; top:182px; left:50%; transform:translateX(-50%); width:160px; height:18px; background:rgba(0,0,0,.08); border-radius:8px; animation:none; }
+    .sk-hero .sk-ban3 { position:absolute; top:212px; left:50%; transform:translateX(-50%); width:240px; height:11px; background:rgba(0,0,0,.06); border-radius:5px; animation:none; }
+
+    /* ── CATEGORY SECTION: white card, 2-row 24vw grid ── */
+    .sk-cat-card { background:#fff; border-radius:20px; padding:18px 16px 14px; margin-bottom:8px; box-shadow:0 2px 12px rgba(0,0,0,.03); }
+    .sk-cat-title { width:170px; height:12px; margin-bottom:18px; }
+    /* exact same grid as .cat-scroll */
+    .sk-cat-grid {
+      display: grid;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 24vw;
+      gap: 12px;
+      overflow: hidden; /* clip at 5 visible cols */
     }
+    .sk-cat-item { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .sk-circle   { border-radius:50%; }  /* size set inline to match 24vw */
+    .sk-cat-lbl  { width:48px; height:10px; border-radius:5px; }
+
+    /* ── 99 STORE CARD: margin 0 16px, border-radius 24px ── */
+    .sk-store-card { background:#fff; border-radius:24px; margin:0 16px 8px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,.03); }
+    .sk-store-hd   { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .sk-store-icon { width:42px; height:42px; border-radius:14px; flex-shrink:0; }
+    .sk-store-t1   { height:16px; width:90px; border-radius:7px; margin-bottom:6px; }
+    .sk-store-t2   { height:11px; width:150px; border-radius:5px; }
+    /* horizontal product cards — exact .prod-card width 156px */
+    .sk-prod-row  { display:flex; gap:14px; overflow:hidden; }
+    .sk-prod      { flex-shrink:0; width:156px; display:flex; flex-direction:column; gap:9px; }
+    .sk-prod-img  { height:116px; border-radius:14px; }
+    .sk-prod-veg  { width:50px; height:9px;  border-radius:4px; }
+    .sk-prod-nm   { height:14px; width:90%;  border-radius:6px; }
+    .sk-prod-rs   { height:11px; width:65%;  border-radius:5px; }
+    .sk-prod-add  { height:32px;             border-radius:12px; }
+
+    /* ── RESTAURANT SECTION: full-width, radius 20px 20px 0 0 ── */
+    .sk-rest-sec  { background:#fff; border-radius:20px 20px 0 0; padding:18px 16px 8px; }
+    .sk-rest-ttl  { width:190px; height:15px; border-radius:8px; margin-bottom:20px; }
+    /* each card mirrors .vr exactly */
+    .sk-vr        { border-radius:20px; overflow:hidden; background:#fff; margin-bottom:24px; box-shadow:0 4px 20px rgba(0,0,0,.05); border:1px solid #f1f5f9; }
+    .sk-vr-img    { height:200px; display:block; }   /* exact .vr-img height */
+    .sk-vr-body   { padding:14px 16px 16px; }
+    .sk-vr-row1   { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+    .sk-vr-name   { height:18px; width:52%; border-radius:8px; }
+    .sk-vr-badge  { height:28px; width:68px; border-radius:10px; }
+    .sk-vr-cuis   { height:13px; width:72%; border-radius:6px; margin-bottom:14px; }
+    .sk-vr-meta   { height:12px; width:50%; border-radius:5px; border-top:1px dashed #e2e8f0; padding-top:12px; }
+
+    /* ── GHOST BOTTOM NAV ── */
+    .sk-nav {
+      position:fixed; bottom:0; left:0; right:0;
+      height:68px;
+      background:rgba(255,255,255,.96);
+      backdrop-filter:blur(12px);
+      border-top:1px solid rgba(0,0,0,.05);
+      box-shadow:0 -4px 24px rgba(0,0,0,.06);
+      display:flex; align-items:center; justify-content:space-around;
+      z-index:10001;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .sk-nav-item   { display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .sk-nav-circle { width:46px; height:46px; border-radius:50%; background:#ececef; }
+    .sk-nav-icon   { width:26px; height:26px; border-radius:50%; }
+    .sk-nav-lbl    { width:28px; height:9px;  border-radius:4px; }
 
     /* ══════════════════════════════════════════
        HERO HEADER (Static & Natural Scroll)
@@ -420,24 +511,128 @@
 <body>
 
 <div id="global-skeleton">
-  <div class="skel-pulse" style="height: 240px; border-radius: 0 0 36px 36px; margin-bottom: 20px;"></div>
-  
-  <div style="padding: 0 16px;">
-    <div class="skel-pulse" style="width: 160px; height: 20px; border-radius: 10px; margin-bottom: 16px;"></div>
-    <div style="display: flex; gap: 14px; margin-bottom: 30px; overflow: hidden;">
-      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
-      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
-      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
-      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
-      <div class="skel-pulse" style="width: 70px; height: 70px; border-radius: 50%; flex-shrink:0;"></div>
+
+  <!-- ① HERO — warm shimmer, exact height mirrors loc+search+banner -->
+  <div class="sk-hero">
+    <div class="sk-loc-name"></div>
+    <div class="sk-loc-sub"></div>
+    <div class="sk-buyone"></div>
+    <div class="sk-avatar"></div>
+    <div class="sk-search"></div>
+    <div class="sk-vegbtn"></div>
+    <div class="sk-ban1"></div>
+    <div class="sk-ban2"></div>
+    <div class="sk-ban3"></div>
+  </div>
+
+  <!-- ② WHAT'S ON YOUR MIND — 2-row × 24vw grid, 5 visible columns -->
+  <div class="sk-cat-card">
+    <div class="sk sk-cat-title d1"></div>
+    <div class="sk-cat-grid">
+      <div class="sk-cat-item"><div class="sk sk-circle" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d1"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d1" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d2"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d2" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d3"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d3" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d4"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d4" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d5"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d1" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d2"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d2" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d3"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d3" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d4"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d4" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d5"></div></div>
+      <div class="sk-cat-item"><div class="sk sk-circle d5" style="width:24vw;height:24vw"></div><div class="sk sk-cat-lbl d1"></div></div>
+    </div>
+  </div>
+
+  <!-- ③ 99 STORE CARD — margin 0 16px, product cards 156px wide -->
+  <div class="sk-store-card">
+    <div class="sk-store-hd">
+      <div class="sk sk-store-icon d1"></div>
+      <div style="flex:1">
+        <div class="sk sk-store-t1 d2"></div>
+        <div class="sk sk-store-t2 d3"></div>
+      </div>
+    </div>
+    <div class="sk-prod-row">
+      <div class="sk-prod">
+        <div class="sk sk-prod-img"></div>
+        <div class="sk sk-prod-veg d1"></div>
+        <div class="sk sk-prod-nm  d1"></div>
+        <div class="sk sk-prod-rs  d2"></div>
+        <div class="sk sk-prod-add d2"></div>
+      </div>
+      <div class="sk-prod">
+        <div class="sk sk-prod-img d1"></div>
+        <div class="sk sk-prod-veg d2"></div>
+        <div class="sk sk-prod-nm  d2"></div>
+        <div class="sk sk-prod-rs  d3"></div>
+        <div class="sk sk-prod-add d3"></div>
+      </div>
+      <div class="sk-prod">
+        <div class="sk sk-prod-img d2"></div>
+        <div class="sk sk-prod-veg d3"></div>
+        <div class="sk sk-prod-nm  d3"></div>
+        <div class="sk sk-prod-rs  d4"></div>
+        <div class="sk sk-prod-add d4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ RESTAURANTS TO EXPLORE — full width, 200px tall images -->
+  <div class="sk-rest-sec">
+    <div class="sk sk-rest-ttl d1"></div>
+
+    <div class="sk-vr">
+      <div class="sk sk-vr-img"></div>
+      <div class="sk-vr-body">
+        <div class="sk-vr-row1">
+          <div class="sk sk-vr-name d1"></div>
+          <div class="sk sk-vr-badge d2"></div>
+        </div>
+        <div class="sk sk-vr-cuis d2"></div>
+        <div class="sk sk-vr-meta d3"></div>
+      </div>
     </div>
 
-    <div class="skel-pulse" style="height: 230px; border-radius: 24px; margin-bottom: 24px;"></div>
+    <div class="sk-vr">
+      <div class="sk sk-vr-img d1"></div>
+      <div class="sk-vr-body">
+        <div class="sk-vr-row1">
+          <div class="sk sk-vr-name d2"></div>
+          <div class="sk sk-vr-badge d3"></div>
+        </div>
+        <div class="sk sk-vr-cuis d3"></div>
+        <div class="sk sk-vr-meta d4"></div>
+      </div>
+    </div>
 
-   <div class="skel-pulse" style="width: 180px; height: 20px; border-radius: 10px; margin-bottom: 16px;"></div>
-    <div class="skel-pulse" style="height: 200px; border-radius: 20px; margin-bottom: 20px;"></div>
-    <div class="skel-pulse" style="height: 200px; border-radius: 20px; margin-bottom: 20px;"></div>
+    <div class="sk-vr">
+      <div class="sk sk-vr-img d2"></div>
+      <div class="sk-vr-body">
+        <div class="sk-vr-row1">
+          <div class="sk sk-vr-name d3"></div>
+          <div class="sk sk-vr-badge d4"></div>
+        </div>
+        <div class="sk sk-vr-cuis d4"></div>
+        <div class="sk sk-vr-meta d5"></div>
+      </div>
+    </div>
   </div>
+
+  <!-- ⑤ GHOST BOTTOM NAV — fixed, mirrors real 3-tab nav -->
+  <div class="sk-nav">
+    <div class="sk-nav-item">
+      <div class="sk sk-nav-circle"></div>
+      <div class="sk sk-nav-lbl d1"></div>
+    </div>
+    <div class="sk-nav-item">
+      <div class="sk sk-nav-icon d2"></div>
+      <div class="sk sk-nav-lbl d2"></div>
+    </div>
+    <div class="sk-nav-item">
+      <div class="sk sk-nav-icon d3"></div>
+      <div class="sk sk-nav-lbl d3"></div>
+    </div>
+  </div>
+
 </div>
 
 <header id="hero" class="hero-header">
@@ -659,9 +854,8 @@
     setTimeout(() => {
       const skel = document.getElementById('global-skeleton');
       if (skel) {
-        skel.style.opacity = '0';
-        skel.style.visibility = 'hidden';
-        setTimeout(() => skel.remove(), 500);
+        skel.classList.add('sk-hide');
+        setTimeout(() => skel.remove(), 550);
       }
       displayRestaurants(false);
     }, 600);

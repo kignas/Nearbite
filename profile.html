@@ -445,5 +445,19 @@
     setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
   }
 </script>
+<script>
+  // Read user data from local storage
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem('nearbite_user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      const nameEl = document.querySelector('.avatar-name');
+      const phoneEl = document.querySelector('.avatar-phone');
+      
+      if (nameEl) nameEl.innerText = user.name;
+      if (phoneEl) phoneEl.innerText = user.phone;
+    }
+  });
+</script>
 </body>
 </html>

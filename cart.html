@@ -140,9 +140,66 @@
       background: var(--brand); color: #fff; border: none;
       padding: 16px 20px; border-radius: 16px; width: 100%;
       box-shadow: 0 4px 14px rgba(252, 128, 25, 0.3);
+      transition: transform 0.1s var(--ease), background 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
     }
+    .btn-checkout:active { transform: scale(0.97); }
     .btn-checkout-text { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
-    .btn-checkout-val { font-size: 16px; font-weight: 900; }
+    .btn-checkout-val  { font-size: 16px; font-weight: 900; }
+
+    /* ── LOCKED state: no address ── */
+    .btn-checkout.locked {
+      background: #e5e7eb;
+      color: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .btn-checkout.locked .btn-checkout-val { color: #9ca3af; }
+
+    /* ── Address card pulse when no address ── */
+    @keyframes cardPulse {
+      0%   { box-shadow: 0 0 0 0   rgba(252,128,25,0.5); }
+      60%  { box-shadow: 0 0 0 8px rgba(252,128,25,0); }
+      100% { box-shadow: 0 0 0 0   rgba(252,128,25,0); }
+    }
+    .address-pulse { animation: cardPulse 0.6s ease-out; }
+
+    /* ── Shake animation for locked button tap ── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-7px); }
+      40%     { transform: translateX(7px); }
+      60%     { transform: translateX(-5px); }
+      80%     { transform: translateX(5px); }
+    }
+    .shake { animation: shake 0.4s ease; }
+
+    /* ── Toast notification ── */
+    #addr-toast {
+      position: fixed;
+      bottom: 160px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1c1c1e;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 11px 20px;
+      border-radius: 999px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #addr-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #addr-toast i { color: #FC8019; }
 
   </style>
 </head>
@@ -161,18 +218,26 @@
 
   <div id="cart-has-items">
     
-    <div class="section-block tap" onclick="window.location.href='address.html'">
+    <div class="section-block tap" id="address-block" onclick="window.location.href='address.html'">
       <div class="address-top">
         <div class="address-title">
-          <i class="fa-solid fa-location-dot" style="color:var(--brand);"></i> Delivering to Home
+          <i class="fa-solid fa-location-dot" style="color:var(--brand);"></i>
+          <span id="address-tag-label">Add Delivery Address</span>
         </div>
-        <a href="address.html" class="btn-change tap">CHANGE</a>
+        <span class="btn-change">CHANGE</span>
       </div>
-      <div class="address-text">Flat 204, Green Gate, Maynaguri, Jalpaiguri District, West Bengal, 735224</div>
+      <div class="address-text" id="address-display-text" style="color:#FC8019; font-weight:700;">
+        Tap to add your delivery address →
+      </div>
     </div>
 
     <div class="section-block" id="cart-items-list">
       </div>
+
+    <div id="free-delivery-nudge" style="display:none; align-items:center; gap:10px; background:#fff7ed; border:1.5px dashed #FC8019; border-radius:16px; margin:0 16px 12px; padding:11px 14px;">
+      <i class="fa-solid fa-scooter" style="color:#FC8019; font-size:16px; flex-shrink:0;"></i>
+      <span id="nudge-text" style="font-size:12px; font-weight:700; color:#92400e; line-height:1.4;"></span>
+    </div>
 
     <div class="section-block">
       <div class="bill-title"><i class="fa-solid fa-receipt" style="color:var(--text-3); margin-right:6px;"></i> Bill Summary</div>
@@ -182,7 +247,7 @@
       </div>
       <div class="bill-row">
         <span class="bill-label">Delivery Fee</span>
-        <span class="bill-val free">FREE</span>
+        <span class="bill-val" id="bill-delivery-val">₹40</span>
       </div>
       <div class="bill-row">
         <span class="bill-label">Platform Fee</span>
@@ -202,6 +267,9 @@
     <button class="btn-explore tap" onclick="window.location.href='index.html'">Explore Restaurants</button>
   </div>
 
+  <!-- Address required toast -->
+  <div id="addr-toast"><i class="fa-solid fa-location-dot"></i> Please add a delivery address first</div>
+
   <div class="checkout-footer" id="checkout-footer">
     
     <div class="payment-method tap">
@@ -212,7 +280,7 @@
       <span style="color:var(--brand); font-size:11px; font-weight:800;">CHANGE</span>
     </div>
 
-    <button class="btn-checkout tap" onclick="placeOrder()">
+    <button class="btn-checkout locked" id="btn-checkout" onclick="placeOrder()">
       <span class="btn-checkout-text">PLACE ORDER <i class="fa-solid fa-caret-right" style="margin-left:4px;"></i></span>
       <span class="btn-checkout-val" id="checkout-total">₹0</span>
     </button>
@@ -248,8 +316,33 @@
       hasItemsEl.style.display = 'block';
       footerEl.style.display = 'flex';
 
-      const subtotal = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
-      const total = subtotal + 5;
+      const subtotal     = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
+      const DELIVERY_MIN = 200;
+      const DELIVERY_FEE = 40;
+      const PLATFORM_FEE = 5;
+      const deliveryFee  = subtotal >= DELIVERY_MIN ? 0 : DELIVERY_FEE;
+      const total        = subtotal + deliveryFee + PLATFORM_FEE;
+
+      /* ── Delivery fee row ── */
+      const deliveryValEl = document.getElementById('bill-delivery-val');
+      if (deliveryFee === 0) {
+        deliveryValEl.textContent = 'FREE';
+        deliveryValEl.className   = 'bill-val free';
+      } else {
+        deliveryValEl.textContent = '₹' + deliveryFee;
+        deliveryValEl.className   = 'bill-val';
+      }
+
+      /* ── Free delivery nudge banner ── */
+      const nudgeEl   = document.getElementById('free-delivery-nudge');
+      const nudgeText = document.getElementById('nudge-text');
+      if (deliveryFee > 0) {
+        const needed = DELIVERY_MIN - subtotal;
+        nudgeText.textContent = 'Add items worth ₹' + needed + ' more for FREE delivery!';
+        nudgeEl.style.display = 'flex';
+      } else {
+        nudgeEl.style.display = 'none';
+      }
 
       document.getElementById('cart-restaurant-name').innerText = "Ruby's Swader Prantik";
 
@@ -271,20 +364,14 @@
         </div>
       `).join('');
 
-      document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
-      document.getElementById('bill-total').innerText    = '₹' + total;
-      document.getElementById('checkout-total').innerText = '₹' + total;
+      document.getElementById('bill-subtotal').innerText     = '₹' + subtotal;
+      document.getElementById('bill-total').innerText         = '₹' + total;
+      document.getElementById('checkout-total').innerText     = '₹' + total;
     }
 
     function cartAdjust(name, change) {
       let savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
       
-      if (!savedCart[name]) {
-         savedCart = {
-          "Dhokar Dalna": { price: 90, quantity: 1, resId: 1 },
-          "Luchi (4 pcs)": { price: 40, quantity: 2, resId: 1 }
-        };
-      }
 
       if (savedCart[name]) {
         savedCart[name].quantity += change;
@@ -300,11 +387,78 @@
       renderCart();
     }
 
-    function placeOrder() {
-      alert('Order placed! Redirecting to tracking...');
+    /* ── Single source of truth: is address filled? ── */
+    function hasAddress() {
+      const saved = JSON.parse(localStorage.getItem('nearbite_address'));
+      return !!(saved && saved.house && saved.house.trim().length > 0);
     }
 
-    document.addEventListener('DOMContentLoaded', renderCart);
+    function loadAddress() {
+      const saved      = JSON.parse(localStorage.getItem('nearbite_address'));
+      const tagLabel   = document.getElementById('address-tag-label');
+      const addrText   = document.getElementById('address-display-text');
+      const checkoutBtn = document.getElementById('btn-checkout');
+
+      if (hasAddress()) {
+        /* ── Address exists: show it, unlock button ── */
+        const tag   = saved.tag || 'Home';
+        const parts = [saved.house, saved.area, saved.landmark].filter(Boolean);
+        tagLabel.textContent      = 'Delivering to ' + tag;
+        addrText.textContent      = parts.join(', ');
+        addrText.style.color      = '';
+        addrText.style.fontWeight = '';
+        checkoutBtn.classList.remove('locked');
+        checkoutBtn.setAttribute('aria-disabled', 'false');
+      } else {
+        /* ── No address: show prompt, LOCK button ── */
+        tagLabel.textContent      = 'Add Delivery Address';
+        addrText.textContent      = 'Tap to add your delivery address →';
+        addrText.style.color      = '#FC8019';
+        addrText.style.fontWeight = '700';
+        checkoutBtn.classList.add('locked');
+        checkoutBtn.setAttribute('aria-disabled', 'true');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('addr-toast');
+      toast.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function placeOrder() {
+      if (!hasAddress()) {
+        /* Shake the button */
+        const btn = document.getElementById('btn-checkout');
+        btn.classList.remove('shake');
+        void btn.offsetWidth; /* reflow to restart animation */
+        btn.classList.add('shake');
+        btn.addEventListener('animationend', () => btn.classList.remove('shake'), { once: true });
+
+        /* Pulse the address card */
+        const card = document.getElementById('address-block');
+        card.classList.remove('address-pulse');
+        void card.offsetWidth;
+        card.classList.add('address-pulse');
+        card.addEventListener('animationend', () => card.classList.remove('address-pulse'), { once: true });
+
+        /* Show toast */
+        showToast('Please add a delivery address first');
+
+        /* Scroll address card into view smoothly */
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return; /* HARD STOP — never reaches track-order */
+      }
+
+      /* Address confirmed → proceed */
+      window.location.href = 'track-order.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCart();
+      loadAddress();
+    });
   </script>
 </body>
 </html>

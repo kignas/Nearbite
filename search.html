@@ -7,97 +7,478 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --brand: #FC8019;
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: #fff;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      /* Full screen height, no outer scroll */
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tap { cursor: pointer; transition: transform 0.15s var(--ease), opacity 0.15s; }
+    .tap:active { transform: scale(0.95); opacity: 0.85; }
+    .hidden { display: none !important; }
+
+    /* ══════════════════════════════════════════
+       PREMIUM ZOMATO-STYLE SEARCH HEADER
+    ══════════════════════════════════════════ */
+    .search-header {
+      flex-shrink: 0;
+      background: #fff;
+      padding: 8px 14px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .search-header-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Back button — scaled up */
+    .back-btn {
+      background: none; border: none; padding: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      border-radius: 50%;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back-btn:active { background: #f3f4f6; }
+    .back-btn i { font-size: 20px; color: #1c1c1c; font-weight: 900; }
+
+    /* The pill bar — taller like home page */
+    .search-input-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 0 10px;
+      height: 52px;
+      border: 1.5px solid #e0e0e0;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated bottom-border-like brand underline on focus */
+    .search-input-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      width: 0; height: 2px;
+      background: var(--brand);
+      border-radius: 2px;
+      transition: width 0.3s var(--ease), left 0.3s var(--ease);
+    }
+    .search-input-wrap:focus-within::after {
+      width: 100%; left: 0;
+    }
+    .search-input-wrap:focus-within {
+      background: #fff;
+      border-color: #e8e8e8;
+      box-shadow: 0 4px 16px rgba(252, 128, 25, 0.12);
+    }
+
+    /* Search magnifier icon inside bar */
+    .search-icon-inner {
+      flex-shrink: 0;
+      display: flex; align-items: center;
+    }
+    .search-icon-inner i {
+      font-size: 18px;
+      color: #b0b0b0;
+      transition: color 0.2s;
+    }
+    .search-input-wrap:focus-within .search-icon-inner i {
+      color: var(--brand);
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #1c1c1c;
+      font-size: 15px;
+      font-weight: 400;
+      font-family: 'Poppins', sans-serif;
+      width: 100%;
+      caret-color: var(--brand);
+    }
+    .search-input::placeholder {
+      color: #b0b0b0;
+      font-weight: 400;
+    }
+
+    /* Dynamic placeholder fade animation */
+    .search-input.placeholder-fade {
+      animation: ph-fade 0.35s ease;
+    }
+    @keyframes ph-fade {
+      0%   { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    /* Clear × button */
+    .icon-btn {
+      background: none; border: none; flex-shrink: 0;
+      padding: 6px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer;
+    }
+    .icon-btn i { font-size: 16px; color: #9ca3af; }
+
+    /* Mic button — scaled up */
+    .mic-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: visible;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mic-btn i { font-size: 20px; color: var(--brand); position: relative; z-index: 1; }
+
+    /* Ripple ring on mic tap */
+    .mic-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(252,128,25,0.12);
+      transform: scale(0);
+      transition: transform 0.3s var(--ease), opacity 0.3s;
+      opacity: 0;
+    }
+    .mic-btn:active::before { transform: scale(1.4); opacity: 1; }
+
+    /* Listening pulse animation */
+    .mic-btn.listening i { color: #e11d48; }
+    .mic-btn.listening::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid #e11d48;
+      animation: mic-pulse 1s ease-out infinite;
+    }
+    @keyframes mic-pulse {
+      0%   { transform: scale(1); opacity: 0.7; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* ── Scrollable page body ── */
+    .page-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 80px;
+    }
+    .page-body.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+    .page-body.no-scrollbar::-webkit-scrollbar { display: none; }
+
+    /* =========================================
+       WHAT'S ON YOUR MIND — ZOMATO STYLE GRID
+       3 columns × N rows, NO horizontal scroll
+    ========================================= */
+    .section-card { padding: 14px 0 0 0; background: #fff; }
+
+    .sec-head {
+      display: flex; align-items: center;
+      margin-bottom: 12px; padding: 0 16px;
+    }
+    .sec-title {
+      font-size: 13px; font-weight: 800; color: #7A808D;
+      text-transform: uppercase; letter-spacing: 1.2px;
+      margin-right: 12px; white-space: nowrap;
+    }
+    .sec-head::after {
+      content: ""; flex-grow: 1; height: 1px; background-color: #E2E8EC;
+    }
+
+    /* ✅ Match home page exactly — 4 cols per row, items same size */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px 0;
+      padding: 0 8px 16px 8px;
+    }
+
+    .cat-item {
+      display: flex; flex-direction: column; align-items: center;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+      will-change: transform;
+      padding: 6px 4px;
+    }
+    .cat-item:active {
+      transform: scale(0.92); opacity: 0.75;
+      transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+    }
+
+    /* Same size as home page items */
+    .cat-ring {
+      width: 95px;
+      height: 95px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+      margin-bottom: 6px;
+    }
+    .cat-ring img {
+      width: 100%; height: 100%; object-fit: contain;
+      transform: scale(1.15) translateZ(0);
+      will-change: transform;
+    }
+
+    .cat-name {
+      font-size: 12px; font-weight: 700; color: #3e4152;
+      text-align: center; line-height: 1.2;
+    }
+
+    /* =========================================
+       SEARCH RESULTS
+    ========================================= */
+    .results-section { padding: 0 16px; }
+
+    .results-count {
+      font-size: 11px; font-weight: 900; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin: 14px 0 8px 0;
+    }
+
+    /* ✅ Fixed: result-card (matching JS) */
+    .result-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f5f9;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.15s;
+    }
+    .result-card:active {
+      background-color: #fef9f5;
+      border-radius: 12px;
+      padding: 14px 8px;
+      margin: 0 -8px;
+    }
+
+    /* ✅ Fixed: res-img-wrap (matching JS) */
+    .res-img-wrap {
+      width: 78px; height: 78px; flex-shrink: 0;
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    }
+    .res-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+
+    /* ✅ Fixed: res-info, res-head, res-name, res-rating (matching JS) */
+    .res-info { flex: 1; min-width: 0; }
+
+    .res-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .res-name {
+      font-size: 15px; font-weight: 900; color: #0f172a;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin: 0; line-height: 1.2; max-width: calc(100% - 52px);
+    }
+
+    .res-rating {
+      display: flex; align-items: center; gap: 3px;
+      background: #16a34a; color: #fff;
+      font-size: 11px; font-weight: 800;
+      padding: 3px 7px; border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .res-meta {
+      font-size: 12px; color: #64748b; font-weight: 600;
+      margin: 0 0 4px 0;
+    }
+
+    .res-match-dish {
+      font-size: 12px; color: #f97316; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;
+    }
+
+    .res-cuisine {
+      font-size: 12px; color: #94a3b8; font-style: italic;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center; padding: 48px 24px; color: #94a3b8;
+    }
+    .empty-state i { font-size: 36px; margin-bottom: 12px; display: block; }
+    .empty-state h3 { font-size: 16px; font-weight: 700; color: #374151; margin: 0 0 8px; }
+    .empty-state p  { font-size: 13px; margin: 0; }
+  </style>
 </head>
-<body class="bg-white pb-20">
+<body>
 
-<!-- ── Sticky Search Bar ── -->
-<div class="sticky top-0 bg-white z-50 px-4 pt-5 pb-4 border-b border-gray-100">
-  <div class="flex items-center gap-3 bg-gray-100 rounded-2xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-orange-400 transition-all">
-    <button onclick="window.history.back()" class="flex-shrink-0">
-      <i class="fa-solid fa-chevron-left text-orange-500 text-base"></i>
+<!-- Premium Zomato-style search header -->
+<div class="search-header">
+  <div class="search-header-row">
+
+    <!-- Back arrow — outside the bar, clean -->
+    <button onclick="window.history.back()" class="back-btn tap" aria-label="Go back">
+      <i class="fa-solid fa-arrow-left"></i>
     </button>
-    <input type="text" id="search-input"
-           placeholder="Search restaurants or dishes..."
-           autofocus
-           class="flex-1 bg-transparent outline-none text-gray-800 text-[15px] font-semibold placeholder-gray-400">
-    <button id="clear-btn" onclick="clearSearch()" class="hidden flex-shrink-0">
-      <i class="fa-solid fa-xmark text-gray-400 text-base"></i>
+
+    <!-- Search pill -->
+    <div class="search-input-wrap">
+      <span class="search-icon-inner">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </span>
+      <input type="text" id="search-input"
+             placeholder="Restaurant name or a dish..."
+             autofocus
+             class="search-input"
+             autocomplete="off"
+             spellcheck="false">
+      <button id="clear-btn" onclick="clearSearch()" class="icon-btn hidden" aria-label="Clear">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Mic — standalone outside the pill -->
+    <button id="mic-btn" class="mic-btn tap" aria-label="Voice search">
+      <i class="fa-solid fa-microphone"></i>
     </button>
-    <i class="fa-solid fa-microphone text-orange-500 text-base flex-shrink-0"></i>
-  </div>
-</div>
-
-<!-- ── What's on your mind (shown when empty) ── -->
-<div id="mind-section" class="px-5 pt-6 pb-4">
-  <h3 class="text-[11px] font-black text-gray-400 tracking-[0.18em] uppercase mb-8">What's on your mind?</h3>
-  <div class="grid grid-cols-3 gap-y-8 gap-x-4">
-
-    <div onclick="quickSearch('Biryani')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
-      <div class="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden">
-        <img src="assets/b1.png">
-      </div>
-      <span class="text-[12px] font-bold text-gray-700">Biryani</span>
-    </div>
-
-    <div onclick="quickSearch('Pizza')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
-      <div class="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center overflow-hidden">
-        <img src="assets/pizaa1.png">
-      </div>
-      <span class="text-[12px] font-bold text-gray-700">Pizzas</span>
-    </div>
-
-    <div onclick="quickSearch('Burger')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
-      <div class="w-20 h-20 rounded-full bg-yellow-50 flex items-center justify-center overflow-hidden">
-        <img src="assets/burgers1.png">
-      </div>
-      <span class="text-[12px] font-bold text-gray-700">Burgers</span>
-    </div>
-
-    <div onclick="quickSearch('Momo')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
-      <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center overflow-hidden">
-        <img src="assets/momo1.jpg">
-      </div>
-      <span class="text-[12px] font-bold text-gray-700">Momos</span>
-    </div>
-
-    <div onclick="quickSearch('Noodles')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
-      <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center overflow-hidden">
-        <img src="assets/noodles.png">
-      </div>
-      <span class="text-[12px] font-bold text-gray-700">Noodles</span>
-    </div>
-
-    <div onclick="quickSearch('Sweets')" class="flex flex-col items-center gap-2.5 cursor-pointer group active:scale-90 transition-transform">
-      <div class="w-20 h-20 rounded-full bg-pink-50 flex items-center justify-center overflow-hidden">
-        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029852/PC_Creative%20refresh/3D_folders/food/momo.png" class="w-full h-full object-contain p-1"
-             onerror="this.src='https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=100&auto=format&fit=crop&q=80'">
-      </div>
-      <span class="text-[12px] font-bold text-gray-700">Sweets</span>
-    </div>
 
   </div>
 </div>
 
-<!-- ── Search Results ── -->
-<div id="results-section" class="px-5 pt-4 hidden">
-  <p id="results-count" class="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-4">– results</p>
-  <div id="results-list" class="flex flex-col divide-y divide-gray-50"></div>
-</div>
+<!-- Scrollable content area -->
+<div class="page-body no-scrollbar">
 
+  <!-- What's on your mind — 3-col static grid, no horizontal scroll -->
+  <div id="mind-section" class="section-card">
+    <div class="sec-head">
+      <span class="sec-title">What's on your mind?</span>
+    </div>
 
+    <div class="cat-grid">
+      <div class="cat-item tap" onclick="quickSearch('Momos')">
+        <div class="cat-ring"><img src="assets/momomain.png" alt="Momos" loading="lazy"></div>
+        <span class="cat-name">Momos</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Noodles')">
+        <div class="cat-ring"><img src="assets/chowmin.png" alt="Noodles" loading="lazy"></div>
+        <span class="cat-name">Chowmin</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Pizza')">
+        <div class="cat-ring"><img src="assets/pizaamain.png" alt="Pizzas" loading="lazy"></div>
+        <span class="cat-name">Pizzas</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Biryani')">
+        <div class="cat-ring"><img src="assets/biriyani main.png" alt="Biryani" loading="lazy"></div>
+        <span class="cat-name">Biryani</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Rolls')">
+        <div class="cat-ring"><img src="assets/rollsmain.png" alt="Rolls" loading="lazy"></div>
+        <span class="cat-name">Rolls</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Fried Rice')">
+        <div class="cat-ring"><img src="assets/fried rice.png" alt="Fried Rice" loading="lazy"></div>
+        <span class="cat-name">Fried Rice</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Sweets')">
+        <div class="cat-ring"><img src="assets/sweets.png" alt="Sweets" loading="lazy"></div>
+        <span class="cat-name">Sweets</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('Puchka')">
+        <div class="cat-ring"><img src="assets/puchka.png" alt="Puchka" loading="lazy"></div>
+        <span class="cat-name">Puchka</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('icecream')">
+        <div class="cat-ring"><img src="assets/icecream.png" alt="Icecream" loading="lazy"></div>
+        <span class="cat-name">Ice Cream</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('cakes')">
+        <div class="cat-ring"><img src="assets/cakes.png" alt="Cakes" loading="lazy"></div>
+        <span class="cat-name">Cakes</span>
+      </div>
+      <div class="cat-item tap" onclick="quickSearch('samosa')">
+        <div class="cat-ring"><img src="assets/samosa.png" alt="Samosa" loading="lazy"></div>
+        <span class="cat-name">Samosa</span>
+      </div>
+      <!-- ✅ Fixed: was "dosa.jpjsg" → "dosa.png" -->
+      <div class="cat-item tap" onclick="quickSearch('dosa')">
+        <div class="cat-ring"><img src="assets/dosa.png" alt="Dosa" loading="lazy"></div>
+        <span class="cat-name">Dosa</span>
+      </div>
+    </div>
+  </div>
 
-<!-- Load home.js first so restaurants data is available on this page too -->
+  <!-- Search Results -->
+  <div id="results-section" class="results-section hidden">
+    <p id="results-count" class="results-count">– results</p>
+    <div id="results-list"></div>
+  </div>
+
+</div><!-- /page-body -->
+
 <script src="home.js"></script>
 <script>
-  const searchInput   = document.getElementById('search-input');
-  const mindSection   = document.getElementById('mind-section');
-  const resultsSection= document.getElementById('results-section');
-  const resultsList   = document.getElementById('results-list');
-  const resultsCount  = document.getElementById('results-count');
-  const clearBtn      = document.getElementById('clear-btn');
+  const searchInput    = document.getElementById('search-input');
+  const mindSection    = document.getElementById('mind-section');
+  const resultsSection = document.getElementById('results-section');
+  const resultsList    = document.getElementById('results-list');
+  const resultsCount   = document.getElementById('results-count');
+  const clearBtn       = document.getElementById('clear-btn');
+
+  // ── Dynamic rotating placeholder ──
+  const placeholders = [
+    "Search for 'Momos'",
+    "Search for 'Biryani'",
+    "Search for 'Pizza'",
+    "Search for 'Rolls'",
+    "Search for 'Dosa'",
+    "Search for 'Chowmin'",
+    "Search for 'Ice Cream'",
+    "Search for 'Puchka'",
+    "Search for 'Sweets'",
+    "Restaurant name or a dish..."
+  ];
+  let phIndex = 0;
+  searchInput.placeholder = placeholders[0];
+  setInterval(() => {
+    if (document.activeElement === searchInput) return;
+    phIndex = (phIndex + 1) % placeholders.length;
+    searchInput.classList.add('placeholder-fade');
+    searchInput.placeholder = placeholders[phIndex];
+    setTimeout(() => searchInput.classList.remove('placeholder-fade'), 350);
+  }, 2000);
 
   searchInput.addEventListener('input', e => {
     const q = e.target.value.trim().toLowerCase();
@@ -112,52 +493,49 @@
   });
 
   function doSearch(q) {
-    const matched = restaurants.filter(res => {
-      return res.name.toLowerCase().includes(q) ||
-             (res.cuisine && res.cuisine.toLowerCase().includes(q)) ||
-             res.menu.some(item => item.name.toLowerCase().includes(q));
-    });
+    if (typeof restaurants === 'undefined') return;
 
-    resultsCount.innerText = matched.length + ' restaurant' + (matched.length !== 1 ? 's' : '') + ' found';
+    const matched = restaurants.filter(res =>
+      res.name.toLowerCase().includes(q) ||
+      (res.cuisine && res.cuisine.toLowerCase().includes(q)) ||
+      (res.menu && res.menu.some(item => item.name.toLowerCase().includes(q)))
+    );
+
+    resultsCount.innerText =
+      matched.length + ' restaurant' + (matched.length !== 1 ? 's' : '') + ' found';
 
     if (matched.length === 0) {
       resultsList.innerHTML = `
-        <div class="text-center py-16 px-4">
-          <i class="fa-solid fa-magnifying-glass text-gray-200 text-5xl mb-4"></i>
-          <p class="font-black text-gray-700 text-[16px]">No results for "${searchInput.value}"</p>
-          <p class="text-gray-400 text-[12px] mt-1">Try searching for something else</p>
+        <div class="empty-state">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <h3>No results for "${searchInput.value}"</h3>
+          <p>Try searching for something else</p>
         </div>`;
       return;
     }
 
     resultsList.innerHTML = matched.map(res => {
-      const matchedDishes = res.menu
+      const matchedDishes = (res.menu || [])
         .filter(item => item.name.toLowerCase().includes(q))
         .slice(0, 3)
         .map(i => i.name)
         .join(', ');
 
       return `
-        <a href="restaurant.html?id=${res.id}"
-           class="flex items-center gap-4 py-4 active:bg-gray-50 transition-colors rounded-xl -mx-1 px-1">
-          <div class="relative w-20 h-20 flex-shrink-0">
+        <a href="restaurant.html?id=${res.id}" class="result-card tap">
+          <div class="res-img-wrap">
             <img src="${res.image}" alt="${res.name}"
-                 class="w-full h-full object-cover rounded-2xl shadow-sm"
                  onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&auto=format&fit=crop&q=80'">
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-2">
-              <h4 class="font-black text-[15px] text-gray-900 leading-tight truncate">${res.name}</h4>
-              <div class="flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0">
-                <i class="fa-solid fa-star text-[8px]"></i> ${res.rating}
-              </div>
+          <div class="res-info">
+            <div class="res-head">
+              <div class="res-name">${res.name}</div>
+              <div class="res-rating"><i class="fa-solid fa-star" style="font-size:7px;"></i> ${res.rating}</div>
             </div>
-            <p class="text-[11px] text-gray-400 font-semibold mt-0.5">${res.time} · ${res.distance}</p>
+            <div class="res-meta">${res.time} · ${res.distance}</div>
             ${matchedDishes
-              ? `<p class="text-[11px] text-orange-500 font-bold mt-1 truncate">
-                   <i class="fa-solid fa-utensils text-[9px]"></i> ${matchedDishes}
-                 </p>`
-              : `<p class="text-[11px] text-gray-400 mt-1 truncate italic">${res.cuisine}</p>`
+              ? `<div class="res-match-dish"><i class="fa-solid fa-utensils" style="font-size:9px;margin-right:3px;"></i>${matchedDishes}</div>`
+              : `<div class="res-cuisine">${res.cuisine || 'Restaurant'}</div>`
             }
           </div>
         </a>`;
@@ -170,6 +548,12 @@
     mindSection.classList.remove('hidden');
     resultsSection.classList.add('hidden');
   }
+
+  // Mic button visual feedback
+  document.getElementById('mic-btn').addEventListener('click', function() {
+    this.classList.toggle('listening');
+    setTimeout(() => this.classList.remove('listening'), 2000);
+  });
 
   function quickSearch(term) {
     searchInput.value = term;

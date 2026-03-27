@@ -7,106 +7,491 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ============================================================
+       ORDERS PAGE — Scoped Styles (Pure CSS, No Tailwind)
+       ============================================================ */
+
+    /* ---------- Page Base ---------- */
+    body {
+      background-color: #f4f4f6;
+      padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
+
+    /* ---------- Tap Micro-interaction ---------- */
+    .tap {
+      transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1),
+                  opacity  0.1s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .tap:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+
+    /* ============================================================
+       STICKY HEADER
+       ============================================================ */
+    .orders-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-back-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #f1f1f5;
+      border: none;
+      cursor: pointer;
+      color: #374151;
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .header-back-btn:active {
+      background: #e5e5ea;
+      transform: scale(0.93);
+    }
+
+    .orders-header h1 {
+      font-size: 18px;
+      font-weight: 900;
+      color: #111827;
+      letter-spacing: -0.3px;
+    }
+
+    /* ============================================================
+       PAGE CONTENT WRAPPER
+       ============================================================ */
+    .orders-content {
+      padding: 20px 16px 0;
+    }
+
+    /* ============================================================
+       SEARCH BAR
+       ============================================================ */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 14px 16px 14px 44px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+    .search-wrap input::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+    .search-wrap input:focus {
+      border-color: #FC8019;
+      box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       EMPTY STATE CARD
+       ============================================================ */
+    #empty-orders {
+      display: none; /* toggled by JS */
+    }
+
+    .empty-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 40px 24px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #f0f0f4;
+      text-align: center;
+    }
+
+    .empty-icon-wrap {
+      width: 88px;
+      height: 88px;
+      background: #fff7ef;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .empty-icon-wrap i {
+      font-size: 36px;
+      color: #fbbf9a;
+    }
+
+    .empty-card h4 {
+      font-size: 17px;
+      font-weight: 900;
+      color: #111827;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+
+    .empty-card p {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 500;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+
+    .explore-btn {
+      display: inline-block;
+      background: #FC8019;
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 14px 32px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      box-shadow:
+        0 6px 20px rgba(252, 128, 25, 0.32),
+        0 2px 6px rgba(252, 128, 25, 0.15);
+      transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1),
+                  opacity  0.1s cubic-bezier(0.25, 1, 0.5, 1),
+                  box-shadow 0.15s ease;
+    }
+    .explore-btn:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+      box-shadow: 0 3px 10px rgba(252, 128, 25, 0.25);
+    }
+
+    /* ============================================================
+       CURRENT ORDER / TRACK SECTION
+       ============================================================ */
+    #track-section {
+      display: none; /* toggled by JS */
+      margin-bottom: 20px;
+    }
+
+    .track-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .track-label {
+      font-size: 10px;
+      font-weight: 900;
+      color: #FC8019;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    /* Pulse dot */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #FC8019;
+      border-radius: 50%;
+      animation: pulse-anim 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse-anim {
+      0%, 100% { transform: scale(1);   opacity: 1; }
+      50%       { transform: scale(1.5); opacity: 0.5; }
+    }
+
+    /* Track card */
+    .track-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid #ffeedd;
+    }
+
+    .track-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .track-card-top h3 {
+      font-size: 16px;
+      font-weight: 900;
+      color: #111827;
+      letter-spacing: -0.2px;
+    }
+
+    #track-restaurant {
+      font-size: 12px;
+      color: #9ca3af;
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    /* Animated bag icon */
+    .track-bag-icon {
+      width: 42px;
+      height: 42px;
+      background: #FC8019;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow:
+        0 6px 18px rgba(252, 128, 25, 0.4),
+        0 2px 6px rgba(252, 128, 25, 0.2);
+      animation: bag-pulse 2s ease-in-out infinite;
+    }
+    @keyframes bag-pulse {
+      0%, 100% { box-shadow: 0 6px 18px rgba(252,128,25,0.4), 0 2px 6px rgba(252,128,25,0.2); }
+      50%       { box-shadow: 0 8px 26px rgba(252,128,25,0.6), 0 3px 10px rgba(252,128,25,0.3); }
+    }
+    .track-bag-icon i {
+      color: #ffffff;
+      font-size: 15px;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-bottom: 20px;
+    }
+
+    .progress-bar-track {
+      position: relative;
+      height: 7px;
+      width: 100%;
+      background: #f0f0f4;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 33.33%;
+      background: linear-gradient(90deg, #FC8019, #ffaa55);
+      border-radius: 999px;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-labels span {
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #d1d5db;
+    }
+
+    .progress-labels span.active-label {
+      color: #FC8019;
+    }
+
+    /* View Cart button */
+    .view-cart-btn {
+      display: block;
+      width: 100%;
+      background: #FC8019;
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      padding: 14px 20px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      text-align: center;
+      box-shadow:
+        0 6px 20px rgba(252, 128, 25, 0.32),
+        0 2px 6px rgba(252, 128, 25, 0.15);
+      transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1),
+                  opacity  0.1s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .view-cart-btn:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+
+    /* ============================================================
+       BOTTOM NAV — safe-area override
+       ============================================================ */
+    .bottom-nav {
+      padding-bottom: env(safe-area-inset-bottom);
+      height: calc(66px + env(safe-area-inset-bottom));
+    }
+
+    /* Active nav item highlight */
+    .nav-item.orders-active {
+      color: #FC8019;
+    }
+
+    /* Food circle icon used in nav */
+    .nav-food-circle {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* NEW badge on nav */
+    .nav-new-badge {
+      position: absolute;
+      top: 6px;
+      right: calc(50% - 22px);
+      background: #FC8019;
+      color: #fff;
+      font-size: 7px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 pb-24">
+
+<body>
 
 <!-- ── Sticky Header ── -->
-<header class="sticky top-0 bg-white z-40 px-5 py-4 border-b border-gray-100 shadow-sm flex items-center gap-4">
-  <button onclick="window.history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200">
-    <i class="fa-solid fa-arrow-left text-gray-700 text-sm"></i>
+<header class="orders-header">
+  <button onclick="window.history.back()" class="header-back-btn tap" aria-label="Go back">
+    <i class="fa-solid fa-arrow-left"></i>
   </button>
-  <h1 class="text-[18px] font-black text-gray-900">My Orders</h1>
+  <h1>My Orders</h1>
 </header>
 
 <!-- ── Page Content ── -->
-<div class="px-4 pt-5">
+<div class="orders-content">
 
   <!-- Search past orders -->
-  <div class="relative mb-5">
-    <input type="text" placeholder="Search your past orders..."
-           class="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-11 pr-4 text-[13px] font-medium text-gray-700 outline-none focus:border-orange-400 transition-colors placeholder-gray-400">
-    <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400 text-sm"></i>
+  <div class="search-wrap">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input type="text" placeholder="Search your past orders...">
   </div>
 
   <!-- Cart items (items in bag, not yet ordered) -->
   <div id="cart-section"></div>
 
   <!-- Empty State -->
-  <div id="empty-orders" class="hidden">
-    <div class="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 text-center">
-      <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-5">
-        <i class="fa-solid fa-bag-shopping text-orange-300 text-4xl"></i>
+  <div id="empty-orders">
+    <div class="empty-card tap">
+      <div class="empty-icon-wrap">
+        <i class="fa-solid fa-bag-shopping"></i>
       </div>
-      <h4 class="text-[17px] font-black text-gray-900 mb-2">No orders yet</h4>
-      <p class="text-[13px] text-gray-500 font-medium leading-relaxed mb-7">
-        Your order history will appear here<br>after you place your first order
+      <h4>No orders yet</h4>
+      <p>
+        Your order history will appear here<br>
+        after you place your first order
       </p>
-      <button onclick="window.location.href='index.html'"
-              class="bg-orange-500 text-white font-black text-[13px] px-8 py-3.5 rounded-2xl shadow-md shadow-orange-100 active:scale-95 transition-transform">
+      <button onclick="window.location.href='index.html'" class="explore-btn">
         Explore Nearbite
       </button>
     </div>
   </div>
 
-  <!-- Track order progress (demo shown when cart has items) -->
-  <div id="track-section" class="hidden mb-5">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-[11px] font-black text-orange-500 uppercase tracking-widest">Current Order</h2>
-      <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+  <!-- Track order progress (shown when cart has items) -->
+  <div id="track-section">
+
+    <div class="track-label-row">
+      <span class="track-label">Current Order</span>
+      <span class="pulse-dot"></span>
     </div>
-    <div class="bg-white rounded-[24px] p-5 shadow-sm border border-orange-100">
-      <div class="flex justify-between items-start mb-5">
+
+    <div class="track-card">
+
+      <div class="track-card-top">
         <div>
-          <h3 class="font-black text-[16px] text-gray-900">Items in your bag</h3>
-          <p id="track-restaurant" class="text-[12px] text-gray-400 font-medium mt-0.5"></p>
+          <h3>Items in your bag</h3>
+          <p id="track-restaurant"></p>
         </div>
-        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-orange-200 animate-pulse">
-          <i class="fa-solid fa-bag-shopping text-white text-sm"></i>
+        <div class="track-bag-icon">
+          <i class="fa-solid fa-bag-shopping"></i>
         </div>
       </div>
 
       <!-- Progress bar -->
-      <div class="space-y-2 mb-5">
-        <div class="relative h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-          <div class="absolute top-0 left-0 h-full w-1/3 bg-orange-500 rounded-full"></div>
+      <div class="progress-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill"></div>
         </div>
-        <div class="flex justify-between text-[9px] font-black uppercase tracking-widest">
-          <span class="text-orange-500">Added</span>
-          <span class="text-gray-300">Confirmed</span>
-          <span class="text-gray-300">Delivered</span>
+        <div class="progress-labels">
+          <span class="active-label">Added</span>
+          <span>Confirmed</span>
+          <span>Delivered</span>
         </div>
       </div>
 
-      <button onclick="window.location.href='cart.html'"
-              class="w-full bg-orange-500 text-white py-3.5 rounded-2xl font-black text-[14px] shadow-md shadow-orange-100 active:scale-[0.98] transition-transform">
+      <button onclick="window.location.href='cart.html'" class="view-cart-btn tap">
         View Cart &amp; Checkout
       </button>
+
     </div>
   </div>
 
-</div>
+</div><!-- /orders-content -->
 
 <!-- ══════════════════════════════════════════
      BOTTOM NAVIGATION
 ══════════════════════════════════════════ -->
 <nav class="bottom-nav">
-
-<nav class="bottom-nav">
-  <a href="index.html" class="nav-item" style="color:#FC8019">
+  <a href="index.html" class="nav-item" style="color:#FC8019;">
     <div class="nav-food-circle">
       <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
     </div>
-    <span style="color:#FC8019">Food</span>
+    <span style="color:#FC8019;">Food</span>
   </a>
-  <a href="under99.html" class="nav-item" style="color:#94a3b8">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <spanstyle="color:#FC8019">99 store</span>
+
+  <a href="under99.html" class="nav-item" style="color:#94a3b8;">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+    </svg>
+    <span style="color:#FC8019">99 store</span>
   </a>
-  <a href="orders.html" class="nav-item" style="color:#94a3b8">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+
+  <a href="orders.html" class="nav-item orders-active" style="position:relative;">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+    </svg>
     <span>Orders</span>
     <span class="nav-new-badge">NEW</span>
   </a>
@@ -121,20 +506,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptySection = document.getElementById('empty-orders');
 
   if (totalItems > 0) {
-    trackSection.classList.remove('hidden');
-    const resId  = Object.values(savedCart)[0].resId;
+    trackSection.style.display = 'block';
+    const resId   = Object.values(savedCart)[0].resId;
     const resData = JSON.parse(localStorage.getItem('restaurantData')) || [];
-    const res = resData.find(r => r.id === resId);
+    const res     = resData.find(r => r.id === resId);
     const trackRes = document.getElementById('track-restaurant');
     if (trackRes) {
-      trackRes.innerText = (res ? res.name : 'Nearbite') + ' · ' + totalItems + ' item' + (totalItems > 1 ? 's' : '') + ' · ₹' + totalPrice;
+      trackRes.innerText =
+        (res ? res.name : 'Nearbite') +
+        ' · ' + totalItems + ' item' + (totalItems > 1 ? 's' : '') +
+        ' · ₹' + totalPrice;
     }
-    emptySection.classList.add('hidden');
+    emptySection.style.display = 'none';
   } else {
-    emptySection.classList.remove('hidden');
-    trackSection.classList.add('hidden');
+    emptySection.style.display = 'block';
+    trackSection.style.display = 'none';
   }
 });
 </script>
+
 </body>
 </html>

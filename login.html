@@ -290,10 +290,20 @@
       if(otpString.length === 4) {
          otpBoxes[3].blur(); 
          
+         // --- NEW: Save user to localStorage ---
+         const phoneVal = document.getElementById('phoneInput').value;
+         const userData = { 
+           name: "Nearbite User", 
+           phone: "+91 " + phoneVal 
+         };
+         localStorage.setItem('nearbite_user', JSON.stringify(userData));
+         // --------------------------------------
+
          // Smooth redirect to index.html
          setTimeout(() => window.location.href = 'index.html', 500);
       }
     }
+
 
     function moveNext(input, index) {
       input.value = input.value.replace(/\D/g, ''); 

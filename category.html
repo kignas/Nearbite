@@ -7,65 +7,142 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-</head>
-<body class="bg-white pb-20">
+  <style>
+    body { background: #fff; padding-bottom: 80px; font-family: 'Poppins', sans-serif; }
+    
+    /* ── Header ── */
+    .cat-header {
+      position: sticky; top: 0; z-index: 50; background: #fff;
+      padding: 16px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #f3f4f6; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .cat-header-left { display: flex; align-items: center; gap: 12px; }
+    .icon-btn-round {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; background: #f3f4f6; border: none; cursor: pointer; color: #1f2937;
+    }
+    .icon-btn-round:active { background: #e5e7eb; }
+    .cat-title { font-size: 17px; font-weight: 900; color: #111827; line-height: 1.2; }
+    .cat-sub { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; }
 
-<!-- ── Sticky Header ── -->
-<div class="sticky top-0 bg-white z-50 px-4 py-4 flex justify-between items-center border-b border-gray-100 shadow-sm">
-  <div class="flex items-center gap-3">
-    <button onclick="history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200">
-      <i class="fa-solid fa-arrow-left text-gray-800 text-sm"></i>
+    /* ── Filter Bar ── */
+    .filter-bar {
+      display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px;
+      background: rgba(249,250,251,0.6); border-bottom: 1px solid #f9fafb;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-pill {
+      display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px;
+      border: 1.5px solid #e5e7eb; border-radius: 999px; font-size: 11px; font-weight: 700;
+      color: #6b7280; background: #fff; white-space: nowrap; cursor: pointer;
+    }
+    .filter-pill.active { border-color: #111827; background: #111827; color: #fff; }
+
+    /* ── Results ── */
+    .results-container { padding: 20px 16px; }
+    .res-count {
+      font-size: 11px; font-weight: 900; color: #9ca3af;
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;
+    }
+    .res-card {
+      display: flex; gap: 16px; margin-bottom: 28px; text-decoration: none;
+      transition: transform 0.1s; display: block; display: flex; /* Override block */
+    }
+    .res-card:active { transform: scale(0.97); }
+    
+    .res-img-wrap { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
+    .res-img-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .res-offer {
+      position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px); color: #fff; font-size: 8px; font-weight: 900;
+      text-align: center; padding: 4px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;
+    }
+    
+    .res-info { flex: 1; min-width: 0; padding-top: 4px; }
+    .res-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+    .res-name { font-size: 16px; font-weight: 900; color: #111827; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .heart-btn { background: none; border: none; padding: 0; color: #d1d5db; font-size: 14px; }
+    
+    .res-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .res-rating { display: flex; align-items: center; gap: 2px; background: #16a34a; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 6px; }
+    .res-time { font-size: 12px; font-weight: 700; color: #374151; }
+    .res-cuisine { font-size: 12px; color: #9ca3af; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .res-loc { font-size: 11px; color: #9ca3af; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+
+    /* ── Skeleton ── */
+    .skel-card { display: flex; gap: 16px; margin-bottom: 24px; }
+    .skel-img { width: 112px; height: 112px; border-radius: 16px; flex-shrink: 0; }
+    .skel-info { flex: 1; padding-top: 4px; display: flex; flex-direction: column; gap: 8px; }
+    .skel-line { border-radius: 4px; }
+
+    /* ── Empty State ── */
+    .empty-state { text-align: center; padding: 80px 32px; }
+    .empty-icon-wrap {
+      width: 96px; height: 96px; background: #f9fafb; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+    }
+    .empty-icon-wrap i { font-size: 36px; color: #e5e7eb; }
+    .empty-title { font-size: 18px; font-weight: 900; color: #111827; margin-bottom: 8px; }
+    .empty-sub { font-size: 13px; font-weight: 500; color: #6b7280; line-height: 1.5; margin-bottom: 32px; }
+    .btn-back-home {
+      background: #FC8019; color: #fff; font-size: 13px; font-weight: 900; padding: 12px 32px;
+      border-radius: 16px; border: none; box-shadow: 0 4px 12px rgba(252,128,25,0.2); cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="cat-header">
+  <div class="cat-header-left">
+    <button onclick="history.back()" class="icon-btn-round">
+      <i class="fa-solid fa-arrow-left"></i>
     </button>
     <div>
-      <h1 id="category-title" class="text-[17px] font-black text-gray-900 leading-tight">Category</h1>
-      <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Restaurants near you</p>
+      <h1 id="category-title" class="cat-title">Category</h1>
+      <p class="cat-sub">Restaurants near you</p>
     </div>
   </div>
-  <button onclick="window.location.href='search.html'" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100">
-    <i class="fa-solid fa-magnifying-glass text-gray-700 text-sm"></i>
+  <button onclick="window.location.href='search.html'" class="icon-btn-round">
+    <i class="fa-solid fa-magnifying-glass"></i>
   </button>
 </div>
 
-<!-- ── Filter Bar ── -->
-<div class="flex overflow-x-auto gap-2 px-4 py-3 no-scrollbar border-b border-gray-50 bg-gray-50/60">
+<div class="filter-bar">
   <button class="filter-pill">
-    <i class="fa-solid fa-sliders mr-1.5 text-[10px]"></i> Filter
+    <i class="fa-solid fa-sliders" style="font-size:10px; margin-right:4px;"></i> Filter
   </button>
   <button onclick="toggleCategorySort()" id="sort-cat-btn" class="filter-pill">
-    Sort By <i class="fa-solid fa-chevron-down ml-1 text-[9px]"></i>
+    Sort By <i class="fa-solid fa-chevron-down" style="font-size:9px; margin-left:4px;"></i>
   </button>
   <button onclick="toggleCategoryRating()" id="rating-cat-btn" class="filter-pill">Ratings 4.0+</button>
   <button onclick="toggleCategoryVeg()" id="veg-cat-btn" class="filter-pill">Pure Veg</button>
 </div>
 
-<!-- ── Results ── -->
-<div id="results-list" class="px-5 pt-5 pb-4">
-  <!-- Skeleton -->
-  <div id="cat-skeleton" class="space-y-6">
-    <div class="flex gap-4">
-      <div class="skeleton w-28 h-28 rounded-2xl flex-shrink-0"></div>
-      <div class="flex-1 space-y-2 pt-1">
-        <div class="skeleton h-5 w-3/4 rounded"></div>
-        <div class="skeleton h-3 w-1/2 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
+<div id="results-list" class="results-container">
+  
+  <div id="cat-skeleton">
+    <div class="skel-card">
+      <div class="skeleton skel-img"></div>
+      <div class="skel-info">
+        <div class="skeleton skel-line" style="height:20px; width:75%;"></div>
+        <div class="skeleton skel-line" style="height:12px; width:50%;"></div>
+        <div class="skeleton skel-line" style="height:12px; width:100%;"></div>
       </div>
     </div>
-    <div class="flex gap-4">
-      <div class="skeleton w-28 h-28 rounded-2xl flex-shrink-0"></div>
-      <div class="flex-1 space-y-2 pt-1">
-        <div class="skeleton h-5 w-2/3 rounded"></div>
-        <div class="skeleton h-3 w-1/2 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
+    <div class="skel-card">
+      <div class="skeleton skel-img"></div>
+      <div class="skel-info">
+        <div class="skeleton skel-line" style="height:20px; width:66%;"></div>
+        <div class="skeleton skel-line" style="height:12px; width:50%;"></div>
+        <div class="skeleton skel-line" style="height:12px; width:100%;"></div>
       </div>
     </div>
   </div>
-  <div id="cat-results" class="hidden"></div>
+
+  <div id="cat-results" style="display:none;"></div>
 </div>
 
-<!-- ── Bottom Navigation ── -->
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item" style="color:#FC8019">
     <div class="nav-food-circle">
@@ -73,11 +150,11 @@
     </div>
     <span style="color:#FC8019">Food</span>
   </a>
-  <a href="under99.html" class="nav-item" style="color:#94a3b8">
+  <a href="under99.html" class="nav-item">
     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <spanstyle="color:#FC8019">99 store</span>
+    <span>99 store</span>
   </a>
-  <a href="orders.html" class="nav-item" style="color:#94a3b8">
+  <a href="orders.html" class="nav-item">
     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
     <span>Orders</span>
     <span class="nav-new-badge">NEW</span>
@@ -106,8 +183,8 @@
     let filtered = restaurants.filter(res => {
       const nameMatch  = res.name.toLowerCase().includes(term);
       const cuisineMatch = res.cuisine && res.cuisine.toLowerCase().includes(term);
-      const menuMatch  = res.menu.some(item => item.name.toLowerCase().includes(term));
-      const vegMatch   = !catVegOnly || res.menu.every(item => item.isVeg);
+      const menuMatch  = res.menu && res.menu.some(item => item.name.toLowerCase().includes(term));
+      const vegMatch   = !catVegOnly || (res.menu && res.menu.every(item => item.isVeg));
       const ratingMatch = !catRatingFilter || parseFloat(res.rating) >= 4.0;
       return (nameMatch || cuisineMatch || menuMatch) && vegMatch && ratingMatch;
     });
@@ -117,62 +194,41 @@
     }
 
     if (skeleton) skeleton.style.display = 'none';
-    container.classList.remove('hidden');
+    container.style.display = 'block';
 
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div class="text-center py-20 px-8">
-          <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5">
-            <i class="fa-solid fa-utensils text-gray-200 text-4xl"></i>
-          </div>
-          <h2 class="text-[18px] font-black text-gray-900 mb-2">No restaurants found</h2>
-          <p class="text-[13px] text-gray-500 font-medium leading-relaxed">
-            We couldn't find any places serving "${baseCategory}" nearby.
-          </p>
-          <button onclick="history.back()"
-                  class="mt-8 bg-orange-500 text-white font-black text-[13px] px-8 py-3 rounded-2xl shadow-md shadow-orange-200 active:scale-95 transition-transform">
-            Go Back
-          </button>
+        <div class="empty-state">
+          <div class="empty-icon-wrap"><i class="fa-solid fa-utensils"></i></div>
+          <h2 class="empty-title">No restaurants found</h2>
+          <p class="empty-sub">We couldn't find any places serving "${baseCategory}" nearby.</p>
+          <button onclick="history.back()" class="btn-back-home">Go Back</button>
         </div>`;
       return;
     }
 
     container.innerHTML = `
-      <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-5">
-        ${filtered.length} restaurant${filtered.length !== 1 ? 's' : ''} found
-      </p>
+      <p class="res-count">${filtered.length} restaurant${filtered.length !== 1 ? 's' : ''} found</p>
       ${filtered.map(res => `
-        <a href="restaurant.html?id=${res.id}"
-           class="flex gap-4 mb-7 active:scale-[0.98] transition-transform block">
-          <div class="relative w-28 h-28 flex-shrink-0">
-            <img src="${res.image}" alt="${res.name}"
-                 class="w-full h-full rounded-2xl object-cover shadow-sm"
-                 onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
-            ${res.offer ? `
-              <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-[8px] font-black text-center py-1 rounded-b-2xl px-1 leading-tight">
-                ${res.offer}
-              </div>` : ''}
+        <a href="restaurant.html?id=${res.id}" class="res-card">
+          <div class="res-img-wrap">
+            <img src="${res.image}" alt="${res.name}" onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
+            ${res.offer ? `<div class="res-offer">${res.offer}</div>` : ''}
           </div>
-          <div class="flex-1 pt-1 min-w-0">
-            <div class="flex justify-between items-start gap-2 mb-1">
-              <h3 class="font-black text-[16px] text-gray-900 leading-tight truncate">${res.name}</h3>
-              <button class="flex-shrink-0"><i class="fa-regular fa-heart text-gray-300 text-sm"></i></button>
+          <div class="res-info">
+            <div class="res-top">
+              <h3 class="res-name">${res.name}</h3>
+              <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
             </div>
-            <div class="flex items-center gap-1.5 mb-1">
-              <div class="flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">
-                <i class="fa-solid fa-star text-[8px]"></i> ${res.rating}
-              </div>
-              <span class="text-[12px] font-bold text-gray-700">· ${res.time}</span>
+            <div class="res-meta-row">
+              <div class="res-rating"><i class="fa-solid fa-star" style="font-size:8px;"></i> ${res.rating}</div>
+              <span class="res-time">· ${res.time}</span>
             </div>
-            <p class="text-[12px] text-gray-400 font-medium truncate">${res.cuisine}</p>
-            <p class="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1">
-              <i class="fa-solid fa-location-dot text-orange-400 text-[9px]"></i>
-              Maynaguri · ${res.distance}
-            </p>
+            <p class="res-cuisine">${res.cuisine || 'Restaurant'}</p>
+            <p class="res-loc"><i class="fa-solid fa-location-dot" style="color:#FC8019; font-size:9px;"></i> Maynaguri · ${res.distance}</p>
           </div>
         </a>`).join('')}`;
   }
-
   function toggleCategorySort() {
     catSortRating = !catSortRating;
     document.getElementById('sort-cat-btn').classList.toggle('active', catSortRating);
