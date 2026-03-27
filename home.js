@@ -28,32 +28,47 @@ async function loadRestaurants() {
 }
 
 function displayRestaurants(restaurants) {
+
   const container =
-    document.getElementById("restaurant-list") ||
-    document.querySelector(".restaurant-list");
+    document.getElementById("restaurant-list");
 
   if (!container) {
     console.error("Restaurant container not found");
     return;
   }
 
-  container.innerHTML = restaurants.map(r => `
-    <div class="restaurant-card">
-      <img src="${r.image}" class="restaurant-image" />
+  container.innerHTML =
+    restaurants.map(r => `
+    
+      <div class="restaurant-card">
 
-      <div class="restaurant-info">
-        <h3>${r.name}</h3>
+        <img 
+          src="${r.image}" 
+          class="restaurant-image"
+        />
 
-        <p>
-          ⭐ ${r.rating}
-          • ${r.time}
-          • ${r.distance}
-        </p>
+        <div class="restaurant-info">
 
-        <p>${r.cuisineDisplay || r.cuisine}</p>
+          <h3>${r.name}</h3>
 
-        <p>${r.offer}</p>
+          <p>
+            ⭐ ${r.rating}
+            • ${r.time}
+            • ${r.distance}
+          </p>
+
+          <p>
+            ${r.cuisineDisplay}
+          </p>
+
+          <p>
+            ${r.offer}
+          </p>
+
+        </div>
+
       </div>
-    </div>
-  `).join("");
+
+    `).join("");
+
 }
