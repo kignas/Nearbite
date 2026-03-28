@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', () =>
 async function loadRestaurants() {
   try {
 
-    const response = await fetch(
-      "https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants"
+    const response = await fetch('https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants')
     );
 
     const result = await response.json();
