@@ -20,6 +20,8 @@ async function loadRestaurants() {
     const restaurants =
       result.data || result.restaurants || [];
 
+   console.log("Restaurants:", restaurants);
+
     displayRestaurants(restaurants);
 
   } catch (error) {
