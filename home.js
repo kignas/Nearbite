@@ -26,7 +26,6 @@ async function loadRestaurants() {
 }
 
 function displayRestaurants() {
-function displayRestaurants() {
   const container =
     document.getElementById("restaurant-list");
 
@@ -40,7 +39,7 @@ function displayRestaurants() {
 
   container.innerHTML = restaurants.map((r, i) => `
 
-    <a href="restaurant.html?id=${r._id}" 
+    <a href="restaurant.html?id=${r._id}"
        class="vr"
        style="
          animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s;
@@ -53,11 +52,11 @@ function displayRestaurants() {
         <img 
           src="${r.image}" 
           alt="${r.name}"
-          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'"
+          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'"
         >
 
         <div class="vr-heart">
-          <i class="fa-solid fa-heart"></i>
+          ❤️
         </div>
 
         <div class="vr-offer">
@@ -76,17 +75,7 @@ function displayRestaurants() {
 
           <div class="vr-rating">
 
-            <i class="fa-solid fa-star star-icon"></i>
-
-            <span class="rating-num">
-              ${r.rating || "4.0"}
-            </span>
-
-            <div class="rating-divider"></div>
-
-            <span class="rating-count">
-              ${r.ratingCount || "1K+"}
-            </span>
+            ⭐ ${r.rating || "4.0"}
 
           </div>
 
@@ -98,13 +87,11 @@ function displayRestaurants() {
 
         <div class="vr-meta">
 
-          <i class="fa-solid fa-clock"></i>
-          ${r.time || "30–40 mins"}
+          ⏱ ${r.time || "30–40 mins"}
 
-          <span class="vr-sep">•</span>
+          •  
 
-          <i class="fa-solid fa-location-dot"></i>
-          ${r.distance || "2 km"}
+          📍 ${r.distance || "2 km"}
 
         </div>
 
@@ -114,6 +101,7 @@ function displayRestaurants() {
 
   `).join("");
 }
+
 
 // Remove skeleton
 function removeSkeleton() {
