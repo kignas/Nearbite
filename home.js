@@ -26,6 +26,7 @@ async function loadRestaurants() {
 }
 
 function displayRestaurants() {
+function displayRestaurants() {
   const container =
     document.getElementById("restaurant-list");
 
@@ -37,36 +38,79 @@ function displayRestaurants() {
     return;
   }
 
-  container.innerHTML = restaurants.map(r => `
+  container.innerHTML = restaurants.map((r, i) => `
 
-    <div class="restaurant-card">
+    <a href="restaurant.html?id=${r._id}" 
+       class="vr"
+       style="
+         animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s;
+         opacity: 0;
+         transform: translateY(20px);
+       ">
 
-      <img 
-        src="${r.image}" 
-        class="restaurant-image"
-      />
+      <div class="vr-img">
 
-      <div class="restaurant-info">
+        <img 
+          src="${r.image}" 
+          alt="${r.name}"
+          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'"
+        >
 
-        <h3>${r.name}</h3>
+        <div class="vr-heart">
+          <i class="fa-solid fa-heart"></i>
+        </div>
 
-        <p>
-          ⭐ ${r.rating || "4.0"} |
-          ⏱ ${r.time || "30 mins"} |
-          📍 ${r.distance || "2 km"}
-        </p>
-
-        <p>
-          ${r.cuisineDisplay || ""}
-        </p>
-
-        <p>
+        <div class="vr-offer">
           ${r.offer || ""}
-        </p>
+        </div>
 
       </div>
 
-    </div>
+      <div class="vr-body">
+
+        <div class="vr-top">
+
+          <span class="vr-name">
+            ${r.name}
+          </span>
+
+          <div class="vr-rating">
+
+            <i class="fa-solid fa-star star-icon"></i>
+
+            <span class="rating-num">
+              ${r.rating || "4.0"}
+            </span>
+
+            <div class="rating-divider"></div>
+
+            <span class="rating-count">
+              ${r.ratingCount || "1K+"}
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="vr-cuisine">
+          ${r.cuisineDisplay || ""}
+        </div>
+
+        <div class="vr-meta">
+
+          <i class="fa-solid fa-clock"></i>
+          ${r.time || "30–40 mins"}
+
+          <span class="vr-sep">•</span>
+
+          <i class="fa-solid fa-location-dot"></i>
+          ${r.distance || "2 km"}
+
+        </div>
+
+      </div>
+
+    </a>
 
   `).join("");
 }
