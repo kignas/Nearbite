@@ -1,3 +1,4 @@
+let restaurants = [];
 
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () =>
@@ -18,9 +19,8 @@ async function loadRestaurants() {
     console.log("API Response:", result);
 
     // Correct data extraction
-    const restaurants = result.data || [];
-
-    displayRestaurants(restaurants);
+restaurants = result.data || [];
+displayRestaurants(restaurants);
 
   } catch (error) {
     console.error("Load error:", error);
