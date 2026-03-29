@@ -6,28 +6,24 @@ document.addEventListener('DOMContentLoaded', () =>
 });
 
 
+
 async function loadRestaurants() {
   try {
-
-    const response = await fetch('https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants')
+    const response = await fetch(
+      "https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants"
     );
 
     const result = await response.json();
 
     console.log("API Response:", result);
 
-    // SAFE handling
-    const restaurants =
-      result.data || result.restaurants || [];
-
-   console.log("Restaurants:", restaurants);
+    // Correct data extraction
+    const restaurants = result.data || [];
 
     displayRestaurants(restaurants);
 
   } catch (error) {
-
     console.error("Load error:", error);
-
   }
 }
 
@@ -41,19 +37,18 @@ function displayRestaurants(restaurants) {
     return;
   }
 
-  if (!restaurants || restaurants.length === 0) {
+  if (!restaurants.length) {
     container.innerHTML =
-      "<p>No restaurants found</p>";
+      "<p>No Restaurants Found</p>";
     return;
   }
 
-  container.innerHTML = restaurants.map(r => {
-
-    return `
+  container.innerHTML =
+    restaurants.map(r => `
       <div class="restaurant-card">
 
-        <img 
-          src="${r.image}" 
+        <img
+          src="${r.image}"
           class="restaurant-image"
         />
 
@@ -62,9 +57,9 @@ function displayRestaurants(restaurants) {
           <h3>${r.name}</h3>
 
           <p>
-            ⭐ ${r.rating || "4.0"}
-            • ${r.time || "30 mins"}
-            • ${r.distance || "2 km"}
+            ⭐ ${r.rating || "4.0"} |
+            ⏱ ${r.time || "30 mins"} |
+            📍 ${r.distance || "2 km"}
           </p>
 
           <p>
@@ -78,8 +73,5 @@ function displayRestaurants(restaurants) {
         </div>
 
       </div>
-    `;
-
-  }).join("");
-
+    `).join("");
 }
