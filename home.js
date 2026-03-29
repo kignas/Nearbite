@@ -1,12 +1,10 @@
+// Global restaurants store
 let restaurants = [];
 
-// ── Init ──────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () =>
-{
- loadRestaurants();
+// Init
+document.addEventListener("DOMContentLoaded", () => {
+  loadRestaurants();
 });
-
-
 
 async function loadRestaurants() {
   try {
@@ -18,19 +16,19 @@ async function loadRestaurants() {
 
     console.log("API Response:", result);
 
-    // Correct data extraction
-restaurants = result.data || [];
-displayRestaurants(restaurants);
+    restaurants = result.data || [];
+
+    displayRestaurants();
+
+    removeSkeleton(); // 🔥 important
 
   } catch (error) {
     console.error("Load error:", error);
   }
 }
 
-function displayRestaurants(restaurants) {
-
-  const container =
-    document.getElementById("restaurant-list");
+function displayRestaurants() {
+  const container = document.getElementById("restaurant-list");
 
   if (!container) {
     console.error("Restaurant container not found");
@@ -38,18 +36,18 @@ function displayRestaurants(restaurants) {
   }
 
   if (!restaurants.length) {
-    container.innerHTML =
-      "<p>No Restaurants Found</p>";
+    container.innerHTML = "<p>No Restaurants Found</p>";
     return;
   }
 
-  container.innerHTML =
-    restaurants.map(r => `
+  container.innerHTML = restaurants
+    .map(r => `
       <div class="restaurant-card">
 
-        <img
-          src="${r.image}"
+        <img 
+          src="${r.image}" 
           class="restaurant-image"
+          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'"
         />
 
         <div class="restaurant-info">
@@ -73,5 +71,20 @@ function displayRestaurants(restaurants) {
         </div>
 
       </div>
-    `).join("");
+    `)
+    .join("");
+}
+
+
+// Remove skeleton
+function removeSkeleton() {
+  const skel = document.getElementById("global-skeleton");
+
+  if (skel) {
+    skel.classList.add("sk-hide");
+
+    setTimeout(() => {
+      skel.remove();
+    }, 500);
+  }
 }
