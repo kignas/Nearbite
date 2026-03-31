@@ -42,10 +42,9 @@ async function loadRestaurants() {
 }
 
 // Render restaurants
+// Render restaurants
 function displayRestaurants() {
-
-  const container =
-    document.getElementById("restaurant-list");
+  const container = document.getElementById("restaurant-list");
 
   if (!container) {
     console.error("restaurant-list not found");
@@ -53,95 +52,58 @@ function displayRestaurants() {
   }
 
   if (!restaurants.length) {
-
-    container.innerHTML =
-      "<p>No Restaurants Found</p>";
-
+    container.innerHTML = "<p>No Restaurants Found</p>";
     return;
   }
 
-  container.innerHTML =
-    restaurants.map((r, i) => `
+  container.innerHTML = restaurants.map((r, i) => `
+    <a 
+      href="restaurant.html?id=${r._id || r.id}"
+      class="vr"
+      style="
+        animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s;
+        opacity: 0;
+        transform: translateY(20px);
+      "
+    >
+      <div class="vr-img">
+        <img 
+          src="${r.image}"
+          alt="${r.name}"
+          loading="lazy"
+          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'"
+        >
+        <div class="vr-heart">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <div class="vr-offer">
+          ${r.offer || ""}
+        </div>
+      </div>
 
-      <a 
-        href="restaurant.html?id=${r._id || r.id}"
-        class="vr"
-        style="
-          animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s;
-          opacity: 0;
-          transform: translateY(20px);
-        "
-      >
-
-        <div class="vr-img">
-
-          <img 
-            src="${r.image}"
-            alt="${r.name}"
-            loading="lazy"
-            onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'"
-          >
-
-          <div class="vr-heart">
-            ❤️
+      <div class="vr-body">
+        <div class="vr-top">
+          <span class="vr-name">
+            ${r.name || "Restaurant"}
+          </span>
+          <div class="vr-rating">
+            <i class="fa-solid fa-star star-icon"></i>
+            <span class="rating-num">${r.rating || "4.0"}</span>
+            <div class="rating-divider"></div>
+            <span class="rating-count">${r.ratingCount || '1K+'}</span>
           </div>
-
-          <div class="vr-offer">
-            ${r.offer || ""}
-          </div>
-
         </div>
 
-        <div class="vr-body">
-
-          <div class="vr-top">
-
-            <span class="vr-name">
-              ${r.name || "Restaurant"}
-            </span>
-
-            <div class="vr-rating">
-              ⭐ ${r.rating || "4.0"}
-            </div>
-
-          </div>
-
-          <div class="vr-cuisine">
-            ${r.cuisineDisplay || ""}
-          </div>
-
-          <div class="vr-meta">
-
-            ⏱ ${r.time || "30–40 mins"}
-
-            <span class="vr-sep">•</span>
-
-            📍 ${r.distance || "2 km"}
-
-          </div>
-
+        <div class="vr-cuisine">
+          ${r.cuisineDisplay || ""}
         </div>
 
-      </a>
-
-    `).join("");
-}
-
-
-// Remove skeleton loader
-function removeSkeleton() {
-
-  const skel =
-    document.getElementById("global-skeleton");
-
-  if (skel) {
-
-    skel.classList.add("sk-hide");
-
-    setTimeout(() => {
-
-      skel.remove();
-
-    }, 500);
-  }
+        <div class="vr-meta">
+          <i class="fa-solid fa-clock"></i> ${r.time || "30–40 mins"}
+          <span class="vr-sep">•</span>
+          <i class="fa-solid fa-location-dot"></i> ${r.distance || "2 km"}
+        </div>
+      </div>
+    </a>
+  `).join("");
 }
