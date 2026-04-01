@@ -85,6 +85,8 @@ async function fetchAndDisplayRestaurants() {
       'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'
 }));
 
+     console.log("Mapped Restaurants:", restaurants);
+
     // Save to localStorage for the restaurant detail page
     // Save to localStorage for the restaurant detail page
    localStorage.setItem('restaurantData', JSON.stringify(restaurants));
