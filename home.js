@@ -5,7 +5,6 @@
 const API_BASE_URL =
   "https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api";
 // Configuration: Centralize your API URL here
-const API_BASE_URL = 'https://x62panacwtp.pike.replit.dev/api';
 let restaurants = [];
 
 // ── UI Helpers ────────────────────────────────────────────────
