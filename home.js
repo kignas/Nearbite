@@ -184,9 +184,6 @@ function renderCartBar() {
     cartBar.classList.remove('visible');
   }
 }
-document.addEventListener("DOMContentLoaded", () => {
-  fetchAndDisplayRestaurants();
-});
 
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
