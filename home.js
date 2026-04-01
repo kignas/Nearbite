@@ -1,109 +1,89 @@
-// Global restaurants store
+/* ============================================================
+   NEARBITE — home.js
+   Central data store + cart logic shared across all pages
+   ============================================================ */
+
+// Initialize an empty array to hold your backend data
 let restaurants = [];
 
-// Run when page loads
-document.addEventListener("DOMContentLoaded", () => {
-  loadRestaurants();
-});
+// ── Render Restaurant Cards (Home Page) ──────────────────────
+async function fetchAndDisplayRestaurants() {
+  const list = document.getElementById('restaurant-list');
+  if (!list) return;
 
-// Load restaurants from API
-async function loadRestaurants() {
   try {
-    const response = await fetch(
-      "https://e392619d-ea6f-4f4e-8630-4de808a2c55e-00-37x62panacwtp.pike.replit.dev/api/restaurants"
-    );
-
-    const result = await response.json();
-
-    console.log("API Response:", result);
-
-    // Correct mapping
-    restaurants = result.data || [];
-
-    console.log("Restaurants Loaded:", restaurants);
-
-    displayRestaurants();
-    removeSkeleton();
-
-  } catch (error) {
-
-    console.error("Load error:", error);
-
-    const container =
-      document.getElementById("restaurant-list");
-
-    if (container) {
-      container.innerHTML =
-        "<p>Failed to load restaurants</p>";
+    // 1. Fetch data from your backend API
+    // (Change the port if your backend runs on something other than 5000)
+    const response = await fetch('http://localhost:5000/api/restaurants');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    removeSkeleton();
-  }
-}
+    // 2. Parse the JSON response
+    const data = await response.json();
+    
+    // 3. Assign data to your variable 
+    // (Note: Adjust 'data' if your API wraps the response, e.g., 'data.restaurants')
+    restaurants = data; 
 
-// Render restaurants
-// Render restaurants
-function displayRestaurants() {
-  const container = document.getElementById("restaurant-list");
+    // Save to localStorage so your restaurant.html page can access it
+    localStorage.setItem('restaurantData', JSON.stringify(restaurants));
 
-  if (!container) {
-    console.error("restaurant-list not found");
-    return;
-  }
-
-  if (!restaurants.length) {
-    container.innerHTML = "<p>No Restaurants Found</p>";
-    return;
-  }
-
-  container.innerHTML = restaurants.map((r, i) => `
-    <a 
-      href="restaurant.html?id=${r._id || r.id}"
-      class="vr"
-      style="
-        animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s;
-        opacity: 0;
-        transform: translateY(20px);
-      "
-    >
-      <div class="vr-img">
-        <img 
-          src="${r.image}"
-          alt="${r.name}"
-          loading="lazy"
-          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'"
-        >
-        <div class="vr-heart">
-          <i class="fa-solid fa-heart"></i>
-        </div>
-        <div class="vr-offer">
-          ${r.offer || ""}
-        </div>
-      </div>
-
-      <div class="vr-body">
-        <div class="vr-top">
-          <span class="vr-name">
-            ${r.name || "Restaurant"}
-          </span>
-          <div class="vr-rating">
-            <i class="fa-solid fa-star star-icon"></i>
-            <span class="rating-num">${r.rating || "4.0"}</span>
-            <div class="rating-divider"></div>
-            <span class="rating-count">${r.ratingCount || '1K+'}</span>
+    // 4. Render the HTML
+    list.innerHTML = restaurants.map(res => {
+      // Handle MongoDB's _id if your backend doesn't map it to id
+      const resId = res.id || res._id; 
+      
+      return `
+      <a href="restaurant.html?id=${resId}" class="block">
+        <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
+          <div class="relative h-52 w-full overflow-hidden">
+            <img
+              src="${res.image}"
+              alt="${res.name}"
+              class="w-full h-full object-cover"
+              onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'"
+            >
+            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
+              ${res.offer}
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-black text-[17px] text-gray-900 leading-tight">${res.name}</h3>
+                <p class="text-[12px] text-gray-400 font-semibold mt-0.5">${res.cuisine}</p>
+              </div>
+              <div class="bg-green-600 text-white text-[12px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1 flex-shrink-0">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                ${res.rating}
+              </div>
+            </div>
+            <div class="flex items-center gap-3 mt-3 pt-3 border-t border-dashed border-gray-100 text-[12px] text-gray-500 font-semibold">
+              <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-orange-400"></i> ${res.time}</span>
+              <span class="text-gray-200">|</span>
+              <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-orange-400"></i> ${res.distance}</span>
+            </div>
           </div>
         </div>
-
-        <div class="vr-cuisine">
-          ${r.cuisineDisplay || ""}
-        </div>
-
-        <div class="vr-meta">
-          <i class="fa-solid fa-clock"></i> ${r.time || "30–40 mins"}
-          <span class="vr-sep">•</span>
-          <i class="fa-solid fa-location-dot"></i> ${r.distance || "2 km"}
-        </div>
-      </div>
-    </a>
-  `).join("");
+      </a>
+    `}).join('');
+  } catch (error) {
+    console.error("Failed to fetch restaurants:", error);
+    list.innerHTML = `<div class="p-4 text-red-500 text-center">Failed to load restaurants. Please ensure the backend is running.</div>`;
+  }
 }
+
+// ── Cart Logic (Keep your existing cart functions here) ────────
+let cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+
+function updateCart(itemName, change, price, resId) { ... }
+function renderCartBar() { ... }
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAndDisplayRestaurants(); // Call the new async function here
+  renderCartBar();
+});
+                
