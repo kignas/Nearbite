@@ -80,10 +80,12 @@ async function fetchAndDisplayRestaurants() {
     }));
 
     // Save to localStorage for the restaurant detail page
-    localStorage.setItem('restaurantData', JSON.stringify(restaurants));
+    // Save to localStorage for the restaurant detail page
+   localStorage.setItem('restaurantData', JSON.stringify(restaurants));
+   // Render restaurants to UI
+   renderRestaurantsToDOM(list);
 
-    // 5. Render the UI exactly as you designed it
-    renderRestaurantsToDOM(list);
+   
 
   } catch (error) {
     console.error("Failed to load Nearbite API:", error);
