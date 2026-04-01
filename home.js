@@ -68,16 +68,22 @@ async function fetchAndDisplayRestaurants() {
 
     // 4. THE ADAPTER: Map backend MongoDB fields to your exact frontend UI fields
     restaurants = result.data.map(dbRes => ({
-      id: dbRes._id, // Map MongoDB _id
-      name: dbRes.name,
-      rating: dbRes.rating ? dbRes.rating.toFixed(1) : "NEW",
-      time: dbRes.time,
-      distance: dbRes.distance,
-      offer: dbRes.offer || '', // Handle empty offers smoothly
-      cuisine: dbRes.cuisineDisplay || (dbRes.cuisine && dbRes.cuisine.join(', ')) || '',
-      image: dbRes.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80',
-      // Note: We leave menu out, because your backend fetches it separately!
-    }));
+  id: dbRes._id,
+  name: dbRes.name,
+  rating: dbRes.rating 
+      ? Number(dbRes.rating).toFixed(1) 
+      : "NEW",
+  time: dbRes.time,
+  distance: dbRes.distance,
+  offer: dbRes.offer || '',
+  cuisine:
+      dbRes.cuisineDisplay ||
+      (dbRes.cuisine && dbRes.cuisine.join(', ')) ||
+      '',
+  image:
+      dbRes.image ||
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600'
+}));
 
     // Save to localStorage for the restaurant detail page
     // Save to localStorage for the restaurant detail page
