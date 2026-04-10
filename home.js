@@ -1,9 +1,8 @@
 /* ============================================================
-   NEARBITE — home.js
-   Live Backend Integration
+   NEARBITE — home.js (API Adapter)
    ============================================================ */
 
-const API_BASE_URL = 'https://x62panacwtp.pike.replit.dev/api';
+const API_BASE_URL = 'https://eatswada.onrender.com/api';
 let restaurants = [];
 
 function showSkeletonLoader(container) {
@@ -17,7 +16,6 @@ function showSkeletonLoader(container) {
               <div class="h-5 bg-gray-200 rounded w-full mb-2"></div>
               <div class="h-3 bg-gray-200 rounded w-1/2"></div>
             </div>
-            <div class="h-6 w-12 bg-gray-200 rounded-lg"></div>
           </div>
         </div>
       </div>
@@ -34,10 +32,8 @@ async function fetchAndDisplayRestaurants() {
 
   try {
     const response = await fetch(`${API_BASE_URL}/restaurants`);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) throw new Error("Server error");
     const result = await response.json();
-
-    if (!result.success || !result.data) throw new Error("API returned invalid format");
 
     restaurants = result.data.map(dbRes => ({
       id: dbRes._id,
@@ -53,39 +49,38 @@ async function fetchAndDisplayRestaurants() {
     localStorage.setItem('restaurantData', JSON.stringify(restaurants));
     
     if (restaurants.length === 0) {
-      list.innerHTML = `<div class="p-4 text-center text-gray-500 font-bold">No restaurants found in database.</div>`;
+      list.innerHTML = `<div class="p-4 text-center font-bold">No restaurants found.</div>`;
       return;
     }
 
     list.innerHTML = restaurants.map(res => `
       <a href="restaurant.html?id=${res.id}" class="block">
-        <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
+        <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
           <div class="relative h-52 w-full overflow-hidden">
             <img src="${res.image}" alt="${res.name}" class="w-full h-full object-cover">
-            ${res.offer ? `<div class="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">${res.offer}</div>` : ''}
+            ${res.offer ? `<div class="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">${res.offer}</div>` : ''}
           </div>
           <div class="p-4">
             <div class="flex justify-between items-start">
               <div>
-                <h3 class="font-black text-[17px] text-gray-900 leading-tight">${res.name}</h3>
+                <h3 class="font-black text-[17px] text-gray-900">${res.name}</h3>
                 <p class="text-[12px] text-gray-400 font-semibold mt-0.5">${res.cuisine}</p>
               </div>
-              <div class="bg-green-600 text-white text-[12px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1 flex-shrink-0">
+              <div class="bg-green-600 text-white text-[12px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
                 <i class="fa-solid fa-star text-[8px]"></i> ${res.rating}
               </div>
             </div>
             <div class="flex items-center gap-3 mt-3 pt-3 border-t border-dashed border-gray-100 text-[12px] text-gray-500 font-semibold">
-              <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-orange-400"></i> ${res.time}</span>
+              <span><i class="fa-regular fa-clock text-orange-400"></i> ${res.time}</span>
               <span class="text-gray-200">|</span>
-              <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-orange-400"></i> ${res.distance}</span>
+              <span><i class="fa-solid fa-location-dot text-orange-400"></i> ${res.distance}</span>
             </div>
           </div>
         </div>
       </a>
     `).join('');
   } catch (error) {
-    console.error("Failed to load API:", error);
-    list.innerHTML = `<div class="p-8 text-center"><p class="text-red-500 font-bold mb-2">Could not connect to database.</p><button onclick="fetchAndDisplayRestaurants()" class="bg-orange-500 text-white px-4 py-2 rounded-lg">Try Again</button></div>`;
+    list.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Could not connect to database.<br><button onclick="fetchAndDisplayRestaurants()" class="mt-4 bg-orange-500 text-white px-4 py-2 rounded-lg">Try Again</button></div>`;
   }
 }
 
@@ -102,8 +97,8 @@ function updateCart(itemName, change, price, resId) {
   if (container) {
     const qty = cart[itemName] ? cart[itemName].quantity : 0;
     container.innerHTML = qty > 0 
-      ? `<div class="add-btn-wrap" style="width:100%;height:100%;"><button onclick="updateCart('${itemName}',-1,${price},'${resId}')">−</button><span>${qty}</span><button onclick="updateCart('${itemName}',1,${price},'${resId}')">+</button></div>`
-      : `<button class="add-btn-single" onclick="updateCart('${itemName}',1,${price},'${resId}')">ADD</button>`;
+      ? `<div class="add-btn-wrap" style="width:100%;height:100%;"><button onclick="updateCart(\`${itemName}\`,-1,${price},\`${resId}\`)">−</button><span>${qty}</span><button onclick="updateCart(\`${itemName}\`,1,${price},\`${resId}\`)">+</button></div>`
+      : `<button class="add-btn-single" onclick="updateCart(\`${itemName}\`,1,${price},\`${resId}\`)">ADD</button>`;
   }
   localStorage.setItem('nearbite_cart', JSON.stringify(cart));
   renderCartBar();
@@ -118,7 +113,7 @@ function renderCartBar() {
   if (totalItems > 0) {
     cartBar.classList.add('visible');
     const summary = document.getElementById('cart-summary');
-    if (summary) summary.innerText = `${totalItems} ITEM${totalItems > 1 ? 'S' : ''}  |  ₹${totalPrice}`;
+    if (summary) summary.innerText = `${totalItems} ITEMS | ₹${totalPrice}`;
   } else {
     cartBar.classList.remove('visible');
   }

@@ -498,7 +498,8 @@
 </nav>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // ── 1. ACTIVE CART TRACKING (Your original awesome logic) ──
   const savedCart   = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
   const totalItems  = Object.values(savedCart).reduce((s, i) => s + i.quantity, 0);
   const totalPrice  = Object.values(savedCart).reduce((s, i) => s + i.quantity * i.price, 0);
@@ -507,20 +508,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (totalItems > 0) {
     trackSection.style.display = 'block';
-    const resId   = Object.values(savedCart)[0].resId;
-    const resData = JSON.parse(localStorage.getItem('restaurantData')) || [];
-    const res     = resData.find(r => r.id === resId);
+    const resId = Object.values(savedCart)[0].resId;
+    // Fallback names if local restaurant data isn't cached
     const trackRes = document.getElementById('track-restaurant');
     if (trackRes) {
-      trackRes.innerText =
-        (res ? res.name : 'Nearbite') +
-        ' · ' + totalItems + ' item' + (totalItems > 1 ? 's' : '') +
-        ' · ₹' + totalPrice;
+      trackRes.innerText = 'Nearbite Order · ' + totalItems + ' item' + (totalItems > 1 ? 's' : '') + ' · ₹' + totalPrice;
     }
     emptySection.style.display = 'none';
   } else {
-    emptySection.style.display = 'block';
     trackSection.style.display = 'none';
+  }
+
+  // ── 2. LIVE PAST ORDERS FETCH (The New Backend Connection) ──
+  const token = localStorage.getItem('nearbite_token');
+  const ordersContent = document.querySelector('.orders-content');
+  
+  // Create a container for past orders
+  const pastOrdersContainer = document.createElement('div');
+  pastOrdersContainer.id = 'past-orders-list';
+  ordersContent.appendChild(pastOrdersContainer);
+
+  if (!token) {
+    // If not logged in & cart is empty, ask them to login!
+    if (totalItems === 0) {
+      emptySection.style.display = 'block';
+      emptySection.querySelector('h4').innerText = "Please log in";
+      emptySection.querySelector('p').innerHTML = "Log in to view your past orders and<br>track your active cravings.";
+      const btn = emptySection.querySelector('.explore-btn');
+      btn.innerText = "LOGIN NOW";
+      btn.onclick = () => window.location.href = 'login.html';
+    }
+    return;
+  }
+
+  try {
+    // Fetch real orders from your live MongoDB database
+    const response = await fetch('https://eatswada.onrender.com/api/orders', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const result = await response.json();
+
+    if (response.ok && result.success && result.data.length > 0) {
+      emptySection.style.display = 'none'; // Hide empty state
+
+      // Add a section title using your existing font styles
+      pastOrdersContainer.innerHTML = `<h3 style="font-size:16px; font-weight:900; color:#111827; margin: 24px 0 16px;">Past Orders</h3>`;
+
+      // Map the database orders into your beautiful track-card UI
+      const ordersHTML = result.data.map(order => {
+        const dateStr = new Date(order.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+        const itemsStr = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
+        const statusColor = order.status === 'delivered' ? '#1ba672' : (order.status === 'cancelled' ? '#e63946' : '#FC8019');
+
+        return `
+          <div class="track-card" style="margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #eee; padding-bottom:12px; margin-bottom:12px;">
+              <div>
+                <h4 style="font-size:15px; font-weight:900; margin:0 0 4px; color:#111827;">${order.restaurantName || "Nearbite Restaurant"}</h4>
+                <span style="font-size:11px; color:#9ca3af; font-weight:600;">${dateStr}</span>
+              </div>
+              <span style="font-size:9px; font-weight:900; color:${statusColor}; background:${statusColor}15; padding:4px 8px; border-radius:6px; text-transform:uppercase; height:fit-content;">${order.status}</span>
+            </div>
+            <p style="font-size:12px; font-weight:600; color:#4b5563; margin:0 0 16px; line-height:1.5;">${itemsStr}</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:15px; font-weight:900; color:#111827;">₹${order.total}</span>
+              <button onclick="window.location.href='restaurant.html?id=${order.restaurant}'" style="background:#fff7ef; color:#FC8019; border:1px solid #ffeedd; padding:8px 16px; border-radius:12px; font-size:12px; font-weight:800; font-family:'Poppins', sans-serif;">REORDER</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      pastOrdersContainer.innerHTML += ordersHTML;
+    } else if (totalItems === 0) {
+      emptySection.style.display = 'block'; // Only show empty state if absolutely nothing exists
+    }
+  } catch (error) {
+    console.error("API Error fetching orders:", error);
   }
 });
 </script>

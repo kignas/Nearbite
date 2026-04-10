@@ -326,79 +326,97 @@
 <script>
 // Override renderItems to use premium card structure
 const _origRenderItems = window.renderItems;
-window.renderItems = function() {
-  const listEl   = document.getElementById('under99-list');
+window.renderItems = async function() {
+  const listEl = document.getElementById('under99-list');
   const skeleton = document.getElementById('skeleton-grid');
+  const API_BASE_URL = 'https://eatswada.onrender.com/api';
+  
   if (!listEl) return;
+  if (skeleton) skeleton.style.display = 'grid';
+  listEl.style.display = 'none';
 
-  let items = [];
-  restaurants.forEach(res => {
-    res.menu.forEach(item => {
-      const inRange = currentMaxPrice === 99
-        ? item.price <= 99
-        : item.price > 99 && item.price <= 149;
-      const dietOk   = !vegOnly99   || item.isVeg;
-      const ratingOk = !ratingFilter || parseFloat(res.rating) >= 4.0;
-      if (inRange && dietOk && ratingOk) {
-        items.push({ ...item, resId: res.id, resName: res.name, resRating: res.rating });
-      }
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurants/under99`);
+    const result = await response.json();
+    
+    // 1. Adapter logic: Map backend structure to UI requirements
+    let items = result.data.map(dbItem => ({
+      name: dbItem.name,
+      price: dbItem.price,
+      isVeg: dbItem.isVeg,
+      img: dbItem.image || dbItem.img || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80',
+      resId: dbItem.restaurant._id,
+      resName: dbItem.restaurant.name,
+      resRating: dbItem.restaurant.rating || 4.0
+    }));
+
+    // 2. Apply your local frontend filters
+    items = items.filter(item => {
+      const inRange = currentMaxPrice === 99 ? item.price <= 99 : item.price > 99 && item.price <= 149;
+      const dietOk = !vegOnly99 || item.isVeg;
+      const ratingOk = !ratingFilter || parseFloat(item.resRating) >= 4.0;
+      return inRange && dietOk && ratingOk;
     });
-  });
 
-  if (sortByRating) items.sort((a,b) => parseFloat(b.resRating) - parseFloat(a.resRating));
+    if (sortByRating) items.sort((a,b) => parseFloat(b.resRating) - parseFloat(a.resRating));
 
-  const countEl = document.getElementById('item-count');
-  if (countEl) countEl.innerText = items.length + ' ITEMS FOUND';
-  if (skeleton) skeleton.style.display = 'none';
-  listEl.style.display = 'grid';
+    // 3. Render
+    const countEl = document.getElementById('item-count');
+    if (countEl) countEl.innerText = items.length + ' ITEMS FOUND';
+    if (skeleton) skeleton.style.display = 'none';
+    listEl.style.display = 'grid';
 
-  if (items.length === 0) {
-    listEl.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-bowl-food"></i>
-        <h3>No items found</h3>
-        <p>Try changing the filters above</p>
-      </div>`;
-    return;
-  }
+    if (items.length === 0) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-bowl-food"></i>
+          <h3>No items found</h3>
+          <p>Try changing the filters above</p>
+        </div>`;
+      return;
+    }
 
-  listEl.innerHTML = items.map((item, idx) => {
-    const key = item.name.replace(/\s+/g,'');
-    const qty = cart[item.name] ? cart[item.name].quantity : 0;
+    listEl.innerHTML = items.map((item, idx) => {
+      const key = item.name.replace(/\s+/g,'');
+      const qty = cart[item.name] ? cart[item.name].quantity : 0;
 
-    const btnHTML = qty > 0
-      ? `<div class="card-stepper">
-           <button class="card-s-btn" onclick="updateCart('${item.name}',-1,${item.price},${item.resId})">−</button>
-           <span class="card-s-count">${qty}</span>
-           <button class="card-s-btn" onclick="updateCart('${item.name}',1,${item.price},${item.resId})">+</button>
-         </div>`
-      : `<button class="card-add-single" onclick="updateCart('${item.name}',1,${item.price},${item.resId})">ADD</button>`;
+      const safeId = String(item.resId).replace(/['"]/g, '');
+      const btnHTML = qty > 0
+        ? `<div class="card-stepper">
+             <button class="card-s-btn" onclick="updateCart(\`${item.name}\`,-1,${item.price},\`${safeId}\`)">−</button>
+             <span class="card-s-count">${qty}</span>
+             <button class="card-s-btn" onclick="updateCart(\`${item.name}\`,1,${item.price},\`${safeId}\`)">+</button>
+           </div>`
+        : `<button class="card-add-single" onclick="updateCart(\`${item.name}\`,1,${item.price},\`${safeId}\`)">ADD</button>`;
 
-    return `
-      <div class="product-card food-card-animate" style="animation-delay:${idx*0.04}s">
-        <div class="card-img-wrap">
-          <img src="${item.img}" alt="${item.name}"
-               onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
-          <div class="price-badge">₹${item.price}</div>
-        </div>
-        <div class="card-btn-float">
-          <div id="btn-container-${key}" class="card-add-wrap">${btnHTML}</div>
-        </div>
-        <div class="card-body">
-          <div class="card-meta-row">
-            <div class="veg-dot ${item.isVeg?'veg':'nonveg'}"><div class="dot"></div></div>
-            <div class="card-rating">
-              <i class="fa-solid fa-star"></i>
-              <span>${item.resRating}</span>
-            </div>
+      return `
+        <div class="product-card food-card-animate" style="animation-delay:${idx*0.04}s">
+          <div class="card-img-wrap">
+            <img src="${item.img}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
+            <div class="price-badge">₹${item.price}</div>
           </div>
-          <p class="card-name">${item.name}</p>
-          <p class="card-rest">${item.resName}</p>
-        </div>
-      </div>`;
-  }).join('');
+          <div class="card-btn-float">
+            <div id="btn-container-${key}" class="card-add-wrap">${btnHTML}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-meta-row">
+              <div class="veg-dot ${item.isVeg?'veg':'nonveg'}"><div class="dot"></div></div>
+              <div class="card-rating">
+                <i class="fa-solid fa-star"></i>
+                <span>${item.resRating}</span>
+              </div>
+            </div>
+            <p class="card-name">${item.name}</p>
+            <p class="card-rest">${item.resName}</p>
+          </div>
+        </div>`;
+    }).join('');
 
-  renderCartBar();
+    renderCartBar();
+  } catch (error) {
+    console.error(error);
+    if (skeleton) skeleton.style.display = 'none';
+  }
 };
 
 // Override updateCart for under99 card structure
@@ -411,16 +429,18 @@ window.updateCart = function(itemName, change, price, rId) {
   const container = document.getElementById('btn-container-' + key);
   if (container) {
     const qty = cart[itemName] ? cart[itemName].quantity : 0;
+    const safeId = String(rId).replace(/['"]/g, ''); // Prevent quote bugs
+
     if (qty > 0) {
       container.innerHTML = `
         <div class="card-stepper">
-          <button class="card-s-btn" onclick="updateCart('${itemName}',-1,${price},${rId})">−</button>
+          <button class="card-s-btn" onclick="updateCart(\`${itemName}\`,-1,${price},\`${safeId}\`)">−</button>
           <span class="card-s-count">${qty}</span>
-          <button class="card-s-btn" onclick="updateCart('${itemName}',1,${price},${rId})">+</button>
+          <button class="card-s-btn" onclick="updateCart(\`${itemName}\`,1,${price},\`${safeId}\`)">+</button>
         </div>`;
     } else {
       container.innerHTML =
-        `<button class="card-add-single" onclick="updateCart('${itemName}',1,${price},${rId})">ADD</button>`;
+        `<button class="card-add-single" onclick="updateCart(\`${itemName}\`,1,${price},\`${safeId}\`)">ADD</button>`;
     }
   }
 

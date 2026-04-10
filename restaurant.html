@@ -786,16 +786,19 @@
   /* ─────────────────────────────────────────────
      BUILD BUTTON HTML
   ───────────────────────────────────────────── */
-  function makeBtnHTML(itemName, qty, price, rId) {
-    if (qty > 0) {
-      return `<div class="item-stepper">
-        <button class="stepper-minus" onclick="updateCart('${itemName}',-1,${price},${rId})">−</button>
-        <span class="stepper-count">${qty}</span>
-        <button class="stepper-plus"  onclick="updateCart('${itemName}',1,${price},${rId})">+</button>
-      </div>`;
-    }
-    return `<button class="item-add-single" onclick="updateCart('${itemName}',1,${price},${rId})">ADD</button>`;
+function makeBtnHTML(itemName, qty, price, rId) {
+  // Safely strip any broken quotes
+  const safeId = String(rId).replace(/['"]/g, ''); 
+  
+  if (qty > 0) {
+    return `<div class="item-stepper">
+      <button class="stepper-minus" onclick="updateCart(\`${itemName}\`,-1,${price},\`${safeId}\`)">−</button>
+      <span class="stepper-count">${qty}</span>
+      <button class="stepper-plus"  onclick="updateCart(\`${itemName}\`,1,${price},\`${safeId}\`)">+</button>
+    </div>`;
   }
+  return `<button class="item-add-single" onclick="updateCart(\`${itemName}\`,1,${price},\`${safeId}\`)">ADD</button>`;
+}
 
   /* ─────────────────────────────────────────────
      HELPER: check customisable
@@ -807,157 +810,146 @@
   /* ─────────────────────────────────────────────
      MAIN PAGE INIT
   ───────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', () => {
-    const params     = new URLSearchParams(window.location.search);
-    const resId      = parseInt(params.get('id'));
-    const restaurant = restaurants.find(r => r.id === resId);
+    /* ─────────────────────────────────────────────
+     MAIN PAGE INIT (LIVE API ADAPTER)
+  ───────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const resId = params.get('id'); // MongoDB uses strings for IDs
+    const API_BASE_URL = 'https://eatswada.onrender.com/api';
 
-    if (!restaurant) {
-      document.getElementById('menu-skeleton').style.display   = 'none';
-      document.getElementById('menu-container').style.display  = 'block';
-      document.getElementById('menu-container').innerHTML = `
-        <div style="text-align:center;padding:60px 20px">
-          <i class="fa-solid fa-utensils" style="font-size:48px;color:#e0e0e0;display:block;margin-bottom:16px"></i>
-          <p style="font-size:17px;font-weight:800;color:#555">Restaurant not found</p>
-          <button onclick="history.back()"
-            style="margin-top:20px;background:#FC8019;color:#fff;font-family:Poppins,sans-serif;
-                   font-weight:800;font-size:13px;border:none;padding:12px 24px;border-radius:14px;cursor:pointer">
-            Go Back
-          </button>
-        </div>`;
-      return;
-    }
+    if (!resId) return showErrorState();
 
-    /* ── Populate info ── */
-    document.title = restaurant.name + ' – Nearbite';
-    document.getElementById('res-name').innerText       = restaurant.name;
-    document.getElementById('res-cuisine').innerText    = restaurant.cuisine || '';
-    document.getElementById('res-rating-num').innerText = restaurant.rating;
-    document.getElementById('res-time').innerHTML       = '<i class="fa-regular fa-clock"></i> ' + restaurant.time;
-    document.getElementById('res-distance').innerHTML   = '<i class="fa-solid fa-location-dot"></i> ' + restaurant.distance;
+    try {
+      // 1. Fetch Restaurant Info and Menu in parallel for speed
+      const [resResponse, menuResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/restaurants/${resId}`),
+        fetch(`${API_BASE_URL}/restaurants/${resId}/menu`)
+      ]);
 
-    if (restaurant.offer) {
-      document.getElementById('res-offer-text').innerText = restaurant.offer;
-      document.getElementById('res-offer-banner').style.display = 'flex';
-    }
+      if (!resResponse.ok || !menuResponse.ok) throw new Error("API Error");
 
-    /* ── Group menu items by category ── */
-    // If items have a `.category` property use it; otherwise all in "Recommended"
-    const grouped = {};
-    restaurant.menu.forEach(item => {
-      const cat = item.category || 'Recommended';
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(item);
-    });
+      const resResult = await resResponse.json();
+      const menuResult = await menuResponse.json();
+      
+      const restaurant = resResult.data;
+      const groupedMenu = menuResult.data; // Backend already groups by category!
 
-    const categories  = Object.keys(grouped);
-    const menuContainer = document.getElementById('menu-container');
+      /* ── Populate Info ── */
+      document.title = restaurant.name + ' – Nearbite';
+      document.getElementById('res-name').innerText = restaurant.name;
+      document.getElementById('res-cuisine').innerText = restaurant.cuisineDisplay || restaurant.cuisine.join(', ');
+      document.getElementById('res-rating-num').innerText = restaurant.rating || "NEW";
+      document.getElementById('res-time').innerHTML = '<i class="fa-regular fa-clock"></i> ' + (restaurant.time || '30 mins');
+      document.getElementById('res-distance').innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + (restaurant.distance || '2 km');
 
-    /* ── Build category nav pills ── */
-    const navInner = document.getElementById('cat-nav-inner');
-    navInner.innerHTML = categories.map((cat, i) => {
-      const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
-      return `<div class="cat-nav-pill ${i===0?'active':''}"
-                   data-target="${catId}"
-                   onclick="scrollToCategory('${catId}')">
-        ${cat}
-      </div>`;
-    }).join('');
+      if (restaurant.offer) {
+        document.getElementById('res-offer-text').innerText = restaurant.offer;
+        document.getElementById('res-offer-banner').style.display = 'flex';
+      }
 
-    /* ── Build grouped menu HTML ── */
-    let globalIdx = 0;
-    menuContainer.innerHTML = categories.map(cat => {
-      const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
-      const items = grouped[cat];
+      const categories = Object.keys(groupedMenu);
+      const menuContainer = document.getElementById('menu-container');
 
-      const itemsHTML = items.map(item => {
-        const key = item.name.replace(/\s+/g, '');
-        const qty = cart[item.name] ? cart[item.name].quantity : 0;
+      /* ── Build category nav pills ── */
+      const navInner = document.getElementById('cat-nav-inner');
+      navInner.innerHTML = categories.map((cat, i) => {
+        const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+        return `<div class="cat-nav-pill ${i===0?'active':''}" data-target="${catId}" onclick="scrollToCategory('${catId}')">${cat}</div>`;
+      }).join('');
 
-        /* ── Tag logic ── */
-        const isBest = BESTSELLER_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
-        const isMust = MUSTTRY_ITEMS.some(b =>   item.name.toLowerCase().includes(b.toLowerCase()));
-        const tagHTML = isBest
-          ? `<div class="item-tag bestseller"><i class="fa-solid fa-fire"></i> Bestseller</div>`
-          : isMust
-          ? `<div class="item-tag musttry"><i class="fa-solid fa-star"></i> Must Try</div>`
-          : '';
+      /* ── Build grouped menu HTML ── */
+      let globalIdx = 0;
+      menuContainer.innerHTML = categories.map(cat => {
+        const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+        const items = groupedMenu[cat];
 
-        /* ── Image ribbon ── */
-        const ribbonHTML = isBest
-          ? `<div class="img-ribbon"><i class="fa-solid fa-fire"></i> Best</div>`
-          : isMust
-          ? `<div class="img-ribbon green-ribbon"><i class="fa-solid fa-star"></i> Try</div>`
-          : '';
+        const itemsHTML = items.map(item => {
+          const key = item.name.replace(/\s+/g, '');
+          const qty = cart[item.name] ? cart[item.name].quantity : 0;
+          const price = item.price;
+          const image = item.image || item.img || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80';
 
-        /* ── Customisable ── */
-        const customHTML = isCustomisable(item.name)
-          ? `<span class="customisable-text">Customisable</span>`
-          : '';
+          const isBest = BESTSELLER_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
+          const isMust = MUSTTRY_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
+          
+          const tagHTML = isBest ? `<div class="item-tag bestseller"><i class="fa-solid fa-fire"></i> Bestseller</div>` : isMust ? `<div class="item-tag musttry"><i class="fa-solid fa-star"></i> Must Try</div>` : '';
+          const ribbonHTML = isBest ? `<div class="img-ribbon"><i class="fa-solid fa-fire"></i> Best</div>` : isMust ? `<div class="img-ribbon green-ribbon"><i class="fa-solid fa-star"></i> Try</div>` : '';
+          const customHTML = isCustomisable(item.name) ? `<span class="customisable-text">Customisable</span>` : '';
 
-        const delay = (globalIdx++ * 0.04).toFixed(2);
+          const delay = (globalIdx++ * 0.04).toFixed(2);
+
+          return `
+            <div class="menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" style="animation-delay:${delay}s">
+              <div class="menu-item-left">
+                <div class="veg-dot ${item.isVeg ? 'veg' : 'nonveg'}"><div class="dot"></div></div>
+                ${tagHTML}
+                <h3 class="item-name">${item.name}</h3>
+                <p  class="item-price">₹${price}</p>
+                <p  class="item-desc">${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}</p>
+              </div>
+              <div class="menu-item-img-wrap">
+                ${ribbonHTML}
+                <img src="${image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
+                <div id="btn-container-${key}" class="item-btn-wrap">
+                  ${makeBtnHTML(item.name, qty, price, "'"+resId+"'")} 
+                </div>
+                ${customHTML}
+              </div>
+            </div>`;
+        }).join('');
 
         return `
-          <div class="menu-item" data-veg="${item.isVeg ? 'true' : 'false'}"
-               style="animation-delay:${delay}s">
-            <div class="menu-item-left">
-              <div class="veg-dot ${item.isVeg ? 'veg' : 'nonveg'}"><div class="dot"></div></div>
-              ${tagHTML}
-              <h3 class="item-name">${item.name}</h3>
-              <p  class="item-price">₹${item.price}</p>
-              <p  class="item-desc">${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}</p>
+          <div class="menu-cat-group" id="${catId}">
+            <div class="menu-cat-header" onclick="toggleCategory(this)">
+              <span class="menu-cat-title">${cat} <span class="menu-cat-count">(${items.length})</span></span>
+              <i class="fa-solid fa-chevron-down menu-cat-chevron"></i>
             </div>
-            <div class="menu-item-img-wrap">
-              ${ribbonHTML}
-              <img src="${item.img}" alt="${item.name}"
-                   onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
-              <div id="btn-container-${key}" class="item-btn-wrap">
-                ${makeBtnHTML(item.name, qty, item.price, resId)}
-              </div>
-              ${customHTML}
-            </div>
+            <div class="menu-cat-items">${itemsHTML}</div>
           </div>`;
       }).join('');
 
-      return `
-        <div class="menu-cat-group" id="${catId}">
-          <div class="menu-cat-header" onclick="toggleCategory(this)">
-            <span class="menu-cat-title">
-              ${cat} <span class="menu-cat-count">(${items.length})</span>
-            </span>
-            <i class="fa-solid fa-chevron-down menu-cat-chevron"></i>
-          </div>
-          <div class="menu-cat-items">
-            ${itemsHTML}
-          </div>
-        </div>`;
-    }).join('');
-
-    /* Show menu, hide skeleton */
-    document.getElementById('menu-skeleton').style.display  = 'none';
-    document.getElementById('menu-container').style.display = 'block';
-
-    /* Setup scrollspy */
-    setupScrollSpy(categories);
-
-    /* ── Override updateCart ── */
-    window.updateCart = function(itemName, change, price, rId) {
-      if (!cart[itemName]) cart[itemName] = { quantity: 0, price, resId: rId };
-      cart[itemName].quantity += change;
-      if (cart[itemName].quantity <= 0) delete cart[itemName];
-
-      const key       = itemName.replace(/\s+/g, '');
-      const container = document.getElementById('btn-container-' + key);
-      if (container) {
-        const qty = cart[itemName] ? cart[itemName].quantity : 0;
-        container.innerHTML = makeBtnHTML(itemName, qty, price, rId);
-      }
-      localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+      document.getElementById('menu-skeleton').style.display = 'none';
+      document.getElementById('menu-container').style.display = 'block';
+      setupScrollSpy(categories);
       renderCartBar();
-    };
 
-    renderCartBar();
-  }); // end DOMContentLoaded
+
+  } catch (error) {
+    alert("Crash details: " + error.message);
+    console.error(error);
+    showErrorState();
+  }
+});
+
+
+  function showErrorState() {
+     document.getElementById('menu-skeleton').style.display = 'none';
+     document.getElementById('menu-container').style.display = 'block';
+     document.getElementById('menu-container').innerHTML = `
+        <div style="text-align:center;padding:60px 20px">
+          <i class="fa-solid fa-server" style="font-size:48px;color:#e0e0e0;display:block;margin-bottom:16px"></i>
+          <p style="font-size:17px;font-weight:800;color:#555">Server Connection Error</p>
+          <button onclick="location.reload()" style="margin-top:20px;background:#FC8019;color:#fff;font-weight:800;font-size:13px;border:none;padding:12px 24px;border-radius:14px;">Try Again</button>
+        </div>`;
+  }
+
+
+  /* ── Override updateCart for Restaurant Page ── */
+  window.updateCart = function(itemName, change, price, rId) {
+    if (!cart[itemName]) cart[itemName] = { quantity: 0, price, resId: rId };
+    cart[itemName].quantity += change;
+    if (cart[itemName].quantity <= 0) delete cart[itemName];
+
+    const key       = itemName.replace(/\s+/g, '');
+    const container = document.getElementById('btn-container-' + key);
+    if (container) {
+      const qty = cart[itemName] ? cart[itemName].quantity : 0;
+      container.innerHTML = makeBtnHTML(itemName, qty, price, rId);
+    }
+    localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+    if (typeof renderCartBar === 'function') renderCartBar();
+  };
 
   /* ─────────────────────────────────────────────
      COLLAPSIBLE CATEGORY
@@ -965,9 +957,8 @@
   function toggleCategory(headerEl) {
     headerEl.classList.toggle('collapsed');
     const itemsEl = headerEl.nextElementSibling;
-    itemsEl.classList.toggle('collapsed');
+    if (itemsEl) itemsEl.classList.toggle('collapsed');
   }
-
-  </script>
+</script>
 </body>
 </html>

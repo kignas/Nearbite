@@ -8,988 +8,276 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <style>
-    /* ============================================================
-       DESIGN TOKENS
-       ============================================================ */
     :root {
       --brand:        #FC8019;
       --brand-light:  #fff4ec;
-      --brand-shadow: rgba(252, 128, 25, 0.28);
       --text-1:       #111827;
       --text-2:       #374151;
       --text-3:       #9ca3af;
       --border:       #e5e7eb;
-      --bg-page:      #f4f4f6;
-      --bg-card:      #ffffff;
+      --bg-page:      #ffffff;
       --bg-input:     #f9fafb;
-      --success:      #16a34a;
-      --ease-bounce:  cubic-bezier(0.25, 1, 0.5, 1);
-      --ease-sheet:   cubic-bezier(0.32, 0.72, 0, 1);
-      --radius-card:  20px;
       --radius-input: 14px;
+      --ease-bounce:  cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    /* ============================================================
-       RESET & BASE
-       ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif; 
       background: var(--bg-page);
-      color: var(--text-1);
+      color: var(--text-1); 
       -webkit-tap-highlight-color: transparent;
-      -webkit-font-smoothing: antialiased;
-      overflow: hidden;
-      height: 100dvh;            /* dynamic viewport height — safe on mobile */
-      display: flex;
-      flex-direction: column;
+      display: flex; 
+      flex-direction: column; 
+      height: 100dvh;
     }
 
-    /* ── Tap micro-interaction ── */
-    .tap {
-      cursor: pointer;
-      transition: transform 0.15s var(--ease-bounce), opacity 0.15s var(--ease-bounce);
-    }
-    .tap:active { transform: scale(0.95); opacity: 0.88; }
+    .tap { cursor: pointer; transition: transform 0.1s var(--ease-bounce); }
+    .tap:active { transform: scale(0.96); }
 
-    /* ============================================================
-       MAP SECTION
-       ============================================================ */
-    .map-section {
-      position: relative;
-      flex: 1;
-      width: 100%;
-      background: #dde8d4;      /* subtle green tint while tiles load */
-      overflow: hidden;
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 50; background: var(--bg-page);
+      padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid var(--border);
     }
-
-    #map {
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-
-    .leaflet-control-attribution { display: none !important; }
-    .leaflet-control-zoom        { display: none !important; }
-
-    /* ============================================================
-       MAP SKELETON OVERLAY
-       — shown while GPS / tiles initialise, hidden via JS
-       ============================================================ */
-    #map-skeleton {
-      position: absolute;
-      inset: 0;
-      z-index: 800;
-      background: #e8efe4;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      transition: opacity 0.5s ease;
-    }
-    #map-skeleton.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* Skeleton grid lines mimicking a map */
-    .skel-map-grid {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
-    .skel-map-grid::before,
-    .skel-map-grid::after {
-      content: '';
-      position: absolute;
-      background: rgba(255, 255, 255, 0.55);
-    }
-    /* Horizontal roads */
-    .skel-map-grid::before {
-      top: 38%; left: 0; right: 0; height: 2px;
-      box-shadow:
-        0 -60px 0 rgba(255,255,255,0.35),
-        0  90px 0 rgba(255,255,255,0.35),
-        0 160px 0 rgba(255,255,255,0.2);
-    }
-    /* Vertical roads */
-    .skel-map-grid::after {
-      left: 30%; top: 0; bottom: 0; width: 2px;
-      box-shadow:
-        -80px  0 0 rgba(255,255,255,0.3),
-        100px  0 0 rgba(255,255,255,0.3),
-        190px  0 0 rgba(255,255,255,0.15);
-    }
-
-    /* Shimmer wave over the grid */
-    .skel-map-shimmer {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        105deg,
-        transparent 35%,
-        rgba(255, 255, 255, 0.45) 50%,
-        transparent 65%
-      );
-      background-size: 300% 100%;
-      animation: mapShimmer 2s infinite linear;
-    }
-    @keyframes mapShimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -100% 0; }
-    }
-
-    /* GPS spinner in the centre */
-    .skel-gps-wrap {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-    .skel-gps-ring {
-      width: 58px; height: 58px;
-      border-radius: 50%;
-      border: 3px solid rgba(252, 128, 25, 0.2);
-      border-top-color: var(--brand);
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .skel-gps-icon {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 22px;
-      color: var(--brand);
-    }
-    .skel-gps-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-2);
-      letter-spacing: 0.02em;
-    }
-
-    /* ============================================================
-       FLOATING TOP BAR
-       ============================================================ */
-    .top-bar {
-      position: absolute;
-      top: 16px; left: 16px; right: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 600;
-    }
-
     .btn-back {
-      width: 42px; height: 42px;
-      background: var(--bg-card);
-      border-radius: 50%;
+      width: 38px; height: 38px; background: #f1f1f5; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      border: none;
-      box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.12),
-        0 1px 3px rgba(0, 0, 0, 0.08);
-      font-size: 15px;
-      color: var(--text-1);
-      flex-shrink: 0;
+      border: none; font-size: 15px; color: var(--text-1);
+    }
+    .header-title { font-size: 18px; font-weight: 800; color: var(--text-1); }
+
+    /* Maynaguri Banner */
+    .local-banner {
+      background: var(--brand-light); color: #92400e; padding: 12px 20px;
+      font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1.5px dashed rgba(252, 128, 25, 0.3);
+    }
+    .local-banner i { color: var(--brand); font-size: 14px; }
+
+    /* Scrollable Form Area */
+    .form-content {
+      flex: 1; overflow-y: auto; padding: 24px 20px 100px;
     }
 
-    .search-bar {
-      flex: 1; height: 42px;
-      background: var(--bg-card);
-      border-radius: 22px;
-      display: flex; align-items: center;
-      padding: 0 14px;
-      gap: 8px;
-      box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.12),
-        0 1px 3px rgba(0, 0, 0, 0.08);
-      color: var(--text-2);
-      font-weight: 600;
-      font-size: 13px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .search-bar i { color: var(--brand); flex-shrink: 0; }
-
-    /* ============================================================
-       CENTER PIN (Swiggy-style floating pin)
-       ============================================================ */
-    .center-pin-container {
-      position: absolute;
-      top: 50%; left: 50%;
-      z-index: 500;
-      pointer-events: none;
-    }
-
-    .center-pin {
-      transform: translate(-50%, -100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: transform 0.25s var(--ease-bounce);
-    }
-    .center-pin.is-dragging {
-      transform: translate(-50%, -130%);
-    }
-
-    .pin-bubble {
-      background: #1c1c1e;
-      color: #fff;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 5px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
-      white-space: nowrap;
-      /* tiny arrow pointing down */
-      position: relative;
-    }
-    .pin-bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -5px; left: 50%;
-      transform: translateX(-50%);
-      border: 5px solid transparent;
-      border-top-color: #1c1c1e;
-      border-bottom-width: 0;
-    }
-
-    .pin-icon {
-      font-size: 42px;
-      color: var(--brand);
-      filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.28));
-      transition: transform 0.25s var(--ease-bounce);
-    }
-    .center-pin.is-dragging .pin-icon {
-      transform: scale(1.1);
-    }
-
-    .pin-shadow {
-      width: 12px; height: 5px;
-      background: rgba(0, 0, 0, 0.18);
-      border-radius: 50%;
-      margin-top: -2px;
-      transition: all 0.25s var(--ease-bounce);
-    }
-    .center-pin.is-dragging .pin-shadow {
-      width: 7px;
-      background: rgba(0, 0, 0, 0.08);
-    }
-
-    /* ============================================================
-       GPS RECENTER BUTTON
-       ============================================================ */
-    .btn-gps {
-      position: absolute;
-      bottom: 28px; right: 16px;
-      z-index: 600;
-      width: 46px; height: 46px;
-      background: var(--bg-card);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      border: none;
-      box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.15),
-        0 1px 4px rgba(0, 0, 0, 0.08);
-      font-size: 18px;
-      color: var(--brand);
-    }
-
-    /* ============================================================
-       BOTTOM SHEET
-       ============================================================ */
-    .bottom-sheet {
-      position: relative;
-      z-index: 700;
-      background: var(--bg-card);
-      border-radius: 26px 26px 0 0;
-      box-shadow:
-        0 -1px 0 rgba(0, 0, 0, 0.05),
-        0 -8px 32px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      /* transitions driven by JS height changes */
-      transition: height 0.45s var(--ease-sheet);
-      height: 230px;
-    }
-
-    /* Drag affordance handle */
-    .drag-handle-wrap {
-      display: flex;
-      justify-content: center;
-      padding: 12px 0 8px;
-      flex-shrink: 0;
-    }
-    .drag-handle {
-      width: 38px; height: 4px;
-      background: #e0e0e8;
-      border-radius: 2px;
-    }
-
-    /* ── Two-pane slider inside the sheet ── */
-    .view-slider {
-      display: flex;
-      width: 200vw;
-      flex: 1;
-      transition: transform 0.4s var(--ease-sheet);
-      overflow: hidden;           /* clip during animation */
-    }
-
-    .view-pane {
-      width: 100vw;
-      flex-shrink: 0;
-      padding: 4px 22px 0;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
-    .view-pane::-webkit-scrollbar { display: none; }
-
-    /* ============================================================
-       PANE 1 — Confirm Location
-       ============================================================ */
-    .loc-eyebrow {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--brand);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 5px;
-    }
-
-    .loc-header {
-      font-size: 19px;
-      font-weight: 800;
-      color: var(--text-1);
-      letter-spacing: -0.3px;
-      margin-bottom: 5px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .loc-header i { color: var(--brand); font-size: 16px; }
-
-    .loc-sub {
-      font-size: 12px;
-      color: var(--text-3);
-      font-weight: 500;
-      line-height: 1.5;
-      margin-bottom: 22px;
-    }
-
-    /* ── Skeleton placeholders inside the confirm pane ── */
-    .loc-skel-title {
-      height: 20px;
-      width: 55%;
-      border-radius: 8px;
-      margin-bottom: 6px;
-    }
-    .loc-skel-sub {
-      height: 14px;
-      width: 75%;
-      border-radius: 6px;
-      margin-bottom: 22px;
-    }
-
-    /* ============================================================
-       PANE 2 — Full Address Form
-       ============================================================ */
-    .form-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-shrink: 0;
-    }
-    .btn-back-form {
-      background: none;
-      border: none;
-      font-size: 18px;
-      color: var(--text-1);
-      padding: 0;
-      display: flex;
-      align-items: center;
-    }
-    .form-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--text-1);
-      letter-spacing: -0.2px;
-    }
-
-    /* ── Input groups ── */
-    .input-group { margin-bottom: 14px; }
-
-    .input-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 7px;
-    }
-
-    .input-field {
-      width: 100%;
-      background: var(--bg-input);
-      border: 1.5px solid transparent;
-      border-radius: var(--radius-input);
-      padding: 14px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      color: var(--text-1);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      outline: none;
-    }
-    .input-field:focus {
-      background: var(--bg-card);
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.12), 0 2px 8px rgba(252, 128, 25, 0.08);
-    }
-    .input-field::placeholder {
-      color: #b0b4bd;
-      font-weight: 500;
-    }
-
-    /* Two-column row */
-    .input-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    /* ── Section divider ── */
-    .section-divider {
-      height: 1px;
-      background: #f0f0f4;
-      margin: 18px 0 16px;
-    }
-    .section-eyebrow {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 12px;
-    }
-
-    /* ── Address Type Pills ── */
-    .type-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
+    /* Tags */
+    .input-group { margin-bottom: 22px; }
+    .input-label { display: block; font-size: 11px; font-weight: 800; color: var(--text-3); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; transition: color 0.2s; }
+    
+    .type-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
     .save-tag {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      border: 1.5px solid var(--border);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-2);
-      background: var(--bg-card);
-      cursor: pointer;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      transition:
-        border-color 0.2s ease,
-        background   0.2s ease,
-        color        0.2s ease,
-        box-shadow   0.2s ease,
-        transform    0.15s var(--ease-bounce);
-      user-select: none;
+      padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 700; color: var(--text-2); transition: 0.2s;
     }
-    .save-tag:active { transform: scale(0.93); }
-    .save-tag i { font-size: 11px; }
+    .save-tag.active { border-color: var(--brand); background: var(--brand-light); color: var(--brand); }
 
-    .save-tag.active {
-      border-color: var(--brand);
-      background: var(--brand-light);
-      color: var(--brand);
-      box-shadow: 0 2px 10px rgba(252, 128, 25, 0.18);
+    /* Inputs */
+    .input-field {
+      width: 100%; background: var(--bg-input); border: 1.5px solid transparent;
+      border-radius: var(--radius-input); padding: 16px; font-size: 14px; font-weight: 600;
+      outline: none; transition: 0.2s; font-family: inherit; color: var(--text-1);
     }
+    .input-field:focus { background: #fff; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.1); }
+    .input-field::placeholder { color: #9ca3af; font-weight: 500; }
 
-    /* ============================================================
-       STICKY SAVE BUTTON
-       ============================================================ */
-    .save-btn-wrap {
-      flex-shrink: 0;
-      padding: 12px 22px calc(12px + env(safe-area-inset-bottom));
-      background: var(--bg-card);
-      /* subtle inner top border */
-      border-top: 1px solid #f0f0f4;
-    }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* The button is outside the scrollable pane, pinned here */
-    #saveBtn {
-      width: 100%;
-      background: var(--brand);
-      color: #fff;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 800;
-      padding: 16px 20px;
-      border-radius: 16px;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      letter-spacing: 0.01em;
-      box-shadow:
-        0 6px 22px var(--brand-shadow),
-        0 2px 6px rgba(252, 128, 25, 0.15);
-      transition:
-        transform 0.15s var(--ease-bounce),
-        opacity   0.15s var(--ease-bounce),
-        box-shadow 0.15s ease;
+    /* Gift / Someone Else Card */
+    .gift-card {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 16px;
+      margin-top: 12px; margin-bottom: 32px; overflow: hidden; transition: border-color 0.2s ease, background 0.2s ease;
     }
-    #saveBtn:active:not(:disabled) {
-      transform: scale(0.96);
-      opacity: 0.9;
-      box-shadow: 0 3px 12px var(--brand-shadow);
-    }
-    #saveBtn:disabled {
-      background: #e5e7eb;
-      color: #9ca3af;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-    #saveBtn .btn-arrow {
-      width: 28px; height: 28px;
-      background: rgba(255, 255, 255, 0.22);
-      border-radius: 50%;
+    .gift-card.active { border-color: var(--brand); background: var(--brand-light); }
+    
+    .gift-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .gift-title-wrap { display: flex; align-items: center; gap: 12px; }
+    
+    .gift-icon {
+      width: 38px; height: 38px; background: #f1f1f5; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
+      color: var(--text-2); font-size: 16px; transition: 0.2s;
+    }
+    .gift-card.active .gift-icon { background: var(--brand); color: #fff; }
+    
+    .gift-title { font-size: 14px; font-weight: 800; color: var(--text-1); }
+    .gift-sub { font-size: 11px; font-weight: 600; color: var(--text-3); margin-top: 2px; }
+
+    /* Custom Toggle Switch */
+    .toggle-track {
+      width: 44px; height: 24px; background: #e5e7eb; border-radius: 99px;
+      position: relative; transition: 0.3s; flex-shrink: 0;
+    }
+    .toggle-circle {
+      width: 20px; height: 20px; background: #fff; border-radius: 50%;
+      position: absolute; top: 2px; left: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .gift-card.active .toggle-track { background: var(--brand); }
+    .gift-card.active .toggle-circle { transform: translateX(20px); }
+
+    .gift-body { padding: 0 16px 16px; display: none; }
+    .gift-body.show { display: block; animation: slideDown 0.3s var(--ease-bounce); }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ============================================================
-       SHIMMER UTILITY (global-style but scoped here)
-       ============================================================ */
-    @keyframes shimmer {
-      0%   { background-position: -600px 0; }
-      100% { background-position:  600px 0; }
+    /* Fixed Footer */
+    .footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--bg-page); padding: 16px 20px 24px;
+      border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
     }
-    .skeleton {
-      background: linear-gradient(90deg, #f0f0f4 25%, #e8e8ee 50%, #f0f0f4 75%);
-      background-size: 1200px 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 10px;
+    .btn-primary {
+      width: 100%; background: var(--brand); color: #fff; font-size: 15px; font-weight: 800;
+      padding: 18px 20px; border-radius: 16px; border: none; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(252, 128, 25, 0.25); transition: 0.2s;
     }
-
-    /* ============================================================
-       CONFIRM PANE SKELETON — mirror of loaded state
-       ============================================================ */
-    .confirm-skeleton { display: none; }  /* shown while loading */
-    .confirm-loaded   { display: block; } /* hidden while loading */
-
-    body.map-loading .confirm-skeleton { display: block; }
-    body.map-loading .confirm-loaded   { display: none;  }
-
-    /* ============================================================
-       SCROLL-TO-BOTTOM INDICATOR
-       on the form pane when content overflows
-       ============================================================ */
-    .scroll-hint {
-      display: flex;
-      justify-content: center;
-      padding: 4px 0 8px;
-      color: var(--text-3);
-      font-size: 11px;
-      gap: 4px;
-      align-items: center;
-    }
-
-    /* ============================================================
-       EXTRA POLISH — input icon prefix
-       ============================================================ */
-    .input-icon-wrap {
-      position: relative;
-    }
-    .input-icon-wrap .input-field {
-      padding-left: 42px;
-    }
-    .input-icon-wrap .field-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-3);
-      font-size: 14px;
-      pointer-events: none;
-    }
-    .input-icon-wrap .input-field:focus ~ .field-icon,
-    .input-icon-wrap .input-field:focus + .field-icon {
-      color: var(--brand);
-    }
-    /* Sibling approach for icon color on focus */
-    .input-icon-wrap:focus-within .field-icon {
-      color: var(--brand);
-      transition: color 0.2s ease;
-    }
+    .btn-primary:disabled { background: #e5e7eb; color: #9ca3af; box-shadow: none; cursor: not-allowed; }
   </style>
 </head>
+<body>
 
-<body class="map-loading">
-
-  <!-- ══════════════════════════════════════
-       MAP SECTION
-  ══════════════════════════════════════ -->
-  <div class="map-section">
-    <div id="map"></div>
-
-    <!-- ── Map Skeleton Overlay ── -->
-    <div id="map-skeleton">
-      <div class="skel-map-grid"></div>
-      <div class="skel-map-shimmer"></div>
-      <div class="skel-gps-wrap">
-        <div class="skel-gps-ring"></div>
-        <i class="fa-solid fa-location-crosshairs skel-gps-icon"></i>
-        <span class="skel-gps-label">Locating you…</span>
-      </div>
-    </div>
-
-    <!-- ── Floating Top Bar ── -->
-    <div class="top-bar">
-      <button class="btn-back tap" onclick="window.history.back()" aria-label="Go back">
-        <i class="fa-solid fa-arrow-left"></i>
-      </button>
-      <div class="search-bar tap">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        Search for area, street, landmark…
-      </div>
-    </div>
-
-    <!-- ── Centre Pin ── -->
-    <div class="center-pin-container">
-      <div class="center-pin" id="centerPin">
-        <div class="pin-bubble">Deliver here</div>
-        <i class="fa-solid fa-location-dot pin-icon"></i>
-        <div class="pin-shadow"></div>
-      </div>
-    </div>
-
-    <!-- ── GPS Recenter ── -->
-    <button class="btn-gps tap" onclick="centerOnGPS()" aria-label="Use my GPS location">
-      <i class="fa-solid fa-crosshairs"></i>
-    </button>
+  <div class="header">
+    <button class="btn-back tap" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="header-title">Address Details</div>
   </div>
 
+  <div class="local-banner">
+    <i class="fa-solid fa-location-dot"></i>
+    <span>Currently delivering exclusively in Maynaguri</span>
+  </div>
 
-  <!-- ══════════════════════════════════════
-       BOTTOM SHEET
-  ══════════════════════════════════════ -->
-  <div class="bottom-sheet" id="bottomSheet">
-    <div class="drag-handle-wrap">
-      <div class="drag-handle"></div>
+  <div class="form-content">
+    
+    <div class="input-group">
+      <label class="input-label">Para / Village / Locality *</label>
+      <input type="text" class="input-field" id="areaInput" placeholder="e.g. Dakshin Khagrabari, Natun Para..." oninput="checkForm()">
     </div>
 
-    <!-- Two-pane slider: Pane 1 = Confirm | Pane 2 = Form -->
-    <div class="view-slider" id="slider">
-
-      <!-- ── PANE 1: Confirm Location ── -->
-      <div class="view-pane" id="pane-confirm">
-
-        <!-- Skeleton (shown while map loads) -->
-        <div class="confirm-skeleton">
-          <div class="skeleton loc-skel-title"></div>
-          <div class="skeleton loc-skel-sub"></div>
-        </div>
-
-        <!-- Loaded content -->
-        <div class="confirm-loaded">
-          <div class="loc-eyebrow">Delivering to</div>
-          <div class="loc-header">
-            <i class="fa-solid fa-location-crosshairs"></i>
-            <span id="loc-name">Maynaguri</span>
-          </div>
-          <div class="loc-sub" id="loc-sub">Jalpaiguri District, West Bengal, 735224</div>
-        </div>
-
-        <button class="btn-primary tap" onclick="openDetailsForm()" id="confirm-btn">
-          Enter complete address &nbsp;<i class="fa-solid fa-arrow-right"></i>
-        </button>
-
-      </div>
-
-      <!-- ── PANE 2: Full Address Form ── -->
-      <div class="view-pane" id="pane-form">
-
-        <div class="form-header">
-          <button class="btn-back-form tap" onclick="closeDetailsForm()" aria-label="Back">
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-          <div class="form-title">Address Details</div>
-        </div>
-
-        <!-- Address Type -->
-        <div class="input-group">
-          <div class="input-label">Save address as</div>
-          <div class="type-row" id="tag-row">
-            <div class="save-tag active tap" onclick="selectTag(this,'Home')">
-              <i class="fa-solid fa-house"></i> Home
-            </div>
-            <div class="save-tag tap" onclick="selectTag(this,'Work')">
-              <i class="fa-solid fa-briefcase"></i> Work
-            </div>
-            <div class="save-tag tap" onclick="selectTag(this,'Friends')">
-              <i class="fa-solid fa-user-group"></i> Friends
-            </div>
-            <div class="save-tag tap" onclick="selectTag(this,'Other')">
-              <i class="fa-solid fa-location-dot"></i> Other
-            </div>
-          </div>
-        </div>
-
-        <!-- House / Flat -->
-        <div class="input-group">
-          <label class="input-label" for="houseInput">House / Flat / Block No. *</label>
-          <div class="input-icon-wrap">
-            <input
-              type="text"
-              class="input-field"
-              id="houseInput"
-              placeholder="e.g. Flat 4B, Ground Floor"
-              oninput="checkForm()"
-              autocomplete="off">
-            <i class="fa-regular fa-building field-icon"></i>
-          </div>
-        </div>
-
-        <!-- Apartment / Area -->
-        <div class="input-group">
-          <label class="input-label" for="areaInput">Apartment / Road / Area</label>
-          <div class="input-icon-wrap">
-            <input
-              type="text"
-              class="input-field"
-              id="areaInput"
-              placeholder="e.g. Sunrise Apartments, MG Road"
-              autocomplete="off">
-            <i class="fa-solid fa-road field-icon"></i>
-          </div>
-        </div>
-
-        <!-- Landmark / Complete Address -->
-        <div class="input-group">
-          <label class="input-label" for="landmarkInput">Landmark / Complete Address</label>
-          <div class="input-icon-wrap">
-            <input
-              type="text"
-              class="input-field"
-              id="landmarkInput"
-              placeholder="e.g. Near City Mall, Opp. Park"
-              autocomplete="off">
-            <i class="fa-solid fa-map-pin field-icon"></i>
-          </div>
-        </div>
-
-        <!-- Directions (Optional) -->
-        <div class="input-group">
-          <label class="input-label" for="directionsInput">Directions to reach <span style="font-weight:500;text-transform:none;color:#b0b4bd;">(Optional)</span></label>
-          <input
-            type="text"
-            class="input-field"
-            id="directionsInput"
-            placeholder="e.g. Ring the 2nd doorbell">
-        </div>
-
-        <div class="section-divider"></div>
-
-        <!-- Receiver Details -->
-        <div class="section-eyebrow">Receiver's details <span style="font-weight:500;text-transform:none;color:#b0b4bd;">(if ordering for someone else)</span></div>
-
-        <div class="input-row">
-          <div class="input-group" style="margin-bottom:0;">
-            <label class="input-label" for="receiverName">Full Name</label>
-            <input
-              type="text"
-              class="input-field"
-              id="receiverName"
-              placeholder="Receiver's name"
-              autocomplete="off">
-          </div>
-          <div class="input-group" style="margin-bottom:0;">
-            <label class="input-label" for="receiverPhone">Phone</label>
-            <input
-              type="tel"
-              class="input-field"
-              id="receiverPhone"
-              placeholder="+91 00000 00000"
-              autocomplete="tel">
-          </div>
-        </div>
-
-        <!-- bottom padding so last field isn't hidden under sticky btn -->
-        <div style="height: 12px; flex-shrink:0;"></div>
-      </div>
-
-    </div><!-- /view-slider -->
-
-    <!-- ── Sticky Save Button (outside scrollable pane) ── -->
-    <div class="save-btn-wrap" id="save-btn-wrap" style="display:none;">
-      <button id="saveBtn" disabled onclick="saveAddress()">
-        Save Address &amp; Proceed
-        <span class="btn-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-      </button>
+    <div class="input-group">
+      <label class="input-label">House Number / Name</label>
+      <input type="text" class="input-field" id="houseInput" placeholder="e.g. House No. 12, Sen Bhawan" oninput="checkForm()">
     </div>
 
-  </div><!-- /bottom-sheet -->
+    <div class="input-group">
+      <label class="input-label">Nearest Landmark *</label>
+      <input type="text" class="input-field" id="landmarkInput" placeholder="e.g. Opposite Kalibari, Near Post Office" oninput="checkForm()">
+    </div>
 
+    <div class="input-group" style="margin-top: 32px;">
+      <label class="input-label" id="contactLabel">Your Contact Details *</label>
+      <div class="input-row">
+        <input type="text" class="input-field" id="receiverName" placeholder="Full Name" oninput="checkForm()">
+        <input type="tel" class="input-field" id="receiverPhone" placeholder="Mobile Number" maxlength="10" oninput="checkForm()">
+      </div>
+    </div>
 
-  <!-- ══════════════════════════════════
-       SCRIPTS
-  ══════════════════════════════════ -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <div class="gift-card" id="giftCard">
+      <div class="gift-header tap" onclick="toggleGift()">
+        <div class="gift-title-wrap">
+          <div class="gift-icon"><i class="fa-solid fa-gift"></i></div>
+          <div>
+            <div class="gift-title">Ordering for someone else?</div>
+            <div class="gift-sub">Send food to your partner or family</div>
+          </div>
+        </div>
+        <div class="toggle-track">
+          <div class="toggle-circle"></div>
+        </div>
+      </div>
+      
+      <div class="gift-body" id="giftBody">
+        <input type="text" class="input-field" id="giftMessage" placeholder="Add a custom message (e.g. Happy Birthday!)" style="background:#fff; border-color:var(--border);">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <div class="input-label">Save address as</div>
+      <div class="type-row">
+        <div class="save-tag active tap" onclick="selectTag(this,'Home')">Home</div>
+        <div class="save-tag tap" onclick="selectTag(this,'Work')">Work</div>
+        <div class="save-tag tap" onclick="selectTag(this,'Other')">Other</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="btn-primary tap" id="saveBtn" disabled onclick="saveAddress()">Save Address & Proceed</button>
+  </div>
 
   <script>
-    /* =========================================
-       1. LEAFLET MAP INITIALIZATION
-          (original logic fully preserved)
-       ========================================= */
-    const maynaguriCoords = [26.5613, 88.8225];
+    let selectedTag = 'Home';
+    let isGift = false;
 
-    const map = L.map('map', {
-      zoomControl: false
-    }).setView(maynaguriCoords, 16);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(map);
-
-    /* ── Hide skeleton once tiles start loading ── */
-    const mapSkeleton = document.getElementById('map-skeleton');
-
-    map.once('load', revealMap);           // fires when first tiles finish
-    setTimeout(revealMap, 3000);           // fallback: reveal after 3 s max
-
-    function revealMap() {
-      mapSkeleton.classList.add('hidden');
-      document.body.classList.remove('map-loading');
+    function selectTag(el, tag) {
+      document.querySelectorAll('.save-tag').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      selectedTag = tag;
     }
 
-    /* =========================================
-       2. MAP DRAG ANIMATIONS & DATA LOGIC
-          (original logic fully preserved)
-       ========================================= */
-    const centerPin = document.getElementById('centerPin');
-    let currentLat = maynaguriCoords[0];
-    let currentLng = maynaguriCoords[1];
+    function toggleGift() {
+      isGift = !isGift;
+      const card = document.getElementById('giftCard');
+      const body = document.getElementById('giftBody');
+      const contactLabel = document.getElementById('contactLabel');
 
-    map.on('movestart', function() {
-      centerPin.classList.add('is-dragging');
-    });
-
-    map.on('moveend', function() {
-      centerPin.classList.remove('is-dragging');
-      const center = map.getCenter();
-      currentLat = center.lat;
-      currentLng = center.lng;
-      console.log(`Pin dropped at -> Lat: ${currentLat}, Lng: ${currentLng}`);
-    });
-
-    function centerOnGPS() {
-      map.flyTo(maynaguriCoords, 16, { animate: true, duration: 1 });
-    }
-
-    /* =========================================
-       3. BOTTOM SHEET UI LOGIC
-          (original logic preserved + enhanced)
-       ========================================= */
-    const bottomSheet   = document.getElementById('bottomSheet');
-    const slider        = document.getElementById('slider');
-    const saveBtnWrap   = document.getElementById('save-btn-wrap');
-    const houseInput    = document.getElementById('houseInput');
-    const areaInput     = document.getElementById('areaInput');
-    const landmarkInput = document.getElementById('landmarkInput');
-    const directionsInput = document.getElementById('directionsInput');
-    const receiverName  = document.getElementById('receiverName');
-    const receiverPhone = document.getElementById('receiverPhone');
-    const saveBtn       = document.getElementById('saveBtn');
-    const tags          = document.querySelectorAll('.save-tag');
-    let   selectedTag   = 'Home';
-
-    function openDetailsForm() {
-      bottomSheet.style.height = '78dvh';
-      slider.style.transform   = 'translateX(-100vw)';
-      saveBtnWrap.style.display = 'block';
-      /* small delay so the sheet expands before keyboard could push it */
-      setTimeout(() => houseInput.focus(), 450);
-    }
-
-    function closeDetailsForm() {
-      bottomSheet.style.height = '230px';
-      slider.style.transform   = 'translateX(0)';
-      saveBtnWrap.style.display = 'none';
-      document.activeElement.blur();
-    }
-
-    function selectTag(clickedElement, tagName) {
-      tags.forEach(tag => tag.classList.remove('active'));
-      clickedElement.classList.add('active');
-      selectedTag = tagName;
+      if (isGift) {
+        card.classList.add('active');
+        body.classList.add('show');
+        contactLabel.innerText = "Receiver's Contact Details *";
+        contactLabel.style.color = "var(--brand)";
+        // Auto-focus the message field for a smoother UX
+        setTimeout(() => document.getElementById('giftMessage').focus(), 100);
+      } else {
+        card.classList.remove('active');
+        body.classList.remove('show');
+        contactLabel.innerText = "Your Contact Details *";
+        contactLabel.style.color = "var(--text-3)";
+        document.getElementById('giftMessage').value = '';
+      }
     }
 
     function checkForm() {
-      saveBtn.disabled = houseInput.value.trim().length === 0;
+      const area = document.getElementById('areaInput').value.trim();
+      const landmark = document.getElementById('landmarkInput').value.trim();
+      const name = document.getElementById('receiverName').value.trim();
+      const phone = document.getElementById('receiverPhone').value.trim();
+      
+      // Button only unlocks if ALL fields are filled AND phone is at least 10 digits
+      document.getElementById('saveBtn').disabled = (
+        area === '' || 
+        landmark === '' || 
+        name === '' || 
+        phone.length < 10
+      );
     }
 
     function saveAddress() {
-      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>&nbsp; Saving…';
-      saveBtn.disabled  = true;
+      const btn = document.getElementById('saveBtn');
+      btn.innerText = 'Saving...'; 
+      btn.disabled = true;
 
-      /* ── THIS IS THE DATA WE WILL SEND TO CONVEX LATER! ── */
       const addressData = {
-        lat:          currentLat,
-        lng:          currentLng,
-        house:        houseInput.value,
-        area:         areaInput.value,
-        landmark:     landmarkInput.value,
-        directions:   directionsInput.value,
-        receiverName: receiverName.value,
-        receiverPhone:receiverPhone.value,
-        tag:          selectedTag
+        tag: selectedTag,
+        area: document.getElementById('areaInput').value,
+        house: document.getElementById('houseInput').value || 'No House Number',
+        landmark: document.getElementById('landmarkInput').value,
+        receiverName: document.getElementById('receiverName').value,
+        receiverPhone: document.getElementById('receiverPhone').value,
+        giftMessage: isGift ? document.getElementById('giftMessage').value : ''
       };
 
-      /* Save to localStorage so cart.html can read it */
+      // Save locally to display in cart
       localStorage.setItem('nearbite_address', JSON.stringify(addressData));
-
-      console.log('Saving to Backend:', addressData);
-
-      /* Go back to cart to complete the order */
-      setTimeout(() => {
-        window.location.href = 'cart.html';
-      }, 800);
+      
+      setTimeout(() => { window.location.href = 'cart.html'; }, 300);
     }
-
-    /* ── Leaflet map resize after sheet expands ── */
-    bottomSheet.addEventListener('transitionend', function() {
-      map.invalidateSize();
-    });
   </script>
 </body>
 </html>

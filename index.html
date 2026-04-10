@@ -333,7 +333,7 @@
     .vr-heart i { font-size: 14px; color: #94a3b8; }
     .vr-body { padding: 14px 16px 16px; }
     .vr-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-    .vr-name { font-size: 17px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
+    .vr-name { font-size: 17px; font-weight: 800; color: #0f172a; letter-spacing: 0px; word-spacing: 2px;  }
     .vr-rating { display: flex; align-items: center; gap: 4px; flex-shrink: 0; background: #f0fdf4; border: 1.5px solid rgba(22,163,74,0.2); border-radius: 10px; padding: 4px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
     .vr-rating .star-icon { font-size: 11px; color: #16a34a; }
     .vr-rating .rating-num { font-size: 13px; font-weight: 900; color: #14532d; line-height: 1; }
@@ -753,7 +753,7 @@
       <span class="cat-name">samosa</span>
      </div>
       <div class="cat-item" onclick="goCategory('dosa')">
-      <div class="cat-ring"><img src="assets/dosa.jpjsg" alt="Burgers" loading="lazy"></div>
+      <div class="cat-ring"><img src="assets/dosa.jpg" alt="dosa" loading="lazy"></div>
       <span class="cat-name">dosa</span>
   </div>
 </div>
@@ -826,9 +826,8 @@
   <div class="sec-head" style="padding:0;margin-bottom:20px">
     <span class="sec-title">Restaurants to explore</span>
   </div>
-  <div id="restaurant-list"
-     class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4">
-  </div>
+  <div id="restaurant-list"></div>
+</div>
 
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item" style="color:#FC8019">
@@ -847,7 +846,7 @@
     <span>Orders</span>
   </a>
 </nav>
-<script src="./home.js"></script>
+<script src="home.js"></script>
 <script>
   // ── Skeleton Loader Removal ──
   window.addEventListener('load', () => {
@@ -858,6 +857,7 @@
         skel.classList.add('sk-hide');
         setTimeout(() => skel.remove(), 550);
       }
+      displayRestaurants(false);
     }, 600);
   });
 
@@ -890,8 +890,45 @@
     } else {
       track.classList.remove('on');
     }
+    if (typeof displayRestaurants === 'function') displayRestaurants(vegOnly);
+  }
 
-  
+  // ── Restaurant render ──
+  function displayRestaurants(filterVeg) {
+    const list = document.getElementById('restaurant-list');
+    if (!list || typeof restaurants === 'undefined') return;
+
+    let data = filterVeg
+      ? restaurants.filter(r => r.menu && r.menu.every(i => i.isVeg))
+      : restaurants;
+
+    list.innerHTML = data.map((res, i) => `
+      <a href="restaurant.html?id=${res.id}" class="vr" style="animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s; opacity: 0; transform: translateY(20px);">
+        <div class="vr-img">
+          <img src="${res.image}" alt="${res.name}"
+               onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'">
+          <div class="vr-heart"><i class="fa-solid fa-heart"></i></div>
+          <div class="vr-offer">${res.offer}</div>
+        </div>
+        <div class="vr-body">
+          <div class="vr-top">
+            <span class="vr-name">${res.name}</span>
+            <div class="vr-rating">
+              <i class="fa-solid fa-star star-icon"></i>
+              <span class="rating-num">${res.rating}</span>
+              <div class="rating-divider"></div>
+              <span class="rating-count">${res.ratingCount || '1K+'}</span>
+            </div>
+          </div>
+          <div class="vr-cuisine">${res.cuisine}</div>
+          <div class="vr-meta">
+            <i class="fa-solid fa-clock"></i> ${res.time}
+            <span class="vr-sep">•</span>
+            <i class="fa-solid fa-location-dot"></i> ${res.distance}
+          </div>
+        </div>
+      </a>
+    `).join('');
   }
 
   // ── Zomato Smart Scroll Logic (BOTTOM NAV ONLY) ──

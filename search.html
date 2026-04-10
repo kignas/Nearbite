@@ -492,54 +492,63 @@
     }
   });
 
-  function doSearch(q) {
-    if (typeof restaurants === 'undefined') return;
+  async function doSearch(q) {
+    const API_BASE_URL = 'https://eatswada.onrender.com/api';
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/restaurants/search?q=${q}`);
+      const result = await response.json();
+      
+      if (!result.success) throw new Error("Search failed");
 
-    const matched = restaurants.filter(res =>
-      res.name.toLowerCase().includes(q) ||
-      (res.cuisine && res.cuisine.toLowerCase().includes(q)) ||
-      (res.menu && res.menu.some(item => item.name.toLowerCase().includes(q)))
-    );
+      // Merge restaurants and menu item results from your API
+      const matchedRes = result.data.restaurants;
+      const matchedMenu = result.data.menuItems;
 
-    resultsCount.innerText =
-      matched.length + ' restaurant' + (matched.length !== 1 ? 's' : '') + ' found';
+      // Extract unique restaurants from the menu items that matched
+      const menuResIds = matchedMenu.map(m => m.restaurant._id);
+      const combinedRestaurants = [...matchedRes, ...matchedMenu.map(m => m.restaurant)]
+          .filter((res, index, self) => index === self.findIndex((t) => t._id === res._id));
 
-    if (matched.length === 0) {
-      resultsList.innerHTML = `
-        <div class="empty-state">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <h3>No results for "${searchInput.value}"</h3>
-          <p>Try searching for something else</p>
-        </div>`;
-      return;
-    }
+      resultsCount.innerText = combinedRestaurants.length + ' result' + (combinedRestaurants.length !== 1 ? 's' : '') + ' found';
 
-    resultsList.innerHTML = matched.map(res => {
-      const matchedDishes = (res.menu || [])
-        .filter(item => item.name.toLowerCase().includes(q))
-        .slice(0, 3)
-        .map(i => i.name)
-        .join(', ');
+      if (combinedRestaurants.length === 0) {
+        resultsList.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h3>No results for "${searchInput.value}"</h3>
+            <p>Try searching for something else</p>
+          </div>`;
+        return;
+      }
 
-      return `
-        <a href="restaurant.html?id=${res.id}" class="result-card tap">
-          <div class="res-img-wrap">
-            <img src="${res.image}" alt="${res.name}"
-                 onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&auto=format&fit=crop&q=80'">
-          </div>
-          <div class="res-info">
-            <div class="res-head">
-              <div class="res-name">${res.name}</div>
-              <div class="res-rating"><i class="fa-solid fa-star" style="font-size:7px;"></i> ${res.rating}</div>
+      resultsList.innerHTML = combinedRestaurants.map(res => {
+        // If they searched a dish, show the matching dish name in the card
+        const matchingDishes = matchedMenu.filter(m => m.restaurant._id === res._id).map(m => m.name).slice(0, 2).join(', ');
+        
+        return `
+          <a href="restaurant.html?id=${res._id}" class="result-card tap">
+            <div class="res-img-wrap">
+              <img src="${res.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&auto=format&fit=crop&q=80'}" alt="${res.name}">
             </div>
-            <div class="res-meta">${res.time} · ${res.distance}</div>
-            ${matchedDishes
-              ? `<div class="res-match-dish"><i class="fa-solid fa-utensils" style="font-size:9px;margin-right:3px;"></i>${matchedDishes}</div>`
-              : `<div class="res-cuisine">${res.cuisine || 'Restaurant'}</div>`
-            }
-          </div>
-        </a>`;
-    }).join('');
+            <div class="res-info">
+              <div class="res-head">
+                <div class="res-name">${res.name}</div>
+                <div class="res-rating"><i class="fa-solid fa-star" style="font-size:7px;"></i> ${res.rating || '4.0'}</div>
+              </div>
+              <div class="res-meta">${res.time || '30 mins'} · ${res.distance || '2 km'}</div>
+              ${matchingDishes
+                ? `<div class="res-match-dish"><i class="fa-solid fa-utensils" style="font-size:9px;margin-right:3px;"></i>${matchingDishes}</div>`
+                : `<div class="res-cuisine">${res.cuisineDisplay || 'Restaurant'}</div>`
+              }
+            </div>
+          </a>`;
+      }).join('');
+      
+    } catch (error) {
+      console.error(error);
+      resultsList.innerHTML = `<div class="empty-state"><p>Error connecting to search server.</p></div>`;
+    }
   }
 
   function clearSearch() {
