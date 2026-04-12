@@ -423,6 +423,7 @@
     }
 
     async function placeOrder() {
+    async function placeOrder() {
       if (!hasAddress()) {
         /* Shake the button */
         const btn = document.getElementById('btn-checkout');
@@ -451,13 +452,13 @@
 
       try {
         // 1. STRICT LOGIN CHECK: Kick to login if no token is found!
-        const token = localStorage.getItem('nearbite_token');
+        // Upgraded to check both token names just like profile.html
+        const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
         if (!token) {
-         // Leave a sticky note!
-        localStorage.setItem('return_to', 'cart.html'); 
-        window.location.href = 'login.html';
-       return;
-      }
+          // Leave a sticky note!
+          localStorage.setItem('return_to', 'cart.html'); 
+          window.location.href = 'login.html';
+          return;
         }
 
         // 2. Gather data from Local Storage
@@ -494,7 +495,7 @@
            method: 'POST',
            headers: { 
              'Content-Type': 'application/json',
-             'Authorization': `Bearer ${token}` // Passes the security check
+             'Authorization': `Bearer ${token}` 
            },
            body: JSON.stringify(payload)
         });
