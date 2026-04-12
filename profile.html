@@ -402,7 +402,7 @@
       <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
     </div>
   </div>
-  <button class="logout-btn tap">
+<button class="logout-btn tap" onclick="handleLogout()">
     <div class="logout-icon"><i class="fa-solid fa-right-from-bracket" style="color:#ef4444;font-size:15px;"></i></div>
     <span class="logout-text">Log Out</span>
   </button>
@@ -446,18 +446,65 @@
   }
 </script>
 <script>
-  // Read user data from local storage
-  document.addEventListener('DOMContentLoaded', () => {
+  // --- PRODUCTION PROFILE CONTROLLER ---
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    
+    // 1. AUTH GUARD: If no token exists, kick them to login immediately
+    if (!token) {
+      window.location.replace('login.html');
+      return;
+    }
+
+    // 2. INSTANT UI LOAD: Load cached user data so the screen doesn't look blank
     const savedUser = localStorage.getItem('nearbite_user');
     if (savedUser) {
       const user = JSON.parse(savedUser);
       const nameEl = document.querySelector('.avatar-name');
       const phoneEl = document.querySelector('.avatar-phone');
       
-      if (nameEl) nameEl.innerText = user.name;
-      if (phoneEl) phoneEl.innerText = user.phone;
+      if (nameEl) nameEl.innerText = user.name || 'Eatswada User';
+      if (phoneEl) phoneEl.innerText = user.phone || 'No phone added';
+    }
+
+    // 3. SILENT VERIFICATION: Test the token with the live server
+    try {
+      const res = await fetch('https://eatswada.onrender.com/api/orders?limit=1', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await res.json();
+
+      // 4. SELF-HEALING: If the backend says the token is dead, auto-logout cleanly!
+      if (data.message === 'Token invalid or expired' || res.status === 401) {
+        console.log('Token expired. Auto-cleaning state...');
+        handleLogout(); 
+      }
+    } catch (err) {
+      console.log('Network error, but keeping cached data for offline support.');
     }
   });
+
+  // --- LOGOUT FUNCTION ---
+  function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('nearbite_user');
+    localStorage.removeItem('nearbite_token'); // Catch-all for old ghosts
+    window.location.replace('login.html'); // .replace prevents hitting "back" to return here
+  }
+
+    // Logout Function
+  function handleLogout() {
+    // 1. Delete the saved ID badge (token) and user details
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('nearbite_user');
+    
+    // 2. Just in case you used a different name, clear this too
+    localStorage.removeItem('nearbite_token'); 
+
+    // 3. Send the user back to the login page
+    window.location.href = 'login.html';
+  }
 </script>
 </body>
 </html>
