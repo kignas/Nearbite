@@ -244,6 +244,14 @@
   </div>
 
   <script>
+    // ==========================================
+    // 1. PRE-AUTH GUARD
+    // ==========================================
+    // If the user already has a token, bounce them to the home page instantly!
+    if (localStorage.getItem('token') || localStorage.getItem('nearbite_token')) {
+      window.location.replace('index.html');
+    }
+
     /* Hero Slider */
     let currentSlide = 0;
     const totalSlides = 3;
@@ -269,14 +277,12 @@
     const API_URL = 'https://eatswada.onrender.com/api/users'; // Base API URL
 
     async function sendOTP() {
-      const phoneVal = '+91' + phoneInput.value; // Format for your backend regex
+      const phoneVal = '+91' + phoneInput.value; 
       
-      // Visual feedback while loading
       actionBtn.innerText = 'Sending...';
       actionBtn.disabled = true;
 
       try {
-        // 1. Ask backend to send the OTP
         const response = await fetch(`${API_URL}/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -286,7 +292,6 @@
         const result = await response.json();
 
         if (response.ok && result.success) {
-          // 2. Success! Switch to the OTP screen
           displayPhone.innerText = phoneVal;
           window.scrollTo({ top: 320, behavior: 'smooth' });
           document.getElementById('step1').classList.remove('active');
@@ -312,7 +317,6 @@
          const phoneVal = '+91' + phoneInput.value;
          
          try {
-           // 1. Send the 4 digits to the backend for verification
            const response = await fetch(`${API_URL}/verify-otp`, {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
@@ -322,15 +326,25 @@
            const result = await response.json();
 
            if (response.ok && result.success) {
-             // 2. Verified! Save the real JWT token and User data securely
-             localStorage.setItem('nearbite_token', result.data.token);
+             // ==========================================
+             // 2. STANDARDIZED TOKENS
+             // ==========================================
+             localStorage.setItem('token', result.data.token);
+             localStorage.setItem('nearbite_token', result.data.token); 
              localStorage.setItem('nearbite_user', JSON.stringify(result.data.user));
              
-             // Smooth redirect to Home Page
-             setTimeout(() => window.location.href = 'index.html', 500);
+             // ==========================================
+             // 3. SMART REDIRECT (THE AMNESIA FIX)
+             // ==========================================
+             // Check if the user came from the cart, otherwise go to index
+             const returnUrl = localStorage.getItem('return_to') || 'index.html';
+             localStorage.removeItem('return_to'); // Throw away the sticky note
+             
+             // .replace() prevents the user from hitting "back" into the login screen
+             setTimeout(() => window.location.replace(returnUrl), 500);
            } else {
              alert(result.message || "Invalid OTP!");
-             otpBoxes.forEach(box => box.value = ''); // Clear boxes on fail
+             otpBoxes.forEach(box => box.value = ''); 
              otpBoxes[0].focus();
            }
          } catch (error) {
@@ -338,7 +352,6 @@
          }
       }
     }
-
 
     function moveNext(input, index) {
       input.value = input.value.replace(/\D/g, ''); 
@@ -351,6 +364,15 @@
     }
     
     function verifyOTP() { checkOTPCompletion(); }
+
+    // ==========================================
+    // 4. THE MISSING BACK BUTTON FUNCTION
+    // ==========================================
+    function goBack() {
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step1').classList.add('active');
+      otpBoxes.forEach(box => box.value = ''); // Clear OTP boxes
+    }
   </script>
-</body>
-</html>
+  </body>
+  </html>
