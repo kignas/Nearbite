@@ -446,17 +446,29 @@
   }
 </script>
 <script>
+  function toggleSwitch(el) { el.classList.toggle('on'); }
+
+  function copyCode(e) {
+    e.stopPropagation(); 
+    navigator.clipboard && navigator.clipboard.writeText('NEAR100');
+    const btn = e.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px;"></i> Copied!';
+    btn.style.background = '#16a34a';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+  }
+
   // --- PRODUCTION PROFILE CONTROLLER ---
   document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('token');
+    // 1. SMART AUTH GUARD: Check for both possible token names!
+    const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
     
-    // 1. AUTH GUARD: If no token exists, kick them to login immediately
     if (!token) {
       window.location.replace('login.html');
       return;
     }
 
-    // 2. INSTANT UI LOAD: Load cached user data so the screen doesn't look blank
+    // 2. INSTANT UI LOAD
     const savedUser = localStorage.getItem('nearbite_user');
     if (savedUser) {
       const user = JSON.parse(savedUser);
@@ -467,43 +479,27 @@
       if (phoneEl) phoneEl.innerText = user.phone || 'No phone added';
     }
 
-    // 3. SILENT VERIFICATION: Test the token with the live server
+    // 3. SILENT VERIFICATION
     try {
       const res = await fetch('https://eatswada.onrender.com/api/orders?limit=1', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       const data = await res.json();
-
-      // 4. SELF-HEALING: If the backend says the token is dead, auto-logout cleanly!
       if (data.message === 'Token invalid or expired' || res.status === 401) {
-        console.log('Token expired. Auto-cleaning state...');
         handleLogout(); 
       }
     } catch (err) {
-      console.log('Network error, but keeping cached data for offline support.');
+      console.log('Network error, keeping cached data.');
     }
   });
 
   // --- LOGOUT FUNCTION ---
   function handleLogout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('nearbite_token');
     localStorage.removeItem('nearbite_user');
-    localStorage.removeItem('nearbite_token'); // Catch-all for old ghosts
-    window.location.replace('login.html'); // .replace prevents hitting "back" to return here
-  }
-
-    // Logout Function
-  function handleLogout() {
-    // 1. Delete the saved ID badge (token) and user details
-    localStorage.removeItem('token'); 
-    localStorage.removeItem('nearbite_user');
-    
-    // 2. Just in case you used a different name, clear this too
-    localStorage.removeItem('nearbite_token'); 
-
-    // 3. Send the user back to the login page
-    window.location.href = 'login.html';
+    window.location.replace('login.html');
   }
 </script>
 </body>
