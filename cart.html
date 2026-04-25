@@ -422,7 +422,6 @@
       window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
     }
 
-    
     async function placeOrder() {
       if (!hasAddress()) {
         /* Shake the button */
@@ -452,13 +451,11 @@
 
       try {
         // 1. STRICT LOGIN CHECK: Kick to login if no token is found!
-        // Upgraded to check both token names just like profile.html
-        const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
+        const token = localStorage.getItem('nearbite_token');
         if (!token) {
-          // Leave a sticky note!
-          localStorage.setItem('return_to', 'cart.html'); 
-          window.location.href = 'login.html';
-          return;
+           alert("Please log in to place an order!");
+           window.location.href = 'login.html';
+           return;
         }
 
         // 2. Gather data from Local Storage
@@ -495,7 +492,7 @@
            method: 'POST',
            headers: { 
              'Content-Type': 'application/json',
-             'Authorization': `Bearer ${token}` 
+             'Authorization': `Bearer ${token}` // Passes the security check
            },
            body: JSON.stringify(payload)
         });
@@ -518,7 +515,7 @@
       }
     }
 
-        document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
       renderCart();
       loadAddress();
     });

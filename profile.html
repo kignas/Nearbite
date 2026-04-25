@@ -3,25 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Profile – Nearbite</title>
+  <title>Your Account · EatSwada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    /* ════════════════════════════════════════════
+       ULTRA-PREMIUM MINIMALIST RESET
+    ════════════════════════════════════════════ */
     :root {
       --brand:   #FC8019;
-      --dark-red:#8B0000;
-      --red:     #C0392B;
-      --green:   #16a34a;
-      --text-1:  #111827;
-      --text-2:  #374151;
-      --text-3:  #6b7280;
-      --bg:      #F2F3F5;
-      --surface: #ffffff;
-      --border:  #F0F2F5;
-      --ease:    cubic-bezier(0.4,0,0.2,1);
+      --text-1:  #111827; /* Near black */
+      --text-2:  #4b5563; /* Dark grey */
+      --text-3:  #9ca3af; /* Light grey */
+      --bg:      #FFFFFF; /* Pure white bg is premium */
+      --divider: #f3f4f6; /* Very subtle borders */
+      --ease:    cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,476 +30,291 @@
       background: var(--bg);
       color: var(--text-1);
       -webkit-tap-highlight-color: transparent;
-      -webkit-font-smoothing: antialiased;
-      padding-bottom: 88px;
+      padding-bottom: 90px;
     }
 
-    .tap { cursor: pointer; transition: transform 0.13s var(--ease); }
-    .tap:active { transform: scale(0.96); }
+    /* Slick tap interactions */
+    .tap { cursor: pointer; transition: background-color 0.15s var(--ease); }
+    .tap:active { background-color: #fafafa; }
 
-    /* ════════════════════════════
-       HERO HEADER
-    ════════════════════════════ */
-    .profile-hero {
-  /* Richer, deeper red gradient */
-  background: linear-gradient(135deg, #A90000 0%, #D32F2F 50%, #E53935 100%);
-  /* Increased bottom padding from 72px to 90px to give the floating card room */
-  padding: 52px 18px 90px;
-  border-bottom-left-radius: 32px;
-  border-bottom-right-radius: 32px;
-  position: relative;
-  overflow: hidden;
-}
+    /* ════════════════════════════════════════════
+       MINIMALIST TOP BAR & HEADER
+    ════════════════════════════════════════════ */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: #FFFFFF;
+      padding: 16px 20px 8px;
+    }
 
-    .profile-hero .dc1 { position:absolute; top:-60px; right:-50px; width:180px; height:180px; background:rgba(255,255,255,0.07); border-radius:50%; pointer-events:none; }
-    .profile-hero .dc2 { position:absolute; bottom:-40px; left:-40px; width:120px; height:120px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none; }
-    .profile-hero .dc3 { position:absolute; top:35%; right:15%; width:52px; height:52px; background:rgba(255,255,255,0.06); border-radius:50%; pointer-events:none; }
-
-    .hero-topbar {
+    .top-action-row {
       display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 24px; position: relative; z-index: 2;
+      margin-bottom: 18px;
     }
-    .btn-back, .btn-more {
-      width:36px; height:36px; background:rgba(255,255,255,0.15);
-      border-radius:50%; border:1.5px solid rgba(255,255,255,0.2);
-      display:flex; align-items:center; justify-content:center;
-      color:#fff; font-size:14px;
-    }
-    .hero-actions { display:flex; align-items:center; gap:8px; }
-    .btn-help {
-      background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.2);
-      border-radius:50px; padding:6px 14px;
-      font-size:12px; font-weight:700; color:#fff; border:none;
-    }
+    
+    .page-title { font-size: 16px; font-weight: 800; color: #000; letter-spacing: -0.2px; }
+    
+    .icon-actions { display: flex; gap: 20px; }
+    
+    /* Using outlined icons like Zomato/Swiggy reference */
+    .icon-actions i { font-size: 16px; color: var(--text-2); }
 
-    /* Avatar row */
-    .avatar-row { display:flex; align-items:center; gap:14px; position:relative; z-index:2; }
-    .avatar-wrap { position:relative; flex-shrink:0; }
+    /* Avatar and Personal Info */
+    .avatar-block { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+    
+    /* Sleek brand-colored initial circle */
     .avatar-circle {
-      width:68px; height:68px; border-radius:50%;
-      background:rgba(255,255,255,0.18);
-      border:2.5px solid rgba(255,255,255,0.3);
-      display:flex; align-items:center; justify-content:center;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--brand); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900;
     }
-    .avatar-circle i { font-size:28px; color:rgba(255,255,255,0.9); }
-    .avatar-edit {
-      position:absolute; bottom:0; right:0; width:22px; height:22px; 
-      background:var(--brand); border-radius:50%; border:2px solid var(--red);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .avatar-edit i { font-size:9px; color:#fff; }
-    .avatar-info { flex:1; min-width:0; }
- .avatar-name {
-  /* Switched off Syne to the clean Plus Jakarta Sans */
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 20px; 
-  font-weight: 800; 
-  color: #fff; 
-  line-height: 1.2; 
-  margin-bottom: 2px;
-  letter-spacing: -0.3px; /* Pulls letters slightly tighter for a premium feel */
-}
+    
+    .personal-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 22px; font-weight: 900; color: #000; letter-spacing: -0.5px; }
+    .user-phone { font-size: 13px; color: var(--text-2); font-weight: 600; margin-top: 2px; }
 
-.avatar-phone {
-  font-size: 12px; 
-  color: rgba(255,255,255,0.75); /* Made slightly brighter for better contrast */
-  font-weight: 500; 
-}
+    /* ════════════════════════════════════════════
+       CONTENT BLOCK & SECTIONS
+    ════════════════════════════════════════════ */
+    .container { padding: 0 16px; margin-top: 12px; }
 
-    .btn-edit-profile {
-      background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.25);
-      border-radius:50px; padding:5px 12px; font-size:11px; font-weight:700; color:#fff; white-space:nowrap;
+    /* Section Label - Cleaned up spacing */
+    .section-label {
+      font-size: 11px; font-weight: 800; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 1.2px;
+      padding: 24px 4px 10px;
     }
 
-    /* ════════════════════════════
-       CONTENT STACK
-    ════════════════════════════ */
-.content-stack {
-  padding: 0 16px; 
-  margin-top: -54px; /* Pulled up slightly more, but safe because of the new hero padding */
-  position: relative; 
-  z-index: 10;
-  display: flex; 
-  flex-direction: column; 
-  gap: 12px;
-}
-
-.stats-bar {
-  background: #fff; 
-  border-radius: 20px; 
-  padding: 18px 16px;
-  /* Layered shadow: tight shadow + wide diffused shadow */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 12px 36px -4px rgba(0, 0, 0, 0.08);
-  display: grid; 
-  grid-template-columns: 1fr 1px 1fr 1px 1fr; 
-  align-items: center;
-}
-
-    .stat-divider { background:#F0F2F5; height:36px; }
-    .stat-item { display:flex; flex-direction:column; align-items:center; gap:3px; }
-    .stat-val { font-family:'Syne', sans-serif; font-size:20px; font-weight:800; color:var(--text-1); line-height:1; }
-    .stat-val.orange { color:var(--brand); }
-    .stat-val.green  { color:var(--green); }
-    .stat-label { font-size:10px; font-weight:600; color:var(--text-3); }
-
-    /* Cards */
-    .card { background:var(--surface); border-radius:20px; box-shadow:0 1px 6px rgba(0,0,0,0.05); border:1px solid var(--border); overflow:hidden; }
-    .section-label { font-size:10px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:1.5px; padding: 6px 4px 8px; margin-top: 8px; }
-
-    /* ONE membership */
- .one-card {
-  /* Sleeker midnight blue gradient */
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-  border-radius: 20px; 
-  padding: 18px; 
-  /* Deep shadow + a subtle inner border to make it pop like a real card */
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  position: relative; 
-  overflow: hidden;
-}
-
-.one-cta { 
-  background: var(--brand); 
-  color: #fff; 
-  font-size: 11px; 
-  font-weight: 800; 
-  padding: 10px 18px; 
-  border-radius: 12px; 
-  border: none; 
-  /* Glowing shadow for the call-to-action */
-  box-shadow: 0 4px 12px rgba(252, 128, 25, 0.35);
-}
-
-    .one-card .dc { position:absolute; right:-30px; top:-30px; width:120px; height:120px; background:rgba(252,128,25,0.08); border-radius:50%; }
-    .one-row { display:flex; justify-content:space-between; align-items:center; position:relative; z-index: 2;}
-    .one-brand { display:flex; align-items:baseline; gap:4px; margin-bottom:6px; }
-    .one-n { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; color:var(--brand); }
-    .one-tag { font-size:8px; font-weight:900; background:var(--brand); color:#fff; padding:2px 7px; border-radius:4px; letter-spacing:1px; text-transform:uppercase; }
-    .one-title { font-size:13px; font-weight:700; color:#fff; line-height:1.35; margin-bottom:2px; }
-    .one-sub { font-size:10.5px; color:rgba(255,255,255,0.45); font-weight:500; }
-    .one-cta { background:var(--brand); color:#fff; font-size:11px; font-weight:800; padding:8px 16px; border-radius:12px; border:none; }
-
-    /* Quick actions */
-    .quick-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:14px; }
-    .quick-item {
-      background:#fff; border-radius:16px; padding:12px 6px;
-      display:flex; flex-direction:column; align-items:center; gap:7px;
-      box-shadow:0 1px 5px rgba(0,0,0,0.05); border:1px solid var(--border);
+    /* The "Account" section card, using subtle border over shadows */
+    .section-card {
+      background: #FFFFFF; border-radius: 18px;
+      border: 1px solid var(--divider);
+      overflow: hidden;
     }
-    .quick-icon { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; }
-    .quick-icon.orange { background:#fff4ec; color:var(--brand); }
-    .quick-icon.blue   { background:#eff6ff; color:#3b82f6; }
-    .quick-icon.green  { background:#f0fdf4; color:var(--green); }
-    .quick-icon.purple { background:#faf5ff; color:#9333ea; }
-    .quick-label { font-size:9px; font-weight:700; color:var(--text-2); text-align:center; line-height:1.3; }
 
-    /* Referral card */
-    .referral-card {
-      background:linear-gradient(135deg,#fff8f0 0%,#fff4e8 100%);
-      border:1.5px solid rgba(252,128,25,0.2); border-radius:20px; padding:16px;
-      position:relative; overflow:hidden;
+    /* Pure single-column list view like the reference screenshot */
+    .row-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--divider);
     }
-    .ref-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
-    .ref-icon { width:40px; height:40px; background:var(--brand); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(252,128,25,0.28); }
-    .ref-title { font-size:15px; font-weight:800; color:var(--text-1); margin-bottom:2px; }
-    .ref-sub { font-size:11.5px; color:var(--text-3); font-weight:500; line-height:1.4; }
-    .ref-code-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
-    .ref-code {
-      flex:1; background:#fff; border:1.5px dashed rgba(252,128,25,0.4); border-radius:10px; padding:8px 12px;
-      font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--brand); letter-spacing:2px;
-    }
-    .ref-copy { background:var(--brand); color:#fff; font-size:11.5px; font-weight:800; padding:9px 16px; border-radius:10px; border:none; }
+    .row-item:last-child { border-bottom: none; }
 
-    /* Menu row */
-    .menu-row { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--border); }
-    .menu-row:last-child { border-bottom:none; }
-    .menu-row:active { background:#fafafa; }
-    .menu-left { display:flex; align-items:center; gap:12px; }
-    .menu-icon { width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-    .menu-icon.orange  { background:#fff4ec; color:var(--brand); }
-    .menu-icon.blue    { background:#eff6ff; color:#3b82f6; }
-    .menu-icon.red     { background:#fef2f2; color:#ef4444; }
-    .menu-icon.yellow  { background:#fffbeb; color:#f59e0b; }
-    .menu-icon.green   { background:#f0fdf4; color:var(--green); }
-    .menu-icon.gray    { background:#f9fafb; color:#6b7280; }
-    .menu-icon.purple  { background:#faf5ff; color:#9333ea; }
-    .menu-icon.teal    { background:#f0fdfa; color:#0d9488; }
-    .menu-text { font-size:13px; font-weight:700; color:var(--text-1); }
-    .menu-sub  { font-size:10.5px; color:var(--text-3); font-weight:500; margin-top:1px; }
-    .menu-right { display:flex; align-items:center; gap:8px; }
-    .menu-badge { background:#ef4444; color:#fff; font-size:7.5px; font-weight:900; padding:2px 7px; border-radius:6px; letter-spacing:0.5px; }
-    .menu-badge.green { background:var(--green); }
-    .menu-badge.orange { background:var(--brand); }
-    .menu-chevron { font-size:11px; color:#d1d5db; }
+    .row-left { display: flex; align-items: center; gap: 16px; }
+    
+    /* Icons are simple, no colored boxes needed here */
+    .row-icon { font-size: 16px; color: var(--text-2); text-align: center; width: 20px; }
+    
+    .row-title { font-size: 14px; font-weight: 700; color: #000; }
+    .row-subtitle { font-size: 11px; color: var(--text-3); font-weight: 600; margin-top: 3px; }
+    
+    .chevron-icon { font-size: 11px; color: #cbd5e1; }
 
-    /* Toggle switch */
-    .toggle-track { width:40px; height:22px; background:#e5e7eb; border-radius:999px; position:relative; flex-shrink:0; transition:background 0.22s; }
-    .toggle-track.on { background:var(--brand); }
-    .toggle-thumb { position:absolute; top:2px; left:2px; width:18px; height:18px; background:#fff; border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,0.18); transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
-    .toggle-track.on .toggle-thumb { transform:translateX(18px); }
+    /* Logout Section */
+    .logout-block { margin-top: 16px; margin-bottom: 12px; }
+    
+    .logout-item { padding: 18px 20px; }
+    .logout-icon { color: #ef4444; font-size: 16px; width: 20px; }
+    .logout-text { color: #ef4444; font-size: 14px; font-weight: 800; }
 
-    /* Logout button */
-    .logout-btn { background:#fff; border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 1px 6px rgba(0,0,0,0.04); border:1px solid var(--border); width:100%; border:none; }
-    .logout-icon { width:34px; height:34px; background:#fef2f2; border-radius:11px; display:flex; align-items:center; justify-content:center; }
-    .logout-text { font-size:13.5px; font-weight:800; color:#ef4444; }
-
-    /* Footer */
-    .app-footer { text-align:center; padding:12px 0 4px; }
-    .app-footer p { font-size:10px; font-weight:600; color:#c4c7cd; }
-    .footer-links { display:flex; justify-content:center; gap:16px; margin-top:6px; }
-    .footer-links a { font-size:10px; font-weight:700; color:#9ca3af; text-decoration:none; }
-
-    /* ════════════════════════════
-       BOTTOM NAV
-    ════════════════════════════ */
+    /* ════════════════════════════════════════════
+       BOTTOM NAVIGATION (BRAND FOCUSED)
+    ════════════════════════════════════════════ */
     .bottom-nav {
-      position:fixed; bottom:0; left:0; right:0; height:68px;
-      background:#fff; border-top:1px solid rgba(0,0,0,0.06);
-      display:flex; align-items:stretch; justify-content: space-around;
-      box-shadow:0 -2px 16px rgba(0,0,0,0.06); z-index:400;
-      padding-bottom:env(safe-area-inset-bottom);
+      position: fixed; bottom: 0; left: 0; right: 0; height: 72px;
+      background: #FFFFFF; border-top: 1px solid #f1f5f9;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 500;
+      padding-bottom: env(safe-area-inset-bottom);
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
     }
-    .nav-item {
-      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:4px; font-size:9.5px; font-weight:700; color:#94a3b8; text-decoration:none;
+    
+    .nav-link {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-decoration: none; color: #94a3b8; gap: 4px;
     }
-    .nav-item svg { width:22px; height:22px; }
-    .nav-item.active { color:var(--brand); }
-    .nav-item.active svg { stroke:var(--brand); }
+    .nav-link.active { color: var(--brand); }
+    
+    .nav-icon { font-size: 19px; }
+    .nav-label { font-size: 10px; font-weight: 800; }
+    
+        /* ── SAFE PREMIUM SLIDE-IN (Content Only, Won't Break Scroll) ── */
+    @keyframes slideInFromRight {
+      0% { 
+        opacity: 0; 
+        transform: translateX(40px); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: translateX(0); 
+      }
+    }
+
+    /* Apply the animation ONLY to the content blocks, keeping the Top Bar safe */
+    .res-card, 
+    .delivery-strip, 
+    .filter-bar, 
+    .menu-section {
+      animation: slideInFromRight 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      /* Staggering the entrance slightly for a fluid feel */
+      opacity: 0; 
+    }
+    
+    .res-card { animation-delay: 0.05s; }
+    .delivery-strip { animation-delay: 0.1s; }
+    .filter-bar { animation-delay: 0.15s; }
+    .menu-section { animation-delay: 0.2s; }
+
+
   </style>
 </head>
 <body>
 
-<div class="profile-hero">
-  <div class="dc1"></div>
-  <div class="dc2"></div>
-  <div class="dc3"></div>
-  <div class="hero-topbar">
-    <button class="btn-back tap" onclick="window.history.back()">
-      <i class="fa-solid fa-arrow-left"></i>
-    </button>
-    <div class="hero-actions">
-      <button class="btn-help tap">Help</button>
-      <button class="btn-more tap"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-    </div>
-  </div>
-  <div class="avatar-row">
-    <div class="avatar-wrap">
-      <div class="avatar-circle"><i class="fa-solid fa-user"></i></div>
-      <div class="avatar-edit tap"><i class="fa-solid fa-pen"></i></div>
-    </div>
-    <div class="avatar-info">
-      <div class="avatar-name">Your Name</div>
-      <div class="avatar-phone">Add your phone number</div>
-    </div>
-    <button class="btn-edit-profile tap">Edit Profile</button>
-  </div>
-</div>
-
-<div class="content-stack">
-
-
-  <div class="card" style="padding:0;">
-    <div class="quick-grid">
-      <div class="quick-item tap">
-        <div class="quick-icon orange"><i class="fa-solid fa-location-dot"></i></div>
-        <span class="quick-label">Saved<br>Address</span>
-      </div>
-      <div class="quick-item tap">
-        <div class="quick-icon blue"><i class="fa-solid fa-wallet"></i></div>
-        <span class="quick-label">Payment<br>Modes</span>
-      </div>
-      <div class="quick-item tap">
-        <div class="quick-icon green"><i class="fa-solid fa-money-bill-transfer"></i></div>
-        <span class="quick-label">My<br>Refunds</span>
-      </div>
-      <div class="quick-item tap">
-        <div class="quick-icon purple"><i class="fa-solid fa-credit-card"></i></div>
-        <span class="quick-label">Nearbite<br>Wallet</span>
+  <div class="header">
+    <div class="top-action-row">
+      <div class="page-title">Your Account</div>
+      <div class="icon-actions">
+        <i class="fa-regular fa-bell tap"></i>
+        <i class="fa-solid fa-magnifying-glass tap" onclick="window.location.href='search.html'"></i>
       </div>
     </div>
-  </div>
-  <div class="referral-card tap">
-    <div class="ref-top">
-      <div>
-        <div class="ref-title">Invite Friends, Earn ₹100</div>
-        <div class="ref-sub">Both you and your friend get<br>₹100 off on first order</div>
-      </div>
-      <div class="ref-icon"><i class="fa-solid fa-gift" style="color:#fff;font-size:18px;"></i></div>
-    </div>
-    <div class="ref-code-row">
-      <div class="ref-code">NEAR100</div>
-      <button class="ref-copy tap" onclick="copyCode(event)"><i class="fa-regular fa-copy" style="margin-right:4px;"></i> Copy</button>
-    </div>
-  </div>
-
-  <div class="section-label">Account</div>
-  <div class="card">
-    <div class="menu-row tap" onclick="window.location.href='orders.html'">
-      <div class="menu-left">
-        <div class="menu-icon gray"><i class="fa-solid fa-box-open"></i></div>
-        <div><div class="menu-text">Past Orders</div></div>
-      </div>
-      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon orange"><i class="fa-solid fa-ticket"></i></div>
-        <div><div class="menu-text">My Vouchers</div><div class="menu-sub">2 active vouchers</div></div>
-      </div>
-      <div class="menu-right"><span class="menu-badge orange">2</span><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon red"><i class="fa-regular fa-heart"></i></div>
-        <div><div class="menu-text">Favourites</div></div>
-      </div>
-      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon green"><i class="fa-solid fa-graduation-cap"></i></div>
-        <div><div class="menu-text">Student Rewards</div></div>
-      </div>
-      <div class="menu-right"><span class="menu-badge green">NEW</span><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-  </div>
-
-  <div class="section-label">Settings</div>
-  <div class="card">
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon gray"><i class="fa-solid fa-bell"></i></div>
-        <div><div class="menu-text">Notifications</div></div>
-      </div>
-      <div class="menu-right"><div class="toggle-track on" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div></div>
-    </div>
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon gray"><i class="fa-solid fa-language"></i></div>
-        <div><div class="menu-text">Language</div><div class="menu-sub">English</div></div>
-      </div>
-      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-  </div>
-
-  <div class="section-label">Support</div>
-  <div class="card">
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon blue"><i class="fa-solid fa-headset"></i></div>
-        <div><div class="menu-text">Customer Support</div></div>
-      </div>
-      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-    <div class="menu-row tap">
-      <div class="menu-left">
-        <div class="menu-icon gray"><i class="fa-solid fa-file-contract"></i></div>
-        <div><div class="menu-text">Terms &amp; Conditions</div></div>
-      </div>
-      <div class="menu-right"><i class="fa-solid fa-chevron-right menu-chevron"></i></div>
-    </div>
-  </div>
-<button class="logout-btn tap" onclick="handleLogout()">
-    <div class="logout-icon"><i class="fa-solid fa-right-from-bracket" style="color:#ef4444;font-size:15px;"></i></div>
-    <span class="logout-text">Log Out</span>
-  </button>
-
-  <div class="app-footer">
-    <p>Nearbite v1.0.0 · Made with ❤ in Maynaguri</p>
-  </div>
-
-</div>
-
-<nav class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
-    <span>Food</span>
-  </a>
-  <a href="under99.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <span>99 Store</span>
-  </a>
-  <a href="orders.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-    <span>Orders</span>
-  </a>
-  <a href="profile.html" class="nav-item active">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-    <span>Profile</span>
-  </a>
-</nav>
-
-<script>
-  function toggleSwitch(el) { el.classList.toggle('on'); }
-
-  function copyCode(e) {
-    e.stopPropagation(); // Prevents the card tap animation from double firing
-    navigator.clipboard && navigator.clipboard.writeText('NEAR100');
-    const btn = e.currentTarget;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px;"></i> Copied!';
-    btn.style.background = '#16a34a';
-    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
-  }
-</script>
-<script>
-  function toggleSwitch(el) { el.classList.toggle('on'); }
-
-  function copyCode(e) {
-    e.stopPropagation(); 
-    navigator.clipboard && navigator.clipboard.writeText('NEAR100');
-    const btn = e.currentTarget;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px;"></i> Copied!';
-    btn.style.background = '#16a34a';
-    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
-  }
-
-  // --- PRODUCTION PROFILE CONTROLLER ---
-  document.addEventListener('DOMContentLoaded', async () => {
-    // 1. SMART AUTH GUARD: Check for both possible token names!
-    const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
     
-    if (!token) {
-      window.location.replace('login.html');
-      return;
-    }
+    <div class="avatar-block">
+      <div class="avatar-circle">E</div>
+      <div class="personal-info">
+        <div class="user-name" id="user-display-name">Guest User</div>
+        <div class="user-phone" id="user-display-phone">Setup Account</div>
+      </div>
+    </div>
+  </div>
 
-    // 2. INSTANT UI LOAD
-    const savedUser = localStorage.getItem('nearbite_user');
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      const nameEl = document.querySelector('.avatar-name');
-      const phoneEl = document.querySelector('.avatar-phone');
-      
-      if (nameEl) nameEl.innerText = user.name || 'Eatswada User';
-      if (phoneEl) phoneEl.innerText = user.phone || 'No phone added';
-    }
+  <div class="container">
+    
+    <div class="section-label">Past Activity</div>
+    <div class="section-card">
+      <div class="row-item tap" onclick="window.location.href='orders.html'">
+        <div class="row-left">
+          <i class="fa-solid fa-clock-rotate-left row-icon"></i>
+          <div>
+            <div class="row-title">Your Past Orders</div>
+            <div class="row-subtitle">View receipt & re-order items</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right chevron-icon"></i>
+      </div>
+    </div>
 
-    // 3. SILENT VERIFICATION
-    try {
-      const res = await fetch('https://eatswada.onrender.com/api/orders?limit=1', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+    <div class="section-label">Account Details</div>
+    <div class="section-card">
+      <div class="row-item tap" onclick="window.location.href='address.html'">
+        <div class="row-left">
+          <i class="fa-solid fa-map-location-dot row-icon"></i>
+          <div>
+            <div class="row-title">Saved Delivery Addresses</div>
+            <div class="row-subtitle">Home, Office & other saved spots</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right chevron-icon"></i>
+      </div>
+    </div>
+
+    <div class="section-label">Help & Policies</div>
+    <div class="section-card">
+      <div class="row-item tap" onclick="window.location.href='support.html'">
+        <div class="row-left">
+          <i class="fa-solid fa-headset row-icon"></i>
+          <div>
+            <div class="row-title">Help & Customer Care</div>
+            <div class="row-subtitle">Contact WhatsApp support</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right chevron-icon"></i>
+      </div>
+      <div class="row-item tap" onclick="window.location.href='legal.html'">
+        <div class="row-left">
+          <i class="fa-solid fa-file-contract row-icon"></i>
+          <div>
+            <div class="row-title">View EatSwada Policies</div>
+            <div class="row-subtitle">Terms, Privacy & Refunds</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right chevron-icon"></i>
+      </div>
+    </div>
+
+    <div class="logout-block section-card">
+      <div class="row-item logout-item tap" onclick="handleLogout()">
+        <div class="row-left">
+          <i class="fa-solid fa-right-from-bracket logout-icon"></i>
+          <span class="logout-text">Log Out of EatSwada</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-link">
+      <i class="fa-solid fa-bowl-food nav-icon"></i>
+      <span class="nav-label">Explore</span>
+    </a>
+    <a href="under99.html" class="nav-link">
+      <i class="fa-solid fa-tag nav-icon"></i>
+      <span class="nav-label">99 Store</span>
+    </a>
+    <a href="orders.html" class="nav-link">
+      <i class="fa-solid fa-truck-ramp-box nav-icon"></i>
+      <span class="nav-label">Orders</span>
+    </a>
+    <a href="profile.html" class="nav-link active">
+      <i class="fa-solid fa-circle-user nav-icon"></i>
+      <span class="nav-label">Account</span>
+    </a>
+  </nav>
+
+  <script>
+    // ════════════════════════════════════════════
+    // AUTH LOGIC & DATA INJECTION
+    // ════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Prioritize the standardized token name
+      const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
       
-      const data = await res.json();
-      if (data.message === 'Token invalid or expired' || res.status === 401) {
-        handleLogout(); 
+      // 1. AUTH GUARD
+      if (!token) {
+        window.location.replace('login.html');
+        return;
       }
-    } catch (err) {
-      console.log('Network error, keeping cached data.');
-    }
-  });
 
-  // --- LOGOUT FUNCTION ---
-  function handleLogout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('nearbite_token');
-    localStorage.removeItem('nearbite_user');
-    window.location.replace('login.html');
-  }
-</script>
+      // 2. LOAD USER DATA
+      const savedUser = localStorage.getItem('nearbite_user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          // Inject user data into the DOM, ensuring safe fallbacks
+          const nameEl = document.getElementById('user-display-name');
+          const phoneEl = document.getElementById('user-display-phone');
+          
+          if (nameEl) nameEl.innerText = user.name || 'EatSwada User';
+          if (phoneEl) phoneEl.innerText = user.phone || 'No phone added';
+        } catch(e) {
+          console.warn("Could not parse saved user data.");
+        }
+      }
+    });
+
+    // ════════════════════════════════════════════
+    // ACCOUNT OPERATIONS
+    // ════════════════════════════════════════════
+    function handleLogout() {
+      // Completely wipe all local storage data, including cart
+      localStorage.removeItem('token');
+      localStorage.removeItem('nearbite_token');
+      localStorage.removeItem('nearbite_user');
+      localStorage.removeItem('nearbite_cart');
+      localStorage.removeItem('nearbite_address');
+      window.location.replace('login.html'); 
+    }
+  </script>
 </body>
 </html>

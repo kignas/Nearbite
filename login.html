@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Login – Nearbite</title>
+  <title>Login – EatSwada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -86,13 +86,12 @@
       padding: 32px 24px 80px;
     }
 
-    /* ── Step Containers (Replaces sliding track) ── */
     .step-container {
-      display: none; /* Hidden by default */
+      display: none; 
       animation: fadeIn 0.3s ease-out forwards;
     }
     .step-container.active {
-      display: block; /* Shows only the active step */
+      display: block; 
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -166,6 +165,7 @@
     
     .resend-row { font-size: 13px; font-weight: 600; color: var(--text-3); text-align: center; }
     .resend-btn { color: var(--brand); background: none; border: none; font-weight: 800; padding-left: 4px; font-size: 13px; }
+    .resend-btn:disabled { color: var(--text-3); pointer-events: none; }
 
   </style>
 </head>
@@ -215,7 +215,7 @@
 
       <div class="divider"><span class="divider-text"></span></div>
 
-      <button class="social-btn tap"style="display: none;">
+      <button class="social-btn tap" style="display: none;">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         Continue with Google
       </button>
@@ -238,20 +238,14 @@
         <input type="text" inputmode="numeric" pattern="\d*" autocomplete="one-time-code" class="otp-box" maxlength="1" oninput="verifyOTP()">
       </div>
 
-      <div class="resend-row">Didn't receive code? <button class="resend-btn tap">Resend</button></div>
+      <div class="resend-row">
+        Didn't receive code? <button id="resendBtn" class="resend-btn tap" onclick="resendOTP()" disabled>Resend in 60s</button>
+      </div>
     </div>
 
   </div>
 
   <script>
-    // ==========================================
-    // 1. PRE-AUTH GUARD
-    // ==========================================
-    // If the user already has a token, bounce them to the home page instantly!
-    if (localStorage.getItem('token') || localStorage.getItem('nearbite_token')) {
-      window.location.replace('index.html');
-    }
-
     /* Hero Slider */
     let currentSlide = 0;
     const totalSlides = 3;
@@ -268,17 +262,39 @@
     const actionBtn = document.getElementById('actionBtn');
     const displayPhone = document.getElementById('displayPhone');
     const otpBoxes = document.querySelectorAll('.otp-box');
+    const resendBtn = document.getElementById('resendBtn');
+    let timerInterval;
 
     function checkPhone() {
       phoneInput.value = phoneInput.value.replace(/\D/g, ''); 
       actionBtn.disabled = phoneInput.value.length !== 10;
     }
 
-    const API_URL = 'https://eatswada.onrender.com/api/users'; // Base API URL
+    const API_URL = 'https://eatswada.onrender.com/api/users'; 
 
+    /* ── The 60 Second Countdown Engine ── */
+    function startOTPTimer() {
+      let timeLeft = 60;
+      resendBtn.disabled = true;
+      resendBtn.innerText = `Resend in ${timeLeft}s`;
+      
+      clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        resendBtn.innerText = `Resend in ${timeLeft}s`;
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          resendBtn.innerText = 'Resend';
+          resendBtn.disabled = false;
+        }
+      }, 1000);
+    }
+
+    /* ── Main Send OTP Function ── */
     async function sendOTP() {
       const phoneVal = '+91' + phoneInput.value; 
-      
       actionBtn.innerText = 'Sending...';
       actionBtn.disabled = true;
 
@@ -297,6 +313,7 @@
           document.getElementById('step1').classList.remove('active');
           document.getElementById('step2').classList.add('active');
           
+          startOTPTimer(); // 🔥 Start the countdown!
           setTimeout(() => { otpBoxes[0].focus(); }, 100); 
         } else {
           alert(result.message || "Failed to send OTP.");
@@ -307,6 +324,44 @@
         actionBtn.innerText = 'Continue';
         actionBtn.disabled = false;
       }
+    }
+
+    /* ── Dedicated Resend Function ── */
+    async function resendOTP() {
+      const phoneVal = '+91' + phoneInput.value;
+      resendBtn.innerText = 'Sending...';
+      resendBtn.disabled = true;
+      
+      try {
+        const response = await fetch(`${API_URL}/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneVal })
+        });
+        
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          otpBoxes.forEach(box => box.value = ''); // Clear old boxes
+          startOTPTimer(); // Restart the clock
+          otpBoxes[0].focus();
+        } else {
+          alert(result.message || "Failed to resend OTP.");
+          resendBtn.innerText = 'Resend';
+          resendBtn.disabled = false;
+        }
+      } catch (error) {
+        alert("Server connection error!");
+        resendBtn.innerText = 'Resend';
+        resendBtn.disabled = false;
+      }
+    }
+
+    function goBack() {
+      clearInterval(timerInterval); // Stop the clock if they go back
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step1').classList.add('active');
+      otpBoxes.forEach(box => box.value = '');
     }
 
     async function checkOTPCompletion() {
@@ -326,22 +381,9 @@
            const result = await response.json();
 
            if (response.ok && result.success) {
-             // ==========================================
-             // 2. STANDARDIZED TOKENS
-             // ==========================================
-             localStorage.setItem('token', result.data.token);
-             localStorage.setItem('nearbite_token', result.data.token); 
+             localStorage.setItem('nearbite_token', result.data.token);
              localStorage.setItem('nearbite_user', JSON.stringify(result.data.user));
-             
-             // ==========================================
-             // 3. SMART REDIRECT (THE AMNESIA FIX)
-             // ==========================================
-             // Check if the user came from the cart, otherwise go to index
-             const returnUrl = localStorage.getItem('return_to') || 'index.html';
-             localStorage.removeItem('return_to'); // Throw away the sticky note
-             
-             // .replace() prevents the user from hitting "back" into the login screen
-             setTimeout(() => window.location.replace(returnUrl), 500);
+             setTimeout(() => window.location.href = 'index.html', 500);
            } else {
              alert(result.message || "Invalid OTP!");
              otpBoxes.forEach(box => box.value = ''); 
@@ -364,15 +406,6 @@
     }
     
     function verifyOTP() { checkOTPCompletion(); }
-
-    // ==========================================
-    // 4. THE MISSING BACK BUTTON FUNCTION
-    // ==========================================
-    function goBack() {
-      document.getElementById('step2').classList.remove('active');
-      document.getElementById('step1').classList.add('active');
-      otpBoxes.forEach(box => box.value = ''); // Clear OTP boxes
-    }
   </script>
-  </body>
-  </html>
+</body>
+</html>

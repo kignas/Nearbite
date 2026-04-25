@@ -222,27 +222,17 @@
       padding-bottom: 24px;
       position: relative;
     }
+    /* RESPONSIVE FLUID TEXT */
     .pb-headline {
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      margin-bottom: 2px;
-      z-index: 2;
-      color: #1a1a1a;
-      filter: drop-shadow(0 2px 6px rgba(255,255,255,0.4));
+      font-size: clamp(20px, 6vw, 26px) !important; /* Adapts to screen size */
+      font-weight: 900; letter-spacing: -0.5px; margin-bottom: 2px;
+      color: #1a1a1a; filter: drop-shadow(0 2px 6px rgba(255,255,255,0.4));
     }
     .pb-dynamic-row {
-      display: inline-flex;
-      align-items: center;
-      height: 40px;
-      font-size: 22px;
-      font-weight: 800;
-      color: #D23F00;
-      margin-bottom: 8px;
-      z-index: 2;
-      position: relative;
+      display: inline-flex; align-items: center; height: 40px;
+      font-size: clamp(18px, 5.5vw, 22px) !important; 
+      font-weight: 800; color: #D23F00; margin-bottom: 8px;
       -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
-      mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
     }
     .pb-static-text { color: #4a2080; margin-right: 8px; line-height: 40px; }
     .pb-scroller { display: flex; flex-direction: column; text-align: left; animation: pbScroll 12s infinite cubic-bezier(0.85, 0, 0.15, 1); }
@@ -272,7 +262,7 @@
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; margin-bottom: 14px; }
     .sec-title { font-size: 17px; font-weight: 900; color: #1a1a1a; letter-spacing: -0.3px; }
 
-    .cat-scroll { display: flex; overflow-x: auto; padding: 0 16px 6px; gap: 0; }
+    .cat-scroll { display: flex;8 overflow-x: auto; padding: 0 16px 6px; gap: 0; }
     .cat-item { flex-shrink: 0; width: 82px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: transform 0.13s; }
     .cat-item:active { transform: scale(0.92); }
     
@@ -280,72 +270,99 @@
     .cat-ring img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
     .cat-name { font-size: 11.5px; font-weight: 600; color: #333; text-align: center; }
 
-    /* ─── Premium 99 Store Redesign ─── */
-    .store-card {
-      background: linear-gradient(135deg, #f0f4ff 0%, #fff 50%, #ffffff 100%);
-      border-radius: 24px;
-      border: 1px solid rgba(37,99,235,0.15);
-      padding: 16px;
-      margin: 0 16px 8px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(37,99,235,0.04);
+    .s99-wrap { 
+      padding: 16px 0 4px 0 !important; 
+      background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); 
+      border-bottom: 8px solid #F1F5F9 !important; /* Premium clean divider */
     }
-    .store-card::after {
-      content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
-      background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
-      border-radius: 50%; pointer-events: none;
-    }
-    .store-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; position: relative; z-index: 2; }
-    .store-icon-wrap { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6 0%, #FF9E00 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.3); border: 1.5px solid rgba(255,255,255,0.5); }
-    .store-title { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; }
-    .store-pro { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
-    .store-sub { font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.2px; margin-top: 2px; }
-    .store-see-all { font-size: 11px; font-weight: 800; color: #2563eb; background: #fff; padding: 8px 14px; border-radius: 12px; border: 1px solid #dde8ff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-decoration: none; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: transform 0.15s; }
-    .store-see-all:active { transform: scale(0.95); }
-
-    .h-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 0 0 8px 0; position: relative; z-index: 2; }
     
-    .prod-card { flex-shrink: 0; width: 156px; background: #fff; border-radius: 20px; padding: 10px; border: 1px solid #f1f5f9; box-shadow: 0 6px 20px rgba(0,0,0,0.04); text-decoration: none; display: block; transition: transform 0.15s; }
-    .prod-card:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-    .prod-img-wrap { position: relative; margin-bottom: 12px; }
-    .prod-img-wrap img { width: 100%; height: 116px; object-fit: cover; background: #f8fafc; border-radius: 14px; }
-    .prod-price-tag { position: absolute; bottom: -10px; right: 8px; background: linear-gradient(to right, #FFD700, #F5BC00); color: #422200; font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 10px; border: 2.5px solid #fff; box-shadow: 0 4px 10px rgba(245,188,0,0.3); letter-spacing: 0.5px; }
-    .prod-veg-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
-    .veg-dot { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .veg-dot .dot { width: 6px; height: 6px; border-radius: 50%; }
-    .veg-dot.veg { border-color: #16a34a; } .veg-dot.veg .dot { background: #16a34a; }
-    .veg-dot.nonveg { border-color: #dc2626; } .veg-dot.nonveg .dot { background: #dc2626; }
-    .veg-tag-txt { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-    .prod-name { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prod-rest { font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prod-add-btn { width: 100%; padding: 8px 0; background: #fff; color: #16a34a; border-radius: 12px; font-size: 12px; font-weight: 800; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: background 0.15s; }
-    .prod-card:active .prod-add-btn { background: #f0fdf4; border-color: #bbf7d0; }
+    /* Premium Card Depth */
+    .s99-card { 
+      width: 132px; flex-shrink: 0; text-decoration: none; display: flex; flex-direction: column; 
+      background: #fff; padding: 10px; border-radius: 18px; 
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); 
+    }
+    
+    /* Clean Image without weird padding */
+    .s99-img-wrap { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 10px; background: #F1F5F9; }
+    .s99-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* Glowing Green + Button */
+    .s99-add-circle { 
+      position: absolute; bottom: 6px; right: 6px; width: 28px; height: 28px; 
+      background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+      color: #1BA672; font-size: 20px; font-weight: 600; line-height: 1; 
+      box-shadow: 0 4px 12px rgba(27, 166, 114, 0.25); border: none; padding: 0; cursor: pointer; 
+    }
+    
+    /* Crisper Price Tags */
+    .s99-price-new { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 2px 5px; border-radius: 5px; }
 
-    /* ─── Restaurants List ─── */
-    .vrest-section { background: #fff; padding: 18px 16px 8px; border-radius: 20px 20px 0 0; }
-    .vr { border-radius: 20px; overflow: hidden; background: #fff; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-decoration: none; display: block; border: 1px solid #f1f5f9; transition: transform 0.15s; }
-    .vr:active { transform: scale(0.98); }
-    .vr-img { width: 100%; height: 200px; position: relative; }
-    .vr-img img { width: 100%; height: 100%; object-fit: cover; }
-    .vr-offer { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 36px 14px 12px; font-size: 13px; font-weight: 900; color: #fff; letter-spacing: -0.2px; }
-    .vr-heart { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: rgba(255,255,255,0.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-    .vr-heart i { font-size: 14px; color: #94a3b8; }
-    .vr-body { padding: 14px 16px 16px; }
-    .vr-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-    .vr-name { font-size: 17px; font-weight: 800; color: #0f172a; letter-spacing: 0px; word-spacing: 2px;  }
-    .vr-rating { display: flex; align-items: center; gap: 4px; flex-shrink: 0; background: #f0fdf4; border: 1.5px solid rgba(22,163,74,0.2); border-radius: 10px; padding: 4px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-    .vr-rating .star-icon { font-size: 11px; color: #16a34a; }
-    .vr-rating .rating-num { font-size: 13px; font-weight: 900; color: #14532d; line-height: 1; }
-    .vr-rating .rating-divider { width: 1px; height: 12px; background: #bbf7d0; margin: 0 2px; }
-    .vr-rating .rating-count { font-size: 10px; font-weight: 700; color: #166534; line-height: 1; }
-    .vr-cuisine { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 12px; }
-    .vr-meta { display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: #475569; font-weight: 700; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
-    .vr-meta i { color: #FC8019; font-size: 12px; }
-    .vr-sep { color: #cbd5e1; font-weight: 900; }
+    /* Swiggy Image & Inner Button */
+    .s99-img-box { width: 100%; aspect-ratio: 1; border-radius: 12px; background: #F1F5F9; position: relative; margin-bottom: 8px; }
+    .s99-img-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .s99-add-btn { position: absolute; bottom: -8px; right: 4px; width: 30px; height: 30px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1BA672; font-size: 18px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid #f1f5f9; cursor: pointer; }
+    
+    /* Swiggy Text Match */
+    .s99-name { font-size: 13px; font-weight: 800; color: #1E293B; line-height: 1.2; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .s99-price-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .s99-price-old { font-size: 12px; color: #94A3B8; text-decoration: line-through; font-weight: 600; }
+    .s99-price-new { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 1px 4px; border-radius: 4px; }
+    .s99-rating { font-size: 11px; font-weight: 800; color: #1BA672; }
+    .s99-rating span { color: #94A3B8; font-weight: 600; }
+    .s99-rest { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+    /* ── STEP 4: ZOMATO RESTAURANT CARDS ── */
+    .vrest-section { background: #fff; padding: 24px 0 8px 0; }
+    .vrest-section .sec-head { padding: 0 16px; margin-bottom: 12px; }
+    
+    .explore-title-row { display: flex; align-items: center; width: 100%; }
+    .explore-title-row span { font-size: 14px; font-weight: 800; color: #64748B; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; margin-right: 16px; }
+    .explore-line { flex-grow: 1; height: 1px; background: #E2E8F0; }
+
+    .z-card { display: block; margin: 0 16px 32px 16px; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    .z-img-wrap { width: 100%; height: 200px; border-radius: 16px; overflow: hidden; position: relative; background: #F1F5F9; margin-bottom: 12px; }
+    .z-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    
+        /* Zomato True Corner Badge */
+    .z-delivery-badge { position: absolute; bottom: 0; left: 0; background: #2563EB; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 0 8px 0 0; z-index: 2; box-shadow: 2px -2px 6px rgba(0,0,0,0.1); }
+    
+    /* Stronger shadow for light images */
+    .z-bookmark { position: absolute; top: 12px; right: 12px; z-index: 2; font-size: 22px; color: #fff; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+    
+    /* Dark gradient at the bottom so the blue badge pops perfectly */
+    .z-img-scrim { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(to top, rgba(0,0,0,0.3), transparent); z-index: 1; }
+    
+    /* Zomato Blue Free Delivery Badge */
+    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+    .z-name { font-size: 20px; font-weight: 800; color: #1C1C1C; letter-spacing: -0.3px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+    .z-rating { background: #24963F; color: #fff; font-size: 13px; font-weight: 800; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .z-rating i { font-size: 10px; }
+        /* Fixed Zomato Title Alignment */
+    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; }
+    .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
+    
+        /* Fixed Zomato Title Alignment */
+    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; box-sizing: border-box; width: 100%; }
+    .z-rest-title { font-size: 13px; font-weight: 800; color: #1C1C1C; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 12px; }
+
+    .z-cuisine { font-size: 14px; color: #64748B; font-weight: 500; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .z-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #64748B; font-weight: 500; }
+    .z-meta i { color: #1BA672; font-size: 12px; } /* Green lightning bolt */
 
     /* ─── Bottom Nav ─── */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch; box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+    /* ULTRA-PREMIUM BOTTOM NAV */
+    .bottom-nav { 
+      position: fixed; bottom: 0; left: 0; right: 0; height: 68px; 
+      background: rgba(255, 255, 255, 0.82) !important; /* Highly transparent */
+      backdrop-filter: blur(24px) saturate(180%) !important; /* Blurs and boosts colors behind it */
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important; /* iOS support */
+      border-top: 1px solid rgba(0,0,0,0.03) !important; 
+      display: flex; align-items: stretch; 
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.04) !important; /* Ultra-soft, tall shadow */
+      z-index: 100; padding-bottom: env(safe-area-inset-bottom); 
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; color: #94a3b8; text-decoration: none; transition: color 0.2s ease; cursor: pointer; position: relative; }
     .nav-item svg { width: 24px; height: 24px; }
     .nav-item.active { color: #FC8019; }
@@ -405,10 +422,6 @@
   scroll-behavior: smooth;
 }
 
-
-
-
-
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -450,7 +463,6 @@
   will-change: transform;
   /* Notice: I deleted the transition from here! We only animate the parent now. */
 }
-
 
 /* 4. Richer Typography */
 .cat-name {
@@ -503,11 +515,230 @@
       transform: scale(0.85);
       transition: transform 0.1s ease-out;
     }
+    
+        /* ── BULLETPROOF CLS FIX 1: 99 Store ── */
+    .slider-img { 
+      width: 100%; 
+      padding-top: 100%; /* Locks a perfect 1:1 square instantly */
+      position: relative; 
+      background: #f3f4f6; 
+      border-radius: 16px 16px 0 0; 
+      overflow: hidden; 
+    }
+    .slider-img img { 
+      position: absolute; /* Detaches image from layout flow */
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
 
+    /* ── BULLETPROOF CLS FIX 2: Main Restaurants ── */
+    .main-res-cover { 
+      width: 100%; 
+      padding-top: 50%; /* Locks a perfect 2:1 wide rectangle instantly */
+      border-radius: 20px; 
+      overflow: hidden; 
+      background: #f3f4f6; 
+      position: relative; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06); 
+    }
+    .main-res-cover img { 
+      position: absolute; /* Detaches image from layout flow */
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+    
+    /* ── STEP 1: EATCLUB PROMO BANNERS ── */
+    .promo-section { padding: 16px 0; background: #fff; }
+    .promo-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px 8px 16px; scrollbar-width: none; }
+    .promo-scroll::-webkit-scrollbar { display: none; }
+    .promo-card { width: 105px; height: 130px; flex-shrink: 0; border-radius: 16px; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 14px; text-decoration: none; overflow: hidden; }
+    .promo-card img { position: absolute; bottom: -5px; width: 85px; height: 85px; object-fit: contain; transition: transform 0.2s; }
+    .promo-card:active img { transform: scale(1.05); }
+    .pc-title { font-size: 14px; font-weight: 900; line-height: 1.1; text-align: center; z-index: 2; }
+    .pc-sub { font-size: 10px; font-weight: 800; opacity: 0.8; margin-bottom: 2px; z-index: 2; letter-spacing: 0.5px; text-transform: uppercase; }
 
+    /* ── STEP 3: ZOMATO SMART FILTERS ── */
+     .filter-scroll { 
+      display: flex; gap: 8px; overflow-x: auto; 
+      padding: 20px 16px 16px 16px !important; 
+      scrollbar-width: none; background: #fff; margin-top: 0 !important; 
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    /* PREMIUM SMART FILTERS */
+    .filter-pill { 
+      display: flex; align-items: center; gap: 6px; padding: 6px 12px; 
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; 
+      font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+    }
+    .filter-pill:active { transform: scale(0.92); }
+    
+    /* Native Soft Active State */
+    .filter-pill.active { 
+      background: rgba(252, 128, 25, 0.08); /* Soft orange tint */
+      color: #FC8019; 
+      border-color: #FC8019; 
+      box-shadow: none; 
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       CORRECTED PRODUCTION POLISH & GPU PERFORMANCE 
+    ══════════════════════════════════════════════════════════ */
+
+    /* 1️⃣ SMOOTH SCROLLING (No background hacks) */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* 2️⃣ GPU ACCELERATION & RENDER PIPELINE */
+    .cat-scroll, .promo-scroll, .s99-scroll, .filter-scroll {
+      -webkit-overflow-scrolling: touch; 
+      contain: layout paint; 
+    }
+    .z-card, .s99-card, .promo-card, .cat-item, .bottom-nav {
+      will-change: transform; 
+      transform: translateZ(0); 
+    }
+    img {
+      content-visibility: auto; 
+    }
+
+    /* 3️⃣ LAYERED DEPTH SYSTEM (CARDS & BUTTONS ONLY) */
+    
+    /* Level 2: Medium Elevation (Cards) */
+    .z-img-wrap, .s99-card, .promo-card {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 10px 24px rgba(0,0,0,0.04) !important;
+    }
+
+    /* Level 1: Light Elevation (Chips, Badges & Circular Buttons) */
+    .filter-pill, .s99-add-circle, .btn-profile, .z-rating, .z-delivery-badge {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+    }
+    
+        /* Perfectly tucked button */
+    .s99-add-circle {
+      position: absolute; bottom: 6px; right: 6px; width: 28px; height: 28px;
+      background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      color: #1BA672; font-size: 20px; font-weight: 600; line-height: 1;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 2; border: none; padding: 0; cursor: pointer;
+    }
+
+    /* 4️⃣ MICRO-ANIMATIONS & TOUCH PHYSICS */
+    
+    /* Physics for Cards */
+    .z-card, .s99-card, .promo-card, .cat-item {
+      transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                  box-shadow 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    }
+    
+    /* Active Press State: Sinks into the page */
+    .z-card:active, .s99-card:active, .promo-card:active, .cat-item:active {
+      transform: scale(0.96) translateZ(0) !important;
+    }
+    
+    /* Active Shadow State */
+    .s99-card:active, .promo-card:active {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.06) !important;
+    }
+
+    /* Physics for Buttons */
+    .filter-pill, .s99-add-circle, .btn-profile, .z-bookmark {
+      transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    }
+    .filter-pill:active, .s99-add-circle:active, .btn-profile:active, .z-bookmark:active {
+      transform: scale(0.92) translateZ(0) !important;
+    }
+    
+        /* UNIFIED PREMIUM HEADERS */
+    .sec-title, .promo-title, .z-rest-title { 
+      font-size: 13px !important; 
+      font-weight: 800 !important; 
+      color: #7A808D !important; 
+      letter-spacing: 1.2px !important; 
+      text-transform: uppercase !important; 
+      white-space: nowrap; 
+    }
+    
+    /* Give Promo Section the same line divider as Zomato */
+    .promo-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+    .promo-line { flex: 1; height: 1px; background: #E2E8F0; margin-left: 12px; }
+    
+        /* ── MASTER POLISH OVERRIDE ── */
+    /* Fix the typo causing layout issues */
+    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start !important; margin-bottom: 2px; }
+    
+    /* Unified Premium Headers */
+    .sec-title, .promo-title, .z-rest-title { 
+      font-size: 13px !important; font-weight: 800 !important; color: #7A808D !important; 
+      letter-spacing: 1.2px !important; text-transform: uppercase !important; white-space: nowrap; 
+    }
+    .promo-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+    .promo-line { flex: 1; height: 1px; background: #E2E8F0; margin-left: 12px; }
+
+    /* Soft Premium Smart Filters */
+    .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px 16px 16px !important; scrollbar-width: none; background: #fff; margin-top: 0 !important; }
+    .filter-pill { display: flex; align-items: center; gap: 6px; padding: 6px 12px !important; background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .filter-pill:active { transform: scale(0.92); }
+    .filter-pill.active { background: rgba(252, 128, 25, 0.08) !important; color: #FC8019 !important; border-color: #FC8019 !important; box-shadow: none !important; }
+    
+        /* ════════ PREMIUM 99 STORE CSS ════════ */
+   .s99-wrap { 
+      padding: 10px 0 15px 0 !important; /* 16px adds more white space BELOW the cards */
+      background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); 
+      border-bottom: 12px solid #F1F5F9 !important; /* Thicker premium grey divider */
+    }
+    .s99-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 16px; margin-bottom: 16px; }
+    .s99-header-text { display: flex; flex-direction: column; gap: 2px; }
+    /* GRADIENT INK LOGO */
+    .s99-logo-text { 
+      font-size: 32px; font-weight: 900; letter-spacing: -1.5px; line-height: 1;
+      background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .s99-logo-text span { 
+      font-size: 24px; letter-spacing: -0.5px; 
+      background: linear-gradient(135deg, #FF6A00 0%, #EE0979 100%); /* Swiggy InstaMart style pop */
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .s99-sub-text { font-size: 13px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+    .s99-see-all { font-size: 14px; font-weight: 800; color: #2563EB; text-decoration: none; margin-top: 8px; }
+
+    .s99-scroll { 
+      display: flex; gap: 12px; overflow-x: auto; 
+      padding: 0 16px 4px 16px !important; 
+      scrollbar-width: none; 
+    }
+    .s99-scroll::-webkit-scrollbar { display: none; }
+    
+    .s99-card { width: 132px; flex-shrink: 0; display: flex; flex-direction: column; background: #fff; padding: 10px; border-radius: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    .s99-img-wrap { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 10px; background: #F1F5F9; }
+    .s99-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    
+    /* Glowing Green + Button Tucked Inside Image */
+    .s99-add-circle { position: absolute; bottom: 6px; right: 6px; width: 28px; height: 28px; background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #1BA672; font-size: 20px; font-weight: 600; line-height: 1; box-shadow: 0 4px 12px rgba(27, 166, 114, 0.25); border: none; padding: 0; cursor: pointer; z-index: 5; }
+    
+    .s99-title-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; }
+    .s99-veg-icon { width: 12px; height: 12px; border-radius: 3px; border: 1px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .s99-veg-icon .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .s99-veg-icon.veg { border-color: #1BA672; } .s99-veg-icon.veg .dot { background: #1BA672; }
+    .s99-veg-icon.nonveg { border-color: #E23744; } .s99-veg-icon.nonveg .dot { background: #E23744; }
+    
+    .s99-name { font-size: 13.5px; font-weight: 800; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .s99-price-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .s99-old-price { font-size: 12px; color: #94A3B8; text-decoration: line-through; font-weight: 600; }
+    .s99-new-price { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 2px 5px; border-radius: 5px; }
+    .s99-rating-row { font-size: 11px; font-weight: 800; color: #1BA672; display: flex; align-items: center; gap: 3px; margin-bottom: 2px; }
+    .s99-rest-name { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
-
 <body>
 
 <div id="global-skeleton">
@@ -758,76 +989,68 @@
   </div>
 </div>
 
-
-<div class="store-card">
-  <div class="store-head">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="store-icon-wrap">
-        <i class="fa-solid fa-store" style="color:#fff;font-size:16px"></i>
-      </div>
-      <div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="store-title">99 Store</span>
-          <span class="store-pro">PRO</span>
-        </div>
-        <p class="store-sub">Meals at ₹99 + Free Delivery</p>
-      </div>
-    </div>
-    <a href="under99.html" class="store-see-all tap">
-      See All <i class="fa-solid fa-arrow-right-long" style="font-size:10px"></i>
-    </a>
+<div class="promo-section">
+  <div class="promo-header">
+    <span class="promo-title">More on EatSwada</span>
+    <div class="promo-line"></div>
   </div>
-
-  <div class="h-scroll no-scrollbar">
-    <a href="under99.html" class="prod-card">
-      <div class="prod-img-wrap">
-        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029850/PC_Creative%20refresh/3D_folders/food/dosa.png" alt="Masala Dosa" onerror="this.src='https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=200&auto=format&fit=crop&q=80'">
-        <div class="prod-price-tag">₹69</div>
-      </div>
-      <div class="prod-veg-row"><div class="veg-dot veg"><div class="dot"></div></div><span class="veg-tag-txt">Veg</span></div>
-      <div class="prod-name">Masala Dosa</div>
-      <div class="prod-rest">Pizza Restaurant</div>
-      <div class="prod-add-btn">ADD +</div>
+  <div class="promo-scroll">
+    <a href="under99.html" class="promo-card tap" style="background: #E0F2FE;">
+      <span class="pc-sub" style="color: #0284C7;">Daily</span>
+      <span class="pc-title" style="color: #0369A1;">99 MEALS</span>
+      <img src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=200&q=80" alt="99" style="position: absolute; bottom: -10px; right: -10px; width: 75px; height: 75px; object-fit: cover; border-radius: 50%; box-shadow: -2px -2px 10px rgba(0,0,0,0.1);">
     </a>
-    <a href="under99.html" class="prod-card">
-      <div class="prod-img-wrap">
-        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029858/PC_Creative%20refresh/3D_folders/food/roll.png" alt="Egg Chicken Roll" onerror="this.src='https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=200&auto=format&fit=crop&q=80'">
-        <div class="prod-price-tag">₹89</div>
-      </div>
-      <div class="prod-veg-row"><div class="veg-dot nonveg"><div class="dot"></div></div><span class="veg-tag-txt">Non-Veg</span></div>
-      <div class="prod-name">Egg Chicken Roll</div>
-      <div class="prod-rest">Wow! Momo</div>
-      <div class="prod-add-btn">ADD +</div>
+    <a href="#" class="promo-card tap" style="background: #FFEDD5;">
+      <span class="pc-sub" style="color: #C2410C;">Value</span>
+      <span class="pc-title" style="color: #9A3412;">OFFERS</span>
+      <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80" alt="Offers" style="position: absolute; bottom: -10px; right: -10px; width: 75px; height: 75px; object-fit: cover; border-radius: 50%; box-shadow: -2px -2px 10px rgba(0,0,0,0.1);">
     </a>
-    <a href="under99.html" class="prod-card">
-      <div class="prod-img-wrap">
-        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029845/PC_Creative%20refresh/3D_folders/food/burger.png" alt="Veg Burger" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80'">
-        <div class="prod-price-tag">₹79</div>
-      </div>
-      <div class="prod-veg-row"><div class="veg-dot veg"><div class="dot"></div></div><span class="veg-tag-txt">Veg</span></div>
-      <div class="prod-name">Veg Burger</div>
-      <div class="prod-rest">Burger King</div>
-      <div class="prod-add-btn">ADD +</div>
+    <a href="#" class="promo-card tap" style="background: #DCFCE7;">
+      <span class="pc-sub" style="color: #15803D;">Healthy</span>
+      <span class="pc-title" style="color: #166534;">GUILT FREE</span>
+      <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&q=80" alt="Healthy" style="position: absolute; bottom: -10px; right: -10px; width: 75px; height: 75px; object-fit: cover; border-radius: 50%; box-shadow: -2px -2px 10px rgba(0,0,0,0.1);">
     </a>
-    <a href="under99.html" class="prod-card">
-      <div class="prod-img-wrap">
-        <img src="https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png" alt="Chicken Biryani" onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&auto=format&fit=crop&q=80'">
-        <div class="prod-price-tag">₹99</div>
-      </div>
-      <div class="prod-veg-row"><div class="veg-dot nonveg"><div class="dot"></div></div><span class="veg-tag-txt">Non-Veg</span></div>
-      <div class="prod-name">Chicken Biryani</div>
-      <div class="prod-rest">Biryani Zone</div>
-      <div class="prod-add-btn">ADD +</div>
+    <a href="#" class="promo-card tap" style="background: #F3E8FF;">
+      <span class="pc-sub" style="color: #7E22CE;">Trending</span>
+      <span class="pc-title" style="color: #6B21A8;">TOP RATED</span>
+      <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&q=80" alt="Pizza" style="position: absolute; bottom: -10px; right: -10px; width: 75px; height: 75px; object-fit: cover; border-radius: 50%; box-shadow: -2px -2px 10px rgba(0,0,0,0.1);">
+    </a>
+    <a href="#" class="promo-card tap" style="background: #FCE7F3;">
+      <span class="pc-sub" style="color: #BE185D;">Sweet</span>
+      <span class="pc-title" style="color: #9D174D;">DESSERTS</span>
+      <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&q=80" alt="Dessert" style="position: absolute; bottom: -10px; right: -10px; width: 75px; height: 75px; object-fit: cover; border-radius: 50%; box-shadow: -2px -2px 10px rgba(0,0,0,0.1);">
     </a>
   </div>
 </div>
 
+<div class="s99-wrap">
+  <div class="s99-header">
+    <div class="s99-header-text">
+      <div class="s99-logo-text">99<span>store</span></div>
+      <span class="s99-sub-text"><i class="fa-solid fa-circle-check" style="color:#1C1C1C;"></i> Meals at ₹99 + Free Delivery</span>
+    </div>
+    <a href="under99.html" class="s99-see-all tap">See All <i class="fa-solid fa-chevron-right" style="font-size:11px;"></i></a>
+  </div>
+  <div id="s99-list" class="s99-scroll"></div>
+</div>
+
+  <div class="filter-scroll">
+    <div class="filter-pill tap"><i class="fa-solid fa-sliders"></i> Filter</div>
+    <div class="filter-pill tap">Sort by <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i></div>
+    <div class="filter-pill tap">⚡ Near & Fast</div>
+    <div id="filter-rating" class="filter-pill tap" onclick="toggleSmartFilter('rating', this)">⭐ Rating 4.0+</div>
+    <div id="filter-veg" class="filter-pill tap" onclick="toggleSmartFilter('veg', this)">Pure Veg</div>
+  </div>
+
+
 <div class="vrest-section">
-  <div class="sec-head" style="padding:0;margin-bottom:20px">
-    <span class="sec-title">Restaurants to explore</span>
+  <div class="z-rest-header">
+    <span class="z-rest-title">Restaurants to explore</span>
+    <div class="z-rest-line"></div>
   </div>
   <div id="restaurant-list"></div>
 </div>
+
 
 <nav class="bottom-nav">
   <a href="index.html" class="nav-item" style="color:#FC8019">
@@ -838,7 +1061,7 @@
   </a>
   <a href="under99.html" class="nav-item" style="color:#94a3b8">
     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <spanstyle="color:#FC8019">99 store</span>
+    <span style="color:#FC8019">99 store</span>
     <span class="nav-new-badge">NEW</span>
   </a>
   <a href="orders.html" class="nav-item" style="color:#94a3b8">
@@ -846,23 +1069,53 @@
     <span>Orders</span>
   </a>
 </nav>
-<script src="home.js"></script>
+<script src="cart-bar.js"></script>
 <script>
-  // ── Skeleton Loader Removal ──
-  window.addEventListener('load', () => {
-    // Artificial 600ms delay to simulate loading for effect
-    setTimeout(() => {
-      const skel = document.getElementById('global-skeleton');
-      if (skel) {
-        skel.classList.add('sk-hide');
-        setTimeout(() => skel.remove(), 550);
-      }
-      displayRestaurants(false);
-    }, 600);
-  });
+  let allRestaurants = []; // Global store for data
 
-  // ── Dynamic search placeholder ──
-  const phrases = ["Search for 'Biryani'", "Search for 'Pizza'", "Search for 'Momos'", "Search for 'Burger'", "Search for 'Sweets'", "Search for 'EatRight'"];
+  async function loadHomeData() {
+    const skel = document.getElementById('global-skeleton');
+    const list = document.getElementById('restaurant-list');
+    
+    const cachedData = sessionStorage.getItem('es_home_restaurants');
+    
+    if (cachedData) {
+      allRestaurants = JSON.parse(cachedData);
+      displayRestaurants();
+      display99Store(allRestaurants); // <--- ADDED HERE
+      if (skel) skel.remove(); 
+    } else {
+      try {
+        const response = await fetch('https://eatswada.onrender.com/api/restaurants');
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          allRestaurants = result.data;
+          sessionStorage.setItem('es_home_restaurants', JSON.stringify(allRestaurants));
+          
+          displayRestaurants();
+          display99Store(allRestaurants); // <--- ADDED HERE
+          
+          if (skel) {
+            skel.classList.add('sk-hide');
+            setTimeout(() => skel.remove(), 500);
+          }
+        } else {
+          throw new Error("Failed to load");
+        }
+      } catch (error) {
+        console.error(error);
+        list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="sessionStorage.removeItem('es_home_restaurants'); loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
+        if (skel) skel.remove(); 
+      }
+    }
+  }
+
+  // Fire the engine immediately
+  window.addEventListener('DOMContentLoaded', loadHomeData);
+
+  // ── 2. Dynamic search placeholder ──
+  const phrases = ["Search for 'Biryani'", "Search for 'Pizza'", "Search for 'Momos'", "Search for 'Burger'", "Search for 'Sweets'", "Search for 'EatSwada'"];
   let pIdx = 0;
   const placeholder = document.getElementById('search-placeholder');
   setInterval(() => {
@@ -875,12 +1128,11 @@
     }, 300);
   }, 2800);
 
-  // ── Category navigation ──
   function goCategory(type) {
     window.location.href = 'category.html?type=' + encodeURIComponent(type);
   }
 
-  // ── VEG filter toggle ──
+  // ── 3. VEG filter toggle ──
   let vegOnly = false;
   function toggleVegFilter() {
     vegOnly = !vegOnly;
@@ -890,67 +1142,183 @@
     } else {
       track.classList.remove('on');
     }
-    if (typeof displayRestaurants === 'function') displayRestaurants(vegOnly);
+    displayRestaurants(vegOnly);
   }
 
-  // ── Restaurant render ──
-  function displayRestaurants(filterVeg) {
+  // Smart Filter Globals
+  let isVegMode = false;
+  let isRatingMode = false;
+
+  window.toggleSmartFilter = function(type, element) {
+    // Toggle active visual class
+    element.classList.toggle('active');
+    
+    // Toggle data mode
+    if (type === 'veg') isVegMode = !isVegMode;
+    if (type === 'rating') isRatingMode = !isRatingMode;
+    
+    // Re-render
+    displayRestaurants();
+  };
+
+  // ── 4. Restaurant render (BULLETPROOF LAYOUT) ──
+  function displayRestaurants() {
     const list = document.getElementById('restaurant-list');
-    if (!list || typeof restaurants === 'undefined') return;
+    if (!list || allRestaurants.length === 0) return;
 
-    let data = filterVeg
-      ? restaurants.filter(r => r.menu && r.menu.every(i => i.isVeg))
-      : restaurants;
+    // Apply Smart Filters
+    let data = [...allRestaurants];
+    
+    if (isVegMode) {
+      data = data.filter(r => r.menu && r.menu.every(i => i.isVeg));
+    }
+    if (isRatingMode) {
+      data = data.filter(r => parseFloat(r.rating || 0) >= 4.0);
+    }
 
+    if (data.length === 0) {
+      list.innerHTML = `<div style="text-align:center; padding:40px 0; color:#64748B; font-weight:600;">No restaurants match your filters.</div>`;
+      return;
+    }
+
+    // STEP 4: ZOMATO JS TEMPLATE
     list.innerHTML = data.map((res, i) => `
-      <a href="restaurant.html?id=${res.id}" class="vr" style="animation: cardFadeUp 0.4s ease forwards ${i * 0.08}s; opacity: 0; transform: translateY(20px);">
-        <div class="vr-img">
-          <img src="${res.image}" alt="${res.name}"
-               onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'">
-          <div class="vr-heart"><i class="fa-solid fa-heart"></i></div>
-          <div class="vr-offer">${res.offer}</div>
+      <a href="restaurant.html?id=${res._id || res.id}" class="z-card" style="animation: cardFadeUp 0.4s ease forwards ${i * 0.05}s; opacity: 0; transform: translateY(20px);">
+        <div class="z-img-wrap">
+          <img src="${res.image || res.img}" alt="${res.name}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80';">
+          <div class="z-img-scrim"></div>
+          <div class="z-delivery-badge">FREE delivery</div>
+          <div class="z-bookmark"><i class="fa-regular fa-bookmark"></i></div>
         </div>
-        <div class="vr-body">
-          <div class="vr-top">
-            <span class="vr-name">${res.name}</span>
-            <div class="vr-rating">
-              <i class="fa-solid fa-star star-icon"></i>
-              <span class="rating-num">${res.rating}</span>
-              <div class="rating-divider"></div>
-              <span class="rating-count">${res.ratingCount || '1K+'}</span>
-            </div>
-          </div>
-          <div class="vr-cuisine">${res.cuisine}</div>
-          <div class="vr-meta">
-            <i class="fa-solid fa-clock"></i> ${res.time}
-            <span class="vr-sep">•</span>
-            <i class="fa-solid fa-location-dot"></i> ${res.distance}
-          </div>
+        
+        <div class="z-info-row">
+          <div class="z-name">${res.name}</div>
+          <div class="z-rating">${res.rating || '4.2'} <i class="fa-solid fa-star"></i></div>
+        </div>
+        
+        <div class="z-cuisine">${res.cuisine || res.cuisineDisplay || 'Indian, Fast Food'}</div>
+        
+        <div class="z-meta">
+          <i class="fa-solid fa-bolt"></i> Near & Fast
+          <span style="color: #CBD5E1; margin: 0 4px;">|</span>
+          ₹150 for one
         </div>
       </a>
     `).join('');
   }
+  
+  // ── AUTOMATIC 99 STORE RENDERER (PERFECTED API FALLBACK) ──
+  async function display99Store(allData) {
+    const list99 = document.getElementById('s99-list');
+    if (!list99) return;
 
-  // ── Zomato Smart Scroll Logic (BOTTOM NAV ONLY) ──
+    let items99 = [];
+
+    // 1. Check if the restaurants object already contains the menu items
+    if (allData && Array.isArray(allData)) {
+      allData.forEach(restaurant => {
+        if (restaurant.menu && Array.isArray(restaurant.menu)) {
+          restaurant.menu.forEach(dish => {
+            let price = typeof dish.price === 'number' ? dish.price : parseFloat(String(dish.price).replace(/[^\d.]/g, '')) || 999;
+            if (price <= 99) {
+              items99.push({
+                name: dish.name, price: price, image: dish.image || dish.img, isVeg: dish.isVeg,
+                resId: restaurant._id || restaurant.id, resName: restaurant.name, resRating: restaurant.rating || 4.2
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // 2. CRITICAL FIX: If no menus found, fetch directly from the 99 Store API
+    if (items99.length === 0) {
+      try {
+        const response = await fetch('https://eatswada.onrender.com/api/restaurants/under99');
+        const result = await response.json();
+        const rawData = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+        
+        items99 = rawData.map(dbItem => {
+          let rId = 'unknown', rName = 'EatSwada Partner', rRating = 4.2;
+          if (dbItem.restaurant && typeof dbItem.restaurant === 'object') {
+            rId = dbItem.restaurant._id || dbItem.restaurant.id;
+            rName = dbItem.restaurant.name;
+            rRating = dbItem.restaurant.rating || 4.2;
+          } else if (dbItem.restaurant) { rId = dbItem.restaurant; }
+          
+          let cleanPrice = typeof dbItem.price === 'number' ? dbItem.price : parseFloat(String(dbItem.price).replace(/[^\d.]/g, '')) || 99;
+          
+          return { name: dbItem.name, price: cleanPrice, image: dbItem.image || dbItem.img, isVeg: Boolean(dbItem.isVeg), resId: rId, resName: rName, resRating: rRating };
+        }).filter(item => item.price <= 99);
+      } catch(e) { console.error("Failed to load 99 items", e); }
+    }
+
+    // 3. Render the items
+    items99 = items99.slice(0, 8);
+
+    if (items99.length === 0) {
+      list99.innerHTML = `<div style="padding: 20px; color: #64748B; font-size: 13px; text-align: center; width: 100%;">Deals updating soon...</div>`;
+      return;
+    }
+
+    list99.innerHTML = items99.map((item, idx) => {
+      const safeName = item.name ? item.name.replace(/'/g, "\\'").replace(/"/g, '&quot;') : 'Item';
+      const safeId = String(item.resId).replace(/['"]/g, '');
+      const oldPrice = Math.floor(item.price * 1.4); 
+      const vegClass = item.isVeg ? 'veg' : 'nonveg';
+
+      return `
+        <a href="under99.html" class="s99-card tap" style="animation: cardFadeUp 0.4s ease forwards ${idx * 0.05}s; opacity: 0;">
+          <div class="s99-img-wrap">
+            <img src="${item.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'}" alt="${safeName}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80';">
+            <button class="s99-add-circle" onclick="event.preventDefault(); updateCart('${safeName}', 1, ${item.price}, '${safeId}')">+</button>
+          </div>
+          <div class="s99-title-row">
+            <div class="s99-veg-icon ${vegClass}"><div class="dot"></div></div>
+            <span class="s99-name">${item.name}</span>
+          </div>
+          <div class="s99-price-row"><span class="s99-old-price">₹${oldPrice}</span><span class="s99-new-price">₹${item.price}</span></div>
+          <div class="s99-rating-row"><i class="fa-solid fa-star"></i> ${item.resRating} <span style="color:#94A3B8; font-weight:600; margin-left:3px;">(10+)</span></div>
+          <div class="s99-rest-name">${item.resName}</div>
+        </a>
+      `;
+    }).join('');
+  }
+
   const bottomNav = document.querySelector('.bottom-nav'); 
   let lastScrollTop = 0;
   const scrollThreshold = 15; 
 
   window.addEventListener('scroll', () => {
     let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-    // Ignore tiny movements
     if (Math.abs(lastScrollTop - currentScroll) <= scrollThreshold) return;
 
-    // Hide bottom nav on scroll down, Show on scroll up
     if (currentScroll > lastScrollTop && currentScroll > 180) {
       if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); 
     } else {
       if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); 
     }
-    
     lastScrollTop = currentScroll;
   }, { passive: true }); 
+  
+  // ── 6. AUTH STATE ──
+  document.addEventListener('DOMContentLoaded', () => {
+    checkAuthStatus();
+  });
+
+  function checkAuthStatus() {
+    const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
+    const userStr = localStorage.getItem('nearbite_user');
+    
+    if (token && userStr) {
+      const user = JSON.parse(userStr);
+      const profileBtn = document.querySelector('.btn-profile');
+      
+      if(profileBtn && user.name) {
+        profileBtn.innerHTML = `<span style="font-weight:900; font-size:16px; color:#FC8019;">${user.name.charAt(0).toUpperCase()}</span>`;
+      }
+    }
+  }
 </script>
 
 <style>

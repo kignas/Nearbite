@@ -3,256 +3,275 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Track Order – Nearbite</title>
+  <title>Live Tracking – EatSwada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <style>
     :root {
       --brand:   #FC8019;
+      --brand-light: #fff4ea;
       --text-1:  #111827;
-      --text-2:  #374151;
+      --text-2:  #4b5563;
       --text-3:  #9ca3af;
       --bg:      #f9fafb;
-      --border:  #e5e7eb;
-      --surface: #ffffff;
-      --ease:    cubic-bezier(0.25, 1, 0.5, 1);
+      --border:  #f3f4f6;
+      --ease:    cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      /* Stripped out Syne entirely, using purely Plus Jakarta Sans for a clean UI */
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--surface); color: var(--text-1);
+      background: var(--bg);
+      color: var(--text-1);
       -webkit-tap-highlight-color: transparent;
-      margin: 0; padding: 0;
-      height: 100vh; display: flex; flex-direction: column;
-      overflow: hidden;
+      margin: 0; 
+      overflow-x: hidden;
     }
 
-    .tap { cursor: pointer; transition: transform 0.1s var(--ease); }
-    .tap:active { transform: scale(0.96); }
+    .tap { cursor: pointer; transition: transform 0.15s var(--ease); }
+    .tap:active { transform: scale(0.95); }
 
-    /* ── Floating Header ── */
-    .top-bar {
-      position: absolute; top: 16px; left: 16px; right: 16px;
-      display: flex; justify-content: space-between; align-items: center; z-index: 400;
-    }
-    .btn-back {
-      width: 44px; height: 44px; background: #fff; border-radius: 50%;
+    /* ════════════════════════════════════════════
+       ANIMATED BRAND HERO (REPLACES MAP)
+    ════════════════════════════════════════════ */
+    .tracker-hero {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48vh; 
+      background: linear-gradient(135deg, #FF9533 0%, #E86A04 100%);
       display: flex; align-items: center; justify-content: center;
-      border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.12); font-size: 16px; color: var(--text-1);
-    }
-    .btn-help {
-      background: #fff; border-radius: 20px; padding: 10px 16px;
-      font-size: 13px; font-weight: 800; color: var(--text-1);
-      border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      z-index: 1; overflow: hidden;
     }
 
-    /* ── Map Area ── */
-    .map-section {
-      height: 50vh; width: 100%; position: relative; background: #e5e5e5;
+    /* Radar Pulse Animation */
+    .pulse-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      animation: radar 3s linear infinite;
     }
-    #map { 
-      width: 100%; height: 100%; z-index: 1; 
-      /* CSS filter to make the free map look more premium/muted */
-      filter: contrast(0.95) saturate(0.8) brightness(1.05);
-    }
-    .leaflet-control-attribution { display: none !important; }
+    .ring-1 { width: 120px; height: 120px; animation-delay: 0s; }
+    .ring-2 { width: 120px; height: 120px; animation-delay: 1s; }
+    .ring-3 { width: 120px; height: 120px; animation-delay: 2s; }
 
-    /* Custom Pulsing Map Marker */
-    .pulse-marker {
-      width: 18px; height: 18px; background: var(--brand);
-      border-radius: 50%; border: 3px solid #fff;
-      box-shadow: 0 0 0 rgba(252, 128, 25, 0.4);
-      animation: pulse 1.5s infinite;
+    @keyframes radar {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(3.5); opacity: 0; }
+    }
+
+    .hero-icon {
+      position: relative; z-index: 2;
+      width: 76px; height: 76px;
+      background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; color: var(--brand);
+      box-shadow: 0 8px 24px rgba(232, 106, 4, 0.4);
+    }
+
+    /* Floating Back Button */
+    .floating-back {
+      position: fixed;
+      top: 20px; left: 20px;
+      width: 44px; height: 44px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; border: 1.5px solid rgba(255, 255, 255, 0.3);
+      font-size: 16px; color: #fff;
+    }
+
+    /* ════════════════════════════════════════════
+       BOTTOM TRACKING SHEET
+    ════════════════════════════════════════════ */
+    .tracking-sheet {
+      position: relative;
+      margin-top: 40vh; /* Overlaps the animated hero */
+      background: #fff;
+      min-height: 60vh;
+      border-radius: 32px 32px 0 0;
+      z-index: 10;
+      padding: 32px 24px;
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.08);
+    }
+
+    .sheet-handle {
+      position: absolute; top: 12px; left: 50%;
+      transform: translateX(-50%);
+      width: 40px; height: 5px;
+      background: #e5e7eb; border-radius: 10px;
+    }
+
+    .eta-header { text-align: center; margin-bottom: 28px; }
+    .eta-title { font-size: 13px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .eta-time { font-size: 32px; font-weight: 900; color: #000; letter-spacing: -1px; }
+    .eta-time span { font-size: 16px; font-weight: 700; color: var(--text-2); letter-spacing: 0; }
+
+    /* ════════════════════════════════════════════
+       PREMIUM VERTICAL TIMELINE
+    ════════════════════════════════════════════ */
+    .timeline { position: relative; padding-left: 20px; margin-bottom: 32px; }
+    
+    .timeline::before {
+      content: ''; position: absolute; top: 8px; bottom: 30px; left: 24px;
+      width: 2px; background: var(--border); z-index: 1;
+    }
+
+    .step { position: relative; margin-bottom: 24px; z-index: 2; display: flex; align-items: flex-start; gap: 16px; }
+    .step:last-child { margin-bottom: 0; }
+
+    .step-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #cbd5e1; margin-top: 6px; flex-shrink: 0;
+      box-shadow: 0 0 0 4px #fff;
+    }
+
+    .step.active .step-dot {
+      background: var(--brand);
+      box-shadow: 0 0 0 4px var(--brand-light);
+      position: relative;
+    }
+    .step.active .step-dot::after {
+      content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border-radius: 50%; border: 2px solid var(--brand);
+      animation: pulse 1.5s infinite; opacity: 0;
     }
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(252, 128, 25, 0.5); }
-      70% { box-shadow: 0 0 0 15px rgba(252, 128, 25, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(252, 128, 25, 0); }
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
     }
 
-    /* ── Tracking Bottom Sheet ── */
-    .tracking-sheet {
-      flex: 1; background: var(--surface); border-radius: 32px 32px 0 0;
-      margin-top: -32px; position: relative; z-index: 10;
-      box-shadow: 0 -8px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column;
-      padding: 16px 24px 24px; overflow-y: auto;
-    }
-
-    .drag-handle {
-      width: 40px; height: 4px; background: #e5e7eb;
-      border-radius: 2px; margin: 0 auto 20px;
-    }
-
-    /* Status Header */
-    .status-header { text-align: left; margin-bottom: 32px; }
-    .eta-title { font-size: 26px; font-weight: 900; color: var(--text-1); letter-spacing: -0.5px; margin-bottom: 4px; }
-    .eta-sub { font-size: 14px; font-weight: 600; color: var(--brand); }
-
-    /* ── Premium Timeline ── */
-    .timeline-container { position: relative; margin-bottom: 40px; }
+    .step-text h4 { font-size: 15px; font-weight: 800; color: var(--text-1); margin-bottom: 2px; }
+    .step-text p { font-size: 12px; color: var(--text-3); font-weight: 500; }
     
-    .timeline-line-bg {
-      position: absolute; top: 10px; left: 10px; right: 10px;
-      height: 2px; background: #f3f4f6; z-index: 1;
-    }
-    .timeline-line-fill {
-      position: absolute; top: 10px; left: 10px; width: 33%;
-      height: 2px; background: var(--brand); z-index: 2; transition: width 0.5s ease;
-    }
-    
-    .timeline-nodes {
-      display: flex; justify-content: space-between; position: relative; z-index: 3;
-    }
-    .node {
-      width: 22px; height: 22px; border-radius: 50%; background: #f3f4f6;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: #fff; transition: all 0.3s ease;
-    }
-    .node.done { background: var(--brand); }
-    .node.active {
-      background: #fff; border: 3px solid var(--brand);
-      box-shadow: 0 0 0 4px rgba(252, 128, 25, 0.1);
-    }
-    
-    .timeline-labels {
-      display: flex; justify-content: space-between; margin-top: 12px;
-    }
-    .t-label {
-      width: 60px; text-align: center; font-size: 11px; font-weight: 700; color: var(--text-3);
-    }
-    .t-label.done { color: var(--text-1); }
-    .t-label.active { color: var(--brand); font-weight: 800; }
+    .step.passed .step-dot { background: var(--brand); }
+    .step.passed .step-text h4 { color: var(--text-2); }
 
-    /* ── Delivery Partner Card ── */
+    /* ════════════════════════════════════════════
+       RIDER CARD
+    ════════════════════════════════════════════ */
     .rider-card {
-      background: #fff; border: 1.5px solid var(--border); border-radius: 20px;
-      padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    }
-    .rider-avatar { width: 48px; height: 48px; background: #f3f4f6; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-    .rider-avatar i { font-size: 24px; color: #9ca3af; }
-    .rider-info { flex: 1; }
-    .rider-name { font-size: 15px; font-weight: 800; color: var(--text-1); margin-bottom: 4px; }
-    .rider-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-3); }
-    .rider-rating { display: flex; align-items: center; gap: 4px; color: #d97706; background: #fef3c7; padding: 3px 6px; border-radius: 6px; font-size: 11px; font-weight: 800; }
-    
-    /* Punchy Solid Call Button */
-    .btn-call {
-      width: 44px; height: 44px; background: #10b981; color: #fff;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 16px; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      background: #fafafa; border: 1px solid var(--border);
+      border-radius: 20px; padding: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
     }
 
-    /* ── Order Details Snippet ── */
-    .order-details {
-      background: #f9fafb; border-radius: 16px; padding: 16px;
-      border: 1px dashed #d1d5db;
+    .rider-left { display: flex; align-items: center; gap: 12px; }
+    .rider-avatar {
+      width: 48px; height: 48px; border-radius: 50%; background: #e5e7eb;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .od-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-    .od-id { font-size: 11px; font-weight: 800; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
-    .od-restaurant { font-size: 16px; font-weight: 800; color: var(--text-1); margin-bottom: 4px; }
-    .od-items { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 12px; }
-    .od-total { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #e5e7eb; }
-    .od-total-label { font-size: 13px; font-weight: 700; color: var(--text-2); }
-    .od-total-val { font-size: 15px; font-weight: 900; color: var(--text-1); }
+    .rider-avatar i { font-size: 24px; color: #9ca3af; margin-top: 8px; }
+    
+    .rider-info h3 { font-size: 15px; font-weight: 800; color: #000; margin-bottom: 4px; }
+    .rider-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-2); }
+    .rider-rating { background: #fff; padding: 2px 6px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 4px; color: #111; }
+    .rider-rating i { color: #f59e0b; font-size: 9px; }
+
+    .btn-call {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--brand-light); color: var(--brand);
+      border: none; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ════════════════════════════════════════════
+       ORDER SUMMARY
+    ════════════════════════════════════════════ */
+    .order-summary {
+      border-top: 1px dashed #e5e7eb; padding-top: 24px;
+    }
+    .summary-res { font-size: 14px; font-weight: 800; color: #000; margin-bottom: 6px; }
+    .summary-items { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 16px; }
+    
+    .summary-total {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8fafc; padding: 12px 16px; border-radius: 12px;
+    }
+    .total-label { font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; }
+    .total-price { font-size: 16px; font-weight: 900; color: #000; }
 
   </style>
 </head>
 <body>
 
-  <div class="top-bar">
-    <button class="btn-back tap" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
-    <button class="btn-help tap">Help</button>
+  <div class="tracker-hero">
+    <div class="pulse-ring ring-1"></div>
+    <div class="pulse-ring ring-2"></div>
+    <div class="pulse-ring ring-3"></div>
+    <div class="hero-icon"><i class="fa-solid fa-motorcycle"></i></div>
   </div>
 
-  <div class="map-section">
-    <div id="map"></div>
-  </div>
+  <button class="floating-back tap" onclick="history.back()">
+    <i class="fa-solid fa-arrow-left"></i>
+  </button>
 
   <div class="tracking-sheet">
-    <div class="drag-handle"></div>
-    
-    <div class="status-header">
-      <div class="eta-title">Preparing Food</div>
-      <div class="eta-sub">Arriving in approx. 25 mins</div>
+    <div class="sheet-handle"></div>
+
+    <div class="eta-header">
+      <div class="eta-title">Estimated Arrival</div>
+      <div class="eta-time">24 <span>mins</span></div>
     </div>
 
-    <div class="timeline-container">
-      <div class="timeline-line-bg"></div>
-      <div class="timeline-line-fill" style="width: 33%;"></div>
-      
-      <div class="timeline-nodes">
-        <div class="node done"><i class="fa-solid fa-check"></i></div>
-        <div class="node active"></div>
-        <div class="node"></div>
-        <div class="node"></div>
-      </div>
-      
-      <div class="timeline-labels">
-        <div class="t-label done">Placed</div>
-        <div class="t-label active">Preparing</div>
-        <div class="t-label">On the way</div>
-        <div class="t-label">Delivered</div>
-      </div>
-    </div>
-
-    <div class="rider-card tap">
-      <div class="rider-avatar">
-        <i class="fa-solid fa-user"></i>
-      </div>
-      <div class="rider-info">
-        <div class="rider-name">Raju Biswas</div>
-        <div class="rider-meta">
-          <div class="rider-rating"><i class="fa-solid fa-star"></i> 4.8</div>
-          <span>•</span>
-          <span>Delivery Partner</span>
+    <div class="timeline">
+      <div class="step passed">
+        <div class="step-dot"></div>
+        <div class="step-text">
+          <h4>Order Confirmed</h4>
+          <p>Restaurant accepted your order</p>
         </div>
       </div>
-      <button class="btn-call tap" onclick="alert('Calling Raju...')">
+      
+      <div class="step active">
+        <div class="step-dot"></div>
+        <div class="step-text">
+          <h4>Food is being prepared</h4>
+          <p>Cooking at EatSwada Kitchen</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-dot"></div>
+        <div class="step-text">
+          <h4>Out for Delivery</h4>
+          <p>Rider is picking up your food</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rider-card">
+      <div class="rider-left">
+        <div class="rider-avatar"><i class="fa-solid fa-motorcycle"></i></div>
+        <div class="rider-info">
+          <h3>Raju Delivery</h3>
+          <div class="rider-meta">
+            <div class="rider-rating"><i class="fa-solid fa-star"></i> 4.8</div>
+            <span>•</span>
+            <span>Delivery Partner</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-call tap" onclick="window.location.href='tel:+910000000000'">
         <i class="fa-solid fa-phone"></i>
       </button>
     </div>
 
-    <div class="order-details">
-      <div class="od-header">
-        <div class="od-id">Order ID: #NB-88492</div>
-      </div>
-      <div class="od-restaurant" id="track-res-name">Ruby's Swader Prantik</div>
-      <div class="od-items">1x Dhokar Dalna, 2x Luchi (4 pcs)</div>
-      <div class="od-total">
-        <span class="od-total-label">Total Paid</span>
-        <span class="od-total-val">₹175</span>
+    <div class="order-summary">
+      <div class="summary-res">Order #NB-88492</div>
+      <div class="summary-items">1x Veg Momos, 2x Schezwan Sauce</div>
+      <div class="summary-total">
+        <span class="total-label">Total Paid Online</span>
+        <span class="total-price">₹175</span>
       </div>
     </div>
 
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  
-  <script>
-    /* Initialize Map (Centered on Maynaguri) */
-    const resCoords = [26.5613, 88.8225]; 
-    const map = L.map('map', { zoomControl: false, dragging: false }).setView(resCoords, 15);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-
-    /* Custom Pulsing Marker */
-    const pulsingIcon = L.divIcon({
-      className: 'custom-div-icon',
-      html: '<div class="pulse-marker"></div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
-
-    L.marker(resCoords, { icon: pulsingIcon }).addTo(map);
-  </script>
 </body>
 </html>
