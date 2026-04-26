@@ -317,78 +317,6 @@
           setTimeout(() => { otpBoxes[0].focus(); }, 100); 
         } else {
           alert(result.message || "Failed to send OTP.");
-  <script>
-    /* Hero Slider */
-    let currentSlide = 0;
-    const totalSlides = 3;
-    setInterval(() => {
-      document.getElementById(`slide${currentSlide}`).classList.remove('active');
-      document.getElementById(`dot${currentSlide}`).classList.remove('active');
-      currentSlide = (currentSlide + 1) % totalSlides;
-      document.getElementById(`slide${currentSlide}`).classList.add('active');
-      document.getElementById(`dot${currentSlide}`).classList.add('active');
-    }, 3500);
-
-    /* Form Logic */
-    const phoneInput = document.getElementById('phoneInput');
-    const actionBtn = document.getElementById('actionBtn');
-    const displayPhone = document.getElementById('displayPhone');
-    const otpBoxes = document.querySelectorAll('.otp-box');
-    const resendBtn = document.getElementById('resendBtn');
-    let timerInterval;
-
-    function checkPhone() {
-      phoneInput.value = phoneInput.value.replace(/\D/g, ''); 
-      actionBtn.disabled = phoneInput.value.length !== 10;
-    }
-
-    const API_URL = 'https://eatswada.onrender.com/api/users'; 
-
-    /* ── The 60 Second Countdown Engine ── */
-    function startOTPTimer() {
-      let timeLeft = 60;
-      resendBtn.disabled = true;
-      resendBtn.innerText = `Resend in ${timeLeft}s`;
-      
-      clearInterval(timerInterval);
-      
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        resendBtn.innerText = `Resend in ${timeLeft}s`;
-        
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          resendBtn.innerText = 'Resend';
-          resendBtn.disabled = false;
-        }
-      }, 1000);
-    }
-
-    /* ── Main Send OTP Function ── */
-    async function sendOTP() {
-      const phoneVal = '+91' + phoneInput.value; 
-      actionBtn.innerText = 'Sending...';
-      actionBtn.disabled = true;
-
-      try {
-        const response = await fetch(`${API_URL}/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: phoneVal })
-        });
-        
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          displayPhone.innerText = phoneVal;
-          window.scrollTo({ top: 320, behavior: 'smooth' });
-          document.getElementById('step1').classList.remove('active');
-          document.getElementById('step2').classList.add('active');
-          
-          startOTPTimer(); // 🔥 Start the countdown!
-          setTimeout(() => { otpBoxes[0].focus(); }, 100); 
-        } else {
-          alert(result.message || "Failed to send OTP.");
         }
       } catch (error) {
         alert("Server connection error!");
@@ -453,20 +381,20 @@
            const result = await response.json();
 
            if (response.ok && result.success) {
-             // 🚨 THE FIX: Bulletproof Token Extraction 🚨
-             // This safely checks multiple locations the backend might put the token
-             const safeToken = result.token || (result.data && result.data.token);
-             const safeUser = result.user || (result.data && result.data.user);
+             const safeToken = result.data.token;
+             const safeUser = result.data.user;
 
-             if (!safeToken) {
-               alert("System Error: Backend did not return a security token.");
-               return;
+             if (safeToken) {
+                 // Save securely to the phone's vault
+                 localStorage.setItem('nearbite_token', safeToken);
+                 localStorage.setItem('token', safeToken); 
+                 localStorage.setItem('nearbite_user', JSON.stringify(safeUser));
+                 
+                 // 🚨 THE MASTER TEST: Go straight to Orders, skipping index.html! 🚨
+                 window.location.href = 'orders.html';
+             } else {
+                 alert("System Error: Token missing from server.");
              }
-
-             localStorage.setItem('nearbite_token', safeToken);
-             localStorage.setItem('nearbite_user', JSON.stringify(safeUser || { phone: phoneVal }));
-             
-             setTimeout(() => window.location.href = 'index.html', 500);
            } else {
              alert(result.message || "Invalid OTP!");
              otpBoxes.forEach(box => box.value = ''); 
