@@ -152,26 +152,25 @@
   </a>
 </nav>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
+  // Try every common token name
+  const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token') || localStorage.getItem('user_token');
   const loader = document.getElementById('loading-state');
   const liveContainer = document.getElementById('live-orders-container');
   const pastContainer = document.getElementById('past-orders-container');
   const emptyState = document.getElementById('empty-orders');
 
-  // Helper to show auth error
-  const requireLogin = () => {
+  // --- DIAGNOSTIC BUG 1: TOKEN MISSING ---
+  if (!token || token === "null" || token === "undefined") {
     loader.style.display = 'none';
     emptyState.style.display = 'block';
-    document.getElementById('empty-title').innerText = "Please log in";
-    document.getElementById('empty-desc').innerHTML = "Log in to view your past orders and<br>track your active cravings.";
-    const btn = document.getElementById('empty-btn');
-    btn.innerText = "LOGIN NOW";
-    btn.onclick = () => window.location.href = 'login.html';
-  };
-
-  if (!token) return requireLogin();
+    document.getElementById('empty-title').innerHTML = "<span style='color:red;'>🚨 FRONTEND BUG</span>";
+    document.getElementById('empty-desc').innerHTML = "Your login.html page is NOT saving the token to phone memory.<br><br><b>Fix:</b> Check your login.html code and see what name it uses in <code>localStorage.setItem(...)</code>.";
+    document.getElementById('empty-btn').style.display = "none";
+    return;
+  }
 
   try {
     // 1. Fetch real orders from backend
@@ -179,9 +178,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     
+    // --- DIAGNOSTIC BUG 2: RENDER REJECTED TOKEN ---
     if (response.status === 401) {
+      loader.style.display = 'none';
+      emptyState.style.display = 'block';
+      document.getElementById('empty-title').innerHTML = "<span style='color:red;'>🚨 BACKEND BUG (401)</span>";
+      document.getElementById('empty-desc').innerHTML = "The token is saved, but Render rejected it!<br><br><b>Fix:</b> You MUST go to your Render Dashboard -> Environment Variables -> and add your <b>JWT_SECRET</b>.";
+      document.getElementById('empty-btn').style.display = "none";
+      
+      // Wipe the bad token
+      localStorage.removeItem('token');
       localStorage.removeItem('nearbite_token');
-      return requireLogin();
+      return;
     }
 
     const result = await response.json();
@@ -190,22 +198,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (response.ok && result.success && result.data.length > 0) {
       const allOrders = result.data;
       
-      // 2. Sort orders into Live vs Past
       const liveStatuses = ['pending', 'preparing', 'out_for_delivery'];
       const liveOrders = allOrders.filter(o => liveStatuses.includes(o.status.toLowerCase()));
       const pastOrders = allOrders.filter(o => !liveStatuses.includes(o.status.toLowerCase()));
 
-      // 3. Render Live Orders
       if (liveOrders.length > 0) {
         let liveHTML = `<div class="section-title">Live Orders <span class="pulse-dot"></span></div>`;
-        
         liveHTML += liveOrders.map(order => {
-          let width = '10%'; 
-          let active1 = 'active-label', active2 = '', active3 = '';
-          
+          let width = '10%'; let active1 = 'active-label', active2 = '', active3 = '';
           if (order.status.toLowerCase() === 'preparing') { width = '50%'; active2 = 'active-label'; }
           if (order.status.toLowerCase() === 'out_for_delivery') { width = '85%'; active2 = 'active-label'; active3 = 'active-label'; }
-
           return `
             <a href="track-order.html?id=${order._id}" class="track-card tap">
               <div class="track-card-top">
@@ -216,11 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="track-bag-icon"><i class="fa-solid fa-motorcycle"></i></div>
               </div>
               <div class="progress-bar-track"><div class="progress-bar-fill" style="width: ${width};"></div></div>
-              <div class="progress-labels">
-                <span class="${active1}">Received</span>
-                <span class="${active2}">Preparing</span>
-                <span class="${active3}">On the way</span>
-              </div>
+              <div class="progress-labels"><span class="${active1}">Received</span><span class="${active2}">Preparing</span><span class="${active3}">On the way</span></div>
               <div class="view-track-btn">Track Order <i class="fa-solid fa-arrow-right"></i></div>
             </a>
           `;
@@ -228,45 +226,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         liveContainer.innerHTML = liveHTML;
       }
 
-      // 4. Render Past Orders
       if (pastOrders.length > 0) {
         let pastHTML = `<div class="section-title" style="margin-top:${liveOrders.length > 0 ? '32px' : '16px'}">Past Orders</div>`;
-        
         pastHTML += pastOrders.map(order => {
-          const dateObj = new Date(order.createdAt);
-          const dateStr = dateObj.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+          const dateStr = new Date(order.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
           const itemsStr = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
-          
-          let statusColor = '#FC8019'; // default orange
-          if (order.status === 'delivered') statusColor = '#1ba672';
-          if (order.status === 'cancelled') statusColor = '#e63946';
-
+          let statusColor = '#FC8019'; if (order.status === 'delivered') statusColor = '#1ba672'; if (order.status === 'cancelled') statusColor = '#e63946';
           return `
             <a href="track-order.html?id=${order._id}" class="past-card tap">
               <div class="past-card-header">
-                <div>
-                  <h4>${order.restaurantName || "EatSwada Partner"}</h4>
-                  <span class="past-card-date">${dateStr}</span>
-                </div>
+                <div><h4>${order.restaurantName || "EatSwada Partner"}</h4><span class="past-card-date">${dateStr}</span></div>
                 <span class="status-badge" style="color:${statusColor}; background:${statusColor}15;">${order.status}</span>
               </div>
               <p class="past-items">${itemsStr}</p>
-              <div class="past-footer">
-                <span class="past-total">₹${order.total}</span>
-                <span class="reorder-btn tap"><i class="fa-solid fa-rotate-right"></i> Details</span>
-              </div>
+              <div class="past-footer"><span class="past-total">₹${order.total}</span><span class="reorder-btn tap">Details</span></div>
             </a>
           `;
         }).join('');
         pastContainer.innerHTML = pastHTML;
       }
     } else {
-      // API returned empty array
       emptyState.style.display = 'block';
       document.getElementById('empty-btn').onclick = () => window.location.href = 'index.html';
     }
   } catch (error) {
-    console.error("API Error fetching orders:", error);
     loader.style.display = 'none';
     emptyState.style.display = 'block';
     document.getElementById('empty-title').innerText = "Connection Error";
@@ -274,6 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
+
 
 </body>
 </html>
