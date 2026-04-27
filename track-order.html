@@ -36,24 +36,24 @@
     .tap:active { transform: scale(0.95); }
 
     /* ════════════════════════════════════════════
-       ANIMATED BRAND HERO (REPLACES MAP)
+       ANIMATED BRAND HERO (DYNAMIC COLORS)
     ════════════════════════════════════════════ */
     .tracker-hero {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 48vh; 
+      position: fixed; top: 0; left: 0; right: 0; height: 48vh; 
       background: linear-gradient(135deg, #FF9533 0%, #E86A04 100%);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1; overflow: hidden;
+      z-index: 1; overflow: hidden; transition: background 0.5s ease;
     }
+    .tracker-hero.cancelled { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+    .tracker-hero.delivered { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
 
-    /* Radar Pulse Animation */
     .pulse-ring {
-      position: absolute;
-      border-radius: 50%;
+      position: absolute; border-radius: 50%;
       border: 2px solid rgba(255, 255, 255, 0.25);
       animation: radar 3s linear infinite;
     }
+    .tracker-hero.cancelled .pulse-ring, .tracker-hero.delivered .pulse-ring { display: none; }
+
     .ring-1 { width: 120px; height: 120px; animation-delay: 0s; }
     .ring-2 { width: 120px; height: 120px; animation-delay: 1s; }
     .ring-3 { width: 120px; height: 120px; animation-delay: 2s; }
@@ -64,150 +64,114 @@
     }
 
     .hero-icon {
-      position: relative; z-index: 2;
-      width: 76px; height: 76px;
-      background: #fff; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px; color: var(--brand);
-      box-shadow: 0 8px 24px rgba(232, 106, 4, 0.4);
+      position: relative; z-index: 2; width: 76px; height: 76px;
+      background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 36px; color: var(--brand); box-shadow: 0 8px 24px rgba(232, 106, 4, 0.4);
     }
+    .tracker-hero.cancelled .hero-icon { color: #ef4444; box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4); }
+    .tracker-hero.delivered .hero-icon { color: #10b981; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4); }
 
-    /* Floating Back Button */
     .floating-back {
-      position: fixed;
-      top: 20px; left: 20px;
-      width: 44px; height: 44px;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100; border: 1.5px solid rgba(255, 255, 255, 0.3);
-      font-size: 16px; color: #fff;
+      position: fixed; top: 20px; left: 20px; width: 44px; height: 44px;
+      background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      z-index: 100; border: 1.5px solid rgba(255, 255, 255, 0.3); font-size: 16px; color: #fff;
     }
 
     /* ════════════════════════════════════════════
        BOTTOM TRACKING SHEET
     ════════════════════════════════════════════ */
     .tracking-sheet {
-      position: relative;
-      margin-top: 40vh; /* Overlaps the animated hero */
-      background: #fff;
-      min-height: 60vh;
-      border-radius: 32px 32px 0 0;
-      z-index: 10;
-      padding: 32px 24px;
+      position: relative; margin-top: 40vh; background: #fff; min-height: 60vh;
+      border-radius: 32px 32px 0 0; z-index: 10; padding: 32px 24px;
       box-shadow: 0 -8px 24px rgba(0,0,0,0.08);
     }
 
     .sheet-handle {
-      position: absolute; top: 12px; left: 50%;
-      transform: translateX(-50%);
-      width: 40px; height: 5px;
-      background: #e5e7eb; border-radius: 10px;
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 5px; background: #e5e7eb; border-radius: 10px;
     }
 
-    .eta-header { text-align: center; margin-bottom: 28px; }
+    .eta-header { text-align: center; margin-bottom: 16px; }
     .eta-title { font-size: 13px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
     .eta-time { font-size: 32px; font-weight: 900; color: #000; letter-spacing: -1px; }
-    .eta-time span { font-size: 16px; font-weight: 700; color: var(--text-2); letter-spacing: 0; }
+    .eta-time.cancelled-text { color: #ef4444; font-size: 24px; }
+    .eta-time.delivered-text { color: #10b981; font-size: 24px; }
+
+    /* 🔐 THE OTP BADGE 🔐 */
+    .customer-otp-box {
+      display: none; text-align: center; background: rgba(16, 185, 129, 0.05);
+      border: 1.5px dashed rgba(16, 185, 129, 0.4); border-radius: 16px;
+      padding: 12px; margin-bottom: 24px;
+    }
+    .otp-label { font-size: 11px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 1px; }
+    .otp-value { font-size: 32px; font-weight: 900; color: #000; letter-spacing: 6px; margin-top: 2px; }
 
     /* ════════════════════════════════════════════
-       PREMIUM VERTICAL TIMELINE
+       DYNAMIC TIMELINE
     ════════════════════════════════════════════ */
     .timeline { position: relative; padding-left: 20px; margin-bottom: 32px; }
-    
-    .timeline::before {
-      content: ''; position: absolute; top: 8px; bottom: 30px; left: 24px;
-      width: 2px; background: var(--border); z-index: 1;
-    }
+    .timeline::before { content: ''; position: absolute; top: 8px; bottom: 30px; left: 24px; width: 2px; background: var(--border); z-index: 1; }
 
     .step { position: relative; margin-bottom: 24px; z-index: 2; display: flex; align-items: flex-start; gap: 16px; }
     .step:last-child { margin-bottom: 0; }
-
-    .step-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #cbd5e1; margin-top: 6px; flex-shrink: 0;
-      box-shadow: 0 0 0 4px #fff;
-    }
-
-    .step.active .step-dot {
-      background: var(--brand);
-      box-shadow: 0 0 0 4px var(--brand-light);
-      position: relative;
-    }
-    .step.active .step-dot::after {
-      content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px;
-      border-radius: 50%; border: 2px solid var(--brand);
-      animation: pulse 1.5s infinite; opacity: 0;
-    }
-    @keyframes pulse {
-      0% { transform: scale(0.6); opacity: 1; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-
-    .step-text h4 { font-size: 15px; font-weight: 800; color: var(--text-1); margin-bottom: 2px; }
-    .step-text p { font-size: 12px; color: var(--text-3); font-weight: 500; }
     
+    .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 0 4px #fff; transition: 0.3s; }
+    .step-text h4 { font-size: 15px; font-weight: 800; color: var(--text-3); margin-bottom: 2px; transition: 0.3s; }
+    .step-text p { font-size: 12px; color: var(--text-3); font-weight: 500; transition: 0.3s; }
+
+    /* Passed State */
     .step.passed .step-dot { background: var(--brand); }
     .step.passed .step-text h4 { color: var(--text-2); }
-
-    /* ════════════════════════════════════════════
-       RIDER CARD
-    ════════════════════════════════════════════ */
-    .rider-card {
-      background: #fafafa; border: 1px solid var(--border);
-      border-radius: 20px; padding: 16px;
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 24px;
-    }
-
-    .rider-left { display: flex; align-items: center; gap: 12px; }
-    .rider-avatar {
-      width: 48px; height: 48px; border-radius: 50%; background: #e5e7eb;
-      display: flex; align-items: center; justify-content: center; overflow: hidden;
-    }
-    .rider-avatar i { font-size: 24px; color: #9ca3af; margin-top: 8px; }
     
-    .rider-info h3 { font-size: 15px; font-weight: 800; color: #000; margin-bottom: 4px; }
-    .rider-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-2); }
-    .rider-rating { background: #fff; padding: 2px 6px; border-radius: 6px; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 4px; color: #111; }
-    .rider-rating i { color: #f59e0b; font-size: 9px; }
-
-    .btn-call {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--brand-light); color: var(--brand);
-      border: none; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
+    /* Active State */
+    .step.active .step-dot { background: var(--brand); box-shadow: 0 0 0 4px var(--brand-light); position: relative; }
+    .step.active .step-dot::after {
+      content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border-radius: 50%; border: 2px solid var(--brand); animation: pulse 1.5s infinite; opacity: 0;
     }
+    .step.active .step-text h4 { color: #000; }
+    .step.active .step-text p { color: var(--brand); font-weight: 700; }
+
+    @keyframes pulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
 
     /* ════════════════════════════════════════════
-       ORDER SUMMARY
+       RIDER & SUMMARY
     ════════════════════════════════════════════ */
-    .order-summary {
-      border-top: 1px dashed #e5e7eb; padding-top: 24px;
-    }
+    .rider-card { background: #fafafa; border: 1px solid var(--border); border-radius: 20px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; display: none; }
+    .rider-left { display: flex; align-items: center; gap: 12px; }
+    .rider-avatar { width: 48px; height: 48px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .rider-info h3 { font-size: 15px; font-weight: 800; color: #000; margin-bottom: 4px; }
+    .rider-meta { font-size: 11px; font-weight: 600; color: var(--text-2); }
+    .btn-call { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-light); color: var(--brand); border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+
+    .order-summary { border-top: 1px dashed #e5e7eb; padding-top: 24px; }
     .summary-res { font-size: 14px; font-weight: 800; color: #000; margin-bottom: 6px; }
     .summary-items { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 16px; }
-    
-    .summary-total {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #f8fafc; padding: 12px 16px; border-radius: 12px;
-    }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px 16px; border-radius: 12px; }
     .total-label { font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; }
     .total-price { font-size: 16px; font-weight: 900; color: #000; }
 
+    .loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top-color: var(--brand); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <div class="tracker-hero">
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <div style="margin-top: 16px; font-weight: 800; color: #6b7280; font-size: 14px;">Fetching your order...</div>
+  </div>
+
+  <div class="tracker-hero" id="hero-bg">
     <div class="pulse-ring ring-1"></div>
     <div class="pulse-ring ring-2"></div>
     <div class="pulse-ring ring-3"></div>
-    <div class="hero-icon"><i class="fa-solid fa-motorcycle"></i></div>
+    <div class="hero-icon" id="hero-icon"><i class="fa-solid fa-motorcycle"></i></div>
   </div>
 
-  <button class="floating-back tap" onclick="history.back()">
+  <button class="floating-back tap" onclick="window.location.href='orders.html'">
     <i class="fa-solid fa-arrow-left"></i>
   </button>
 
@@ -215,63 +179,185 @@
     <div class="sheet-handle"></div>
 
     <div class="eta-header">
-      <div class="eta-title">Estimated Arrival</div>
-      <div class="eta-time">24 <span>mins</span></div>
+      <div class="eta-title" id="eta-title">Estimated Arrival</div>
+      <div class="eta-time" id="eta-time">-- <span>mins</span></div>
     </div>
 
-    <div class="timeline">
-      <div class="step passed">
-        <div class="step-dot"></div>
-        <div class="step-text">
-          <h4>Order Confirmed</h4>
-          <p>Restaurant accepted your order</p>
-        </div>
-      </div>
-      
-      <div class="step active">
-        <div class="step-dot"></div>
-        <div class="step-text">
-          <h4>Food is being prepared</h4>
-          <p>Cooking at EatSwada Kitchen</p>
-        </div>
-      </div>
+    <div class="customer-otp-box" id="otp-container">
+      <div class="otp-label">Hand this PIN to the Rider</div>
+      <div class="otp-value" id="otp-display">----</div>
+    </div>
 
-      <div class="step">
+    <div class="timeline" id="timeline">
+      <div class="step" id="step-1">
         <div class="step-dot"></div>
-        <div class="step-text">
-          <h4>Out for Delivery</h4>
-          <p>Rider is picking up your food</p>
-        </div>
+        <div class="step-text"><h4>Order Confirmed</h4><p>Restaurant accepted your order</p></div>
+      </div>
+      <div class="step" id="step-2">
+        <div class="step-dot"></div>
+        <div class="step-text"><h4>Food is being prepared</h4><p>Cooking at the Kitchen</p></div>
+      </div>
+      <div class="step" id="step-3">
+        <div class="step-dot"></div>
+        <div class="step-text"><h4>Out for Delivery</h4><p>Rider is on the way</p></div>
       </div>
     </div>
 
-    <div class="rider-card">
+    <div class="rider-card" id="rider-card">
       <div class="rider-left">
         <div class="rider-avatar"><i class="fa-solid fa-motorcycle"></i></div>
         <div class="rider-info">
-          <h3>Raju Delivery</h3>
-          <div class="rider-meta">
-            <div class="rider-rating"><i class="fa-solid fa-star"></i> 4.8</div>
-            <span>•</span>
-            <span>Delivery Partner</span>
-          </div>
+          <h3>EatSwada Rider</h3>
+          <div class="rider-meta">Delivery Partner</div>
         </div>
       </div>
-      <button class="btn-call tap" onclick="window.location.href='tel:+910000000000'">
-        <i class="fa-solid fa-phone"></i>
-      </button>
+      <button class="btn-call tap" onclick="alert('Rider tracking coming soon!')"><i class="fa-solid fa-phone"></i></button>
     </div>
 
     <div class="order-summary">
-      <div class="summary-res">Order #NB-88492</div>
-      <div class="summary-items">1x Veg Momos, 2x Schezwan Sauce</div>
+      <div class="summary-res" id="display-res-name">Loading...</div>
+      <div class="summary-items" id="display-items">...</div>
       <div class="summary-total">
-        <span class="total-label">Total Paid Online</span>
-        <span class="total-price">₹175</span>
+        <span class="total-label" id="payment-type">Total</span>
+        <span class="total-price" id="display-total">₹0</span>
       </div>
     </div>
-
   </div>
 
+  <script>
+    let pollInterval;
+
+    // 🧠 The EXACT same Math Hack from Admin page to ensure the OTPs match perfectly!
+    function generateOTP(orderId) {
+       let hash = parseInt(orderId.slice(-5), 16).toString();
+       return hash.slice(-4).padStart(4, '0');
+    }
+
+    async function fetchOrderData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id');
+
+      if (!orderId) {
+        window.location.href = 'orders.html'; // Kick out if no ID in URL
+        return;
+      }
+
+      const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token'); 
+      if (!token) return;
+
+      try {
+        // Securely fetch the user's specific history
+        const response = await fetch('https://eatswada.onrender.com/api/orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // Find the exact order we are tracking
+          const liveOrder = result.data.find(o => o._id === orderId);
+          
+          if (!liveOrder) {
+             alert("Order not found.");
+             window.location.href = 'orders.html';
+             return;
+          }
+
+          renderLiveUI(liveOrder);
+        }
+      } catch (err) {
+        console.error("Failed to fetch live order data");
+      }
+    }
+
+    function renderLiveUI(order) {
+      document.getElementById('loading-overlay').style.display = 'none';
+
+      // 1. Inject Basic Data
+      document.getElementById('display-res-name').innerText = `Order #${order.orderNumber || String(order._id).slice(-5).toUpperCase()}`;
+      document.getElementById('display-items').innerText = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
+      document.getElementById('display-total').innerText = `₹${order.total}`;
+      document.getElementById('payment-type').innerText = order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery';
+
+      // 2. Generate and Display OTP
+      const orderOTP = generateOTP(order._id);
+      document.getElementById('otp-display').innerText = orderOTP;
+
+      // 3. UI Elements
+      const s1 = document.getElementById('step-1');
+      const s2 = document.getElementById('step-2');
+      const s3 = document.getElementById('step-3');
+      const heroBg = document.getElementById('hero-bg');
+      const heroIcon = document.getElementById('hero-icon');
+      const etaTitle = document.getElementById('eta-title');
+      const etaTime = document.getElementById('eta-time');
+      const otpBox = document.getElementById('otp-container');
+      const riderCard = document.getElementById('rider-card');
+      const timeline = document.getElementById('timeline');
+
+      // Reset all classes
+      s1.className = 'step'; s2.className = 'step'; s3.className = 'step';
+      heroBg.className = 'tracker-hero';
+      heroIcon.innerHTML = '<i class="fa-solid fa-motorcycle"></i>';
+      otpBox.style.display = 'none';
+      riderCard.style.display = 'none';
+      etaTitle.innerText = "Estimated Arrival";
+
+      const status = order.status.toLowerCase();
+
+      // 🛑 CANCELLED LOGIC
+      if (status === 'cancelled') {
+         clearInterval(pollInterval); // Stop asking the server
+         heroBg.classList.add('cancelled');
+         heroIcon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+         etaTitle.innerText = "Status";
+         etaTime.innerHTML = "CANCELLED";
+         etaTime.className = "eta-time cancelled-text";
+         timeline.style.display = "none";
+         return;
+      }
+
+      // ✅ DELIVERED LOGIC
+      if (status === 'delivered') {
+         clearInterval(pollInterval);
+         heroBg.classList.add('delivered');
+         heroIcon.innerHTML = '<i class="fa-solid fa-check-double"></i>';
+         etaTitle.innerText = "Status";
+         etaTime.innerHTML = "DELIVERED";
+         etaTime.className = "eta-time delivered-text";
+         
+         s1.classList.add('passed'); s2.classList.add('passed'); s3.classList.add('passed');
+         return;
+      }
+
+      // 🛵 LIVE PROGRESS LOGIC
+      timeline.style.display = "block";
+      etaTime.className = "eta-time";
+
+      if (status === 'pending' || status === 'placed') {
+         etaTime.innerHTML = "35 <span>mins</span>";
+         s1.classList.add('active');
+      } 
+      else if (status === 'preparing') {
+         etaTime.innerHTML = "20 <span>mins</span>";
+         s1.classList.add('passed');
+         s2.classList.add('active');
+         otpBox.style.display = 'block'; // Show OTP to customer
+      } 
+      else if (status === 'out_for_delivery') {
+         etaTime.innerHTML = "5 <span>mins</span>";
+         s1.classList.add('passed');
+         s2.classList.add('passed');
+         s3.classList.add('active');
+         otpBox.style.display = 'block'; // Keep OTP visible
+         riderCard.style.display = 'flex'; // Show rider
+      }
+    }
+
+    // Initialize Engine
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchOrderData(); // Run immediately
+      pollInterval = setInterval(fetchOrderData, 5000); // Check server every 5 seconds for updates
+    });
+  </script>
 </body>
 </html>
