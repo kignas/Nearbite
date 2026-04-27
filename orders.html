@@ -257,6 +257,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     requireLogin("NETWORK_ERROR_CHECK_CONSOLE");
   }
+} // End of fetchOrders function
+
+// Run immediately, then check every 10 seconds for live updates silently!
+fetchOrders(); 
+setInterval(fetchOrders, 10000); 
+
 });
 </script>
 </body>
