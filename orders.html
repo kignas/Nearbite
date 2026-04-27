@@ -153,7 +153,7 @@
 </nav>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   // Grab the token, and ensure it isn't the literal word "undefined"
   let token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
   if (token === 'undefined' || token === 'null') token = null;
@@ -167,7 +167,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     loader.style.display = 'none';
     emptyState.style.display = 'block';
     document.getElementById('empty-title').innerText = "Please log in";
-    // 🚨 Prints the EXACT reason from the backend 🚨
     document.getElementById('empty-desc').innerHTML = `Log in to view your past orders.<br><br><span style="color:#ef4444; font-size:11px; font-weight:bold;">BACKEND SAYS: ${reason}</span>`;
     const btn = document.getElementById('empty-btn');
     btn.innerText = "LOGIN NOW";
@@ -179,89 +178,97 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (!token) return requireLogin("TOKEN_IS_EMPTY_OR_UNDEFINED");
 
-  try {
-    const response = await fetch('https://eatswada.onrender.com/api/orders', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    // 🚨 THIS WILL CATCH THE EXACT BACKEND ERROR MESSAGE 🚨
-    if (response.status === 401) {
-      const errorData = await response.json();
-      return requireLogin(errorData.message.toUpperCase());
-    }
+  // 🚨 THE FIX: I actually created the fetchOrders function here! 🚨
+  async function fetchOrders() {
+    try {
+      const response = await fetch('https://eatswada.onrender.com/api/orders', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.status === 401) {
+        const errorData = await response.json();
+        return requireLogin(errorData.message.toUpperCase());
+      }
 
-    if (response.status === 404) {
-        return requireLogin("API_ROUTE_NOT_FOUND");
-    }
+      if (response.status === 404) {
+          return requireLogin("API_ROUTE_NOT_FOUND");
+      }
 
-    const result = await response.json();
-    loader.style.display = 'none';
+      const result = await response.json();
+      
+      // Only hide loader on the very first load
+      if (loader) loader.style.display = 'none';
 
-    if (response.ok && result.success && result.data.length > 0) {
-      const allOrders = result.data;
-      const liveStatuses = ['pending', 'preparing', 'out_for_delivery'];
-      const liveOrders = allOrders.filter(o => liveStatuses.includes(o.status.toLowerCase()));
-      const pastOrders = allOrders.filter(o => !liveStatuses.includes(o.status.toLowerCase()));
+      if (response.ok && result.success && result.data.length > 0) {
+        const allOrders = result.data;
+        const liveStatuses = ['pending', 'preparing', 'out_for_delivery'];
+        const liveOrders = allOrders.filter(o => liveStatuses.includes(o.status.toLowerCase()));
+        const pastOrders = allOrders.filter(o => !liveStatuses.includes(o.status.toLowerCase()));
 
-      if (liveOrders.length > 0) {
-        let liveHTML = `<div class="section-title">Live Orders <span class="pulse-dot"></span></div>`;
-        liveHTML += liveOrders.map(order => {
-          let width = '10%'; let active1 = 'active-label', active2 = '', active3 = '';
-          if (order.status.toLowerCase() === 'preparing') { width = '50%'; active2 = 'active-label'; }
-          if (order.status.toLowerCase() === 'out_for_delivery') { width = '85%'; active2 = 'active-label'; active3 = 'active-label'; }
-          return `
-            <a href="track-order.html?id=${order._id}" class="track-card tap">
-              <div class="track-card-top">
-                <div>
-                  <h3>${order.status === 'out_for_delivery' ? 'Arriving Soon!' : 'Preparing Order'}</h3>
-                  <p class="track-restaurant-name">${order.restaurantName || "EatSwada Partner"} • ₹${order.total}</p>
+        if (liveOrders.length > 0) {
+          let liveHTML = `<div class="section-title">Live Orders <span class="pulse-dot"></span></div>`;
+          liveHTML += liveOrders.map(order => {
+            let width = '10%'; let active1 = 'active-label', active2 = '', active3 = '';
+            if (order.status.toLowerCase() === 'preparing') { width = '50%'; active2 = 'active-label'; }
+            if (order.status.toLowerCase() === 'out_for_delivery') { width = '85%'; active2 = 'active-label'; active3 = 'active-label'; }
+            return `
+              <a href="track-order.html?id=${order._id}" class="track-card tap">
+                <div class="track-card-top">
+                  <div>
+                    <h3>${order.status === 'out_for_delivery' ? 'Arriving Soon!' : 'Preparing Order'}</h3>
+                    <p class="track-restaurant-name">${order.restaurantName || "EatSwada Partner"} • ₹${order.total}</p>
+                  </div>
+                  <div class="track-bag-icon"><i class="fa-solid fa-motorcycle"></i></div>
                 </div>
-                <div class="track-bag-icon"><i class="fa-solid fa-motorcycle"></i></div>
-              </div>
-              <div class="progress-bar-track"><div class="progress-bar-fill" style="width: ${width};"></div></div>
-              <div class="progress-labels"><span class="${active1}">Received</span><span class="${active2}">Preparing</span><span class="${active3}">On the way</span></div>
-              <div class="view-track-btn">Track Order <i class="fa-solid fa-arrow-right"></i></div>
-            </a>
-          `;
-        }).join('');
-        liveContainer.innerHTML = liveHTML;
-      }
+                <div class="progress-bar-track"><div class="progress-bar-fill" style="width: ${width};"></div></div>
+                <div class="progress-labels"><span class="${active1}">Received</span><span class="${active2}">Preparing</span><span class="${active3}">On the way</span></div>
+                <div class="view-track-btn">Track Order <i class="fa-solid fa-arrow-right"></i></div>
+              </a>
+            `;
+          }).join('');
+          liveContainer.innerHTML = liveHTML;
+        } else {
+          liveContainer.innerHTML = '';
+        }
 
-      if (pastOrders.length > 0) {
-        let pastHTML = `<div class="section-title" style="margin-top:${liveOrders.length > 0 ? '32px' : '16px'}">Past Orders</div>`;
-        pastHTML += pastOrders.map(order => {
-          const dateStr = new Date(order.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-          const itemsStr = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
-          let statusColor = '#FC8019'; if (order.status === 'delivered') statusColor = '#1ba672'; if (order.status === 'cancelled') statusColor = '#e63946';
-          return `
-            <a href="track-order.html?id=${order._id}" class="past-card tap">
-              <div class="past-card-header">
-                <div><h4>${order.restaurantName || "EatSwada Partner"}</h4><span class="past-card-date">${dateStr}</span></div>
-                <span class="status-badge" style="color:${statusColor}; background:${statusColor}15;">${order.status}</span>
-              </div>
-              <p class="past-items">${itemsStr}</p>
-              <div class="past-footer"><span class="past-total">₹${order.total}</span><span class="reorder-btn tap">Details</span></div>
-            </a>
-          `;
-        }).join('');
-        pastContainer.innerHTML = pastHTML;
+        if (pastOrders.length > 0) {
+          let pastHTML = `<div class="section-title" style="margin-top:${liveOrders.length > 0 ? '32px' : '16px'}">Past Orders</div>`;
+          pastHTML += pastOrders.map(order => {
+            const dateStr = new Date(order.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+            const itemsStr = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
+            let statusColor = '#FC8019'; if (order.status === 'delivered') statusColor = '#1ba672'; if (order.status === 'cancelled') statusColor = '#e63946';
+            return `
+              <a href="track-order.html?id=${order._id}" class="past-card tap">
+                <div class="past-card-header">
+                  <div><h4>${order.restaurantName || "EatSwada Partner"}</h4><span class="past-card-date">${dateStr}</span></div>
+                  <span class="status-badge" style="color:${statusColor}; background:${statusColor}15;">${order.status}</span>
+                </div>
+                <p class="past-items">${itemsStr}</p>
+                <div class="past-footer"><span class="past-total">₹${order.total}</span><span class="reorder-btn tap">Details</span></div>
+              </a>
+            `;
+          }).join('');
+          pastContainer.innerHTML = pastHTML;
+        } else {
+          pastContainer.innerHTML = '';
+        }
+      } else {
+        emptyState.style.display = 'block';
+        document.getElementById('empty-title').innerText = "No orders found";
+        document.getElementById('empty-desc').innerText = "Looks like you haven't placed any orders yet.";
+        const btn = document.getElementById('empty-btn');
+        btn.innerText = "Explore Restaurants";
+        btn.onclick = () => window.location.href = 'index.html';
       }
-    } else {
-      emptyState.style.display = 'block';
-      document.getElementById('empty-title').innerText = "No orders found";
-      document.getElementById('empty-desc').innerText = "Looks like you haven't placed any orders yet.";
-      const btn = document.getElementById('empty-btn');
-      btn.innerText = "Explore Restaurants";
-      btn.onclick = () => window.location.href = 'index.html';
+    } catch (error) {
+      console.error(error);
+      requireLogin("NETWORK_ERROR_CHECK_CONSOLE");
     }
-  } catch (error) {
-    requireLogin("NETWORK_ERROR_CHECK_CONSOLE");
-  }
-} // End of fetchOrders function
+  } // ✅ Properly closing the fetchOrders function!
 
-// Run immediately, then check every 10 seconds for live updates silently!
-fetchOrders(); 
-setInterval(fetchOrders, 10000); 
+  // Run immediately, then check every 10 seconds for live updates silently!
+  fetchOrders(); 
+  setInterval(fetchOrders, 10000); 
 
 });
 </script>
