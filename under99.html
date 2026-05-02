@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="view-transition" content="same-origin">
   <title>₹99 Store – </title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -327,8 +328,8 @@
     
     if (!listEl) return;
 
-    // Cache Buster v8
-    const cachedData = sessionStorage.getItem('es_under99_data_v8');
+    // Cache Buster v9
+    const cachedData = sessionStorage.getItem('es_under99_data_v9');
     let items = [];
 
     if (cachedData && cachedData !== "[]") {
@@ -343,7 +344,13 @@
         const result = await response.json();
         const rawData = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
 
-        if (rawData.length === 0) throw new Error("Backend connected, but 0 items found.");
+        // 🚨 THE FIX: Elegant empty state instead of crashing!
+        if (rawData.length === 0) {
+            if (skeleton) skeleton.style.display = 'none';
+            listEl.style.display = 'block';
+            listEl.innerHTML = `<div style="text-align:center; padding: 60px 20px;"><i class="fa-solid fa-tags" style="font-size:44px; color:#e0e0e0; margin-bottom:14px;"></i><h3 style="font-size:16px; font-weight:800; color:#555;">No Deals Available</h3><p style="font-size:12px; color:#bbb; margin-top:6px;">Check back later for fresh ₹99 items!</p></div>`;
+            return;
+        }
 
         items = rawData.map(dbItem => {
           let cleanPrice = typeof dbItem.price === 'number' ? dbItem.price : parseFloat(String(dbItem.price).replace(/[^\d.]/g, '')) || 99;
@@ -368,7 +375,7 @@
           };
         });
 
-        sessionStorage.setItem('es_under99_data_v8', JSON.stringify(items));
+        sessionStorage.setItem('es_under99_data_v9', JSON.stringify(items));
       } catch (error) {
         if (skeleton) skeleton.style.display = 'none';
         listEl.style.display = 'block';
@@ -413,7 +420,6 @@
 
       const originalPrice = Math.floor(item.price * 1.4);
 
-      // ⚡ UPDATED: EATSWADA ORANGE ADD BUTTONS
       const btnHTML = qty > 0
         ? `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);">
              <button onclick="updateCart('${safeName}', -1, ${item.price}, '${safeId}')" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>
@@ -466,6 +472,7 @@
 
     if (typeof window.renderCartBar === 'function') window.renderCartBar();
   };
+
 
   // ── 2. THE BULLETPROOF UPDATE FUNCTION (NOW IN ORANGE) ──
   window.updateCart = function(itemName, change, price, rId) {
