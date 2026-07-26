@@ -938,54 +938,8 @@
     <span class="sec-title">What's on your mind?</span>
   </div>
   
-  <div class="cat-scroll no-scrollbar">
-    <div class="cat-item" onclick="goCategory('Momos')">
-      <div class="cat-ring"><img src="assets/momomain.png" alt="Momos" loading="lazy"></div>
-      <span class="cat-name">Momos</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Noodles')">
-      <div class="cat-ring"><img src="assets/chowmin.png" alt="Noodles" loading="lazy"></div>
-      <span class="cat-name">Chowmin</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Pizza')">
-      <div class="cat-ring"><img src="assets/pizaamain.png" alt="Pizzas" loading="lazy"></div>
-      <span class="cat-name">Pizzas</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Biryani')">
-      <div class="cat-ring"><img src="assets/biriyani main.png" alt="Biryani" loading="lazy"></div>
-      <span class="cat-name">Biryani</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Rolls')">
-      <div class="cat-ring"><img src="assets/rollsmain.png" alt="Rolls" loading="lazy"></div>
-      <span class="cat-name">Rolls</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Fried Rice')">
-      <div class="cat-ring"><img src="assets/fried rice.png" alt="Burgers" loading="lazy"></div>
-      <span class="cat-name">Fried rice</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Burger')">
-      <div class="cat-ring"><img src="assets/sweets.png" alt="Burgers" loading="lazy"></div>
-      <span class="cat-name">Sweets</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('Puchka')">
-      <div class="cat-ring"><img src="assets/puchka.png" alt="Burgers" loading="lazy"></div>
-      <span class="cat-name">Puchka</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('icecream')">
-      <div class="cat-ring"><img src="assets/icecream.png" alt="Burgers" loading="lazy"></div>
-      <span class="cat-name">icecream</span>
-    </div>
-    <div class="cat-item" onclick="goCategory('cakes')">
-      <div class="cat-ring"><img src="assets/cakes.png" alt="Burgers" loading="lazy"></div>
-      <span class="cat-name">cakes</span>
-    </div>
-     <div class="cat-item" onclick="goCategory('samosa')">
-      <div class="cat-ring"><img src="assets/samosa.png" alt="Burgers" loading="lazy"></div>
-      <span class="cat-name">samosa</span>
-     </div>
-      <div class="cat-item" onclick="goCategory('dosa')">
-      <div class="cat-ring"><img src="assets/dosa.jpg" alt="dosa" loading="lazy"></div>
-      <span class="cat-name">dosa</span>
+  <div class="cat-scroll no-scrollbar" id="cat-scroll">
+    <!-- Categories are rendered dynamically by loadCategories() in the script below -->
   </div>
 </div>
 
@@ -1113,6 +1067,70 @@
 
   // Fire the engine immediately
   window.addEventListener('DOMContentLoaded', loadHomeData);
+
+  // ── Dynamic "What's on your mind?" categories ──
+  // Fallback used only if the API fails or returns no active categories.
+  const FALLBACK_CATEGORIES = [
+    { name: 'Momos',      type: 'Momos',      image: 'assets/momomain.png' },
+    { name: 'Chowmin',    type: 'Noodles',    image: 'assets/chowmin.png' },
+    { name: 'Pizzas',     type: 'Pizza',      image: 'assets/pizaamain.png' },
+    { name: 'Biryani',    type: 'Biryani',    image: 'assets/biriyani main.png' },
+    { name: 'Rolls',      type: 'Rolls',      image: 'assets/rollsmain.png' },
+    { name: 'Fried rice', type: 'Fried Rice', image: 'assets/fried rice.png' },
+    { name: 'Sweets',     type: 'Burger',     image: 'assets/sweets.png' },
+    { name: 'Puchka',     type: 'Puchka',     image: 'assets/puchka.png' },
+    { name: 'icecream',   type: 'icecream',   image: 'assets/icecream.png' },
+    { name: 'cakes',      type: 'cakes',      image: 'assets/cakes.png' },
+    { name: 'samosa',     type: 'samosa',     image: 'assets/samosa.png' },
+    { name: 'dosa',       type: 'dosa',       image: 'assets/dosa.jpg' },
+  ];
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function renderCategories(categories) {
+    const container = document.getElementById('cat-scroll');
+    if (!container) return;
+
+    container.innerHTML = categories.map(cat => {
+      const safeType = escapeHtml(cat.type).replace(/'/g, "\\'");
+      return `
+    <div class="cat-item" onclick="goCategory('${safeType}')">
+      <div class="cat-ring"><img src="${escapeHtml(cat.image)}" alt="${escapeHtml(cat.name)}" loading="lazy"></div>
+      <span class="cat-name">${escapeHtml(cat.name)}</span>
+    </div>`;
+    }).join('');
+  }
+
+  async function loadCategories() {
+    try {
+      const response = await fetch('https://eatswada.onrender.com/api/categories');
+      const result = await response.json();
+
+      if (!response.ok || !result.success || !Array.isArray(result.data)) {
+        throw new Error('Categories request failed');
+      }
+
+      const categories = result.data
+        .filter(cat => cat.isActive === true)
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map(cat => ({ name: cat.name, type: cat.name, image: cat.image }));
+
+      if (categories.length === 0) {
+        throw new Error('No active categories returned');
+      }
+
+      renderCategories(categories);
+    } catch (error) {
+      console.error('Failed to load categories, using fallback:', error);
+      renderCategories(FALLBACK_CATEGORIES);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', loadCategories);
 
   // ── 2. Dynamic search placeholder ──
   const phrases = ["Search for 'Biryani'", "Search for 'Pizza'", "Search for 'Momos'", "Search for 'Burger'", "Search for 'Sweets'", "Search for 'EatSwada'"];
