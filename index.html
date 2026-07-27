@@ -1066,6 +1066,7 @@
   }
 
   // Fire the engine immediately
+  // Fire the engine immediately
   window.addEventListener('DOMContentLoaded', loadHomeData);
 
   // ── Dynamic "What's on your mind?" categories ──
@@ -1095,17 +1096,11 @@
     const container = document.getElementById('cat-scroll');
     if (!container) return;
 
-    const FALLBACK_IMG = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&q=80';
-
     container.innerHTML = categories.map(cat => {
       const safeType = escapeHtml(cat.type).replace(/'/g, "\\'");
-      // Guard against empty/missing image strings (an empty src reloads the
-      // page in some browsers) and add onerror so a broken Cloudinary URL
-      // never shows the browser's broken-image icon.
-      const imgSrc = escapeHtml(cat.image && cat.image.trim() ? cat.image : FALLBACK_IMG);
       return `
     <div class="cat-item" onclick="goCategory('${safeType}')">
-      <div class="cat-ring"><img src="${imgSrc}" alt="${escapeHtml(cat.name)}" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_IMG}';"></div>
+      <div class="cat-ring"><img src="${escapeHtml(cat.image)}" alt="${escapeHtml(cat.name)}" loading="lazy" onerror="this.closest('.cat-item').style.display='none'"></div>
       <span class="cat-name">${escapeHtml(cat.name)}</span>
     </div>`;
     }).join('');
@@ -1120,12 +1115,9 @@
         throw new Error('Categories request failed');
       }
 
-      // Schema field is "order" (not "displayOrder"); the public /api/categories
-      // route already returns isActive:true docs pre-sorted by order, but we
-      // sort again here defensively in case that ever changes.
       const categories = result.data
         .filter(cat => cat.isActive === true)
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .sort((a, b) => a.order - b.order)
         .map(cat => ({ name: cat.name, type: cat.name, image: cat.image }));
 
       if (categories.length === 0) {
