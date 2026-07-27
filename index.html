@@ -410,16 +410,9 @@
 
 .cat-scroll {
   display: grid;
-  grid-template-rows: repeat(2, auto); 
-  grid-auto-flow: column; 
-  grid-auto-columns: 24vw; /* Slightly tightened the columns */
-  justify-content: start; 
-  /* CRITICAL FIX: 12px vertical gap kills the "trench", 12px horizontal keeps them close */
-  gap: 12px 12px; 
-  padding: 0 16px 16px 16px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; 
-  scroll-behavior: smooth;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 8px;
+  padding: 4px 16px 16px 16px;
 }
 
 .no-scrollbar {
@@ -446,8 +439,8 @@
 
 /* 4. Maximized Images & Clean Shadows */
 .cat-ring {
-  width: 24vw;
-  height: 24vw;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -459,9 +452,17 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transform: scale(1.25) translateZ(0); 
-  will-change: transform;
-  /* Notice: I deleted the transition from here! We only animate the parent now. */
+  /* Transparent PNG/WebP source images are expected to already fill their
+     frame — no artificial zoom needed (and it would clip transparent edges). */
+}
+
+.cat-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 28px 0;
+  color: #9aa0ab;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* 4. Richer Typography */
@@ -1069,21 +1070,9 @@
   window.addEventListener('DOMContentLoaded', loadHomeData);
 
   // ── Dynamic "What's on your mind?" categories ──
-  // Fallback used only if the API fails or returns no active categories.
-  const FALLBACK_CATEGORIES = [
-    { name: 'Momos',      type: 'Momos',      image: 'assets/momomain.png' },
-    { name: 'Chowmin',    type: 'Noodles',    image: 'assets/chowmin.png' },
-    { name: 'Pizzas',     type: 'Pizza',      image: 'assets/pizaamain.png' },
-    { name: 'Biryani',    type: 'Biryani',    image: 'assets/biriyani main.png' },
-    { name: 'Rolls',      type: 'Rolls',      image: 'assets/rollsmain.png' },
-    { name: 'Fried rice', type: 'Fried Rice', image: 'assets/fried rice.png' },
-    { name: 'Sweets',     type: 'Burger',     image: 'assets/sweets.png' },
-    { name: 'Puchka',     type: 'Puchka',     image: 'assets/puchka.png' },
-    { name: 'icecream',   type: 'icecream',   image: 'assets/icecream.png' },
-    { name: 'cakes',      type: 'cakes',      image: 'assets/cakes.png' },
-    { name: 'samosa',     type: 'samosa',     image: 'assets/samosa.png' },
-    { name: 'dosa',       type: 'dosa',       image: 'assets/dosa.jpg' },
-  ];
+  // No hardcoded fallback — categories come from the database only.
+  // If the fetch fails or returns nothing, we show an explicit empty
+  // state rather than ever displaying made-up data.
 
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({
@@ -1094,6 +1083,11 @@
   function renderCategories(categories) {
     const container = document.getElementById('cat-scroll');
     if (!container) return;
+
+    if (!categories.length) {
+      container.innerHTML = `<div class="cat-empty-state">No categories available</div>`;
+      return;
+    }
 
     container.innerHTML = categories.map(cat => {
       const safeType = escapeHtml(cat.type).replace(/'/g, "\\'");
@@ -1119,14 +1113,10 @@
         .sort((a, b) => a.order - b.order)
         .map(cat => ({ name: cat.name, type: cat.name, image: cat.image }));
 
-      if (categories.length === 0) {
-        throw new Error('No active categories returned');
-      }
-
       renderCategories(categories);
     } catch (error) {
-      console.error('Failed to load categories, using fallback:', error);
-      renderCategories(FALLBACK_CATEGORIES);
+      console.error('Failed to load categories:', error);
+      renderCategories([]); // empty state — never hardcoded data
     }
   }
 
