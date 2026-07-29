@@ -190,7 +190,38 @@
     .empty-filter-msg i { font-size: 40px; color: #e0e0e0; display: block; margin-bottom: 12px; }
     .empty-filter-msg p { font-size: 14px; font-weight: 700; color: #aaa; }
     
-        /* ── SAFE PREMIUM SLIDE-IN (Content Only, Won't Break Scroll) ── */
+    /* ============================================================
+       WARNING CARDS
+    ============================================================ */
+    .closed-warning-card {
+      margin: 14px 14px 0;
+      padding: 14px 16px;
+      border-radius: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideInFromRight 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      opacity: 0;
+    }
+    .closed-warning-card.closed-today {
+      background: #fff8f1;
+      border: 1.5px solid #fed7aa;
+    }
+    .closed-warning-card.temp-closed {
+      background: #fff1f2;
+      border: 1.5px solid #fecdd3;
+    }
+    .closed-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .closed-today .closed-icon { background: #ffedd5; color: #ea580c; font-size: 16px; }
+    .temp-closed .closed-icon { background: #ffe4e6; color: #e11d48; font-size: 16px; }
+    .closed-text { padding-top: 2px; }
+    .closed-text h4 { font-size: 15px; font-weight: 900; color: #1e293b; margin-bottom: 3px; }
+    .closed-text p { font-size: 13px; font-weight: 600; color: #64748b; line-height: 1.4; }
+
+    /* ── SAFE PREMIUM SLIDE-IN (Content Only, Won't Break Scroll) ── */
     @keyframes slideInFromRight {
       0% { 
         opacity: 0; 
@@ -217,7 +248,7 @@
     .filter-bar { animation-delay: 0.15s; }
     .menu-section { animation-delay: 0.2s; }
 
-        /* ── ULTRA PREMIUM EXIT ANIMATION ── */
+    /* ── ULTRA PREMIUM EXIT ANIMATION ── */
     @keyframes slideOutRight {
       0% { transform: translateX(0); opacity: 1; }
       100% { transform: translateX(50px); opacity: 0; }
@@ -227,8 +258,6 @@
       /* Overrides the entrance animation and slides everything away */
       animation: slideOutRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
     }
-
-
 
   </style>
 </head>
@@ -325,6 +354,17 @@
   const CUSTOMISABLE_ITEMS = ['Veg Momos', 'Chicken Momos', 'Paneer Tikka', 'Butter Chicken', 'Pizza', 'Burger', 'Sandwich', 'Margherita Pizza', 'Double Patty Burger'];
 
   let activeFilter = null; 
+  let isRestaurantOpen = true; // Added to track restaurant availability
+
+  function formatTime(timeStr) {
+    if (!timeStr) return '';
+    let [hours, minutes] = timeStr.split(':');
+    let h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${minutes} ${ampm}`;
+  }
 
   function toggleFilter(type) {
     activeFilter = (activeFilter === type) ? null : type;
@@ -397,32 +437,39 @@
   window.makeBtnHTML = function(itemName, qty, price, rId, inStock) {
     const safeName = itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const safeId = String(rId).replace(/['"]/g, ''); 
-    const outOfStock = inStock === false;
+    const isItemAvailable = inStock !== false && isRestaurantOpen;
 
     if (qty > 0) {
-      // Already in the cart. If it has since gone out of stock, still allow
-      // removing/reducing it, but block increasing the quantity further.
-      const plusBtn = outOfStock
+      // Disables adding if unavailable. Allows removing if the restaurant is OPEN but the item is out of stock.
+      // If the restaurant is CLOSED, all changes (add and remove) are disabled.
+      const plusBtn = !isItemAvailable
         ? `<button onclick="notifyItemUnavailable()" style="width:32px;height:100%;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:16px;cursor:not-allowed;">+</button>`
         : `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true)" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">+</button>`;
+      
+      const minusBtn = !isRestaurantOpen
+        ? `<button onclick="notifyItemUnavailable()" style="width:32px;height:100%;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:18px;cursor:not-allowed;">−</button>`
+        : `<button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', true)" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:18px;cursor:pointer;">−</button>`;
+
       return `
-        <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid ${outOfStock ? '#e2e8f0' : '#FC8019'};border-radius:10px;width:100px;height:36px;overflow:hidden;box-shadow:0 4px 12px rgba(252,128,25,0.15); margin: 0 auto;">
-           <button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', ${!outOfStock})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:18px;cursor:pointer;">−</button>
-           <span style="font-size:14px;font-weight:800;color:${outOfStock ? '#94a3b8' : '#FC8019'};">${qty}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid ${!isItemAvailable ? '#e2e8f0' : '#FC8019'};border-radius:10px;width:100px;height:36px;overflow:hidden;box-shadow:0 4px 12px rgba(252,128,25,0.15); margin: 0 auto;">
+           ${minusBtn}
+           <span style="font-size:14px;font-weight:800;color:${!isItemAvailable ? '#94a3b8' : '#FC8019'};">${qty}</span>
            ${plusBtn}
          </div>`;
     }
 
-    if (outOfStock) {
+    if (!isItemAvailable) {
       return `<button disabled style="width:100px;height:36px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;color:#94a3b8;font-weight:800;font-size:12px;cursor:not-allowed; margin: 0 auto; display: block;">Unavailable</button>`;
     }
     return `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true)" style="width:100px;height:36px;background:#fff;border:1px solid #f9ded0;border-radius:10px;color:#FC8019;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06);cursor:pointer; margin: 0 auto; display: block;">ADD</button>`;
   };
 
-  // Shown when someone tries to increase the quantity of an item already in
-  // their cart that has since gone Out of Stock.
   function notifyItemUnavailable() {
-    alert("This item just went out of stock and can't be added right now.");
+    if (!isRestaurantOpen) {
+      alert("The restaurant is not accepting orders right now.");
+    } else {
+      alert("This item just went out of stock and can't be added right now.");
+    }
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -445,6 +492,40 @@
       
       const restaurant = resResult.data;
       const groupedMenu = menuResult.data;
+
+      // Track restaurant availability globally for menu item states
+      isRestaurantOpen = restaurant.isOpen !== false;
+
+      // Render the correct Warning Status Card if closed
+      if (!isRestaurantOpen) {
+        const reason = restaurant.availability?.closedReason;
+        const opensAt = restaurant.availability?.opensAt;
+        let warningHtml = '';
+        
+        if (reason === 'closed_today') {
+          const timeStr = opensAt ? `Opens tomorrow at ${formatTime(opensAt)}.` : `Not accepting orders today.`;
+          warningHtml = `
+            <div class="closed-warning-card closed-today">
+              <div class="closed-icon"><i class="fa-solid fa-moon"></i></div>
+              <div class="closed-text">
+                <h4>Closed Today</h4>
+                <p>The restaurant is taking a break. ${timeStr}</p>
+              </div>
+            </div>
+          `;
+        } else {
+          warningHtml = `
+            <div class="closed-warning-card temp-closed">
+              <div class="closed-icon"><i class="fa-solid fa-store-slash"></i></div>
+              <div class="closed-text">
+                <h4>Temporarily Closed</h4>
+                <p>This restaurant is currently unavailable. Please check back later.</p>
+              </div>
+            </div>
+          `;
+        }
+        document.querySelector('.res-card').insertAdjacentHTML('beforebegin', warningHtml);
+      }
 
       document.title = restaurant.name + ' – EatSwada';
       document.getElementById('res-name').innerText = restaurant.name;
@@ -497,10 +578,16 @@
 
           const delay = (globalIdx++ * 0.04).toFixed(2);
           const imageSrc = item.image || item.img || '';
-          // Existing menu items may not carry the field at all — only an
-          // explicit false counts as Out of Stock, same convention the
-          // admin panel already uses (checkbox defaults to checked/true).
+          
           const inStock = item.inStock !== false;
+          const isItemAvailable = inStock && isRestaurantOpen;
+          
+          // Apply slight grayscale if the restaurant or item is unavailable
+          const imageFilter = !isItemAvailable ? 'filter:grayscale(90%); opacity:0.8;' : '';
+          
+          let overlayText = '';
+          if (!isRestaurantOpen) overlayText = 'Unavailable';
+          else if (!inStock) overlayText = 'Out of Stock';
 
           return `
             <div class="menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" style="display:flex; justify-content:space-between; padding:28px 0; border-bottom:1px dashed #e2e8f0; animation: fadeSlideUp 0.4s ease forwards ${delay}s; gap:16px;">
@@ -524,11 +611,11 @@
                 
                 <div style="width:100%; aspect-ratio:1; border-radius:16px; overflow:hidden; background:#f1f5f9; border:1px solid rgba(0,0,0,0.04); position:relative;">
                   ${imageSrc 
-                    ? `<img src="${imageSrc}" alt="${item.name}" loading="lazy" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; ${inStock ? '' : 'filter:grayscale(100%);'}" onerror="this.style.display='none'">` 
+                    ? `<img src="${imageSrc}" alt="${item.name}" loading="lazy" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; ${imageFilter}" onerror="this.style.display='none'">` 
                     : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e1;"><i class="fa-solid fa-utensils" style="font-size:24px;"></i></div>`
                   }
-                  ${!inStock ? `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.5);">
-                    <span style="background:#1e293b; color:#fff; font-size:10px; font-weight:800; letter-spacing:0.03em; padding:5px 10px; border-radius:6px; text-transform:uppercase;">Out of Stock</span>
+                  ${overlayText ? `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.5);">
+                    <span style="background:#1e293b; color:#fff; font-size:10px; font-weight:800; letter-spacing:0.03em; padding:5px 10px; border-radius:6px; text-transform:uppercase;">${overlayText}</span>
                   </div>` : ''}
                 </div>
                 
@@ -576,9 +663,11 @@
   }
 
   window.updateCart = function(itemName, change, price, rId, inStock) {
-    // Defense in depth: the Unavailable button has no onclick and the
-    // already-in-cart "+" is swapped for notifyItemUnavailable() above, but
-    // block it here too in case this is ever called some other way.
+    if (!isRestaurantOpen) {
+      notifyItemUnavailable();
+      return;
+    }
+    
     if (change > 0 && inStock === false) {
       notifyItemUnavailable();
       return;
@@ -609,7 +698,7 @@
     /* ── ULTRA PREMIUM BACK NAVIGATION ── */
   window.premiumBack = function() {
     // 1. Grab all the main blocks that we animated in
-    const elementsToHide = document.querySelectorAll('.res-card, .delivery-strip, .filter-bar, .menu-section, .cat-nav');
+    const elementsToHide = document.querySelectorAll('.res-card, .delivery-strip, .filter-bar, .menu-section, .cat-nav, .closed-warning-card');
     
     // 2. Add the exit animation class to all of them
     elementsToHide.forEach(el => el.classList.add('slide-out-active'));
