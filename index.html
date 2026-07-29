@@ -1032,37 +1032,30 @@
     const skel = document.getElementById('global-skeleton');
     const list = document.getElementById('restaurant-list');
     
-    const cachedData = sessionStorage.getItem('es_home_restaurants');
+    // 🔧 FIX: Removed the sessionStorage caching block entirely so the user always 
+    // receives the most up-to-date availability state natively from the server on load.
     
-    if (cachedData) {
-      allRestaurants = JSON.parse(cachedData);
-      displayRestaurants();
-      display99Store(allRestaurants); // <--- ADDED HERE
-      if (skel) skel.remove(); 
-    } else {
-      try {
-        const response = await fetch('https://eatswada.onrender.com/api/restaurants');
-        const result = await response.json();
+    try {
+      const response = await fetch('https://eatswada.onrender.com/api/restaurants');
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        allRestaurants = result.data;
         
-        if (response.ok && result.success) {
-          allRestaurants = result.data;
-          sessionStorage.setItem('es_home_restaurants', JSON.stringify(allRestaurants));
-          
-          displayRestaurants();
-          display99Store(allRestaurants); // <--- ADDED HERE
-          
-          if (skel) {
-            skel.classList.add('sk-hide');
-            setTimeout(() => skel.remove(), 500);
-          }
-        } else {
-          throw new Error("Failed to load");
+        displayRestaurants();
+        display99Store(allRestaurants); 
+        
+        if (skel) {
+          skel.classList.add('sk-hide');
+          setTimeout(() => skel.remove(), 500);
         }
-      } catch (error) {
-        console.error(error);
-        list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="sessionStorage.removeItem('es_home_restaurants'); loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
-        if (skel) skel.remove(); 
+      } else {
+        throw new Error("Failed to load");
       }
+    } catch (error) {
+      console.error(error);
+      list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
+      if (skel) skel.remove(); 
     }
   }
 
