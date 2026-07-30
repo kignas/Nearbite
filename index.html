@@ -51,7 +51,7 @@
     .sk.d1{animation-delay:.08s}.sk.d2{animation-delay:.16s}
     .sk.d3{animation-delay:.24s}.sk.d4{animation-delay:.32s}.sk.d5{animation-delay:.40s}
 
-    /* ── Category skeleton — mirrors the real .cat-scroll 4-col grid ── */
+    /* ── Category skeleton — mirrors the real .cat-scroll 2-row x 24vw grid ── */
     .cs-item { display:flex; flex-direction:column; align-items:center; width:100%; }
     .cs-ring { width:100%; aspect-ratio:1/1; border-radius:50%; }
     .cs-name { width:70%; height:11px; margin-top:8px; border-radius:5px; }
@@ -400,9 +400,16 @@
 
 .cat-scroll {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px 8px;
-  padding: 4px 16px 16px 16px;
+  grid-template-rows: repeat(2, auto); 
+  grid-auto-flow: column; 
+  grid-auto-columns: 24vw; /* Slightly tightened the columns */
+  justify-content: start; 
+  /* CRITICAL FIX: 12px vertical gap kills the "trench", 12px horizontal keeps them close */
+  gap: 12px 12px; 
+  padding: 0 16px 16px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; 
+  scroll-behavior: smooth;
 }
 
 .no-scrollbar {
@@ -429,23 +436,22 @@
 
 /* 4. Maximized Images & Clean Shadows */
 .cat-ring {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 24vw;
+  height: 24vw;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  background: #F1F5F9; /* neutral placeholder tone — was transparent, which showed as a white gap while the icon loaded */
-  border-radius: 50%;
-  overflow: hidden;
+  background: transparent; 
 }
 
 .cat-ring img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* Transparent PNG/WebP source images are expected to already fill their
-     frame — no artificial zoom needed (and it would clip transparent edges). */
+  transform: scale(1.25) translateZ(0); 
+  will-change: transform;
+  /* Notice: I deleted the transition from here! We only animate the parent now. */
 }
 
 /* Every lazy-loaded photo fades in on top of its (already-colored) placeholder
