@@ -282,6 +282,64 @@
     .z-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #64748B; font-weight: 500; }
     .z-meta i { color: #1BA672; font-size: 12px; } /* Green lightning bolt */
 
+    /* ═══ Restaurant Availability (closed_today / temporarily_closed / unavailable) ═══
+       Card markup and layout are untouched — this only layers a grayscale
+       treatment + centered status pill on top of the existing z-img-wrap,
+       and dims the text underneath. Removing the "is-unavailable" class on
+       the next render (once the restaurant is open again) reverses all of
+       it automatically, since nothing here is a one-way state. */
+    .z-img-wrap img {
+      transition: filter 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .z-img-wrap.is-unavailable img {
+      filter: grayscale(1) contrast(0.94);
+      opacity: 0.5;
+    }
+    .z-card.is-unavailable { cursor: default; }
+    .z-card.is-unavailable .z-name,
+    .z-card.is-unavailable .z-cuisine,
+    .z-card.is-unavailable .z-meta {
+      opacity: 0.55;
+      transition: opacity 0.5s ease;
+    }
+    .z-card.is-unavailable .z-rating,
+    .z-card.is-unavailable .z-delivery-badge { opacity: 0.6; }
+    .z-card.is-unavailable:active { transform: none; opacity: 1; }
+
+    .z-availability-overlay {
+      position: absolute; inset: 0; z-index: 3;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(180deg, rgba(20,20,20,0.12), rgba(20,20,20,0.34));
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.45s ease;
+    }
+    .z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
+    .z-availability-pill {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      color: #1C1C1C; font-size: 12.5px; font-weight: 800; letter-spacing: 0.2px;
+      padding: 9px 18px; border-radius: 999px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.7);
+      transform: scale(0.9);
+      animation: zPillIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .z-availability-pill i { font-size: 12px; color: #E23744; }
+    @keyframes zPillIn { to { transform: scale(1); } }
+
+    /* Toast used when a closed restaurant's card or a closed restaurant's
+       99-store item is tapped */
+    #es-availability-toast {
+      position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
+      background: rgba(26,26,26,0.95); color: #fff; font-size: 13px; font-weight: 700;
+      padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+      opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .s99-add-circle.is-disabled { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+
     /* ─── Bottom Nav ─── */
     /* ULTRA-PREMIUM BOTTOM NAV */
     .bottom-nav { 
@@ -997,6 +1055,48 @@ img[loading="lazy"].loaded { opacity: 1; }
     displayRestaurants();
   };
 
+  // ── Restaurant availability → Zomato/Swiggy style status ──
+  // Reads the existing backend fields only (availability.isOpen /
+  // availability.closedReason, falling back to the legacy top-level
+  // isOpen for any older records) — no new fields are introduced.
+  function getAvailabilityStatus(res) {
+    const avail = res.availability || {};
+    const isOpen = typeof avail.isOpen === 'boolean' ? avail.isOpen : res.isOpen;
+    if (isOpen !== false) return null; // open (or unknown) → fully available
+
+    const reason = avail.closedReason || res.closedReason || res.status || '';
+    if (reason === 'closed_today') return 'closed_today';
+    if (reason === 'temporarily_closed') return 'temporarily_closed';
+    // isOpen is explicitly false but no specific reason was recorded
+    return 'unavailable';
+  }
+
+  function getAvailabilityLabel(status) {
+    return status === 'closed_today' ? 'Closed Today' : 'Temporarily Closed';
+  }
+
+  // Ids of currently-unavailable restaurants, refreshed on every
+  // displayRestaurants() render — used so the 99-store list (further
+  // down the page) can also disable Add to Cart for those items.
+  window.__unavailableRestaurantIds = new Set();
+
+  function showAvailabilityToast(label) {
+    let toast = document.getElementById('es-availability-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'es-availability-toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = label === 'Closed Today'
+      ? 'This restaurant is closed for today'
+      : 'This restaurant is temporarily unavailable';
+    toast.classList.remove('show');
+    void toast.offsetWidth; // restart animation
+    toast.classList.add('show');
+    clearTimeout(window.__esToastTimer);
+    window.__esToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
   // ── 4. Restaurant render (BULLETPROOF LAYOUT) ──
   function displayRestaurants() {
     const list = document.getElementById('restaurant-list');
@@ -1018,13 +1118,33 @@ img[loading="lazy"].loaded { opacity: 1; }
     }
 
     // STEP 4: ZOMATO JS TEMPLATE
-    list.innerHTML = data.map((res, i) => `
-      <a href="restaurant.html?id=${res._id || res.id}" class="z-card" style="animation: cardFadeUp 0.3s ease forwards ${i * 0.05}s; opacity: 0; transform: translateY(10px);">
-        <div class="z-img-wrap">
+    window.__unavailableRestaurantIds = new Set();
+
+    list.innerHTML = data.map((res, i) => {
+      const resId = res._id || res.id;
+      const status = getAvailabilityStatus(res);
+      const isUnavailable = !!status;
+      if (isUnavailable) window.__unavailableRestaurantIds.add(String(resId));
+
+      const label = isUnavailable ? getAvailabilityLabel(status) : '';
+      // Closed restaurants keep their href (so the URL/markup shape is
+      // unchanged) but navigation is blocked via onclick, same as how
+      // Add to Cart gets blocked below for their 99-store items.
+      const guard = isUnavailable
+        ? ` onclick="event.preventDefault(); showAvailabilityToast('${label}');"`
+        : '';
+
+      return `
+      <a href="restaurant.html?id=${resId}" class="z-card${isUnavailable ? ' is-unavailable' : ''}"${guard} aria-disabled="${isUnavailable}" style="animation: cardFadeUp 0.3s ease forwards ${i * 0.05}s; opacity: 0; transform: translateY(10px);">
+        <div class="z-img-wrap${isUnavailable ? ' is-unavailable' : ''}">
           <img src="${res.image || res.img}" alt="${res.name}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'; this.classList.add('loaded');">
           <div class="z-img-scrim"></div>
           <div class="z-delivery-badge">FREE delivery</div>
           <div class="z-bookmark"><i class="fa-regular fa-bookmark"></i></div>
+          ${isUnavailable ? `
+          <div class="z-availability-overlay">
+            <div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ${label}</div>
+          </div>` : ''}
         </div>
         
         <div class="z-info-row">
@@ -1040,7 +1160,8 @@ img[loading="lazy"].loaded { opacity: 1; }
           ₹150 for one
         </div>
       </a>
-    `).join('');
+    `;
+    }).join('');
   }
   
   // ── AUTOMATIC 99 STORE RENDERER (PERFECTED API FALLBACK) ──
@@ -1102,12 +1223,16 @@ img[loading="lazy"].loaded { opacity: 1; }
       const safeId = String(item.resId).replace(/['"]/g, '');
       const oldPrice = Math.floor(item.price * 1.4); 
       const vegClass = item.isVeg ? 'veg' : 'nonveg';
+      const resUnavailable = window.__unavailableRestaurantIds && window.__unavailableRestaurantIds.has(safeId);
+      const addBtn = resUnavailable
+        ? `<button class="s99-add-circle is-disabled" disabled onclick="event.preventDefault(); showAvailabilityToast('Temporarily Closed');">+</button>`
+        : `<button class="s99-add-circle" onclick="event.preventDefault(); updateCart('${safeName}', 1, ${item.price}, '${safeId}')">+</button>`;
 
       return `
         <a href="under99.html" class="s99-card tap" style="animation: cardFadeUp 0.3s ease forwards ${idx * 0.05}s; opacity: 0;">
           <div class="s99-img-wrap">
             <img src="${item.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'}" alt="${safeName}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'; this.classList.add('loaded');">
-            <button class="s99-add-circle" onclick="event.preventDefault(); updateCart('${safeName}', 1, ${item.price}, '${safeId}')">+</button>
+            ${addBtn}
           </div>
           <div class="s99-title-row">
             <div class="s99-veg-icon ${vegClass}"><div class="dot"></div></div>
