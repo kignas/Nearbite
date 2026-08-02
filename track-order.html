@@ -144,7 +144,7 @@
     .rider-info h3 { font-size: 15px; font-weight: 800; color: #000; margin-bottom: 4px; }
     .rider-meta { font-size: 11px; font-weight: 600; color: var(--text-2); }
     
-    /* 🚨 FIXED: Native Anchor Tag for the call button to bypass Android WebView blocks */
+    /* Native Anchor Tag for the call button */
     .btn-call { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-light); color: var(--brand); border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
 
     .order-summary { border-top: 1px dashed #e5e7eb; padding-top: 24px; }
@@ -190,6 +190,7 @@
       <div class="otp-value" id="otp-display">----</div>
     </div>
 
+    <!-- Enhanced Timeline to account for backend changes -->
     <div class="timeline" id="timeline">
       <div class="step" id="step-1">
         <div class="step-dot"></div>
@@ -200,6 +201,10 @@
         <div class="step-text"><h4>Food is being prepared</h4><p>Cooking at the Kitchen</p></div>
       </div>
       <div class="step" id="step-3">
+        <div class="step-dot"></div>
+        <div class="step-text"><h4 id="dispatch-title">Finding a Rider...</h4><p id="dispatch-desc">Assigning delivery partner</p></div>
+      </div>
+      <div class="step" id="step-4">
         <div class="step-dot"></div>
         <div class="step-text"><h4>Out for Delivery</h4><p>Rider is on the way</p></div>
       </div>
@@ -227,7 +232,8 @@
       </div>
     </div>
 
-  </div> <script>
+  </div> 
+  <script>
     let pollInterval;
 
     function generateOTP(orderId) {
@@ -275,12 +281,14 @@
       document.getElementById('display-total').innerText = `₹${order.total}`;
       document.getElementById('payment-type').innerText = order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery';
 
-      const orderOTP = generateOTP(order._id);
+      // Fallback to hashing if the backend does not return the plaintext OTP inside this array
+      const orderOTP = order.deliveryOtp || generateOTP(order._id);
       document.getElementById('otp-display').innerText = orderOTP;
 
       const s1 = document.getElementById('step-1');
       const s2 = document.getElementById('step-2');
       const s3 = document.getElementById('step-3');
+      const s4 = document.getElementById('step-4');
       const heroBg = document.getElementById('hero-bg');
       const heroIcon = document.getElementById('hero-icon');
       const etaTitle = document.getElementById('eta-title');
@@ -289,10 +297,19 @@
       const riderCard = document.getElementById('rider-card');
       const timeline = document.getElementById('timeline');
 
-      s1.className = 'step'; s2.className = 'step'; s3.className = 'step';
+      s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step';
       heroBg.className = 'tracker-hero';
       heroIcon.innerHTML = '<i class="fa-solid fa-motorcycle"></i>';
+      
+      // Reset OTP Box styles if returning from a success state
       otpBox.style.display = 'none';
+      otpBox.style.background = 'rgba(16, 185, 129, 0.05)';
+      otpBox.style.border = '1.5px dashed rgba(16, 185, 129, 0.4)';
+      otpBox.innerHTML = `
+        <div class="otp-label">Hand this PIN to the Rider</div>
+        <div class="otp-value" id="otp-display">${orderOTP}</div>
+      `;
+
       riderCard.style.display = 'none';
       etaTitle.innerText = "Estimated Arrival";
 
@@ -316,14 +333,14 @@
          etaTitle.innerText = "Status";
          etaTime.innerHTML = "DELIVERED";
          etaTime.className = "eta-time delivered-text";
-         s1.classList.add('passed'); s2.classList.add('passed'); s3.classList.add('passed');
+         s1.classList.add('passed'); s2.classList.add('passed'); s3.classList.add('passed'); s4.classList.add('passed');
          return;
       }
 
       timeline.style.display = "block";
       etaTime.className = "eta-time";
 
-      if (status === 'pending' || status === 'placed') {
+      if (status === 'pending' || status === 'placed' || status === 'confirmed') {
          etaTime.innerHTML = "35 <span>mins</span>";
          s1.classList.add('active');
       } 
@@ -331,14 +348,49 @@
          etaTime.innerHTML = "20 <span>mins</span>";
          s1.classList.add('passed');
          s2.classList.add('active');
-         otpBox.style.display = 'block'; 
       } 
+      else if (status === 'waiting_for_rider') {
+         etaTime.innerHTML = "15 <span>mins</span>";
+         s1.classList.add('passed');
+         s2.classList.add('passed');
+         s3.classList.add('active');
+         document.getElementById('dispatch-title').innerText = "Finding a rider...";
+         document.getElementById('dispatch-desc').innerText = "Assigning delivery partner";
+      }
+      else if (status === 'assigned') {
+         etaTime.innerHTML = "15 <span>mins</span>";
+         s1.classList.add('passed');
+         s2.classList.add('passed');
+         s3.classList.add('active');
+         document.getElementById('dispatch-title').innerText = "Rider Assigned";
+         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
+         riderCard.style.display = 'flex'; 
+      }
       else if (status === 'out_for_delivery') {
          etaTime.innerHTML = "5 <span>mins</span>";
          s1.classList.add('passed');
          s2.classList.add('passed');
-         s3.classList.add('active');
+         s3.classList.add('passed');
+         s4.classList.add('active');
+         document.getElementById('dispatch-title').innerText = "Rider Assigned";
+         document.getElementById('dispatch-desc').innerText = "Order picked up";
          otpBox.style.display = 'block'; 
+         riderCard.style.display = 'flex'; 
+      }
+      else if (status === 'otp_verified') {
+         etaTime.innerHTML = "1 <span>min</span>";
+         s1.classList.add('passed');
+         s2.classList.add('passed');
+         s3.classList.add('passed');
+         s4.classList.add('active');
+         document.getElementById('dispatch-title').innerText = "Rider Assigned";
+         document.getElementById('dispatch-desc').innerText = "Order picked up";
+         
+         otpBox.style.display = 'block';
+         otpBox.style.background = 'rgba(16, 185, 129, 0.1)';
+         otpBox.style.border = '1.5px solid #10b981';
+         otpBox.innerHTML = '<div class="otp-label" style="color: #059669; font-size: 14px; padding: 8px 0;">✅ OTP Verified</div>';
+         
          riderCard.style.display = 'flex'; 
       }
     }
