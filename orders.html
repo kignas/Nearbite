@@ -162,11 +162,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const pastContainer = document.getElementById('past-orders-container');
   const emptyState = document.getElementById('empty-orders');
 
-  const requireLogin = (reason) => {
+  const requireLogin = () => {
     loader.style.display = 'none';
     emptyState.style.display = 'block';
     document.getElementById('empty-title').innerText = "Please log in";
-    document.getElementById('empty-desc').innerHTML = `Log in to view your past orders.<br><br><span style="color:#ef4444; font-size:11px; font-weight:bold;">BACKEND SAYS: ${reason}</span>`;
+    document.getElementById('empty-desc').innerHTML = `Log in to view your orders.`;
     const btn = document.getElementById('empty-btn');
     btn.innerText = "LOGIN NOW";
     btn.onclick = () => {
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   };
 
-  if (!token) return requireLogin("TOKEN_IS_EMPTY_OR_UNDEFINED");
+  if (!token) return requireLogin();
 
   async function fetchOrders() {
     try {
@@ -184,12 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       
       if (response.status === 401) {
-        const errorData = await response.json();
-        return requireLogin(errorData.message.toUpperCase());
+        return requireLogin();
       }
 
       if (response.status === 404) {
-          return requireLogin("API_ROUTE_NOT_FOUND");
+          return requireLogin();
       }
 
       const result = await response.json();
@@ -279,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (error) {
       console.error(error);
-      requireLogin("NETWORK_ERROR_CHECK_CONSOLE");
+      requireLogin();
     }
   } 
 

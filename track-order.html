@@ -214,11 +214,11 @@
       <div class="rider-left">
         <div class="rider-avatar"><i class="fa-solid fa-motorcycle"></i></div>
         <div class="rider-info">
-          <h3>EatSwada Rider</h3>
+          <h3 id="rider-name">Delivery Partner</h3>
           <div class="rider-meta">Delivery Partner</div>
         </div>
       </div>
-      <a href="tel:+917319342178" class="btn-call tap">
+      <a href="#" id="rider-call-btn" class="btn-call tap" style="display:none;">
         <i class="fa-solid fa-phone"></i>
       </a>
     </div>
@@ -236,11 +236,6 @@
   <script>
     let pollInterval;
 
-    function generateOTP(orderId) {
-       let hash = parseInt(orderId.slice(-5), 16).toString();
-       return hash.slice(-4).padStart(4, '0');
-    }
-
     async function fetchOrderData() {
       const urlParams = new URLSearchParams(window.location.search);
       const orderId = urlParams.get('id');
@@ -250,13 +245,23 @@
         return;
       }
 
-      const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token'); 
-      if (!token) return;
+      const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
 
       try {
         const response = await fetch('https://eatswada.onrender.com/api/orders', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+
+        if (response.status === 401) {
+          localStorage.clear();
+          window.location.href = 'login.html';
+          return;
+        }
+
         const result = await response.json();
 
         if (response.ok && result.success) {
@@ -281,8 +286,7 @@
       document.getElementById('display-total').innerText = `₹${order.total}`;
       document.getElementById('payment-type').innerText = order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery';
 
-      // Fallback to hashing if the backend does not return the plaintext OTP inside this array
-      const orderOTP = order.deliveryOtp || generateOTP(order._id);
+      const orderOTP = order.deliveryOtp || '----';
       document.getElementById('otp-display').innerText = orderOTP;
 
       const s1 = document.getElementById('step-1');
@@ -296,6 +300,32 @@
       const otpBox = document.getElementById('otp-container');
       const riderCard = document.getElementById('rider-card');
       const timeline = document.getElementById('timeline');
+      const riderNameEl = document.getElementById('rider-name');
+      const riderCallBtn = document.getElementById('rider-call-btn');
+
+      if (order.rider && order.rider.name) {
+        riderNameEl.innerText = order.rider.name;
+      } else {
+        riderNameEl.innerText = 'Delivery Partner';
+      }
+      if (order.rider && order.rider.phone) {
+        riderCallBtn.href = `tel:${order.rider.phone}`;
+        riderCallBtn.style.display = 'flex';
+      } else {
+        riderCallBtn.style.display = 'none';
+      }
+
+      // Minutes remaining, computed from the backend's estimatedDelivery
+      // timestamp rather than a fixed guess per status.
+      function minutesRemaining() {
+        if (!order.estimatedDelivery) return null;
+        const diffMs = new Date(order.estimatedDelivery) - Date.now();
+        return Math.max(1, Math.round(diffMs / 60000));
+      }
+      function etaHTML() {
+        const mins = minutesRemaining();
+        return mins === null ? '-- <span>mins</span>' : `${mins} <span>mins</span>`;
+      }
 
       s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step';
       heroBg.className = 'tracker-hero';
@@ -341,16 +371,16 @@
       etaTime.className = "eta-time";
 
       if (status === 'pending' || status === 'placed' || status === 'confirmed') {
-         etaTime.innerHTML = "35 <span>mins</span>";
+         etaTime.innerHTML = etaHTML();
          s1.classList.add('active');
       } 
       else if (status === 'preparing') {
-         etaTime.innerHTML = "20 <span>mins</span>";
+         etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('active');
       } 
       else if (status === 'waiting_for_rider') {
-         etaTime.innerHTML = "15 <span>mins</span>";
+         etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('passed');
          s3.classList.add('active');
@@ -358,7 +388,7 @@
          document.getElementById('dispatch-desc').innerText = "Assigning delivery partner";
       }
       else if (status === 'assigned') {
-         etaTime.innerHTML = "15 <span>mins</span>";
+         etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('passed');
          s3.classList.add('active');
@@ -367,7 +397,7 @@
          riderCard.style.display = 'flex'; 
       }
       else if (status === 'out_for_delivery') {
-         etaTime.innerHTML = "5 <span>mins</span>";
+         etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('passed');
          s3.classList.add('passed');
@@ -378,7 +408,7 @@
          riderCard.style.display = 'flex'; 
       }
       else if (status === 'otp_verified') {
-         etaTime.innerHTML = "1 <span>min</span>";
+         etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('passed');
          s3.classList.add('passed');
