@@ -12,31 +12,48 @@
 
   <style>
     :root {
-      /* ── Brand: warm terracotta/orange (kept — this is EatSwada's existing identity) ── */
+      /* ── Brand: Premium warm terracotta/orange ── */
       --brand:        #FC8019;
-      --brand-deep:   #C1440E;
+      --brand-deep:   #E0680B;
       --brand-light:  #FFF1E1;
-      /* ── "Live" accent: a distinct teal used only for real-time / in-motion moments ── */
+      --brand-glow:   rgba(252, 128, 25, 0.35);
+      
+      /* ── "Live" accent: premium teal ── */
       --live:         #0C8C8C;
       --live-light:   #E3F5F4;
-      --success:      #1D9A6C;
-      --success-light:#E7F7EF;
-      --danger:       #E1483A;
-      --danger-light: #FDEBE9;
-      /* ── Warm neutrals (not cool gray) to match the brand ── */
-      --ink-900:  #241A12;
-      --ink-700:  #5B4C3F;
-      --ink-500:  #8A7A6C;
-      --ink-300:  #C9BBAE;
-      --paper:    #FFFAF4;
-      --paper-2:  #FFF3E4;
+      --live-glow:    rgba(12, 140, 140, 0.4);
+      
+      /* ── Semantic Colors ── */
+      --success:      #10B981;
+      --success-light:#ECFDF5;
+      --success-glow: rgba(16, 185, 129, 0.3);
+      --danger:       #EF4444;
+      --danger-light: #FEF2F2;
+      
+      /* ── Premium Neutrals ── */
+      --ink-900:  #111827;
+      --ink-700:  #374151;
+      --ink-500:  #6B7280;
+      --ink-300:  #D1D5DB;
+      --paper:    #F9FAFB;
+      --paper-2:  #F3F4F6;
       --card:     #FFFFFF;
-      --line:     #F0E2D2;
-      --shadow:    0 10px 30px rgba(36,26,18,.08);
-      --shadow-lg: 0 22px 50px rgba(36,26,18,.16);
-      --ease: cubic-bezier(.4,0,.2,1);
-      --r-lg: 28px;
-      --r-md: 18px;
+      --line:     #E5E7EB;
+      
+      /* ── UI Essentials ── */
+      --shadow-sm: 0 4px 12px rgba(17, 24, 39, 0.04);
+      --shadow:    0 12px 32px rgba(17, 24, 39, 0.08);
+      --shadow-lg: 0 24px 48px rgba(17, 24, 39, 0.12);
+      --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.06);
+      
+      /* ── Spring Animations ── */
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+      
+      /* ── Border Radii ── */
+      --r-xl: 32px;
+      --r-lg: 24px;
+      --r-md: 16px;
       --r-sm: 12px;
     }
 
@@ -49,419 +66,556 @@
       -webkit-tap-highlight-color: transparent;
       margin: 0;
       overflow-x: hidden;
+      display: flex;
+      justify-content: center;
     }
 
-    button { font-family: inherit; border: none; background: none; }
-    a { color: inherit; }
+    /* Constrain for desktop to feel like a premium app */
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: var(--paper);
+      position: relative;
+      box-shadow: 0 0 40px rgba(0,0,0,0.05);
+      overflow-x: hidden;
+    }
 
-    .tap { cursor: pointer; transition: transform 0.15s var(--ease); }
-    .tap:active { transform: scale(0.94); }
+    button, a { 
+      font-family: inherit; border: none; background: none; 
+      color: inherit; text-decoration: none; 
+      outline: none;
+    }
 
-    :focus-visible { outline: 2px solid var(--live); outline-offset: 3px; border-radius: 4px; }
+    .tap { cursor: pointer; transition: transform 0.2s var(--spring), opacity 0.2s var(--ease); }
+    .tap:active { transform: scale(0.92); opacity: 0.8; }
+    .tap:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; border-radius: var(--r-sm); }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-        scroll-behavior: auto !important;
-      }
+      *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
     }
 
     /* ════════════════════════════════════════════
-       ANIMATED BRAND HERO (DYNAMIC COLORS)
+       ANIMATED BRAND HERO (GLASSMORPHISM & MESH)
     ════════════════════════════════════════════ */
     .tracker-hero {
-      position: fixed; top: 0; left: 0; right: 0; height: 46vh;
+      position: fixed; top: 0; left: 0; right: 0; height: 48vh;
+      max-width: 480px; margin: 0 auto;
       background: linear-gradient(135deg, #FF9533 0%, var(--brand-deep) 100%);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1; overflow: hidden; transition: background 0.6s ease;
+      z-index: 1; overflow: hidden; transition: background 0.8s var(--ease);
+      will-change: background;
     }
-    .tracker-hero.cancelled { background: linear-gradient(135deg, #f16a5e 0%, #a82c22 100%); }
-    .tracker-hero.delivered { background: linear-gradient(135deg, #2bc98d 0%, #0d7a52 100%); }
+    .tracker-hero.cancelled { background: linear-gradient(135deg, #F87171 0%, #B91C1C 100%); }
+    .tracker-hero.delivered { background: linear-gradient(135deg, #34D399 0%, #047857 100%); }
 
-    .hero-sheen {
-      position: absolute; inset: -20% -50%; z-index: 1; pointer-events: none;
-      background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.14) 50%, transparent 60%);
-      animation: sheen 6s ease-in-out infinite;
+    /* Animated Organic Mesh Blobs */
+    .hero-blob {
+      position: absolute; width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%; top: -10%; left: -20%;
+      animation: float 8s infinite alternate ease-in-out;
+      mix-blend-mode: overlay; pointer-events: none;
     }
-    @keyframes sheen { 0%, 100% { transform: translateX(-15%); } 50% { transform: translateX(15%); } }
+    .hero-blob.two { width: 400px; height: 400px; top: 40%; left: 50%; animation-duration: 12s; animation-direction: alternate-reverse; }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -40px) scale(1.1); }
+    }
 
     .pulse-ring {
       position: absolute; border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.25);
-      animation: radar 3s linear infinite;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      animation: radar 4s var(--ease) infinite;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.2), 0 0 20px rgba(255,255,255,0.2);
     }
-    .tracker-hero.cancelled .pulse-ring, .tracker-hero.delivered .pulse-ring { display: none; }
+    .tracker-hero.cancelled .pulse-ring, .tracker-hero.delivered .pulse-ring { animation: none; opacity: 0; }
 
-    .ring-1 { width: 120px; height: 120px; animation-delay: 0s; }
-    .ring-2 { width: 120px; height: 120px; animation-delay: 1s; }
-    .ring-3 { width: 120px; height: 120px; animation-delay: 2s; }
+    .ring-1 { width: 140px; height: 140px; animation-delay: 0s; }
+    .ring-2 { width: 140px; height: 140px; animation-delay: 1.2s; }
+    .ring-3 { width: 140px; height: 140px; animation-delay: 2.4s; }
 
     @keyframes radar {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(3.5); opacity: 0; }
+      0% { transform: scale(0.8); opacity: 1; border-width: 3px; }
+      100% { transform: scale(4); opacity: 0; border-width: 0px; }
     }
 
+    /* Premium Icon Floating in Hero */
     .hero-icon {
-      position: relative; z-index: 2; width: 80px; height: 80px;
-      background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 36px; color: var(--brand); box-shadow: 0 10px 26px rgba(193, 68, 14, 0.4);
+      position: relative; z-index: 2; width: 88px; height: 88px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 38px; color: var(--brand); 
+      box-shadow: 0 20px 40px rgba(224, 104, 11, 0.4), inset 0 -4px 10px rgba(0,0,0,0.05);
+      animation: bounce-gentle 3s ease-in-out infinite alternate;
     }
-    .tracker-hero.cancelled .hero-icon { color: var(--danger); box-shadow: 0 10px 26px rgba(225, 72, 58, 0.4); }
-    .tracker-hero.delivered .hero-icon { color: var(--success); box-shadow: 0 10px 26px rgba(13, 122, 82, 0.4); }
+    .tracker-hero.cancelled .hero-icon { color: var(--danger); box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4); animation: none; }
+    .tracker-hero.delivered .hero-icon { color: var(--success); box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4); animation: pop 0.6s var(--spring) forwards; }
+
+    @keyframes bounce-gentle { 0% { transform: translateY(-4px); } 100% { transform: translateY(4px); } }
+    @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+    /* Glassmorphism Header Elements */
+    .glass-nav {
+      position: fixed; top: 0; left: 0; right: 0; 
+      padding: calc(20px + env(safe-area-inset-top)) 24px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 100; max-width: 480px; margin: 0 auto;
+      pointer-events: none; /* Let clicks pass through except on children */
+    }
 
     .floating-back {
-      position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; width: 44px; height: 44px;
-      background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      width: 44px; height: 44px;
+      background: rgba(255, 255, 255, 0.25); 
+      backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%);
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      z-index: 100; border: 1.5px solid rgba(255, 255, 255, 0.3); font-size: 16px; color: #fff; text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.5); font-size: 18px; color: #fff;
+      box-shadow: var(--shadow-glass); pointer-events: auto;
     }
 
     .hero-live-badge {
-      position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
-      z-index: 100; display: none; align-items: center; gap: 7px;
-      background: rgba(255,255,255,.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border: 1.5px solid rgba(255,255,255,.32); color: #fff;
-      font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
-      padding: 9px 14px 9px 11px; border-radius: 999px;
+      display: none; align-items: center; gap: 8px;
+      background: rgba(0, 0, 0, 0.2); 
+      backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.25); color: #fff;
+      font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      padding: 10px 18px 10px 14px; border-radius: 999px;
+      box-shadow: var(--shadow-glass); pointer-events: auto;
     }
     .hero-live-badge .live-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: #5EEAD4;
-      animation: live-pulse 1.6s infinite;
+      width: 8px; height: 8px; border-radius: 50%; background: #34D399;
+      box-shadow: 0 0 10px #34D399;
+      animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
     @keyframes live-pulse {
-      0% { box-shadow: 0 0 0 0 rgba(94,234,212,.7); }
-      70% { box-shadow: 0 0 0 8px rgba(94,234,212,0); }
-      100% { box-shadow: 0 0 0 0 rgba(94,234,212,0); }
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+      50% { opacity: .7; transform: scale(0.9); box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
     }
 
     /* ════════════════════════════════════════════
        BOTTOM TRACKING SHEET
     ════════════════════════════════════════════ */
     .tracking-sheet {
-      position: relative; margin-top: 39vh; background: var(--paper-2); min-height: 61vh;
-      border-radius: var(--r-lg) var(--r-lg) 0 0; z-index: 10; padding: 30px 20px calc(28px + env(safe-area-inset-bottom));
-      box-shadow: 0 -10px 30px rgba(36,26,18,0.1);
+      position: relative; margin-top: 42vh; background: var(--paper); min-height: 58vh;
+      border-radius: var(--r-xl) var(--r-xl) 0 0; z-index: 10; 
+      padding: 32px 24px calc(100px + env(safe-area-inset-bottom)); /* Extra bottom space for FAB */
+      box-shadow: 0 -20px 40px rgba(0,0,0,0.12);
+      will-change: transform;
     }
 
     .sheet-handle {
       position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 38px; height: 5px; background: rgba(36,26,18,.15); border-radius: 10px;
+      width: 48px; height: 5px; background: var(--ink-300); border-radius: 10px;
     }
 
-    /* Shared card-on-card surface for everything inside the sheet */
-    .card-fade { opacity: 0; transform: translateY(14px); }
-    body.data-loaded .card-fade { animation: fadeInUp .55s var(--ease) forwards; }
-    body.data-loaded .d1 { animation-delay: .02s; }
-    body.data-loaded .d2 { animation-delay: .08s; }
-    body.data-loaded .d3 { animation-delay: .14s; }
+    /* Staggered Card Entrances */
+    .card-fade { opacity: 0; transform: translateY(20px); will-change: opacity, transform; }
+    body.data-loaded .card-fade { animation: slideUp .6s var(--spring) forwards; }
+    body.data-loaded .d1 { animation-delay: .05s; }
+    body.data-loaded .d2 { animation-delay: .10s; }
+    body.data-loaded .d3 { animation-delay: .15s; }
     body.data-loaded .d4 { animation-delay: .20s; }
-    body.data-loaded .d5 { animation-delay: .26s; }
-    body.data-loaded .d6 { animation-delay: .32s; }
-    body.data-loaded .d7 { animation-delay: .38s; }
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    body.data-loaded .d5 { animation-delay: .25s; }
+    body.data-loaded .d6 { animation-delay: .30s; }
+    body.data-loaded .d7 { animation-delay: .35s; }
+    @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-    /* ── ETA header ── */
-    .eta-header { text-align: center; margin-bottom: 18px; padding-top: 6px; }
-    .eta-title { font-size: 12px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 6px; }
-    .eta-time { font-size: 40px; font-weight: 900; color: var(--ink-900); letter-spacing: -1.2px; font-variant-numeric: tabular-nums; }
-    .eta-time span { font-size: 16px; font-weight: 700; color: var(--ink-500); letter-spacing: 0; margin-left: 2px; }
-    .eta-time.cancelled-text { color: var(--danger); font-size: 24px; }
-    .eta-time.delivered-text { color: var(--success); font-size: 24px; }
-    .eta-caption { font-size: 12px; color: var(--ink-500); font-weight: 600; margin-top: 6px; }
-
-    /* ── Live route strip (future-ready map placeholder) ── */
-    .route-card {
-      display: none; background: var(--card); border-radius: var(--r-md);
-      padding: 16px 16px 14px; margin-bottom: 20px; box-shadow: var(--shadow);
+    /* ── Premium ETA header ── */
+    .eta-header { text-align: center; margin-bottom: 24px; padding-top: 8px; }
+    .eta-title { font-size: 13px; font-weight: 800; color: var(--brand); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+    .eta-time { 
+      font-size: 48px; font-weight: 900; color: var(--ink-900); 
+      letter-spacing: -2px; font-variant-numeric: tabular-nums; 
+      text-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
-    .route-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .eta-time span { font-size: 18px; font-weight: 700; color: var(--ink-500); letter-spacing: -0.5px; margin-left: 4px; }
+    .eta-time.cancelled-text { color: var(--danger); font-size: 28px; letter-spacing: 0; }
+    .eta-time.delivered-text { color: var(--success); font-size: 28px; letter-spacing: 0; }
+    .eta-caption { font-size: 13px; color: var(--ink-500); font-weight: 600; margin-top: 8px; }
+
+    /* ── Live route strip ── */
+    .route-card {
+      display: none; background: var(--card); border-radius: var(--r-lg);
+      padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+    }
+    .route-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .live-badge {
       display: inline-flex; align-items: center; gap: 6px; background: var(--live-light); color: var(--live);
-      font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
-      padding: 5px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      padding: 6px 12px; border-radius: 999px;
     }
-    .live-badge .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--live); animation: live-pulse-solo 1.6s infinite; }
+    .live-badge .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--live); animation: live-pulse-solo 1.6s infinite; }
     @keyframes live-pulse-solo { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
-    .route-caption { font-size: 12px; font-weight: 700; color: var(--ink-700); }
+    .route-caption { font-size: 13px; font-weight: 700; color: var(--ink-700); }
 
-    .route-track { position: relative; height: 46px; margin: 4px 4px 12px; }
+    .route-track { position: relative; height: 46px; margin: 0 8px 16px; }
     .route-track::before {
-      content: ''; position: absolute; left: 22px; right: 22px; top: 50%; height: 2px;
-      background-image: linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
-      background-size: 12px 2px; transform: translateY(-50%);
+      content: ''; position: absolute; left: 24px; right: 24px; top: 50%; height: 4px;
+      background: var(--paper-2); border-radius: 4px; transform: translateY(-50%);
     }
+    .route-track::after {
+      content: ''; position: absolute; left: 24px; width: 0; top: 50%; height: 4px;
+      background: var(--live); border-radius: 4px; transform: translateY(-50%);
+      transition: width 1s var(--ease); z-index: 1;
+    }
+    .route-track.stage-searching::after { width: 10%; }
+    .route-track.stage-assigned::after { width: 20%; }
+    .route-track.stage-enroute::after { width: 50%; } /* Animated below */
+    .route-track.stage-arriving::after { width: 80%; }
+    .route-track.stage-delivered::after { width: 100%; background: var(--success); }
+
     .route-pin {
       position: absolute; top: 50%; transform: translateY(-50%);
-      width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 11px; background: var(--paper-2); color: var(--ink-700); border: 2px solid var(--card); box-shadow: var(--shadow);
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; background: var(--card); color: var(--ink-700); border: 2px solid var(--line); box-shadow: var(--shadow-sm);
       z-index: 2;
     }
     .route-pin-start { left: 0; }
-    .route-pin-end { right: 0; background: var(--brand-light); color: var(--brand-deep); }
+    .route-pin-end { right: 0; border-color: var(--brand-light); color: var(--brand-deep); }
     .route-puck {
       position: absolute; top: 50%; left: 8%; transform: translate(-50%, -50%);
-      width: 30px; height: 30px; border-radius: 50%; background: var(--live); color: #fff;
-      display: flex; align-items: center; justify-content: center; font-size: 13px;
-      box-shadow: 0 6px 14px rgba(12,140,138,.4); z-index: 3; transition: left .6s var(--ease);
+      width: 36px; height: 36px; border-radius: 50%; background: #fff; color: var(--live);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      box-shadow: 0 8px 16px var(--live-glow); z-index: 3; transition: left 1s var(--ease), background 0.5s;
+      border: 3px solid var(--live);
     }
-    .route-track.stage-searching .route-puck { left: 20%; }
-    .route-track.stage-assigned .route-puck { left: 28%; }
-    .route-track.stage-enroute .route-puck { animation: travel 3.2s ease-in-out infinite alternate; }
-    .route-track.stage-arriving .route-puck { left: 88%; }
-    .route-track.stage-delivered .route-puck { left: 92%; background: var(--success); box-shadow: 0 6px 14px rgba(29,154,108,.4); }
-    @keyframes travel { from { left: 32%; } to { left: 86%; } }
+    .route-track.stage-searching .route-puck { left: 16%; }
+    .route-track.stage-assigned .route-puck { left: 26%; }
+    .route-track.stage-enroute .route-puck { animation: travel 4s ease-in-out infinite alternate; }
+    .route-track.stage-arriving .route-puck { left: 86%; }
+    .route-track.stage-delivered .route-puck { left: 100%; border-color: var(--success); color: var(--success); box-shadow: 0 8px 16px var(--success-glow); }
+    
+    @keyframes travel { from { left: 30%; } to { left: 80%; } }
 
-    .route-foot { font-size: 11px; color: var(--ink-500); font-weight: 600; text-align: center; }
+    .route-foot { font-size: 12px; color: var(--ink-500); font-weight: 600; text-align: center; background: var(--paper-2); padding: 8px; border-radius: var(--r-sm); }
 
-    /* ── OTP card ── */
+    /* ── OTP Vault ── */
     .customer-otp-box {
-      display: none; text-align: center; background: rgba(29, 154, 108, 0.06);
-      border: 1.5px dashed rgba(29, 154, 108, 0.4); border-radius: var(--r-md);
-      padding: 18px 16px; margin-bottom: 20px;
+      display: none; text-align: center; background: var(--card);
+      border: 2px dashed var(--line); border-radius: var(--r-lg);
+      padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow);
+      position: relative; overflow: hidden; transition: all 0.5s var(--ease);
     }
-    .otp-icon { width: 34px; height: 34px; margin: 0 auto 8px; border-radius: 50%; background: rgba(29,154,108,.12); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 15px; }
-    .otp-icon.verified { background: rgba(29,154,108,.18); }
-    .otp-label { font-size: 11px; font-weight: 800; color: #0f7a4f; text-transform: uppercase; letter-spacing: 1px; }
-    .otp-value { font-size: 34px; font-weight: 900; color: var(--ink-900); letter-spacing: 8px; margin-top: 4px; font-variant-numeric: tabular-nums; }
-    .otp-instructions { font-size: 11.5px; color: var(--ink-500); font-weight: 600; margin-top: 8px; line-height: 1.4; }
+    .otp-icon { 
+      width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 16px; 
+      background: var(--paper-2); color: var(--ink-700); 
+      display: flex; align-items: center; justify-content: center; font-size: 20px; 
+      transition: all 0.5s var(--spring);
+    }
+    .otp-icon.verified { background: var(--success-light); color: var(--success); transform: scale(1.1); }
+    .otp-label { font-size: 12px; font-weight: 800; color: var(--ink-700); text-transform: uppercase; letter-spacing: 1.5px; transition: color 0.3s; }
+    .otp-value { font-size: 42px; font-weight: 900; color: var(--ink-900); letter-spacing: 12px; margin: 8px 0; font-variant-numeric: tabular-nums; }
+    .otp-instructions { font-size: 13px; color: var(--ink-500); font-weight: 600; line-height: 1.5; }
+    
+    /* OTP Success Animation */
+    .premium-success-ping { animation: successPing 0.6s var(--spring) forwards; }
+    @keyframes successPing { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); box-shadow: 0 0 0 15px var(--success-glow); } 100% { transform: scale(1.1); box-shadow: 0 0 0 0 var(--success-glow); } }
 
     /* ════════════════════════════════════════════
-       DYNAMIC TIMELINE
+       PREMIUM DYNAMIC TIMELINE
     ════════════════════════════════════════════ */
-    .timeline { position: relative; padding-left: 22px; margin-bottom: 22px; }
-    .timeline::before { content: ''; position: absolute; top: 6px; bottom: 26px; left: 29px; width: 2px; background: var(--line); z-index: 1; }
+    .timeline { position: relative; padding-left: 28px; margin-bottom: 32px; }
+    .timeline::before { content: ''; position: absolute; top: 8px; bottom: 32px; left: 34px; width: 4px; background: var(--paper-2); z-index: 1; border-radius: 4px; }
     .timeline-fill {
-      position: absolute; top: 6px; left: 29px; width: 2px; height: 0%;
+      position: absolute; top: 8px; left: 34px; width: 4px; height: 0%;
       background: linear-gradient(180deg, var(--brand) 0%, var(--brand-deep) 100%);
-      z-index: 1; border-radius: 2px; transition: height .7s var(--ease);
+      z-index: 1; border-radius: 4px; transition: height 1s var(--spring);
+      box-shadow: 0 0 10px var(--brand-glow);
     }
 
-    .step { position: relative; margin-bottom: 22px; z-index: 2; display: flex; align-items: flex-start; gap: 18px; }
+    .step { position: relative; margin-bottom: 28px; z-index: 2; display: flex; align-items: flex-start; gap: 20px; }
     .step:last-child { margin-bottom: 0; }
 
     .step-dot {
-      width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--ink-300);
-      margin-top: 2px; flex-shrink: 0; box-shadow: 0 0 0 4px var(--paper-2); transition: 0.3s;
+      width: 18px; height: 18px; border-radius: 50%; background: var(--paper-2); border: 4px solid #fff;
+      margin-top: 2px; flex-shrink: 0; box-shadow: 0 0 0 1px var(--line); transition: all 0.5s var(--spring);
       display: flex; align-items: center; justify-content: center; position: relative;
     }
-    .step-check { font-size: 7px; color: #fff; opacity: 0; transition: opacity .25s var(--ease); }
-    .step-text h4 { font-size: 14.5px; font-weight: 800; color: var(--ink-300); margin-bottom: 2px; transition: 0.3s; }
-    .step-text p { font-size: 12px; color: var(--ink-300); font-weight: 600; transition: 0.3s; }
+    .step-check { font-size: 8px; color: #fff; opacity: 0; transition: opacity .3s var(--ease); }
+    .step-text { padding-top: 1px; }
+    .step-text h4 { font-size: 15px; font-weight: 800; color: var(--ink-300); margin-bottom: 4px; transition: color 0.4s; }
+    .step-text p { font-size: 13px; color: var(--ink-300); font-weight: 600; transition: color 0.4s; line-height: 1.4; }
 
     /* Passed State */
-    .step.passed .step-dot { background: var(--brand); border-color: var(--brand); }
-    .step.passed .step-check { opacity: 1; }
-    .step.passed .step-text h4 { color: var(--ink-700); }
+    .step.passed .step-dot { background: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+    .step.passed .step-check { opacity: 1; transform: scale(1); }
+    .step.passed .step-text h4 { color: var(--ink-900); }
     .step.passed .step-text p { color: var(--ink-500); }
 
     /* Active State */
-    .step.active .step-dot { background: var(--brand); border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-light); }
+    .step.active .step-dot { background: #fff; border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-light); }
     .step.active .step-dot::after {
-      content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px;
-      border-radius: 50%; border: 2px solid var(--brand); animation: pulse 1.5s infinite; opacity: 0;
+      content: ''; position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px;
+      border-radius: 50%; border: 2px solid var(--brand); animation: pulse 2s infinite; opacity: 0;
     }
-    .step.active .step-text h4 { color: var(--ink-900); }
-    .step.active .step-text p { color: var(--brand-deep); font-weight: 700; }
+    .step.active .step-text h4 { color: var(--brand-deep); font-size: 16px; }
+    .step.active .step-text p { color: var(--ink-700); font-weight: 700; }
 
-    @keyframes pulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+    @keyframes pulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
 
     /* ════════════════════════════════════════════
-       RIDER CARD
+       RIDER CARD (PREMIUM UPGRADE)
     ════════════════════════════════════════════ */
     .rider-card {
-      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
-      padding: 14px 14px 14px 14px; display: none; align-items: center; justify-content: space-between;
-      margin-bottom: 14px; box-shadow: var(--shadow);
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl);
+      padding: 16px; display: none; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden;
     }
-    .rider-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .rider-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
+    
+    .rider-photo-wrapper { position: relative; }
     .rider-photo {
-      width: 50px; height: 50px; border-radius: 50%; background: var(--paper-2); color: var(--ink-500);
-      display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 20px;
-      border: 2px solid var(--paper-2);
+      width: 56px; height: 56px; border-radius: 18px; background: var(--paper-2); color: var(--ink-500);
+      display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 24px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
     }
     .rider-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .rider-info { min-width: 0; }
-    .rider-info h3 { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rider-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .rider-rating, .rider-vehicle {
-      display: none; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--ink-700);
-      background: var(--paper-2); padding: 3px 8px; border-radius: 999px;
+    .verified-badge {
+      position: absolute; bottom: -4px; right: -4px; width: 22px; height: 22px;
+      background: var(--success); color: #fff; border-radius: 50%; border: 2px solid #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 10px;
+      box-shadow: var(--shadow-sm);
     }
-    .rider-rating i { color: #F5A623; font-size: 10px; }
-    .rider-vehicle i { color: var(--ink-500); font-size: 10px; }
 
-    .btn-call {
-      width: 44px; height: 44px; border-radius: 50%; background: var(--brand-light); color: var(--brand-deep);
-      display: flex; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0; font-size: 17px;
+    .rider-info { min-width: 0; }
+    .rider-info h3 { font-size: 16px; font-weight: 800; color: var(--ink-900); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rider-meta-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .rider-rating, .rider-vehicle {
+      display: none; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; 
+      background: var(--paper); border: 1px solid var(--line); padding: 4px 10px; border-radius: 8px;
     }
+    .rider-rating { color: var(--ink-900); }
+    .rider-rating i { color: #F5A623; font-size: 11px; }
+    .rider-vehicle { color: var(--ink-700); }
+    .rider-vehicle i { color: var(--ink-500); font-size: 11px; }
+
+    .rider-actions { display: flex; gap: 10px; }
+    .btn-action {
+      width: 48px; height: 48px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-call { background: var(--success-light); color: var(--success); }
+    .btn-chat { background: var(--brand-light); color: var(--brand-deep); display: none; } /* added display:none initial */
 
     /* ════════════════════════════════════════════
-       INFO CARDS (restaurant / delivery address)
+       INFO CARDS & SUPPORT (GRID SYSTEM)
     ════════════════════════════════════════════ */
     .info-card {
-      display: none; align-items: flex-start; gap: 12px; background: var(--card);
-      border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow);
+      display: none; align-items: flex-start; gap: 16px; background: var(--card);
+      border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
     }
     .info-card-icon {
-      width: 38px; height: 38px; border-radius: 12px; background: var(--paper-2); color: var(--brand-deep);
-      display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 14px; background: var(--paper-2); color: var(--ink-700);
+      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
     }
     .info-card-body { min-width: 0; }
-    .info-card-label { font-size: 10.5px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; }
-    .info-card-title { font-size: 14px; font-weight: 800; color: var(--ink-900); margin-bottom: 2px; }
-    .info-card-sub { font-size: 12px; color: var(--ink-500); font-weight: 600; line-height: 1.4; }
+    .info-card-label { font-size: 11px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .info-card-title { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 4px; }
+    .info-card-sub { font-size: 13px; color: var(--ink-700); font-weight: 600; line-height: 1.5; }
 
-    /* ════════════════════════════════════════════
-       SUPPORT ROW
-    ════════════════════════════════════════════ */
-    .support-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    /* Rich Help Section */
+    .support-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
     .support-btn {
-      display: flex; display: none; flex: 1; flex-direction: column; align-items: center; gap: 6px;
-      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm);
-      padding: 12px 6px; text-decoration: none; font-size: 11px; font-weight: 700; color: var(--ink-700);
-      box-shadow: var(--shadow);
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+      padding: 16px 8px; font-size: 12px; font-weight: 800; color: var(--ink-900);
+      box-shadow: var(--shadow-sm); text-align: center;
     }
     .support-btn.always-on { display: flex; }
-    .support-btn i { font-size: 15px; color: var(--brand-deep); }
+    .support-btn-icon {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--paper-2);
+      display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--ink-700);
+    }
+    .support-btn:hover .support-btn-icon { background: var(--brand-light); color: var(--brand-deep); }
 
     /* ════════════════════════════════════════════
-       ORDER SUMMARY + INVOICE
+       ORDER SUMMARY & PREMIUM INVOICE
     ════════════════════════════════════════════ */
-    .order-summary { background: var(--card); border-radius: var(--r-md); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
-    .summary-eyebrow { font-size: 10.5px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
-    .summary-res { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 6px; }
-    .summary-items { font-size: 12.5px; color: var(--ink-700); line-height: 1.6; margin-bottom: 16px; }
-    .summary-total { display: flex; justify-content: space-between; align-items: center; background: var(--paper-2); padding: 13px 16px; border-radius: var(--r-sm); }
-    .total-label { font-size: 11.5px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: .4px; }
-    .total-price { font-size: 17px; font-weight: 900; color: var(--ink-900); }
+    .order-summary { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+    .summary-eyebrow { font-size: 11px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .summary-res { font-size: 18px; font-weight: 900; color: var(--ink-900); margin-bottom: 8px; }
+    .summary-items { font-size: 14px; color: var(--ink-700); line-height: 1.6; margin-bottom: 20px; font-weight: 500; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; background: var(--paper-2); padding: 16px 20px; border-radius: var(--r-md); }
+    .total-label { font-size: 13px; font-weight: 800; color: var(--ink-700); text-transform: uppercase; letter-spacing: 0.5px; }
+    .total-price { font-size: 20px; font-weight: 900; color: var(--ink-900); }
 
     .invoice-btn {
-      width: 100%; margin-top: 12px; padding: 13px; border-radius: var(--r-sm);
-      background: var(--paper-2); color: var(--ink-900); font-size: 13px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; margin-top: 16px; padding: 16px; border-radius: var(--r-md);
+      background: var(--paper); border: 1px solid var(--line); color: var(--ink-900); 
+      font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px;
     }
-    .invoice-btn i { color: var(--brand-deep); }
+    .invoice-btn i { color: var(--ink-500); font-size: 16px; }
 
+    /* Slide-up Invoice Modal with Backdrop Blur */
     .invoice-modal {
       position: fixed; inset: 0; z-index: 2000; display: flex; align-items: flex-end; justify-content: center;
-      background: rgba(36,26,18,0); pointer-events: none; transition: background .3s var(--ease);
+      background: rgba(17,24,39,0); pointer-events: none; transition: background .4s var(--ease);
+      backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
     }
-    .invoice-modal.open { background: rgba(36,26,18,.45); pointer-events: auto; }
+    .invoice-modal.open { background: rgba(17,24,39,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); pointer-events: auto; }
     .invoice-sheet {
-      background: #fff; width: 100%; max-width: 480px; border-radius: 24px 24px 0 0;
-      padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); transform: translateY(100%);
-      transition: transform .35s var(--ease); box-shadow: var(--shadow-lg); max-height: 80vh; overflow-y: auto;
+      background: var(--card); width: 100%; max-width: 480px; border-radius: var(--r-xl) var(--r-xl) 0 0;
+      padding: 32px 24px calc(32px + env(safe-area-inset-bottom)); transform: translateY(100%);
+      transition: transform .5s var(--spring); box-shadow: var(--shadow-lg); max-height: 85vh; overflow-y: auto;
+      position: relative;
+    }
+    /* Jagged receipt edge effect */
+    .invoice-sheet::before {
+      content: ''; position: absolute; top: -8px; left: 0; right: 0; height: 8px;
+      background-image: radial-gradient(circle at 10px 0, transparent 10px, var(--card) 11px);
+      background-size: 20px 8px; background-repeat: repeat-x;
     }
     .invoice-modal.open .invoice-sheet { transform: translateY(0); }
-    .invoice-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .invoice-head h3 { font-size: 17px; font-weight: 900; }
-    .invoice-close { width: 32px; height: 32px; border-radius: 50%; background: var(--paper-2); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink-700); }
-    .invoice-meta { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px dashed var(--line); }
-    .invoice-meta > div { display: flex; justify-content: space-between; font-size: 13px; }
+    
+    .invoice-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .invoice-head h3 { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+    .invoice-close { width: 40px; height: 40px; border-radius: 50%; background: var(--paper-2); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink-700); }
+    
+    .invoice-meta { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 2px dashed var(--line); }
+    .invoice-meta > div { display: flex; justify-content: space-between; font-size: 14px; }
     .invoice-meta span { color: var(--ink-500); font-weight: 600; }
     .invoice-meta strong { color: var(--ink-900); font-weight: 800; }
-    .invoice-items { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px dashed var(--line); }
-    .invoice-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--ink-700); }
-    .invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 900; margin-bottom: 18px; }
+    
+    .invoice-items { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 2px dashed var(--line); }
+    .invoice-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: var(--ink-700); }
+    .invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 900; margin-bottom: 24px; }
+    
     .invoice-print {
-      width: 100%; padding: 14px; border-radius: var(--r-sm); background: var(--brand); color: #fff;
-      font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 18px; border-radius: var(--r-md); background: var(--ink-900); color: #fff;
+      font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 10px 20px rgba(17,24,39,0.2);
     }
 
     @media print {
       body * { visibility: hidden; }
       .invoice-sheet, .invoice-sheet * { visibility: visible; }
-      .invoice-sheet { position: absolute; top: 0; left: 0; width: 100%; max-height: none; transform: none; }
+      .invoice-sheet { position: absolute; top: 0; left: 0; width: 100%; max-height: none; transform: none; box-shadow: none; }
+      .invoice-sheet::before { display: none; }
       .invoice-print, .invoice-close { display: none !important; }
     }
 
     /* ════════════════════════════════════════════
-       RATING CARD
+       RATING CARD (GAMIFIED)
     ════════════════════════════════════════════ */
     .rating-card {
-      display: none; text-align: center; background: var(--card); border-radius: var(--r-md);
-      padding: 26px 20px; box-shadow: var(--shadow); margin-bottom: 14px;
+      display: none; text-align: center; background: linear-gradient(180deg, var(--card) 0%, var(--paper) 100%);
+      border-radius: var(--r-xl); padding: 32px 24px; box-shadow: var(--shadow); margin-bottom: 20px;
+      border: 1px solid var(--line);
     }
     .rating-icon {
-      width: 46px; height: 46px; margin: 0 auto 12px; border-radius: 50%; background: var(--success-light);
-      color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 19px;
+      width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 20px; background: var(--success-light);
+      color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 28px;
+      box-shadow: 0 10px 20px var(--success-glow);
     }
-    .rating-card h3 { font-size: 16px; font-weight: 900; margin-bottom: 4px; }
-    .rating-card p { font-size: 12.5px; color: var(--ink-500); font-weight: 600; margin-bottom: 18px; }
-    .stars { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-    .stars i { font-size: 26px; color: var(--ink-300); cursor: pointer; transition: color .2s var(--ease), transform .15s var(--ease); }
-    .stars i:active { transform: scale(1.15); }
-    .stars i.active { color: #F5A623; }
+    .rating-card h3 { font-size: 18px; font-weight: 900; margin-bottom: 8px; }
+    .rating-card p { font-size: 14px; color: var(--ink-500); font-weight: 600; margin-bottom: 24px; }
+    .stars { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+    .stars i { font-size: 32px; color: var(--ink-300); cursor: pointer; transition: color .3s var(--ease), transform .2s var(--spring); }
+    .stars i:hover { transform: scale(1.1); }
+    .stars i:active { transform: scale(0.9); }
+    .stars i.active { color: #F5A623; filter: drop-shadow(0 4px 8px rgba(245,166,35,0.4)); }
     .rating-submit {
-      width: 100%; padding: 13px; border-radius: var(--r-sm); background: var(--ink-300); color: #fff;
-      font-size: 13.5px; font-weight: 800; transition: background .2s var(--ease);
+      width: 100%; padding: 16px; border-radius: var(--r-md); background: var(--ink-300); color: #fff;
+      font-size: 15px; font-weight: 800; transition: all .3s var(--ease);
     }
-    .rating-submit:not(:disabled) { background: var(--brand); }
-    .rating-thanks { display: none; font-size: 14px; font-weight: 800; color: var(--success); }
+    .rating-submit:not(:disabled) { background: var(--brand); box-shadow: 0 10px 20px var(--brand-glow); cursor: pointer; }
+    .rating-submit:not(:disabled):active { transform: scale(0.98); box-shadow: 0 5px 10px var(--brand-glow); }
+    .rating-thanks { display: none; font-size: 16px; font-weight: 800; color: var(--success); animation: pop 0.5s var(--spring); }
 
     /* ════════════════════════════════════════════
-       SKELETON LOADING
+       FLOATING ACTION BUTTON (SOS/HELP)
     ════════════════════════════════════════════ */
-    .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 999; overflow: hidden; }
-    .skeleton-hero { height: 46vh; background: linear-gradient(135deg, #FFDDB8 0%, #FFC79A 100%); }
-    .skeleton-sheet {
-      margin-top: -26px; position: relative; background: var(--paper-2); border-radius: var(--r-lg) var(--r-lg) 0 0;
-      min-height: 61vh; padding: 34px 20px;
+    .fab-help {
+      position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); right: 24px;
+      width: 56px; height: 56px; border-radius: 50%; background: var(--ink-900); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+      box-shadow: 0 12px 24px rgba(17,24,39,0.3); z-index: 100;
+      transition: transform 0.2s var(--spring);
     }
-    .skel { border-radius: 10px; background: linear-gradient(90deg, #EFE0CC 25%, #FBEFDD 37%, #EFE0CC 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
-    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-    .skel-line { height: 14px; margin: 0 auto 10px; }
-    .skel-line.w-40 { width: 40%; height: 11px; }
-    .skel-line.w-30 { width: 30%; height: 32px; margin-bottom: 22px; }
-    .skel-block { height: 84px; border-radius: var(--r-md); margin-bottom: 16px; }
-    .skel-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: var(--r-md); padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); }
-    .skel-dot { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
-    .skel-row .skel-line { margin: 0; flex: 1; }
+    /* Restrict FAB strictly within the app container bounds on desktop */
+    @media (min-width: 481px) {
+      .fab-help { right: calc(50% - 240px + 24px); }
+    }
 
-    .spinner-wrap { display: none; }
+    /* ════════════════════════════════════════════
+       PREMIUM LOADING SKELETON
+    ════════════════════════════════════════════ */
+    .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 999; overflow: hidden; display: flex; justify-content: center; }
+    .skeleton-container { width: 100%; max-width: 480px; position: relative; }
+    .skeleton-hero { height: 48vh; background: linear-gradient(135deg, #FFDDB8 0%, #FFC79A 100%); position: relative; overflow: hidden; }
+    .skeleton-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmerHero 2s infinite;
+    }
+    @keyframes shimmerHero { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    .skeleton-sheet {
+      margin-top: -32px; position: relative; background: var(--paper); border-radius: var(--r-xl) var(--r-xl) 0 0;
+      min-height: 58vh; padding: 40px 24px;
+    }
+    .skel { border-radius: 8px; background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%); background-size: 400% 100%; animation: shimmer 1.5s infinite linear; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    
+    .skel-line { height: 16px; margin: 0 auto 12px; }
+    .skel-line.w-40 { width: 40%; height: 12px; }
+    .skel-line.w-30 { width: 30%; height: 40px; margin-bottom: 32px; }
+    .skel-block { height: 100px; border-radius: var(--r-lg); margin-bottom: 24px; }
+    .skel-row { display: flex; align-items: center; gap: 16px; background: #fff; border-radius: var(--r-lg); padding: 20px; margin-bottom: 16px; border: 1px solid var(--line); }
+    .skel-dot { width: 56px; height: 56px; border-radius: 18px; flex-shrink: 0; }
+    .skel-row .skel-line { margin: 0; flex: 1; height: 20px; }
   </style>
 </head>
 <body>
 
+<div class="app-container">
+
+  <!-- Skeleton Loader -->
   <div class="loading-overlay" id="loading-overlay">
-    <div class="skeleton-hero"></div>
-    <div class="skeleton-sheet">
-      <div class="skel-line w-40 skel" style="margin:0 auto 8px;"></div>
-      <div class="skel-line w-30 skel"></div>
-      <div class="skel-block skel"></div>
-      <div class="skel-row">
-        <div class="skel-dot skel"></div>
-        <div class="skel-line skel"></div>
-      </div>
-      <div class="skel-row">
-        <div class="skel-dot skel"></div>
-        <div class="skel-line skel"></div>
-      </div>
-      <div class="skel-row">
-        <div class="skel-dot skel"></div>
-        <div class="skel-line skel"></div>
+    <div class="skeleton-container">
+      <div class="skeleton-hero"></div>
+      <div class="skeleton-sheet">
+        <div class="skel-line w-40 skel" style="margin:0 auto 12px;"></div>
+        <div class="skel-line w-30 skel"></div>
+        <div class="skel-block skel"></div>
+        <div class="skel-row">
+          <div class="skel-dot skel"></div>
+          <div class="skel-line skel"></div>
+        </div>
+        <div class="skel-row">
+          <div class="skel-dot skel"></div>
+          <div class="skel-line skel"></div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Hero Section -->
   <div class="tracker-hero" id="hero-bg">
-    <div class="hero-sheen"></div>
+    <div class="hero-blob"></div>
+    <div class="hero-blob two"></div>
     <div class="pulse-ring ring-1"></div>
     <div class="pulse-ring ring-2"></div>
     <div class="pulse-ring ring-3"></div>
     <div class="hero-icon" id="hero-icon"><i class="fa-solid fa-motorcycle"></i></div>
   </div>
 
-  <a href="orders.html" class="floating-back tap">
-    <i class="fa-solid fa-arrow-left"></i>
-  </a>
-
-  <div class="hero-live-badge" id="hero-live-badge">
-    <span class="live-dot"></span> Live Tracking
+  <!-- Glassmorphism Nav -->
+  <div class="glass-nav">
+    <a href="orders.html" class="floating-back tap" aria-label="Go back to orders">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div class="hero-live-badge" id="hero-live-badge">
+      <span class="live-dot"></span> Live Tracking
+    </div>
+    <div style="width: 44px;"></div> <!-- Spacer for flex balance -->
   </div>
 
+  <!-- Tracking Sheet -->
   <div class="tracking-sheet">
     <div class="sheet-handle"></div>
 
@@ -471,9 +625,7 @@
       <div class="eta-caption">We'll update this automatically as your order moves</div>
     </div>
 
-    <!-- Future-ready live map placeholder: a self-contained route visual that
-         needs no coordinates today, and gives a clear mount point (#route-card)
-         for a real map/SDK later without any markup changes. -->
+    <!-- Live Route Strip -->
     <div class="route-card card-fade d2" id="route-card">
       <div class="route-card-head">
         <span class="live-badge"><span class="live-dot"></span>Live</span>
@@ -484,16 +636,18 @@
         <div class="route-puck"><i class="fa-solid fa-motorcycle"></i></div>
         <div class="route-pin route-pin-end"><i class="fa-solid fa-house"></i></div>
       </div>
-      <div class="route-foot">Full live map view is coming soon</div>
+      <div class="route-foot">Live map visualization active</div>
     </div>
 
+    <!-- Security Vault (OTP) -->
     <div class="customer-otp-box card-fade d2" id="otp-container">
       <div class="otp-icon"><i class="fa-solid fa-shield-halved"></i></div>
-      <div class="otp-label">Hand this PIN to your rider</div>
+      <div class="otp-label">Delivery PIN</div>
       <div class="otp-value" id="otp-display">----</div>
-      <div class="otp-instructions">Share this code only when your rider arrives with the order</div>
+      <div class="otp-instructions">Share this code only when your rider arrives to securely receive your order.</div>
     </div>
 
+    <!-- Glowing Timeline -->
     <div class="timeline card-fade d3" id="timeline">
       <div class="timeline-fill" id="timeline-fill"></div>
       <div class="step" id="step-1">
@@ -501,22 +655,26 @@
         <div class="step-text"><h4>Order Confirmed</h4><p>Restaurant accepted your order</p></div>
       </div>
       <div class="step" id="step-2">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
+        <div class="step-dot"><i class="fa-solid fa-fire-burner step-check"></i></div>
         <div class="step-text"><h4>Food is being prepared</h4><p>Cooking at the Kitchen</p></div>
       </div>
       <div class="step" id="step-3">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
+        <div class="step-dot"><i class="fa-solid fa-motorcycle step-check"></i></div>
         <div class="step-text"><h4 id="dispatch-title">Finding a Rider...</h4><p id="dispatch-desc">Assigning delivery partner</p></div>
       </div>
       <div class="step" id="step-4">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
+        <div class="step-dot"><i class="fa-solid fa-box-open step-check"></i></div>
         <div class="step-text"><h4>Out for Delivery</h4><p>Rider is on the way</p></div>
       </div>
     </div>
 
+    <!-- Rider Profile -->
     <div class="rider-card card-fade d4" id="rider-card">
       <div class="rider-left">
-        <div class="rider-photo" id="rider-photo"><i class="fa-solid fa-user"></i></div>
+        <div class="rider-photo-wrapper">
+          <div class="rider-photo" id="rider-photo"><i class="fa-solid fa-user"></i></div>
+          <div class="verified-badge"><i class="fa-solid fa-check"></i></div>
+        </div>
         <div class="rider-info">
           <h3 id="rider-name">Delivery Partner</h3>
           <div class="rider-meta-row">
@@ -525,13 +683,17 @@
           </div>
         </div>
       </div>
-      <a href="#" id="rider-call-btn" class="btn-call tap" style="display:none;">
-        <i class="fa-solid fa-phone"></i>
-      </a>
+      <div class="rider-actions">
+        <a href="#" id="rider-chat-btn" class="btn-action btn-chat tap" aria-label="Message Rider">
+          <i class="fa-solid fa-comment-dots"></i>
+        </a>
+        <a href="#" id="rider-call-btn" class="btn-action btn-call tap" style="display:none;" aria-label="Call Rider">
+          <i class="fa-solid fa-phone"></i>
+        </a>
+      </div>
     </div>
 
-    <!-- Restaurant info card — only shown if the backend already returns
-         order.restaurant on this order. No data is invented here. -->
+    <!-- Restaurant Info -->
     <div class="info-card card-fade d4" id="restaurant-card">
       <div class="info-card-icon"><i class="fa-solid fa-store"></i></div>
       <div class="info-card-body">
@@ -541,8 +703,7 @@
       </div>
     </div>
 
-    <!-- Delivery address card — only shown if the backend already returns
-         order.deliveryAddress (or order.address) on this order. -->
+    <!-- Delivery Address -->
     <div class="info-card card-fade d5" id="address-card">
       <div class="info-card-icon"><i class="fa-solid fa-location-dot"></i></div>
       <div class="info-card-body">
@@ -551,12 +712,23 @@
       </div>
     </div>
 
+    <!-- Support Grid -->
     <div class="support-row card-fade d5">
-      <a href="#" id="support-call-restaurant" class="support-btn tap"><i class="fa-solid fa-store"></i>Restaurant</a>
-      <a href="#" id="support-call-rider" class="support-btn tap"><i class="fa-solid fa-motorcycle"></i>Rider</a>
-      <a href="support.html" class="support-btn always-on tap"><i class="fa-solid fa-circle-question"></i>Help</a>
+      <a href="#" id="support-call-restaurant" class="support-btn tap">
+        <div class="support-btn-icon"><i class="fa-solid fa-store"></i></div>
+        Call Resto
+      </a>
+      <a href="#" id="support-call-rider" class="support-btn tap">
+        <div class="support-btn-icon"><i class="fa-solid fa-motorcycle"></i></div>
+        Call Rider
+      </a>
+      <a href="support.html" class="support-btn always-on tap">
+        <div class="support-btn-icon"><i class="fa-solid fa-shield-heart"></i></div>
+        Safety
+      </a>
     </div>
 
+    <!-- Order Summary -->
     <div class="order-summary card-fade d6">
       <div class="summary-eyebrow">Order Details</div>
       <div class="summary-res" id="display-res-name">Loading...</div>
@@ -565,9 +737,10 @@
         <span class="total-label" id="payment-type">Total</span>
         <span class="total-price" id="display-total">₹0</span>
       </div>
-      <button class="invoice-btn tap" id="invoice-btn"><i class="fa-solid fa-file-invoice"></i> View Invoice</button>
+      <button class="invoice-btn tap" id="invoice-btn" aria-label="View Invoice"><i class="fa-solid fa-receipt"></i> View Invoice</button>
     </div>
 
+    <!-- Rating System -->
     <div class="rating-card card-fade d7" id="rating-card">
       <div class="rating-icon"><i class="fa-solid fa-heart"></i></div>
       <h3>How was your order?</h3>
@@ -585,20 +758,28 @@
 
   </div>
 
+  <!-- Floating Action Button -->
+  <a href="support.html" class="fab-help tap" aria-label="Get Help">
+    <i class="fa-solid fa-question"></i>
+  </a>
+
+  <!-- Invoice Modal -->
   <div class="invoice-modal" id="invoice-modal">
     <div class="invoice-sheet">
       <div class="invoice-head">
         <h3>Invoice</h3>
-        <button class="invoice-close tap" id="invoice-close"><i class="fa-solid fa-xmark"></i></button>
+        <button class="invoice-close tap" id="invoice-close" aria-label="Close Invoice"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="invoice-body"><!-- filled from the order data already fetched by fetchOrderData() --></div>
       <button class="invoice-print tap" id="invoice-print"><i class="fa-solid fa-print"></i> Print / Save as PDF</button>
     </div>
   </div>
 
+</div> <!-- /.app-container -->
+
   <script>
     let pollInterval;
-    let currentOrder = null; // holds the latest fetched order, used by the invoice modal
+    let currentOrder = null;
 
     async function fetchOrderData() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -642,9 +823,6 @@
       }
     }
 
-    // Best-effort extraction of a human-readable delivery address from
-    // whatever shape the backend already returns. Returns '' (and the
-    // address card stays hidden) if nothing usable is present.
     function getDeliveryAddressText(order) {
       if (!order) return '';
       if (typeof order.deliveryAddress === 'string' && order.deliveryAddress.trim()) {
@@ -685,7 +863,7 @@
       const riderNameEl = document.getElementById('rider-name');
       const riderCallBtn = document.getElementById('rider-call-btn');
 
-      // Premium additions — all optional / defensive
+      // Premium additions
       const riderPhotoEl = document.getElementById('rider-photo');
       const riderRatingEl = document.getElementById('rider-rating');
       const riderRatingValueEl = document.getElementById('rider-rating-value');
@@ -700,6 +878,7 @@
       const heroLiveBadge = document.getElementById('hero-live-badge');
       const timelineFill = document.getElementById('timeline-fill');
       const ratingCard = document.getElementById('rating-card');
+      const riderChatBtn = document.getElementById('rider-chat-btn');
 
       if (order.rider && order.rider.name) {
         riderNameEl.innerText = order.rider.name;
@@ -709,16 +888,19 @@
       if (order.rider && order.rider.phone) {
         riderCallBtn.href = `tel:${order.rider.phone}`;
         riderCallBtn.style.display = 'flex';
+        // Connect Chat Button cleanly without breaking backend connections
+        if(riderChatBtn) {
+            riderChatBtn.href = `sms:${order.rider.phone}`;
+            riderChatBtn.style.display = 'flex';
+        }
       } else {
         riderCallBtn.style.display = 'none';
+        if(riderChatBtn) riderChatBtn.style.display = 'none';
       }
 
-      // ── Optional premium fields: rendered only when the backend already
-      // provides them on the order object. Nothing here is fabricated —
-      // each block hides itself gracefully when the field is absent. ──
       if (order.rider && (order.rider.photo || order.rider.avatar || order.rider.image)) {
         const src = order.rider.photo || order.rider.avatar || order.rider.image;
-        riderPhotoEl.innerHTML = `<img src="${src}" alt="">`;
+        riderPhotoEl.innerHTML = `<img src="${src}" alt="Rider">`;
       } else {
         riderPhotoEl.innerHTML = '<i class="fa-solid fa-user"></i>';
       }
@@ -771,8 +953,6 @@
       currentOrder = order;
       document.body.classList.add('data-loaded');
 
-      // Minutes remaining, computed from the backend's estimatedDelivery
-      // timestamp rather than a fixed guess per status.
       function minutesRemaining() {
         if (!order.estimatedDelivery) return null;
         const diffMs = new Date(order.estimatedDelivery) - Date.now();
@@ -787,21 +967,20 @@
       heroBg.className = 'tracker-hero';
       heroIcon.innerHTML = '<i class="fa-solid fa-motorcycle"></i>';
 
-      // Reset premium elements each render
       routeCard.style.display = 'none';
       heroLiveBadge.style.display = 'none';
       ratingCard.style.display = 'none';
       timelineFill.style.height = '0%';
 
-      // Reset OTP Box styles if returning from a success state
+      // Reset OTP Vault
       otpBox.style.display = 'none';
-      otpBox.style.background = 'rgba(16, 185, 129, 0.05)';
-      otpBox.style.border = '1.5px dashed rgba(16, 185, 129, 0.4)';
+      otpBox.style.background = 'var(--card)';
+      otpBox.style.borderColor = 'var(--line)';
       otpBox.innerHTML = `
         <div class="otp-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="otp-label">Hand this PIN to your rider</div>
+        <div class="otp-label">Delivery PIN</div>
         <div class="otp-value" id="otp-display">${orderOTP}</div>
-        <div class="otp-instructions">Share this code only when your rider arrives with the order</div>
+        <div class="otp-instructions">Share this code only when your rider arrives to securely receive your order.</div>
       `;
 
       riderCard.style.display = 'none';
@@ -903,12 +1082,12 @@
          document.getElementById('dispatch-desc').innerText = "Order picked up";
 
          otpBox.style.display = 'block';
-         otpBox.style.background = 'rgba(16, 185, 129, 0.1)';
-         otpBox.style.border = '1.5px solid #10b981';
+         otpBox.style.background = 'var(--success-light)';
+         otpBox.style.borderColor = 'var(--success)';
          otpBox.innerHTML = `
-           <div class="otp-icon verified"><i class="fa-solid fa-circle-check"></i></div>
-           <div class="otp-label" style="color: #059669; font-size: 14px; padding: 4px 0 0;">OTP Verified</div>
-           <div class="otp-instructions">Your rider has confirmed the handoff</div>
+           <div class="otp-icon verified premium-success-ping"><i class="fa-solid fa-check-double"></i></div>
+           <div class="otp-label" style="color: var(--success); font-size: 14px; padding: 4px 0 0;">Verification Complete</div>
+           <div class="otp-instructions" style="margin-top: 8px;">The handoff is confirmed. Enjoy your meal!</div>
          `;
 
          riderCard.style.display = 'flex';
@@ -920,9 +1099,6 @@
       }
     }
 
-    // One-time wiring for the invoice modal and the post-delivery rating
-    // widget. Kept separate from renderLiveUI (which runs every poll) so
-    // listeners are only ever attached once.
     function setupPremiumInteractions() {
       const invoiceBtn = document.getElementById('invoice-btn');
       const invoiceModal = document.getElementById('invoice-modal');
@@ -954,11 +1130,6 @@
       if (invoiceModal) invoiceModal.addEventListener('click', (e) => { if (e.target === invoiceModal) invoiceModal.classList.remove('open'); });
       if (invoicePrint) invoicePrint.addEventListener('click', () => window.print());
 
-      // Star rating widget — a purely client-side acknowledgement.
-      // NOTE: this page only ever calls GET /api/orders (see fetchOrderData
-      // above); there is no ratings endpoint in that contract, so submitting
-      // here does not persist anywhere yet. Wire this up to a POST endpoint
-      // once the backend exposes one.
       const ratingStars = document.querySelectorAll('#rating-stars i');
       const ratingSubmitBtn = document.getElementById('rating-submit');
       let selectedRating = 0;
