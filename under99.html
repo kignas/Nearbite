@@ -365,6 +365,7 @@
           }
 
           return {
+            _id: dbItem._id || dbItem.id || 'unknown',
             name: dbItem.name || 'Special Item',
             price: cleanPrice,
             isVeg: Boolean(dbItem.isVeg),
@@ -415,18 +416,25 @@
       const key = item.name.replace(/\s+/g,'');
       const qty = cartMemory[item.name] ? cartMemory[item.name].quantity : 0;
       
-      const safeName = item.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      const safeId = String(item.resId).replace(/['"]/g, '');
-
       const originalPrice = Math.floor(item.price * 1.4);
+
+      // Create a secure encoded payload to pass to the updateCart button safely
+      const cartPayload = encodeURIComponent(JSON.stringify({
+        menuItem: item._id,
+        image: item.img,
+        name: item.name,
+        price: item.price,
+        isVeg: item.isVeg,
+        resId: item.resId
+      })).replace(/'/g, "%27");
 
       const btnHTML = qty > 0
         ? `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);">
-             <button onclick="updateCart('${safeName}', -1, ${item.price}, '${safeId}')" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>
+             <button onclick="updateCart('${cartPayload}', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>
              <span style="font-size:13px;font-weight:800;color:#FC8019;">${qty}</span>
-             <button onclick="updateCart('${safeName}', 1, ${item.price}, '${safeId}')" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button>
+             <button onclick="updateCart('${cartPayload}', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button>
            </div>`
-        : `<button onclick="updateCart('${safeName}', 1, ${item.price}, '${safeId}')" style="width:72px;height:32px;background:#fff;border:1px solid #f9ded0;border-radius:8px;color:#FC8019;font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
+        : `<button onclick="updateCart('${cartPayload}', 1)" style="width:72px;height:32px;background:#fff;border:1px solid #f9ded0;border-radius:8px;color:#FC8019;font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
 
       const vegIcon = item.isVeg 
         ? `<div style="width:12px;height:12px;border:1.5px solid #16a34a;border-radius:2px;display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;background:#16a34a;border-radius:50%;"></div></div>`
@@ -475,30 +483,45 @@
 
 
   // ── 2. THE BULLETPROOF UPDATE FUNCTION (NOW IN ORANGE) ──
-  window.updateCart = function(itemName, change, price, rId) {
+  window.updateCart = function(encodedPayload, change) {
+    const payload = JSON.parse(decodeURIComponent(encodedPayload));
     let cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-    if (!cartMemory[itemName]) cartMemory[itemName] = { quantity: 0, price, resId: rId };
-    cartMemory[itemName].quantity += change;
-    if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
+    
+    // Store exact same comprehensive cart object as restaurant.html
+    if (!cartMemory[payload.name]) {
+      cartMemory[payload.name] = { 
+        menuItem: payload.menuItem,
+        image: payload.image,
+        name: payload.name,
+        price: payload.price,
+        quantity: 0, 
+        isVeg: payload.isVeg,
+        resId: payload.resId 
+      };
+    }
+    
+    cartMemory[payload.name].quantity += change;
+    
+    if (cartMemory[payload.name].quantity <= 0) {
+      delete cartMemory[payload.name];
+    }
 
-    const key = itemName.replace(/\s+/g,'');
+    const key = payload.name.replace(/\s+/g,'');
     const container = document.getElementById('btn-container-' + key);
     
     if (container) {
-      const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
-      const safeName = itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      const safeId = String(rId).replace(/['"]/g, ''); 
+      const qty = cartMemory[payload.name] ? cartMemory[payload.name].quantity : 0;
 
       // ⚡ UPDATED: EATSWADA ORANGE ADD BUTTONS
       if (qty > 0) {
         container.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);">
-             <button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}')" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>
+             <button onclick="updateCart('${encodedPayload}', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>
              <span style="font-size:13px;font-weight:800;color:#FC8019;">${qty}</span>
-             <button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}')" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button>
+             <button onclick="updateCart('${encodedPayload}', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button>
            </div>`;
       } else {
-        container.innerHTML = `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}')" style="width:72px;height:32px;background:#fff;border:1px solid #f9ded0;border-radius:8px;color:#FC8019;font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
+        container.innerHTML = `<button onclick="updateCart('${encodedPayload}', 1)" style="width:72px;height:32px;background:#fff;border:1px solid #f9ded0;border-radius:8px;color:#FC8019;font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
       }
     }
 
