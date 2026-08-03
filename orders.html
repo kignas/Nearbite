@@ -191,6 +191,12 @@ img{max-width:100%;display:block;}
 .order-line-row{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-700);margin-bottom:8px;}
 .order-line-row i{color:var(--ink-400);font-size:12px;width:14px;text-align:center;}
 .order-line-row .extra-tag{color:var(--ink-400);font-weight:700;}
+.item-thumb{
+  display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;
+  background:var(--brand-50);color:var(--brand);font-size:11px;font-weight:800;vertical-align:middle;
+  margin-right:6px;overflow:hidden;flex-shrink:0;
+}
+.item-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .addr-row{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink-500);font-weight:600;margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed var(--line);}
 .addr-row i{color:var(--ink-400);font-size:12px;width:14px;text-align:center;margin-top:1px;}
 .addr-row span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;}
@@ -462,14 +468,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('header-greeting').innerText = text;
   })();
 
-  // Formatting Helper
+  // Formatting Helper — shows the item's actual menu image (returned by
+  // the API, live where available). Falls back to an initials badge if no
+  // image exists for that item; never an emoji, never a stand-in photo.
   const formatItemsDisplay = (items) => {
     if (!items || items.length === 0) return '';
     const first = items[0];
-    const isChicken = first.name.toLowerCase().includes('chicken');
-    const isVeg = first.name.toLowerCase().includes('paneer') || first.name.toLowerCase().includes('veg');
-    const icon = isChicken ? '🍗' : (isVeg ? '🥗' : '🍲');
-    let html = `${icon} ${first.name} ×${first.quantity}`;
+    const thumb = first.image
+      ? `<span class="item-thumb"><img src="${first.image}" loading="lazy" alt=""></span>`
+      : `<span class="item-thumb">${initials(first.name)}</span>`;
+    let html = `${thumb}${first.name} ×${first.quantity}`;
     if (items.length > 1) {
       html += `<br><span class="extra-items">+${items.length - 1} more item${items.length > 2 ? 's' : ''}</span>`;
     }
