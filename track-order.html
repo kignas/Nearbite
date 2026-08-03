@@ -7,37 +7,38 @@
   <title>Live Tracking – EatSwada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
-      /* ── Brand: warm terracotta/orange (kept — this is EatSwada's existing identity) ── */
+      /* Brand Colors */
       --brand:        #FC8019;
-      --brand-deep:   #C1440E;
-      --brand-light:  #FFF1E1;
-      /* ── "Live" accent: a distinct teal used only for real-time / in-motion moments ── */
-      --live:         #0C8C8C;
-      --live-light:   #E3F5F4;
-      --success:      #1D9A6C;
-      --success-light:#E7F7EF;
-      --danger:       #E1483A;
-      --danger-light: #FDEBE9;
-      /* ── Warm neutrals (not cool gray) to match the brand ── */
-      --ink-900:  #241A12;
-      --ink-700:  #5B4C3F;
-      --ink-500:  #8A7A6C;
-      --ink-300:  #C9BBAE;
-      --paper:    #FFFAF4;
-      --paper-2:  #FFF3E4;
+      --brand-deep:   #E06B12;
+      --brand-light:  #FFF5ED;
+      --success:      #059669;
+      --success-light:#ECFDF5;
+      --danger:       #DC2626;
+      --danger-light: #FEF2F2;
+      
+      /* Refined Premium Neutrals */
+      --ink-900:  #111827;
+      --ink-700:  #374151;
+      --ink-500:  #6B7280;
+      --ink-300:  #D1D5DB;
+      --paper:    #F9FAFB;
       --card:     #FFFFFF;
-      --line:     #F0E2D2;
-      --shadow:    0 10px 30px rgba(36,26,18,.08);
-      --shadow-lg: 0 22px 50px rgba(36,26,18,.16);
-      --ease: cubic-bezier(.4,0,.2,1);
-      --r-lg: 28px;
-      --r-md: 18px;
-      --r-sm: 12px;
+      --line:     #F3F4F6;
+      
+      /* Modern Elevations (No heavy blur, crisp drops) */
+      --shadow-sm: 0 2px 8px rgba(17, 24, 39, 0.04);
+      --shadow-md: 0 12px 32px rgba(17, 24, 39, 0.08);
+      --shadow-lg: 0 24px 48px rgba(17, 24, 39, 0.12);
+      
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+      --r-lg: 24px;
+      --r-md: 16px;
+      --r-sm: 10px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,426 +50,295 @@
       -webkit-tap-highlight-color: transparent;
       margin: 0;
       overflow-x: hidden;
+      line-height: 1.5;
     }
 
-    button { font-family: inherit; border: none; background: none; }
-    a { color: inherit; }
+    button { font-family: inherit; border: none; background: none; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
 
-    .tap { cursor: pointer; transition: transform 0.15s var(--ease); }
-    .tap:active { transform: scale(0.94); }
+    /* Premium Micro-interactions */
+    .tap { transition: transform 0.2s var(--ease), opacity 0.2s var(--ease); }
+    .tap:active { transform: scale(0.96); opacity: 0.9; }
 
-    :focus-visible { outline: 2px solid var(--live); outline-offset: 3px; border-radius: 4px; }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-        scroll-behavior: auto !important;
-      }
-    }
+    :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
 
     /* ════════════════════════════════════════════
-       COMPACT BRAND HERO (DYNAMIC COLORS)
-       Curved-route bike animation replaces the old
-       radar rings — soft gradient, subtle particles,
-       soft shadows only.
+       REFINED PREMIUM HERO
     ════════════════════════════════════════════ */
     .tracker-hero {
-      position: fixed; top: 0; left: 0; right: 0; height: 28vh;
-      background: linear-gradient(160deg, #FFB169 0%, var(--brand) 48%, var(--brand-deep) 100%);
-      z-index: 1; overflow: hidden; transition: background 0.6s ease;
+      position: fixed; top: 0; left: 0; right: 0; height: 24vh;
+      background: linear-gradient(135deg, #FFB976 0%, var(--brand) 100%);
+      z-index: 1; display: flex; align-items: center; justify-content: center;
+      transition: background 0.6s ease;
     }
-    .tracker-hero.cancelled { background: linear-gradient(160deg, #f7a99e 0%, #f16a5e 48%, #a82c22 100%); }
-    .tracker-hero.delivered { background: linear-gradient(160deg, #7be0bb 0%, #2bc98d 48%, #0d7a52 100%); }
+    .tracker-hero.cancelled { background: linear-gradient(135deg, #FCA5A5 0%, var(--danger) 100%); }
+    .tracker-hero.delivered { background: linear-gradient(135deg, #6EE7B7 0%, var(--success) 100%); }
 
-    /* Soft drifting particles — replaces the old ripple/radar rings */
-    .hero-particle {
-      position: absolute; border-radius: 50%; background: rgba(255,255,255,.55);
-      pointer-events: none; animation: particle-float 7s ease-in-out infinite;
-    }
-    .tracker-hero.cancelled .hero-particle, .tracker-hero.delivered .hero-particle { display: none; }
-    .hero-particle.p1 { width: 6px; height: 6px; left: 18%; top: 66%; animation-delay: 0s; }
-    .hero-particle.p2 { width: 4px; height: 4px; left: 78%; top: 32%; animation-delay: 1.6s; }
-    .hero-particle.p3 { width: 5px; height: 5px; left: 54%; top: 76%; animation-delay: 3.2s; }
-    @keyframes particle-float {
-      0%, 100% { transform: translateY(0); opacity: 0; }
-      15%      { opacity: .7; }
-      50%      { transform: translateY(-22px); opacity: .35; }
-      85%      { opacity: 0; }
-    }
-
-    /* Faint dotted route line the bike glides along */
-    .hero-route { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .hero-route path {
-      fill: none; stroke: rgba(255,255,255,.32); stroke-width: 2.5;
-      stroke-linecap: round; stroke-dasharray: 1 10;
-    }
-    .tracker-hero.cancelled .hero-route, .tracker-hero.delivered .hero-route { opacity: 0; }
-
+    /* Floating Icon Animation */
     .hero-icon {
-      position: absolute; z-index: 2; width: 58px; height: 58px; left: 0; top: 0;
-      background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 25px; color: var(--brand); box-shadow: 0 10px 22px rgba(193, 68, 14, 0.35);
-      animation: bike-glide 6s ease-in-out infinite alternate;
+      width: 64px; height: 64px; background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: var(--brand); 
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      animation: gentle-float 4s ease-in-out infinite alternate;
     }
-    .tracker-hero.cancelled .hero-icon, .tracker-hero.delivered .hero-icon {
-      animation: none; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    }
-    .tracker-hero.cancelled .hero-icon { color: var(--danger); box-shadow: 0 10px 22px rgba(225, 72, 58, 0.35); }
-    .tracker-hero.delivered .hero-icon { color: var(--success); box-shadow: 0 10px 22px rgba(13, 122, 82, 0.35); }
+    .tracker-hero.cancelled .hero-icon { color: var(--danger); animation: none; }
+    .tracker-hero.delivered .hero-icon { color: var(--success); animation: none; }
 
-    @keyframes bike-glide {
-      0%   { left: 8%;  top: 62%; transform: translate(-50%, -50%) rotate(-6deg); }
-      30%  { left: 34%; top: 18%; transform: translate(-50%, -50%) rotate(3deg); }
-      65%  { left: 66%; top: 60%; transform: translate(-50%, -50%) rotate(-4deg); }
-      100% { left: 90%; top: 24%; transform: translate(-50%, -50%) rotate(5deg); }
+    @keyframes gentle-float {
+      0%   { transform: translateY(0px); }
+      100% { transform: translateY(-12px); }
     }
 
     .floating-back {
-      position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; width: 44px; height: 44px;
-      background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; 
+      width: 44px; height: 44px;
+      background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      z-index: 100; border: 1.5px solid rgba(255, 255, 255, 0.3); font-size: 16px; color: #fff; text-decoration: none;
-    }
-
-    .hero-live-badge {
-      position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
-      z-index: 100; display: none; align-items: center; gap: 7px;
-      background: rgba(255,255,255,.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border: 1.5px solid rgba(255,255,255,.32); color: #fff;
-      font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
-      padding: 9px 14px 9px 11px; border-radius: 999px;
-    }
-    .hero-live-badge .live-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: #5EEAD4;
-      animation: live-pulse 1.6s infinite;
-    }
-    @keyframes live-pulse {
-      0% { box-shadow: 0 0 0 0 rgba(94,234,212,.7); }
-      70% { box-shadow: 0 0 0 8px rgba(94,234,212,0); }
-      100% { box-shadow: 0 0 0 0 rgba(94,234,212,0); }
+      z-index: 100; font-size: 18px; color: #fff;
     }
 
     /* ════════════════════════════════════════════
        BOTTOM TRACKING SHEET
     ════════════════════════════════════════════ */
     .tracking-sheet {
-      position: relative; margin-top: 24vh; background: var(--paper-2); min-height: 76vh;
-      border-radius: var(--r-lg) var(--r-lg) 0 0; z-index: 10; padding: 30px 20px calc(28px + env(safe-area-inset-bottom));
-      box-shadow: 0 -10px 30px rgba(36,26,18,0.1);
+      position: relative; margin-top: 20vh; background: var(--paper); min-height: 80vh;
+      border-radius: var(--r-lg) var(--r-lg) 0 0; z-index: 10; 
+      padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
+      box-shadow: 0 -8px 24px rgba(17, 24, 39, 0.06);
     }
 
     .sheet-handle {
       position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 38px; height: 5px; background: rgba(36,26,18,.15); border-radius: 10px;
+      width: 40px; height: 4px; background: var(--ink-300); border-radius: 4px;
     }
 
-    /* Shared card-on-card surface for everything inside the sheet */
-    .card-fade { opacity: 0; transform: translateY(14px); }
-    body.data-loaded .card-fade { animation: fadeInUp .55s var(--ease) forwards; }
-    body.data-loaded .d1 { animation-delay: .02s; }
-    body.data-loaded .d2 { animation-delay: .08s; }
-    body.data-loaded .d3 { animation-delay: .14s; }
-    body.data-loaded .d4 { animation-delay: .20s; }
-    body.data-loaded .d5 { animation-delay: .26s; }
-    body.data-loaded .d6 { animation-delay: .32s; }
-    body.data-loaded .d7 { animation-delay: .38s; }
+    .card-fade { opacity: 0; transform: translateY(16px); }
+    body.data-loaded .card-fade { animation: fadeInUp 0.6s var(--ease) forwards; }
+    body.data-loaded .d1 { animation-delay: 0.05s; }
+    body.data-loaded .d2 { animation-delay: 0.10s; }
+    body.data-loaded .d3 { animation-delay: 0.15s; }
+    body.data-loaded .d4 { animation-delay: 0.20s; }
+    body.data-loaded .d5 { animation-delay: 0.25s; }
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-    /* ── ETA header ── */
-    .eta-header { text-align: center; margin-bottom: 18px; padding-top: 6px; }
-    .eta-title { font-size: 12px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 6px; }
-    .eta-time { font-size: 40px; font-weight: 900; color: var(--ink-900); letter-spacing: -1.2px; font-variant-numeric: tabular-nums; }
-    .eta-time span { font-size: 16px; font-weight: 700; color: var(--ink-500); letter-spacing: 0; margin-left: 2px; }
-    .eta-time.cancelled-text { color: var(--danger); font-size: 24px; }
-    .eta-time.delivered-text { color: var(--success); font-size: 24px; }
-    .eta-caption { font-size: 12px; color: var(--ink-500); font-weight: 600; margin-top: 6px; }
+    /* ── ETA Header ── */
+    .eta-header { text-align: center; margin-bottom: 32px; padding-top: 16px; }
+    .eta-title { font-size: 13px; font-weight: 700; color: var(--ink-500); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .eta-time { font-size: 44px; font-weight: 800; color: var(--ink-900); letter-spacing: -1.5px; line-height: 1; }
+    .eta-time span { font-size: 18px; font-weight: 600; color: var(--ink-500); letter-spacing: 0; margin-left: 4px; }
+    .eta-time.cancelled-text { color: var(--danger); font-size: 28px; }
 
-    /* ── Live route strip (future-ready map placeholder) ── */
-    .route-card {
-      display: none; background: var(--card); border-radius: var(--r-md);
-      padding: 16px 16px 14px; margin-bottom: 20px; box-shadow: var(--shadow);
-    }
-    .route-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .live-badge {
-      display: inline-flex; align-items: center; gap: 6px; background: var(--live-light); color: var(--live);
-      font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
-      padding: 5px 10px; border-radius: 999px;
-    }
-    .live-badge .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--live); animation: live-pulse-solo 1.6s infinite; }
-    @keyframes live-pulse-solo { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
-    .route-caption { font-size: 12px; font-weight: 700; color: var(--ink-700); }
-
-    .route-track { position: relative; height: 46px; margin: 4px 4px 12px; }
-    .route-track::before {
-      content: ''; position: absolute; left: 22px; right: 22px; top: 50%; height: 2px;
-      background-image: linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
-      background-size: 12px 2px; transform: translateY(-50%);
-    }
-    .route-pin {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 11px; background: var(--paper-2); color: var(--ink-700); border: 2px solid var(--card); box-shadow: var(--shadow);
-      z-index: 2;
-    }
-    .route-pin-start { left: 0; }
-    .route-pin-end { right: 0; background: var(--brand-light); color: var(--brand-deep); }
-    .route-puck {
-      position: absolute; top: 50%; left: 8%; transform: translate(-50%, -50%);
-      width: 30px; height: 30px; border-radius: 50%; background: var(--live); color: #fff;
-      display: flex; align-items: center; justify-content: center; font-size: 13px;
-      box-shadow: 0 6px 14px rgba(12,140,138,.4); z-index: 3; transition: left .6s var(--ease);
-    }
-    .route-track.stage-searching .route-puck { left: 20%; }
-    .route-track.stage-assigned .route-puck { left: 28%; }
-    .route-track.stage-enroute .route-puck { animation: travel 3.2s ease-in-out infinite alternate; }
-    .route-track.stage-arriving .route-puck { left: 88%; }
-    .route-track.stage-delivered .route-puck { left: 92%; background: var(--success); box-shadow: 0 6px 14px rgba(29,154,108,.4); }
-    @keyframes travel { from { left: 32%; } to { left: 86%; } }
-
-    .route-foot { font-size: 11px; color: var(--ink-500); font-weight: 600; text-align: center; }
-
-    /* ── OTP card ── */
+    /* ── OTP Card ── */
     .customer-otp-box {
-      display: none; text-align: center; background: rgba(29, 154, 108, 0.06);
-      border: 1.5px dashed rgba(29, 154, 108, 0.4); border-radius: var(--r-md);
-      padding: 18px 16px; margin-bottom: 20px;
+      display: none; display: flex; align-items: center; justify-content: space-between;
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+      padding: 16px 20px; margin-bottom: 24px; box-shadow: var(--shadow-sm);
     }
-    .otp-icon { width: 34px; height: 34px; margin: 0 auto 8px; border-radius: 50%; background: rgba(29,154,108,.12); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 15px; }
-    .otp-icon.verified { background: rgba(29,154,108,.18); }
-    .otp-label { font-size: 11px; font-weight: 800; color: #0f7a4f; text-transform: uppercase; letter-spacing: 1px; }
-    .otp-value { font-size: 34px; font-weight: 900; color: var(--ink-900); letter-spacing: 8px; margin-top: 4px; font-variant-numeric: tabular-nums; }
-    .otp-instructions { font-size: 11.5px; color: var(--ink-500); font-weight: 600; margin-top: 8px; line-height: 1.4; }
+    .otp-left { display: flex; flex-direction: column; }
+    .otp-label { font-size: 12px; font-weight: 700; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.5px; }
+    .otp-instructions { font-size: 13px; color: var(--ink-900); font-weight: 500; margin-top: 4px; }
+    .otp-value { font-size: 28px; font-weight: 800; color: var(--ink-900); letter-spacing: 4px; background: var(--paper); padding: 8px 16px; border-radius: 8px; }
 
     /* ════════════════════════════════════════════
-       DYNAMIC TIMELINE
+       PREMIUM TIMELINE (UBER EATS STYLE)
     ════════════════════════════════════════════ */
-    .timeline { position: relative; padding-left: 22px; margin-bottom: 22px; }
-    .timeline::before { content: ''; position: absolute; top: 6px; bottom: 26px; left: 29px; width: 2px; background: var(--line); z-index: 1; }
+    .timeline { position: relative; padding-left: 24px; margin-bottom: 32px; }
+    .timeline::before { 
+      content: ''; position: absolute; top: 10px; bottom: 30px; left: 28px; 
+      width: 1.5px; background: var(--line); z-index: 1; 
+    }
     .timeline-fill {
-      position: absolute; top: 6px; left: 29px; width: 2px; height: 0%;
-      background: linear-gradient(180deg, var(--brand) 0%, var(--brand-deep) 100%);
-      z-index: 1; border-radius: 2px; transition: height .7s var(--ease);
+      position: absolute; top: 10px; left: 28px; width: 1.5px; height: 0%;
+      background: var(--brand);
+      z-index: 1; transition: height 0.8s var(--ease);
     }
 
-    .step { position: relative; margin-bottom: 22px; z-index: 2; display: flex; align-items: flex-start; gap: 18px; }
+    .step { position: relative; margin-bottom: 28px; z-index: 2; display: flex; align-items: flex-start; gap: 20px; }
     .step:last-child { margin-bottom: 0; }
 
     .step-dot {
-      width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--ink-300);
-      margin-top: 2px; flex-shrink: 0; box-shadow: 0 0 0 4px var(--paper-2); transition: 0.3s;
-      display: flex; align-items: center; justify-content: center; position: relative;
+      width: 10px; height: 10px; border-radius: 50%; background: var(--ink-300); 
+      margin-top: 6px; flex-shrink: 0; transition: all 0.4s var(--ease);
+      position: relative; box-shadow: 0 0 0 4px var(--paper);
     }
-    .step-check { font-size: 7px; color: #fff; opacity: 0; transition: opacity .25s var(--ease); }
-    .step-text h4 { font-size: 14.5px; font-weight: 800; color: var(--ink-300); margin-bottom: 2px; transition: 0.3s; }
-    .step-text p { font-size: 12px; color: var(--ink-300); font-weight: 600; transition: 0.3s; }
+    .step-text h4 { font-size: 16px; font-weight: 700; color: var(--ink-300); margin-bottom: 4px; transition: color 0.4s; }
+    .step-text p { font-size: 13px; color: var(--ink-300); font-weight: 500; transition: color 0.4s; }
 
     /* Passed State */
-    .step.passed .step-dot { background: var(--brand); border-color: var(--brand); }
-    .step.passed .step-check { opacity: 1; }
-    .step.passed .step-text h4 { color: var(--ink-700); }
+    .step.passed .step-dot { background: var(--brand); }
+    .step.passed .step-text h4 { color: var(--ink-900); }
     .step.passed .step-text p { color: var(--ink-500); }
 
     /* Active State */
-    .step.active .step-dot { background: var(--brand); border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-light); }
-    .step.active .step-dot::after {
-      content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px;
-      border-radius: 50%; border: 2px solid var(--brand); animation: pulse 1.5s infinite; opacity: 0;
-    }
-    .step.active .step-text h4 { color: var(--ink-900); }
-    .step.active .step-text p { color: var(--brand-deep); font-weight: 700; }
-
-    @keyframes pulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+    .step.active .step-dot { background: var(--brand); box-shadow: 0 0 0 4px var(--brand-light); }
+    .step.active .step-text h4 { color: var(--ink-900); font-size: 17px; }
+    .step.active .step-text p { color: var(--brand); font-weight: 600; }
 
     /* ════════════════════════════════════════════
        RIDER CARD
     ════════════════════════════════════════════ */
     .rider-card {
       background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
-      padding: 14px 14px 14px 14px; display: none; align-items: center; justify-content: space-between;
-      margin-bottom: 14px; box-shadow: var(--shadow);
+      padding: 16px; display: none; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; box-shadow: var(--shadow-sm);
     }
-    .rider-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .rider-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
     .rider-photo {
-      width: 50px; height: 50px; border-radius: 50%; background: var(--paper-2); color: var(--ink-500);
-      display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 20px;
-      border: 2px solid var(--paper-2);
+      width: 56px; height: 56px; border-radius: 50%; background: var(--paper); color: var(--ink-500);
+      display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 24px;
     }
     .rider-photo img { width: 100%; height: 100%; object-fit: cover; }
     .rider-info { min-width: 0; }
-    .rider-info h3 { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rider-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .rider-info h3 { font-size: 16px; font-weight: 700; color: var(--ink-900); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rider-meta-row { display: flex; align-items: center; gap: 10px; }
     .rider-rating, .rider-vehicle {
-      display: none; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--ink-700);
-      background: var(--paper-2); padding: 3px 8px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--ink-700);
     }
-    .rider-rating i { color: #F5A623; font-size: 10px; }
-    .rider-vehicle i { color: var(--ink-500); font-size: 10px; }
+    .rider-rating i { color: #F5A623; font-size: 11px; }
+    .rider-vehicle i { color: var(--ink-500); font-size: 11px; }
 
-    .btn-call {
-      width: 44px; height: 44px; border-radius: 50%; background: var(--brand-light); color: var(--brand-deep);
-      display: flex; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0; font-size: 17px;
+    .rider-actions { display: flex; gap: 12px; }
+    .btn-action {
+      width: 48px; height: 48px; border-radius: 50%; background: var(--paper); color: var(--ink-900);
+      display: flex; align-items: center; justify-content: center; font-size: 18px; transition: background 0.2s;
     }
-
-    /* ════════════════════════════════════════════
-       INFO CARDS (restaurant / delivery address)
-    ════════════════════════════════════════════ */
-    .info-card {
-      display: none; align-items: flex-start; gap: 12px; background: var(--card);
-      border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow);
-    }
-    .info-card-icon {
-      width: 38px; height: 38px; border-radius: 12px; background: var(--paper-2); color: var(--brand-deep);
-      display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
-    }
-    .info-card-body { min-width: 0; }
-    .info-card-label { font-size: 10.5px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; }
-    .info-card-title { font-size: 14px; font-weight: 800; color: var(--ink-900); margin-bottom: 2px; }
-    .info-card-sub { font-size: 12px; color: var(--ink-500); font-weight: 600; line-height: 1.4; }
+    .btn-action:hover { background: var(--line); }
 
     /* ════════════════════════════════════════════
        SUPPORT ROW
     ════════════════════════════════════════════ */
-    .support-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .support-row { display: flex; gap: 12px; margin-bottom: 24px; }
     .support-btn {
-      display: flex; display: none; flex: 1; flex-direction: column; align-items: center; gap: 6px;
-      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm);
-      padding: 12px 6px; text-decoration: none; font-size: 11px; font-weight: 700; color: var(--ink-700);
-      box-shadow: var(--shadow);
+      display: flex; flex: 1; align-items: center; justify-content: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+      padding: 14px; text-decoration: none; font-size: 13px; font-weight: 600; color: var(--ink-900);
+      box-shadow: var(--shadow-sm); transition: box-shadow 0.2s var(--ease);
     }
-    .support-btn.always-on { display: flex; }
-    .support-btn i { font-size: 15px; color: var(--brand-deep); }
+    .support-btn:hover { box-shadow: var(--shadow-md); }
+    .support-btn i { font-size: 16px; color: var(--ink-500); }
 
     /* ════════════════════════════════════════════
-       ORDER SUMMARY + INVOICE
+       ORDER DETAILS (REDESIGNED)
     ════════════════════════════════════════════ */
-    .order-summary { background: var(--card); border-radius: var(--r-md); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
-    .summary-eyebrow { font-size: 10.5px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
-    .summary-res { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 6px; }
-    .summary-items { font-size: 12.5px; color: var(--ink-700); line-height: 1.6; margin-bottom: 16px; }
-    .summary-total { display: flex; justify-content: space-between; align-items: center; background: var(--paper-2); padding: 13px 16px; border-radius: var(--r-sm); }
-    .total-label { font-size: 11.5px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: .4px; }
-    .total-price { font-size: 17px; font-weight: 900; color: var(--ink-900); }
+    .order-summary { background: var(--card); border-radius: var(--r-md); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; border: 1px solid var(--line); }
+    .summary-title { font-size: 18px; font-weight: 800; color: var(--ink-900); margin-bottom: 20px; }
+    
+    .detail-row { display: flex; flex-direction: column; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .detail-row:last-of-type { border-bottom: none; margin-bottom: 20px; padding-bottom: 0; }
+    
+    .detail-label { font-size: 12px; font-weight: 600; color: var(--ink-500); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-value { font-size: 15px; font-weight: 600; color: var(--ink-900); line-height: 1.5; }
+    
+    .summary-total { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; margin-bottom: 20px; }
+    .total-label { font-size: 16px; font-weight: 700; color: var(--ink-900); }
+    .total-price { font-size: 18px; font-weight: 800; color: var(--ink-900); }
 
     .invoice-btn {
-      width: 100%; margin-top: 12px; padding: 13px; border-radius: var(--r-sm);
-      background: var(--paper-2); color: var(--ink-900); font-size: 13px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 14px; border-radius: var(--r-md);
+      background: var(--paper); color: var(--brand); font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--brand-light);
     }
-    .invoice-btn i { color: var(--brand-deep); }
-
-    .invoice-modal {
-      position: fixed; inset: 0; z-index: 2000; display: flex; align-items: flex-end; justify-content: center;
-      background: rgba(36,26,18,0); pointer-events: none; transition: background .3s var(--ease);
-    }
-    .invoice-modal.open { background: rgba(36,26,18,.45); pointer-events: auto; }
-    .invoice-sheet {
-      background: #fff; width: 100%; max-width: 480px; border-radius: 24px 24px 0 0;
-      padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); transform: translateY(100%);
-      transition: transform .35s var(--ease); box-shadow: var(--shadow-lg); max-height: 80vh; overflow-y: auto;
-    }
-    .invoice-modal.open .invoice-sheet { transform: translateY(0); }
-    .invoice-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .invoice-head h3 { font-size: 17px; font-weight: 900; }
-    .invoice-close { width: 32px; height: 32px; border-radius: 50%; background: var(--paper-2); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink-700); }
-    .invoice-meta { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px dashed var(--line); }
-    .invoice-meta > div { display: flex; justify-content: space-between; font-size: 13px; }
-    .invoice-meta span { color: var(--ink-500); font-weight: 600; }
-    .invoice-meta strong { color: var(--ink-900); font-weight: 800; }
-    .invoice-items { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px dashed var(--line); }
-    .invoice-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--ink-700); }
-    .invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 900; margin-bottom: 18px; }
-    .invoice-print {
-      width: 100%; padding: 14px; border-radius: var(--r-sm); background: var(--brand); color: #fff;
-      font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-
-    @media print {
-      body * { visibility: hidden; }
-      .invoice-sheet, .invoice-sheet * { visibility: visible; }
-      .invoice-sheet { position: absolute; top: 0; left: 0; width: 100%; max-height: none; transform: none; }
-      .invoice-print, .invoice-close { display: none !important; }
-    }
+    .invoice-btn:hover { background: var(--brand-light); }
 
     /* ════════════════════════════════════════════
-       RATING CARD
+       DELIVERY COMPLETED SCREEN
     ════════════════════════════════════════════ */
+    #delivery-completed-screen { display: none; text-align: center; }
+    .success-icon-large {
+      width: 80px; height: 80px; background: var(--success-light); color: var(--success);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin: 0 auto 20px; box-shadow: 0 12px 24px rgba(5, 150, 105, 0.15);
+    }
+    .delivery-title { font-size: 24px; font-weight: 800; color: var(--ink-900); margin-bottom: 8px; }
+    .delivery-time { font-size: 14px; color: var(--ink-500); font-weight: 500; margin-bottom: 32px; }
+
+    /* Rating Component */
     .rating-card {
-      display: none; text-align: center; background: var(--card); border-radius: var(--r-md);
-      padding: 26px 20px; box-shadow: var(--shadow); margin-bottom: 14px;
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+      padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px;
     }
-    .rating-icon {
-      width: 46px; height: 46px; margin: 0 auto 12px; border-radius: 50%; background: var(--success-light);
-      color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 19px;
-    }
-    .rating-card h3 { font-size: 16px; font-weight: 900; margin-bottom: 4px; }
-    .rating-card p { font-size: 12.5px; color: var(--ink-500); font-weight: 600; margin-bottom: 18px; }
-    .stars { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-    .stars i { font-size: 26px; color: var(--ink-300); cursor: pointer; transition: color .2s var(--ease), transform .15s var(--ease); }
-    .stars i:active { transform: scale(1.15); }
+    .rating-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .rating-card p { font-size: 13px; color: var(--ink-500); margin-bottom: 20px; }
+    .stars { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+    .stars i { font-size: 32px; color: var(--line); cursor: pointer; transition: color 0.2s var(--ease), transform 0.1s var(--ease); }
+    .stars i:hover, .stars i:active { transform: scale(1.1); }
     .stars i.active { color: #F5A623; }
     .rating-submit {
-      width: 100%; padding: 13px; border-radius: var(--r-sm); background: var(--ink-300); color: #fff;
-      font-size: 13.5px; font-weight: 800; transition: background .2s var(--ease);
+      width: 100%; padding: 14px; border-radius: var(--r-md); background: var(--ink-300); color: #fff;
+      font-size: 14px; font-weight: 700; transition: background 0.3s var(--ease);
     }
-    .rating-submit:not(:disabled) { background: var(--brand); }
-    .rating-thanks { display: none; font-size: 14px; font-weight: 800; color: var(--success); }
+    .rating-submit:not(:disabled) { background: var(--brand); cursor: pointer; }
+    .rating-thanks { display: none; font-size: 15px; font-weight: 700; color: var(--success); padding: 16px 0; }
+
+    .action-buttons { display: flex; flex-direction: column; gap: 12px; }
+    .btn-primary { width: 100%; padding: 16px; border-radius: var(--r-md); background: var(--brand); color: #fff; font-size: 15px; font-weight: 700; text-align: center; }
+    .btn-secondary { width: 100%; padding: 16px; border-radius: var(--r-md); background: var(--paper); color: var(--ink-900); font-size: 15px; font-weight: 700; text-align: center; border: 1px solid var(--line); }
+
+    /* ════════════════════════════════════════════
+       INVOICE MODAL
+    ════════════════════════════════════════════ */
+    .invoice-modal {
+      position: fixed; inset: 0; z-index: 2000; display: flex; align-items: flex-end; justify-content: center;
+      background: rgba(17, 24, 39, 0); pointer-events: none; transition: background 0.3s var(--ease);
+    }
+    .invoice-modal.open { background: rgba(17, 24, 39, 0.4); pointer-events: auto; }
+    .invoice-sheet {
+      background: #fff; width: 100%; max-width: 480px; border-radius: var(--r-lg) var(--r-lg) 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); transform: translateY(100%);
+      transition: transform 0.4s var(--ease); box-shadow: var(--shadow-lg); max-height: 85vh; overflow-y: auto;
+    }
+    .invoice-modal.open .invoice-sheet { transform: translateY(0); }
+    .invoice-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .invoice-head h3 { font-size: 20px; font-weight: 800; }
+    .invoice-close { width: 36px; height: 36px; border-radius: 50%; background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--ink-700); }
+    
+    .invoice-meta { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px dashed var(--ink-300); }
+    .invoice-meta > div { display: flex; justify-content: space-between; font-size: 14px; }
+    .invoice-meta span { color: var(--ink-500); font-weight: 500; }
+    .invoice-meta strong { color: var(--ink-900); font-weight: 700; }
+    
+    .invoice-items { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px dashed var(--ink-300); }
+    .invoice-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--ink-700); }
+    
+    .invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 800; margin-bottom: 24px; }
+    .invoice-print {
+      width: 100%; padding: 16px; border-radius: var(--r-md); background: var(--ink-900); color: #fff;
+      font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
 
     /* ════════════════════════════════════════════
        SKELETON LOADING
     ════════════════════════════════════════════ */
     .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 999; overflow: hidden; }
-    .skeleton-hero { height: 28vh; background: linear-gradient(135deg, #FFDDB8 0%, #FFC79A 100%); }
+    .skeleton-hero { height: 24vh; background: var(--ink-300); }
     .skeleton-sheet {
-      margin-top: -18px; position: relative; background: var(--paper-2); border-radius: var(--r-lg) var(--r-lg) 0 0;
-      min-height: 76vh; padding: 34px 20px;
+      margin-top: -20px; position: relative; background: var(--paper); border-radius: var(--r-lg) var(--r-lg) 0 0;
+      min-height: 80vh; padding: 40px 20px;
     }
-    .skel { border-radius: 10px; background: linear-gradient(90deg, #EFE0CC 25%, #FBEFDD 37%, #EFE0CC 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
+    .skel { border-radius: 8px; background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 37%, #E5E7EB 63%); background-size: 400% 100%; animation: shimmer 1.5s ease infinite; }
     @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-    .skel-line { height: 14px; margin: 0 auto 10px; }
-    .skel-line.w-40 { width: 40%; height: 11px; }
-    .skel-line.w-30 { width: 30%; height: 32px; margin-bottom: 22px; }
-    .skel-block { height: 84px; border-radius: var(--r-md); margin-bottom: 16px; }
-    .skel-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: var(--r-md); padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); }
-    .skel-dot { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
-    .skel-row .skel-line { margin: 0; flex: 1; }
-
-    .spinner-wrap { display: none; }
+    .skel-line { height: 16px; margin: 0 auto 12px; }
+    .skel-line.w-40 { width: 40%; height: 12px; }
+    .skel-line.w-30 { width: 30%; height: 40px; margin-bottom: 32px; }
+    .skel-block { height: 120px; border-radius: var(--r-md); margin-bottom: 24px; }
   </style>
 </head>
 <body>
 
+  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loading-overlay">
-    <div class="skeleton-hero"></div>
+    <div class="skeleton-hero skel"></div>
     <div class="skeleton-sheet">
-      <div class="skel-line w-40 skel" style="margin:0 auto 8px;"></div>
+      <div class="skel-line w-40 skel"></div>
       <div class="skel-line w-30 skel"></div>
       <div class="skel-block skel"></div>
-      <div class="skel-row">
-        <div class="skel-dot skel"></div>
-        <div class="skel-line skel"></div>
-      </div>
-      <div class="skel-row">
-        <div class="skel-dot skel"></div>
-        <div class="skel-line skel"></div>
-      </div>
-      <div class="skel-row">
-        <div class="skel-dot skel"></div>
-        <div class="skel-line skel"></div>
-      </div>
+      <div class="skel-block skel"></div>
     </div>
   </div>
 
+  <!-- Premium Hero section (Animated Icon Only) -->
   <div class="tracker-hero" id="hero-bg">
-    <span class="hero-particle p1"></span>
-    <span class="hero-particle p2"></span>
-    <span class="hero-particle p3"></span>
-
-    <svg class="hero-route" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M16 68 C 96 14, 186 92, 284 32" />
-    </svg>
-
     <div class="hero-icon" id="hero-icon"><i class="fa-solid fa-motorcycle"></i></div>
   </div>
 
@@ -476,162 +346,152 @@
     <i class="fa-solid fa-arrow-left"></i>
   </a>
 
-  <div class="hero-live-badge" id="hero-live-badge">
-    <span class="live-dot"></span> Live Tracking
-  </div>
-
+  <!-- Bottom Sheet Area -->
   <div class="tracking-sheet">
     <div class="sheet-handle"></div>
 
-    <div class="eta-header card-fade d1">
-      <div class="eta-title" id="eta-title">Estimated Arrival</div>
-      <div class="eta-time" id="eta-time">-- <span>mins</span></div>
-      <div class="eta-caption">We'll update this automatically as your order moves</div>
-    </div>
+    <!-- WRAPPER: ACTIVE TRACKING (Hidden when delivered) -->
+    <div id="active-tracking-view">
+      
+      <div class="eta-header card-fade d1">
+        <div class="eta-title" id="eta-title">Estimated Arrival</div>
+        <div class="eta-time" id="eta-time">-- <span>mins</span></div>
+      </div>
 
-    <!-- Future-ready live map placeholder: a self-contained route visual that
-         needs no coordinates today, and gives a clear mount point (#route-card)
-         for a real map/SDK later without any markup changes. -->
-    <div class="route-card card-fade d2" id="route-card">
-      <div class="route-card-head">
-        <span class="live-badge"><span class="live-dot"></span>Live</span>
-        <span class="route-caption" id="route-caption">Rider is on the way</span>
+      <div class="customer-otp-box card-fade d2" id="otp-container">
+        <div class="otp-left">
+          <div class="otp-label">Delivery PIN</div>
+          <div class="otp-instructions">Share with rider on arrival</div>
+        </div>
+        <div class="otp-value" id="otp-display">----</div>
       </div>
-      <div class="route-track" id="route-track">
-        <div class="route-pin route-pin-start"><i class="fa-solid fa-store"></i></div>
-        <div class="route-puck"><i class="fa-solid fa-motorcycle"></i></div>
-        <div class="route-pin route-pin-end"><i class="fa-solid fa-house"></i></div>
-      </div>
-      <div class="route-foot">Full live map view is coming soon</div>
-    </div>
 
-    <div class="customer-otp-box card-fade d2" id="otp-container">
-      <div class="otp-icon"><i class="fa-solid fa-shield-halved"></i></div>
-      <div class="otp-label">Hand this PIN to your rider</div>
-      <div class="otp-value" id="otp-display">----</div>
-      <div class="otp-instructions">Share this code only when your rider arrives with the order</div>
-    </div>
-
-    <div class="timeline card-fade d3" id="timeline">
-      <div class="timeline-fill" id="timeline-fill"></div>
-      <div class="step" id="step-1">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
-        <div class="step-text"><h4>Order Confirmed</h4><p>Restaurant accepted your order</p></div>
-      </div>
-      <div class="step" id="step-2">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
-        <div class="step-text"><h4>Food is being prepared</h4><p>Cooking at the Kitchen</p></div>
-      </div>
-      <div class="step" id="step-3">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
-        <div class="step-text"><h4 id="dispatch-title">Finding a Rider...</h4><p id="dispatch-desc">Assigning delivery partner</p></div>
-      </div>
-      <div class="step" id="step-4">
-        <div class="step-dot"><i class="fa-solid fa-check step-check"></i></div>
-        <div class="step-text"><h4>Out for Delivery</h4><p>Rider is on the way</p></div>
-      </div>
-    </div>
-
-    <div class="rider-card card-fade d4" id="rider-card">
-      <div class="rider-left">
-        <div class="rider-photo" id="rider-photo"><i class="fa-solid fa-user"></i></div>
-        <div class="rider-info">
-          <h3 id="rider-name">Delivery Partner</h3>
-          <div class="rider-meta-row">
-            <span class="rider-rating" id="rider-rating"><i class="fa-solid fa-star"></i><span id="rider-rating-value"></span></span>
-            <span class="rider-vehicle" id="rider-vehicle"><i class="fa-solid fa-motorcycle"></i></span>
-          </div>
+      <div class="timeline card-fade d2" id="timeline">
+        <div class="timeline-fill" id="timeline-fill"></div>
+        <div class="step" id="step-1">
+          <div class="step-dot"></div>
+          <div class="step-text"><h4>Order Confirmed</h4><p>Restaurant accepted your order</p></div>
+        </div>
+        <div class="step" id="step-2">
+          <div class="step-dot"></div>
+          <div class="step-text"><h4>Preparing your order</h4><p>Cooking at the Kitchen</p></div>
+        </div>
+        <div class="step" id="step-3">
+          <div class="step-dot"></div>
+          <div class="step-text"><h4 id="dispatch-title">Finding a Rider</h4><p id="dispatch-desc">Assigning delivery partner</p></div>
+        </div>
+        <div class="step" id="step-4">
+          <div class="step-dot"></div>
+          <div class="step-text"><h4>Out for Delivery</h4><p>Rider is on the way</p></div>
         </div>
       </div>
-      <a href="#" id="rider-call-btn" class="btn-call tap" style="display:none;">
-        <i class="fa-solid fa-phone"></i>
-      </a>
-    </div>
 
-    <!-- Restaurant info card — only shown if the backend already returns
-         order.restaurant on this order. No data is invented here. -->
-    <div class="info-card card-fade d4" id="restaurant-card">
-      <div class="info-card-icon"><i class="fa-solid fa-store"></i></div>
-      <div class="info-card-body">
-        <div class="info-card-label">Restaurant</div>
-        <div class="info-card-title" id="restaurant-name">—</div>
-        <div class="info-card-sub" id="restaurant-address"></div>
+      <div class="rider-card card-fade d3" id="rider-card">
+        <div class="rider-left">
+          <div class="rider-photo" id="rider-photo"><i class="fa-solid fa-user"></i></div>
+          <div class="rider-info">
+            <h3 id="rider-name">Delivery Partner</h3>
+            <div class="rider-meta-row">
+              <span class="rider-rating" id="rider-rating"><i class="fa-solid fa-star"></i> <span id="rider-rating-value"></span></span>
+              <span class="rider-vehicle" id="rider-vehicle"><i class="fa-solid fa-motorcycle"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="rider-actions">
+          <a href="#" class="btn-action tap" aria-label="Message Rider"><i class="fa-solid fa-comment-dots"></i></a>
+          <a href="#" id="rider-call-btn" class="btn-action tap" aria-label="Call Rider"><i class="fa-solid fa-phone"></i></a>
+        </div>
+      </div>
+      
+      <div class="support-row card-fade d3">
+        <a href="#" id="support-call-restaurant" class="support-btn tap" style="display:none;"><i class="fa-solid fa-store"></i> Restaurant</a>
+        <a href="support.html" class="support-btn tap"><i class="fa-solid fa-headset"></i> Support</a>
+      </div>
+    </div> <!-- /active-tracking-view -->
+
+    <!-- WRAPPER: DELIVERY COMPLETED (Hidden during active tracking) -->
+    <div id="delivery-completed-view" class="card-fade d1">
+      <div class="success-icon-large"><i class="fa-solid fa-check"></i></div>
+      <div class="delivery-title">Delivered successfully</div>
+      <div class="delivery-time" id="delivered-time-text">Your order has arrived</div>
+
+      <div class="rating-card">
+        <h3>Rate your experience</h3>
+        <p>How was the delivery partner and food?</p>
+        <div class="stars" id="rating-stars">
+          <i class="fa-solid fa-star" data-value="1"></i>
+          <i class="fa-solid fa-star" data-value="2"></i>
+          <i class="fa-solid fa-star" data-value="3"></i>
+          <i class="fa-solid fa-star" data-value="4"></i>
+          <i class="fa-solid fa-star" data-value="5"></i>
+        </div>
+        <button class="rating-submit tap" id="rating-submit" disabled>Submit Feedback</button>
+        <div class="rating-thanks" id="rating-thanks">Thanks for your feedback! 🌟</div>
+      </div>
+      
+      <div class="action-buttons">
+        <a href="home.html" class="btn-primary tap">Order Again</a>
+        <a href="support.html" class="btn-secondary tap">Need Help?</a>
       </div>
     </div>
 
-    <!-- Delivery address card — only shown if the backend already returns
-         order.deliveryAddress (or order.address) on this order. -->
-    <div class="info-card card-fade d5" id="address-card">
-      <div class="info-card-icon"><i class="fa-solid fa-location-dot"></i></div>
-      <div class="info-card-body">
-        <div class="info-card-label">Delivering To</div>
-        <div class="info-card-sub" id="address-text"></div>
+    <!-- SHARED: ORDER DETAILS (Shown in both states) -->
+    <div class="order-summary card-fade d4" id="order-details-card">
+      <div class="summary-title">Order Details</div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Order ID</div>
+        <div class="detail-value" id="display-order-id">#---</div>
       </div>
-    </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Restaurant</div>
+        <div class="detail-value" id="display-res-name">Loading...</div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Items</div>
+        <div class="detail-value" id="display-items">...</div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Payment Method</div>
+        <div class="detail-value" id="payment-type">...</div>
+      </div>
 
-    <div class="support-row card-fade d5">
-      <a href="#" id="support-call-restaurant" class="support-btn tap"><i class="fa-solid fa-store"></i>Restaurant</a>
-      <a href="#" id="support-call-rider" class="support-btn tap"><i class="fa-solid fa-motorcycle"></i>Rider</a>
-      <a href="support.html" class="support-btn always-on tap"><i class="fa-solid fa-circle-question"></i>Help</a>
-    </div>
-
-    <div class="order-summary card-fade d6">
-      <div class="summary-eyebrow">Order Details</div>
-      <div class="summary-res" id="display-res-name">Loading...</div>
-      <div class="summary-items" id="display-items">...</div>
       <div class="summary-total">
-        <span class="total-label" id="payment-type">Total</span>
+        <span class="total-label">Total</span>
         <span class="total-price" id="display-total">₹0</span>
       </div>
       <button class="invoice-btn tap" id="invoice-btn"><i class="fa-solid fa-file-invoice"></i> View Invoice</button>
     </div>
 
-    <div class="rating-card card-fade d7" id="rating-card">
-      <div class="rating-icon"><i class="fa-solid fa-heart"></i></div>
-      <h3>How was your order?</h3>
-      <p>Rate your experience with this delivery</p>
-      <div class="stars" id="rating-stars">
-        <i class="fa-solid fa-star" data-value="1"></i>
-        <i class="fa-solid fa-star" data-value="2"></i>
-        <i class="fa-solid fa-star" data-value="3"></i>
-        <i class="fa-solid fa-star" data-value="4"></i>
-        <i class="fa-solid fa-star" data-value="5"></i>
-      </div>
-      <button class="rating-submit" id="rating-submit" disabled>Submit Rating</button>
-      <div class="rating-thanks" id="rating-thanks">Thanks for rating your order 💛</div>
-    </div>
+  </div> <!-- /tracking-sheet -->
 
-  </div>
-
+  <!-- Invoice Modal -->
   <div class="invoice-modal" id="invoice-modal">
     <div class="invoice-sheet">
       <div class="invoice-head">
         <h3>Invoice</h3>
         <button class="invoice-close tap" id="invoice-close"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div id="invoice-body"><!-- filled from the order data already fetched by fetchOrderData() --></div>
-      <button class="invoice-print tap" id="invoice-print"><i class="fa-solid fa-print"></i> Print / Save as PDF</button>
+      <div id="invoice-body"></div>
+      <button class="invoice-print tap" id="invoice-print"><i class="fa-solid fa-print"></i> Download Invoice</button>
     </div>
   </div>
 
   <script>
     let pollInterval;
-    let currentOrder = null; // holds the latest fetched order, used by the invoice modal
+    let currentOrder = null;
 
     async function fetchOrderData() {
       const urlParams = new URLSearchParams(window.location.search);
       const orderId = urlParams.get('id');
 
-      if (!orderId) {
-        window.location.href = 'orders.html';
-        return;
-      }
+      if (!orderId) { window.location.href = 'orders.html'; return; }
 
       const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-      if (!token) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!token) { window.location.href = 'login.html'; return; }
 
       try {
         const response = await fetch('https://eatswada.onrender.com/api/orders', {
@@ -656,32 +516,17 @@
           renderLiveUI(liveOrder);
         }
       } catch (err) {
-        console.error("Failed to fetch live order data");
+        console.error("Failed to fetch live order data", err);
       }
-    }
-
-    // Best-effort extraction of a human-readable delivery address from
-    // whatever shape the backend already returns. Returns '' (and the
-    // address card stays hidden) if nothing usable is present.
-    function getDeliveryAddressText(order) {
-      if (!order) return '';
-      if (typeof order.deliveryAddress === 'string' && order.deliveryAddress.trim()) {
-        return order.deliveryAddress.trim();
-      }
-      if (order.deliveryAddress && typeof order.deliveryAddress === 'object') {
-        return order.deliveryAddress.formatted || order.deliveryAddress.fullAddress ||
-               order.deliveryAddress.addressLine || order.deliveryAddress.line1 || '';
-      }
-      if (typeof order.address === 'string' && order.address.trim()) {
-        return order.address.trim();
-      }
-      return '';
     }
 
     function renderLiveUI(order) {
       document.getElementById('loading-overlay').style.display = 'none';
+      currentOrder = order;
 
-      document.getElementById('display-res-name').innerText = `Order #${order.orderNumber || String(order._id).slice(-5).toUpperCase()}`;
+      const orderNumber = order.orderNumber || String(order._id).slice(-5).toUpperCase();
+      document.getElementById('display-order-id').innerText = `#${orderNumber}`;
+      document.getElementById('display-res-name').innerText = order.restaurant && order.restaurant.name ? order.restaurant.name : 'Restaurant';
       document.getElementById('display-items').innerText = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
       document.getElementById('display-total').innerText = `₹${order.total}`;
       document.getElementById('payment-type').innerText = order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery';
@@ -699,98 +544,68 @@
       const etaTime = document.getElementById('eta-time');
       const otpBox = document.getElementById('otp-container');
       const riderCard = document.getElementById('rider-card');
-      const timeline = document.getElementById('timeline');
+      const timelineFill = document.getElementById('timeline-fill');
+      
       const riderNameEl = document.getElementById('rider-name');
       const riderCallBtn = document.getElementById('rider-call-btn');
-
-      // Premium additions — all optional / defensive
       const riderPhotoEl = document.getElementById('rider-photo');
       const riderRatingEl = document.getElementById('rider-rating');
       const riderRatingValueEl = document.getElementById('rider-rating-value');
       const riderVehicleEl = document.getElementById('rider-vehicle');
-      const restaurantCard = document.getElementById('restaurant-card');
-      const addressCard = document.getElementById('address-card');
-      const supportCallRestaurant = document.getElementById('support-call-restaurant');
-      const supportCallRider = document.getElementById('support-call-rider');
-      const routeCard = document.getElementById('route-card');
-      const routeTrack = document.getElementById('route-track');
-      const routeCaption = document.getElementById('route-caption');
-      const heroLiveBadge = document.getElementById('hero-live-badge');
-      const timelineFill = document.getElementById('timeline-fill');
-      const ratingCard = document.getElementById('rating-card');
+      
+      const activeTrackingView = document.getElementById('active-tracking-view');
+      const deliveryCompletedView = document.getElementById('delivery-completed-view');
+      const orderDetailsCard = document.getElementById('order-details-card');
 
+      // Populate Rider
       if (order.rider && order.rider.name) {
         riderNameEl.innerText = order.rider.name;
+        riderCard.style.display = 'flex';
+        
+        if (order.rider.phone) {
+          riderCallBtn.href = `tel:${order.rider.phone}`;
+          riderCallBtn.style.display = 'flex';
+        } else {
+          riderCallBtn.style.display = 'none';
+        }
+
+        if (order.rider.photo || order.rider.avatar || order.rider.image) {
+          const src = order.rider.photo || order.rider.avatar || order.rider.image;
+          riderPhotoEl.innerHTML = `<img src="${src}" alt="Rider">`;
+        } else {
+          riderPhotoEl.innerHTML = '<i class="fa-solid fa-user"></i>';
+        }
+
+        if (order.rider.rating) {
+          riderRatingValueEl.innerText = order.rider.rating;
+          riderRatingEl.style.display = 'inline-flex';
+        } else {
+          riderRatingEl.style.display = 'none';
+        }
+
+        const vehicleLabel = order.rider.vehicleNumber || order.rider.vehicle || order.rider.vehicleType;
+        if (vehicleLabel) {
+          if (!riderVehicleEl.querySelector('span')) riderVehicleEl.appendChild(document.createElement('span'));
+          riderVehicleEl.lastElementChild.innerText = vehicleLabel;
+          riderVehicleEl.style.display = 'inline-flex';
+        } else {
+          riderVehicleEl.style.display = 'none';
+        }
       } else {
-        riderNameEl.innerText = 'Delivery Partner';
-      }
-      if (order.rider && order.rider.phone) {
-        riderCallBtn.href = `tel:${order.rider.phone}`;
-        riderCallBtn.style.display = 'flex';
-      } else {
-        riderCallBtn.style.display = 'none';
+        riderCard.style.display = 'none';
       }
 
-      // ── Optional premium fields: rendered only when the backend already
-      // provides them on the order object. Nothing here is fabricated —
-      // each block hides itself gracefully when the field is absent. ──
-      if (order.rider && (order.rider.photo || order.rider.avatar || order.rider.image)) {
-        const src = order.rider.photo || order.rider.avatar || order.rider.image;
-        riderPhotoEl.innerHTML = `<img src="${src}" alt="">`;
-      } else {
-        riderPhotoEl.innerHTML = '<i class="fa-solid fa-user"></i>';
-      }
-      if (order.rider && order.rider.rating) {
-        riderRatingValueEl.innerText = order.rider.rating;
-        riderRatingEl.style.display = 'inline-flex';
-      } else {
-        riderRatingEl.style.display = 'none';
-      }
-      const vehicleLabel = order.rider && (order.rider.vehicleNumber || order.rider.vehicle || order.rider.vehicleType);
-      if (vehicleLabel) {
-        riderVehicleEl.querySelector('span') ? null : riderVehicleEl.appendChild(document.createElement('span'));
-        riderVehicleEl.lastElementChild.innerText = vehicleLabel;
-        riderVehicleEl.style.display = 'inline-flex';
-      } else {
-        riderVehicleEl.style.display = 'none';
-      }
-
-      if (order.restaurant && order.restaurant.name) {
-        document.getElementById('restaurant-name').innerText = order.restaurant.name;
-        const rAddr = order.restaurant.address || '';
-        const rAddrEl = document.getElementById('restaurant-address');
-        rAddrEl.innerText = rAddr;
-        rAddrEl.style.display = rAddr ? 'block' : 'none';
-        restaurantCard.style.display = 'flex';
-      } else {
-        restaurantCard.style.display = 'none';
-      }
+      // Populate Restaurant Support
+      const supportCallRestaurant = document.getElementById('support-call-restaurant');
       if (order.restaurant && order.restaurant.phone) {
         supportCallRestaurant.href = `tel:${order.restaurant.phone}`;
         supportCallRestaurant.style.display = 'flex';
       } else {
         supportCallRestaurant.style.display = 'none';
       }
-      if (order.rider && order.rider.phone) {
-        supportCallRider.href = `tel:${order.rider.phone}`;
-        supportCallRider.style.display = 'flex';
-      } else {
-        supportCallRider.style.display = 'none';
-      }
 
-      const addressText = getDeliveryAddressText(order);
-      if (addressText) {
-        document.getElementById('address-text').innerText = addressText;
-        addressCard.style.display = 'flex';
-      } else {
-        addressCard.style.display = 'none';
-      }
-
-      currentOrder = order;
       document.body.classList.add('data-loaded');
 
-      // Minutes remaining, computed from the backend's estimatedDelivery
-      // timestamp rather than a fixed guess per status.
       function minutesRemaining() {
         if (!order.estimatedDelivery) return null;
         const diffMs = new Date(order.estimatedDelivery) - Date.now();
@@ -801,32 +616,16 @@
         return mins === null ? '-- <span>mins</span>' : `${mins} <span>mins</span>`;
       }
 
+      // Reset Step States
       s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step';
       heroBg.className = 'tracker-hero';
       heroIcon.innerHTML = '<i class="fa-solid fa-motorcycle"></i>';
-
-      // Reset premium elements each render
-      routeCard.style.display = 'none';
-      heroLiveBadge.style.display = 'none';
-      ratingCard.style.display = 'none';
       timelineFill.style.height = '0%';
-
-      // Reset OTP Box styles if returning from a success state
-      otpBox.style.display = 'none';
-      otpBox.style.background = 'rgba(16, 185, 129, 0.05)';
-      otpBox.style.border = '1.5px dashed rgba(16, 185, 129, 0.4)';
-      otpBox.innerHTML = `
-        <div class="otp-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="otp-label">Hand this PIN to your rider</div>
-        <div class="otp-value" id="otp-display">${orderOTP}</div>
-        <div class="otp-instructions">Share this code only when your rider arrives with the order</div>
-      `;
-
-      riderCard.style.display = 'none';
       etaTitle.innerText = "Estimated Arrival";
 
       const status = order.status.toLowerCase();
 
+      // State Rendering
       if (status === 'cancelled') {
          clearInterval(pollInterval);
          heroBg.classList.add('cancelled');
@@ -834,52 +633,58 @@
          etaTitle.innerText = "Status";
          etaTime.innerHTML = "CANCELLED";
          etaTime.className = "eta-time cancelled-text";
-         timeline.style.display = "none";
+         document.getElementById('timeline').style.display = "none";
+         otpBox.style.display = 'none';
+         riderCard.style.display = 'none';
+         activeTrackingView.style.display = 'block';
+         deliveryCompletedView.style.display = 'none';
          return;
       }
 
       if (status === 'delivered') {
          clearInterval(pollInterval);
          heroBg.classList.add('delivered');
-         heroIcon.innerHTML = '<i class="fa-solid fa-check-double"></i>';
-         etaTitle.innerText = "Status";
-         etaTime.innerHTML = "DELIVERED";
-         etaTime.className = "eta-time delivered-text";
-         s1.classList.add('passed'); s2.classList.add('passed'); s3.classList.add('passed'); s4.classList.add('passed');
-         timelineFill.style.height = '100%';
-         routeCard.style.display = 'flex';
-         routeTrack.className = 'route-track stage-delivered';
-         routeCaption.innerText = 'Delivered — enjoy your meal!';
-         ratingCard.style.display = 'block';
+         heroIcon.innerHTML = '<i class="fa-solid fa-bag-shopping"></i>';
+         
+         // Toggle views
+         activeTrackingView.style.display = 'none';
+         deliveryCompletedView.style.display = 'block';
+         
+         // Formatting time if available, otherwise default text
+         const timeText = order.deliveredAt ? new Date(order.deliveredAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Enjoy your meal!';
+         document.getElementById('delivered-time-text').innerText = timeText;
+         
+         // Reposition order details below success messaging naturally
          return;
       }
 
-      timeline.style.display = "block";
+      // Active Tracking States
+      activeTrackingView.style.display = 'block';
+      deliveryCompletedView.style.display = 'none';
       etaTime.className = "eta-time";
 
       if (status === 'pending' || status === 'placed' || status === 'confirmed') {
          etaTime.innerHTML = etaHTML();
          s1.classList.add('active');
-         timelineFill.style.height = '12%';
+         timelineFill.style.height = '10%';
+         otpBox.style.display = 'none';
       }
       else if (status === 'preparing') {
          etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('active');
-         timelineFill.style.height = '38%';
+         timelineFill.style.height = '40%';
+         otpBox.style.display = 'none';
       }
       else if (status === 'waiting_for_rider') {
          etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('passed');
          s3.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Finding a rider...";
+         document.getElementById('dispatch-title').innerText = "Finding a Rider";
          document.getElementById('dispatch-desc').innerText = "Assigning delivery partner";
-         timelineFill.style.height = '62%';
-         heroLiveBadge.style.display = 'flex';
-         routeCard.style.display = 'flex';
-         routeTrack.className = 'route-track stage-searching';
-         routeCaption.innerText = 'Looking for a nearby rider';
+         timelineFill.style.height = '70%';
+         otpBox.style.display = 'none';
       }
       else if (status === 'assigned') {
          etaTime.innerHTML = etaHTML();
@@ -887,61 +692,29 @@
          s2.classList.add('passed');
          s3.classList.add('active');
          document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
-         riderCard.style.display = 'flex';
-         timelineFill.style.height = '62%';
-         heroLiveBadge.style.display = 'flex';
-         routeCard.style.display = 'flex';
-         routeTrack.className = 'route-track stage-assigned';
-         routeCaption.innerText = 'Rider is heading to the restaurant';
+         document.getElementById('dispatch-desc').innerText = "Heading to restaurant";
+         timelineFill.style.height = '70%';
+         otpBox.style.display = 'none';
       }
-      else if (status === 'out_for_delivery') {
+      else if (status === 'out_for_delivery' || status === 'otp_verified') {
          etaTime.innerHTML = etaHTML();
          s1.classList.add('passed');
          s2.classList.add('passed');
          s3.classList.add('passed');
          s4.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Order picked up";
-         otpBox.style.display = 'block';
-         riderCard.style.display = 'flex';
-         timelineFill.style.height = '88%';
-         heroLiveBadge.style.display = 'flex';
-         routeCard.style.display = 'flex';
-         routeTrack.className = 'route-track stage-enroute';
-         routeCaption.innerText = 'Rider is on the way to you';
-      }
-      else if (status === 'otp_verified') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('passed');
-         s3.classList.add('passed');
-         s4.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Order picked up";
-
-         otpBox.style.display = 'block';
-         otpBox.style.background = 'rgba(16, 185, 129, 0.1)';
-         otpBox.style.border = '1.5px solid #10b981';
-         otpBox.innerHTML = `
-           <div class="otp-icon verified"><i class="fa-solid fa-circle-check"></i></div>
-           <div class="otp-label" style="color: #059669; font-size: 14px; padding: 4px 0 0;">OTP Verified</div>
-           <div class="otp-instructions">Your rider has confirmed the handoff</div>
-         `;
-
-         riderCard.style.display = 'flex';
-         timelineFill.style.height = '95%';
-         heroLiveBadge.style.display = 'flex';
-         routeCard.style.display = 'flex';
-         routeTrack.className = 'route-track stage-arriving';
-         routeCaption.innerText = 'Rider has arrived';
+         document.getElementById('dispatch-title').innerText = "Order Picked Up";
+         document.getElementById('dispatch-desc').innerText = "Rider left the restaurant";
+         timelineFill.style.height = '100%';
+         
+         if(status === 'otp_verified') {
+           otpBox.style.display = 'none';
+         } else {
+           otpBox.style.display = 'flex';
+         }
       }
     }
 
-    // One-time wiring for the invoice modal and the post-delivery rating
-    // widget. Kept separate from renderLiveUI (which runs every poll) so
-    // listeners are only ever attached once.
-    function setupPremiumInteractions() {
+    function setupInteractions() {
       const invoiceBtn = document.getElementById('invoice-btn');
       const invoiceModal = document.getElementById('invoice-modal');
       const invoiceClose = document.getElementById('invoice-close');
@@ -959,7 +732,7 @@
           }).join('');
           invoiceBody.innerHTML = `
             <div class="invoice-meta">
-              <div><span>Order</span><strong>#${idLabel}</strong></div>
+              <div><span>Order ID</span><strong>#${idLabel}</strong></div>
               <div><span>Payment</span><strong>${order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery'}</strong></div>
             </div>
             <div class="invoice-items">${itemsHtml}</div>
@@ -968,25 +741,32 @@
           invoiceModal.classList.add('open');
         });
       }
+      
       if (invoiceClose) invoiceClose.addEventListener('click', () => invoiceModal.classList.remove('open'));
       if (invoiceModal) invoiceModal.addEventListener('click', (e) => { if (e.target === invoiceModal) invoiceModal.classList.remove('open'); });
       if (invoicePrint) invoicePrint.addEventListener('click', () => window.print());
 
-      // Star rating widget — a purely client-side acknowledgement.
-      // NOTE: this page only ever calls GET /api/orders (see fetchOrderData
-      // above); there is no ratings endpoint in that contract, so submitting
-      // here does not persist anywhere yet. Wire this up to a POST endpoint
-      // once the backend exposes one.
+      // Star rating micro-interaction
       const ratingStars = document.querySelectorAll('#rating-stars i');
       const ratingSubmitBtn = document.getElementById('rating-submit');
       let selectedRating = 0;
+      
       ratingStars.forEach(star => {
         star.addEventListener('click', () => {
           selectedRating = parseInt(star.dataset.value, 10);
-          ratingStars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value, 10) <= selectedRating));
+          ratingStars.forEach(s => {
+             if (parseInt(s.dataset.value, 10) <= selectedRating) {
+                 s.classList.add('active');
+                 s.classList.remove('fa-regular');
+                 s.classList.add('fa-solid');
+             } else {
+                 s.classList.remove('active');
+             }
+          });
           if (ratingSubmitBtn) ratingSubmitBtn.disabled = false;
         });
       });
+      
       if (ratingSubmitBtn) {
         ratingSubmitBtn.addEventListener('click', () => {
           document.getElementById('rating-stars').style.display = 'none';
@@ -999,7 +779,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       fetchOrderData();
       pollInterval = setInterval(fetchOrderData, 5000);
-      setupPremiumInteractions();
+      setupInteractions();
     });
   </script>
 </body>
