@@ -285,241 +285,233 @@
     <script src="config.js"></script>
     <script>
     function renderCart() {
-      // Pull actual cart from local storage
-      let savedCart = JSON.parse(localStorage.getItem('nearbite_cart'));
-      
-      const emptyEl = document.getElementById('empty-cart');
-      const hasItemsEl = document.getElementById('cart-has-items');
-      const listEl  = document.getElementById('cart-items-list');
-      const footerEl = document.getElementById('checkout-footer');
+  let savedCart;
+  try {
+    savedCart = JSON.parse(localStorage.getItem('nearbite_cart'));
+  } catch(e) {
+    savedCart = null;
+  }
+  
+  const emptyEl = document.getElementById('empty-cart');
+  const hasItemsEl = document.getElementById('cart-has-items');
+  const listEl  = document.getElementById('cart-items-list');
+  const footerEl = document.getElementById('checkout-footer');
 
-      if (!savedCart || Object.keys(savedCart).length === 0) {
-        emptyEl.style.display = 'block';
-        hasItemsEl.style.display = 'none';
-        footerEl.style.display = 'none';
-        return;
-      }
+  if (!savedCart || Object.keys(savedCart).length === 0) {
+    emptyEl.style.display = 'block';
+    hasItemsEl.style.display = 'none';
+    footerEl.style.display = 'none';
+    return;
+  }
 
-      emptyEl.style.display = 'none';
-      hasItemsEl.style.display = 'block';
-      footerEl.style.display = 'flex';
+  emptyEl.style.display = 'none';
+  hasItemsEl.style.display = 'block';
+  footerEl.style.display = 'flex';
 
-      const items = Object.entries(savedCart);
-      const subtotal     = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
-      const DELIVERY_MIN = 200;
-      const DELIVERY_FEE = 40;
-      const PLATFORM_FEE = 5;
-      const deliveryFee  = subtotal >= DELIVERY_MIN ? 0 : DELIVERY_FEE;
-      const total        = subtotal + deliveryFee + PLATFORM_FEE;
+  const items = Object.entries(savedCart);
+  const subtotal     = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
+  const DELIVERY_MIN = 200;
+  const DELIVERY_FEE = 40;
+  const PLATFORM_FEE = 5;
+  const deliveryFee  = subtotal >= DELIVERY_MIN ? 0 : DELIVERY_FEE;
+  const total        = subtotal + deliveryFee + PLATFORM_FEE;
 
-      /* ── Delivery fee row ── */
-      const deliveryValEl = document.getElementById('bill-delivery-val');
-      if (deliveryFee === 0) {
-        deliveryValEl.textContent = 'FREE';
-        deliveryValEl.className   = 'bill-val free';
-      } else {
-        deliveryValEl.textContent = '₹' + deliveryFee;
-        deliveryValEl.className   = 'bill-val';
-      }
+  const deliveryValEl = document.getElementById('bill-delivery-val');
+  if (deliveryFee === 0) {
+    deliveryValEl.textContent = 'FREE';
+    deliveryValEl.className   = 'bill-val free';
+  } else {
+    deliveryValEl.textContent = '₹' + deliveryFee;
+    deliveryValEl.className   = 'bill-val';
+  }
 
-      /* ── Free delivery nudge banner ── */
-      const nudgeEl   = document.getElementById('free-delivery-nudge');
-      const nudgeText = document.getElementById('nudge-text');
-      if (deliveryFee > 0) {
-        const needed = DELIVERY_MIN - subtotal;
-        nudgeText.textContent = 'Add items worth ₹' + needed + ' more for FREE delivery!';
-        nudgeEl.style.display = 'flex';
-      } else {
-        nudgeEl.style.display = 'none';
-      }
+  const nudgeEl   = document.getElementById('free-delivery-nudge');
+  const nudgeText = document.getElementById('nudge-text');
+  if (deliveryFee > 0) {
+    const needed = DELIVERY_MIN - subtotal;
+    nudgeText.textContent = 'Add items worth ₹' + needed + ' more for FREE delivery!';
+    nudgeEl.style.display = 'flex';
+  } else {
+    nudgeEl.style.display = 'none';
+  }
 
-      // Dynamically display the restaurant name based on the first item in the cart
-      let resName = "Nearbite Restaurant";
-      if (items.length > 0 && items[0][1].resName) {
-         resName = items[0][1].resName;
-      }
-      document.getElementById('cart-restaurant-name').innerText = resName;
+  let resName = "Nearbite Restaurant";
+  if (items.length > 0 && items[0][1].resName) {
+     resName = items[0][1].resName;
+  }
+  document.getElementById('cart-restaurant-name').innerText = resName;
 
-      listEl.innerHTML = items.map(([name, info]) => `
-        <div class="cart-item">
-          <div class="item-info">
-            <div class="item-icon"></div>
-            <div class="item-name">${name}</div>
-            <div class="item-price">₹${info.price}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div class="counter-btn tap">
-              <button onclick="cartAdjust('${name}', -1)">−</button>
-              <span>${info.quantity}</span>
-              <button onclick="cartAdjust('${name}', 1)">+</button>
-            </div>
-            <div class="item-total">₹${info.quantity * info.price}</div>
-          </div>
+  listEl.innerHTML = items.map(([name, info]) => `
+    <div class="cart-item">
+      <div class="item-info">
+        <div class="item-icon"></div>
+        <div class="item-name">${name}</div>
+        <div class="item-price">₹${info.price}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="counter-btn tap">
+          <button onclick="cartAdjust('${name}', -1)">−</button>
+          <span>${info.quantity}</span>
+          <button onclick="cartAdjust('${name}', 1)">+</button>
         </div>
-      `).join('');
+        <div class="item-total">₹${info.quantity * info.price}</div>
+      </div>
+    </div>
+  `).join('');
 
-      document.getElementById('bill-subtotal').innerText     = '₹' + subtotal;
-      document.getElementById('bill-total').innerText         = '₹' + total;
-      document.getElementById('checkout-total').innerText     = '₹' + total;
+  document.getElementById('bill-subtotal').innerText     = '₹' + subtotal;
+  document.getElementById('bill-total').innerText         = '₹' + total;
+  document.getElementById('checkout-total').innerText     = '₹' + total;
+}
+
+function cartAdjust(name, change) {
+  let savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+  if (savedCart[name]) {
+    savedCart[name].quantity += change;
+    if (savedCart[name].quantity <= 0) delete savedCart[name];
+    localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
+    renderCart();
+  }
+}
+
+function clearCart() {
+  localStorage.removeItem('nearbite_cart');
+  renderCart();
+}
+
+function hasAddress() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
+  return !!(saved && saved.house && saved.house.trim().length > 0);
+}
+
+function loadAddress() {
+  let saved;
+  try {
+     saved = JSON.parse(localStorage.getItem('nearbite_address'));
+  } catch(e) {
+     saved = null;
+  }
+  const tagLabel   = document.getElementById('address-tag-label');
+  const addrText   = document.getElementById('address-display-text');
+  const checkoutBtn = document.getElementById('btn-checkout');
+
+  if (hasAddress() && saved) {
+    const tag   = saved.tag || 'Home';
+    const parts = [saved.house, saved.area, saved.landmark].filter(Boolean);
+    tagLabel.textContent      = 'Delivering to ' + tag;
+    addrText.textContent      = parts.join(', ');
+    addrText.style.color      = '';
+    addrText.style.fontWeight = '';
+    checkoutBtn.classList.remove('locked');
+    checkoutBtn.setAttribute('aria-disabled', 'false');
+  } else {
+    tagLabel.textContent      = 'Add Delivery Address';
+    addrText.textContent      = 'Tap to add your delivery address →';
+    addrText.style.color      = '#FC8019';
+    addrText.style.fontWeight = '700';
+    checkoutBtn.classList.add('locked');
+    checkoutBtn.setAttribute('aria-disabled', 'true');
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('addr-toast');
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+async function placeOrder() {
+  if (!hasAddress()) {
+    const btn = document.getElementById('btn-checkout');
+    btn.classList.remove('shake');
+    void btn.offsetWidth; 
+    btn.classList.add('shake');
+    btn.addEventListener('animationend', () => btn.classList.remove('shake'), { once: true });
+
+    const card = document.getElementById('address-block');
+    card.classList.remove('address-pulse');
+    void card.offsetWidth;
+    card.classList.add('address-pulse');
+    card.addEventListener('animationend', () => card.classList.remove('address-pulse'), { once: true });
+
+    showToast('Please add a delivery address first');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return; 
+  }
+
+  const btn = document.getElementById('btn-checkout');
+  const originalHTML = btn.innerHTML;
+  
+  btn.innerHTML = '<span class="btn-checkout-text" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> PLACING ORDER...</span>';
+  btn.style.pointerEvents = 'none';
+
+  try {
+    const token = localStorage.getItem('nearbite_token');
+    if (!token) {
+       alert("Please log in to place an order!");
+       window.location.href = 'login.html';
+       return;
     }
 
-    function cartAdjust(name, change) {
-      let savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-      
-      if (savedCart[name]) {
-        savedCart[name].quantity += change;
-        if (savedCart[name].quantity <= 0) delete savedCart[name];
-        localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
-        renderCart();
-      }
+    const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
+    
+    const itemsArray = [];
+    let restaurantId = null;
+
+    for (const [name, info] of Object.entries(savedCart)) {
+       if (info.resId) {
+          restaurantId = info.resId;
+       }
+
+       itemsArray.push({
+          menuItem: info.menuItem || null,
+          name: name,
+          price: info.price,
+          quantity: info.quantity,
+          customizations: info.customizations || {}
+       });
     }
 
-    function clearCart() {
-      localStorage.removeItem('nearbite_cart');
-      renderCart();
-    }
+    const payload = {
+       items: itemsArray,
+       deliveryAddress: savedAddress,
+       restaurant: restaurantId,
+       restaurantId: restaurantId 
+    };
 
-    function hasAddress() {
-      const saved = JSON.parse(localStorage.getItem('nearbite_address'));
-      return !!(saved && saved.house && saved.house.trim().length > 0);
-    }
-
-    function loadAddress() {
-      const saved      = JSON.parse(localStorage.getItem('nearbite_address'));
-      const tagLabel   = document.getElementById('address-tag-label');
-      const addrText   = document.getElementById('address-display-text');
-      const checkoutBtn = document.getElementById('btn-checkout');
-
-      if (hasAddress()) {
-        const tag   = saved.tag || 'Home';
-        const parts = [saved.house, saved.area, saved.landmark].filter(Boolean);
-        tagLabel.textContent      = 'Delivering to ' + tag;
-        addrText.textContent      = parts.join(', ');
-        addrText.style.color      = '';
-        addrText.style.fontWeight = '';
-        checkoutBtn.classList.remove('locked');
-        checkoutBtn.setAttribute('aria-disabled', 'false');
-      } else {
-        tagLabel.textContent      = 'Add Delivery Address';
-        addrText.textContent      = 'Tap to add your delivery address →';
-        addrText.style.color      = '#FC8019';
-        addrText.style.fontWeight = '700';
-        checkoutBtn.classList.add('locked');
-        checkoutBtn.setAttribute('aria-disabled', 'true');
-      }
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('addr-toast');
-      toast.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-
-    async function placeOrder() {
-      if (!hasAddress()) {
-        const btn = document.getElementById('btn-checkout');
-        btn.classList.remove('shake');
-        void btn.offsetWidth; 
-        btn.classList.add('shake');
-        btn.addEventListener('animationend', () => btn.classList.remove('shake'), { once: true });
-
-        const card = document.getElementById('address-block');
-        card.classList.remove('address-pulse');
-        void card.offsetWidth;
-        card.classList.add('address-pulse');
-        card.addEventListener('animationend', () => card.classList.remove('address-pulse'), { once: true });
-
-        showToast('Please add a delivery address first');
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return; 
-      }
-
-      const btn = document.getElementById('btn-checkout');
-      const originalHTML = btn.innerHTML;
-      
-      // VISUAL FIX: Professional loading state with spinner
-      btn.innerHTML = `
-        <span class="btn-checkout-text" style="display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-circle-notch fa-spin"></i> PLACING ORDER...
-        </span>`;
-      btn.style.pointerEvents = 'none';
-
-      try {
-        const token = localStorage.getItem('nearbite_token');
-        if (!token) {
-           alert("Please log in to place an order!");
-           window.location.href = 'login.html';
-           return;
-        }
-
-        const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-        const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
-        
-        const itemsArray = [];
-        let restaurantId = null;
-
-        for (const [name, info] of Object.entries(savedCart)) {
-
-
-        for (const [name, info] of Object.entries(savedCart)) {
-           // Extract the ID that was saved by cart-bar.js
-           if (info.resId) {
-              restaurantId = info.resId;
-           }
-
-           itemsArray.push({
-              menuItem: info.menuItem || null,
-              name: name,
-              price: info.price,
-              quantity: info.quantity,
-              customizations: info.customizations || {}
-           });
-        }
-
-        // We completely removed client-side price sending as part of our backend security fix!
-        // The backend now calculates everything dynamically.
-        const payload = {
-           items: itemsArray,
-           deliveryAddress: savedAddress,
-           // Inject the extracted restaurant ID into the payload
-           restaurant: restaurantId,
-           restaurantId: restaurantId 
-        };
-
-
-        // URL FIX: Uses the config file dynamically
-        const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
-           method: 'POST',
-           headers: { 
-             'Content-Type': 'application/json',
-             'Authorization': `Bearer ${token}` 
-           },
-           body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (response.ok && (result.success || response.status === 201)) {
-            localStorage.removeItem('nearbite_cart');
-            window.location.href = 'track-order.html';
-        } else {
-            throw new Error(result.message || "Failed to place order.");
-        }
-
-      } catch (error) {
-        console.error(error);
-        alert("Wait: " + error.message);
-        // Revert button if there's an error
-        btn.innerHTML = originalHTML;
-        btn.style.pointerEvents = 'auto';
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderCart();
-      loadAddress();
+    const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
+       method: 'POST',
+       headers: { 
+         'Content-Type': 'application/json',
+         'Authorization': `Bearer ${token}` 
+       },
+       body: JSON.stringify(payload)
     });
+
+    const result = await response.json();
+
+    if (response.ok && (result.success || response.status === 201)) {
+        localStorage.removeItem('nearbite_cart');
+        window.location.href = 'track-order.html';
+    } else {
+        throw new Error(result.message || "Failed to place order.");
+    }
+
+  } catch (error) {
+    console.error(error);
+    alert("Wait: " + error.message);
+    btn.innerHTML = originalHTML;
+    btn.style.pointerEvents = 'auto';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderCart();
+  loadAddress();
+});
   </script>
 </body>
 </html>
