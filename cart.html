@@ -453,12 +453,14 @@
            return;
         }
 
-        const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+                const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
         const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
         
         const itemsArray = [];
-                const itemsArray = [];
         let restaurantId = null;
+
+        for (const [name, info] of Object.entries(savedCart)) {
+
 
         for (const [name, info] of Object.entries(savedCart)) {
            // Extract the ID that was saved by cart-bar.js
