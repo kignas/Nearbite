@@ -11,8 +11,12 @@
   /* ── 1. THE MATH ENGINE (Updated with Strict Validation) ── */
   /* ── 1. THE MATH ENGINE (Updated with ALL Parameters) ── */
   // We added param5, menuItemId, image, and isVeg to catch what the button is sending
-  window.updateCart = function(name, qtyChange, price, restaurantId, param5, menuItemId, image, isVeg) {
+    window.updateCart = function(name, qtyChange, price, restaurantId, param5, menuItemId, image, isVeg) {
     
+    // ADD THIS ONE LINE FOR DEBUGGING:
+    alert("Menu Item ID is: " + menuItemId + " | Restaurant ID is: " + restaurantId);
+
+
     // 0. STRICT VALIDATION: Prevent Mongoose CastErrors
     if (!restaurantId || restaurantId === 'undefined' || restaurantId === 'null') {
         console.error("CRITICAL UI ERROR: Missing resId for item:", name);
