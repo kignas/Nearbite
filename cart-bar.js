@@ -1,5 +1,4 @@
-⁹
-   /* ================================================================
+/* ================================================================
    PRODUCTION CART ENGINE & MULTI-IMAGE UI 
    Handles Math, LocalStorage, and the Floating Cart Bar
    ================================================================ */
@@ -8,27 +7,60 @@
   if (window.__esWhiteCartBar) return;
   window.__esWhiteCartBar = true;
 
-    /* ── 1. THE MATH ENGINE (Master Version) ── */
-  window.updateCart = function(itemName, change, price, rId, inStock, menuItemId, image, isVeg) {
-    
-    // 1. Safe Availability Check (Works across all pages)
-    if (typeof isRestaurantOpen !== 'undefined' && !isRestaurantOpen) {
-        if (typeof notifyItemUnavailable === 'function') notifyItemUnavailable();
-        return;
+  // 🛡️ CRASH-PROOF STORAGE PARSER
+  // This prevents your cart bar from becoming invisible if corrupted data exists
+  function safeGetCart() {
+    try {
+        const data = localStorage.getItem('nearbite_cart');
+        return (data && data !== "undefined" && data !== "null") ? JSON.parse(data) : {};
+    } catch (e) {
+        console.warn("Corrupted cart detected and wiped.");
+        localStorage.removeItem('nearbite_cart');
+        return {};
     }
-    if (change > 0 && inStock === false) {
+  }
+
+  /* ── 1. THE MATH ENGINE (Unified Master Version) ── */
+  window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg) {
+    let itemName = arg1;
+    let change = arg2;
+    let isUnder99Payload = false;
+    let originalPayload = null;
+
+    // 🎯 DETECT WHICH PAGE WE ARE ON (Under99 vs Restaurant)
+    if (arguments.length === 2 && typeof arg1 === 'string' && arg1.includes('%7B')) {
+        try {
+            isUnder99Payload = true;
+            originalPayload = arg1;
+            const payload = JSON.parse(decodeURIComponent(arg1));
+            itemName = payload.name;
+            change = arg2;
+            price = payload.price;
+            rId = payload.resId;
+            menuItemId = payload.menuItem;
+            image = payload.image;
+            isVeg = payload.isVeg;
+            inStock = true; 
+        } catch(e) {
+            console.error("Payload decode error", e);
+            return;
+        }
+    }
+
+    // Safe Availability Check
+    if (!isUnder99Payload && typeof isRestaurantOpen !== 'undefined' && !isRestaurantOpen) {
         if (typeof notifyItemUnavailable === 'function') notifyItemUnavailable();
         return;
     }
 
-    // 2. Strict Validation (Prevents Backend Crashes)
+    // Strict Backend Validation
     if (!rId || rId === 'undefined' || rId === 'null') {
         alert("CRITICAL ERROR: Missing Restaurant ID. Please refresh.");
         return;
     }
 
-    // 3. Storage & Cross-Restaurant Logic
-    let cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    // Cross-Restaurant Protection
+    let cartMemory = safeGetCart();
     const existingItems = Object.keys(cartMemory);
     
     if (existingItems.length > 0) {
@@ -39,87 +71,77 @@
         }
     }
 
-    // 4. Update Memory Payload
+    // Update the Payload
     if (!cartMemory[itemName]) {
         cartMemory[itemName] = {
-            quantity: 0,
-            price: parseFloat(price),
-            resId: rId,
-            menuItem: menuItemId, 
-            image: image,
-            name: itemName,
-            isVeg: isVeg
+            quantity: 0, price: parseFloat(price), resId: rId,
+            menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg
         };
     } else {
         if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
         if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
         if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
-        if (typeof cartMemory[itemName].isVeg !== 'boolean') cartMemory[itemName].isVeg = isVeg;
     }
     
     cartMemory[itemName].quantity += change;
     if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
 
-    // 5. Visually Update the Button
+    // 🎯 VISUALLY UPDATE THE CORRECT BUTTON TYPE
     const key = itemName.replace(/\s+/g, '');
     const container = document.getElementById('btn-container-' + key);
-    if (container && typeof window.makeBtnHTML === 'function') {
+    
+    if (container) {
         const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
-        container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg);
+        
+        if (isUnder99Payload) {
+            if (qty > 0) {
+                container.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);"><button onclick="updateCart('${originalPayload}', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button><span style="font-size:13px;font-weight:800;color:#FC8019;">${qty}</span><button onclick="updateCart('${originalPayload}', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button></div>`;
+            } else {
+                container.innerHTML = `<button onclick="updateCart('${originalPayload}', 1)" style="width:72px;height:32px;background:#fff;border:1px solid #f9ded0;border-radius:8px;color:#FC8019;font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
+            }
+        } else if (typeof window.makeBtnHTML === 'function') {
+            container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg);
+        }
     }
     
-    // 6. Save and Trigger Floating Cart Bar
+    // Save and Trigger Floating Cart Bar
     localStorage.setItem('nearbite_cart', JSON.stringify(cartMemory));
-    
-    if (typeof window.updateGlobalCart === 'function') {
-        window.updateGlobalCart();
-    } else {
-        console.error("Cart bar script is missing or failed to initialize!");
-    }
+    if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
   };
 
-
-  /* ── 2. THE CSS (Multi-image overlapping & Clear Cart UI) ── */
+  /* ── 2. THE CSS ── */
   const CSS = `
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-
     @keyframes slideUpWhiteCart {
       0% { transform: translate(-50%, 150%); opacity: 0; }
       100% { transform: translate(-50%, 0); opacity: 1; }
     }
-
     #white-cart-root {
       position: fixed; left: 50%; transform: translateX(-50%);
       width: calc(100% - 24px); max-width: 420px;
       z-index: 9999; transition: bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       display: none;
     }
-
     #white-cart-container {
       background: #FFFFFF; border-radius: 24px; padding: 12px;
       display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0px 8px 24px rgba(0,0,0,0.12);
       font-family: 'Plus Jakarta Sans', sans-serif; height: 76px; 
     }
-
     .wc-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
     .wc-image-stack { display: flex; position: relative; height: 40px; min-width: 40px; align-items: center; transition: width 0.3s ease; }
     .wc-img { width: 40px; height: 40px; border-radius: 20px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; position: absolute; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; }
-    
     .wc-img:nth-child(1) { left: 0px; z-index: 3; }
     .wc-img:nth-child(2) { left: 16px; z-index: 2; transform: scale(0.95); opacity: 0.95; }
     .wc-img:nth-child(3) { left: 32px; z-index: 1; transform: scale(0.9); opacity: 0.85; }
-
     .wc-info { display: flex; flex-direction: column; min-width: 0; justify-content: center; }
     .wc-res-name { font-size: 14px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .wc-menu-link { font-size: 12px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
-
     .wc-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .wc-btn { background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%); border: none; border-radius: 20px; height: 48px; padding: 0 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.1s ease; }
     .wc-btn:active { transform: scale(0.96); }
     .wc-btn-title { font-size: 13px; font-weight: 800; line-height: 1.1; }
     .wc-btn-sub { font-size: 11px; font-weight: 600; opacity: 0.95; }
-
     .wc-close { width: 32px; height: 32px; border-radius: 50%; background: #F1F1F1; border: none; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 15px; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
     .wc-close:active { background: #e5e7eb; }
   `;
@@ -153,7 +175,6 @@
             </button>
             <button class="wc-close" id="wc-close-btn"><i class="fa-solid fa-xmark"></i></button>
           </div>
-          
           <div id="wc-clear-actions" style="display: none; gap: 8px; align-items: center;">
             <button class="wc-btn" id="wc-confirm-clear" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
               <span class="wc-btn-title">Clear Cart</span>
@@ -173,10 +194,8 @@
     const root = document.getElementById('white-cart-root');
     if (!root) return;
     const nav = document.querySelector('.bottom-nav');
-    if (nav) {
-      const rect = nav.getBoundingClientRect();
-      const isHidden = nav.classList.contains('bottom-nav-hidden') || rect.top >= window.innerHeight;
-      root.style.bottom = isHidden ? '20px' : '84px';
+    if (nav && !nav.classList.contains('bottom-nav-hidden')) {
+      root.style.bottom = '84px';
     } else {
       root.style.bottom = '20px';
     }
@@ -185,7 +204,7 @@
   window.updateGlobalCart = function () {
     if (isDismissed) return;
 
-    const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    const savedCart = safeGetCart();
     const itemNames = Object.keys(savedCart);
     const root = document.getElementById('white-cart-root');
     const countEl = document.getElementById('wc-item-count');
@@ -194,7 +213,6 @@
 
     if (!root || !countEl || !imgStackEl) return;
 
-    // Reset clear actions
     const stdActions = document.getElementById('wc-standard-actions');
     const clearActions = document.getElementById('wc-clear-actions');
     if (stdActions && clearActions) {
@@ -210,17 +228,22 @@
       const lastItemName = itemNames[itemNames.length - 1];
       if (resEl) resEl.innerText = lastItemName;
 
-      // Render Images
+      // Safe image parsing
       imgStackEl.innerHTML = ''; 
       const latestThreeNames = itemNames.slice(-3).reverse(); 
-      const imageDict = JSON.parse(localStorage.getItem('es_image_dict')) || {};
+      let imageDict = {};
+      try {
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") {
+              imageDict = JSON.parse(dictData);
+          }
+      } catch(e) {}
 
       latestThreeNames.forEach((name) => {
          const imgSrc = imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
          const img = document.createElement('img');
          img.src = imgSrc;
          img.classList.add('wc-img');
-         img.alt = name;
          imgStackEl.appendChild(img);
       });
 
@@ -241,7 +264,6 @@
     document.body.appendChild(makeDOM());
     syncBottom();
 
-    // 📸 Image Snatcher
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button, .counter-btn, [onclick*="updateCart"]');
       if (!btn) return;
@@ -249,8 +271,19 @@
       let foodName = "";
       const clickCode = btn.getAttribute('onclick');
       if (clickCode) {
-        const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
-        if (match) foodName = match[1];
+        // Handle encoded payloads for images
+        if (clickCode.includes('%7B')) {
+            try {
+                const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
+                if (match) {
+                    const payload = JSON.parse(decodeURIComponent(match[1]));
+                    foodName = payload.name;
+                }
+            } catch(err) {}
+        } else {
+            const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
+            if (match) foodName = match[1];
+        }
       }
 
       let wrapper = btn;
@@ -264,13 +297,18 @@
       }
 
       if (foodName && capturedImg) {
-        let dict = JSON.parse(localStorage.getItem('es_image_dict')) || {};
+        let dict = {};
+        try {
+            const dictData = localStorage.getItem('es_image_dict');
+            if (dictData && dictData !== "undefined" && dictData !== "null") {
+                dict = JSON.parse(dictData);
+            }
+        } catch(e) {}
         dict[foodName] = capturedImg;
         localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
     }, true); 
 
-    // CLEAR CART FLOW
     document.getElementById('wc-close-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       document.getElementById('wc-standard-actions').style.display = 'none';
