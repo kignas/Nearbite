@@ -457,9 +457,15 @@
         const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
         
         const itemsArray = [];
+                const itemsArray = [];
         let restaurantId = null;
 
         for (const [name, info] of Object.entries(savedCart)) {
+           // Extract the ID that was saved by cart-bar.js
+           if (info.resId) {
+              restaurantId = info.resId;
+           }
+
            itemsArray.push({
               menuItem: info.menuItem || null,
               name: name,
@@ -473,8 +479,12 @@
         // The backend now calculates everything dynamically.
         const payload = {
            items: itemsArray,
-           deliveryAddress: savedAddress
+           deliveryAddress: savedAddress,
+           // Inject the extracted restaurant ID into the payload
+           restaurant: restaurantId,
+           restaurantId: restaurantId 
         };
+
 
         // URL FIX: Uses the config file dynamically
         const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
