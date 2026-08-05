@@ -9,7 +9,9 @@
   window.__esWhiteCartBar = true;
 
   /* ── 1. THE MATH ENGINE (Updated with Strict Validation) ── */
-  window.updateCart = function(name, qtyChange, price, restaurantId) {
+  /* ── 1. THE MATH ENGINE (Updated with ALL Parameters) ── */
+  // We added param5, menuItemId, image, and isVeg to catch what the button is sending
+  window.updateCart = function(name, qtyChange, price, restaurantId, param5, menuItemId, image, isVeg) {
     
     // 0. STRICT VALIDATION: Prevent Mongoose CastErrors
     if (!restaurantId || restaurantId === 'undefined' || restaurantId === 'null') {
@@ -18,10 +20,16 @@
         return; 
     }
 
+    if (!menuItemId || menuItemId === 'undefined' || menuItemId === 'null') {
+        console.error("CRITICAL UI ERROR: Missing menuItem ID for item:", name);
+        alert("Sorry, this item is missing database data. Please refresh the page.");
+        return;
+    }
+
     // 1. Pull the current cart from the phone's memory
     let cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
     
-    // Check for Cross-Restaurant Ordering (Swiggy Rule)
+    // Check for Cross-Restaurant Ordering
     const existingItems = Object.keys(cart);
     if (existingItems.length > 0) {
       const firstItemResId = cart[existingItems[0]].resId;
@@ -31,9 +39,16 @@
       }
     }
 
-    // 2. Add or update the item
+    // 2. Add or update the item - NOW SAVING THE menuItemId AND image!
     if (!cart[name]) {
-      cart[name] = { quantity: 0, price: parseFloat(price), resId: restaurantId };
+      cart[name] = { 
+          quantity: 0, 
+          price: parseFloat(price), 
+          resId: restaurantId,
+          menuItem: menuItemId, // <-- THIS IS WHAT FIXES YOUR BACKEND CRASH
+          image: image,
+          isVeg: isVeg
+      };
     }
     
     cart[name].quantity += parseInt(qtyChange);
