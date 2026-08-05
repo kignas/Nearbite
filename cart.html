@@ -475,11 +475,16 @@ async function placeOrder() {
        });
     }
 
+        // Sending the ID under multiple keys ensures the backend catches it 
+    // regardless of whether the controller expects resId, restaurant, or restaurantId
     const payload = {
        items: itemsArray,
        deliveryAddress: savedAddress,
        restaurant: restaurantId,
-       restaurantId: restaurantId 
+       restaurantId: restaurantId,
+       resId: restaurantId,
+       restaurant_id: restaurantId,
+       storeId: restaurantId
     };
 
     const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
