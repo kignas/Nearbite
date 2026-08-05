@@ -8,65 +8,74 @@
   if (window.__esWhiteCartBar) return;
   window.__esWhiteCartBar = true;
 
-  /* ── 1. THE MATH ENGINE (Updated with Strict Validation) ── */
-  /* ── 1. THE MATH ENGINE (Updated with ALL Parameters) ── */
-  // We added param5, menuItemId, image, and isVeg to catch what the button is sending
-    window.updateCart = function(name, qtyChange, price, restaurantId, param5, menuItemId, image, isVeg) {
+    /* ── 1. THE MATH ENGINE (Master Version) ── */
+  window.updateCart = function(itemName, change, price, rId, inStock, menuItemId, image, isVeg) {
     
-    // ADD THIS ONE LINE FOR DEBUGGING:
-    alert("Menu Item ID is: " + menuItemId + " | Restaurant ID is: " + restaurantId);
-
-
-    // 0. STRICT VALIDATION: Prevent Mongoose CastErrors
-    if (!restaurantId || restaurantId === 'undefined' || restaurantId === 'null') {
-        console.error("CRITICAL UI ERROR: Missing resId for item:", name);
-        alert("Sorry, there was an issue adding this item. Please refresh the page.");
-        return; 
+    // 1. Safe Availability Check (Works across all pages)
+    if (typeof isRestaurantOpen !== 'undefined' && !isRestaurantOpen) {
+        if (typeof notifyItemUnavailable === 'function') notifyItemUnavailable();
+        return;
     }
-
-    if (!menuItemId || menuItemId === 'undefined' || menuItemId === 'null') {
-        console.error("CRITICAL UI ERROR: Missing menuItem ID for item:", name);
-        alert("Sorry, this item is missing database data. Please refresh the page.");
+    if (change > 0 && inStock === false) {
+        if (typeof notifyItemUnavailable === 'function') notifyItemUnavailable();
         return;
     }
 
-    // 1. Pull the current cart from the phone's memory
-    let cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    // 2. Strict Validation (Prevents Backend Crashes)
+    if (!rId || rId === 'undefined' || rId === 'null') {
+        alert("CRITICAL ERROR: Missing Restaurant ID. Please refresh.");
+        return;
+    }
+
+    // 3. Storage & Cross-Restaurant Logic
+    let cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+    const existingItems = Object.keys(cartMemory);
     
-    // Check for Cross-Restaurant Ordering
-    const existingItems = Object.keys(cart);
     if (existingItems.length > 0) {
-      const firstItemResId = cart[existingItems[0]].resId;
-      if (firstItemResId && firstItemResId !== restaurantId && qtyChange > 0) {
-        alert("You can only order from one restaurant at a time. Please clear your cart to start a new order.");
-        return;
-      }
+        const firstItemResId = cartMemory[existingItems[0]].resId;
+        if (firstItemResId && firstItemResId !== rId && change > 0) {
+            alert("You can only order from one restaurant at a time. Please clear your cart to start a new order.");
+            return;
+        }
     }
 
-    // 2. Add or update the item - NOW SAVING THE menuItemId AND image!
-    if (!cart[name]) {
-      cart[name] = { 
-          quantity: 0, 
-          price: parseFloat(price), 
-          resId: restaurantId,
-          menuItem: menuItemId, // <-- THIS IS WHAT FIXES YOUR BACKEND CRASH
-          image: image,
-          isVeg: isVeg
-      };
+    // 4. Update Memory Payload
+    if (!cartMemory[itemName]) {
+        cartMemory[itemName] = {
+            quantity: 0,
+            price: parseFloat(price),
+            resId: rId,
+            menuItem: menuItemId, 
+            image: image,
+            name: itemName,
+            isVeg: isVeg
+        };
+    } else {
+        if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
+        if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
+        if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
+        if (typeof cartMemory[itemName].isVeg !== 'boolean') cartMemory[itemName].isVeg = isVeg;
     }
     
-    cart[name].quantity += parseInt(qtyChange);
+    cartMemory[itemName].quantity += change;
+    if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
 
-    // 3. If quantity is 0, remove the food from the cart
-    if (cart[name].quantity <= 0) {
-      delete cart[name];
+    // 5. Visually Update the Button
+    const key = itemName.replace(/\s+/g, '');
+    const container = document.getElementById('btn-container-' + key);
+    if (container && typeof window.makeBtnHTML === 'function') {
+        const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
+        container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg);
     }
-
-    // 4. Save back to phone and trigger UI update
-    localStorage.setItem('nearbite_cart', JSON.stringify(cart));
     
-    if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(50);
-    if (window.updateGlobalCart) window.updateGlobalCart();
+    // 6. Save and Trigger Floating Cart Bar
+    localStorage.setItem('nearbite_cart', JSON.stringify(cartMemory));
+    
+    if (typeof window.updateGlobalCart === 'function') {
+        window.updateGlobalCart();
+    } else {
+        console.error("Cart bar script is missing or failed to initialize!");
+    }
   };
 
 
