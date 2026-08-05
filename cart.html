@@ -462,12 +462,13 @@ async function placeOrder() {
     let restaurantId = null;
 
     for (const [name, info] of Object.entries(savedCart)) {
-       if (info.resId) {
+       // STRICT SANITIZATION: Block the literal word "undefined"
+       if (info.resId && info.resId !== "undefined" && info.resId !== "null") {
           restaurantId = info.resId;
        }
 
        itemsArray.push({
-          menuItem: info.menuItem || null,
+          menuItem: (info.menuItem && info.menuItem !== "undefined") ? info.menuItem : null,
           name: name,
           price: info.price,
           quantity: info.quantity,
@@ -475,8 +476,16 @@ async function placeOrder() {
        });
     }
 
-        // Sending the ID under multiple keys ensures the backend catches it 
-    // regardless of whether the controller expects resId, restaurant, or restaurantId
+    // THE ULTIMATE BLOCKER: Prevent corrupted data from crashing the MongoDB backend
+    if (!restaurantId || restaurantId.length < 20) {
+        btn.innerHTML = originalHTML;
+        btn.style.pointerEvents = 'auto';
+        alert("Corrupted data detected from the Under 99 page! We are automatically clearing your cart. Please add the items directly from the main Restaurant menu to proceed.");
+        localStorage.removeItem('nearbite_cart');
+        window.location.reload();
+        return;
+    }
+
     const payload = {
        items: itemsArray,
        deliveryAddress: savedAddress,
@@ -512,6 +521,7 @@ async function placeOrder() {
     btn.style.pointerEvents = 'auto';
   }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   renderCart();
