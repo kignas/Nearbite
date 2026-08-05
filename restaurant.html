@@ -437,7 +437,7 @@
   window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg) {
     const safeName = itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const safeId = String(rId).replace(/['"]/g, ''); 
-    const safeMenuItemId = String(item.menuItem || '').replace(/['"]/g, '');
+    const safeMenuItemId = String(menuItemId || '').replace(/['"]/g, '');
     const safeImage = String(image || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const vegArg = isVeg ? 'true' : 'false';
     const isItemAvailable = inStock !== false && isRestaurantOpen;
