@@ -272,3 +272,44 @@
   });
 
 })();
+function addToCart(menuItem, resId, image, price, quantity = 1) {
+    // 1. Strict Validation Check
+    if (!resId || resId === 'undefined' || resId === 'null') {
+        console.error("CRITICAL UI ERROR: Attempted to add item without a valid resId", { menuItem, resId, image, price });
+        alert("Sorry, there was an issue adding this item. Please refresh the page.");
+        return; 
+    }
+
+    if (!menuItem) {
+        console.error("CRITICAL UI ERROR: Missing menuItem ID");
+        return;
+    }
+
+    // 2. Fetch Existing Cart
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // 3. Prevent cross-restaurant ordering (Optional but recommended)
+    if (cart.length > 0 && cart[0].resId !== resId) {
+        alert("You can only order from one restaurant at a time. Please clear your cart first.");
+        return;
+    }
+
+    // 4. Update or Add Item
+    let existingItemIndex = cart.findIndex(item => item.menuItem === menuItem);
+    
+    if (existingItemIndex > -1) {
+        cart[existingItemIndex].quantity += quantity;
+    } else {
+        cart.push({
+            menuItem: menuItem,
+            resId: resId,
+            image: image,
+            price: Number(price),
+            quantity: Number(quantity)
+        });
+    }
+
+    // 5. Save and trigger UI update
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartUI(); // Assuming you have a function to update the cart bar/counter
+}
