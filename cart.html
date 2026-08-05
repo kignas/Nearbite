@@ -284,6 +284,34 @@
 
     <script src="config.js"></script>
     <script>
+
+      (function sanitizeLegacyCarts() {
+    try {
+        const cart = JSON.parse(localStorage.getItem('nearbite_cart'));
+        if (!cart) return;
+
+        let isCorrupted = false;
+        
+        // Scan all items in the cart object
+        for (const itemName in cart) {
+            const item = cart[itemName];
+            if (!item.resId || item.resId === "undefined" || item.resId === "null") {
+                isCorrupted = true;
+                break;
+            }
+        }
+
+        if (isCorrupted) {
+            console.warn("Corrupted legacy cart detected. Flushing storage to prevent Mongoose crash.");
+            localStorage.removeItem('nearbite_cart');
+            alert("We updated our system and had to reset your cart. Please add your items again.");
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error("Error sanitizing cart:", error);
+    }
+})();
+
     function renderCart() {
   let savedCart;
   try {
