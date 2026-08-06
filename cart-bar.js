@@ -59,6 +59,14 @@
         return;
     }
 
+    // 🛡️ Same protection for the menu item id — the backend rejects any cart
+    // item that isn't a real Menu _id, so catch it here instead of letting a
+    // half-built cart entry reach checkout.
+    if (change > 0 && (!menuItemId || menuItemId === 'undefined' || menuItemId === 'null')) {
+        alert("CRITICAL ERROR: Missing Menu Item ID. Please refresh and try again.");
+        return;
+    }
+
     // Cross-Restaurant Protection
     let cartMemory = safeGetCart();
     const existingItems = Object.keys(cartMemory);

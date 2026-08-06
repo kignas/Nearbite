@@ -485,6 +485,21 @@
   // ── 2. THE BULLETPROOF UPDATE FUNCTION (NOW IN ORANGE) ──
   window.updateCart = function(encodedPayload, change) {
     const payload = JSON.parse(decodeURIComponent(encodedPayload));
+
+    // 🛡️ Same validation as cart-bar.js: never let a cart entry get created
+    // without a real restaurant id or menu item id, since the backend will
+    // reject the whole order the moment one bad item slips through.
+    if (change > 0) {
+      if (!payload.resId || payload.resId === 'undefined' || payload.resId === 'null') {
+        alert("CRITICAL ERROR: Missing Restaurant ID. Please refresh.");
+        return;
+      }
+      if (!payload.menuItem || payload.menuItem === 'undefined' || payload.menuItem === 'null') {
+        alert("CRITICAL ERROR: Missing Menu Item ID. Please refresh and try again.");
+        return;
+      }
+    }
+
     let cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
     
     // Store exact same comprehensive cart object as restaurant.html

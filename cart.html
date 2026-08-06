@@ -504,11 +504,11 @@ async function placeOrder() {
        });
     }
 
-    // THE ULTIMATE BLOCKER: Prevent corrupted data from crashing the MongoDB backend
+    // Safety net: block obviously corrupted carts before they ever hit the backend.
     if (!restaurantId || restaurantId.length < 20) {
         btn.innerHTML = originalHTML;
         btn.style.pointerEvents = 'auto';
-        alert("Corrupted data detected from the Under 99 page! We are automatically clearing your cart. Please add the items directly from the main Restaurant menu to proceed.");
+        alert("Your cart data looks corrupted. We're clearing it so you can add items fresh.");
         localStorage.removeItem('nearbite_cart');
         window.location.reload();
         return;

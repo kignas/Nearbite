@@ -1168,6 +1168,7 @@ img[loading="lazy"].loaded { opacity: 1; }
             if (price <= 99) {
               items99.push({
                 name: dish.name, price: price, image: dish.image || dish.img, isVeg: dish.isVeg,
+                menuItem: dish._id || dish.id,
                 resId: restaurant._id || restaurant.id, resName: restaurant.name, resRating: restaurant.rating || 4.2
               });
             }
@@ -1193,7 +1194,11 @@ img[loading="lazy"].loaded { opacity: 1; }
           
           let cleanPrice = typeof dbItem.price === 'number' ? dbItem.price : parseFloat(String(dbItem.price).replace(/[^\d.]/g, '')) || 99;
           
-          return { name: dbItem.name, price: cleanPrice, image: dbItem.image || dbItem.img, isVeg: Boolean(dbItem.isVeg), resId: rId, resName: rName, resRating: rRating };
+          return {
+            name: dbItem.name, price: cleanPrice, image: dbItem.image || dbItem.img, isVeg: Boolean(dbItem.isVeg),
+            menuItem: dbItem._id || dbItem.id,
+            resId: rId, resName: rName, resRating: rRating
+          };
         }).filter(item => item.price <= 99);
       } catch(e) { console.error("Failed to load 99 items", e); }
     }
@@ -1209,12 +1214,18 @@ img[loading="lazy"].loaded { opacity: 1; }
     list99.innerHTML = items99.map((item, idx) => {
       const safeName = item.name ? item.name.replace(/'/g, "\\'").replace(/"/g, '&quot;') : 'Item';
       const safeId = String(item.resId).replace(/['"]/g, '');
+      // 🔧 FIX: menuItem/image/isVeg were never passed here before, so every cart
+      // entry added from this homepage strip was saved with menuItem: undefined —
+      // which the backend correctly rejects as "Corrupted items detected".
+      const safeMenuItemId = String(item.menuItem || '').replace(/['"]/g, '');
+      const safeImage = String(item.image || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const vegArg = item.isVeg ? 'true' : 'false';
       const oldPrice = Math.floor(item.price * 1.4); 
       const vegClass = item.isVeg ? 'veg' : 'nonveg';
       const resUnavailable = window.__unavailableRestaurantIds && window.__unavailableRestaurantIds.has(safeId);
       const addBtn = resUnavailable
         ? `<button class="s99-add-circle is-disabled" disabled onclick="event.preventDefault(); showAvailabilityToast('Temporarily Closed');">+</button>`
-        : `<button class="s99-add-circle" onclick="event.preventDefault(); updateCart('${safeName}', 1, ${item.price}, '${safeId}')">+</button>`;
+        : `<button class="s99-add-circle" onclick="event.preventDefault(); updateCart('${safeName}', 1, ${item.price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg})">+</button>`;
 
       return `
         <a href="under99.html" class="s99-card tap" style="animation: cardFadeUp 0.3s ease forwards ${idx * 0.05}s; opacity: 0;">
