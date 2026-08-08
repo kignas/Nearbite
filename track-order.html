@@ -482,6 +482,11 @@
         <div class="info-card-label">Restaurant</div>
         <div class="info-card-title" id="restaurant-name">—</div>
         <div class="info-card-sub" id="restaurant-address"></div>
+        <div id="restaurant-owner-contact" style="display:none;margin-top:9px;">
+          <a id="restaurant-call-btn" href="#" style="display:inline-flex;align-items:center;gap:7px;color:#FC8019;text-decoration:none;font-size:12px;font-weight:800;">
+            <i class="fa-solid fa-phone"></i><span id="restaurant-phone"></span>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -800,27 +805,38 @@
       }
 
       const summaryRestaurantName = document.getElementById('summary-restaurant-name');
-      if (order.restaurant && order.restaurant.name) {
-        document.getElementById('restaurant-name').innerText = order.restaurant.name;
-        document.getElementById('hero-restaurant-name').innerText = order.restaurant.name;
-        if (summaryRestaurantName) { summaryRestaurantName.innerText = order.restaurant.name; summaryRestaurantName.style.display = 'block'; }
+      const restaurantName = order.restaurantName ||
+        (order.restaurant && order.restaurant.name) || 'EatSwada Partner';
+      const restaurantAddress = order.restaurantAddress ||
+        (order.restaurant && order.restaurant.address) || '';
+      const restaurantPhone = order.restaurantPhone ||
+        (order.restaurant && order.restaurant.phone) || '';
 
-        const rAddr = order.restaurant.address || '';
-        const rAddrEl = document.getElementById('restaurant-address');
-        rAddrEl.innerText = rAddr;
-        rAddrEl.style.display = rAddr ? 'block' : 'none';
-        restaurantCard.style.display = 'flex';
+      document.getElementById('restaurant-name').innerText = restaurantName;
+      document.getElementById('hero-restaurant-name').innerText = restaurantName;
+      if (summaryRestaurantName) {
+        summaryRestaurantName.innerText = restaurantName;
+        summaryRestaurantName.style.display = 'block';
+      }
 
-        if (order.restaurant.phone) {
-          helpCallRestaurant.href = `tel:${order.restaurant.phone}`;
-          helpCallRestaurant.style.display = 'flex';
-        } else {
-          helpCallRestaurant.style.display = 'none';
-        }
+      const rAddrEl = document.getElementById('restaurant-address');
+      rAddrEl.innerText = restaurantAddress;
+      rAddrEl.style.display = restaurantAddress ? 'block' : 'none';
+      restaurantCard.style.display = 'flex';
+
+      const restaurantOwnerContact = document.getElementById('restaurant-owner-contact');
+      const restaurantCallBtn = document.getElementById('restaurant-call-btn');
+      const restaurantPhoneEl = document.getElementById('restaurant-phone');
+
+      if (restaurantPhone) {
+        restaurantPhoneEl.innerText = restaurantPhone;
+        restaurantCallBtn.href = `tel:${restaurantPhone}`;
+        restaurantOwnerContact.style.display = 'block';
+
+        helpCallRestaurant.href = `tel:${restaurantPhone}`;
+        helpCallRestaurant.style.display = 'flex';
       } else {
-        document.getElementById('hero-restaurant-name').innerText = order.restaurantName || 'EatSwada Partner';
-        restaurantCard.style.display = 'none';
-        if (summaryRestaurantName) summaryRestaurantName.style.display = 'none';
+        restaurantOwnerContact.style.display = 'none';
         helpCallRestaurant.style.display = 'none';
       }
 

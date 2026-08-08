@@ -385,13 +385,40 @@
              const safeUser = result.data.user;
 
              if (safeToken) {
-                 // Save securely to the phone's vault
+                 // Keep the cart intact across login. Authentication is required
+                 // only when the customer tries to place the order.
                  localStorage.setItem('nearbite_token', safeToken);
-                 localStorage.setItem('token', safeToken); 
+                 localStorage.setItem('token', safeToken);
                  localStorage.setItem('nearbite_user', JSON.stringify(safeUser));
-                 
-                 // 🚨 THE MASTER TEST: Go straight to Orders, skipping index.html! 🚨
-                 window.location.href = 'orders.html';
+
+                 const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
+
+                 // First-time OTP users are created with the default name
+                 // "Nearbite User". Fetch the profile and check whether an
+                 // address already exists before deciding where to send them.
+                 try {
+                   const profileResponse = await fetch(`${API_URL}/profile`, {
+                     headers: { 'Authorization': `Bearer ${safeToken}` }
+                   });
+                   const profileResult = await profileResponse.json();
+                   const profile = profileResult && profileResult.success ? profileResult.data : safeUser;
+
+                   const addresses = Array.isArray(profile?.addresses) ? profile.addresses : [];
+                   const hasRealName = !!profile?.name && profile.name.trim() !== 'Nearbite User';
+                   const hasAddress = addresses.length > 0 || !!profile?.defaultAddress;
+
+                   if (!hasRealName || !hasAddress) {
+                     localStorage.setItem('nearbite_after_login', requestedPage);
+                     window.location.href = 'complete-profile.html';
+                   } else {
+                     localStorage.removeItem('nearbite_after_login');
+                     window.location.href = requestedPage;
+                   }
+                 } catch (profileError) {
+                   console.error('Profile lookup failed:', profileError);
+                   localStorage.setItem('nearbite_after_login', requestedPage);
+                   window.location.href = 'complete-profile.html';
+                 }
              } else {
                  alert("System Error: Token missing from server.");
              }

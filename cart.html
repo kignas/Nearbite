@@ -410,36 +410,76 @@ function clearCart() {
 function hasAddress() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
-  return !!(saved && saved.house && saved.house.trim().length > 0);
+  return !!(saved && saved.house && saved.area && saved.landmark);
 }
 
-function loadAddress() {
-  let saved;
-  try {
-     saved = JSON.parse(localStorage.getItem('nearbite_address'));
-  } catch(e) {
-     saved = null;
-  }
-  const tagLabel   = document.getElementById('address-tag-label');
-  const addrText   = document.getElementById('address-display-text');
+async function loadAddress() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
+
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  const tagLabel = document.getElementById('address-tag-label');
+  const addrText = document.getElementById('address-display-text');
   const checkoutBtn = document.getElementById('btn-checkout');
+  const checkoutText = checkoutBtn ? checkoutBtn.querySelector('.btn-checkout-text') : null;
+
+  // Returning customers may have their address on the server but not in this
+  // browser's localStorage. Hydrate the local cart UI from their saved profile.
+  if (token && !hasAddress()) {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        const user = result.data || {};
+        const address = user.defaultAddress ||
+          (Array.isArray(user.addresses) ? user.addresses.find(a => a.isDefault) || user.addresses[0] : null);
+
+        if (address && address.house && address.area && address.landmark) {
+          saved = {
+            tag: address.tag || 'Home',
+            house: address.house || '',
+            area: address.area || '',
+            landmark: address.landmark || '',
+            city: address.city || 'Maynaguri',
+            pincode: address.pincode || ''
+          };
+          localStorage.setItem('nearbite_address', JSON.stringify(saved));
+        }
+      }
+    } catch (e) {
+      console.warn('Could not hydrate saved address:', e);
+    }
+  }
 
   if (hasAddress() && saved) {
-    const tag   = saved.tag || 'Home';
-    const parts = [saved.house, saved.area, saved.landmark].filter(Boolean);
-    tagLabel.textContent      = 'Delivering to ' + tag;
-    addrText.textContent      = parts.join(', ');
-    addrText.style.color      = '';
+    const tag = saved.tag || 'Home';
+    const parts = [saved.house, saved.area, saved.landmark, saved.city].filter(Boolean);
+    tagLabel.textContent = 'Delivering to ' + tag;
+    addrText.textContent = parts.join(', ');
+    addrText.style.color = '';
     addrText.style.fontWeight = '';
     checkoutBtn.classList.remove('locked');
     checkoutBtn.setAttribute('aria-disabled', 'false');
+    if (checkoutText) checkoutText.innerHTML = 'PLACE ORDER <i class="fa-solid fa-caret-right" style="margin-left:4px;"></i>';
+  } else if (!token) {
+    // Guest users can browse and build a cart. Login is required only here.
+    tagLabel.textContent = 'Login to order';
+    addrText.textContent = 'Login with your phone to add your delivery address →';
+    addrText.style.color = '#FC8019';
+    addrText.style.fontWeight = '700';
+    checkoutBtn.classList.remove('locked');
+    checkoutBtn.setAttribute('aria-disabled', 'false');
+    if (checkoutText) checkoutText.innerHTML = 'LOGIN TO ORDER <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>';
   } else {
-    tagLabel.textContent      = 'Add Delivery Address';
-    addrText.textContent      = 'Tap to add your delivery address →';
-    addrText.style.color      = '#FC8019';
+    tagLabel.textContent = 'Add Delivery Address';
+    addrText.textContent = 'Tap to add your delivery address →';
+    addrText.style.color = '#FC8019';
     addrText.style.fontWeight = '700';
     checkoutBtn.classList.add('locked');
     checkoutBtn.setAttribute('aria-disabled', 'true');
+    if (checkoutText) checkoutText.innerHTML = 'ADD ADDRESS <i class="fa-solid fa-location-dot" style="margin-left:4px;"></i>';
   }
 }
 
@@ -451,97 +491,91 @@ function showToast(msg) {
 }
 
 async function placeOrder() {
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+
+  // Guest cart is allowed. Authentication starts only when they press Order.
+  if (!token) {
+    localStorage.setItem('nearbite_after_login', 'cart.html');
+    window.location.href = 'login.html';
+    return;
+  }
+
   if (!hasAddress()) {
-    const btn = document.getElementById('btn-checkout');
-    btn.classList.remove('shake');
-    void btn.offsetWidth; 
-    btn.classList.add('shake');
-    btn.addEventListener('animationend', () => btn.classList.remove('shake'), { once: true });
-
-    const card = document.getElementById('address-block');
-    card.classList.remove('address-pulse');
-    void card.offsetWidth;
-    card.classList.add('address-pulse');
-    card.addEventListener('animationend', () => card.classList.remove('address-pulse'), { once: true });
-
-    showToast('Please add a delivery address first');
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return; 
+    window.location.href = 'address.html';
+    return;
   }
 
   const btn = document.getElementById('btn-checkout');
   const originalHTML = btn.innerHTML;
-  
-  btn.innerHTML = '<span class="btn-checkout-text" style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> PLACING ORDER...</span>';
+
+  btn.innerHTML = '<span class="btn-checkout-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> PLACING ORDER...</span>';
   btn.style.pointerEvents = 'none';
 
   try {
-    const token = localStorage.getItem('nearbite_token');
-    if (!token) {
-       alert("Please log in to place an order!");
-       window.location.href = 'login.html';
-       return;
-    }
-
     const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
     const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
-    
+
     const itemsArray = [];
     let restaurantId = null;
+    let restaurantName = '';
 
     for (const [name, info] of Object.entries(savedCart)) {
-       // STRICT SANITIZATION: Block the literal word "undefined"
-       if (info.resId && info.resId !== "undefined" && info.resId !== "null") {
-          restaurantId = info.resId;
-       }
+      if (info.resId && info.resId !== "undefined" && info.resId !== "null") {
+        restaurantId = info.resId;
+      }
+      if (!restaurantName && info.resName) restaurantName = info.resName;
 
-       itemsArray.push({
-          menuItem: (info.menuItem && info.menuItem !== "undefined") ? info.menuItem : null,
-          name: name,
-          price: info.price,
-          quantity: info.quantity,
-          customizations: info.customizations || {}
-       });
+      itemsArray.push({
+        menuItem: (info.menuItem && info.menuItem !== "undefined") ? info.menuItem : null,
+        name: name,
+        price: info.price,
+        quantity: info.quantity,
+        customizations: info.customizations || {}
+      });
     }
 
-    // Safety net: block obviously corrupted carts before they ever hit the backend.
     if (!restaurantId || restaurantId.length < 20) {
-        btn.innerHTML = originalHTML;
-        btn.style.pointerEvents = 'auto';
-        alert("Your cart data looks corrupted. We're clearing it so you can add items fresh.");
-        localStorage.removeItem('nearbite_cart');
-        window.location.reload();
-        return;
+      throw new Error("Your cart data looks corrupted. Please add the items again.");
     }
+
+    const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    const deliveryFee = subtotal >= 200 ? 0 : 40;
+    const platformFee = 5;
+    const total = subtotal + deliveryFee + platformFee;
 
     const payload = {
-       items: itemsArray,
-       deliveryAddress: savedAddress,
-       restaurant: restaurantId,
-       restaurantId: restaurantId,
-       resId: restaurantId,
-       restaurant_id: restaurantId,
-       storeId: restaurantId
+      items: itemsArray,
+      deliveryAddress: savedAddress,
+      restaurantId: restaurantId,
+      restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
+      subtotal,
+      total
     };
 
     const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
-       method: 'POST',
-       headers: { 
-         'Content-Type': 'application/json',
-         'Authorization': `Bearer ${token}` 
-       },
-       body: JSON.stringify(payload)
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
     });
 
     const result = await response.json();
 
-    if (response.ok && (result.success || response.status === 201)) {
-        localStorage.removeItem('nearbite_cart');
-        window.location.href = 'track-order.html';
-    } else {
-        throw new Error(result.message || "Failed to place order.");
-    }
+    if (response.ok && result.success) {
+      localStorage.removeItem('nearbite_cart');
 
+      // Keep the one-time delivery PIN returned by the backend so the
+      // tracking page can display it even though the backend stores only a hash.
+      if (result.deliveryOtp) {
+        localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
+      }
+
+      window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
+    } else {
+      throw new Error(result.message || "Failed to place order.");
+    }
   } catch (error) {
     console.error(error);
     alert("Wait: " + error.message);
@@ -551,9 +585,9 @@ async function placeOrder() {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   renderCart();
-  loadAddress();
+  await loadAddress();
 });
   </script>
 </body>
