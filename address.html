@@ -514,8 +514,22 @@ async function saveAddress() {
 
     localStorage.setItem('nearbite_address', JSON.stringify(saved));
     localStorage.setItem('nearbite_address_updated_at', String(Date.now()));
+    // Restore the guest cart if authentication cleared it.
+    try {
+      const currentCart = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
+      const backupCart = localStorage.getItem('nearbite_cart_before_auth');
+      if (Object.keys(currentCart).length === 0 && backupCart) {
+        localStorage.setItem('nearbite_cart', backupCart);
+      }
+      localStorage.removeItem('nearbite_cart_before_auth');
+    } catch (e) {
+      console.warn('Could not restore cart after address save:', e);
+    }
 
-    window.location.href = 'cart.html';
+
+    const next = localStorage.getItem('nearbite_after_login') || 'cart.html';
+    localStorage.removeItem('nearbite_after_login');
+    window.location.href = next;
   } catch (err) {
     console.error('Save address failed:', err);
 
