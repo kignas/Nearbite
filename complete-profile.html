@@ -133,7 +133,63 @@
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
 
   // GeoJSON coordinates: [longitude, latitude]
+  // Keep the coordinates in memory AND in localStorage so a refresh/navigation
+  // does not unnecessarily lose a successfully captured customer location.
   let deliveryCoordinates = null;
+
+  function normalizeCoordinates(value) {
+    // Supports GeoJSON [lng, lat], {lat,lng}, {latitude,longitude},
+    // and address.location.coordinates.
+    let coords = value;
+    if (coords && coords.coordinates) coords = coords.coordinates;
+
+    if (Array.isArray(coords) && coords.length >= 2) {
+      const a = Number(coords[0]);
+      const b = Number(coords[1]);
+      if (Number.isFinite(a) && Number.isFinite(b)) {
+        // GeoJSON is [lng, lat]. Reject impossible ranges.
+        if (Math.abs(a) <= 180 && Math.abs(b) <= 90) return [a, b];
+      }
+    }
+
+    if (coords && typeof coords === 'object') {
+      const lat = Number(coords.lat ?? coords.latitude);
+      const lng = Number(coords.lng ?? coords.lon ?? coords.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lng) &&
+          lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return [lng, lat];
+      }
+    }
+
+    return null;
+  }
+
+  function saveCoordinatesLocally(coords) {
+    if (!Array.isArray(coords) || coords.length !== 2) return;
+    localStorage.setItem('nearbite_delivery_coordinates', JSON.stringify(coords));
+  }
+
+  function restoreCoordinatesLocally() {
+    try {
+      const raw = localStorage.getItem('nearbite_delivery_coordinates');
+      const coords = normalizeCoordinates(raw ? JSON.parse(raw) : null);
+      if (coords) {
+        deliveryCoordinates = coords;
+        return true;
+      }
+
+      const savedAddress = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
+      const addressCoords = normalizeCoordinates(savedAddress?.location);
+      if (addressCoords) {
+        deliveryCoordinates = addressCoords;
+        saveCoordinatesLocally(addressCoords);
+        return true;
+      }
+    } catch (e) {
+      console.warn('Could not restore saved delivery coordinates', e);
+    }
+    return false;
+  }
 
   function setLocationStatus(message, type = '') {
     const el = $('locationStatus');
@@ -169,6 +225,7 @@
         }
 
         deliveryCoordinates = [lng, lat];
+        saveCoordinatesLocally(deliveryCoordinates);
         btnText.textContent = 'Location captured ✓';
         setLocationStatus(
           `GPS location saved (${lat.toFixed(5)}, ${lng.toFixed(5)}).`,
@@ -222,16 +279,28 @@
   $('email').addEventListener('input', validate);
 
   async function loadExistingProfile() {
+    // First restore anything already captured on this device. This prevents
+    // the page from showing the GPS error after a refresh or route change.
+    const restored = restoreCoordinatesLocally();
+    if (restored) {
+      $('locationBtnText').textContent = 'Saved location ✓';
+      setLocationStatus('Your saved GPS location will be used for delivery distance.', 'success');
+    }
+
     try {
       const res = await fetch(`${API}/users/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const result = await res.json();
-      if (!res.ok || !result.success) return;
+      if (!res.ok || !result.success) {
+        validate();
+        return;
+      }
 
       const user = result.data || {};
       if (user.name && user.name !== 'Nearbite User') $('name').value = user.name;
-      $('phone').value = user.phone || (JSON.parse(localStorage.getItem('nearbite_user') || '{}').phone || '');
+      const localUser = JSON.parse(localStorage.getItem('nearbite_user') || '{}');
+      $('phone').value = user.phone || localUser.phone || '';
       if (user.email) $('email').value = user.email;
 
       const address = user.defaultAddress ||
@@ -244,17 +313,21 @@
         $('city').value = address.city || 'Maynaguri';
         $('pincode').value = address.pincode || '';
 
-        const coords = address.location?.coordinates;
-        if (Array.isArray(coords) && coords.length === 2 &&
-            Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]))) {
-          deliveryCoordinates = [Number(coords[0]), Number(coords[1])];
+        const coords = normalizeCoordinates(address.location);
+        if (coords) {
+          deliveryCoordinates = coords;
+          saveCoordinatesLocally(coords);
           $('locationBtnText').textContent = 'Saved location ✓';
           setLocationStatus('Your saved GPS location will be used for delivery distance.', 'success');
         }
       }
+
       validate();
     } catch (e) {
+      // A temporary profile API failure must not erase a valid locally
+      // captured GPS location.
       console.warn('Could not load existing profile', e);
+      validate();
     }
   }
 
@@ -263,7 +336,7 @@
     if (!validate()) {
       if (!Array.isArray(deliveryCoordinates)) {
         setLocationStatus('Please capture your current GPS location before continuing.', 'error');
-        showError('A valid Google Maps/GPS location is required.');
+        showError('Please capture your delivery location using GPS before continuing.');
       }
       return;
     }
@@ -318,6 +391,7 @@
       const savedUser = profileResult.data || JSON.parse(localStorage.getItem('nearbite_user') || '{}');
       localStorage.setItem('nearbite_user', JSON.stringify(savedUser));
       localStorage.setItem('nearbite_address', JSON.stringify(addressPayload));
+      saveCoordinatesLocally(deliveryCoordinates);
 
       const next = localStorage.getItem('nearbite_after_login') || 'index.html';
       localStorage.removeItem('nearbite_after_login');
@@ -331,7 +405,11 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', loadExistingProfile);
+  document.addEventListener('DOMContentLoaded', () => {
+    restoreCoordinatesLocally();
+    loadExistingProfile();
+    validate();
+  });
 </script>
 </body>
 </html>
