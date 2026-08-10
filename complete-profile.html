@@ -193,13 +193,53 @@
       localStorage.setItem('nearbite_user', JSON.stringify(savedUser));
 
       /*
-       * IMPORTANT:
-       * complete-profile no longer saves an address and no longer requires GPS.
-       * address.html is now the single source of truth for delivery addresses.
+       * Preserve the page that started the login flow.
+       * Do not overwrite the cart or the original redirect target.
        */
-      localStorage.setItem('nearbite_after_login', 'cart.html');
+      // Restore the guest cart if authentication unexpectedly cleared it.
+      // Never overwrite a non-empty current cart.
+      try {
+        const currentCart = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
+        const backupCart = localStorage.getItem('nearbite_cart_before_auth');
+        if (Object.keys(currentCart).length === 0 && backupCart) {
+          localStorage.setItem('nearbite_cart', backupCart);
+        }
+      } catch (e) {
+        console.warn('Could not restore cart after login:', e);
+      }
 
-      window.location.href = 'address.html';
+      const next = localStorage.getItem('nearbite_after_login') || 'cart.html';
+
+      // If this account already has a saved address, skip the address page.
+      // Otherwise address.html becomes the single address + GPS step.
+      let hasServerAddress = false;
+      try {
+        const addressRes = await fetch(`${API}/users/addresses`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store'
+        });
+        if (addressRes.ok) {
+          const addressResult = await addressRes.json();
+          const addresses = Array.isArray(addressResult) ? addressResult :
+            Array.isArray(addressResult.addresses) ? addressResult.addresses :
+            Array.isArray(addressResult.data) ? addressResult.data :
+            Array.isArray(addressResult?.data?.addresses) ? addressResult.data.addresses : [];
+          hasServerAddress = addresses.length > 0;
+          if (hasServerAddress) {
+            const preferred = addresses.find(a => a.isDefault || a.default || a.tag === 'Home') || addresses[0];
+            localStorage.setItem('nearbite_address', JSON.stringify(preferred));
+          }
+        }
+      } catch (e) {
+        console.warn('Could not check saved address:', e);
+      }
+
+      if (hasServerAddress || localStorage.getItem('nearbite_address')) {
+        localStorage.removeItem('nearbite_after_login');
+        window.location.href = next;
+      } else {
+        window.location.href = 'address.html';
+      }
     } catch (error) {
       console.error(error);
       showError(
