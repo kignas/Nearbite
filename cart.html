@@ -539,8 +539,31 @@ async function placeOrder() {
     }
 
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-    const deliveryFee = subtotal >= 200 ? 0 : 40;
     const platformFee = 5;
+
+    // Match the same customer-facing estimate used by renderCart().
+    let deliveryFee = 40;
+    if (subtotal >= 200) {
+      deliveryFee = 0;
+    } else if (savedAddress &&
+               Number.isFinite(Number(savedAddress.latitude)) &&
+               Number.isFinite(Number(savedAddress.longitude))) {
+      const lat = Number(savedAddress.latitude);
+      const lon = Number(savedAddress.longitude);
+      const BASE_LAT = 26.5239;
+      const BASE_LON = 88.8206;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat - BASE_LAT);
+      const dLon = toRad(lon - BASE_LON);
+      const a = Math.sin(dLat/2) ** 2 +
+                Math.cos(toRad(BASE_LAT)) * Math.cos(toRad(lat)) *
+                Math.sin(dLon/2) ** 2;
+      const distanceKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      if (distanceKm <= 5) deliveryFee = 30;
+      else if (distanceKm <= 12) deliveryFee = 40;
+      else deliveryFee = 50;
+    }
+
     const total = subtotal + deliveryFee + platformFee;
 
     const payload = {
@@ -549,6 +572,8 @@ async function placeOrder() {
       restaurantId: restaurantId,
       restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
       subtotal,
+      deliveryFee,
+      platformFee,
       total
     };
 
