@@ -244,7 +244,7 @@
       </div>
       <div class="bill-row">
         <span class="bill-label">Delivery Fee</span>
-        <span class="bill-val" id="bill-delivery-val">₹40</span>
+        <span class="bill-val" id="bill-delivery-val">Calculating…</span>
       </div>
       <div class="bill-row">
         <span class="bill-label">Platform Fee</span>
@@ -312,85 +312,157 @@
     }
 })();
 
-    function renderCart() {
-  let savedCart;
-  try {
-    savedCart = JSON.parse(localStorage.getItem('nearbite_cart'));
-  } catch(e) {
-    savedCart = null;
-  }
-  
-  const emptyEl = document.getElementById('empty-cart');
-  const hasItemsEl = document.getElementById('cart-has-items');
-  const listEl  = document.getElementById('cart-items-list');
-  const footerEl = document.getElementById('checkout-footer');
+    function normalizeCoords(value) {
+      // GeoJSON: { type: 'Point', coordinates: [lng, lat] }
+      if (value && Array.isArray(value.coordinates) && value.coordinates.length === 2) {
+        const lng = Number(value.coordinates[0]);
+        const lat = Number(value.coordinates[1]);
+        if (Number.isFinite(lng) && Number.isFinite(lat) && Math.abs(lng) <= 180 && Math.abs(lat) <= 90) {
+          return [lng, lat];
+        }
+      }
+      // Legacy/local format: { longitude, latitude }
+      if (value && Number.isFinite(Number(value.longitude)) && Number.isFinite(Number(value.latitude))) {
+        const lng = Number(value.longitude);
+        const lat = Number(value.latitude);
+        if (Math.abs(lng) <= 180 && Math.abs(lat) <= 90) return [lng, lat];
+      }
+      return null;
+    }
 
-  if (!savedCart || Object.keys(savedCart).length === 0) {
-    emptyEl.style.display = 'block';
-    hasItemsEl.style.display = 'none';
-    footerEl.style.display = 'none';
-    return;
-  }
+    function distanceKm(from, to) {
+      const [fromLng, fromLat] = from;
+      const [toLng, toLat] = to;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(toLat - fromLat);
+      const dLng = toRad(toLng - fromLng);
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) ** 2;
+      return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
 
-  emptyEl.style.display = 'none';
-  hasItemsEl.style.display = 'block';
-  footerEl.style.display = 'flex';
+    function deliveryFeeForDistance(distance) {
+      if (!Number.isFinite(distance) || distance < 0) return null;
+      if (distance < 10) return 30;
+      if (distance <= 15) return 40;
+      return 50;
+    }
 
-  const items = Object.entries(savedCart);
-  const subtotal     = items.reduce((s, [, v]) => s + v.quantity * v.price, 0);
-  const DELIVERY_MIN = 200;
-  const DELIVERY_FEE = 40;
-  const PLATFORM_FEE = 5;
-  const deliveryFee  = subtotal >= DELIVERY_MIN ? 0 : DELIVERY_FEE;
-  const total        = subtotal + deliveryFee + PLATFORM_FEE;
+    function getCartRestaurantId(savedCart) {
+      for (const [, info] of Object.entries(savedCart || {})) {
+        if (info && info.resId && info.resId !== 'undefined' && info.resId !== 'null') return String(info.resId);
+      }
+      return null;
+    }
 
-  const deliveryValEl = document.getElementById('bill-delivery-val');
-  if (deliveryFee === 0) {
-    deliveryValEl.textContent = 'FREE';
-    deliveryValEl.className   = 'bill-val free';
-  } else {
-    deliveryValEl.textContent = '₹' + deliveryFee;
-    deliveryValEl.className   = 'bill-val';
-  }
+    async function getRestaurantLocation(restaurantId) {
+      if (!restaurantId) return null;
+      try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(restaurantId)}`);
+        const result = await response.json();
+        if (!response.ok || !result.success) return null;
+        const restaurant = result.data || {};
+        return normalizeCoords(restaurant.location);
+      } catch (error) {
+        console.warn('Could not load restaurant GPS:', error);
+        return null;
+      }
+    }
 
-  const nudgeEl   = document.getElementById('free-delivery-nudge');
-  const nudgeText = document.getElementById('nudge-text');
-  if (deliveryFee > 0) {
-    const needed = DELIVERY_MIN - subtotal;
-    nudgeText.textContent = 'Add items worth ₹' + needed + ' more for FREE delivery!';
-    nudgeEl.style.display = 'flex';
-  } else {
-    nudgeEl.style.display = 'none';
-  }
+    async function calculateCurrentDelivery() {
+      let savedCart = {};
+      let savedAddress = null;
+      try { savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
+      try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
 
-  let resName = "Nearbite Restaurant";
-  if (items.length > 0 && items[0][1].resName) {
-     resName = items[0][1].resName;
-  }
-  document.getElementById('cart-restaurant-name').innerText = resName;
+      const restaurantId = getCartRestaurantId(savedCart);
+      const customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
+      const restaurantCoords = await getRestaurantLocation(restaurantId);
 
-  listEl.innerHTML = items.map(([name, info]) => `
-    <div class="cart-item">
-      <div class="item-info">
-        <div class="item-icon"></div>
-        <div class="item-name">${name}</div>
-        <div class="item-price">₹${info.price}</div>
-      </div>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div class="counter-btn tap">
-          <button onclick="cartAdjust('${name}', -1)">−</button>
-          <span>${info.quantity}</span>
-          <button onclick="cartAdjust('${name}', 1)">+</button>
+      if (!customerCoords || !restaurantCoords) {
+        return { fee: 30, distance: null, source: 'fallback' };
+      }
+
+      const distance = distanceKm(restaurantCoords, customerCoords);
+      return { fee: deliveryFeeForDistance(distance), distance, source: 'gps' };
+    }
+
+    async function renderCart() {
+      let savedCart;
+      try {
+        savedCart = JSON.parse(localStorage.getItem('nearbite_cart'));
+      } catch(e) {
+        savedCart = null;
+      }
+
+      const emptyEl = document.getElementById('empty-cart');
+      const hasItemsEl = document.getElementById('cart-has-items');
+      const listEl  = document.getElementById('cart-items-list');
+      const footerEl = document.getElementById('checkout-footer');
+
+      if (!savedCart || Object.keys(savedCart).length === 0) {
+        emptyEl.style.display = 'block';
+        hasItemsEl.style.display = 'none';
+        footerEl.style.display = 'none';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      hasItemsEl.style.display = 'block';
+      footerEl.style.display = 'flex';
+
+      const items = Object.entries(savedCart);
+      const subtotal = items.reduce((s, [, v]) => s + Number(v.quantity || 0) * Number(v.price || 0), 0);
+      const PLATFORM_FEE = 5;
+
+      let delivery = await calculateCurrentDelivery();
+      let deliveryFee = delivery.fee;
+
+      // Never show FREE based on subtotal. Production pricing is distance based:
+      // <10 km = ₹30, 10–15 km = ₹40, >15 km = ₹50.
+      if (deliveryFee == null) deliveryFee = 30;
+      const total = subtotal + deliveryFee + PLATFORM_FEE;
+
+      const deliveryValEl = document.getElementById('bill-delivery-val');
+      deliveryValEl.textContent = '₹' + deliveryFee;
+      deliveryValEl.className = 'bill-val';
+
+      const nudgeEl = document.getElementById('free-delivery-nudge');
+      const nudgeText = document.getElementById('nudge-text');
+      if (delivery.distance != null) {
+        nudgeText.textContent = `${delivery.distance < 10 ? delivery.distance.toFixed(1) : delivery.distance.toFixed(1)} km delivery distance • ₹${deliveryFee} delivery fee`;
+        nudgeEl.style.display = 'flex';
+      } else {
+        nudgeText.textContent = 'Delivery fee calculated from restaurant and delivery GPS.';
+        nudgeEl.style.display = 'flex';
+      }
+
+      let resName = 'Nearbite Restaurant';
+      if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
+      document.getElementById('cart-restaurant-name').innerText = resName;
+
+      listEl.innerHTML = items.map(([name, info]) => `
+        <div class="cart-item">
+          <div class="item-info">
+            <div class="item-icon"></div>
+            <div class="item-name">${name}</div>
+            <div class="item-price">₹${info.price}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="counter-btn tap">
+              <button onclick="cartAdjust('${name}', -1)">−</button>
+              <span>${info.quantity}</span>
+              <button onclick="cartAdjust('${name}', 1)">+</button>
+            </div>
+            <div class="item-total">₹${info.quantity * info.price}</div>
+          </div>
         </div>
-        <div class="item-total">₹${info.quantity * info.price}</div>
-      </div>
-    </div>
-  `).join('');
+      `).join('');
 
-  document.getElementById('bill-subtotal').innerText     = '₹' + subtotal;
-  document.getElementById('bill-total').innerText         = '₹' + total;
-  document.getElementById('checkout-total').innerText     = '₹' + total;
-}
+      document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
+      document.getElementById('bill-total').innerText = '₹' + total;
+      document.getElementById('checkout-total').innerText = '₹' + total;
+    }
 
 function cartAdjust(name, change) {
   let savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
@@ -443,7 +515,8 @@ async function loadAddress() {
             area: address.area || '',
             landmark: address.landmark || '',
             city: address.city || 'Maynaguri',
-            pincode: address.pincode || ''
+            pincode: address.pincode || '',
+            location: address.location || null
           };
           localStorage.setItem('nearbite_address', JSON.stringify(saved));
         }
@@ -546,28 +619,11 @@ async function placeOrder() {
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     const platformFee = 5;
 
-    // Match the same customer-facing estimate used by renderCart().
-    let deliveryFee = 40;
-    if (subtotal >= 200) {
-      deliveryFee = 0;
-    } else if (savedAddress &&
-               Number.isFinite(Number(savedAddress.latitude)) &&
-               Number.isFinite(Number(savedAddress.longitude))) {
-      const lat = Number(savedAddress.latitude);
-      const lon = Number(savedAddress.longitude);
-      const BASE_LAT = 26.5239;
-      const BASE_LON = 88.8206;
-      const toRad = d => d * Math.PI / 180;
-      const dLat = toRad(lat - BASE_LAT);
-      const dLon = toRad(lon - BASE_LON);
-      const a = Math.sin(dLat/2) ** 2 +
-                Math.cos(toRad(BASE_LAT)) * Math.cos(toRad(lat)) *
-                Math.sin(dLon/2) ** 2;
-      const distanceKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      if (distanceKm <= 5) deliveryFee = 30;
-      else if (distanceKm <= 12) deliveryFee = 40;
-      else deliveryFee = 50;
-    }
+    // The backend is the final authority, but the checkout preview must use
+    // the SAME restaurant GPS + customer GPS pricing so the customer sees
+    // the amount that will actually be charged.
+    const delivery = await calculateCurrentDelivery();
+    const deliveryFee = delivery.fee == null ? 30 : delivery.fee;
 
     const total = subtotal + deliveryFee + platformFee;
 
@@ -616,8 +672,8 @@ async function placeOrder() {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-  renderCart();
   await loadAddress();
+  await renderCart();
 });
   </script>
 </body>
