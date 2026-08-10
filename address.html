@@ -159,7 +159,7 @@
       padding: 18px 20px; border-radius: 16px; border: none; cursor: pointer;
       box-shadow: 0 4px 14px rgba(252, 128, 25, 0.25); transition: 0.2s;
     }
-    .btn-primary:disabled { background: #e5e7eb; color: #9ca3af; box-shadow: none; cursor: not-allowed; }
+    .location-btn:disabled { opacity: .65; cursor: wait; } .btn-primary:disabled { background: #e5e7eb; color: #9ca3af; box-shadow: none; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -176,6 +176,20 @@
 
   <div class="form-content">
     
+<div class="location-card">
+  <div class="location-row">
+    <div class="location-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+    <div>
+      <div class="location-title">Delivery location</div>
+      <div class="location-sub">Your GPS location is used to calculate delivery distance and fee.</div>
+    </div>
+  </div>
+  <button type="button" class="location-btn tap" id="locationBtn" onclick="getLocation()">
+    <i class="fa-solid fa-location-crosshairs"></i> USE MY CURRENT LOCATION
+  </button>
+  <div id="locationStatus" class="location-status"></div>
+</div>
+
     <div class="input-group">
       <label class="input-label">Para / Village / Locality *</label>
       <input type="text" class="input-field" id="areaInput" placeholder="e.g. Dakshin Khagrabari, Natun Para..." oninput="checkForm()">
@@ -234,127 +248,308 @@
   </div>
 
   <script>
-    let selectedTag = 'Home';
-    let isGift = false;
-    let selectedLatitude = null;
-    let selectedLongitude = null;
+/* =========================================================
+   NEARBITE ADDRESS — SERVER-SYNCED ADDRESS BOOK
+   ========================================================= */
+const API_BASE = 'https://eatswada.onrender.com/api';
 
-    function setLocationStatus(message, type) {
-      const el = document.getElementById('locationStatus');
-      el.textContent = message;
-      el.className = 'location-status ' + (type || '');
-    }
+let selectedTag = 'Home';
+let isGift = false;
+let selectedLatitude = null;
+let selectedLongitude = null;
+let editingAddressId = null;
 
-    function getLocation() {
-      const btn = document.getElementById('locationBtn');
+function getToken() {
+  return localStorage.getItem('nearbite_token') ||
+         localStorage.getItem('token') || '';
+}
 
-      if (!navigator.geolocation) {
-        setLocationStatus('Location services are not supported on this device/browser.', 'error');
-        return;
-      }
+function authHeaders() {
+  const token = getToken();
+  return token ? {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  } : { 'Content-Type': 'application/json' };
+}
 
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> LOCATING...';
-      setLocationStatus('', '');
+function setLocationStatus(message, type) {
+  const el = document.getElementById('locationStatus');
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'location-status ' + (type || '');
+}
 
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          selectedLatitude = Number(position.coords.latitude.toFixed(7));
-          selectedLongitude = Number(position.coords.longitude.toFixed(7));
+function getLocation() {
+  const btn = document.getElementById('locationBtn');
 
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> LOCATION CAPTURED';
-          setLocationStatus(
-            'Location captured successfully. Your coordinates will be used for delivery-distance calculation.',
-            'ok'
-          );
-          checkForm();
-        },
-        error => {
-          selectedLatitude = null;
-          selectedLongitude = null;
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> USE MY CURRENT LOCATION';
+  if (!navigator.geolocation) {
+    setLocationStatus('Location services are not supported by this browser.', 'error');
+    return;
+  }
 
-          let message = 'Could not get your location. Please allow location permission and try again.';
-          if (error.code === 1) message = 'Location permission was denied. Please enable it in your browser settings.';
-          if (error.code === 2) message = 'Your location is temporarily unavailable. Please try again.';
-          if (error.code === 3) message = 'Location request timed out. Please try again.';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> LOCATING...';
+  setLocationStatus('', '');
 
-          setLocationStatus(message, 'error');
-          checkForm();
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      selectedLatitude = Number(position.coords.latitude.toFixed(7));
+      selectedLongitude = Number(position.coords.longitude.toFixed(7));
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> LOCATION CAPTURED ✓';
+
+      setLocationStatus(
+        `GPS saved (${selectedLatitude}, ${selectedLongitude}).`,
+        'ok'
       );
+
+      checkForm();
+    },
+    error => {
+      selectedLatitude = null;
+      selectedLongitude = null;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> USE MY CURRENT LOCATION';
+
+      let message = 'Could not get your location. Please allow location permission and try again.';
+      if (error.code === 1) message = 'Location permission was denied. Enable location permission for this site.';
+      if (error.code === 2) message = 'Your location is temporarily unavailable. Please try again.';
+      if (error.code === 3) message = 'Location request timed out. Please try again.';
+
+      setLocationStatus(message, 'error');
+      checkForm();
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 30000
+    }
+  );
+}
+
+function selectTag(el, tag) {
+  document.querySelectorAll('.save-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  selectedTag = tag;
+}
+
+function toggleGift() {
+  isGift = !isGift;
+  const card = document.getElementById('giftCard');
+  const body = document.getElementById('giftBody');
+  const contactLabel = document.getElementById('contactLabel');
+
+  if (isGift) {
+    card.classList.add('active');
+    body.classList.add('show');
+    contactLabel.innerText = "Receiver's Contact Details *";
+    contactLabel.style.color = "var(--brand)";
+  } else {
+    card.classList.remove('active');
+    body.classList.remove('show');
+    contactLabel.innerText = "Your Contact Details *";
+    contactLabel.style.color = "var(--text-3)";
+    document.getElementById('giftMessage').value = '';
+  }
+
+  checkForm();
+}
+
+function checkForm() {
+  const area = document.getElementById('areaInput').value.trim();
+  const landmark = document.getElementById('landmarkInput').value.trim();
+  const name = document.getElementById('receiverName').value.trim();
+  const phone = document.getElementById('receiverPhone').value.replace(/\D/g, '');
+
+  document.getElementById('saveBtn').disabled = !(
+    area &&
+    landmark &&
+    name &&
+    phone.length >= 10 &&
+    Number.isFinite(selectedLatitude) &&
+    Number.isFinite(selectedLongitude)
+  );
+}
+
+function getExistingAddress() {
+  try {
+    return JSON.parse(localStorage.getItem('nearbite_address') || 'null');
+  } catch (_) {
+    return null;
+  }
+}
+
+function populateFromLocal() {
+  const a = getExistingAddress();
+  if (!a) return;
+
+  document.getElementById('areaInput').value = a.area || a.locality || '';
+  document.getElementById('houseInput').value = a.house || '';
+  document.getElementById('landmarkInput').value = a.landmark || '';
+  document.getElementById('receiverName').value = a.receiverName || a.name || '';
+  document.getElementById('receiverPhone').value = (a.receiverPhone || a.phone || '').replace(/\D/g, '');
+  selectedLatitude = Number(a.latitude);
+  selectedLongitude = Number(a.longitude);
+
+  if (!Number.isFinite(selectedLatitude) || !Number.isFinite(selectedLongitude)) {
+    selectedLatitude = null;
+    selectedLongitude = null;
+  } else {
+    const btn = document.getElementById('locationBtn');
+    btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> LOCATION CAPTURED ✓';
+    setLocationStatus(
+      `Saved GPS (${selectedLatitude}, ${selectedLongitude}).`,
+      'ok'
+    );
+  }
+
+  const tag = a.tag || 'Home';
+  const tagEl = [...document.querySelectorAll('.save-tag')]
+    .find(el => el.textContent.trim().toLowerCase() === tag.toLowerCase());
+
+  if (tagEl) selectTag(tagEl, tag);
+
+  checkForm();
+}
+
+async function loadAddresses() {
+  const token = getToken();
+  if (!token) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/users/addresses`, {
+      headers: authHeaders(),
+      cache: 'no-store'
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('AUTH_EXPIRED');
     }
 
-    function selectTag(el, tag) {
-      document.querySelectorAll('.save-tag').forEach(t => t.classList.remove('active'));
-      el.classList.add('active');
-      selectedTag = tag;
+    if (!res.ok) throw new Error(`ADDRESS_LIST_${res.status}`);
+
+    const payload = await res.json();
+    const addresses =
+      Array.isArray(payload) ? payload :
+      Array.isArray(payload.addresses) ? payload.addresses :
+      Array.isArray(payload.data) ? payload.data :
+      Array.isArray(payload?.data?.addresses) ? payload.data.addresses : [];
+
+    // If the server already has addresses, use the preferred one as the cart cache.
+    if (addresses.length) {
+      const preferred = addresses.find(a => a.isDefault || a.default || a.tag === 'Home') || addresses[0];
+      localStorage.setItem('nearbite_address', JSON.stringify(preferred));
+    }
+  } catch (err) {
+    if (err.message === 'AUTH_EXPIRED') {
+      localStorage.removeItem('nearbite_token');
+      localStorage.removeItem('token');
+      window.location.replace('login.html');
+      return;
+    }
+    console.warn('Could not load server addresses:', err);
+  }
+
+  populateFromLocal();
+}
+
+function buildAddressPayload() {
+  return {
+    tag: selectedTag,
+    area: document.getElementById('areaInput').value.trim(),
+    house: document.getElementById('houseInput').value.trim() || 'No House Number',
+    landmark: document.getElementById('landmarkInput').value.trim(),
+    receiverName: document.getElementById('receiverName').value.trim(),
+    receiverPhone: document.getElementById('receiverPhone').value.replace(/\D/g, ''),
+    giftMessage: isGift ? document.getElementById('giftMessage').value.trim() : '',
+    latitude: Number(selectedLatitude),
+    longitude: Number(selectedLongitude)
+  };
+}
+
+async function saveAddress() {
+  const btn = document.getElementById('saveBtn');
+  const originalText = btn.innerText;
+
+  if (!getToken()) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  const addressData = buildAddressPayload();
+
+  btn.innerText = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    // Primary production endpoint.
+    const res = await fetch(`${API_BASE}/users/addresses`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(addressData)
+    });
+
+    let payload = {};
+    try { payload = await res.json(); } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('AUTH_EXPIRED');
     }
 
-    function toggleGift() {
-      isGift = !isGift;
-      const card = document.getElementById('giftCard');
-      const body = document.getElementById('giftBody');
-      const contactLabel = document.getElementById('contactLabel');
-
-      if (isGift) {
-        card.classList.add('active');
-        body.classList.add('show');
-        contactLabel.innerText = "Receiver's Contact Details *";
-        contactLabel.style.color = "var(--brand)";
-        // Auto-focus the message field for a smoother UX
-        setTimeout(() => document.getElementById('giftMessage').focus(), 100);
-      } else {
-        card.classList.remove('active');
-        body.classList.remove('show');
-        contactLabel.innerText = "Your Contact Details *";
-        contactLabel.style.color = "var(--text-3)";
-        document.getElementById('giftMessage').value = '';
-      }
+    if (!res.ok) {
+      const msg = payload?.message || payload?.error || `Could not save address (${res.status}).`;
+      throw new Error(msg);
     }
 
-    function checkForm() {
-      const area = document.getElementById('areaInput').value.trim();
-      const landmark = document.getElementById('landmarkInput').value.trim();
-      const name = document.getElementById('receiverName').value.trim();
-      const phone = document.getElementById('receiverPhone').value.trim();
-      
-      // Location is required because delivery distance must be calculated from GPS.
-      document.getElementById('saveBtn').disabled = (
-        area === '' || 
-        landmark === '' || 
-        name === '' || 
-        phone.length < 10 ||
-        !selectedLatitude ||
-        !selectedLongitude
-      );
+    // Prefer the server-returned address if supplied.
+    const saved =
+      payload?.address ||
+      payload?.data?.address ||
+      payload?.data ||
+      addressData;
+
+    localStorage.setItem('nearbite_address', JSON.stringify(saved));
+    localStorage.setItem('nearbite_address_updated_at', String(Date.now()));
+
+    window.location.href = 'cart.html';
+  } catch (err) {
+    console.error('Save address failed:', err);
+
+    if (err.message === 'AUTH_EXPIRED') {
+      localStorage.removeItem('nearbite_token');
+      localStorage.removeItem('token');
+      window.location.replace('login.html');
+      return;
     }
 
-    function saveAddress() {
-      const btn = document.getElementById('saveBtn');
-      btn.innerText = 'Saving...'; 
-      btn.disabled = true;
+    // Do NOT silently pretend that the backend save succeeded.
+    // Keep the data locally as a recovery cache.
+    localStorage.setItem('nearbite_address_pending', JSON.stringify(addressData));
 
-      const addressData = {
-        tag: selectedTag,
-        area: document.getElementById('areaInput').value,
-        house: document.getElementById('houseInput').value || 'No House Number',
-        landmark: document.getElementById('landmarkInput').value,
-        receiverName: document.getElementById('receiverName').value,
-        receiverPhone: document.getElementById('receiverPhone').value,
-        giftMessage: isGift ? document.getElementById('giftMessage').value : '',
-        latitude: selectedLatitude,
-        longitude: selectedLongitude
-      };
+    btn.disabled = false;
+    btn.innerText = originalText;
 
-      // Save locally to display in cart
-      localStorage.setItem('nearbite_address', JSON.stringify(addressData));
-      
-      setTimeout(() => { window.location.href = 'cart.html'; }, 300);
-    }
-  </script>
+    setLocationStatus(
+      err.message || 'Could not save this address. Please try again.',
+      'error'
+    );
+
+    alert('Address could not be saved to your account. Please try again.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!getToken()) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  loadAddresses();
+});
+</script>
 </body>
 </html>
