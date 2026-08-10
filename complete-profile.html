@@ -38,11 +38,6 @@
     .primary{display:block;width:100%;max-width:600px;margin:auto;border:0;border-radius:15px;padding:16px;background:var(--brand);color:#fff;font:800 14px 'Plus Jakarta Sans'}
     .primary:disabled{opacity:.45}
     .error{display:none;background:#fef2f2;color:var(--danger);border:1px solid #fecaca;border-radius:12px;padding:12px;font-size:12px;font-weight:700;margin-bottom:16px}
-    .location-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 16px;border:1.5px solid var(--brand);border-radius:14px;background:var(--brand-light);color:var(--brand);font:800 13px 'Plus Jakarta Sans';cursor:pointer}
-    .location-btn:disabled{opacity:.65;cursor:wait}
-    .location-status{margin-top:8px;font-size:11px;line-height:1.5;color:#9ca3af}
-    .location-status.success{color:var(--success);font-weight:700}
-    .location-status.error{color:var(--danger);font-weight:700}
     .loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:20;align-items:center;justify-content:center;flex-direction:column}
     .spinner{width:36px;height:36px;border:4px solid #eee;border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -59,7 +54,7 @@
     <div class="hero">
       <div class="hero-icon"><i class="fa-solid fa-user-check"></i></div>
       <h1>Almost there!</h1>
-      <p>Tell us your name and delivery details once. We'll save them to your Nearbite account so future orders are faster.</p>
+      <p>Tell us your name once. We'll save it to your Nearbite account so your future orders are faster.</p>
     </div>
 
     <div class="error" id="errorBox"></div>
@@ -83,44 +78,20 @@
 
     <section class="section">
       <div class="section-title">Delivery address</div>
-      <div class="field">
-        <label for="house">House / Flat / Building *</label>
-        <input id="house" type="text" maxlength="120" placeholder="House no., flat, building" autocomplete="street-address">
-      </div>
-      <div class="field">
-        <label for="area">Area / Locality *</label>
-        <input id="area" type="text" maxlength="120" placeholder="Area, road or locality">
-      </div>
-      <div class="field">
-        <label for="landmark">Nearby landmark *</label>
-        <input id="landmark" type="text" maxlength="160" placeholder="Near Post Office, opposite school">
-      </div>
-      <div class="field location-field">
-        <label>Delivery location *</label>
-        <button type="button" class="location-btn" id="locationBtn" onclick="captureLocation()">
-          <i class="fa-solid fa-location-crosshairs"></i>
-          <span id="locationBtnText">Use my current location</span>
-        </button>
-        <div class="location-status" id="locationStatus">
-          Your GPS location is used only to calculate delivery distance and fee.
+      <div style="background:#fff4ec;border:1px solid #fed7aa;border-radius:16px;padding:16px;">
+        <div style="font-size:14px;font-weight:800;color:#111827;margin-bottom:6px;">
+          Add your delivery address next
         </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="city">City / Town *</label>
-          <input id="city" type="text" value="Maynaguri" maxlength="80">
-        </div>
-        <div class="field">
-          <label for="pincode">PIN code *</label>
-          <input id="pincode" type="tel" inputmode="numeric" maxlength="6" placeholder="735224">
+        <div style="font-size:12px;line-height:1.6;color:#6b7280;">
+          After saving your profile, Nearbite will take you to your saved-address page.
+          There you can enter your address and capture your real GPS location for delivery-distance calculation.
         </div>
       </div>
     </section>
   </main>
 
   <div class="footer">
-    <button class="primary" id="saveBtn" disabled onclick="completeProfile()">Save & continue to cart</button>
+    <button class="primary" id="saveBtn" disabled onclick="completeProfile()">Save & continue to address</button>
   </div>
 
   <div class="loading" id="loading">
@@ -132,133 +103,12 @@
   const API = CONFIG.API_BASE_URL;
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
 
-  // GeoJSON coordinates: [longitude, latitude]
-  // Keep the coordinates in memory AND in localStorage so a refresh/navigation
-  // does not unnecessarily lose a successfully captured customer location.
-  let deliveryCoordinates = null;
-
-  function normalizeCoordinates(value) {
-    // Supports GeoJSON [lng, lat], {lat,lng}, {latitude,longitude},
-    // and address.location.coordinates.
-    let coords = value;
-    if (coords && coords.coordinates) coords = coords.coordinates;
-
-    if (Array.isArray(coords) && coords.length >= 2) {
-      const a = Number(coords[0]);
-      const b = Number(coords[1]);
-      if (Number.isFinite(a) && Number.isFinite(b)) {
-        // GeoJSON is [lng, lat]. Reject impossible ranges.
-        if (Math.abs(a) <= 180 && Math.abs(b) <= 90) return [a, b];
-      }
-    }
-
-    if (coords && typeof coords === 'object') {
-      const lat = Number(coords.lat ?? coords.latitude);
-      const lng = Number(coords.lng ?? coords.lon ?? coords.longitude);
-      if (Number.isFinite(lat) && Number.isFinite(lng) &&
-          lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-        return [lng, lat];
-      }
-    }
-
-    return null;
-  }
-
-  function saveCoordinatesLocally(coords) {
-    if (!Array.isArray(coords) || coords.length !== 2) return;
-    localStorage.setItem('nearbite_delivery_coordinates', JSON.stringify(coords));
-  }
-
-  function restoreCoordinatesLocally() {
-    try {
-      const raw = localStorage.getItem('nearbite_delivery_coordinates');
-      const coords = normalizeCoordinates(raw ? JSON.parse(raw) : null);
-      if (coords) {
-        deliveryCoordinates = coords;
-        return true;
-      }
-
-      const savedAddress = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
-      const addressCoords = normalizeCoordinates(savedAddress?.location);
-      if (addressCoords) {
-        deliveryCoordinates = addressCoords;
-        saveCoordinatesLocally(addressCoords);
-        return true;
-      }
-    } catch (e) {
-      console.warn('Could not restore saved delivery coordinates', e);
-    }
-    return false;
-  }
-
-  function setLocationStatus(message, type = '') {
-    const el = $('locationStatus');
-    el.textContent = message;
-    el.className = `location-status ${type}`.trim();
-  }
-
-  function captureLocation() {
-    if (!navigator.geolocation) {
-      setLocationStatus('GPS is not supported by this browser.', 'error');
-      return;
-    }
-
-    const btn = $('locationBtn');
-    const btnText = $('locationBtnText');
-    btn.disabled = true;
-    btnText.textContent = 'Getting your location...';
-    setLocationStatus('Please allow location access when your browser asks.');
-
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const lat = Number(position.coords.latitude);
-        const lng = Number(position.coords.longitude);
-
-        if (!Number.isFinite(lat) || !Number.isFinite(lng) ||
-            lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-          deliveryCoordinates = null;
-          setLocationStatus('Could not read a valid GPS location. Please try again.', 'error');
-          btn.disabled = false;
-          btnText.textContent = 'Use my current location';
-          validate();
-          return;
-        }
-
-        deliveryCoordinates = [lng, lat];
-        saveCoordinatesLocally(deliveryCoordinates);
-        btnText.textContent = 'Location captured ✓';
-        setLocationStatus(
-          `GPS location saved (${lat.toFixed(5)}, ${lng.toFixed(5)}).`,
-          'success'
-        );
-        btn.disabled = false;
-        validate();
-      },
-      error => {
-        deliveryCoordinates = null;
-        let message = 'Could not get your location. Please allow location permission and try again.';
-        if (error.code === 1) message = 'Location permission was denied. Allow location access in Chrome and try again.';
-        if (error.code === 2) message = 'Your location could not be determined. Turn on phone location/GPS and try again.';
-        if (error.code === 3) message = 'Location request timed out. Please try again.';
-        setLocationStatus(message, 'error');
-        btn.disabled = false;
-        btnText.textContent = 'Use my current location';
-        validate();
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
-      }
-    );
-  }
-
   if (!token) {
     window.location.replace('login.html');
   }
 
   const $ = id => document.getElementById(id);
-  const fields = ['name','house','area','landmark','city','pincode'];
+  const fields = ['name'];
 
   function showError(message) {
     $('errorBox').textContent = message;
@@ -266,66 +116,39 @@
   }
 
   function validate() {
-    const ok = fields.every(id => $(id).value.trim()) &&
-      /^\d{6}$/.test($('pincode').value.trim()) &&
-      $('name').value.trim().length >= 2 &&
-      Array.isArray(deliveryCoordinates) &&
-      deliveryCoordinates.length === 2;
+    const ok = $('name').value.trim().length >= 2;
     $('saveBtn').disabled = !ok;
     return ok;
   }
 
-  fields.forEach(id => $(id).addEventListener('input', validate));
+  $('name').addEventListener('input', validate);
   $('email').addEventListener('input', validate);
 
   async function loadExistingProfile() {
-    // First restore anything already captured on this device. This prevents
-    // the page from showing the GPS error after a refresh or route change.
-    const restored = restoreCoordinatesLocally();
-    if (restored) {
-      $('locationBtnText').textContent = 'Saved location ✓';
-      setLocationStatus('Your saved GPS location will be used for delivery distance.', 'success');
-    }
-
     try {
       const res = await fetch(`${API}/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
       });
+
       const result = await res.json();
-      if (!res.ok || !result.success) {
-        validate();
-        return;
-      }
+
+      if (!res.ok || !result.success) return;
 
       const user = result.data || {};
-      if (user.name && user.name !== 'Nearbite User') $('name').value = user.name;
-      const localUser = JSON.parse(localStorage.getItem('nearbite_user') || '{}');
-      $('phone').value = user.phone || localUser.phone || '';
-      if (user.email) $('email').value = user.email;
 
-      const address = user.defaultAddress ||
-        (Array.isArray(user.addresses) ? user.addresses.find(a => a.isDefault) || user.addresses[0] : null);
-
-      if (address) {
-        $('house').value = address.house || '';
-        $('area').value = address.area || '';
-        $('landmark').value = address.landmark || '';
-        $('city').value = address.city || 'Maynaguri';
-        $('pincode').value = address.pincode || '';
-
-        const coords = normalizeCoordinates(address.location);
-        if (coords) {
-          deliveryCoordinates = coords;
-          saveCoordinatesLocally(coords);
-          $('locationBtnText').textContent = 'Saved location ✓';
-          setLocationStatus('Your saved GPS location will be used for delivery distance.', 'success');
-        }
+      if (user.name && user.name !== 'Nearbite User') {
+        $('name').value = user.name;
       }
+
+      $('phone').value =
+        user.phone ||
+        (JSON.parse(localStorage.getItem('nearbite_user') || '{}').phone || '');
+
+      if (user.email) $('email').value = user.email;
 
       validate();
     } catch (e) {
-      // A temporary profile API failure must not erase a valid locally
-      // captured GPS location.
       console.warn('Could not load existing profile', e);
       validate();
     }
@@ -333,13 +156,8 @@
 
   async function completeProfile() {
     showError('');
-    if (!validate()) {
-      if (!Array.isArray(deliveryCoordinates)) {
-        setLocationStatus('Please capture your current GPS location before continuing.', 'error');
-        showError('Please capture your delivery location using GPS before continuing.');
-      }
-      return;
-    }
+
+    if (!validate()) return;
 
     const btn = $('saveBtn');
     btn.disabled = true;
@@ -359,57 +177,40 @@
           email: $('email').value.trim() || undefined
         })
       });
+
       const profileResult = await profileRes.json();
+
       if (!profileRes.ok || !profileResult.success) {
-        throw new Error(profileResult.message || 'Could not save your profile.');
+        throw new Error(
+          profileResult.message || 'Could not save your profile.'
+        );
       }
 
-      const addressPayload = {
-        tag: 'Home',
-        house: $('house').value.trim(),
-        area: $('area').value.trim(),
-        landmark: $('landmark').value.trim(),
-        city: $('city').value.trim(),
-        pincode: $('pincode').value.trim(),
-        isDefault: true,
-        location: {
-          type: 'Point',
-          coordinates: deliveryCoordinates
-        }
-      };
+      const savedUser =
+        profileResult.data ||
+        JSON.parse(localStorage.getItem('nearbite_user') || '{}');
 
-      const addressRes = await fetch(`${API}/users/addresses`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(addressPayload)
-      });
-      const addressResult = await addressRes.json();
-      if (!addressRes.ok || !addressResult.success) {
-        throw new Error(addressResult.message || 'Could not save your delivery address.');
-      }
-
-      const savedUser = profileResult.data || JSON.parse(localStorage.getItem('nearbite_user') || '{}');
       localStorage.setItem('nearbite_user', JSON.stringify(savedUser));
-      localStorage.setItem('nearbite_address', JSON.stringify(addressPayload));
-      saveCoordinatesLocally(deliveryCoordinates);
 
-      const next = localStorage.getItem('nearbite_after_login') || 'index.html';
-      localStorage.removeItem('nearbite_after_login');
+      /*
+       * IMPORTANT:
+       * complete-profile no longer saves an address and no longer requires GPS.
+       * address.html is now the single source of truth for delivery addresses.
+       */
+      localStorage.setItem('nearbite_after_login', 'cart.html');
 
-      window.location.href = next;
+      window.location.href = 'address.html';
     } catch (error) {
       console.error(error);
-      showError(error.message || 'Something went wrong. Please try again.');
+      showError(
+        error.message || 'Something went wrong. Please try again.'
+      );
       btn.disabled = false;
       $('loading').style.display = 'none';
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    restoreCoordinatesLocally();
-    loadExistingProfile();
-    validate();
-  });
+  document.addEventListener('DOMContentLoaded', loadExistingProfile);
 </script>
 </body>
 </html>
