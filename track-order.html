@@ -183,7 +183,7 @@
     /* ════════════════════════════════════════════
        LIVE ROUTE PLACEHOLDER CARD
     ════════════════════════════════════════════ */
-    .map-card { display:none !important; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 18px 14px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .map-card { display:none; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 18px 14px; margin-bottom: 16px; box-shadow: var(--shadow); }
     .map-card-header { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:800; color:var(--ink-900); margin-bottom:16px; text-transform:uppercase; letter-spacing:.4px; }
     .map-card-header i { color: var(--brand); }
     .map-visual { position: relative; height: 96px; margin-bottom: 12px; background: linear-gradient(180deg,#FAFAFB, #F3F4F6); border-radius: var(--r-sm); overflow:hidden; }
@@ -339,11 +339,6 @@
       .sheet-cta, .sheet-close { display: none !important; }
     }
 
-
-    /* Production safety: never show a fake restaurant route/location.
-       This card will stay hidden until real GPS/coordinates are implemented. */
-    #map-card { display:none !important; }
-
     .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 999; padding: 40px 20px; }
     .skel { border-radius: 8px; background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 37%, #E5E7EB 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
     .skel-circle { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 24px; }
@@ -486,11 +481,10 @@
       <div class="info-card-body">
         <div class="info-card-label">Restaurant</div>
         <div class="info-card-title" id="restaurant-name">—</div>
-        <div class="info-card-sub" id="restaurant-address" style="display:none;"></div>
+        <div class="info-card-sub" id="restaurant-address"></div>
         <div id="restaurant-owner-contact" style="display:none;margin-top:9px;">
-          <a id="restaurant-call-btn" href="#" aria-label="Call restaurant"
-             style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#E8F8F1;color:#0E7A57;text-decoration:none;font-size:15px;font-weight:800;">
-            <i class="fa-solid fa-phone"></i>
+          <a id="restaurant-call-btn" href="#" style="display:inline-flex;align-items:center;gap:7px;color:#FC8019;text-decoration:none;font-size:12px;font-weight:800;">
+            <i class="fa-solid fa-phone"></i><span id="restaurant-phone"></span>
           </a>
         </div>
       </div>
@@ -677,71 +671,34 @@
       const itemsList = document.getElementById('summary-items-list');
       const chargesWrap = document.getElementById('summary-charges');
 
-      // Older orders can contain a non-array/null items value. Normalize it
-      // instead of allowing one bad item to blank the entire tracking page.
-      const items = Array.isArray(order?.items) ? order.items : [];
-
-      itemsList.innerHTML = items.map(i => {
-        const qty = Number(i?.quantity ?? 1);
-        const price = Number(i?.price);
-        const hasPrice = Number.isFinite(price);
-        const safeQty = Number.isFinite(qty) && qty > 0 ? qty : 1;
-        const name = i?.name || i?.itemName || 'Item';
-
-        return `<div class="item-row">
-          <span class="item-qty">${safeQty}×</span>
-          <span class="item-name">${name}</span>
-          ${hasPrice ? `<span class="item-price">${fmtMoney(price * safeQty)}</span>` : ''}
-        </div>`;
+      itemsList.innerHTML = (order.items || []).map(i => {
+        const hasPrice = typeof i.price === 'number';
+        return `<div class="item-row"><span class="item-qty">${i.quantity}×</span><span class="item-name">${i.name}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
       }).join('');
 
+      // Only ever render charge rows for fields the backend actually provided —
+      // never fabricate discount/tax/delivery/coupon figures.
       const rows = [];
-      const pricedItems = items.filter(i => Number.isFinite(Number(i?.price)));
-      const allItemsHavePrices = items.length > 0 && pricedItems.length === items.length;
-      const subtotal = allItemsHavePrices
-        ? items.reduce((sum, i) => sum + Number(i.price) * Math.max(1, Number(i.quantity ?? 1)), 0)
-        : null;
+      const allItemsHavePrices = (order.items || []).length > 0 && order.items.every(i => typeof i.price === 'number');
+      const subtotal = allItemsHavePrices ? order.items.reduce((s, i) => s + i.price * i.quantity, 0) : null;
 
-      if (subtotal !== null) {
-        rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
-      }
+      if (subtotal !== null) rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
 
-      const discount = Number.isFinite(Number(order?.discount))
-        ? Number(order.discount)
-        : (Number.isFinite(Number(order?.couponDiscount)) ? Number(order.couponDiscount) : undefined);
+      const discount = order.discount ?? order.couponDiscount;
+      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + order.couponCode + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
 
-      if (typeof discount === 'number' && discount > 0) {
-        rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + order.couponCode + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
-      }
+      const taxes = order.taxes ?? order.tax;
+      if (typeof taxes === 'number' && taxes > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxes)}</span></div>`);
 
-      const taxesValue = Number.isFinite(Number(order?.taxes))
-        ? Number(order.taxes)
-        : (Number.isFinite(Number(order?.tax)) ? Number(order.tax) : undefined);
+      const deliveryFee = order.deliveryFee ?? order.deliveryCharge;
+      if (typeof deliveryFee === 'number') rows.push(`<div class="charge-row"><span class="charge-label">Delivery Fee</span><span class="charge-val">${deliveryFee > 0 ? fmtMoney(deliveryFee) : 'FREE'}</span></div>`);
 
-      if (typeof taxesValue === 'number' && taxesValue > 0) {
-        rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxesValue)}</span></div>`);
-      }
-
-      const deliveryFee = Number.isFinite(Number(order?.deliveryFee))
-        ? Number(order.deliveryFee)
-        : (Number.isFinite(Number(order?.deliveryCharge)) ? Number(order.deliveryCharge) : undefined);
-
-      if (typeof deliveryFee === 'number') {
-        rows.push(`<div class="charge-row"><span class="charge-label">Delivery Fee</span><span class="charge-val">${deliveryFee > 0 ? fmtMoney(deliveryFee) : 'FREE'}</span></div>`);
-      }
-
-      const total = Number(order?.total);
-      if (
-        subtotal !== null &&
-        typeof discount === 'undefined' &&
-        typeof taxesValue === 'undefined' &&
-        typeof deliveryFee === 'undefined' &&
-        Number.isFinite(total)
-      ) {
-        const gap = total - subtotal;
-        if (gap > 0) {
-          rows.push(`<div class="charge-row"><span class="charge-label">Taxes &amp; Charges</span><span class="charge-val">${fmtMoney(gap)}</span></div>`);
-        }
+      // If we know a subtotal but none of the individual charge fields exist,
+      // show the honest gap between subtotal and total as one transparent line
+      // rather than inventing categorized charges.
+      if (subtotal !== null && discount === undefined && taxes === undefined && deliveryFee === undefined) {
+        const gap = order.total - subtotal;
+        if (gap > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes &amp; Charges</span><span class="charge-val">${fmtMoney(gap)}</span></div>`);
       }
 
       chargesWrap.innerHTML = rows.join('');
@@ -795,7 +752,6 @@
       const riderCard = document.getElementById('rider-card');
       const timeline = document.getElementById('timeline');
       const mapCard = document.getElementById('map-card');
-      if (mapCard) mapCard.style.display = 'none';
       const riderNameEl = document.getElementById('rider-name');
       const riderCallBtn = document.getElementById('rider-call-btn');
       const riderChatBtn = document.getElementById('rider-chat-btn');
@@ -851,11 +807,10 @@
       const summaryRestaurantName = document.getElementById('summary-restaurant-name');
       const restaurantName = order.restaurantName ||
         (order.restaurant && order.restaurant.name) || 'EatSwada Partner';
-      // Restaurant address/location is intentionally NOT rendered.
-      // The old value can be a text-only/fallback location and must not be presented as a real location.
+      const restaurantAddress = order.restaurantAddress ||
+        (order.restaurant && order.restaurant.address) || '';
       const restaurantPhone = order.restaurantPhone ||
-        (order.restaurant && order.restaurant.phone) ||
-        (order.restaurant && order.restaurant.owner && order.restaurant.owner.phone) || '';
+        (order.restaurant && order.restaurant.phone) || '';
 
       document.getElementById('restaurant-name').innerText = restaurantName;
       document.getElementById('hero-restaurant-name').innerText = restaurantName;
@@ -864,14 +819,9 @@
         summaryRestaurantName.style.display = 'block';
       }
 
-      // Reveal the page as soon as the essential order data is available.
-      // Optional sections below must never be able to blank the whole page.
-      document.body.classList.add('data-loaded');
-
-      // Never show a restaurant address/location on the customer tracking page.
       const rAddrEl = document.getElementById('restaurant-address');
-      rAddrEl.innerText = '';
-      rAddrEl.style.display = 'none';
+      rAddrEl.innerText = restaurantAddress;
+      rAddrEl.style.display = restaurantAddress ? 'block' : 'none';
       restaurantCard.style.display = 'flex';
 
       const restaurantOwnerContact = document.getElementById('restaurant-owner-contact');
@@ -879,10 +829,8 @@
       const restaurantPhoneEl = document.getElementById('restaurant-phone');
 
       if (restaurantPhone) {
-        // Call-only UI: never print the restaurant phone number.
-        restaurantPhoneEl.innerText = '';
+        restaurantPhoneEl.innerText = restaurantPhone;
         restaurantCallBtn.href = `tel:${restaurantPhone}`;
-        restaurantCallBtn.setAttribute('aria-label', 'Call restaurant');
         restaurantOwnerContact.style.display = 'block';
 
         helpCallRestaurant.href = `tel:${restaurantPhone}`;
@@ -905,6 +853,7 @@
       else { instrEl.style.display = 'none'; }
 
       currentOrder = order;
+      document.body.classList.add('data-loaded');
 
       function minutesRemaining() {
         if (!order.estimatedDelivery) return null;
@@ -979,7 +928,7 @@
 
       document.getElementById('timeline').closest('.timeline-card').style.display = "block";
       timeline.style.display = "block";
-      mapCard.style.display = 'none'; // Real GPS route is not implemented yet.
+      mapCard.style.display = 'block';
       etaTime.className = "eta-time";
 
       let progress = 0.1;
