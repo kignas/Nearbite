@@ -183,7 +183,7 @@
     /* ════════════════════════════════════════════
        LIVE ROUTE PLACEHOLDER CARD
     ════════════════════════════════════════════ */
-    .map-card { display:none; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 18px 14px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .map-card { display:none !important; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 18px 14px; margin-bottom: 16px; box-shadow: var(--shadow); }
     .map-card-header { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:800; color:var(--ink-900); margin-bottom:16px; text-transform:uppercase; letter-spacing:.4px; }
     .map-card-header i { color: var(--brand); }
     .map-visual { position: relative; height: 96px; margin-bottom: 12px; background: linear-gradient(180deg,#FAFAFB, #F3F4F6); border-radius: var(--r-sm); overflow:hidden; }
@@ -677,34 +677,71 @@
       const itemsList = document.getElementById('summary-items-list');
       const chargesWrap = document.getElementById('summary-charges');
 
-      itemsList.innerHTML = (order.items || []).map(i => {
-        const hasPrice = typeof i.price === 'number';
-        return `<div class="item-row"><span class="item-qty">${i.quantity}×</span><span class="item-name">${i.name}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
+      // Older orders can contain a non-array/null items value. Normalize it
+      // instead of allowing one bad item to blank the entire tracking page.
+      const items = Array.isArray(order?.items) ? order.items : [];
+
+      itemsList.innerHTML = items.map(i => {
+        const qty = Number(i?.quantity ?? 1);
+        const price = Number(i?.price);
+        const hasPrice = Number.isFinite(price);
+        const safeQty = Number.isFinite(qty) && qty > 0 ? qty : 1;
+        const name = i?.name || i?.itemName || 'Item';
+
+        return `<div class="item-row">
+          <span class="item-qty">${safeQty}×</span>
+          <span class="item-name">${name}</span>
+          ${hasPrice ? `<span class="item-price">${fmtMoney(price * safeQty)}</span>` : ''}
+        </div>`;
       }).join('');
 
-      // Only ever render charge rows for fields the backend actually provided —
-      // never fabricate discount/tax/delivery/coupon figures.
       const rows = [];
-      const allItemsHavePrices = (order.items || []).length > 0 && order.items.every(i => typeof i.price === 'number');
-      const subtotal = allItemsHavePrices ? order.items.reduce((s, i) => s + i.price * i.quantity, 0) : null;
+      const pricedItems = items.filter(i => Number.isFinite(Number(i?.price)));
+      const allItemsHavePrices = items.length > 0 && pricedItems.length === items.length;
+      const subtotal = allItemsHavePrices
+        ? items.reduce((sum, i) => sum + Number(i.price) * Math.max(1, Number(i.quantity ?? 1)), 0)
+        : null;
 
-      if (subtotal !== null) rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
+      if (subtotal !== null) {
+        rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
+      }
 
-      const discount = order.discount ?? order.couponDiscount;
-      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + order.couponCode + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
+      const discount = Number.isFinite(Number(order?.discount))
+        ? Number(order.discount)
+        : (Number.isFinite(Number(order?.couponDiscount)) ? Number(order.couponDiscount) : undefined);
 
-      const taxes = order.taxes ?? order.tax;
-      if (typeof taxes === 'number' && taxes > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxes)}</span></div>`);
+      if (typeof discount === 'number' && discount > 0) {
+        rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + order.couponCode + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
+      }
 
-      const deliveryFee = order.deliveryFee ?? order.deliveryCharge;
-      if (typeof deliveryFee === 'number') rows.push(`<div class="charge-row"><span class="charge-label">Delivery Fee</span><span class="charge-val">${deliveryFee > 0 ? fmtMoney(deliveryFee) : 'FREE'}</span></div>`);
+      const taxesValue = Number.isFinite(Number(order?.taxes))
+        ? Number(order.taxes)
+        : (Number.isFinite(Number(order?.tax)) ? Number(order.tax) : undefined);
 
-      // If we know a subtotal but none of the individual charge fields exist,
-      // show the honest gap between subtotal and total as one transparent line
-      // rather than inventing categorized charges.
-      if (subtotal !== null && discount === undefined && taxes === undefined && deliveryFee === undefined) {
-        const gap = order.total - subtotal;
-        if (gap > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes &amp; Charges</span><span class="charge-val">${fmtMoney(gap)}</span></div>`);
+      if (typeof taxesValue === 'number' && taxesValue > 0) {
+        rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxesValue)}</span></div>`);
+      }
+
+      const deliveryFee = Number.isFinite(Number(order?.deliveryFee))
+        ? Number(order.deliveryFee)
+        : (Number.isFinite(Number(order?.deliveryCharge)) ? Number(order.deliveryCharge) : undefined);
+
+      if (typeof deliveryFee === 'number') {
+        rows.push(`<div class="charge-row"><span class="charge-label">Delivery Fee</span><span class="charge-val">${deliveryFee > 0 ? fmtMoney(deliveryFee) : 'FREE'}</span></div>`);
+      }
+
+      const total = Number(order?.total);
+      if (
+        subtotal !== null &&
+        typeof discount === 'undefined' &&
+        typeof taxesValue === 'undefined' &&
+        typeof deliveryFee === 'undefined' &&
+        Number.isFinite(total)
+      ) {
+        const gap = total - subtotal;
+        if (gap > 0) {
+          rows.push(`<div class="charge-row"><span class="charge-label">Taxes &amp; Charges</span><span class="charge-val">${fmtMoney(gap)}</span></div>`);
+        }
       }
 
       chargesWrap.innerHTML = rows.join('');
@@ -827,6 +864,10 @@
         summaryRestaurantName.style.display = 'block';
       }
 
+      // Reveal the page as soon as the essential order data is available.
+      // Optional sections below must never be able to blank the whole page.
+      document.body.classList.add('data-loaded');
+
       // Never show a restaurant address/location on the customer tracking page.
       const rAddrEl = document.getElementById('restaurant-address');
       rAddrEl.innerText = '';
@@ -864,7 +905,6 @@
       else { instrEl.style.display = 'none'; }
 
       currentOrder = order;
-      document.body.classList.add('data-loaded');
 
       function minutesRemaining() {
         if (!order.estimatedDelivery) return null;
@@ -939,7 +979,7 @@
 
       document.getElementById('timeline').closest('.timeline-card').style.display = "block";
       timeline.style.display = "block";
-      mapCard.style.display = 'block';
+      mapCard.style.display = 'none'; // Real GPS route is not implemented yet.
       etaTime.className = "eta-time";
 
       let progress = 0.1;
