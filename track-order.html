@@ -339,6 +339,11 @@
       .sheet-cta, .sheet-close { display: none !important; }
     }
 
+
+    /* Production safety: never show a fake restaurant route/location.
+       This card will stay hidden until real GPS/coordinates are implemented. */
+    #map-card { display:none !important; }
+
     .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 999; padding: 40px 20px; }
     .skel { border-radius: 8px; background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 37%, #E5E7EB 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
     .skel-circle { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 24px; }
@@ -481,10 +486,11 @@
       <div class="info-card-body">
         <div class="info-card-label">Restaurant</div>
         <div class="info-card-title" id="restaurant-name">—</div>
-        <div class="info-card-sub" id="restaurant-address"></div>
+        <div class="info-card-sub" id="restaurant-address" style="display:none;"></div>
         <div id="restaurant-owner-contact" style="display:none;margin-top:9px;">
-          <a id="restaurant-call-btn" href="#" style="display:inline-flex;align-items:center;gap:7px;color:#FC8019;text-decoration:none;font-size:12px;font-weight:800;">
-            <i class="fa-solid fa-phone"></i><span id="restaurant-phone"></span>
+          <a id="restaurant-call-btn" href="#" aria-label="Call restaurant"
+             style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#E8F8F1;color:#0E7A57;text-decoration:none;font-size:15px;font-weight:800;">
+            <i class="fa-solid fa-phone"></i>
           </a>
         </div>
       </div>
@@ -752,6 +758,7 @@
       const riderCard = document.getElementById('rider-card');
       const timeline = document.getElementById('timeline');
       const mapCard = document.getElementById('map-card');
+      if (mapCard) mapCard.style.display = 'none';
       const riderNameEl = document.getElementById('rider-name');
       const riderCallBtn = document.getElementById('rider-call-btn');
       const riderChatBtn = document.getElementById('rider-chat-btn');
@@ -807,10 +814,11 @@
       const summaryRestaurantName = document.getElementById('summary-restaurant-name');
       const restaurantName = order.restaurantName ||
         (order.restaurant && order.restaurant.name) || 'EatSwada Partner';
-      const restaurantAddress = order.restaurantAddress ||
-        (order.restaurant && order.restaurant.address) || '';
+      // Restaurant address/location is intentionally NOT rendered.
+      // The old value can be a text-only/fallback location and must not be presented as a real location.
       const restaurantPhone = order.restaurantPhone ||
-        (order.restaurant && order.restaurant.phone) || '';
+        (order.restaurant && order.restaurant.phone) ||
+        (order.restaurant && order.restaurant.owner && order.restaurant.owner.phone) || '';
 
       document.getElementById('restaurant-name').innerText = restaurantName;
       document.getElementById('hero-restaurant-name').innerText = restaurantName;
@@ -819,9 +827,10 @@
         summaryRestaurantName.style.display = 'block';
       }
 
+      // Never show a restaurant address/location on the customer tracking page.
       const rAddrEl = document.getElementById('restaurant-address');
-      rAddrEl.innerText = restaurantAddress;
-      rAddrEl.style.display = restaurantAddress ? 'block' : 'none';
+      rAddrEl.innerText = '';
+      rAddrEl.style.display = 'none';
       restaurantCard.style.display = 'flex';
 
       const restaurantOwnerContact = document.getElementById('restaurant-owner-contact');
@@ -829,8 +838,10 @@
       const restaurantPhoneEl = document.getElementById('restaurant-phone');
 
       if (restaurantPhone) {
-        restaurantPhoneEl.innerText = restaurantPhone;
+        // Call-only UI: never print the restaurant phone number.
+        restaurantPhoneEl.innerText = '';
         restaurantCallBtn.href = `tel:${restaurantPhone}`;
+        restaurantCallBtn.setAttribute('aria-label', 'Call restaurant');
         restaurantOwnerContact.style.display = 'block';
 
         helpCallRestaurant.href = `tel:${restaurantPhone}`;
