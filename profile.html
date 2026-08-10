@@ -211,7 +211,7 @@
           <i class="fa-solid fa-map-location-dot row-icon"></i>
           <div>
             <div class="row-title">Saved Delivery Addresses</div>
-            <div class="row-subtitle">Home, Office & other saved spots</div>
+            <div class="row-subtitle" id="address-summary">Home, Office & other saved spots</div>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right chevron-icon"></i>
@@ -273,48 +273,170 @@
   </nav>
 
   <script>
-    // ════════════════════════════════════════════
-    // AUTH LOGIC & DATA INJECTION
-    // ════════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Prioritize the standardized token name
-      const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-      
-      // 1. AUTH GUARD
-      if (!token) {
-        window.location.replace('login.html');
-        return;
-      }
+/* =========================================================
+   NEARBITE PROFILE — PRODUCTION AUTH / PROFILE LOADER
+   ========================================================= */
+const API_BASE = 'https://eatswada.onrender.com/api';
 
-      // 2. LOAD USER DATA
-      const savedUser = localStorage.getItem('nearbite_user');
-      if (savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-          // Inject user data into the DOM, ensuring safe fallbacks
-          const nameEl = document.getElementById('user-display-name');
-          const phoneEl = document.getElementById('user-display-phone');
-          
-          if (nameEl) nameEl.innerText = user.name || 'EatSwada User';
-          if (phoneEl) phoneEl.innerText = user.phone || 'No phone added';
-        } catch(e) {
-          console.warn("Could not parse saved user data.");
-        }
-      }
+function getToken() {
+  return localStorage.getItem('nearbite_token') ||
+         localStorage.getItem('token') || '';
+}
+
+function getSavedUser() {
+  try {
+    return JSON.parse(localStorage.getItem('nearbite_user') || 'null');
+  } catch (_) {
+    return null;
+  }
+}
+
+function authHeaders() {
+  const token = getToken();
+  return token ? {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  } : { 'Content-Type': 'application/json' };
+}
+
+function firstObject(value) {
+  if (!value) return null;
+  if (Array.isArray(value)) return value[0] || null;
+  if (typeof value === 'object') {
+    if (value.user && typeof value.user === 'object') return value.user;
+    if (value.data && typeof value.data === 'object' && !Array.isArray(value.data)) return value.data;
+    return value;
+  }
+  return null;
+}
+
+function normalizeUser(payload) {
+  const u = firstObject(payload) || {};
+  return {
+    name: u.name || u.fullName || u.full_name || '',
+    phone: u.phone || u.mobile || u.mobileNumber || '',
+    email: u.email || ''
+  };
+}
+
+async function loadProfile() {
+  const token = getToken();
+
+  if (!token) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  // Render cached data immediately so the page never feels blank.
+  const cached = getSavedUser();
+  if (cached) renderUser(normalizeUser(cached));
+
+  try {
+    const res = await fetch(`${API_BASE}/users/profile`, {
+      method: 'GET',
+      headers: authHeaders(),
+      cache: 'no-store'
     });
 
-    // ════════════════════════════════════════════
-    // ACCOUNT OPERATIONS
-    // ════════════════════════════════════════════
-    function handleLogout() {
-      // Completely wipe all local storage data, including cart
-      localStorage.removeItem('token');
-      localStorage.removeItem('nearbite_token');
-      localStorage.removeItem('nearbite_user');
-      localStorage.removeItem('nearbite_cart');
-      localStorage.removeItem('nearbite_address');
-      window.location.replace('login.html'); 
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('AUTH_EXPIRED');
     }
-  </script>
+
+    if (!res.ok) throw new Error(`PROFILE_${res.status}`);
+
+    const payload = await res.json();
+    const user = normalizeUser(payload);
+
+    if (user.name || user.phone || user.email) {
+      localStorage.setItem('nearbite_user', JSON.stringify(user));
+      renderUser(user);
+    }
+  } catch (err) {
+    if (err.message === 'AUTH_EXPIRED') {
+      localStorage.removeItem('nearbite_token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('nearbite_user');
+      window.location.replace('login.html');
+      return;
+    }
+
+    // Keep cached information if the API is temporarily unavailable.
+    if (!cached) {
+      renderUser({ name: 'Nearbite User', phone: 'Account' });
+    }
+    console.warn('Profile API unavailable:', err);
+  }
+
+  loadAddressSummary();
+}
+
+function renderUser(user) {
+  const name = user.name || 'Nearbite User';
+  const phone = user.phone || 'No phone added';
+
+  const nameEl = document.getElementById('user-display-name');
+  const phoneEl = document.getElementById('user-display-phone');
+  const avatarEl = document.querySelector('.avatar-circle');
+
+  if (nameEl) nameEl.textContent = name;
+  if (phoneEl) phoneEl.textContent = phone;
+  if (avatarEl) {
+    const letter = name.trim().charAt(0).toUpperCase() || 'N';
+    avatarEl.textContent = letter;
+  }
+}
+
+async function loadAddressSummary() {
+  try {
+    const res = await fetch(`${API_BASE}/users/addresses`, {
+      headers: authHeaders(),
+      cache: 'no-store'
+    });
+
+    if (!res.ok) return;
+
+    const payload = await res.json();
+    const addresses =
+      Array.isArray(payload) ? payload :
+      Array.isArray(payload.addresses) ? payload.addresses :
+      Array.isArray(payload.data) ? payload.data :
+      Array.isArray(payload?.data?.addresses) ? payload.data.addresses : [];
+
+    if (!addresses.length) return;
+
+    const preferred = addresses.find(a => a.isDefault || a.default || a.tag === 'Home') || addresses[0];
+
+    // Keep the cart-compatible local cache synchronized with the server.
+    localStorage.setItem('nearbite_address', JSON.stringify(preferred));
+
+    const subtitle = document.querySelector(
+      '[onclick*="address.html"] .row-subtitle'
+    );
+
+    if (subtitle) {
+      const text = [
+        preferred.house,
+        preferred.area || preferred.locality,
+        preferred.landmark
+      ].filter(Boolean).join(', ');
+
+      if (text) subtitle.textContent = text;
+    }
+  } catch (err) {
+    console.warn('Address summary unavailable:', err);
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('nearbite_token');
+  localStorage.removeItem('nearbite_user');
+  localStorage.removeItem('nearbite_cart');
+  localStorage.removeItem('nearbite_address');
+  window.location.replace('login.html');
+}
+
+document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
 </body>
 </html>
