@@ -58,6 +58,28 @@
     }
     .local-banner i { color: var(--brand); font-size: 14px; }
 
+    /* Location picker */
+    .location-card {
+      background:#f8fafc; border:1.5px solid var(--border); border-radius:16px;
+      padding:14px; margin-bottom:22px;
+    }
+    .location-row { display:flex; align-items:center; gap:12px; }
+    .location-icon {
+      width:42px; height:42px; flex:0 0 42px; border-radius:13px;
+      background:var(--brand-light); color:var(--brand);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .location-title { font-size:13px; font-weight:800; }
+    .location-sub { font-size:11px; color:var(--text-3); margin-top:3px; line-height:1.4; }
+    .location-btn {
+      margin-top:12px; width:100%; border:1.5px solid var(--brand);
+      background:#fff; color:var(--brand); border-radius:12px;
+      padding:11px 12px; font:800 12px 'Plus Jakarta Sans';
+    }
+    .location-status { display:none; margin-top:10px; font-size:11px; font-weight:700; line-height:1.45; }
+    .location-status.ok { display:block; color:#059669; }
+    .location-status.error { display:block; color:#dc2626; }
+
     /* Scrollable Form Area */
     .form-content {
       flex: 1; overflow-y: auto; padding: 24px 20px 100px;
@@ -214,6 +236,57 @@
   <script>
     let selectedTag = 'Home';
     let isGift = false;
+    let selectedLatitude = null;
+    let selectedLongitude = null;
+
+    function setLocationStatus(message, type) {
+      const el = document.getElementById('locationStatus');
+      el.textContent = message;
+      el.className = 'location-status ' + (type || '');
+    }
+
+    function getLocation() {
+      const btn = document.getElementById('locationBtn');
+
+      if (!navigator.geolocation) {
+        setLocationStatus('Location services are not supported on this device/browser.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> LOCATING...';
+      setLocationStatus('', '');
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          selectedLatitude = Number(position.coords.latitude.toFixed(7));
+          selectedLongitude = Number(position.coords.longitude.toFixed(7));
+
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> LOCATION CAPTURED';
+          setLocationStatus(
+            'Location captured successfully. Your coordinates will be used for delivery-distance calculation.',
+            'ok'
+          );
+          checkForm();
+        },
+        error => {
+          selectedLatitude = null;
+          selectedLongitude = null;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> USE MY CURRENT LOCATION';
+
+          let message = 'Could not get your location. Please allow location permission and try again.';
+          if (error.code === 1) message = 'Location permission was denied. Please enable it in your browser settings.';
+          if (error.code === 2) message = 'Your location is temporarily unavailable. Please try again.';
+          if (error.code === 3) message = 'Location request timed out. Please try again.';
+
+          setLocationStatus(message, 'error');
+          checkForm();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
 
     function selectTag(el, tag) {
       document.querySelectorAll('.save-tag').forEach(t => t.classList.remove('active'));
@@ -249,12 +322,14 @@
       const name = document.getElementById('receiverName').value.trim();
       const phone = document.getElementById('receiverPhone').value.trim();
       
-      // Button only unlocks if ALL fields are filled AND phone is at least 10 digits
+      // Location is required because delivery distance must be calculated from GPS.
       document.getElementById('saveBtn').disabled = (
         area === '' || 
         landmark === '' || 
         name === '' || 
-        phone.length < 10
+        phone.length < 10 ||
+        !selectedLatitude ||
+        !selectedLongitude
       );
     }
 
@@ -270,7 +345,9 @@
         landmark: document.getElementById('landmarkInput').value,
         receiverName: document.getElementById('receiverName').value,
         receiverPhone: document.getElementById('receiverPhone').value,
-        giftMessage: isGift ? document.getElementById('giftMessage').value : ''
+        giftMessage: isGift ? document.getElementById('giftMessage').value : '',
+        latitude: selectedLatitude,
+        longitude: selectedLongitude
       };
 
       // Save locally to display in cart
