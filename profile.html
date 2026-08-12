@@ -1,442 +1,299 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Your Account · EatSwada</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    /* ════════════════════════════════════════════
-       ULTRA-PREMIUM MINIMALIST RESET
-    ════════════════════════════════════════════ */
-    :root {
-      --brand:   #FC8019;
-      --text-1:  #111827; /* Near black */
-      --text-2:  #4b5563; /* Dark grey */
-      --text-3:  #9ca3af; /* Light grey */
-      --bg:      #FFFFFF; /* Pure white bg is premium */
-      --divider: #f3f4f6; /* Very subtle borders */
-      --ease:    cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text-1);
-      -webkit-tap-highlight-color: transparent;
-      padding-bottom: 90px;
-    }
-
-    /* Slick tap interactions */
-    .tap { cursor: pointer; transition: background-color 0.15s var(--ease); }
-    .tap:active { background-color: #fafafa; }
-
-    /* ════════════════════════════════════════════
-       MINIMALIST TOP BAR & HEADER
-    ════════════════════════════════════════════ */
-    .header {
-      position: sticky; top: 0; z-index: 100;
-      background: #FFFFFF;
-      padding: 16px 20px 8px;
-    }
-
-    .top-action-row {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 18px;
-    }
-    
-    .page-title { font-size: 16px; font-weight: 800; color: #000; letter-spacing: -0.2px; }
-    
-    .icon-actions { display: flex; gap: 20px; }
-    
-    /* Using outlined icons like Zomato/Swiggy reference */
-    .icon-actions i { font-size: 16px; color: var(--text-2); }
-
-    /* Avatar and Personal Info */
-    .avatar-block { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
-    
-    /* Sleek brand-colored initial circle */
-    .avatar-circle {
-      width: 60px; height: 60px; border-radius: 50%;
-      background: var(--brand); color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px; font-weight: 900;
-    }
-    
-    .personal-info { display: flex; flex-direction: column; }
-    .user-name { font-size: 22px; font-weight: 900; color: #000; letter-spacing: -0.5px; }
-    .user-phone { font-size: 13px; color: var(--text-2); font-weight: 600; margin-top: 2px; }
-
-    /* ════════════════════════════════════════════
-       CONTENT BLOCK & SECTIONS
-    ════════════════════════════════════════════ */
-    .container { padding: 0 16px; margin-top: 12px; }
-
-    /* Section Label - Cleaned up spacing */
-    .section-label {
-      font-size: 11px; font-weight: 800; color: var(--text-3);
-      text-transform: uppercase; letter-spacing: 1.2px;
-      padding: 24px 4px 10px;
-    }
-
-    /* The "Account" section card, using subtle border over shadows */
-    .section-card {
-      background: #FFFFFF; border-radius: 18px;
-      border: 1px solid var(--divider);
-      overflow: hidden;
-    }
-
-    /* Pure single-column list view like the reference screenshot */
-    .row-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--divider);
-    }
-    .row-item:last-child { border-bottom: none; }
-
-    .row-left { display: flex; align-items: center; gap: 16px; }
-    
-    /* Icons are simple, no colored boxes needed here */
-    .row-icon { font-size: 16px; color: var(--text-2); text-align: center; width: 20px; }
-    
-    .row-title { font-size: 14px; font-weight: 700; color: #000; }
-    .row-subtitle { font-size: 11px; color: var(--text-3); font-weight: 600; margin-top: 3px; }
-    
-    .chevron-icon { font-size: 11px; color: #cbd5e1; }
-
-    /* Logout Section */
-    .logout-block { margin-top: 16px; margin-bottom: 12px; }
-    
-    .logout-item { padding: 18px 20px; }
-    .logout-icon { color: #ef4444; font-size: 16px; width: 20px; }
-    .logout-text { color: #ef4444; font-size: 14px; font-weight: 800; }
-
-    /* ════════════════════════════════════════════
-       BOTTOM NAVIGATION (BRAND FOCUSED)
-    ════════════════════════════════════════════ */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 72px;
-      background: #FFFFFF; border-top: 1px solid #f1f5f9;
-      display: flex; align-items: center; justify-content: space-around;
-      z-index: 500;
-      padding-bottom: env(safe-area-inset-bottom);
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
-    }
-    
-    .nav-link {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-decoration: none; color: #94a3b8; gap: 4px;
-    }
-    .nav-link.active { color: var(--brand); }
-    
-    .nav-icon { font-size: 19px; }
-    .nav-label { font-size: 10px; font-weight: 800; }
-    
-        /* ── SAFE PREMIUM SLIDE-IN (Content Only, Won't Break Scroll) ── */
-    @keyframes slideInFromRight {
-      0% { 
-        opacity: 0; 
-        transform: translateX(40px); 
-      }
-      100% { 
-        opacity: 1; 
-        transform: translateX(0); 
-      }
-    }
-
-    /* Apply the animation ONLY to the content blocks, keeping the Top Bar safe */
-    .res-card, 
-    .delivery-strip, 
-    .filter-bar, 
-    .menu-section {
-      animation: slideInFromRight 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-      /* Staggering the entrance slightly for a fluid feel */
-      opacity: 0; 
-    }
-    
-    .res-card { animation-delay: 0.05s; }
-    .delivery-strip { animation-delay: 0.1s; }
-    .filter-bar { animation-delay: 0.15s; }
-    .menu-section { animation-delay: 0.2s; }
-
-
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Profile · Nearbite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{
+  --brand:#fc8019;--brand-soft:#fff3e9;--ink:#111827;--muted:#6b7280;
+  --soft:#f7f7f8;--line:#eceef1;--danger:#dc2626;--white:#fff;
+  --shadow:0 8px 30px rgba(17,24,39,.06);--radius:20px
+}
+*{box-sizing:border-box}
+html{background:var(--soft)}
+body{margin:0;background:var(--soft);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:92px}
+button,a,input{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+.app{max-width:720px;margin:auto;min-height:100dvh}
+.header{background:var(--white);padding:14px 16px 18px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between}
+.title{font-size:17px;font-weight:800}
+.top-actions{display:flex;gap:8px}
+.icon-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#4b5563;display:grid;place-items:center}
+.profile-hero{margin-top:16px;display:flex;align-items:center;gap:14px}
+.avatar{width:64px;height:64px;border-radius:20px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:800;overflow:hidden;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.user h1{margin:0;font-size:21px;letter-spacing:-.4px}
+.user p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.verified{display:inline-flex;align-items:center;gap:5px;margin-top:8px;color:#15803d;font-size:10px;font-weight:800}
+.content{padding:14px 14px 24px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.section{margin-top:18px}
+.section:first-child{margin-top:0}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#9ca3af;font-weight:800;margin:0 4px 9px}
+.row{display:flex;align-items:center;gap:13px;padding:16px;border-bottom:1px solid var(--line);min-height:68px}
+.row:last-child{border-bottom:0}
+.row-icon{width:40px;height:40px;border-radius:13px;background:#f7f7f8;display:grid;place-items:center;color:#4b5563;flex:none}
+.row-main{min-width:0;flex:1}
+.row-title{font-size:13px;font-weight:800}
+.row-sub{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{color:#c4c8ce;font-size:11px}
+.edit-btn{border:0;background:var(--brand-soft);color:#d8610d;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800}
+.skeleton{height:14px;width:150px;border-radius:8px;background:linear-gradient(90deg,#f1f1f2 25%,#fafafa 50%,#f1f1f2 75%);background-size:300px 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:300px 0}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;padding:12px}
+.modal.show{display:flex}
+.sheet{width:min(520px,100%);margin:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.sheet h2{font-size:18px;margin:0}
+.sheet p{font-size:12px;color:var(--muted);line-height:1.5}
+.field{margin-top:14px}
+.field label{display:block;font-size:11px;font-weight:800;color:#4b5563;margin-bottom:7px}
+.field input{width:100%;height:48px;border:1px solid var(--line);border-radius:13px;padding:0 13px;outline:none;background:#fafafa}
+.field input:focus{border-color:#f5a36d;background:#fff}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
+.btn{height:46px;border-radius:13px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12px}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn:disabled{opacity:.5}
+.error{color:var(--danger);font-size:11px;margin-top:9px;min-height:15px}
+.logout{color:var(--danger)}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.nav{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);height:70px}
+.nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#9ca3af;font-size:10px;font-weight:800}
+.nav a.active{color:var(--brand)}
+.nav i{font-size:18px}
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:#111827;color:#fff;padding:11px 14px;border-radius:12px;font-size:11px;z-index:120;transition:.2s;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
 </head>
 <body>
-
-  <div class="header">
-    <div class="top-action-row">
-      <div class="page-title">Your Account</div>
-      <div class="icon-actions">
-        <i class="fa-regular fa-bell tap"></i>
-        <i class="fa-solid fa-magnifying-glass tap" onclick="window.location.href='search.html'"></i>
-      </div>
-    </div>
-    
-    <div class="avatar-block">
-      <div class="avatar-circle">E</div>
-      <div class="personal-info">
-        <div class="user-name" id="user-display-name">Guest User</div>
-        <div class="user-phone" id="user-display-phone">Setup Account</div>
-      </div>
+<div class="app">
+<header class="header">
+  <div class="top">
+    <div class="title">Profile</div>
+    <div class="top-actions">
+      <button class="icon-btn" aria-label="Search" onclick="location.href='search.html'"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
   </div>
-
-  <div class="container">
-    
-    <div class="section-label">Past Activity</div>
-    <div class="section-card">
-      <div class="row-item tap" onclick="window.location.href='orders.html'">
-        <div class="row-left">
-          <i class="fa-solid fa-clock-rotate-left row-icon"></i>
-          <div>
-            <div class="row-title">Your Past Orders</div>
-            <div class="row-subtitle">View receipt & re-order items</div>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right chevron-icon"></i>
-      </div>
+  <div class="profile-hero">
+    <div class="avatar" id="avatar">N</div>
+    <div class="user">
+      <h1 id="userName">Nearbite User</h1>
+      <p id="userPhone">Loading account…</p>
+      <div class="verified"><i class="fa-solid fa-circle-check"></i><span id="verifiedText">Verified phone account</span></div>
     </div>
-
-    <div class="section-label">Account Details</div>
-    <div class="section-card">
-      <div class="row-item tap" onclick="window.location.href='address.html'">
-        <div class="row-left">
-          <i class="fa-solid fa-map-location-dot row-icon"></i>
-          <div>
-            <div class="row-title">Saved Delivery Addresses</div>
-            <div class="row-subtitle" id="address-summary">Home, Office & other saved spots</div>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right chevron-icon"></i>
-      </div>
-    </div>
-
-    <div class="section-label">Help & Policies</div>
-    <div class="section-card">
-      <div class="row-item tap" onclick="window.location.href='support.html'">
-        <div class="row-left">
-          <i class="fa-solid fa-headset row-icon"></i>
-          <div>
-            <div class="row-title">Help & Customer Care</div>
-            <div class="row-subtitle">Contact WhatsApp support</div>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right chevron-icon"></i>
-      </div>
-      <div class="row-item tap" onclick="window.location.href='legal.html'">
-        <div class="row-left">
-          <i class="fa-solid fa-file-contract row-icon"></i>
-          <div>
-            <div class="row-title">View EatSwada Policies</div>
-            <div class="row-subtitle">Terms, Privacy & Refunds</div>
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-right chevron-icon"></i>
-      </div>
-    </div>
-
-    <div class="logout-block section-card">
-      <div class="row-item logout-item tap" onclick="handleLogout()">
-        <div class="row-left">
-          <i class="fa-solid fa-right-from-bracket logout-icon"></i>
-          <span class="logout-text">Log Out of EatSwada</span>
-        </div>
-      </div>
-    </div>
-
   </div>
+</header>
 
-  <nav class="bottom-nav">
-    <a href="index.html" class="nav-link">
-      <i class="fa-solid fa-bowl-food nav-icon"></i>
-      <span class="nav-label">Explore</span>
-    </a>
-    <a href="under99.html" class="nav-link">
-      <i class="fa-solid fa-tag nav-icon"></i>
-      <span class="nav-label">99 Store</span>
-    </a>
-    <a href="orders.html" class="nav-link">
-      <i class="fa-solid fa-truck-ramp-box nav-icon"></i>
-      <span class="nav-label">Orders</span>
-    </a>
-    <a href="profile.html" class="nav-link active">
-      <i class="fa-solid fa-circle-user nav-icon"></i>
-      <span class="nav-label">Account</span>
-    </a>
-  </nav>
+<main class="content">
+  <section class="section">
+    <div class="section-title">Your account</div>
+    <div class="card">
+      <div class="row">
+        <div class="row-icon"><i class="fa-regular fa-user"></i></div>
+        <div class="row-main"><div class="row-title">Name</div><div class="row-sub" id="nameValue"><span class="skeleton"></span></div></div>
+        <button class="edit-btn" id="editProfileBtn">Edit</button>
+      </div>
+      <div class="row">
+        <div class="row-icon"><i class="fa-solid fa-phone"></i></div>
+        <div class="row-main"><div class="row-title">Mobile number</div><div class="row-sub" id="phoneValue"><span class="skeleton"></span></div></div>
+        <i class="fa-solid fa-lock" style="color:#c4c8ce;font-size:11px"></i>
+      </div>
+      <div class="row">
+        <div class="row-icon"><i class="fa-regular fa-envelope"></i></div>
+        <div class="row-main"><div class="row-title">Email</div><div class="row-sub" id="emailValue">Not added</div></div>
+        <button class="edit-btn" id="editEmailBtn">Edit</button>
+      </div>
+    </div>
+  </section>
 
-  <script>
-/* =========================================================
-   NEARBITE PROFILE — PRODUCTION AUTH / PROFILE LOADER
-   ========================================================= */
-const API_BASE = 'https://eatswada.onrender.com/api';
+  <section class="section">
+    <div class="section-title">Orders & delivery</div>
+    <div class="card">
+      <a class="row" href="orders.html">
+        <div class="row-icon"><i class="fa-solid fa-receipt"></i></div>
+        <div class="row-main"><div class="row-title">Your orders</div><div class="row-sub">Track previous orders and reorder</div></div>
+        <i class="fa-solid fa-chevron-right chev"></i>
+      </a>
+      <a class="row" href="address.html">
+        <div class="row-icon"><i class="fa-solid fa-location-dot"></i></div>
+        <div class="row-main"><div class="row-title">Saved delivery addresses</div><div class="row-sub" id="addressSummary">Manage your saved locations</div></div>
+        <i class="fa-solid fa-chevron-right chev"></i>
+      </a>
+    </div>
+  </section>
 
-function getToken() {
-  return localStorage.getItem('nearbite_token') ||
-         localStorage.getItem('token') || '';
+  <section class="section">
+    <div class="section-title">Help & policies</div>
+    <div class="card">
+      <a class="row" href="support.html">
+        <div class="row-icon"><i class="fa-solid fa-headset"></i></div>
+        <div class="row-main"><div class="row-title">Help & customer care</div><div class="row-sub">Get help with an order or account</div></div>
+        <i class="fa-solid fa-chevron-right chev"></i>
+      </a>
+      <a class="row" href="legal.html">
+        <div class="row-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="row-main"><div class="row-title">Terms, privacy & refunds</div><div class="row-sub">Read Nearbite policies</div></div>
+        <i class="fa-solid fa-chevron-right chev"></i>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="card">
+      <button class="row logout" id="logoutBtn" style="width:100%;background:#fff;border:0;text-align:left">
+        <div class="row-icon" style="background:#fff1f2;color:#dc2626"><i class="fa-solid fa-right-from-bracket"></i></div>
+        <div class="row-main"><div class="row-title">Log out</div><div class="row-sub">Sign out of this device</div></div>
+        <i class="fa-solid fa-chevron-right chev"></i>
+      </button>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom">
+  <div class="nav">
+    <a href="index.html"><i class="fa-solid fa-bowl-food"></i><span>Explore</span></a>
+    <a href="under99.html"><i class="fa-solid fa-tag"></i><span>99 Store</span></a>
+    <a href="orders.html"><i class="fa-solid fa-receipt"></i><span>Orders</span></a>
+    <a href="profile.html" class="active"><i class="fa-solid fa-circle-user"></i><span>Account</span></a>
+  </div>
+</nav>
+</div>
+
+<div class="modal" id="editModal">
+  <div class="sheet">
+    <h2>Edit profile</h2>
+    <p>Update your account details. Your verified mobile number cannot be changed here.</p>
+    <div class="field"><label for="editName">Name</label><input id="editName" autocomplete="name" maxlength="80"></div>
+    <div class="field"><label for="editEmail">Email (optional)</label><input id="editEmail" type="email" autocomplete="email" maxlength="120"></div>
+    <div class="error" id="editError"></div>
+    <div class="sheet-actions">
+      <button class="btn" id="cancelEdit">Cancel</button>
+      <button class="btn primary" id="saveEdit">Save changes</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const API_BASE='https://eatswada.onrender.com/api';
+const $=id=>document.getElementById(id);
+
+function token(){
+  return localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';
 }
-
-function getSavedUser() {
-  try {
-    return JSON.parse(localStorage.getItem('nearbite_user') || 'null');
-  } catch (_) {
-    return null;
-  }
+function headers(){
+  const t=token();
+  return {'Content-Type':'application/json',...(t?{'Authorization':'Bearer '+t}:{})};
 }
-
-function authHeaders() {
-  const token = getToken();
-  return token ? {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  } : { 'Content-Type': 'application/json' };
+function cachedUser(){
+  try{return JSON.parse(localStorage.getItem('nearbite_user')||'null')}catch{return null}
 }
-
-function firstObject(value) {
-  if (!value) return null;
-  if (Array.isArray(value)) return value[0] || null;
-  if (typeof value === 'object') {
-    if (value.user && typeof value.user === 'object') return value.user;
-    if (value.data && typeof value.data === 'object' && !Array.isArray(value.data)) return value.data;
-    return value;
-  }
-  return null;
-}
-
-function normalizeUser(payload) {
-  const u = firstObject(payload) || {};
+function normalizeUser(payload){
+  const u=payload?.user||payload?.data?.user||payload?.data||payload||{};
   return {
-    name: u.name || u.fullName || u.full_name || '',
-    phone: u.phone || u.mobile || u.mobileNumber || '',
-    email: u.email || ''
+    name:u.name||u.fullName||'',
+    phone:u.phone||u.mobile||u.mobileNumber||'',
+    email:u.email||''
   };
 }
-
-async function loadProfile() {
-  const token = getToken();
-
-  if (!token) {
-    window.location.replace('login.html');
-    return;
+function saveUser(u){localStorage.setItem('nearbite_user',JSON.stringify(u))}
+function renderUser(u){
+  const name=u.name||'Nearbite User';
+  $('userName').textContent=name;
+  $('userPhone').textContent=u.phone||'Phone not available';
+  $('nameValue').textContent=name;
+  $('phoneValue').textContent=u.phone||'Not available';
+  $('emailValue').textContent=u.email||'Not added';
+  $('avatar').textContent=(name.trim()[0]||'N').toUpperCase();
+}
+function toast(msg){
+  $('toast').textContent=msg;
+  $('toast').classList.add('show');
+  clearTimeout(toast.t);
+  toast.t=setTimeout(()=>$('toast').classList.remove('show'),2500);
+}
+async function loadProfile(){
+  if(!token()){location.replace('login.html');return null}
+  const cached=cachedUser();
+  if(cached)renderUser(normalizeUser(cached));
+  try{
+    const res=await fetch(API_BASE+'/users/profile',{headers:headers(),cache:'no-store'});
+    if(res.status===401||res.status===403)throw new Error('AUTH');
+    if(!res.ok)throw new Error('PROFILE');
+    const u=normalizeUser(await res.json());
+    saveUser(u);renderUser(u);return u;
+  }catch(e){
+    if(e.message==='AUTH'){
+      localStorage.removeItem('nearbite_token');localStorage.removeItem('token');localStorage.removeItem('nearbite_user');
+      location.replace('login.html');return null;
+    }
+    if(!cached)renderUser({name:'Nearbite User',phone:'Account unavailable'});
+    return cached||null;
   }
-
-  // Render cached data immediately so the page never feels blank.
-  const cached = getSavedUser();
-  if (cached) renderUser(normalizeUser(cached));
-
-  try {
-    const res = await fetch(`${API_BASE}/users/profile`, {
-      method: 'GET',
-      headers: authHeaders(),
-      cache: 'no-store'
+}
+async function loadAddresses(){
+  try{
+    const res=await fetch(API_BASE+'/users/addresses',{headers:headers(),cache:'no-store'});
+    if(!res.ok)return;
+    const payload=await res.json();
+    const list=Array.isArray(payload)?payload:
+      Array.isArray(payload?.addresses)?payload.addresses:
+      Array.isArray(payload?.data?.addresses)?payload.data.addresses:
+      Array.isArray(payload?.data)?payload.data:[];
+    if(!list.length){$('addressSummary').textContent='No saved address · Add one';return}
+    const preferred=list.find(a=>a.isDefault||a.default||a.tag==='Home')||list[0];
+    localStorage.setItem('nearbite_address',JSON.stringify(preferred));
+    const label=preferred.tag||preferred.label||'Saved address';
+    const text=[preferred.house,preferred.area||preferred.locality,preferred.city].filter(Boolean).join(', ');
+    $('addressSummary').textContent=(label+': '+(text||'Saved location')).slice(0,90);
+  }catch{ /* profile remains usable when address API is temporarily unavailable */ }
+}
+function openEdit(){
+  const u=cachedUser()||{};
+  $('editName').value=u.name||$('userName').textContent||'';
+  $('editEmail').value=u.email||'';
+  $('editError').textContent='';
+  $('editModal').classList.add('show');
+}
+function closeEdit(){$('editModal').classList.remove('show')}
+async function saveEdit(){
+  const name=$('editName').value.trim();
+  const email=$('editEmail').value.trim();
+  if(name.length<2){$('editError').textContent='Please enter your name.';return}
+  const b=$('saveEdit');b.disabled=true;b.textContent='Saving…';$('editError').textContent='';
+  try{
+    const res=await fetch(API_BASE+'/users/profile',{
+      method:'PUT',headers:headers(),body:JSON.stringify({name,email:email||undefined})
     });
-
-    if (res.status === 401 || res.status === 403) {
-      throw new Error('AUTH_EXPIRED');
-    }
-
-    if (!res.ok) throw new Error(`PROFILE_${res.status}`);
-
-    const payload = await res.json();
-    const user = normalizeUser(payload);
-
-    if (user.name || user.phone || user.email) {
-      localStorage.setItem('nearbite_user', JSON.stringify(user));
-      renderUser(user);
-    }
-  } catch (err) {
-    if (err.message === 'AUTH_EXPIRED') {
-      localStorage.removeItem('nearbite_token');
-      localStorage.removeItem('token');
-      localStorage.removeItem('nearbite_user');
-      window.location.replace('login.html');
-      return;
-    }
-
-    // Keep cached information if the API is temporarily unavailable.
-    if (!cached) {
-      renderUser({ name: 'Nearbite User', phone: 'Account' });
-    }
-    console.warn('Profile API unavailable:', err);
-  }
-
-  loadAddressSummary();
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok||payload.success===false)throw new Error(payload.message||'Could not save profile.');
+    const u=normalizeUser(payload);
+    saveUser(u);renderUser(u);closeEdit();toast('Profile updated');
+  }catch(e){$('editError').textContent=e.message||'Could not save profile.'}
+  finally{b.disabled=false;b.textContent='Save changes'}
 }
-
-function renderUser(user) {
-  const name = user.name || 'Nearbite User';
-  const phone = user.phone || 'No phone added';
-
-  const nameEl = document.getElementById('user-display-name');
-  const phoneEl = document.getElementById('user-display-phone');
-  const avatarEl = document.querySelector('.avatar-circle');
-
-  if (nameEl) nameEl.textContent = name;
-  if (phoneEl) phoneEl.textContent = phone;
-  if (avatarEl) {
-    const letter = name.trim().charAt(0).toUpperCase() || 'N';
-    avatarEl.textContent = letter;
-  }
-}
-
-async function loadAddressSummary() {
-  try {
-    const res = await fetch(`${API_BASE}/users/addresses`, {
-      headers: authHeaders(),
-      cache: 'no-store'
-    });
-
-    if (!res.ok) return;
-
-    const payload = await res.json();
-    const addresses =
-      Array.isArray(payload) ? payload :
-      Array.isArray(payload.addresses) ? payload.addresses :
-      Array.isArray(payload.data) ? payload.data :
-      Array.isArray(payload?.data?.addresses) ? payload.data.addresses : [];
-
-    if (!addresses.length) return;
-
-    const preferred = addresses.find(a => a.isDefault || a.default || a.tag === 'Home') || addresses[0];
-
-    // Keep the cart-compatible local cache synchronized with the server.
-    localStorage.setItem('nearbite_address', JSON.stringify(preferred));
-
-    const subtitle = document.querySelector(
-      '[onclick*="address.html"] .row-subtitle'
-    );
-
-    if (subtitle) {
-      const text = [
-        preferred.house,
-        preferred.area || preferred.locality,
-        preferred.landmark
-      ].filter(Boolean).join(', ');
-
-      if (text) subtitle.textContent = text;
-    }
-  } catch (err) {
-    console.warn('Address summary unavailable:', err);
-  }
-}
-
-function handleLogout() {
+$('editProfileBtn').onclick=openEdit;
+$('editEmailBtn').onclick=openEdit;
+$('cancelEdit').onclick=closeEdit;
+$('saveEdit').onclick=saveEdit;
+$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEdit()});
+$('logoutBtn').onclick=()=>{
+  if(!confirm('Log out of Nearbite on this device?'))return;
   localStorage.removeItem('token');
   localStorage.removeItem('nearbite_token');
   localStorage.removeItem('nearbite_user');
-  localStorage.removeItem('nearbite_cart');
   localStorage.removeItem('nearbite_address');
-  window.location.replace('login.html');
-}
-
-document.addEventListener('DOMContentLoaded', loadProfile);
+  location.replace('login.html');
+};
+document.addEventListener('DOMContentLoaded',async()=>{await loadProfile();await loadAddresses()});
 </script>
 </body>
 </html>
