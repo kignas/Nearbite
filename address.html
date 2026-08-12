@@ -1,569 +1,181 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Add Address – Nearbite</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    :root {
-      --brand:        #FC8019;
-      --brand-light:  #fff4ec;
-      --text-1:       #111827;
-      --text-2:       #374151;
-      --text-3:       #9ca3af;
-      --border:       #e5e7eb;
-      --bg-page:      #ffffff;
-      --bg-input:     #f9fafb;
-      --radius-input: 14px;
-      --ease-bounce:  cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      background: var(--bg-page);
-      color: var(--text-1); 
-      -webkit-tap-highlight-color: transparent;
-      display: flex; 
-      flex-direction: column; 
-      height: 100dvh;
-    }
-
-    .tap { cursor: pointer; transition: transform 0.1s var(--ease-bounce); }
-    .tap:active { transform: scale(0.96); }
-
-    /* Header */
-    .header {
-      position: sticky; top: 0; z-index: 50; background: var(--bg-page);
-      padding: 16px 20px; display: flex; align-items: center; gap: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .btn-back {
-      width: 38px; height: 38px; background: #f1f1f5; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      border: none; font-size: 15px; color: var(--text-1);
-    }
-    .header-title { font-size: 18px; font-weight: 800; color: var(--text-1); }
-
-    /* Maynaguri Banner */
-    .local-banner {
-      background: var(--brand-light); color: #92400e; padding: 12px 20px;
-      font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px;
-      border-bottom: 1.5px dashed rgba(252, 128, 25, 0.3);
-    }
-    .local-banner i { color: var(--brand); font-size: 14px; }
-
-    /* Location picker */
-    .location-card {
-      background:#f8fafc; border:1.5px solid var(--border); border-radius:16px;
-      padding:14px; margin-bottom:22px;
-    }
-    .location-row { display:flex; align-items:center; gap:12px; }
-    .location-icon {
-      width:42px; height:42px; flex:0 0 42px; border-radius:13px;
-      background:var(--brand-light); color:var(--brand);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .location-title { font-size:13px; font-weight:800; }
-    .location-sub { font-size:11px; color:var(--text-3); margin-top:3px; line-height:1.4; }
-    .location-btn {
-      margin-top:12px; width:100%; border:1.5px solid var(--brand);
-      background:#fff; color:var(--brand); border-radius:12px;
-      padding:11px 12px; font:800 12px 'Plus Jakarta Sans';
-    }
-    .location-status { display:none; margin-top:10px; font-size:11px; font-weight:700; line-height:1.45; }
-    .location-status.ok { display:block; color:#059669; }
-    .location-status.error { display:block; color:#dc2626; }
-
-    /* Scrollable Form Area */
-    .form-content {
-      flex: 1; overflow-y: auto; padding: 24px 20px 100px;
-    }
-
-    /* Tags */
-    .input-group { margin-bottom: 22px; }
-    .input-label { display: block; font-size: 11px; font-weight: 800; color: var(--text-3); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; transition: color 0.2s; }
-    
-    .type-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-    .save-tag {
-      padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--border);
-      font-size: 13px; font-weight: 700; color: var(--text-2); transition: 0.2s;
-    }
-    .save-tag.active { border-color: var(--brand); background: var(--brand-light); color: var(--brand); }
-
-    /* Inputs */
-    .input-field {
-      width: 100%; background: var(--bg-input); border: 1.5px solid transparent;
-      border-radius: var(--radius-input); padding: 16px; font-size: 14px; font-weight: 600;
-      outline: none; transition: 0.2s; font-family: inherit; color: var(--text-1);
-    }
-    .input-field:focus { background: #fff; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.1); }
-    .input-field::placeholder { color: #9ca3af; font-weight: 500; }
-
-    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    /* Gift / Someone Else Card */
-    .gift-card {
-      background: #fff; border: 1.5px solid var(--border); border-radius: 16px;
-      margin-top: 12px; margin-bottom: 32px; overflow: hidden; transition: border-color 0.2s ease, background 0.2s ease;
-    }
-    .gift-card.active { border-color: var(--brand); background: var(--brand-light); }
-    
-    .gift-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .gift-title-wrap { display: flex; align-items: center; gap: 12px; }
-    
-    .gift-icon {
-      width: 38px; height: 38px; background: #f1f1f5; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text-2); font-size: 16px; transition: 0.2s;
-    }
-    .gift-card.active .gift-icon { background: var(--brand); color: #fff; }
-    
-    .gift-title { font-size: 14px; font-weight: 800; color: var(--text-1); }
-    .gift-sub { font-size: 11px; font-weight: 600; color: var(--text-3); margin-top: 2px; }
-
-    /* Custom Toggle Switch */
-    .toggle-track {
-      width: 44px; height: 24px; background: #e5e7eb; border-radius: 99px;
-      position: relative; transition: 0.3s; flex-shrink: 0;
-    }
-    .toggle-circle {
-      width: 20px; height: 20px; background: #fff; border-radius: 50%;
-      position: absolute; top: 2px; left: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    .gift-card.active .toggle-track { background: var(--brand); }
-    .gift-card.active .toggle-circle { transform: translateX(20px); }
-
-    .gift-body { padding: 0 16px 16px; display: none; }
-    .gift-body.show { display: block; animation: slideDown 0.3s var(--ease-bounce); }
-    
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Fixed Footer */
-    .footer {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: var(--bg-page); padding: 16px 20px 24px;
-      border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
-    }
-    .btn-primary {
-      width: 100%; background: var(--brand); color: #fff; font-size: 15px; font-weight: 800;
-      padding: 18px 20px; border-radius: 16px; border: none; cursor: pointer;
-      box-shadow: 0 4px 14px rgba(252, 128, 25, 0.25); transition: 0.2s;
-    }
-    .location-btn:disabled { opacity: .65; cursor: wait; } .btn-primary:disabled { background: #e5e7eb; color: #9ca3af; box-shadow: none; cursor: not-allowed; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff">
+<title>Saved addresses · Nearbite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--brand:#fc8019;--soft:#f7f7f8;--ink:#111827;--muted:#6b7280;--line:#e8eaed;--green:#15803d;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--soft);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;padding-bottom:30px}
+.app{max-width:720px;margin:auto;min-height:100dvh}.header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:13px 16px}
+.top{display:flex;align-items:center;gap:12px}.back,.add{width:40px;height:40px;border:0;border-radius:13px;background:#f5f5f6;display:grid;place-items:center;color:#374151}.add{background:#fff2e8;color:var(--brand)}
+.title{font-size:17px;font-weight:800;flex:1}.sub{font-size:11px;color:var(--muted);margin:4px 0 0 52px}
+.main{padding:16px}.hint{background:#fff2e8;border:1px solid #ffe1ce;color:#8a4517;border-radius:16px;padding:12px 13px;font-size:11px;line-height:1.5;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:19px;box-shadow:0 6px 24px rgba(17,24,39,.05);margin-bottom:11px;overflow:hidden}
+.addr{padding:15px}.addr-top{display:flex;gap:12px}.addr-icon{width:42px;height:42px;border-radius:13px;background:#f7f7f8;display:grid;place-items:center;flex:none}.addr-icon.default{background:#fff2e8;color:var(--brand)}
+.addr-body{flex:1;min-width:0}.tag{font-size:13px;font-weight:800;display:flex;gap:7px;align-items:center}.default{color:var(--brand);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.line{font-size:11px;color:#4b5563;line-height:1.55;margin-top:5px}.meta{font-size:10px;color:#9ca3af;margin-top:5px}
+.actions{display:flex;gap:8px;margin-top:13px;padding-top:11px;border-top:1px solid #f0f1f2}.action{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;font-size:10px;font-weight:800;color:#374151}.action.primary{border-color:#ffd5bd;background:#fff8f3;color:#c85e0d}.action.danger{color:var(--red)}
+.empty{text-align:center;background:#fff;border:1px dashed #d9dce0;border-radius:19px;padding:34px 20px;color:var(--muted);font-size:12px}.empty i{font-size:30px;color:#c7cbd1;margin-bottom:10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:100;display:none;align-items:flex-end;padding:10px}.modal.show{display:flex}.sheet{width:min(620px,100%);max-height:92dvh;overflow:auto;background:#fff;border-radius:25px;padding:19px;margin:auto}
+.sheet-head{display:flex;align-items:center;gap:10px}.sheet-head h2{font-size:17px;margin:0;flex:1}.close{border:0;background:#f4f4f5;width:36px;height:36px;border-radius:11px}.loc{margin:15px 0;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:15px}.loc button{width:100%;height:43px;border:1px solid var(--brand);background:#fff7f2;color:#c85e0d;border-radius:12px;font-weight:800;font-size:11px}.status{font-size:10px;margin-top:8px;color:var(--green);line-height:1.4}.status.err{color:var(--red)}
+.tags{display:flex;gap:8px;margin:12px 0}.tagbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800}.tagbtn.on{border-color:var(--brand);background:#fff2e8;color:var(--brand)}
+label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;font-weight:800;margin:13px 0 7px}input{width:100%;height:46px;border:1px solid var(--line);background:#fafafa;border-radius:12px;padding:0 12px;outline:none;font-size:12px}input:focus{border-color:#f5a36d;background:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.save{width:100%;height:48px;border:0;background:var(--brand);color:#fff;border-radius:13px;font-weight:800;margin-top:17px}.save:disabled{background:#ddd;color:#999}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,15px);opacity:0;background:#111827;color:#fff;padding:10px 14px;border-radius:11px;font-size:11px;z-index:130;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
 </head>
 <body>
-
-  <div class="header">
-    <button class="btn-back tap" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="header-title">Address Details</div>
+<div class="app">
+<header class="header">
+  <div class="top">
+    <button class="back" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="title">Saved addresses</div>
+    <button class="add" onclick="openEditor()"><i class="fa-solid fa-plus"></i></button>
   </div>
-
-  <div class="local-banner">
-    <i class="fa-solid fa-location-dot"></i>
-    <span>Currently delivering exclusively in Maynaguri</span>
-  </div>
-
-  <div class="form-content">
-    
-<div class="location-card">
-  <div class="location-row">
-    <div class="location-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
-    <div>
-      <div class="location-title">Delivery location</div>
-      <div class="location-sub">Your GPS location is used to calculate delivery distance and fee.</div>
-    </div>
-  </div>
-  <button type="button" class="location-btn tap" id="locationBtn" onclick="getLocation()">
-    <i class="fa-solid fa-location-crosshairs"></i> USE MY CURRENT LOCATION
-  </button>
-  <div id="locationStatus" class="location-status"></div>
+  <div class="sub">Choose where you want your food delivered</div>
+</header>
+<main class="main">
+  <div class="hint"><i class="fa-solid fa-location-dot"></i> Your saved GPS location is used to calculate restaurant distance and delivery charges. You can switch addresses before placing each order.</div>
+  <div id="list"><div class="empty"><i class="fa-solid fa-location-dot"></i><br>Loading addresses…</div></div>
+</main>
 </div>
 
-    <div class="input-group">
-      <label class="input-label">Para / Village / Locality *</label>
-      <input type="text" class="input-field" id="areaInput" placeholder="e.g. Dakshin Khagrabari, Natun Para..." oninput="checkForm()">
-    </div>
-
-    <div class="input-group">
-      <label class="input-label">House Number / Name</label>
-      <input type="text" class="input-field" id="houseInput" placeholder="e.g. House No. 12, Sen Bhawan" oninput="checkForm()">
-    </div>
-
-    <div class="input-group">
-      <label class="input-label">Nearest Landmark *</label>
-      <input type="text" class="input-field" id="landmarkInput" placeholder="e.g. Opposite Kalibari, Near Post Office" oninput="checkForm()">
-    </div>
-
-    <div class="input-group" style="margin-top: 32px;">
-      <label class="input-label" id="contactLabel">Your Contact Details *</label>
-      <div class="input-row">
-        <input type="text" class="input-field" id="receiverName" placeholder="Full Name" oninput="checkForm()">
-        <input type="tel" class="input-field" id="receiverPhone" placeholder="Mobile Number" maxlength="10" oninput="checkForm()">
-      </div>
-    </div>
-
-    <div class="gift-card" id="giftCard">
-      <div class="gift-header tap" onclick="toggleGift()">
-        <div class="gift-title-wrap">
-          <div class="gift-icon"><i class="fa-solid fa-gift"></i></div>
-          <div>
-            <div class="gift-title">Ordering for someone else?</div>
-            <div class="gift-sub">Send food to your partner or family</div>
-          </div>
-        </div>
-        <div class="toggle-track">
-          <div class="toggle-circle"></div>
-        </div>
-      </div>
-      
-      <div class="gift-body" id="giftBody">
-        <input type="text" class="input-field" id="giftMessage" placeholder="Add a custom message (e.g. Happy Birthday!)" style="background:#fff; border-color:var(--border);">
-      </div>
-    </div>
-
-    <div class="input-group">
-      <div class="input-label">Save address as</div>
-      <div class="type-row">
-        <div class="save-tag active tap" onclick="selectTag(this,'Home')">Home</div>
-        <div class="save-tag tap" onclick="selectTag(this,'Work')">Work</div>
-        <div class="save-tag tap" onclick="selectTag(this,'Other')">Other</div>
-      </div>
-    </div>
-
+<div class="modal" id="modal">
+ <div class="sheet">
+  <div class="sheet-head"><h2 id="formTitle">Add new address</h2><button class="close" onclick="closeEditor()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="loc">
+    <button id="gpsBtn" onclick="captureGps()"><i class="fa-solid fa-location-crosshairs"></i> Use my current location</button>
+    <div class="status" id="gpsStatus"></div>
   </div>
-
-  <div class="footer">
-    <button class="btn-primary tap" id="saveBtn" disabled onclick="saveAddress()">Save Address & Proceed</button>
+  <label>Save as</label>
+  <div class="tags">
+    <button class="tagbtn on" data-tag="Home" onclick="chooseTag('Home')">Home</button>
+    <button class="tagbtn" data-tag="Work" onclick="chooseTag('Work')">Work</button>
+    <button class="tagbtn" data-tag="Other" onclick="chooseTag('Other')">Other</button>
   </div>
+  <div class="grid">
+    <div><label>House / flat</label><input id="house" placeholder="House No. / Name"></div>
+    <div><label>Pincode</label><input id="pincode" inputmode="numeric" maxlength="6" placeholder="735224"></div>
+  </div>
+  <label>Area / street</label><input id="area" placeholder="Locality / village / street">
+  <label>Landmark</label><input id="landmark" placeholder="Nearby landmark">
+  <div class="grid">
+    <div><label>City</label><input id="city" value="Maynaguri"></div>
+    <div><label>Receiver name</label><input id="receiverName" placeholder="Full name"></div>
+  </div>
+  <label>Receiver phone</label><input id="receiverPhone" inputmode="tel" maxlength="10" placeholder="10-digit mobile number">
+  <button class="save" id="save" onclick="saveAddress()">Save address</button>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
 
-  <script>
-/* =========================================================
-   NEARBITE ADDRESS — SERVER-SYNCED ADDRESS BOOK
-   ========================================================= */
-const API_BASE = 'https://eatswada.onrender.com/api';
-
-let selectedTag = 'Home';
-let isGift = false;
-let selectedLatitude = null;
-let selectedLongitude = null;
-let editingAddressId = null;
-
-function getToken() {
-  return localStorage.getItem('nearbite_token') ||
-         localStorage.getItem('token') || '';
+<script>
+const API='https://eatswada.onrender.com/api';
+let addresses=[], editingId=null, tag='Home', lat=null, lng=null;
+const $=id=>document.getElementById(id);
+const token=()=>localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';
+const headers=()=>({'Content-Type':'application/json',...(token()?{'Authorization':'Bearer '+token()}:{})});
+function toast(s){$('toast').textContent=s;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),2200)}
+function goBack(){if(new URLSearchParams(location.search).get('return')==='cart')location.href='cart.html';else history.back()}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function coords(a){const c=a?.location?.coordinates;return Array.isArray(c)&&c.length>=2?[Number(c[1]),Number(c[0])]:[null,null]}
+function cache(a){localStorage.setItem('nearbite_address',JSON.stringify(a));localStorage.setItem('nearbite_address_updated_at',String(Date.now()))}
+function useAddress(a){
+  cache(a);
+  toast('Delivery address selected');
+  setTimeout(()=>goBack(),250);
 }
-
-function authHeaders() {
-  const token = getToken();
-  return token ? {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  } : { 'Content-Type': 'application/json' };
+function render(){
+ const root=$('list');
+ if(!addresses.length){root.innerHTML='<div class="empty"><i class="fa-solid fa-location-dot"></i><br><b>No saved addresses</b><br><span>Add your first delivery address.</span></div>';return}
+ root.innerHTML=addresses.map(a=>{
+   const [la,lo]=coords(a), is=a.isDefault===true;
+   const label=a.tag||'Other';
+   const icon=label==='Home'?'fa-house':label==='Work'?'fa-briefcase':'fa-location-dot';
+   const text=[a.house,a.area,a.landmark].filter(Boolean).join(', ');
+   return `<div class="card"><div class="addr">
+    <div class="addr-top"><div class="addr-icon ${is?'default':''}"><i class="fa-solid ${icon}"></i></div>
+    <div class="addr-body"><div class="tag">${escapeHtml(label)} ${is?'<span class="default">Default</span>':''}</div>
+    <div class="line">${escapeHtml(text||'Address details')}</div>
+    <div class="meta">${escapeHtml(a.city||'Maynaguri')}${a.pincode?' · '+escapeHtml(a.pincode):''}${Number.isFinite(la)?' · GPS saved':''}</div></div></div>
+    <div class="actions">
+      <button class="action primary" onclick="useAddressById('${a._id}')"><i class="fa-solid fa-check"></i> Use this address</button>
+      ${!is?`<button class="action" onclick="setDefault('${a._id}')">Set default</button>`:''}
+      <button class="action" onclick="editAddress('${a._id}')">Edit</button>
+      <button class="action danger" onclick="deleteAddress('${a._id}')">Delete</button>
+    </div>
+   </div></div>`;
+ }).join('');
 }
-
-function setLocationStatus(message, type) {
-  const el = document.getElementById('locationStatus');
-  if (!el) return;
-  el.textContent = message;
-  el.className = 'location-status ' + (type || '');
+function byId(id){return addresses.find(a=>String(a._id)===String(id))}
+function useAddressById(id){const a=byId(id);if(a)useAddress(a)}
+async function load(){
+ if(!token()){location.replace('login.html');return}
+ try{
+  const r=await fetch(API+'/users/addresses',{headers:headers(),cache:'no-store'});
+  if(r.status===401||r.status===403)throw new Error('AUTH');
+  const p=await r.json();addresses=Array.isArray(p?.data)?p.data:Array.isArray(p?.addresses)?p.addresses:Array.isArray(p)?p:[];
+  render();
+  const selected=addresses.find(a=>a.isDefault)||addresses[0]; if(selected)cache(selected);
+ }catch(e){
+  if(e.message==='AUTH'){localStorage.removeItem('nearbite_token');localStorage.removeItem('token');location.replace('login.html');return}
+  $('list').innerHTML='<div class="empty">Could not load addresses. Please try again.</div>';
+ }
 }
-
-function getLocation() {
-  const btn = document.getElementById('locationBtn');
-
-  if (!navigator.geolocation) {
-    setLocationStatus('Location services are not supported by this browser.', 'error');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> LOCATING...';
-  setLocationStatus('', '');
-
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      selectedLatitude = Number(position.coords.latitude.toFixed(7));
-      selectedLongitude = Number(position.coords.longitude.toFixed(7));
-
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> LOCATION CAPTURED ✓';
-
-      setLocationStatus(
-        `GPS saved (${selectedLatitude}, ${selectedLongitude}).`,
-        'ok'
-      );
-
-      checkForm();
-    },
-    error => {
-      selectedLatitude = null;
-      selectedLongitude = null;
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> USE MY CURRENT LOCATION';
-
-      let message = 'Could not get your location. Please allow location permission and try again.';
-      if (error.code === 1) message = 'Location permission was denied. Enable location permission for this site.';
-      if (error.code === 2) message = 'Your location is temporarily unavailable. Please try again.';
-      if (error.code === 3) message = 'Location request timed out. Please try again.';
-
-      setLocationStatus(message, 'error');
-      checkForm();
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 30000
-    }
-  );
+function chooseTag(t){tag=t;document.querySelectorAll('.tagbtn').forEach(b=>b.classList.toggle('on',b.dataset.tag===t))}
+function openEditor(id=null){
+ editingId=id;tag='Home';lat=null;lng=null;
+ const a=id?byId(id):null;
+ $('formTitle').textContent=a?'Edit address':'Add new address';
+ $('house').value=a?.house||'';$('area').value=a?.area||'';$('landmark').value=a?.landmark||'';
+ $('city').value=a?.city||'Maynaguri';$('pincode').value=a?.pincode||'';
+ $('receiverName').value=a?.receiverName||'';$('receiverPhone').value=(a?.receiverPhone||'').replace(/\D/g,'');
+ const c=coords(a);if(Number.isFinite(c[0])){lat=c[0];lng=c[1];$('gpsStatus').textContent=`Saved GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`}
+ else $('gpsStatus').textContent='';
+ chooseTag(a?.tag||'Home');$('modal').classList.add('show');
 }
-
-function selectTag(el, tag) {
-  document.querySelectorAll('.save-tag').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  selectedTag = tag;
+function editAddress(id){openEditor(id)}
+function closeEditor(){$('modal').classList.remove('show')}
+function captureGps(){
+ if(!navigator.geolocation){$('gpsStatus').textContent='Location is not supported by this browser.';$('gpsStatus').className='status err';return}
+ $('gpsBtn').disabled=true;$('gpsBtn').textContent='Getting location…';
+ navigator.geolocation.getCurrentPosition(p=>{
+   lat=Number(p.coords.latitude.toFixed(7));lng=Number(p.coords.longitude.toFixed(7));
+   $('gpsStatus').className='status';$('gpsStatus').textContent=`GPS captured: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+   $('gpsBtn').disabled=false;$('gpsBtn').innerHTML='<i class="fa-solid fa-location-dot"></i> Location captured';
+ },e=>{
+   $('gpsBtn').disabled=false;$('gpsBtn').innerHTML='<i class="fa-solid fa-location-crosshairs"></i> Use my current location';
+   $('gpsStatus').className='status err';$('gpsStatus').textContent=e.code===1?'Location permission denied.':e.code===3?'Location request timed out.':'Could not get your location.';
+ },{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
 }
-
-function toggleGift() {
-  isGift = !isGift;
-  const card = document.getElementById('giftCard');
-  const body = document.getElementById('giftBody');
-  const contactLabel = document.getElementById('contactLabel');
-
-  if (isGift) {
-    card.classList.add('active');
-    body.classList.add('show');
-    contactLabel.innerText = "Receiver's Contact Details *";
-    contactLabel.style.color = "var(--brand)";
-  } else {
-    card.classList.remove('active');
-    body.classList.remove('show');
-    contactLabel.innerText = "Your Contact Details *";
-    contactLabel.style.color = "var(--text-3)";
-    document.getElementById('giftMessage').value = '';
-  }
-
-  checkForm();
+async function saveAddress(){
+ const data={tag,house:$('house').value.trim()||'No House Number',area:$('area').value.trim(),landmark:$('landmark').value.trim(),
+ city:$('city').value.trim()||'Maynaguri',pincode:$('pincode').value.trim(),
+ receiverName:$('receiverName').value.trim(),receiverPhone:$('receiverPhone').value.replace(/\D/g,''),
+ latitude:lat,longitude:lng,isDefault:!addresses.length};
+ if(!data.area||!Number.isFinite(lat)||!Number.isFinite(lng)){toast('Add area and capture your GPS location');return}
+ const b=$('save');b.disabled=true;b.textContent='Saving…';
+ try{
+  const url=editingId?API+'/users/addresses/'+encodeURIComponent(editingId):API+'/users/addresses';
+  const r=await fetch(url,{method:editingId?'PUT':'POST',headers:headers(),body:JSON.stringify(data)});
+  const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not save address');
+  await load();const saved=p.data||p.address; if(saved)cache(saved);
+  closeEditor();toast(editingId?'Address updated':'Address added');
+ }catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save address'}
 }
-
-function checkForm() {
-  const area = document.getElementById('areaInput').value.trim();
-  const landmark = document.getElementById('landmarkInput').value.trim();
-  const name = document.getElementById('receiverName').value.trim();
-  const phone = document.getElementById('receiverPhone').value.replace(/\D/g, '');
-
-  document.getElementById('saveBtn').disabled = !(
-    area &&
-    landmark &&
-    name &&
-    phone.length >= 10 &&
-    Number.isFinite(selectedLatitude) &&
-    Number.isFinite(selectedLongitude)
-  );
+async function setDefault(id){
+ try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id)+'/default',{method:'PATCH',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not set default');await load();toast('Default address changed')}catch(e){toast(e.message)}
 }
-
-function getExistingAddress() {
-  try {
-    return JSON.parse(localStorage.getItem('nearbite_address') || 'null');
-  } catch (_) {
-    return null;
-  }
+async function deleteAddress(id){
+ const a=byId(id);if(!a)return;
+ if(!confirm(`Delete your ${a.tag||'saved'} address?`))return;
+ try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id),{method:'DELETE',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not delete address');await load();const next=addresses.find(x=>x.isDefault)||addresses[0];if(next)cache(next);else localStorage.removeItem('nearbite_address');toast('Address deleted')}catch(e){toast(e.message)}
 }
-
-function populateFromLocal() {
-  const a = getExistingAddress();
-  if (!a) return;
-
-  document.getElementById('areaInput').value = a.area || a.locality || '';
-  document.getElementById('houseInput').value = a.house || '';
-  document.getElementById('landmarkInput').value = a.landmark || '';
-  document.getElementById('receiverName').value = a.receiverName || a.name || '';
-  document.getElementById('receiverPhone').value = (a.receiverPhone || a.phone || '').replace(/\D/g, '');
-  selectedLatitude = Number(a.latitude);
-  selectedLongitude = Number(a.longitude);
-
-  if (!Number.isFinite(selectedLatitude) || !Number.isFinite(selectedLongitude)) {
-    selectedLatitude = null;
-    selectedLongitude = null;
-  } else {
-    const btn = document.getElementById('locationBtn');
-    btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> LOCATION CAPTURED ✓';
-    setLocationStatus(
-      `Saved GPS (${selectedLatitude}, ${selectedLongitude}).`,
-      'ok'
-    );
-  }
-
-  const tag = a.tag || 'Home';
-  const tagEl = [...document.querySelectorAll('.save-tag')]
-    .find(el => el.textContent.trim().toLowerCase() === tag.toLowerCase());
-
-  if (tagEl) selectTag(tagEl, tag);
-
-  checkForm();
-}
-
-async function loadAddresses() {
-  const token = getToken();
-  if (!token) {
-    window.location.replace('login.html');
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/users/addresses`, {
-      headers: authHeaders(),
-      cache: 'no-store'
-    });
-
-    if (res.status === 401 || res.status === 403) {
-      throw new Error('AUTH_EXPIRED');
-    }
-
-    if (!res.ok) throw new Error(`ADDRESS_LIST_${res.status}`);
-
-    const payload = await res.json();
-    const addresses =
-      Array.isArray(payload) ? payload :
-      Array.isArray(payload.addresses) ? payload.addresses :
-      Array.isArray(payload.data) ? payload.data :
-      Array.isArray(payload?.data?.addresses) ? payload.data.addresses : [];
-
-    // If the server already has addresses, use the preferred one as the cart cache.
-    if (addresses.length) {
-      const preferred = addresses.find(a => a.isDefault || a.default || a.tag === 'Home') || addresses[0];
-      localStorage.setItem('nearbite_address', JSON.stringify(preferred));
-    }
-  } catch (err) {
-    if (err.message === 'AUTH_EXPIRED') {
-      localStorage.removeItem('nearbite_token');
-      localStorage.removeItem('token');
-      window.location.replace('login.html');
-      return;
-    }
-    console.warn('Could not load server addresses:', err);
-  }
-
-  populateFromLocal();
-}
-
-function buildAddressPayload() {
-  return {
-    tag: selectedTag,
-    area: document.getElementById('areaInput').value.trim(),
-    house: document.getElementById('houseInput').value.trim() || 'No House Number',
-    landmark: document.getElementById('landmarkInput').value.trim(),
-    receiverName: document.getElementById('receiverName').value.trim(),
-    receiverPhone: document.getElementById('receiverPhone').value.replace(/\D/g, ''),
-    giftMessage: isGift ? document.getElementById('giftMessage').value.trim() : '',
-    latitude: Number(selectedLatitude),
-    longitude: Number(selectedLongitude)
-  };
-}
-
-async function saveAddress() {
-  const btn = document.getElementById('saveBtn');
-  const originalText = btn.innerText;
-
-  if (!getToken()) {
-    window.location.replace('login.html');
-    return;
-  }
-
-  const addressData = buildAddressPayload();
-
-  btn.innerText = 'Saving...';
-  btn.disabled = true;
-
-  try {
-    // Primary production endpoint.
-    const res = await fetch(`${API_BASE}/users/addresses`, {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify(addressData)
-    });
-
-    let payload = {};
-    try { payload = await res.json(); } catch (_) {}
-
-    if (res.status === 401 || res.status === 403) {
-      throw new Error('AUTH_EXPIRED');
-    }
-
-    if (!res.ok) {
-      const msg = payload?.message || payload?.error || `Could not save address (${res.status}).`;
-      throw new Error(msg);
-    }
-
-    // Prefer the server-returned address if supplied.
-    const saved =
-      payload?.address ||
-      payload?.data?.address ||
-      payload?.data ||
-      addressData;
-
-    localStorage.setItem('nearbite_address', JSON.stringify(saved));
-    localStorage.setItem('nearbite_address_updated_at', String(Date.now()));
-    // Restore the guest cart if authentication cleared it.
-    try {
-      const currentCart = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
-      const backupCart = localStorage.getItem('nearbite_cart_before_auth');
-      if (Object.keys(currentCart).length === 0 && backupCart) {
-        localStorage.setItem('nearbite_cart', backupCart);
-      }
-      localStorage.removeItem('nearbite_cart_before_auth');
-    } catch (e) {
-      console.warn('Could not restore cart after address save:', e);
-    }
-
-
-    const next = localStorage.getItem('nearbite_after_login') || 'cart.html';
-    localStorage.removeItem('nearbite_after_login');
-    window.location.href = next;
-  } catch (err) {
-    console.error('Save address failed:', err);
-
-    if (err.message === 'AUTH_EXPIRED') {
-      localStorage.removeItem('nearbite_token');
-      localStorage.removeItem('token');
-      window.location.replace('login.html');
-      return;
-    }
-
-    // Do NOT silently pretend that the backend save succeeded.
-    // Keep the data locally as a recovery cache.
-    localStorage.setItem('nearbite_address_pending', JSON.stringify(addressData));
-
-    btn.disabled = false;
-    btn.innerText = originalText;
-
-    setLocationStatus(
-      err.message || 'Could not save this address. Please try again.',
-      'error'
-    );
-
-    alert('Address could not be saved to your account. Please try again.');
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (!getToken()) {
-    window.location.replace('login.html');
-    return;
-  }
-
-  loadAddresses();
-});
+document.addEventListener('DOMContentLoaded',load);
 </script>
 </body>
 </html>
