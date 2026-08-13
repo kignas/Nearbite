@@ -641,8 +641,24 @@
               const hasAddress = addresses.length > 0 || !!(profile && profile.defaultAddress);
 
               if (!hasRealName || !hasAddress) {
+                // New/incomplete customers must set their delivery GPS location
+                // before profile/address completion. Keep the original destination
+                // so a guest cart returns to cart.html after onboarding.
                 localStorage.setItem('nearbite_after_login', requestedPage);
-                window.location.href = 'complete-profile.html';
+                const savedLocation = (() => {
+                  try {
+                    const v = JSON.parse(localStorage.getItem('nearbite_onboarding_location') || 'null');
+                    return !!(v && Number.isFinite(Number(v.latitude)) && Number.isFinite(Number(v.longitude)));
+                  } catch (e) {
+                    return false;
+                  }
+                })();
+
+                if (!savedLocation) {
+                  window.location.href = 'location-onboarding.html';
+                } else {
+                  window.location.href = 'complete-profile.html';
+                }
               } else {
                 localStorage.removeItem('nearbite_after_login');
                 window.location.href = requestedPage;

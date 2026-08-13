@@ -107,6 +107,14 @@
     window.location.replace('login.html');
   }
 
+  // New-user onboarding: location is collected before profile/address details.
+  // Existing users with a saved address should never be forced through this flow.
+  const onboardingLocation = localStorage.getItem('nearbite_onboarding_location');
+  const locationDone = new URLSearchParams(window.location.search).get('location') === 'done';
+  if (!onboardingLocation && !locationDone) {
+    window.location.replace('location-onboarding.html');
+  }
+
   const $ = id => document.getElementById(id);
   const fields = ['name'];
 
@@ -208,7 +216,15 @@
         console.warn('Could not restore cart after login:', e);
       }
 
-      const next = localStorage.getItem('nearbite_after_login') || 'cart.html';
+      let next = localStorage.getItem('nearbite_after_login');
+      if (!next) {
+        let hasGuestCart = false;
+        try {
+          const c = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
+          hasGuestCart = !!c && Object.keys(c).length > 0;
+        } catch (e) {}
+        next = hasGuestCart ? 'cart.html' : 'index.html';
+      }
 
       // If this account already has a saved address, skip the address page.
       // Otherwise address.html becomes the single address + GPS step.
@@ -225,9 +241,14 @@
             Array.isArray(addressResult.data) ? addressResult.data :
             Array.isArray(addressResult?.data?.addresses) ? addressResult.data.addresses : [];
           hasServerAddress = addresses.length > 0;
-          if (hasServerAddress) {
-            const preferred = addresses.find(a => a.isDefault || a.default || a.tag === 'Home') || addresses[0];
-            localStorage.setItem('nearbite_address', JSON.stringify(preferred));
+          // Only hydrate an address if no current checkout address exists.
+          // Default address and currently selected checkout address are separate concepts.
+          if (hasServerAddress && !localStorage.getItem('nearbite_selected_address_id')) {
+            const preferred = addresses.find(a => a.isDefault || a.default) || addresses[0];
+            if (preferred) {
+              localStorage.setItem('nearbite_selected_address_id', String(preferred._id));
+              localStorage.setItem('nearbite_address', JSON.stringify(preferred));
+            }
           }
         }
       } catch (e) {

@@ -21,11 +21,6 @@
 .addr-body{flex:1;min-width:0}.tag{font-size:13px;font-weight:800;display:flex;gap:7px;align-items:center}.default{color:var(--brand);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.line{font-size:11px;color:#4b5563;line-height:1.55;margin-top:5px}.meta{font-size:10px;color:#9ca3af;margin-top:5px}
 .actions{display:flex;gap:8px;margin-top:13px;padding-top:11px;border-top:1px solid #f0f1f2}.action{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;font-size:10px;font-weight:800;color:#374151}.action.primary{border-color:#ffd5bd;background:#fff8f3;color:#c85e0d}.action.danger{color:var(--red)}
 .empty{text-align:center;background:#fff;border:1px dashed #d9dce0;border-radius:19px;padding:34px 20px;color:var(--muted);font-size:12px}.empty i{font-size:30px;color:#c7cbd1;margin-bottom:10px}
-.card.selected{border-color:#bbf7d0;box-shadow:0 6px 24px rgba(21,128,61,.12)}.current{color:var(--green);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
-.locperm{display:none;gap:11px;background:#fff2e8;border:1px solid #ffe1ce;border-radius:16px;padding:13px;margin-bottom:14px}.locperm.show{display:flex}.locperm.denied{background:#fef2f2;border-color:#fecaca}
-.locperm-icon{font-size:18px;flex:none;line-height:1.2}.locperm-body{flex:1;min-width:0}.locperm-title{font-size:12px;font-weight:800;color:#8a4517;margin-bottom:4px}.locperm.denied .locperm-title{color:#991b1b}
-.locperm-text{font-size:11px;color:#8a4517;line-height:1.5;margin-bottom:10px}.locperm.denied .locperm-text{color:#991b1b}
-.locperm-btn{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:9px 14px;font-size:11px;font-weight:800}.locperm-btn:disabled{opacity:.6}.locperm.denied .locperm-btn{background:#dc2626}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:100;display:none;align-items:flex-end;padding:10px}.modal.show{display:flex}.sheet{width:min(620px,100%);max-height:92dvh;overflow:auto;background:#fff;border-radius:25px;padding:19px;margin:auto}
 .sheet-head{display:flex;align-items:center;gap:10px}.sheet-head h2{font-size:17px;margin:0;flex:1}.close{border:0;background:#f4f4f5;width:36px;height:36px;border-radius:11px}.loc{margin:15px 0;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:15px}.loc button{width:100%;height:43px;border:1px solid var(--brand);background:#fff7f2;color:#c85e0d;border-radius:12px;font-weight:800;font-size:11px}.status{font-size:10px;margin-top:8px;color:var(--green);line-height:1.4}.status.err{color:var(--red)}
 .tags{display:flex;gap:8px;margin:12px 0}.tagbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800}.tagbtn.on{border-color:var(--brand);background:#fff2e8;color:var(--brand)}
@@ -44,14 +39,6 @@ label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em
   <div class="sub">Choose where you want your food delivered</div>
 </header>
 <main class="main">
-  <div class="locperm" id="locPermCard">
-    <div class="locperm-icon">📍</div>
-    <div class="locperm-body">
-      <div class="locperm-title" id="locPermTitle"></div>
-      <div class="locperm-text" id="locPermText"></div>
-      <button class="locperm-btn" id="locPermBtn" onclick="requestLocationPermission()"></button>
-    </div>
-  </div>
   <div class="hint"><i class="fa-solid fa-location-dot"></i> Your saved GPS location is used to calculate restaurant distance and delivery charges. You can switch addresses before placing each order.</div>
   <div id="list"><div class="empty"><i class="fa-solid fa-location-dot"></i><br>Loading addresses…</div></div>
 </main>
@@ -88,7 +75,6 @@ label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em
 
 <script>
 const API='https://eatswada.onrender.com/api';
-const SELECTED_ID_KEY='nearbite_selected_address_id';
 let addresses=[], editingId=null, tag='Home', lat=null, lng=null;
 const $=id=>document.getElementById(id);
 const token=()=>localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';
@@ -98,30 +84,26 @@ function goBack(){if(new URLSearchParams(location.search).get('return')==='cart'
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function coords(a){const c=a?.location?.coordinates;return Array.isArray(c)&&c.length>=2?[Number(c[1]),Number(c[0])]:[null,null]}
 function cache(a){localStorage.setItem('nearbite_address',JSON.stringify(a));localStorage.setItem('nearbite_address_updated_at',String(Date.now()))}
-function selectedId(){return localStorage.getItem(SELECTED_ID_KEY)||''}
 function useAddress(a){
-  if(a&&a._id)localStorage.setItem(SELECTED_ID_KEY,String(a._id));
   cache(a);
-  render();
   toast('Delivery address selected');
   setTimeout(()=>goBack(),250);
 }
 function render(){
  const root=$('list');
  if(!addresses.length){root.innerHTML='<div class="empty"><i class="fa-solid fa-location-dot"></i><br><b>No saved addresses</b><br><span>Add your first delivery address.</span></div>';return}
- const selId=selectedId();
  root.innerHTML=addresses.map(a=>{
-   const [la,lo]=coords(a), is=a.isDefault===true, sel=String(a._id)===String(selId);
+   const [la,lo]=coords(a), is=a.isDefault===true;
    const label=a.tag||'Other';
    const icon=label==='Home'?'fa-house':label==='Work'?'fa-briefcase':'fa-location-dot';
    const text=[a.house,a.area,a.landmark].filter(Boolean).join(', ');
-   return `<div class="card ${sel?'selected':''}"><div class="addr">
+   return `<div class="card"><div class="addr">
     <div class="addr-top"><div class="addr-icon ${is?'default':''}"><i class="fa-solid ${icon}"></i></div>
-    <div class="addr-body"><div class="tag">${escapeHtml(label)} ${is?'<span class="default">Default</span>':''} ${sel?'<span class="current">Delivering here</span>':''}</div>
+    <div class="addr-body"><div class="tag">${escapeHtml(label)} ${is?'<span class="default">Default</span>':''}</div>
     <div class="line">${escapeHtml(text||'Address details')}</div>
     <div class="meta">${escapeHtml(a.city||'Maynaguri')}${a.pincode?' · '+escapeHtml(a.pincode):''}${Number.isFinite(la)?' · GPS saved':''}</div></div></div>
     <div class="actions">
-      <button class="action primary" onclick="useAddressById('${a._id}')"><i class="fa-solid fa-check"></i> ${sel?'Selected':'Use this address'}</button>
+      <button class="action primary" onclick="useAddressById('${a._id}')"><i class="fa-solid fa-check"></i> Use this address</button>
       ${!is?`<button class="action" onclick="setDefault('${a._id}')">Set default</button>`:''}
       <button class="action" onclick="editAddress('${a._id}')">Edit</button>
       <button class="action danger" onclick="deleteAddress('${a._id}')">Delete</button>
@@ -131,33 +113,17 @@ function render(){
 }
 function byId(id){return addresses.find(a=>String(a._id)===String(id))}
 function useAddressById(id){const a=byId(id);if(a)useAddress(a)}
-// Single source of truth for "which address is the current checkout selection".
-// Default address is a separate concept (a.isDefault) and must never override
-// this once nearbite_selected_address_id is set to a still-valid address.
-function resolveSelectedAddress(){
- const selId=selectedId();
- let selected=selId?byId(selId):null;
- if(!selected){
-   selected=addresses.find(a=>a.isDefault)||addresses[0]||null;
-   if(selected)localStorage.setItem(SELECTED_ID_KEY,String(selected._id));
- }
- if(selected){
-   cache(selected);
- }else{
-   localStorage.removeItem('nearbite_address');
-   localStorage.removeItem(SELECTED_ID_KEY);
-   localStorage.removeItem('nearbite_address_updated_at');
- }
- return selected;
-}
 async function load(){
  if(!token()){location.replace('login.html');return}
  try{
   const r=await fetch(API+'/users/addresses',{headers:headers(),cache:'no-store'});
   if(r.status===401||r.status===403)throw new Error('AUTH');
   const p=await r.json();addresses=Array.isArray(p?.data)?p.data:Array.isArray(p?.addresses)?p.addresses:Array.isArray(p)?p:[];
-  resolveSelectedAddress();
   render();
+  const selectedId=localStorage.getItem('nearbite_selected_address_id');
+  const selected=selectedId ? addresses.find(a=>String(a._id)===String(selectedId)) : null;
+  const initial=selected || addresses.find(a=>a.isDefault) || addresses[0];
+  if(initial && !selectedId) cache(initial);
  }catch(e){
   if(e.message==='AUTH'){localStorage.removeItem('nearbite_token');localStorage.removeItem('token');location.replace('login.html');return}
   $('list').innerHTML='<div class="empty">Could not load addresses. Please try again.</div>';
@@ -200,12 +166,9 @@ async function saveAddress(){
   const url=editingId?API+'/users/addresses/'+encodeURIComponent(editingId):API+'/users/addresses';
   const r=await fetch(url,{method:editingId?'PUT':'POST',headers:headers(),body:JSON.stringify(data)});
   const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not save address');
-  // load() -> resolveSelectedAddress() re-caches nearbite_address from fresh
-  // server data ONLY for whichever address is currently selected. Do not
-  // separately cache(saved) here — editing a non-selected address (e.g.
-  // editing "Home" while "Work" is the current checkout selection) must not
-  // change what's delivering.
-  await load();
+  await load();const saved=p.data||p.address; if(saved)cache(saved);
+  if(saved?._id) localStorage.setItem('nearbite_selected_address_id',String(saved._id));
+  localStorage.removeItem('nearbite_onboarding_location');
   closeEditor();toast(editingId?'Address updated':'Address added');
  }catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save address'}
 }
@@ -215,57 +178,9 @@ async function setDefault(id){
 async function deleteAddress(id){
  const a=byId(id);if(!a)return;
  if(!confirm(`Delete your ${a.tag||'saved'} address?`))return;
- try{
-  const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id),{method:'DELETE',headers:headers()});
-  const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not delete address');
-  // load() -> resolveSelectedAddress() already falls back to default/first
-  // ONLY when nearbite_selected_address_id no longer matches any address
-  // (i.e. the deleted one was the current selection). Deleting an
-  // unrelated address now leaves the current selection untouched.
-  await load();
-  toast('Address deleted');
- }catch(e){toast(e.message)}
+ try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id),{method:'DELETE',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not delete address');await load();const next=addresses.find(x=>x.isDefault)||addresses[0];if(next)cache(next);else localStorage.removeItem('nearbite_address');toast('Address deleted')}catch(e){toast(e.message)}
 }
-// ── Location permission nudge (production-grade, non-spammy) ──
-// Reads permission state via the Permissions API without prompting.
-// getCurrentPosition() is only ever called from an explicit user tap.
-function renderLocPerm(state){
- const card=$('locPermCard');if(!card)return;
- if(state==='granted'){card.classList.remove('show','denied');return}
- card.classList.add('show');
- if(state==='denied'){
-  card.classList.add('denied');
-  $('locPermTitle').textContent='Location permission is blocked';
-  $('locPermText').textContent='Please enable location access for Nearbite in your browser settings to get accurate delivery distance and charges.';
-  $('locPermBtn').textContent='Try Again';
- }else{
-  card.classList.remove('denied');
-  $('locPermTitle').textContent='Enable location for a better ordering experience';
-  $('locPermText').textContent='We use your location to accurately calculate delivery distance, delivery charges and provide a smoother ordering experience.';
-  $('locPermBtn').textContent='Enable Location';
- }
-}
-function initLocationPermission(){
- if(!$('locPermCard'))return;
- if(navigator.permissions&&navigator.permissions.query){
-  navigator.permissions.query({name:'geolocation'}).then(status=>{
-   renderLocPerm(status.state);
-   status.onchange=()=>renderLocPerm(status.state);
-  }).catch(()=>renderLocPerm('prompt'));
- }else{
-  renderLocPerm('prompt');
- }
-}
-function requestLocationPermission(){
- if(!navigator.geolocation){renderLocPerm('denied');return}
- $('locPermBtn').disabled=true;
- navigator.geolocation.getCurrentPosition(
-  ()=>{renderLocPerm('granted')},
-  e=>{$('locPermBtn').disabled=false;renderLocPerm(e.code===1?'denied':'prompt')},
-  {enableHighAccuracy:false,timeout:10000,maximumAge:60000}
- );
-}
-document.addEventListener('DOMContentLoaded',()=>{load();initLocationPermission()});
+document.addEventListener('DOMContentLoaded',load);
 </script>
 </body>
 </html>

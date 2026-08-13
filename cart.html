@@ -198,20 +198,6 @@
       transform: translateX(-50%) translateY(0);
     }
     #addr-toast i { color: #FC8019; }
-
-    /* ── Location permission nudge ── */
-    .locperm { display:none; gap:11px; background:#fff7ed; border:1px solid #ffd9b3; border-radius:16px; margin:0 16px 12px; padding:13px; }
-    .locperm.show { display:flex; }
-    .locperm.denied { background:#fef2f2; border-color:#fecaca; }
-    .locperm-icon { font-size:18px; flex:none; line-height:1.2; }
-    .locperm-body { flex:1; min-width:0; }
-    .locperm-title { font-size:12px; font-weight:800; color:#9a3412; margin-bottom:4px; }
-    .locperm.denied .locperm-title { color:#991b1b; }
-    .locperm-text { font-size:11px; color:#9a3412; line-height:1.5; margin-bottom:10px; }
-    .locperm.denied .locperm-text { color:#991b1b; }
-    .locperm-btn { border:0; background:var(--brand); color:#fff; border-radius:10px; padding:9px 14px; font-size:11px; font-weight:800; }
-    .locperm-btn:disabled { opacity:.6; }
-    .locperm.denied .locperm-btn { background:#dc2626; }
   </style>
 </head>
 <body>
@@ -239,15 +225,6 @@
       </div>
       <div class="address-text" id="address-display-text" style="color:#FC8019; font-weight:700;">
         Tap to add your delivery address →
-      </div>
-    </div>
-
-    <div class="locperm" id="locPermCard">
-      <div class="locperm-icon">📍</div>
-      <div class="locperm-body">
-        <div class="locperm-title" id="locPermTitle"></div>
-        <div class="locperm-text" id="locPermText"></div>
-        <button class="locperm-btn" id="locPermBtn" onclick="requestLocationPermission()"></button>
       </div>
     </div>
 
@@ -366,7 +343,7 @@
 
     function deliveryFeeForDistance(distance) {
       if (!Number.isFinite(distance) || distance < 0) return null;
-      if (distance < 10) return 35;
+      if (distance < 10) return 30;
       if (distance <= 15) return 40;
       return 50;
     }
@@ -397,13 +374,16 @@
       let savedAddress = null;
       try { savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
       try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+      // Current checkout address is distinct from the user's default address.
+      // The address page updates both the selected ID and its local cache.
+      const selectedAddressId = localStorage.getItem('nearbite_selected_address_id');
 
       const restaurantId = getCartRestaurantId(savedCart);
       const customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
       const restaurantCoords = await getRestaurantLocation(restaurantId);
 
       if (!customerCoords || !restaurantCoords) {
-        return { fee: 35, distance: null, source: 'fallback' };
+        return { fee: 30, distance: null, source: 'fallback' };
       }
 
       const distance = distanceKm(restaurantCoords, customerCoords);
@@ -442,8 +422,8 @@
       let deliveryFee = delivery.fee;
 
       // Never show FREE based on subtotal. Production pricing is distance based:
-      // <10 km = ₹35, 10–15 km = ₹40, >15 km = ₹50.
-      if (deliveryFee == null) deliveryFee = 35;
+      // <10 km = ₹30, 10–15 km = ₹40, >15 km = ₹50.
+      if (deliveryFee == null) deliveryFee = 30;
       const total = subtotal + deliveryFee + PLATFORM_FEE;
 
       const deliveryValEl = document.getElementById('bill-delivery-val');
@@ -505,148 +485,54 @@ function clearCart() {
 function hasAddress() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
-  // Only house + area are required on the Address schema — landmark is
-  // optional (default ''), so it must NOT gate whether a selection counts.
-  return !!(saved && saved.house && saved.area);
-}
-
-// Cart must always reflect the currently SELECTED checkout address, not
-// just whatever default happens to be cached — resolved the same way
-// address.html does it, keyed off nearbite_selected_address_id and never
-// off a.tag === 'Home'.
-async function resolveDeliveryAddress() {
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-  let saved = null;
-  try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
-
-  if (!token) return saved; // guest — nothing to resolve server-side
-
-  try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/users/addresses`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-      cache: 'no-store'
-    });
-    const result = await response.json();
-    const list = Array.isArray(result?.data) ? result.data
-               : Array.isArray(result?.addresses) ? result.addresses
-               : Array.isArray(result) ? result : [];
-
-    if (response.ok && list.length) {
-      const selId = localStorage.getItem('nearbite_selected_address_id');
-      let match = selId ? list.find(a => String(a._id) === String(selId)) : null;
-      if (!match) match = list.find(a => a.isDefault) || list[0];
-
-      if (match) {
-        localStorage.setItem('nearbite_selected_address_id', String(match._id));
-        saved = {
-          _id: match._id,
-          tag: match.tag || 'Home',
-          house: match.house || '',
-          area: match.area || '',
-          landmark: match.landmark || '',
-          city: match.city || 'Maynaguri',
-          pincode: match.pincode || '',
-          location: match.location || null
-        };
-        localStorage.setItem('nearbite_address', JSON.stringify(saved));
-        localStorage.setItem('nearbite_address_updated_at', String(Date.now()));
-        return saved;
-      }
-    }
-  } catch (e) {
-    console.warn('Could not resolve delivery address from server:', e);
-  }
-
-  // Server list unreachable/empty — keep whatever is already cached locally.
-  if (saved && saved.house && saved.area) return saved;
-
-  // Last resort for older accounts with nothing in the Address collection
-  // yet: hydrate from the profile's defaultAddress.
-  try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const result = await response.json();
-    if (response.ok && result.success) {
-      const user = result.data || {};
-      const address = user.defaultAddress ||
-        (Array.isArray(user.addresses) ? user.addresses.find(a => a.isDefault) || user.addresses[0] : null);
-
-      if (address && address.house && address.area) {
-        saved = {
-          tag: address.tag || 'Home',
-          house: address.house || '',
-          area: address.area || '',
-          landmark: address.landmark || '',
-          city: address.city || 'Maynaguri',
-          pincode: address.pincode || '',
-          location: address.location || null
-        };
-        localStorage.setItem('nearbite_address', JSON.stringify(saved));
-      }
-    }
-  } catch (e) {
-    console.warn('Could not hydrate saved address:', e);
-  }
-
-  return saved;
-}
-
-// ── Location permission nudge (production-grade, non-spammy) ──
-// Reads permission state via the Permissions API without prompting.
-// getCurrentPosition() is only ever called from an explicit user tap.
-// Device GPS is NEVER substituted for a saved address's own coordinates —
-// see calculateCurrentDelivery(). This only controls the nudge banner.
-function renderLocPerm(state) {
-  const card = document.getElementById('locPermCard');
-  if (!card) return;
-  if (state === 'granted') { card.classList.remove('show', 'denied'); return; }
-  card.classList.add('show');
-  const title = document.getElementById('locPermTitle');
-  const text = document.getElementById('locPermText');
-  const btn = document.getElementById('locPermBtn');
-  if (state === 'denied') {
-    card.classList.add('denied');
-    title.textContent = 'Location permission is blocked';
-    text.textContent = 'Please enable location access for Nearbite in your browser settings to get accurate delivery distance and charges.';
-    btn.textContent = 'Try Again';
-  } else {
-    card.classList.remove('denied');
-    title.textContent = 'Enable location for a better ordering experience';
-    text.textContent = 'We use your location to accurately calculate delivery distance, delivery charges and provide a smoother ordering experience.';
-    btn.textContent = 'Enable Location';
-  }
-}
-function initLocationPermission() {
-  if (!document.getElementById('locPermCard')) return;
-  if (navigator.permissions && navigator.permissions.query) {
-    navigator.permissions.query({ name: 'geolocation' }).then(status => {
-      renderLocPerm(status.state);
-      status.onchange = () => renderLocPerm(status.state);
-    }).catch(() => renderLocPerm('prompt'));
-  } else {
-    renderLocPerm('prompt');
-  }
-}
-function requestLocationPermission() {
-  if (!navigator.geolocation) { renderLocPerm('denied'); return; }
-  const btn = document.getElementById('locPermBtn');
-  if (btn) btn.disabled = true;
-  navigator.geolocation.getCurrentPosition(
-    () => { renderLocPerm('granted'); },
-    e => { if (btn) btn.disabled = false; renderLocPerm(e.code === 1 ? 'denied' : 'prompt'); },
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-  );
+  return !!(saved && saved.house && saved.area && saved.landmark);
 }
 
 async function loadAddress() {
-  const saved = await resolveDeliveryAddress();
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
 
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
   const tagLabel = document.getElementById('address-tag-label');
   const addrText = document.getElementById('address-display-text');
   const checkoutBtn = document.getElementById('btn-checkout');
   const checkoutText = checkoutBtn ? checkoutBtn.querySelector('.btn-checkout-text') : null;
+
+  // Returning customers may have their address on the server but not in this
+  // browser's localStorage. Hydrate the local cart UI from their saved profile.
+  if (token && !hasAddress()) {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        const user = result.data || {};
+        const selectedId = localStorage.getItem('nearbite_selected_address_id');
+        const addressList = Array.isArray(user.addresses) ? user.addresses : [];
+        const address = (selectedId && addressList.find(a => String(a._id) === String(selectedId))) ||
+          user.defaultAddress ||
+          addressList.find(a => a.isDefault) ||
+          addressList[0];
+
+        if (address && address.house && address.area && address.landmark) {
+          saved = {
+            tag: address.tag || 'Home',
+            house: address.house || '',
+            area: address.area || '',
+            landmark: address.landmark || '',
+            city: address.city || 'Maynaguri',
+            pincode: address.pincode || '',
+            location: address.location || null
+          };
+          localStorage.setItem('nearbite_address', JSON.stringify(saved));
+          if (address._id) localStorage.setItem('nearbite_selected_address_id', String(address._id));
+        }
+      }
+    } catch (e) {
+      console.warn('Could not hydrate saved address:', e);
+    }
+  }
 
   if (hasAddress() && saved) {
     const tag = saved.tag || 'Home';
@@ -714,7 +600,6 @@ async function placeOrder() {
   try {
     const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
     const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
-    const selectedAddressId = localStorage.getItem('nearbite_selected_address_id') || savedAddress?._id || null;
 
     const itemsArray = [];
     let restaurantId = null;
@@ -746,14 +631,13 @@ async function placeOrder() {
     // the SAME restaurant GPS + customer GPS pricing so the customer sees
     // the amount that will actually be charged.
     const delivery = await calculateCurrentDelivery();
-    const deliveryFee = delivery.fee == null ? 35 : delivery.fee;
+    const deliveryFee = delivery.fee == null ? 30 : delivery.fee;
 
     const total = subtotal + deliveryFee + platformFee;
 
     const payload = {
       items: itemsArray,
-      addressId: selectedAddressId,
-      deliveryAddress: savedAddress, // backward-compat fallback only — backend prefers addressId
+      deliveryAddress: savedAddress,
       restaurantId: restaurantId,
       restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
       subtotal,
@@ -796,20 +680,8 @@ async function placeOrder() {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-  initLocationPermission();
   await loadAddress();
   await renderCart();
-});
-
-// Safety net: some browsers restore this page from the back/forward cache
-// when navigating back from address.html, which does not re-fire
-// DOMContentLoaded. Re-resolve the address + totals so a changed selection
-// is never stale without a manual refresh.
-window.addEventListener('pageshow', (e) => {
-  if (e.persisted) {
-    loadAddress();
-    renderCart();
-  }
 });
   </script>
 </body>
