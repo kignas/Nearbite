@@ -204,6 +204,16 @@
       40%, 60% { transform: translateX(4px); }
     }
 
+    .verify-otp-btn {
+      width: 100%; background: var(--brand); color: #fff;
+      font-size: 15px; font-weight: 800; padding: 15px;
+      border-radius: 14px; border: none; box-shadow: 0 4px 12px rgba(252,128,25,0.22);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 18px; transition: transform .15s, opacity .15s;
+    }
+    .verify-otp-btn:active:not(:disabled) { transform: scale(.985); }
+    .verify-otp-btn:disabled { background: #f3f4f6; color: #9ca3af; box-shadow: none; pointer-events: none; }
+
     .resend-row { font-size: 13px; font-weight: 600; color: var(--text-3); text-align: center; margin-top: 22px; }
     .resend-btn { color: var(--brand); background: none; border: none; font-weight: 800; padding-left: 4px; font-size: 13px; }
     .resend-btn:disabled { color: var(--text-3); pointer-events: none; }
@@ -307,6 +317,10 @@
         <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 3 of 4" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
         <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 4 of 4" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
       </div>
+      <button type="button" id="verifyOtpBtn" class="verify-otp-btn tap" onclick="verifyOTP()" disabled aria-label="Verify OTP">
+        <span id="verifyOtpBtnText">Verify OTP</span>
+      </button>
+
       <div id="otpError" class="field-error" role="alert" aria-live="polite">
         <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
         <span id="otpErrorText">Incorrect code. Please try again.</span>
@@ -488,6 +502,7 @@
           startOTPTimer();
           listenForWebOTP();
           setTimeout(() => { otpBoxes[0].focus(); }, 100);
+          updateVerifyButton();
         } else {
           showBanner(step1Banner, step1BannerText, (result && result.message) || "We couldn't send the code. Please try again.");
         }
@@ -528,6 +543,7 @@
           startOTPTimer();
           listenForWebOTP();
           otpBoxes[0].focus();
+          updateVerifyButton();
         } else {
           showBanner(step2Banner, step2BannerText, (result && result.message) || "Couldn't resend the code. Please try again.");
           resendBtn.innerText = 'Resend';
@@ -553,16 +569,32 @@
       otpBoxes.forEach(box => { box.value = ''; box.classList.remove('error'); box.removeAttribute('readonly'); });
       hideBanner(step2Banner);
       hideFieldError(otpError);
+      updateVerifyButton();
     }
 
     /* ============================================================
        Verify OTP
     ============================================================ */
+    function updateVerifyButton() {
+      const complete = Array.from(otpBoxes).every(box => box.value.length === 1);
+      const btn = document.getElementById('verifyOtpBtn');
+      if (btn && !isVerifying) btn.disabled = !complete;
+    }
+
+    function setVerifyButtonLoading(loading) {
+      const btn = document.getElementById('verifyOtpBtn');
+      const text = document.getElementById('verifyOtpBtnText');
+      if (!btn || !text) return;
+      btn.disabled = loading || !Array.from(otpBoxes).every(box => box.value.length === 1);
+      text.innerHTML = loading ? '<span class="spinner"></span>Verifying…' : 'Verify OTP';
+    }
+
     async function checkOTPCompletion() {
       const otpString = Array.from(otpBoxes).map(box => box.value).join('');
       if (otpString.length !== otpBoxes.length || isVerifying) return;
 
       isVerifying = true;
+      setVerifyButtonLoading(true);
       hideBanner(step2Banner);
       hideFieldError(otpError);
       otpBoxes.forEach(box => box.setAttribute('readonly', 'true'));
@@ -637,6 +669,8 @@
         showBanner(step2Banner, step2BannerText, "Verification failed. Check your connection and try again.");
       } finally {
         isVerifying = false;
+        setVerifyButtonLoading(false);
+        updateVerifyButton();
       }
     }
 
@@ -650,6 +684,7 @@
       if (input.value.length === 1 && index < otpBoxes.length - 1) {
         otpBoxes[index + 1].focus();
       }
+      updateVerifyButton();
       checkOTPCompletion();
     }
 
@@ -666,6 +701,7 @@
       digits.forEach((d, i) => { if (otpBoxes[i]) otpBoxes[i].value = d; });
       const nextIndex = Math.min(digits.length, otpBoxes.length - 1);
       otpBoxes[nextIndex].focus();
+      updateVerifyButton();
       checkOTPCompletion();
     }
 
