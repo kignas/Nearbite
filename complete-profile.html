@@ -1,277 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#ffffff">
-  <title>Complete Your Profile – Nearbite</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="config.js"></script>
-  <style>
-    :root {
-      --brand:#FC8019; --brand-light:#fff4ec; --text:#111827; --muted:#6b7280;
-      --border:#e5e7eb; --input:#f9fafb; --danger:#dc2626; --success:#059669;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:var(--text);min-height:100dvh}
-    .header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;position:sticky;top:0;background:#fff;z-index:5}
-    .back{width:40px;height:40px;border:0;border-radius:50%;background:#f3f4f6;font-size:16px}
-    .title{font-size:18px;font-weight:800}
-    .content{padding:26px 20px 120px;max-width:600px;margin:auto}
-    .hero{text-align:center;margin:8px 0 28px}
-    .hero-icon{width:64px;height:64px;border-radius:22px;background:var(--brand-light);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:25px;margin:0 auto 16px}
-    .hero h1{font-size:25px;font-weight:900;letter-spacing:-.5px}
-    .hero p{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.6}
-    .section{margin-top:22px}
-    .section-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:10px}
-    .field{margin-bottom:14px}
-    label{display:block;font-size:12px;font-weight:800;color:#374151;margin-bottom:7px}
-    input{width:100%;padding:15px;border:1.5px solid transparent;border-radius:14px;background:var(--input);font:600 14px 'Plus Jakarta Sans';outline:0;color:var(--text)}
-    input:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 3px rgba(252,128,25,.1)}
-    input[readonly]{background:#f1f5f9;color:#6b7280}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .hint{font-size:11px;color:#9ca3af;margin-top:7px;line-height:1.5}
-    .footer{position:fixed;bottom:0;left:0;right:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--border);z-index:10}
-    .primary{display:block;width:100%;max-width:600px;margin:auto;border:0;border-radius:15px;padding:16px;background:var(--brand);color:#fff;font:800 14px 'Plus Jakarta Sans'}
-    .primary:disabled{opacity:.45}
-    .error{display:none;background:#fef2f2;color:var(--danger);border:1px solid #fecaca;border-radius:12px;padding:12px;font-size:12px;font-weight:700;margin-bottom:16px}
-    .loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:20;align-items:center;justify-content:center;flex-direction:column}
-    .spinner{width:36px;height:36px;border:4px solid #eee;border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media(max-width:430px){.row{grid-template-columns:1fr}.hero h1{font-size:23px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff">
+<title>Your details · Nearbite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--brand:#fc8019;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--soft:#f8fafc;--green:#15803d;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--soft);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif}
+.app{max-width:620px;margin:auto;min-height:100dvh;background:#fff}.header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px}.top{display:flex;align-items:center;gap:12px}.back{width:40px;height:40px;border:0;border-radius:13px;background:#f4f4f5}.title{font-size:17px;font-weight:800}
+.main{padding:22px 18px 105px}.progress{display:flex;align-items:center;gap:7px;margin-bottom:22px}.step{height:5px;flex:1;border-radius:9px;background:#eceef0}.step.on{background:var(--brand)}
+.hero{text-align:center;margin:6px 0 25px}.hero-icon{width:58px;height:58px;border-radius:19px;background:#fff2e8;color:var(--brand);display:grid;place-items:center;margin:0 auto 12px;font-size:23px}.hero h1{font-size:23px;margin:0;font-weight:900;letter-spacing:-.5px}.hero p{font-size:12px;color:var(--muted);line-height:1.55;margin:7px 0 0}
+.section{margin-top:20px}.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8b929c;font-weight:900;margin-bottom:10px}
+.field{margin-bottom:13px}label{display:block;font-size:11px;font-weight:800;color:#374151;margin-bottom:7px}input{width:100%;height:48px;border:1px solid var(--line);background:#fafafa;border-radius:13px;padding:0 13px;font:600 13px 'Plus Jakarta Sans';outline:0}input:focus{border-color:#f3a26b;background:#fff;box-shadow:0 0 0 3px #fc80191a}input[readonly]{background:#f1f5f9;color:#6b7280}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.location-card{border:1px solid #fed7aa;background:#fff8f3;border-radius:17px;padding:14px}.loc-row{display:flex;gap:11px}.loc-icon{width:38px;height:38px;border-radius:12px;background:#fff;color:var(--brand);display:grid;place-items:center;flex:none}.loc-main{font-size:12px;font-weight:800;line-height:1.45}.loc-meta{font-size:10px;color:var(--green);margin-top:4px;line-height:1.4}.change{margin-top:11px;border:0;background:transparent;color:#c85e0d;font-size:11px;font-weight:900;padding:0}
+.error{display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:11px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-bottom:14px}
+.footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 18px calc(12px + env(safe-area-inset-bottom));z-index:30}.primary{width:100%;max-width:584px;margin:auto;height:50px;border:0;border-radius:14px;background:var(--brand);color:#fff;font:800 13px 'Plus Jakarta Sans'}.primary:disabled{opacity:.45}
+.success{display:none;text-align:center;padding:50px 25px}.success-icon{width:72px;height:72px;border-radius:24px;background:#ecfdf5;color:var(--green);display:grid;place-items:center;margin:0 auto 18px;font-size:30px}.success h2{font-size:24px;margin:0}.success p{color:var(--muted);font-size:12px;line-height:1.6}
+.spinner{width:16px;height:16px;border:2px solid #ffffff66;border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-3px;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:430px){.grid{grid-template-columns:1fr}.main{padding-left:16px;padding-right:16px}}
+</style>
 </head>
 <body>
-  <div class="header">
-    <button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="title">Complete your profile</div>
-  </div>
+<div class="app">
+<header class="header"><div class="top"><button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button><div class="title">Set up your Nearbite account</div></div></header>
+<main class="main" id="formView">
+<div class="progress"><div class="step on"></div><div class="step on"></div><div class="step"></div></div>
+<div class="hero"><div class="hero-icon"><i class="fa-solid fa-user-check"></i></div><h1>Almost there!</h1><p>Save your details and delivery point once. Future orders will be faster.</p></div>
+<div class="error" id="error"></div>
 
-  <main class="content">
-    <div class="hero">
-      <div class="hero-icon"><i class="fa-solid fa-user-check"></i></div>
-      <h1>Almost there!</h1>
-      <p>Tell us your name once. We'll save it to your Nearbite account so your future orders are faster.</p>
-    </div>
+<section class="section"><div class="section-title">Customer details</div>
+<div class="field"><label>FULL NAME *</label><input id="name" maxlength="60" placeholder="Enter your full name" autocomplete="name"></div>
+<div class="grid"><div class="field"><label>MOBILE NUMBER</label><input id="phone" readonly></div><div class="field"><label>EMAIL (OPTIONAL)</label><input id="email" maxlength="120" type="email" placeholder="you@example.com" autocomplete="email"></div></div>
+</section>
 
-    <div class="error" id="errorBox"></div>
+<section class="section"><div class="section-title">Delivery location</div>
+<div class="location-card"><div class="loc-row"><div class="loc-icon"><i class="fa-solid fa-location-dot"></i></div><div><div class="loc-main" id="locationText">Your selected GPS location</div><div class="loc-meta" id="locationMeta">GPS captured for delivery distance calculation</div></div></div><button class="change" onclick="changeLocation()">Change location</button></div>
+</section>
 
-    <section class="section">
-      <div class="section-title">Personal details</div>
-      <div class="field">
-        <label for="name">Full name *</label>
-        <input id="name" type="text" maxlength="60" placeholder="Enter your full name" autocomplete="name">
-      </div>
-      <div class="field">
-        <label for="phone">Mobile number</label>
-        <input id="phone" type="tel" readonly>
-        <div class="hint">Verified with OTP. This number will be used for order updates and delivery contact.</div>
-      </div>
-      <div class="field">
-        <label for="email">Email (optional)</label>
-        <input id="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email">
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">Delivery address</div>
-      <div style="background:#fff4ec;border:1px solid #fed7aa;border-radius:16px;padding:16px;">
-        <div style="font-size:14px;font-weight:800;color:#111827;margin-bottom:6px;">
-          Add your delivery address next
-        </div>
-        <div style="font-size:12px;line-height:1.6;color:#6b7280;">
-          After saving your profile, Nearbite will take you to your saved-address page.
-          There you can enter your address and capture your real GPS location for delivery-distance calculation.
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="footer">
-    <button class="primary" id="saveBtn" disabled onclick="completeProfile()">Save & continue to address</button>
-  </div>
-
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div style="margin-top:12px;font-weight:800;font-size:13px;">Saving your details...</div>
-  </div>
-
+<section class="section"><div class="section-title">Delivery address</div>
+<div class="grid"><div class="field"><label>HOUSE / FLAT</label><input id="house" maxlength="100" placeholder="House no. / building"></div><div class="field"><label>PINCODE *</label><input id="pincode" inputmode="numeric" maxlength="6" placeholder="735224"></div></div>
+<div class="field"><label>AREA / STREET *</label><input id="area" maxlength="160" placeholder="Locality / street / village"></div>
+<div class="field"><label>LANDMARK</label><input id="landmark" maxlength="160" placeholder="Nearby landmark (optional)"></div>
+<div class="grid"><div class="field"><label>CITY</label><input id="city" value="Maynaguri"></div><div class="field"><label>SAVE AS</label><select id="tag" style="width:100%;height:48px;border:1px solid #e5e7eb;background:#fafafa;border-radius:13px;padding:0 13px;font:600 13px 'Plus Jakarta Sans'"><option>Home</option><option>Work</option><option>Other</option></select></div></div>
+</section>
+</main>
+<div class="success" id="successView"><div class="success-icon"><i class="fa-solid fa-check"></i></div><h2>You're all set!</h2><p>Your Nearbite profile and delivery address are saved. Taking you to your order…</p></div>
+<div class="footer" id="footer"><button class="primary" id="saveBtn" onclick="saveAll()" disabled>Save & continue</button></div>
+</div>
 <script>
-  const API = CONFIG.API_BASE_URL;
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-
-  if (!token) {
-    window.location.replace('login.html');
-  }
-
-  // New-user onboarding: location is collected before profile/address details.
-  // Existing users with a saved address should never be forced through this flow.
-  const onboardingLocation = localStorage.getItem('nearbite_onboarding_location');
-  const locationDone = new URLSearchParams(window.location.search).get('location') === 'done';
-  if (!onboardingLocation && !locationDone) {
-    window.location.replace('location-onboarding.html');
-  }
-
-  const $ = id => document.getElementById(id);
-  const fields = ['name'];
-
-  function showError(message) {
-    $('errorBox').textContent = message;
-    $('errorBox').style.display = message ? 'block' : 'none';
-  }
-
-  function validate() {
-    const ok = $('name').value.trim().length >= 2;
-    $('saveBtn').disabled = !ok;
-    return ok;
-  }
-
-  $('name').addEventListener('input', validate);
-  $('email').addEventListener('input', validate);
-
-  async function loadExistingProfile() {
-    try {
-      const res = await fetch(`${API}/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store'
-      });
-
-      const result = await res.json();
-
-      if (!res.ok || !result.success) return;
-
-      const user = result.data || {};
-
-      if (user.name && user.name !== 'Nearbite User') {
-        $('name').value = user.name;
-      }
-
-      $('phone').value =
-        user.phone ||
-        (JSON.parse(localStorage.getItem('nearbite_user') || '{}').phone || '');
-
-      if (user.email) $('email').value = user.email;
-
-      validate();
-    } catch (e) {
-      console.warn('Could not load existing profile', e);
-      validate();
-    }
-  }
-
-  async function completeProfile() {
-    showError('');
-
-    if (!validate()) return;
-
-    const btn = $('saveBtn');
-    btn.disabled = true;
-    $('loading').style.display = 'flex';
-
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      };
-
-      const profileRes = await fetch(`${API}/users/profile`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          name: $('name').value.trim(),
-          email: $('email').value.trim() || undefined
-        })
-      });
-
-      const profileResult = await profileRes.json();
-
-      if (!profileRes.ok || !profileResult.success) {
-        throw new Error(
-          profileResult.message || 'Could not save your profile.'
-        );
-      }
-
-      const savedUser =
-        profileResult.data ||
-        JSON.parse(localStorage.getItem('nearbite_user') || '{}');
-
-      localStorage.setItem('nearbite_user', JSON.stringify(savedUser));
-
-      /*
-       * Preserve the page that started the login flow.
-       * Do not overwrite the cart or the original redirect target.
-       */
-      // Restore the guest cart if authentication unexpectedly cleared it.
-      // Never overwrite a non-empty current cart.
-      try {
-        const currentCart = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
-        const backupCart = localStorage.getItem('nearbite_cart_before_auth');
-        if (Object.keys(currentCart).length === 0 && backupCart) {
-          localStorage.setItem('nearbite_cart', backupCart);
-        }
-      } catch (e) {
-        console.warn('Could not restore cart after login:', e);
-      }
-
-      let next = localStorage.getItem('nearbite_after_login');
-      if (!next) {
-        let hasGuestCart = false;
-        try {
-          const c = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
-          hasGuestCart = !!c && Object.keys(c).length > 0;
-        } catch (e) {}
-        next = hasGuestCart ? 'cart.html' : 'index.html';
-      }
-
-      // If this account already has a saved address, skip the address page.
-      // Otherwise address.html becomes the single address + GPS step.
-      let hasServerAddress = false;
-      try {
-        const addressRes = await fetch(`${API}/users/addresses`, {
-          headers: { Authorization: `Bearer ${token}` },
-          cache: 'no-store'
-        });
-        if (addressRes.ok) {
-          const addressResult = await addressRes.json();
-          const addresses = Array.isArray(addressResult) ? addressResult :
-            Array.isArray(addressResult.addresses) ? addressResult.addresses :
-            Array.isArray(addressResult.data) ? addressResult.data :
-            Array.isArray(addressResult?.data?.addresses) ? addressResult.data.addresses : [];
-          hasServerAddress = addresses.length > 0;
-          // Only hydrate an address if no current checkout address exists.
-          // Default address and currently selected checkout address are separate concepts.
-          if (hasServerAddress && !localStorage.getItem('nearbite_selected_address_id')) {
-            const preferred = addresses.find(a => a.isDefault || a.default) || addresses[0];
-            if (preferred) {
-              localStorage.setItem('nearbite_selected_address_id', String(preferred._id));
-              localStorage.setItem('nearbite_address', JSON.stringify(preferred));
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('Could not check saved address:', e);
-      }
-
-      if (hasServerAddress || localStorage.getItem('nearbite_address')) {
-        localStorage.removeItem('nearbite_after_login');
-        window.location.href = next;
-      } else {
-        window.location.href = 'address.html';
-      }
-    } catch (error) {
-      console.error(error);
-      showError(
-        error.message || 'Something went wrong. Please try again.'
-      );
-      btn.disabled = false;
-      $('loading').style.display = 'none';
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', loadExistingProfile);
+const API='https://eatswada.onrender.com/api';
+const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');
+const $=id=>document.getElementById(id);
+let saving=false;
+if(!token)location.replace('login.html');
+function getLocation(){try{return JSON.parse(localStorage.getItem('nearbite_onboarding_location')||'null')}catch(e){return null}}
+function getGeo(){try{return JSON.parse(localStorage.getItem('nearbite_onboarding_geocode')||'null')}catch(e){return null}}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]) )}
+function showError(s){$('error').textContent=s;$('error').style.display=s?'block':'none'}
+function validate(){const ok=$('name').value.trim().length>=2 && $('area').value.trim().length>=2 && /^\d{6}$/.test($('pincode').value.trim()) && !!getLocation();$('saveBtn').disabled=!ok||saving;return ok}
+function hydrate(){
+ const loc=getLocation();if(!loc){location.replace('location-onboarding.html');return}
+ const geo=getGeo();const a=geo?.address||{};
+ $('phone').value=(JSON.parse(localStorage.getItem('nearbite_user')||'{}').phone||'');
+ $('locationText').textContent=geo?.display_name||`GPS ${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`;
+ $('locationMeta').textContent=`GPS captured${loc.accuracy?` · ±${Math.round(loc.accuracy)} m`:''}`;
+ if(a.postcode)$('pincode').value=a.postcode;
+ $('area').value=[a.road,a.suburb,a.village,a.neighbourhood].filter(Boolean).slice(0,2).join(', ');
+ $('city').value=a.city||a.town||a.municipality||'Maynaguri';
+ $('name').value='';
+ loadProfile();
+}
+async function fetchJson(url,options={},timeout=12000){
+ const c=new AbortController();const t=setTimeout(()=>c.abort(),timeout);
+ try{const r=await fetch(url,{...options,signal:c.signal});const p=await r.json().catch(()=>({}));return {r,p}}finally{clearTimeout(t)}
+}
+async function loadProfile(){
+ try{const {r,p}=await fetchJson(API+'/users/profile',{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
+ if(r.ok&&p.success){const u=p.data||{};$('name').value=(u.name&&u.name!=='Nearbite User')?u.name:'';$('email').value=u.email||'';$('phone').value=u.phone||$('phone').value;validate()}}
+ catch(e){validate()}
+}
+function changeLocation(){location.href='location-onboarding.html'}
+async function saveAll(){
+ showError('');if(!validate())return;saving=true;$('saveBtn').disabled=true;$('saveBtn').innerHTML='<span class="spinner"></span> Saving…';
+ const headers={'Content-Type':'application/json',Authorization:`Bearer ${token}`};const loc=getLocation();
+ try{
+  const profile=await fetchJson(API+'/users/profile',{method:'PUT',headers,body:JSON.stringify({name:$('name').value.trim(),email:$('email').value.trim()||undefined})});
+  if(!profile.r.ok||!profile.p.success)throw new Error(profile.p.message||'Could not save your profile.');
+  const addressPayload={tag:$('tag').value,house:$('house').value.trim()||'No House Number',area:$('area').value.trim(),landmark:$('landmark').value.trim(),city:$('city').value.trim()||'Maynaguri',pincode:$('pincode').value.trim(),receiverName:$('name').value.trim(),receiverPhone:($('phone').value||'').replace(/\D/g,''),latitude:Number(loc.latitude),longitude:Number(loc.longitude),isDefault:true};
+  const addresses=await fetchJson(API+'/users/addresses',{method:'POST',headers,body:JSON.stringify(addressPayload)});
+  if(!addresses.r.ok)throw new Error(addresses.p.message||'Could not save your delivery address.');
+  const saved=addresses.p.data||addresses.p.address;
+  if(saved){localStorage.setItem('nearbite_address',JSON.stringify(saved));if(saved._id)localStorage.setItem('nearbite_selected_address_id',String(saved._id))}
+  const originalNext=localStorage.getItem('nearbite_after_login');
+  localStorage.removeItem('nearbite_onboarding_location');localStorage.removeItem('nearbite_onboarding_geocode');
+  localStorage.removeItem('nearbite_after_login');
+  $('formView').style.display='none';$('footer')?.remove();$('successView').style.display='block';
+  let next=originalNext;
+  let hasCart=false;try{const c=JSON.parse(localStorage.getItem('nearbite_cart')||'{}');hasCart=!!c&&Object.keys(c).length>0}catch(e){}
+  next=next|| (hasCart?'cart.html':'index.html');
+  setTimeout(()=>location.replace(next),900);
+ }catch(e){
+  console.error(e);showError(e.name==='AbortError'?'The server took too long to respond. Your details were not lost; please try again.':(e.message||'Something went wrong. Please try again.'));
+  saving=false;$('saveBtn').disabled=false;$('saveBtn').textContent='Save & continue';
+ }
+}
+['name','email','house','pincode','area','landmark','city'].forEach(id=>$(id).addEventListener('input',validate));
+window.addEventListener('load',hydrate);
 </script>
 </body>
 </html>

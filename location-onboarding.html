@@ -3,31 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#fff">
-<title>Your location · Nearbite</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="theme-color" content="#ffffff">
+<title>Choose delivery location · Nearbite</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-:root{--brand:#fc8019;--ink:#111827;--muted:#6b7280;--line:#e7e8eb}
+:root{--brand:#fc8019;--ink:#111827;--muted:#6b7280;--line:#e7e8eb;--soft:#f7f7f8}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif;color:var(--ink);overflow:hidden}
-#map{position:absolute;inset:0}
+#map{position:absolute;inset:0;background:#e9eef2}
 .top{position:absolute;top:14px;left:14px;right:14px;z-index:1000;display:flex;align-items:center;gap:10px}
-.back,.locate{width:42px;height:42px;border:0;border-radius:14px;background:#fff;box-shadow:0 5px 20px #0002;color:#111827}
-.title{flex:1;background:#fff;border-radius:14px;padding:11px 14px;box-shadow:0 5px 20px #0002}
-.title b{font-size:14px}.title span{display:block;font-size:10px;color:var(--muted);margin-top:2px}
-.pin{position:absolute;left:50%;top:50%;z-index:900;transform:translate(-50%,-100%);pointer-events:none;color:var(--brand);font-size:42px;text-shadow:0 3px 8px #0003}
-.pin-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid var(--brand);transform:translate(-50%,-50%);z-index:901;pointer-events:none}
-.sheet{position:absolute;left:10px;right:10px;bottom:10px;z-index:1000;background:#fff;border-radius:24px;padding:18px;box-shadow:0 -5px 30px #0002}
-.status{display:flex;gap:11px;align-items:flex-start;margin-bottom:13px}
-.status-icon{width:40px;height:40px;border-radius:13px;background:#fff2e8;color:var(--brand);display:grid;place-items:center;flex:none}
+.back,.locate{width:44px;height:44px;border:0;border-radius:14px;background:#fff;box-shadow:0 5px 20px #0002;color:#111827;font-size:16px}
+.title{flex:1;background:rgba(255,255,255,.97);border-radius:15px;padding:11px 14px;box-shadow:0 5px 20px #0002}
+.title b{font-size:14px}.title span{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.pin{position:absolute;left:50%;top:50%;z-index:900;transform:translate(-50%,-100%);pointer-events:none;color:var(--brand);font-size:44px;filter:drop-shadow(0 4px 5px #0004)}
+.pin-dot{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid var(--brand);transform:translate(-50%,-50%);z-index:901;pointer-events:none}
+.gps-marker{width:18px;height:18px;border:3px solid #fff;border-radius:50%;background:#1677ff;box-shadow:0 2px 10px #0005}
+.gps-pulse{border:2px solid #1677ff;border-radius:50%;animation:pulse 1.8s infinite}@keyframes pulse{0%{transform:scale(.7);opacity:.75}100%{transform:scale(1.8);opacity:0}}
+.sheet{position:absolute;left:10px;right:10px;bottom:10px;z-index:1000;background:rgba(255,255,255,.98);border-radius:25px;padding:18px;box-shadow:0 -5px 30px #0002}
+.status{display:flex;gap:11px;align-items:flex-start;margin-bottom:13px}.status-icon{width:40px;height:40px;border-radius:13px;background:#fff2e8;color:var(--brand);display:grid;place-items:center;flex:none}
 .status b{font-size:14px}.status span{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:3px}
 .address{font-size:12px;color:#374151;background:#f8fafc;border:1px solid var(--line);padding:11px 12px;border-radius:13px;margin-bottom:11px;min-height:40px}
-.actions{display:grid;grid-template-columns:1fr 1.2fr;gap:9px}.btn{height:48px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12px}.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.address strong{display:block;color:#111827;margin-bottom:2px}.accuracy{font-size:10px;color:#15803d;margin-top:5px}
 .warn{display:none;background:#fff7ed;border:1px solid #fed7aa;color:#9a4d13;padding:10px 12px;border-radius:12px;font-size:10px;line-height:1.45;margin-bottom:11px}
-.loading{position:fixed;inset:0;background:#fff;z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column}
-.spinner{width:36px;height:36px;border:4px solid #eee;border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.actions{display:grid;grid-template-columns:1fr 1.2fr;gap:9px}.btn{height:48px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12px}.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn:disabled{opacity:.45}
 .leaflet-control-attribution{font-size:8px}
 </style>
 </head>
@@ -35,68 +34,92 @@
 <div id="map"></div>
 <div class="pin"><i class="fa-solid fa-location-dot"></i></div><div class="pin-dot"></div>
 <div class="top">
-  <button class="back" onclick="goBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-  <div class="title"><b>Set your delivery location</b><span>Move the map to place the pin exactly where you receive orders.</span></div>
+  <button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
+  <div class="title"><b>Set your delivery location</b><span>Allow location or move the map to your exact delivery point.</span></div>
   <button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location"><i class="fa-solid fa-location-crosshairs"></i></button>
 </div>
 <div class="sheet">
   <div class="status">
     <div class="status-icon"><i class="fa-solid fa-location-dot"></i></div>
-    <div><b>Accurate location = accurate delivery</b><span>Nearbite uses this GPS point to calculate delivery distance and charges.</span></div>
+    <div><b>Use your real location</b><span>We use this GPS point to calculate restaurant distance and delivery charges accurately.</span></div>
   </div>
   <div class="warn" id="warn"></div>
-  <div class="address" id="coords">Getting your location…</div>
+  <div class="address" id="address">Waiting for your location…</div>
   <div class="actions">
-    <button class="btn" onclick="locateMe()"><i class="fa-solid fa-crosshairs"></i> Use current</button>
+    <button class="btn" id="currentBtn" onclick="locateMe()"><i class="fa-solid fa-crosshairs"></i> Use current</button>
     <button class="btn primary" id="confirm" onclick="confirmLocation()" disabled>Confirm location</button>
   </div>
 </div>
-<div class="loading" id="loading"><div class="spinner"></div><b style="margin-top:12px;font-size:13px">Finding your location…</b><span style="margin-top:5px;color:#6b7280;font-size:11px">Please allow location access</span></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const DEFAULT=[26.52,88.73]; // Maynaguri fallback only; never used as confirmed customer GPS.
-let map, current=null, locating=false;
+const DEFAULT=[26.52,88.73]; // Map-only fallback. Never saved as customer GPS.
+let map,current=null,locating=false,gpsMarker=null,accuracyCircle=null,watchId=null,firstFix=false;
 const $=id=>document.getElementById(id);
-function goBack(){history.back()}
-function showWarn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
-function updateText(){
- if(!current){$('coords').textContent='Move the map or allow location access to set your delivery point.';return}
- $('coords').textContent=`Pin: ${current.lat.toFixed(6)}, ${current.lng.toFixed(6)} · Move the map to adjust`;
- $('confirm').disabled=false;
+function warn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
+function setAddress(main,meta=''){ $('address').innerHTML=`<strong>${escapeHtml(main)}</strong>${meta?`<div class="accuracy">${escapeHtml(meta)}</div>`:''}` }
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]) )}
+function updateCenterFromMap(){
+ if(firstFix)return;
+ const c=map.getCenter(); current={lat:c.lat,lng:c.lng}; setAddress('Move the map to your delivery point','Map selection · GPS not yet confirmed'); $('confirm').disabled=false;
 }
-function initMap(){
- map=L.map('map',{zoomControl:false,attributionControl:true}).setView(DEFAULT,15);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'© OpenStreetMap contributors'}).addTo(map);
- map.on('moveend',()=>{const c=map.getCenter();current={lat:c.lat,lng:c.lng};updateText()});
- locateMe();
+function showGps(lat,lng,accuracy){
+ if(gpsMarker)map.removeLayer(gpsMarker);
+ if(accuracyCircle)map.removeLayer(accuracyCircle);
+ const icon=L.divIcon({className:'',html:'<div class="gps-marker"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+ gpsMarker=L.marker([lat,lng],{icon,interactive:false}).addTo(map);
+ accuracyCircle=L.circle([lat,lng],{radius:Math.min(Math.max(accuracy||30,10),500),color:'#1677ff',fillColor:'#1677ff',fillOpacity:.08,weight:1}).addTo(map);
+}
+async function reverseGeocode(lat,lng){
+ try{
+  const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=18&addressdetails=1`,{headers:{Accept:'application/json'}});
+  if(!r.ok)return null;
+  const d=await r.json(); localStorage.setItem('nearbite_onboarding_geocode',JSON.stringify(d));
+  return d;
+ }catch(e){return null}
+}
+function applyPosition(p,center=true){
+ current={lat:Number(p.coords.latitude),lng:Number(p.coords.longitude),accuracy:Number(p.coords.accuracy||0)};
+ firstFix=true; showGps(current.lat,current.lng,current.accuracy);
+ if(center)map.setView([current.lat,current.lng],17,{animate:true});
+ const acc=current.accuracy?`GPS accuracy ±${Math.round(current.accuracy)} m`:'GPS location captured';
+ setAddress('Current location',acc); $('confirm').disabled=false; warn('');
+ reverseGeocode(current.lat,current.lng).then(d=>{
+  if(d?.display_name)setAddress(d.display_name,acc);
+ });
 }
 function locateMe(){
  if(locating)return;
- if(!navigator.geolocation){showWarn('This browser does not support location. You can still move the map and choose a location manually.');return}
- locating=true;$('locateBtn').disabled=true;$('loading').style.display='flex';showWarn('');
+ if(!navigator.geolocation){warn('Your browser does not support location. Move the map manually to choose your delivery point.');return}
+ locating=true;$('locateBtn').disabled=true;$('currentBtn').disabled=true;warn('Requesting your live location…');
  navigator.geolocation.getCurrentPosition(p=>{
-   current={lat:p.coords.latitude,lng:p.coords.longitude};
-   map.setView([current.lat,current.lng],17,{animate:true});
-   updateText();locating=false;$('locateBtn').disabled=false;$('loading').style.display='none';
+   applyPosition(p,true); locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
  },e=>{
-   locating=false;$('locateBtn').disabled=false;$('loading').style.display='none';
-   const msg=e.code===1
-    ? 'Location permission was denied. Please allow location access in your browser settings for accurate delivery distance and charges.'
-    : e.code===3 ? 'Location request timed out. Tap “Use current” to try again, or move the map manually.'
-    : 'We could not get your location. You can move the map manually and confirm your delivery point.';
-   showWarn(msg);updateText();
- },{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
+   locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
+   const msg=e.code===1?'Location permission was denied. Please allow location access in browser settings for accurate delivery.':
+     e.code===3?'Location took too long. Check GPS/location services and tap “Use current” again.':
+     'We could not get your GPS location. You can move the map manually and confirm the delivery point.';
+   warn(msg); setAddress('Location not available','You can still choose the point manually on the map.');
+ },{enableHighAccuracy:true,timeout:25000,maximumAge:10000});
 }
 function confirmLocation(){
  if(!current)return;
  localStorage.setItem('nearbite_onboarding_location',JSON.stringify({
-   latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),capturedAt:Date.now()
+   latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),
+   accuracy:Number((current.accuracy||0).toFixed(1)),capturedAt:Date.now()
  }));
  localStorage.setItem('nearbite_location_permission_seen','1');
  const next=localStorage.getItem('nearbite_after_login');
  window.location.href='complete-profile.html?location=done'+(next?'':'&new=1');
 }
-window.addEventListener('load',initMap);
+function init(){
+ map=L.map('map',{zoomControl:false,attributionControl:true}).setView(DEFAULT,15);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'© OpenStreetMap contributors'}).addTo(map);
+ map.on('moveend',updateCenterFromMap);
+ // Start with the real map immediately; permission is requested without a fake full-screen loader.
+ setAddress('Finding your current location…','Please allow location access when your browser asks.');
+ locateMe();
+}
+window.addEventListener('load',init);
 </script>
 </body>
 </html>
