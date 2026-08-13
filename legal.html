@@ -3,67 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Policies – EatSwada</title>
+  <title>Terms, Privacy &amp; Refunds – Nearbite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <style>
+    :root {
+      --brand: #FC8019;
+      --text-1: #111827;
+      --text-2: #374151;
+      --text-3: #9ca3af;
+      --bg: #f4f4f6;
+      --border: #e5e7eb;
+      --ease: cubic-bezier(0.25,1,0.5,1);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f4f4f6; color: #111; padding-bottom: 40px; -webkit-tap-highlight-color: transparent; }
-    
-    /* Top Bar */
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-1); padding-bottom: 48px; -webkit-tap-highlight-color: transparent; }
+
+    .tap { cursor: pointer; transition: transform 0.15s var(--ease), opacity 0.15s; }
+    .tap:active { transform: scale(0.96); opacity: 0.85; }
+
     .top-bar { position: sticky; top: 0; background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.06); padding: 14px 16px; display: flex; align-items: center; gap: 16px; z-index: 100; }
-    .back-btn { background: #f3f4f6; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    .back-btn { background: #f3f4f6; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
     .back-btn:active { transform: scale(0.9); }
     .page-title { font-size: 16px; font-weight: 800; }
 
-    .container { padding: 20px; }
+    .toc-bar { position: sticky; top: 66px; background: rgba(244,244,246,0.96); backdrop-filter: blur(12px); z-index: 99; padding: 10px 20px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(0,0,0,0.04); }
+    .toc-bar::-webkit-scrollbar { display: none; }
+    .toc-chip { flex-shrink: 0; background: #fff; border: 1.5px solid var(--border); color: var(--text-2); font-size: 12px; font-weight: 700; padding: 7px 13px; border-radius: 20px; text-decoration: none; }
 
-    /* Legal Section */
-    .legal-box { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 16px; border: 1px solid #f0f0f0; }
-    .legal-box h4 { font-size: 15px; font-weight: 800; margin-bottom: 10px; color: #111; display: flex; align-items: center; gap: 8px; }
-    .legal-box h4 i { color: #FC8019; }
-    .legal-box p { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 10px; }
+    .container { padding: 20px; max-width: 620px; margin: 0 auto; }
+
+    .doc-meta { text-align: center; font-size: 12px; color: var(--text-3); font-weight: 600; margin-bottom: 24px; }
+    .doc-meta strong { color: var(--text-2); }
+
+    .legal-section { scroll-margin-top: 116px; margin-bottom: 28px; }
+    .legal-section > h2 { font-size: 18px; font-weight: 900; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+    .legal-section > h2 i { color: var(--brand); font-size: 16px; }
+    .legal-section > .section-sub { font-size: 12.5px; color: var(--text-3); font-weight: 600; margin-bottom: 14px; }
+
+    .legal-box { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 12px; border: 1px solid #f0f0f0; }
+    .legal-box h3 { font-size: 13.5px; font-weight: 800; margin-bottom: 8px; color: var(--text-1); }
+    .legal-box p { font-size: 13px; color: #555; line-height: 1.65; margin-bottom: 8px; }
     .legal-box p:last-child { margin-bottom: 0; }
+    .legal-box ul { margin: 4px 0 8px 18px; }
+    .legal-box li { font-size: 13px; color: #555; line-height: 1.65; margin-bottom: 4px; }
+    .legal-box a { color: var(--brand); font-weight: 700; text-decoration: none; border-bottom: 1px dotted var(--brand); }
+
+    .back-to-top { display: block; text-align: center; font-size: 11.5px; font-weight: 700; color: var(--brand); text-decoration: none; margin-top: 6px; }
+
+    .contact-cta { text-align: center; margin-top: 8px; }
+    .contact-cta a { display: inline-block; background: var(--text-1); color: #fff; font-size: 13px; font-weight: 800; padding: 11px 22px; border-radius: 20px; text-decoration: none; }
+
+    .signature-block { text-align: center; margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--border); }
+    .signature-avatar { width: 48px; height: 48px; border-radius: 50%; background: #e5e7eb; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #9ca3af; margin-bottom: 8px; }
+    .signature-block p { font-size: 12px; color: #666; }
+    .signature-block .entity-name { font-size: 12px; font-weight: 800; color: #111; }
+    .signature-block .doc-dates { font-size: 10.5px; color: #999; margin-top: 4px; }
+
+    .disclaimer { font-size: 11px; color: var(--text-3); text-align: center; line-height: 1.6; margin-top: 14px; }
   </style>
 </head>
 <body>
 
-  <div class="top-bar">
-    <button class="back-btn" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="page-title">EatSwada Policies</div>
+  <div class="top-bar" id="top-anchor">
+    <button class="back-btn tap" onclick="history.back()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+    <h1 class="page-title" id="pageTitleText">Nearbite Policies</h1>
   </div>
+
+  <nav class="toc-bar" aria-label="Policy sections">
+    <a class="toc-chip" href="#terms">Terms of Service</a>
+    <a class="toc-chip" href="#privacy">Privacy Policy</a>
+    <a class="toc-chip" href="#refunds">Refund &amp; Cancellation</a>
+  </nav>
 
   <div class="container">
-    
-    <div class="legal-box">
-      <h4><i class="fa-solid fa-money-bill-transfer"></i> Refund & Cancellation Policy</h4>
-      <p>Orders can be cancelled within 60 seconds of placement without any charges. Once the restaurant accepts the order and begins preparation, cancellations are not permitted.</p>
-      <p>Refunds will be initiated immediately if an order is cancelled by the restaurant, or if items are missing/incorrect upon delivery. Refunds take 3-5 business days to reflect in your original payment method.</p>
+    <div class="doc-meta">Effective <strong id="effectiveDate"></strong> &nbsp;·&nbsp; Last updated <strong id="lastUpdatedDate"></strong></div>
+
+    <!-- ============ TERMS OF SERVICE ============ -->
+    <section class="legal-section" id="terms">
+      <h2><i class="fa-solid fa-file-contract" aria-hidden="true"></i> Terms of Service</h2>
+      <div class="section-sub">The rules for using Nearbite</div>
+
+      <div class="legal-box">
+        <h3>Using Nearbite</h3>
+        <p>Nearbite is a technology platform that lets you browse menus and place food orders with independent restaurant partners. By using Nearbite, you agree to these Terms and to our Privacy Policy.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Your account</h3>
+        <p>You need an account, verified by a one-time code sent to your phone number, to place an order. You're responsible for keeping your account secure and for all activity under it. Let us know right away if you suspect unauthorized access.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Accurate delivery information</h3>
+        <p>You agree to provide an accurate delivery address and contact number. Nearbite and our delivery partners aren't responsible for delays or failed deliveries caused by incorrect or incomplete information you provide.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Restaurant partners &amp; menus</h3>
+        <p>Restaurants on Nearbite are independent businesses, not Nearbite employees or agents. They set their own menus, prices, and availability, which can change without notice. Responsibility for the quality, safety, and preparation of food sits with the restaurant partner.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Orders &amp; payments</h3>
+        <p>Placing an order is an offer to purchase at the price shown at checkout. Payments are handled through our payment partners — see the Privacy Policy below for how payment information is handled. The order confirmation and pricing shown in-app at the time of purchase govern the transaction.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Delivery</h3>
+        <p>Estimated delivery times are just that — estimates — and can vary with distance, weather, restaurant load, and traffic. We work with our restaurant and delivery partners to get your order to you as promptly as reasonably possible.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Cancellations &amp; refunds</h3>
+        <p>See our full <a href="#refunds">Refund &amp; Cancellation Policy</a> below for how cancellations, missing items, and refunds are handled.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Prohibited use</h3>
+        <p>Don't misuse Nearbite — this includes placing fraudulent orders, abusing promotions or cash-on-delivery, harassing restaurant or delivery staff, or attempting to interfere with the platform's normal operation.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Account suspension</h3>
+        <p>We may suspend or terminate accounts that violate these Terms or misuse the platform, with notice where reasonably possible.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Nearbite's role</h3>
+        <p>Nearbite operates the ordering platform connecting you with independent restaurant and delivery partners. We are not the seller of the food and are not a party to the sale between you and the restaurant, though we help facilitate and support that transaction.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Changes to these Terms</h3>
+        <p>We may update these Terms as Nearbite evolves. Material changes will be reflected by updating the "Last updated" date at the top of this page.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Contact</h3>
+        <p>Questions about these Terms? Reach us through <a href="support.html">Help &amp; Support</a>.</p>
+      </div>
+      <a class="back-to-top" href="#top-anchor">Back to top</a>
+    </section>
+
+    <!-- ============ PRIVACY POLICY ============ -->
+    <section class="legal-section" id="privacy">
+      <h2><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Privacy Policy</h2>
+      <div class="section-sub">What we collect and how it's used</div>
+
+      <div class="legal-box">
+        <h3>Information we collect</h3>
+        <ul>
+          <li>Your name and phone number, used to verify your account</li>
+          <li>Delivery addresses and location you provide, used to deliver your orders</li>
+          <li>Order details — items, restaurant, order value, and order history</li>
+        </ul>
+        <p>We only collect what's needed to run your account and fulfill your orders.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>How we use it</h3>
+        <ul>
+          <li>To create and verify your account, and to process and deliver your orders</li>
+          <li>To provide customer support when you contact us</li>
+          <li>To process payments through our payment partners</li>
+        </ul>
+      </div>
+
+      <div class="legal-box">
+        <h3>Who we share it with</h3>
+        <p>We share only what's necessary with the restaurant preparing your order and the rider delivering it (such as your address and order details), and with our payment gateway partner to process payment. We don't sell your personal data to third parties.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Security</h3>
+        <p>We use reasonable technical and organizational measures to protect your information. Payment details are processed by our payment gateway partners and are not stored on Nearbite's own servers.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Your rights &amp; account deletion</h3>
+        <p>You can update your name and delivery addresses anytime from your Profile. To request access to, correction of, or deletion of your personal data — including closing your account — contact us through <a href="support.html">Help &amp; Support</a>.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Policy updates</h3>
+        <p>We may update this Privacy Policy from time to time. Changes take effect when posted here, with the "Last updated" date above reflecting the most recent revision.</p>
+      </div>
+      <a class="back-to-top" href="#top-anchor">Back to top</a>
+    </section>
+
+    <!-- ============ REFUND & CANCELLATION ============ -->
+    <section class="legal-section" id="refunds">
+      <h2><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i> Refund &amp; Cancellation Policy</h2>
+      <div class="section-sub">How cancellations and refunds work</div>
+
+      <div class="legal-box">
+        <h3>Cancelling an order</h3>
+        <p>You can cancel an order free of charge within 60 seconds of placing it. Once the restaurant accepts the order and begins preparation, it can no longer be cancelled through the app.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Restaurant-cancelled or incorrect orders</h3>
+        <p>If a restaurant cancels your order, or if items arrive missing or incorrect, report it through <a href="support.html">Help &amp; Support</a> as soon as possible so we can review and process a refund where applicable.</p>
+      </div>
+
+      <div class="legal-box">
+        <h3>Refund timing</h3>
+        <p>Once a refund is approved, it's issued to your original payment method. Exactly how long it takes to reflect depends on your bank or payment provider and is outside Nearbite's direct control.</p>
+      </div>
+      <a class="back-to-top" href="#top-anchor">Back to top</a>
+    </section>
+
+    <div class="contact-cta">
+      <a href="support.html">Contact Nearbite Support</a>
     </div>
 
-    <div class="legal-box">
-      <h4><i class="fa-solid fa-file-contract"></i> Terms of Service</h4>
-      <p>By using EatSwada, you agree to provide accurate delivery information. EatSwada acts as a technology platform connecting users with independent restaurant partners in Maynaguri.</p>
-      <p>Prices and offers are determined by the respective restaurants and are subject to change without prior notice. Abuse of the platform or cash-on-delivery system may result in account suspension.</p>
+    <div class="signature-block">
+      <div class="signature-avatar" id="entityAvatar">E</div>
+      <p class="entity-name" id="entityName">EatSwada Food Technologies</p>
+      <p id="entityAddress">Maynaguri, West Bengal</p>
+      <p class="doc-dates" id="footerDates"></p>
     </div>
 
-    <div class="legal-box">
-      <h4><i class="fa-solid fa-shield-halved"></i> Privacy Policy</h4>
-      <p>We collect your name, phone number, and delivery address strictly to fulfill your food orders. We do not sell your personal data to third parties.</p>
-      <p>Payment details are securely processed by our payment gateway partners (e.g., PhonePe/Razorpay) and are never stored on EatSwada servers.</p>
-    </div>
-    
-    <div style="text-align:center; margin-top: 32px; opacity: 0.6;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: #e5e7eb; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #9ca3af; margin-bottom: 8px;">E</div>
-      <p style="font-size: 12px; font-weight: 800; color: #111;">EatSwada Food Technologies</p>
-      <p style="font-size: 11px; color: #666;">Maynaguri, West Bengal</p>
-      <p style="font-size: 10px; color: #999; margin-top: 4px;">Last Updated: April 2026</p>
-    </div>
-
+    <p class="disclaimer">This page is a plain-language summary provided for Nearbite users and should be reviewed by a legal professional before being treated as your final Terms of Service, Privacy Policy, or Refund Policy.</p>
   </div>
 
+  <script>
+    /* ============================================================
+       CONFIGURATION — confirm/replace before treating this as final.
+       Nothing below is a confirmed legal fact — see the delivery
+       message for the full list of items that still need sign-off.
+    ============================================================ */
+    const APP_NAME              = 'Nearbite';
+    const LEGAL_ENTITY_NAME     = 'EatSwada Food Technologies'; // TODO: confirm this is the final registered legal entity name
+    const LEGAL_ADDRESS         = 'Maynaguri, West Bengal';     // TODO: confirm the full registered address
+    const POLICY_EFFECTIVE_DATE = 'April 1, 2026';  // TODO: confirm the actual effective date
+    const POLICY_LAST_UPDATED   = 'August 13, 2026';
+
+    document.getElementById('pageTitleText').textContent = APP_NAME + ' Policies';
+    document.getElementById('effectiveDate').textContent = POLICY_EFFECTIVE_DATE;
+    document.getElementById('lastUpdatedDate').textContent = POLICY_LAST_UPDATED;
+    document.getElementById('entityName').textContent = LEGAL_ENTITY_NAME;
+    document.getElementById('entityAddress').textContent = LEGAL_ADDRESS;
+    document.getElementById('entityAvatar').textContent = LEGAL_ENTITY_NAME.trim().charAt(0).toUpperCase() || 'N';
+    document.getElementById('footerDates').textContent = 'Effective ' + POLICY_EFFECTIVE_DATE + ' · Last updated ' + POLICY_LAST_UPDATED;
+  </script>
 </body>
 </html>
