@@ -60,6 +60,9 @@ function setAddress(main,meta=''){ $('address').innerHTML=`<strong>${escapeHtml(
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]) )}
 let mapMoveTimer=null;
 function updateCenterFromMap(){
+ // The fallback map center is never a valid customer location.
+ // Only a real GPS fix can unlock map selection.
+ if(!firstFix)return;
  const c=map.getCenter();
  if(!Number.isFinite(c.lat)||!Number.isFinite(c.lng))return;
  // The center pin is the selected delivery point. After the first GPS fix,
@@ -107,10 +110,17 @@ function locateMe(){
    applyPosition(p,true); locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
  },e=>{
    locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
-   const msg=e.code===1?'Location permission was denied. Please allow location access in browser settings for accurate delivery.':
-     e.code===3?'Location took too long. Check GPS/location services and tap “Use current” again.':
-     'We could not get your GPS location. You can move the map manually and confirm the delivery point.';
-   warn(msg); setAddress('Location not available','You can still choose the point manually on the map.');
+   const msg=e.code===1?'Location permission was denied. We’ll let you enter your delivery address manually.':
+     e.code===3?'Location took too long. Please try again or enter your delivery address manually.':
+     'We could not get your GPS location. You can enter your delivery address manually.';
+   warn(msg);
+   setAddress('Location not available','Opening manual address entry…');
+   if(e.code===1){
+     setTimeout(()=>{
+       const next=localStorage.getItem('nearbite_after_login');
+       window.location.href='complete-profile.html?location=manual'+(next?'':'&new=1');
+     },700);
+   }
  },{enableHighAccuracy:true,timeout:25000,maximumAge:10000});
 }
 async function confirmLocation(){
@@ -138,7 +148,8 @@ function init(){
  map.on('moveend',updateCenterFromMap);
  map.on('movestart',()=>{ if(!locating) $('address').style.opacity='.75'; });
  map.on('moveend',()=>{ $('address').style.opacity='1'; });
- // Start with the real map immediately; permission is requested without a fake full-screen loader.
+ // The default map is visual context only and cannot be confirmed.
+ $('confirm').disabled=true;
  setAddress('Finding your current location…','Please allow location access when your browser asks.');
  locateMe();
 }
