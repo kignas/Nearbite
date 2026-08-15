@@ -85,7 +85,12 @@ function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;',
 function coords(a){const c=a?.location?.coordinates;return Array.isArray(c)&&c.length>=2?[Number(c[1]),Number(c[0])]:[null,null]}
 function cache(a){localStorage.setItem('nearbite_address',JSON.stringify(a));localStorage.setItem('nearbite_address_updated_at',String(Date.now()))}
 function useAddress(a){
+  if(!a)return;
+  // The selected address is the single source of truth for Cart/Checkout.
+  // Always update both the selected ID and the cached address together.
+  if(a._id) localStorage.setItem('nearbite_selected_address_id',String(a._id));
   cache(a);
+  window.dispatchEvent(new CustomEvent('nearbite:address-changed',{detail:a}));
   toast('Delivery address selected');
   setTimeout(()=>goBack(),250);
 }
@@ -123,7 +128,10 @@ async function load(){
   const selectedId=localStorage.getItem('nearbite_selected_address_id');
   const selected=selectedId ? addresses.find(a=>String(a._id)===String(selectedId)) : null;
   const initial=selected || addresses.find(a=>a.isDefault) || addresses[0];
-  if(initial && !selectedId) cache(initial);
+  if(initial && !selectedId){
+    if(initial._id) localStorage.setItem('nearbite_selected_address_id',String(initial._id));
+    cache(initial);
+  }
  }catch(e){
   if(e.message==='AUTH'){localStorage.removeItem('nearbite_token');localStorage.removeItem('token');location.replace('login.html');return}
   $('list').innerHTML='<div class="empty">Could not load addresses. Please try again.</div>';
@@ -173,12 +181,33 @@ async function saveAddress(){
  }catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save address'}
 }
 async function setDefault(id){
- try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id)+'/default',{method:'PATCH',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not set default');await load();toast('Default address changed')}catch(e){toast(e.message)}
+ try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id)+'/default',{method:'PATCH',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not set default');
+   // Changing the account default must NOT move the customer's current
+   // session selection — only "Use this address" (useAddress) does that.
+   await load();
+   toast('Default address changed')}catch(e){toast(e.message)}
 }
 async function deleteAddress(id){
  const a=byId(id);if(!a)return;
  if(!confirm(`Delete your ${a.tag||'saved'} address?`))return;
- try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id),{method:'DELETE',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not delete address');await load();const next=addresses.find(x=>x.isDefault)||addresses[0];if(next)cache(next);else localStorage.removeItem('nearbite_address');toast('Address deleted')}catch(e){toast(e.message)}
+ try{
+  const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id),{method:'DELETE',headers:headers()});
+  const p=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(p.message||'Could not delete address');
+  const wasSelected=String(localStorage.getItem('nearbite_selected_address_id'))===String(id);
+  await load();
+  if(wasSelected){
+    // The selected address no longer exists — nearbite_selected_address_id must
+    // not keep pointing at it. Prefer the current default, else the first
+    // remaining address, else clear the selection entirely. Deleting a
+    // non-selected address must not touch the selection at all.
+    const next=addresses.find(x=>x.isDefault)||addresses[0];
+    if(next){localStorage.setItem('nearbite_selected_address_id',String(next._id));cache(next)}
+    else{localStorage.removeItem('nearbite_selected_address_id');localStorage.removeItem('nearbite_address')}
+    window.dispatchEvent(new CustomEvent('nearbite:address-changed',{detail:next||null}));
+  }
+  toast('Address deleted')
+ }catch(e){toast(e.message)}
 }
 document.addEventListener('DOMContentLoaded',load);
 </script>

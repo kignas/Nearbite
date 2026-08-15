@@ -379,8 +379,27 @@
       const selectedAddressId = localStorage.getItem('nearbite_selected_address_id');
 
       const restaurantId = getCartRestaurantId(savedCart);
-      const customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
+      let customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
       const restaurantCoords = await getRestaurantLocation(restaurantId);
+
+      // If a selected server-side address exists, hydrate its coordinates before
+      // calculating delivery. This prevents Home/Work switches from using stale GPS.
+      const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+      if(token && selectedAddressId){
+        try{
+          const response = await fetch(`${CONFIG.API_BASE_URL}/profile`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
+          const result = await response.json();
+          if(response.ok && result.success){
+            const list=Array.isArray(result.data?.addresses)?result.data.addresses:[];
+            const selected=list.find(a=>String(a._id)===String(selectedAddressId));
+            if(selected){
+              customerCoords=normalizeCoords(selected.location||selected);
+              localStorage.setItem('nearbite_address',JSON.stringify(selected));
+              savedAddress=selected;
+            }
+          }
+        }catch(e){ console.warn('Could not refresh selected delivery address:',e); }
+      }
 
       if (!customerCoords || !restaurantCoords) {
         return { fee: 30, distance: null, source: 'fallback' };
@@ -485,7 +504,7 @@ function clearCart() {
 function hasAddress() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
-  return !!(saved && saved.house && saved.area && saved.landmark);
+  return !!(saved && saved.house && saved.area && normalizeCoords(saved.location || saved));
 }
 
 async function loadAddress() {
@@ -515,7 +534,7 @@ async function loadAddress() {
           addressList.find(a => a.isDefault) ||
           addressList[0];
 
-        if (address && address.house && address.area && address.landmark) {
+        if (address && address.house && address.area && normalizeCoords(address.location || address)) {
           saved = {
             tag: address.tag || 'Home',
             house: address.house || '',
@@ -523,7 +542,12 @@ async function loadAddress() {
             landmark: address.landmark || '',
             city: address.city || 'Maynaguri',
             pincode: address.pincode || '',
-            location: address.location || null
+            location: address.location || null,
+            latitude: address.latitude,
+            longitude: address.longitude,
+            receiverName: address.receiverName || '',
+            receiverPhone: address.receiverPhone || '',
+            _id: address._id
           };
           localStorage.setItem('nearbite_address', JSON.stringify(saved));
           if (address._id) localStorage.setItem('nearbite_selected_address_id', String(address._id));
@@ -599,7 +623,6 @@ async function placeOrder() {
 
   try {
     const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-    const savedAddress = JSON.parse(localStorage.getItem('nearbite_address'));
 
     const itemsArray = [];
     let restaurantId = null;
@@ -632,6 +655,13 @@ async function placeOrder() {
     // the amount that will actually be charged.
     const delivery = await calculateCurrentDelivery();
     const deliveryFee = delivery.fee == null ? 30 : delivery.fee;
+
+    // Read the selected address AFTER calculateCurrentDelivery() — it
+    // re-hydrates nearbite_address from the server-authoritative selection.
+    // Reading it earlier could send an address that doesn't match the
+    // distance/fee that were just calculated.
+    let savedAddress;
+    try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) { savedAddress = null; }
 
     const total = subtotal + deliveryFee + platformFee;
 
@@ -678,6 +708,16 @@ async function placeOrder() {
   }
 }
 
+
+window.addEventListener('pageshow',()=>{ loadAddress(); renderCart(); });
+window.addEventListener('storage',(e)=>{
+  if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
+    loadAddress(); renderCart();
+  }
+});
+// address.html dispatches this when the selected address changes; refresh
+// address text + recalculate distance/fee/total using the existing pipeline.
+window.addEventListener('nearbite:address-changed',()=>{ loadAddress(); renderCart(); });
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadAddress();

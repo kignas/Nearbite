@@ -58,9 +58,21 @@ const $=id=>document.getElementById(id);
 function warn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
 function setAddress(main,meta=''){ $('address').innerHTML=`<strong>${escapeHtml(main)}</strong>${meta?`<div class="accuracy">${escapeHtml(meta)}</div>`:''}` }
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]) )}
+let mapMoveTimer=null;
 function updateCenterFromMap(){
- if(firstFix)return;
- const c=map.getCenter(); current={lat:c.lat,lng:c.lng}; setAddress('Move the map to your delivery point','Map selection · GPS not yet confirmed'); $('confirm').disabled=false;
+ const c=map.getCenter();
+ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lng))return;
+ // The center pin is the selected delivery point. After the first GPS fix,
+ // moving the map intentionally changes the delivery coordinates.
+ current={lat:c.lat,lng:c.lng,accuracy:firstFix && current?.accuracy ? current.accuracy : 0};
+ $('confirm').disabled=false;
+ clearTimeout(mapMoveTimer);
+ mapMoveTimer=setTimeout(async()=>{
+   setAddress('Selected delivery location','Getting the address for this point…');
+   const d=await reverseGeocode(current.lat,current.lng);
+   const meta=current.accuracy?`GPS accuracy ±${Math.round(current.accuracy)} m`:'Delivery point selected on map';
+   setAddress(d?.display_name||'Selected delivery location',meta);
+ },250);
 }
 function showGps(lat,lng,accuracy){
  if(gpsMarker)map.removeLayer(gpsMarker);
@@ -101,20 +113,31 @@ function locateMe(){
    warn(msg); setAddress('Location not available','You can still choose the point manually on the map.');
  },{enableHighAccuracy:true,timeout:25000,maximumAge:10000});
 }
-function confirmLocation(){
+async function confirmLocation(){
  if(!current)return;
- localStorage.setItem('nearbite_onboarding_location',JSON.stringify({
-   latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),
-   accuracy:Number((current.accuracy||0).toFixed(1)),capturedAt:Date.now()
- }));
- localStorage.setItem('nearbite_location_permission_seen','1');
- const next=localStorage.getItem('nearbite_after_login');
- window.location.href='complete-profile.html?location=done'+(next?'':'&new=1');
+ const btn=$('confirm');
+ btn.disabled=true; btn.textContent='Saving location…';
+ try{
+   const d=await reverseGeocode(current.lat,current.lng);
+   localStorage.setItem('nearbite_onboarding_location',JSON.stringify({
+     latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),
+     accuracy:Number((current.accuracy||0).toFixed(1)),capturedAt:Date.now()
+   }));
+   if(d) localStorage.setItem('nearbite_onboarding_geocode',JSON.stringify(d));
+   localStorage.setItem('nearbite_location_permission_seen','1');
+   const next=localStorage.getItem('nearbite_after_login');
+   window.location.href='complete-profile.html?location=done'+(next?'':'&new=1');
+ }catch(e){
+   warn('We could not save the location. Please try again.');
+   btn.disabled=false; btn.textContent='Confirm location';
+ }
 }
 function init(){
  map=L.map('map',{zoomControl:false,attributionControl:true}).setView(DEFAULT,15);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'© OpenStreetMap contributors'}).addTo(map);
  map.on('moveend',updateCenterFromMap);
+ map.on('movestart',()=>{ if(!locating) $('address').style.opacity='.75'; });
+ map.on('moveend',()=>{ $('address').style.opacity='1'; });
  // Start with the real map immediately; permission is requested without a fake full-screen loader.
  setAddress('Finding your current location…','Please allow location access when your browser asks.');
  locateMe();

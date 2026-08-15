@@ -66,14 +66,18 @@ function validate(){const ok=$('name').value.trim().length>=2 && $('area').value
 function hydrate(){
  const loc=getLocation();if(!loc){location.replace('location-onboarding.html');return}
  const geo=getGeo();const a=geo?.address||{};
- $('phone').value=(JSON.parse(localStorage.getItem('nearbite_user')||'{}').phone||'');
+ let localUser={};
+ try{localUser=JSON.parse(localStorage.getItem('nearbite_user')||'{}')||{}}catch(e){}
+ $('phone').value=(localUser.phone||'');
+ $('name').value=(localUser.name&&localUser.name!=='Nearbite User')?localUser.name:'';
+ $('email').value=localUser.email||'';
  $('locationText').textContent=geo?.display_name||`GPS ${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`;
  $('locationMeta').textContent=`GPS captured${loc.accuracy?` · ±${Math.round(loc.accuracy)} m`:''}`;
  if(a.postcode)$('pincode').value=a.postcode;
  $('area').value=[a.road,a.suburb,a.village,a.neighbourhood].filter(Boolean).slice(0,2).join(', ');
  $('city').value=a.city||a.town||a.municipality||'Maynaguri';
- $('name').value='';
  loadProfile();
+ validate();
 }
 async function fetchJson(url,options={},timeout=12000){
  const c=new AbortController();const t=setTimeout(()=>c.abort(),timeout);
@@ -95,7 +99,7 @@ async function saveAll(){
   const addresses=await fetchJson(API+'/users/addresses',{method:'POST',headers,body:JSON.stringify(addressPayload)});
   if(!addresses.r.ok)throw new Error(addresses.p.message||'Could not save your delivery address.');
   const saved=addresses.p.data||addresses.p.address;
-  if(saved){localStorage.setItem('nearbite_address',JSON.stringify(saved));if(saved._id)localStorage.setItem('nearbite_selected_address_id',String(saved._id))}
+  if(saved){localStorage.setItem('nearbite_address',JSON.stringify(saved));if(saved._id)localStorage.setItem('nearbite_selected_address_id',String(saved._id));}
   const originalNext=localStorage.getItem('nearbite_after_login');
   localStorage.removeItem('nearbite_onboarding_location');localStorage.removeItem('nearbite_onboarding_geocode');
   localStorage.removeItem('nearbite_after_login');

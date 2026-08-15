@@ -249,8 +249,14 @@ async function loadAddresses(){
       Array.isArray(payload?.data?.addresses)?payload.data.addresses:
       Array.isArray(payload?.data)?payload.data:[];
     if(!list.length){$('addressSummary').textContent='No saved address · Add one';return}
-    const preferred=list.find(a=>a.isDefault||a.default||a.tag==='Home')||list[0];
+    // The customer's current SELECTED address (set from Address/Cart) is the
+    // source of truth here, not the account default. Only fall back to the
+    // default when there is no selection or it no longer matches a real address.
+    const selectedId=localStorage.getItem('nearbite_selected_address_id');
+    const selected=selectedId?list.find(a=>String(a._id)===String(selectedId)):null;
+    const preferred=selected||list.find(a=>a.isDefault||a.default||a.tag==='Home')||list[0];
     localStorage.setItem('nearbite_address',JSON.stringify(preferred));
+    if(preferred?._id&&String(preferred._id)!==String(selectedId)) localStorage.setItem('nearbite_selected_address_id',String(preferred._id));
     const label=preferred.tag||preferred.label||'Saved address';
     const text=[preferred.house,preferred.area||preferred.locality,preferred.city].filter(Boolean).join(', ');
     $('addressSummary').textContent=(label+': '+(text||'Saved location')).slice(0,90);
@@ -294,6 +300,9 @@ $('logoutBtn').onclick=()=>{
   location.replace('login.html');
 };
 document.addEventListener('DOMContentLoaded',async()=>{await loadProfile();await loadAddresses()});
+// Keep the account summary in sync if the selected delivery address changes
+// elsewhere (Address/Cart) without a full page reload.
+window.addEventListener('nearbite:address-changed',loadAddresses);
 </script>
 </body>
 </html>
