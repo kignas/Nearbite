@@ -246,10 +246,6 @@
         <span class="bill-label">Delivery Fee</span>
         <span class="bill-val" id="bill-delivery-val">Calculating…</span>
       </div>
-      <div class="bill-row">
-        <span class="bill-label">Platform Fee</span>
-        <span class="bill-val">₹5</span>
-      </div>
       <div class="bill-total-row">
         <span class="total-label">To Pay</span>
         <span class="total-val" id="bill-total">₹0</span>
@@ -435,15 +431,13 @@
 
       const items = Object.entries(savedCart);
       const subtotal = items.reduce((s, [, v]) => s + Number(v.quantity || 0) * Number(v.price || 0), 0);
-      const PLATFORM_FEE = 5;
-
       let delivery = await calculateCurrentDelivery();
       let deliveryFee = delivery.fee;
 
       // Never show FREE based on subtotal. Production pricing is distance based:
       // <10 km = ₹30, 10–15 km = ₹40, >15 km = ₹50.
       if (deliveryFee == null) deliveryFee = 30;
-      const total = subtotal + deliveryFee + PLATFORM_FEE;
+      const total = subtotal + deliveryFee;
 
       const deliveryValEl = document.getElementById('bill-delivery-val');
       deliveryValEl.textContent = '₹' + deliveryFee;
@@ -648,8 +642,6 @@ async function placeOrder() {
     }
 
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-    const platformFee = 5;
-
     // The backend is the final authority, but the checkout preview must use
     // the SAME restaurant GPS + customer GPS pricing so the customer sees
     // the amount that will actually be charged.
@@ -663,7 +655,7 @@ async function placeOrder() {
     let savedAddress;
     try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) { savedAddress = null; }
 
-    const total = subtotal + deliveryFee + platformFee;
+    const total = subtotal + deliveryFee;
 
     const payload = {
       items: itemsArray,
@@ -672,7 +664,6 @@ async function placeOrder() {
       restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
       subtotal,
       deliveryFee,
-      platformFee,
       total
     };
 
