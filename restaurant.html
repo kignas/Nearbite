@@ -285,7 +285,7 @@
           <i class="fa-solid fa-star rating-star"></i>
           <span id="res-rating-num" class="rating-num">–</span>
           <div class="rating-divider"></div>
-          <span class="rating-count">1K+ ratings</span>
+          <span id="res-rating-count" class="rating-count">— ratings</span>
         </div>
         <span class="meta-dot">•</span>
         <span id="res-time" class="meta-chip"><i class="fa-regular fa-clock"></i> –</span>
@@ -298,7 +298,7 @@
       </div>
     </div>
     <div class="delivery-strip">
-      <div class="del-chip"><i class="fa-solid fa-motorcycle orange"></i> FREE delivery above ₹199</div>
+      <div class="del-chip" id="res-free-delivery"><i class="fa-solid fa-motorcycle orange"></i> FREE delivery above ₹199</div>
       <div class="del-sep"></div>
       <div class="del-chip"><i class="fa-regular fa-clock blue"></i> On-time delivery</div>
     </div>
@@ -534,8 +534,15 @@
       document.getElementById('res-name').innerText = restaurant.name;
       document.getElementById('res-cuisine').innerText = restaurant.cuisineDisplay || restaurant.cuisine.join(', ');
       document.getElementById('res-rating-num').innerText = restaurant.rating || "NEW";
-      document.getElementById('res-time').innerHTML = '<i class="fa-regular fa-clock"></i> ' + (restaurant.time || '30 mins');
+      document.getElementById('res-rating-count').innerText = `${Number(restaurant.ratingCount || 0).toLocaleString('en-IN')} ratings`;
+      document.getElementById('res-time').innerHTML = '<i class="fa-regular fa-clock"></i> ' + (restaurant.time || `${restaurant.estimatedDeliveryMin || 30}-${restaurant.estimatedDeliveryMax || 40} mins`);
       document.getElementById('res-distance').innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + (restaurant.distance || '2 km');
+      const freeDeliveryEl = document.getElementById('res-free-delivery');
+      if (freeDeliveryEl) {
+        freeDeliveryEl.innerHTML = restaurant.freeDeliveryEnabled === false
+          ? '<i class="fa-solid fa-motorcycle orange"></i> Delivery available'
+          : `<i class="fa-solid fa-motorcycle orange"></i> FREE delivery${restaurant.freeDeliveryAbove > 0 ? ` above ₹${Number(restaurant.freeDeliveryAbove).toLocaleString('en-IN')}` : ''}`;
+      }
 
       if (restaurant.offer) {
         document.getElementById('res-offer-text').innerText = restaurant.offer;

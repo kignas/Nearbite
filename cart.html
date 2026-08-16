@@ -354,11 +354,16 @@
     async function getRestaurantLocation(restaurantId) {
       if (!restaurantId) return null;
       try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(restaurantId)}`);
+        const response = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(restaurantId)}`, { cache: 'no-store' });
         const result = await response.json();
         if (!response.ok || !result.success) return null;
         const restaurant = result.data || {};
-        return normalizeCoords(restaurant.location);
+        return {
+          coords: normalizeCoords(restaurant.location),
+          freeDeliveryEnabled: restaurant.freeDeliveryEnabled !== false,
+          freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
+          deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
+        };
       } catch (error) {
         console.warn('Could not load restaurant GPS:', error);
         return null;
@@ -375,8 +380,10 @@
       const selectedAddressId = localStorage.getItem('nearbite_selected_address_id');
 
       const restaurantId = getCartRestaurantId(savedCart);
+      const subtotal = Object.entries(savedCart).reduce((sum, [, item]) => sum + Number(item.quantity || 0) * Number(item.price || 0), 0);
       let customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
-      const restaurantCoords = await getRestaurantLocation(restaurantId);
+      const restaurantInfo = await getRestaurantLocation(restaurantId);
+      const restaurantCoords = restaurantInfo?.coords;
 
       // If a selected server-side address exists, hydrate its coordinates before
       // calculating delivery. This prevents Home/Work switches from using stale GPS.
@@ -402,7 +409,14 @@
       }
 
       const distance = distanceKm(restaurantCoords, customerCoords);
-      return { fee: deliveryFeeForDistance(distance), distance, source: 'gps' };
+      const radius = Number(restaurantInfo?.deliveryRadiusKm);
+      if (Number.isFinite(radius) && radius > 0 && distance > radius) {
+        return { fee: null, distance, source: 'gps', outsideRadius: true, radius };
+      }
+
+      const baseFee = deliveryFeeForDistance(distance);
+      const freeDelivery = restaurantInfo?.freeDeliveryEnabled && restaurantInfo?.freeDeliveryAbove > 0 && subtotal >= restaurantInfo.freeDeliveryAbove;
+      return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0 };
     }
 
     async function renderCart() {
@@ -434,9 +448,11 @@
       let delivery = await calculateCurrentDelivery();
       let deliveryFee = delivery.fee;
 
-      // Never show FREE based on subtotal. Production pricing is distance based:
-      // <10 km = ₹30, 10–15 km = ₹40, >15 km = ₹50.
-      if (deliveryFee == null) deliveryFee = 30;
+      if (delivery.outsideRadius) {
+        deliveryFee = 0;
+      } else if (deliveryFee == null) {
+        deliveryFee = 30;
+      }
       const total = subtotal + deliveryFee;
 
       const deliveryValEl = document.getElementById('bill-delivery-val');
@@ -445,12 +461,20 @@
 
       const nudgeEl = document.getElementById('free-delivery-nudge');
       const nudgeText = document.getElementById('nudge-text');
-      if (delivery.distance != null) {
-        nudgeText.textContent = `${delivery.distance < 10 ? delivery.distance.toFixed(1) : delivery.distance.toFixed(1)} km delivery distance • ₹${deliveryFee} delivery fee`;
+      if (delivery.outsideRadius) {
+        nudgeText.textContent = `${delivery.distance.toFixed(1)} km — outside this restaurant's ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km delivery area`;
         nudgeEl.style.display = 'flex';
+        nudgeEl.style.borderColor = '#ef4444';
+      } else if (delivery.distance != null) {
+        nudgeText.textContent = delivery.freeDelivery
+          ? `${delivery.distance.toFixed(1)} km delivery distance • FREE delivery`
+          : `${delivery.distance.toFixed(1)} km delivery distance • ₹${deliveryFee} delivery fee`;
+        nudgeEl.style.display = 'flex';
+        nudgeEl.style.borderColor = '';
       } else {
         nudgeText.textContent = 'Delivery fee calculated from restaurant and delivery GPS.';
         nudgeEl.style.display = 'flex';
+        nudgeEl.style.borderColor = '';
       }
 
       let resName = 'Nearbite Restaurant';
@@ -646,6 +670,9 @@ async function placeOrder() {
     // the SAME restaurant GPS + customer GPS pricing so the customer sees
     // the amount that will actually be charged.
     const delivery = await calculateCurrentDelivery();
+    if (delivery.outsideRadius) {
+      throw new Error(`This restaurant does not deliver to your selected address (${delivery.distance.toFixed(1)} km away; limit ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km).`);
+    }
     const deliveryFee = delivery.fee == null ? 30 : delivery.fee;
 
     // Read the selected address AFTER calculateCurrentDelivery() — it
