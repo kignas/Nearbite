@@ -1213,6 +1213,12 @@ img[loading="lazy"].loaded { opacity: 1; }
       </a>
     `;
     }).join('');
+
+    // The restaurant cards are rendered dynamically, so initialize the
+    // automatic gallery only AFTER the new gallery DOM exists. Without this
+    // call the gallery markup renders correctly but never starts its timer or
+    // swipe handlers.
+    requestAnimationFrame(() => initRestaurantGalleries());
   }
   
   window.addEventListener('nearbite:address-changed', () => {
@@ -1236,7 +1242,9 @@ img[loading="lazy"].loaded { opacity: 1; }
 
       let index = 0;
       let startX = 0;
+      let moved = false;
       let timer = null;
+      const AUTO_DELAY = 5000; // slow, Zomato-style automatic rotation
 
       const go = (next) => {
         index = (next + slides.length) % slides.length;
@@ -1244,22 +1252,59 @@ img[loading="lazy"].loaded { opacity: 1; }
         dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
       };
 
-      const restart = () => {
-        if (timer) clearInterval(timer);
-        timer = setInterval(() => go(index + 1), 4200);
+      const stop = () => {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
       };
 
+      const restart = () => {
+        stop();
+        timer = setInterval(() => go(index + 1), AUTO_DELAY);
+      };
+
+      // Touch swipe: pause while the customer is interacting, then resume
+      // the automatic rotation after the gesture.
       gallery.addEventListener('touchstart', e => {
         startX = e.touches[0].clientX;
-        if (timer) clearInterval(timer);
+        moved = false;
+        stop();
+      }, { passive: true });
+
+      gallery.addEventListener('touchmove', e => {
+        if (Math.abs(e.touches[0].clientX - startX) > 10) moved = true;
       }, { passive: true });
 
       gallery.addEventListener('touchend', e => {
         const endX = e.changedTouches[0].clientX;
         const delta = endX - startX;
-        if (Math.abs(delta) > 35) go(index + (delta < 0 ? 1 : -1));
+        if (Math.abs(delta) > 35) {
+          go(index + (delta < 0 ? 1 : -1));
+          // Prevent the enclosing restaurant link from navigating after a swipe.
+          gallery.dataset.swiped = '1';
+          setTimeout(() => { gallery.dataset.swiped = '0'; }, 450);
+        }
         restart();
       }, { passive: true });
+
+      gallery.addEventListener('click', e => {
+        if (gallery.dataset.swiped === '1' || moved) {
+          e.preventDefault();
+          e.stopPropagation();
+          moved = false;
+        }
+      }, true);
+
+      // Pause when the card is off-screen to avoid unnecessary timers.
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => entry.isIntersecting ? restart() : stop());
+        }, { threshold: 0.15 });
+        observer.observe(gallery);
+      } else {
+        restart();
+      }
 
       dots.forEach((dot, i) => dot.addEventListener('click', e => {
         e.preventDefault();
@@ -1267,8 +1312,6 @@ img[loading="lazy"].loaded { opacity: 1; }
         go(i);
         restart();
       }));
-
-      restart();
     });
   }
 
