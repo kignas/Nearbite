@@ -1,5 +1,5 @@
 /* ================================================================
-   PRODUCTION CART ENGINE & MULTI-IMAGE UI 
+   PRODUCTION CART ENGINE & MULTI-IMAGE UI  (v2 — polished floating bar)
    Handles Math, LocalStorage, and the Floating Cart Bar
    ================================================================ */
 
@@ -7,12 +7,22 @@
   if (window.__esWhiteCartBar) return;
   window.__esWhiteCartBar = true;
 
+  // Display-only setting: change this one line if the storefront's
+  // currency symbol is ever not ₹ (Indian Rupee). Nothing else in this
+  // file needs to change.
+  const CURRENCY_SYMBOL = '₹';
+
   // 🛡️ CRASH-PROOF STORAGE PARSER
   // This prevents your cart bar from becoming invisible if corrupted data exists
   function safeGetCart() {
     try {
         const data = localStorage.getItem('nearbite_cart');
-        return (data && data !== "undefined" && data !== "null") ? JSON.parse(data) : {};
+        if (!data || data === "undefined" || data === "null") return {};
+        const parsed = JSON.parse(data);
+        // Guard against old/corrupted data that parses successfully but
+        // isn't a plain object (e.g. an array, a number, a bare string).
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+        return parsed;
     } catch (e) {
         console.warn("Corrupted cart detected and wiped.");
         localStorage.removeItem('nearbite_cart');
@@ -121,263 +131,129 @@
   const CSS = `
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
-    @keyframes nbCartSlideUp {
-      0% { transform: translate(-50%, 120%); opacity: 0; }
+    @keyframes slideUpWhiteCart {
+      0% { transform: translate(-50%, 150%); opacity: 0; }
       100% { transform: translate(-50%, 0); opacity: 1; }
     }
-    @keyframes nbCartGlow {
-      0%, 100% { opacity: .35; transform: translateX(-120%); }
-      50% { opacity: .7; transform: translateX(120%); }
+    @keyframes slideDownWhiteCart {
+      0% { transform: translate(-50%, 0); opacity: 1; }
+      100% { transform: translate(-50%, 130%); opacity: 0; }
     }
-    @keyframes nbCartPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.035); }
+    @keyframes wcBump {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.22); }
+      100% { transform: scale(1); }
+    }
+    @keyframes wcShine {
+      0% { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+      15% { opacity: 0.45; }
+      55% { opacity: 0.45; }
+      100% { transform: translateX(220%) skewX(-20deg); opacity: 0; }
     }
 
     #white-cart-root {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 20px);
-      max-width: 430px;
-      z-index: 9999;
-      display: none;
-      pointer-events: none;
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      filter: drop-shadow(0 14px 30px rgba(15,23,42,.18));
+      position: fixed; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 24px); max-width: 420px;
+      z-index: 9999; display: none;
     }
-
+    #white-cart-root.wc-enter {
+      animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    #white-cart-root.wc-exiting {
+      animation: slideDownWhiteCart 0.26s ease forwards;
+    }
     #white-cart-container {
-      position: relative;
-      overflow: hidden;
-      min-height: 72px;
-      padding: 9px 10px 9px 10px;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      border: 1px solid rgba(255,255,255,.9);
-      border-radius: 22px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.98), rgba(248,250,252,.96)),
-        #fff;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.95),
-        0 0 0 1px rgba(15,23,42,.035),
-        0 12px 28px rgba(15,23,42,.13);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      pointer-events: auto;
+      background: rgba(255,255,255,0.88);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(17,24,39,0.06);
+      border-radius: 24px; padding: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 1px rgba(16,24,40,0.04), 0 4px 12px rgba(16,24,40,0.08), 0 16px 32px -8px rgba(16,24,40,0.16);
+      font-family: 'Plus Jakarta Sans', sans-serif; height: 76px;
+      box-sizing: border-box;
     }
-
-    #white-cart-container::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -45%;
-      width: 38%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255,91,31,.85), transparent);
-      animation: nbCartGlow 4s ease-in-out infinite;
-      pointer-events: none;
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      #white-cart-container { background: rgba(255,255,255,0.98); }
     }
 
     .wc-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1;
-      min-width: 0;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
+      all: unset;
+      display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+      cursor: pointer; box-sizing: border-box;
     }
-
-    .wc-image-stack {
-      display: flex;
-      position: relative;
-      height: 44px;
-      min-width: 44px;
-      align-items: center;
-      transition: width .25s ease;
-      flex-shrink: 0;
+    .wc-thumb-wrap { position: relative; display: flex; align-items: center; flex-shrink: 0; }
+    .wc-image-stack { display: flex; position: relative; height: 40px; min-width: 40px; align-items: center; transition: width 0.3s ease; }
+    .wc-img { width: 40px; height: 40px; border-radius: 20px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; position: absolute; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; }
+    .wc-img:nth-child(1) { left: 0px; z-index: 3; }
+    .wc-img:nth-child(2) { left: 16px; z-index: 2; transform: scale(0.95); opacity: 0.95; }
+    .wc-img:nth-child(3) { left: 32px; z-index: 1; transform: scale(0.9); opacity: 0.85; }
+    .wc-qty-badge {
+      position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px;
+      padding: 0 4px; border-radius: 9px;
+      background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
+      color: #fff; font-size: 10px; font-weight: 800; line-height: 18px; text-align: center;
+      border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.18); z-index: 4;
     }
+    .wc-bump { animation: wcBump 0.32s ease; }
 
-    .wc-img {
-      width: 44px;
-      height: 44px;
-      border-radius: 15px;
-      object-fit: cover;
-      background: #f1f5f9;
-      flex-shrink: 0;
-      position: absolute;
-      border: 2px solid #fff;
-      box-shadow: 0 3px 10px rgba(15,23,42,.14);
-      transition: transform .25s ease, opacity .25s ease;
-    }
+    .wc-info { display: flex; flex-direction: column; min-width: 0; justify-content: center; }
+    .wc-res-name { font-size: 14px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wc-menu-link { font-size: 12px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
 
-    .wc-img:nth-child(1) { left: 0; z-index: 3; }
-    .wc-img:nth-child(2) { left: 14px; z-index: 2; transform: scale(.94); opacity: .96; }
-    .wc-img:nth-child(3) { left: 28px; z-index: 1; transform: scale(.88); opacity: .9; }
-
-    .wc-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-width: 0;
-      gap: 3px;
-    }
-
-    .wc-res-name {
-      max-width: 142px;
-      font-size: 13px;
-      line-height: 1.15;
-      font-weight: 800;
-      color: #111827;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .wc-menu-link {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: #64748b;
-      font-size: 10.5px;
-      line-height: 1.1;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .wc-menu-link .wc-check {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      color: #fff;
-      background: linear-gradient(135deg,#22c55e,#16a34a);
-      box-shadow: 0 3px 8px rgba(34,197,94,.25);
-      font-size: 9px;
-    }
-
-    .wc-right {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-shrink: 0;
-    }
-
+    .wc-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .wc-btn {
-      position: relative;
-      overflow: hidden;
-      min-width: 104px;
-      height: 50px;
-      padding: 0 14px;
-      border: 0;
-      border-radius: 17px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      background: linear-gradient(135deg, #ff8a00 0%, #ff5a1f 48%, #ff3d1f 100%);
-      box-shadow:
-        0 7px 16px rgba(255,90,31,.24),
-        inset 0 1px 0 rgba(255,255,255,.25);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .14s ease, box-shadow .14s ease;
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
+      border: none; border-radius: 20px; height: 48px; min-height: 44px; padding: 0 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #ffffff; cursor: pointer; -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s ease; font-family: inherit;
     }
-
+    .wc-btn:active { transform: scale(0.96); }
     .wc-btn::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(105deg, transparent 25%, rgba(255,255,255,.22) 48%, transparent 70%);
-      transform: translateX(-120%);
-      animation: nbCartGlow 5s ease-in-out infinite;
-      pointer-events: none;
+      content: ''; position: absolute; top: 0; left: 0; width: 45%; height: 100%;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+      transform: translateX(-120%) skewX(-20deg); pointer-events: none;
     }
-
-    .wc-btn:active {
-      transform: scale(.96);
-      box-shadow: 0 4px 10px rgba(255,90,31,.2);
+    #white-cart-root.wc-enter #wc-standard-actions .wc-btn::after {
+      animation: wcShine 1s ease 0.45s 1 both;
     }
-
-    .wc-btn-title {
-      position: relative;
-      z-index: 1;
-      font-size: 12.5px;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .wc-btn-sub {
-      position: relative;
-      z-index: 1;
-      margin-top: 3px;
-      font-size: 10px;
-      font-weight: 700;
-      opacity: .92;
-    }
-
+    .wc-btn-title { font-size: 13px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+    .wc-btn-sub { font-size: 11px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
     .wc-close {
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      background: #f8fafc;
-      border: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #64748b;
-      font-size: 13px;
-      cursor: pointer;
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-      transition: background .15s ease, transform .15s ease;
+      width: 36px; height: 36px; border-radius: 50%; background: #F1F1F1; border: none;
+      display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 15px;
+      cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+    }
+    .wc-close:active { background: #e5e7eb; }
+
+    #white-cart-root button:focus-visible,
+    #white-cart-root .wc-left:focus-visible {
+      outline: 2px solid #FF4D4F; outline-offset: 2px;
     }
 
-    .wc-close:active {
-      transform: scale(.92);
-      background: #eef2f7;
+    @media (hover: hover) {
+      .wc-btn:hover { filter: brightness(1.04); }
+      .wc-close:hover { background: #e9e9e9; }
     }
 
-    .wc-cart-badge {
-      position: absolute;
-      top: -4px;
-      right: 42px;
-      min-width: 20px;
-      height: 20px;
-      padding: 0 6px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      background: #111827;
-      border: 2px solid #fff;
-      font-size: 9px;
-      font-weight: 800;
-      box-shadow: 0 3px 8px rgba(15,23,42,.18);
-      pointer-events: none;
-      animation: nbCartPulse 2.5s ease-in-out infinite;
+    @media (max-width: 340px) {
+      #white-cart-container { padding: 10px; height: 72px; }
+      .wc-img { width: 36px; height: 36px; }
+      .wc-image-stack { height: 36px; min-width: 36px; }
+      .wc-btn { padding: 0 12px; }
+      .wc-res-name { font-size: 13px; }
     }
 
-    @media (max-width: 360px) {
-      #white-cart-root { width: calc(100% - 14px); }
-      #white-cart-container { padding: 8px; gap: 6px; }
-      .wc-image-stack { min-width: 40px; height: 40px; }
-      .wc-img { width: 40px; height: 40px; border-radius: 13px; }
-      .wc-img:nth-child(2) { left: 12px; }
-      .wc-img:nth-child(3) { left: 24px; }
-      .wc-res-name { max-width: 105px; font-size: 12px; }
-      .wc-btn { min-width: 92px; height: 48px; padding: 0 10px; }
-      .wc-close { width: 31px; height: 31px; }
+    @media (prefers-reduced-motion: reduce) {
+      #white-cart-root, #white-cart-root * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
     }
   `;
-
 
   function injectCSS() {
     if (document.getElementById('wc-styles')) return;
@@ -392,41 +268,31 @@
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
     wrap.innerHTML = `
-      <div id="white-cart-container" aria-label="Cart summary">
-        <div class="wc-cart-badge" id="wc-cart-badge">1</div>
-
-        <div class="wc-left" onclick="window.location.href='cart.html'" role="button" tabindex="0">
-          <div class="wc-image-stack" id="wc-dynamic-img-stack"></div>
-
+      <div id="white-cart-container">
+        <button type="button" class="wc-left" aria-label="View cart" onclick="window.location.href='cart.html'">
+          <div class="wc-thumb-wrap">
+            <div class="wc-image-stack" id="wc-dynamic-img-stack"></div>
+            <span class="wc-qty-badge" id="wc-qty-badge" aria-hidden="true">0</span>
+          </div>
           <div class="wc-info">
-            <div class="wc-res-name" id="wc-dynamic-res">Nearbite Order</div>
-            <div class="wc-menu-link">
-              <span class="wc-check">✓</span>
-              <span>1 restaurant • <span id="wc-item-count">1 item</span></span>
-            </div>
+            <div class="wc-res-name" id="wc-dynamic-res">EatSwada Order</div>
+            <div class="wc-menu-link">Added to cart <i class="fa-solid fa-check" aria-hidden="true" style="font-size:10px;"></i></div>
           </div>
-        </div>
-
+        </button>
         <div class="wc-right">
-          <div id="wc-standard-actions" style="display:flex;gap:7px;align-items:center;">
-            <button class="wc-btn" onclick="window.location.href='cart.html'" aria-label="View cart">
-              <span class="wc-btn-title">View Cart&nbsp; →</span>
-              <span class="wc-btn-sub" id="wc-total-label">Review your order</span>
+          <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" class="wc-btn" onclick="window.location.href='cart.html'">
+              <span class="wc-btn-title">View Cart →</span>
+              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
             </button>
-            <button class="wc-close" id="wc-close-btn" aria-label="Cart options">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
-
-          <div id="wc-clear-actions" style="display:none;gap:7px;align-items:center;">
-            <button class="wc-btn" id="wc-confirm-clear"
-              style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);">
+          <div id="wc-clear-actions" style="display: none; gap: 8px; align-items: center;">
+            <button type="button" class="wc-btn" id="wc-confirm-clear" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
               <span class="wc-btn-title">Clear Cart</span>
-              <span class="wc-btn-sub">Remove everything</span>
+              <span class="wc-btn-sub">Remove all items</span>
             </button>
-            <button class="wc-close" id="wc-cancel-clear" aria-label="Keep cart">
-              <i class="fa-solid fa-arrow-left"></i>
-            </button>
+            <button type="button" class="wc-close" id="wc-cancel-clear" aria-label="Cancel, keep cart items"><i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i></button>
           </div>
         </div>
       </div>
@@ -436,16 +302,68 @@
 
   /* ── 4. UI BEHAVIOR LOGIC ── */
   let isDismissed = false;
+  let lastTotalQty = null;
+  let exitTimer = null;
+  const EXIT_MS = 260;
+
+  function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function formatCurrency(n) {
+    const rounded = Math.round(n);
+    try {
+      return CURRENCY_SYMBOL + rounded.toLocaleString('en-IN');
+    } catch (e) {
+      return CURRENCY_SYMBOL + rounded;
+    }
+  }
+
+  function bump(el) {
+    if (!el || prefersReducedMotion()) return;
+    el.classList.remove('wc-bump');
+    void el.offsetWidth; // force reflow so the animation can replay
+    el.classList.add('wc-bump');
+  }
+
+  function showCartBar(root) {
+    if (!root) return;
+    if (exitTimer) { clearTimeout(exitTimer); exitTimer = null; }
+    root.classList.remove('wc-exiting');
+    if (root.style.display === 'none' || root.style.display === '') {
+      root.style.display = 'block';
+      root.classList.remove('wc-enter');
+      if (!prefersReducedMotion()) {
+        void root.offsetWidth; // force reflow so the enter animation replays
+        root.classList.add('wc-enter');
+      }
+    }
+  }
+
+  function hideCartBar(root) {
+    if (!root) return;
+    if (root.style.display === 'none' || root.style.display === '') return;
+    if (exitTimer) { clearTimeout(exitTimer); exitTimer = null; }
+    root.classList.remove('wc-enter');
+    if (prefersReducedMotion()) {
+      root.style.display = 'none';
+      root.classList.remove('wc-exiting');
+      return;
+    }
+    root.classList.add('wc-exiting');
+    exitTimer = setTimeout(() => {
+      root.style.display = 'none';
+      root.classList.remove('wc-exiting');
+      exitTimer = null;
+    }, EXIT_MS);
+  }
 
   function syncBottom() {
     const root = document.getElementById('white-cart-root');
     if (!root) return;
     const nav = document.querySelector('.bottom-nav');
-    if (nav && !nav.classList.contains('bottom-nav-hidden')) {
-      root.style.bottom = '84px';
-    } else {
-      root.style.bottom = '20px';
-    }
+    const base = (nav && !nav.classList.contains('bottom-nav-hidden')) ? 84 : 20;
+    root.style.bottom = `calc(${base}px + env(safe-area-inset-bottom, 0px))`;
   }
 
   window.updateGlobalCart = function () {
@@ -455,10 +373,9 @@
     const itemNames = Object.keys(savedCart);
     const root = document.getElementById('white-cart-root');
     const countEl = document.getElementById('wc-item-count');
-    const badgeEl = document.getElementById('wc-cart-badge');
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
     const resEl = document.getElementById('wc-dynamic-res');
-    const totalLabelEl = document.getElementById('wc-total-label');
+    const badgeEl = document.getElementById('wc-qty-badge');
 
     if (!root || !countEl || !imgStackEl) return;
 
@@ -470,20 +387,46 @@
     }
 
     if (itemNames.length > 0) {
+      // Totals — cast defensively in case old/malformed cart entries are
+      // missing quantity or price fields.
       let totalQty = 0;
-      itemNames.forEach(key => { totalQty += savedCart[key].quantity; });
-      countEl.innerText = totalQty === 1 ? '1 item' : `${totalQty} items`;
-      if (badgeEl) badgeEl.innerText = totalQty > 99 ? '99+' : String(totalQty);
+      let totalPrice = 0;
+      let priceKnown = true;
+      itemNames.forEach(key => {
+        const item = savedCart[key] || {};
+        const q = Number(item.quantity);
+        const safeQty = Number.isFinite(q) ? Math.max(0, q) : 0;
+        totalQty += safeQty;
 
-      const firstCartItem = savedCart[itemNames[0]] || {};
-      const restaurantName =
-        firstCartItem.restaurantName ||
-        firstCartItem.restaurant ||
-        firstCartItem.resName ||
-        'Nearbite Restaurant';
+        const p = Number(item.price);
+        if (Number.isFinite(p) && p >= 0) {
+          totalPrice += p * safeQty;
+        } else {
+          priceKnown = false;
+        }
+      });
 
-      if (resEl) resEl.innerText = restaurantName;
-      if (totalLabelEl) totalLabelEl.innerText = 'Ready to checkout';
+      const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
+      countEl.innerText = (priceKnown && totalPrice > 0)
+        ? `${baseCountText} · ${formatCurrency(totalPrice)}`
+        : baseCountText;
+
+      if (badgeEl) badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
+
+      if (lastTotalQty !== null && lastTotalQty !== totalQty) {
+        bump(countEl);
+        bump(badgeEl);
+      }
+      lastTotalQty = totalQty;
+
+      // Restaurant / item label. The cart data only ever stores a resId
+      // (not a friendly restaurant name), so this preserves the original
+      // behavior of showing the most recently added item — while checking
+      // for an optional resName/restaurantName field first, in case a
+      // future update to the cart payload starts including one.
+      const lastItemName = itemNames[itemNames.length - 1];
+      const lastItem = savedCart[lastItemName] || {};
+      if (resEl) resEl.innerText = lastItem.resName || lastItem.restaurantName || lastItemName;
 
       // Safe image parsing
       imgStackEl.innerHTML = ''; 
@@ -500,19 +443,17 @@
          const imgSrc = imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
          const img = document.createElement('img');
          img.src = imgSrc;
+         img.alt = '';
          img.classList.add('wc-img');
          imgStackEl.appendChild(img);
       });
 
       imgStackEl.style.width = latestThreeNames.length === 1 ? '40px' : latestThreeNames.length === 2 ? '56px' : '72px';
 
-      if (root.style.display === 'none' || root.style.display === '') {
-        root.style.display = 'block';
-        root.style.animation = 'slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
-      }
+      showCartBar(root);
     } else {
-      root.style.display = 'none';
-      if (badgeEl) badgeEl.innerText = '0';
+      hideCartBar(root);
+      lastTotalQty = null;
     }
   };
 
@@ -566,6 +507,16 @@
         localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
     }, true); 
+
+    const wcLeft = document.querySelector('#white-cart-root .wc-left');
+    if (wcLeft) {
+      wcLeft.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          window.location.href = 'cart.html';
+        }
+      });
+    }
 
     document.getElementById('wc-close-btn').addEventListener('click', (e) => {
       e.stopPropagation();
