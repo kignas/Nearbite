@@ -183,11 +183,11 @@
       cursor: pointer; box-sizing: border-box;
     }
     .wc-thumb-wrap { position: relative; display: flex; align-items: center; flex-shrink: 0; }
-    .wc-image-stack { display: flex; position: relative; height: 40px; min-width: 40px; align-items: center; transition: width 0.3s ease; }
+    .wc-image-stack { display: flex; position: relative; height: 40px; width: 56px !important; min-width: 56px; align-items: center; flex: 0 0 56px; }
     .wc-img { width: 40px; height: 40px; border-radius: 20px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; position: absolute; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; }
     .wc-img:nth-child(1) { left: 0px; z-index: 3; }
-    .wc-img:nth-child(2) { left: 16px; z-index: 2; transform: scale(0.95); opacity: 0.95; }
-    .wc-img:nth-child(3) { left: 32px; z-index: 1; transform: scale(0.9); opacity: 0.85; }
+    .wc-img:nth-child(2) { left: 14px; z-index: 2; transform: scale(0.94); opacity: 0.96; }
+    .wc-img:nth-child(3) { left: 28px; z-index: 1; transform: scale(0.88); opacity: 0.90; }
     .wc-qty-badge {
       position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px;
       padding: 0 4px; border-radius: 9px;
@@ -197,9 +197,9 @@
     }
     .wc-bump { animation: wcBump 0.32s ease; }
 
-    .wc-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; justify-content: center; }
-    .wc-res-name { font-size: 14px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .wc-menu-link { font-size: 12px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+    .wc-info { display: none; }
+    .wc-res-name { display: none; }
+    .wc-menu-link { display: none; }
 
     .wc-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; flex-shrink: 0; }
     .wc-btn {
@@ -276,7 +276,7 @@
           </div>
           <div class="wc-info">
             <div class="wc-res-name" id="wc-dynamic-res">EatSwada Order</div>
-            
+            <div class="wc-menu-link" aria-hidden="true"></div>
           </div>
         </button>
         <div class="wc-right">
@@ -430,7 +430,7 @@
 
       // Safe image parsing
       imgStackEl.innerHTML = ''; 
-      const latestThreeNames = [...new Set(itemNames.slice(-3).reverse())]; 
+      const latestThreeNames = itemNames.slice(-3).reverse(); 
       let imageDict = {};
       try {
           const dictData = localStorage.getItem('es_image_dict');
