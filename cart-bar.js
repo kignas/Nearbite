@@ -167,10 +167,10 @@
       -webkit-backdrop-filter: blur(20px) saturate(160%);
       backdrop-filter: blur(20px) saturate(160%);
       border: 1px solid rgba(17,24,39,0.06);
-      border-radius: 24px; padding: 12px;
+      border-radius: 24px; padding: 8px 12px;
       display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 1px 1px rgba(16,24,40,0.04), 0 4px 12px rgba(16,24,40,0.08), 0 16px 32px -8px rgba(16,24,40,0.16);
-      font-family: 'Plus Jakarta Sans', sans-serif; height: 76px;
+      font-family: 'Plus Jakarta Sans', sans-serif; height: 58px;
       box-sizing: border-box;
     }
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -205,7 +205,7 @@
     .wc-btn {
       position: relative; overflow: hidden;
       background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
-      border: none; border-radius: 20px; height: 48px; min-height: 44px; padding: 0 16px;
+      border: none; border-radius: 20px; height: 40px; min-height: 36px; padding: 0 16px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       color: #ffffff; cursor: pointer; -webkit-tap-highlight-color: transparent;
       transition: transform 0.1s ease; font-family: inherit;
@@ -239,7 +239,7 @@
     }
 
     @media (max-width: 340px) {
-      #white-cart-container { padding: 10px; height: 72px; }
+      #white-cart-container { padding: 6px 10px; height: 54px; }
       .wc-img { width: 36px; height: 36px; }
       .wc-image-stack { height: 36px; min-width: 36px; }
       .wc-btn { padding: 0 12px; }
