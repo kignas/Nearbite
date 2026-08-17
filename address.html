@@ -80,7 +80,7 @@ const $=id=>document.getElementById(id);
 const token=()=>localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';
 const headers=()=>({'Content-Type':'application/json',...(token()?{'Authorization':'Bearer '+token()}:{})});
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),2200)}
-function goBack(){if(new URLSearchParams(location.search).get('return')==='cart')location.href='cart.html';else history.back()}
+function goBack(){if(new URLSearchParams(location.search).get('return')==='cart')location.replace('cart.html');else window.nearbiteSafeBack()}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function coords(a){const c=a?.location?.coordinates;return Array.isArray(c)&&c.length>=2?[Number(c[1]),Number(c[0])]:[null,null]}
 function cache(a){localStorage.setItem('nearbite_address',JSON.stringify(a));localStorage.setItem('nearbite_address_updated_at',String(Date.now()))}
@@ -211,5 +211,7 @@ async function deleteAddress(id){
 }
 document.addEventListener('DOMContentLoaded',load);
 </script>
+
+<script src="navigation.js"></script>
 </body>
 </html>

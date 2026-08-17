@@ -95,7 +95,7 @@
 <body>
 <div class="cat-header">
   <div class="cat-header-left">
-    <button onclick="history.back()" class="icon-btn-round">
+    <button onclick="window.nearbiteSafeBack()" class="icon-btn-round">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
     <div>
@@ -202,7 +202,7 @@
           <div class="empty-icon-wrap"><i class="fa-solid fa-utensils"></i></div>
           <h2 class="empty-title">No restaurants found</h2>
           <p class="empty-sub">We couldn't find any places serving "${baseCategory}" nearby.</p>
-          <button onclick="history.back()" class="btn-back-home">Go Back</button>
+          <button onclick="window.nearbiteSafeBack()" class="btn-back-home">Go Back</button>
         </div>`;
       return;
     }
@@ -245,5 +245,7 @@
     renderCategory();
   }
 </script>
+
+<script src="navigation.js"></script>
 </body>
 </html>

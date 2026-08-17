@@ -69,7 +69,7 @@
 <body>
 
   <div class="top-bar" id="top-anchor">
-    <button class="back-btn tap" onclick="history.back()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+    <button class="back-btn tap" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
     <h1 class="page-title" id="pageTitleText">Nearbite Policies</h1>
   </div>
 
@@ -251,5 +251,7 @@
     document.getElementById('entityAvatar').textContent = LEGAL_ENTITY_NAME.trim().charAt(0).toUpperCase() || 'N';
     document.getElementById('footerDates').textContent = 'Effective ' + POLICY_EFFECTIVE_DATE + ' · Last updated ' + POLICY_LAST_UPDATED;
   </script>
+
+<script src="navigation.js"></script>
 </body>
 </html>

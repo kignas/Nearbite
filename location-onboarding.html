@@ -34,7 +34,7 @@
 <div id="map"></div>
 <div class="pin"><i class="fa-solid fa-location-dot"></i></div><div class="pin-dot"></div>
 <div class="top">
-  <button class="back" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
+  <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
   <div class="title"><b>Set your delivery location</b><span>Allow location or move the map to your exact delivery point.</span></div>
   <button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location"><i class="fa-solid fa-location-crosshairs"></i></button>
 </div>
@@ -155,5 +155,7 @@ function init(){
 }
 window.addEventListener('load',init);
 </script>
+
+<script src="navigation.js"></script>
 </body>
 </html>
