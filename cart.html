@@ -687,6 +687,7 @@ async function placeOrder() {
     const payload = {
       items: itemsArray,
       deliveryAddress: savedAddress,
+       addressId: localStorage.getItem('nearbite_selected_address_id') || (savedAddress && savedAddress._id) || null,
       restaurantId: restaurantId,
       restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
       subtotal,
