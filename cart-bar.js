@@ -31,7 +31,7 @@
   }
 
   /* ── 1. THE MATH ENGINE (Unified Master Version) ── */
-  window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg) {
+  window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     let itemName = arg1;
     let change = arg2;
     let isUnder99Payload = false;
@@ -50,6 +50,7 @@
             menuItemId = payload.menuItem;
             image = payload.image;
             isVeg = payload.isVeg;
+            originalPrice = payload.originalPrice;
             inStock = true; 
         } catch(e) {
             console.error("Payload decode error", e);
@@ -92,13 +93,14 @@
     // Update the Payload
     if (!cartMemory[itemName]) {
         cartMemory[itemName] = {
-            quantity: 0, price: parseFloat(price), resId: rId,
+            quantity: 0, price: parseFloat(price), originalPrice: Number(originalPrice) > Number(price) ? Number(originalPrice) : null, resId: rId,
             menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg
         };
     } else {
         if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
         if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
         if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
+        if (!cartMemory[itemName].originalPrice && Number(originalPrice) > Number(price)) cartMemory[itemName].originalPrice = Number(originalPrice);
     }
     
     cartMemory[itemName].quantity += change;

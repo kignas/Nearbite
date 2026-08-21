@@ -416,7 +416,9 @@
       const key = item.name.replace(/\s+/g,'');
       const qty = cartMemory[item.name] ? cartMemory[item.name].quantity : 0;
       
-      const originalPrice = Math.floor(item.price * 1.4);
+      const rawOriginalPrice = Number(item.originalPrice);
+      const originalPrice = Number.isFinite(rawOriginalPrice) && rawOriginalPrice > Number(item.price) ? rawOriginalPrice : null;
+      const discountPercent = originalPrice ? Math.round((1 - Number(item.price) / originalPrice) * 100) : 0;
 
       // Create a secure encoded payload to pass to the updateCart button safely
       const cartPayload = encodeURIComponent(JSON.stringify({
@@ -425,7 +427,8 @@
         name: item.name,
         price: item.price,
         isVeg: item.isVeg,
-        resId: item.resId
+        resId: item.resId,
+        originalPrice: originalPrice
       })).replace(/'/g, "%27");
 
       const btnHTML = qty > 0
@@ -461,7 +464,7 @@
             
             <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:2px;">
               <div style="display:flex;flex-direction:column;gap:2px;">
-                <span style="font-size:10px;color:#9ca3af;text-decoration:line-through;">₹${originalPrice}</span>
+                ${originalPrice ? `<span style="font-size:10px;color:#9ca3af;text-decoration:line-through;">₹${originalPrice}</span><span style="font-size:9px;color:#16a34a;font-weight:800;">${discountPercent}% OFF</span>` : ''}
                 <span style="font-size:13px;font-weight:800;color:#111;">
                   <span style="background:#fef08a;padding:0 3px;border-radius:3px;">₹${item.price}</span>
                 </span>
@@ -511,7 +514,8 @@
         price: payload.price,
         quantity: 0, 
         isVeg: payload.isVeg,
-        resId: payload.resId 
+        resId: payload.resId,
+        originalPrice: Number(payload.originalPrice) > Number(payload.price) ? Number(payload.originalPrice) : null 
       };
     }
     

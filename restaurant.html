@@ -434,7 +434,7 @@
     return CUSTOMISABLE_ITEMS.some(c => name.toLowerCase().includes(c.toLowerCase()));
   }
 
-  window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg) {
+  window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     const safeName = itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const safeId = String(rId).replace(/['"]/g, ''); 
     const safeMenuItemId = String(menuItemId || '').replace(/['"]/g, '');
@@ -447,11 +447,11 @@
       // If the restaurant is CLOSED, all changes (add and remove) are disabled.
       const plusBtn = !isItemAvailable
         ? `<button onclick="notifyItemUnavailable()" style="width:32px;height:100%;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:16px;cursor:not-allowed;">+</button>`
-        : `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">+</button>`;
+        : `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number.isFinite(Number(originalPrice)) ? Number(originalPrice) : 0})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">+</button>`;
       
       const minusBtn = !isRestaurantOpen
         ? `<button onclick="notifyItemUnavailable()" style="width:32px;height:100%;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:18px;cursor:not-allowed;">−</button>`
-        : `<button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:18px;cursor:pointer;">−</button>`;
+        : `<button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number.isFinite(Number(originalPrice)) ? Number(originalPrice) : 0})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:18px;cursor:pointer;">−</button>`;
 
       return `
         <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid ${!isItemAvailable ? '#e2e8f0' : '#FC8019'};border-radius:10px;width:100px;height:36px;overflow:hidden;box-shadow:0 4px 12px rgba(252,128,25,0.15); margin: 0 auto;">
@@ -464,7 +464,7 @@
     if (!isItemAvailable) {
       return `<button disabled style="width:100px;height:36px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;color:#94a3b8;font-weight:800;font-size:12px;cursor:not-allowed; margin: 0 auto; display: block;">Unavailable</button>`;
     }
-    return `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg})" style="width:100px;height:36px;background:#fff;border:1px solid #f9ded0;border-radius:10px;color:#FC8019;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06);cursor:pointer; margin: 0 auto; display: block;">ADD</button>`;
+    return `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number.isFinite(Number(originalPrice)) ? Number(originalPrice) : 0})" style="width:100px;height:36px;background:#fff;border:1px solid #f9ded0;border-radius:10px;color:#FC8019;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06);cursor:pointer; margin: 0 auto; display: block;">ADD</button>`;
   };
 
   function notifyItemUnavailable() {
@@ -571,7 +571,9 @@
           const qty = cartMemory[item.name] ? cartMemory[item.name].quantity : 0;
           
           const cleanPrice = typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^\d.]/g, '')) || 0;
-          const originalPrice = Math.floor(cleanPrice * 1.3);
+          const rawOriginalPrice = Number(item.originalPrice);
+          const originalPrice = Number.isFinite(rawOriginalPrice) && rawOriginalPrice > cleanPrice ? rawOriginalPrice : null;
+          const discountPercent = originalPrice ? Math.round((1 - cleanPrice / originalPrice) * 100) : 0;
 
           const isBest = BESTSELLER_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
           const isMust = MUSTTRY_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
@@ -611,7 +613,7 @@
                 
                 <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
                   <span style="font-size:15px; font-weight:800; color:#0f172a;">₹${cleanPrice}</span>
-                  <span style="font-size:12px; font-weight:600; color:#94a3b8; text-decoration:line-through;">₹${originalPrice}</span>
+                  ${originalPrice ? `<span style="font-size:12px; font-weight:600; color:#94a3b8; text-decoration:line-through;">₹${originalPrice}</span><span style="font-size:10px;font-weight:800;color:#16a34a;background:#ecfdf5;padding:2px 5px;border-radius:5px;">${discountPercent}% OFF</span>` : ''}
                 </div>
                 
                 <p style="font-size:13px; font-weight:500; color:#64748b; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}</p>
@@ -630,7 +632,7 @@
                 </div>
                 
                 <div id="btn-container-${key}" style="position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); z-index:10; width: 100%;">
-                  ${window.makeBtnHTML(item.name, qty, cleanPrice, resId, inStock, item._id, imageSrc, item.isVeg)}
+                  ${window.makeBtnHTML(item.name, qty, cleanPrice, resId, inStock, item._id, imageSrc, item.isVeg, originalPrice)}
                 </div>
                 
                 ${isCustomisable(item.name) ? `<div style="font-size:10px; font-weight:600; color:#9ca3af; margin-top:24px;">Customisable</div>` : '<div style="margin-top:16px;"></div>'}

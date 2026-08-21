@@ -77,6 +77,12 @@
     .item-icon::after { content: ''; width: 6px; height: 6px; background: #16a34a; border-radius: 50%; }
     .item-name { font-size: 14px; font-weight: 700; color: var(--text-1); display: inline; }
     .item-price { font-size: 12px; font-weight: 800; color: var(--text-2); margin-top: 4px; }
+    .item-price-wrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px; }
+    .item-original-price { font-size:11px; font-weight:600; color:#94a3b8; text-decoration:line-through; }
+    .item-discount-badge { font-size:9px; font-weight:800; color:#15803d; background:#ecfdf5; padding:2px 5px; border-radius:5px; }
+    .item-total-wrap { width:70px; text-align:right; }
+    .item-total-original { display:block; font-size:10px; font-weight:600; color:#94a3b8; text-decoration:line-through; margin-top:2px; }
+    .savings-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; color:#15803d; font-weight:800; font-size:13px; }
     
     /* Native Add/Minus Button */
     .counter-btn {
@@ -241,6 +247,14 @@
       <div class="bill-row">
         <span class="bill-label">Item Total</span>
         <span class="bill-val" id="bill-subtotal">₹0</span>
+      </div>
+      <div class="bill-row" id="bill-mrp" style="display:none;">
+        <span class="bill-label">Item MRP</span>
+        <span class="bill-val" id="bill-mrp-val">₹0</span>
+      </div>
+      <div class="savings-row" id="bill-savings" style="display:none;">
+        <span>You saved</span>
+        <span class="bill-val">-₹0</span>
       </div>
       <div class="bill-row">
         <span class="bill-label">Delivery Fee</span>
@@ -481,12 +495,31 @@
       if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
       document.getElementById('cart-restaurant-name').innerText = resName;
 
-      listEl.innerHTML = items.map(([name, info]) => `
+      const totalSavings = items.reduce((sum, [, info]) => {
+        const current = Number(info.price) || 0;
+        const original = Number(info.originalPrice);
+        const qty = Number(info.quantity) || 0;
+        return sum + (Number.isFinite(original) && original > current ? (original - current) * qty : 0);
+      }, 0);
+
+      const originalCartTotal = subtotal + totalSavings;
+
+      listEl.innerHTML = items.map(([name, info]) => {
+        const currentPrice = Number(info.price) || 0;
+        const originalPrice = Number(info.originalPrice);
+        const hasDiscount = Number.isFinite(originalPrice) && originalPrice > currentPrice;
+        const discountPercent = hasDiscount ? Math.round((1 - currentPrice / originalPrice) * 100) : 0;
+        const lineTotal = (Number(info.quantity) || 0) * currentPrice;
+        const originalLineTotal = hasDiscount ? (Number(info.quantity) || 0) * originalPrice : null;
+        return `
         <div class="cart-item">
           <div class="item-info">
             <div class="item-icon"></div>
             <div class="item-name">${name}</div>
-            <div class="item-price">₹${info.price}</div>
+            <div class="item-price-wrap">
+              <span class="item-price">₹${currentPrice}</span>
+              ${hasDiscount ? `<span class="item-original-price">₹${originalPrice}</span><span class="item-discount-badge">${discountPercent}% OFF</span>` : ''}
+            </div>
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <div class="counter-btn tap">
@@ -494,12 +527,25 @@
               <span>${info.quantity}</span>
               <button onclick="cartAdjust('${name}', 1)">+</button>
             </div>
-            <div class="item-total">₹${info.quantity * info.price}</div>
+            <div class="item-total-wrap">
+              <div class="item-total">₹${lineTotal}</div>
+              ${hasDiscount ? `<span class="item-total-original">₹${originalLineTotal}</span>` : ''}
+            </div>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
 
       document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
+      const savingsEl = document.getElementById('bill-savings');
+      if (savingsEl) {
+        savingsEl.style.display = totalSavings > 0 ? 'flex' : 'none';
+        savingsEl.querySelector('.bill-val').innerText = '-₹' + totalSavings;
+      }
+      const mrpEl = document.getElementById('bill-mrp');
+      if (mrpEl) {
+        mrpEl.style.display = totalSavings > 0 ? 'flex' : 'none';
+        document.getElementById('bill-mrp-val').innerText = '₹' + originalCartTotal;
+      }
       document.getElementById('bill-total').innerText = '₹' + total;
       document.getElementById('checkout-total').innerText = '₹' + total;
     }
