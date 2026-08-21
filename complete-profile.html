@@ -77,6 +77,11 @@
         <label for="email">Email (optional)</label>
         <input id="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email">
       </div>
+      <div class="field">
+        <label for="password">Create password *</label>
+        <input id="password" type="password" minlength="6" maxlength="72" placeholder="At least 6 characters" autocomplete="new-password">
+        <div class="hint">You'll use your mobile number and this password to log in next time. Keep it private.</div>
+      </div>
     </section>
 
     <section class="section">
@@ -125,6 +130,7 @@
 
   const $ = id => document.getElementById(id);
   const fields = ['name','house','area','landmark','city','pincode'];
+  const passwordField = $('password');
 
   function showError(message) {
     $('errorBox').textContent = message;
@@ -134,13 +140,14 @@
   function validate() {
     const ok = fields.every(id => $(id).value.trim()) &&
       /^\d{6}$/.test($('pincode').value.trim()) &&
-      $('name').value.trim().length >= 2;
+      $('name').value.trim().length >= 2 && passwordField.value.length >= 6;
     $('saveBtn').disabled = !ok;
     return ok;
   }
 
   fields.forEach(id => $(id).addEventListener('input', validate));
   $('email').addEventListener('input', validate);
+  passwordField.addEventListener('input', validate);
 
   const isManualLocation = new URLSearchParams(location.search).get('location') === 'manual';
   if (isManualLocation) $('manualLocationNotice').style.display = 'block';
@@ -223,7 +230,8 @@
         headers,
         body: JSON.stringify({
           name: $('name').value.trim(),
-          email: $('email').value.trim() || undefined
+          email: $('email').value.trim() || undefined,
+          password: passwordField.value
         })
       });
       const profileResult = await profileRes.json();
