@@ -209,6 +209,185 @@
       transform: translateX(-50%) translateY(0);
     }
     #addr-toast i { color: #FC8019; }
+
+    /* =========================================================
+       Nearbite production checkout polish
+       ========================================================= */
+    .checkout-footer{
+      padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.97);
+      border-top:1px solid #eceef1;
+      box-shadow:0 -10px 30px rgba(17,24,39,.10);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      gap:10px;
+    }
+
+    .payment-options{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+    }
+
+    .payment-options::before{
+      content:'Payment method';
+      grid-column:1 / -1;
+      font-size:11px;
+      line-height:1;
+      font-weight:800;
+      color:#6b7280;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+      margin:0 2px 1px;
+    }
+
+    .payment-method-option{
+      min-height:68px;
+      padding:11px 12px;
+      border:1.5px solid #e7e9ed;
+      border-radius:16px;
+      background:#fff;
+      box-shadow:0 2px 7px rgba(17,24,39,.035);
+      transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .12s ease;
+    }
+
+    .payment-method-option:active{transform:scale(.985)}
+    .payment-method-option.selected{
+      border-color:var(--brand);
+      background:linear-gradient(180deg,#fffaf5 0%,#fff6ee 100%);
+      box-shadow:0 4px 14px rgba(252,128,25,.10);
+    }
+
+    .payment-method-option > div:first-child{
+      min-width:0;
+      gap:9px !important;
+    }
+
+    .payment-title{
+      font-size:12px;
+      line-height:1.25;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .payment-sub{
+      font-size:9.5px;
+      line-height:1.35;
+      font-weight:600;
+      margin-top:3px;
+      white-space:nowrap;
+    }
+
+    .payment-check{
+      flex:0 0 auto;
+      font-size:15px;
+    }
+
+    .upi-icon,.cod-icon{
+      width:32px;
+      height:32px;
+      border-radius:10px;
+      flex:0 0 32px;
+      font-size:13px;
+    }
+
+    .btn-checkout{
+      min-height:54px;
+      padding:15px 18px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#ff8a1f 0%,#fc8019 100%);
+      box-shadow:0 7px 18px rgba(252,128,25,.25);
+    }
+
+    .btn-checkout-text{
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+
+    .btn-checkout-val{
+      font-size:17px;
+    }
+
+    .btn-checkout.locked{
+      background:#e5e7eb;
+      box-shadow:none;
+    }
+
+    /* More premium checkout cards */
+    .section-block{
+      border:1px solid rgba(229,231,235,.72);
+      box-shadow:0 3px 14px rgba(17,24,39,.035);
+    }
+
+    .address-title{font-size:15px}
+    .address-text{font-size:12px}
+
+    .cart-item{
+      padding:17px 0;
+      border-bottom:1px solid #f0f1f3;
+    }
+
+    .item-name{font-size:14px;line-height:1.3}
+    .item-price{
+      display:flex;
+      align-items:center;
+      gap:5px;
+      flex-wrap:wrap;
+      margin-top:5px;
+    }
+
+    .discount-badge{
+      display:inline-flex;
+      align-items:center;
+      min-height:18px;
+      padding:2px 6px;
+      border-radius:6px;
+      background:#ecfdf3;
+      color:#15803d;
+      font-size:9px;
+      line-height:1;
+      font-weight:800;
+    }
+
+    .item-original{
+      color:#9ca3af;
+      text-decoration:line-through;
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .item-selling{
+      color:#111827;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .item-total{
+      width:64px;
+      font-size:15px;
+    }
+
+    .item-save{
+      margin-top:3px;
+      font-size:9px;
+      color:#16a34a;
+      font-weight:800;
+    }
+
+    .bill-row{margin-bottom:11px}
+    .bill-row.savings-row .bill-label,
+    .bill-row.savings-row .bill-val{color:#16a34a;font-weight:800}
+
+    @media (max-width:380px){
+      .checkout-footer{padding-left:12px;padding-right:12px}
+      .payment-options{gap:7px}
+      .payment-method-option{padding:10px 9px;min-height:64px}
+      .payment-title{font-size:11px}
+      .payment-sub{font-size:8.5px}
+      .upi-icon,.cod-icon{width:29px;height:29px;flex-basis:29px}
+      .payment-method-option > div:first-child{gap:7px !important}
+    }
+
   </style>
 </head>
 <body>
@@ -253,6 +432,14 @@
         <span class="bill-label">Item Total</span>
         <span class="bill-val" id="bill-subtotal">₹0</span>
       </div>
+      <div class="bill-row" id="bill-mrp-row" style="display:none;">
+        <span class="bill-label">Item MRP</span>
+        <span class="bill-val" id="bill-mrp">₹0</span>
+      </div>
+      <div class="bill-row savings-row" id="bill-savings-row" style="display:none;">
+        <span class="bill-label">You save</span>
+        <span class="bill-val" id="bill-savings-val">₹0</span>
+      </div>
       <div class="bill-row">
         <span class="bill-label">Delivery Fee</span>
         <span class="bill-val" id="bill-delivery-val">Calculating…</span>
@@ -280,14 +467,14 @@
       <div class="payment-method-option selected" data-method="upi" onclick="selectPaymentMethod('upi')">
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
-          <div><div class="payment-title">Online Payment</div><div class="payment-sub">UPI, GPay, PhonePe</div></div>
+          <div><div class="payment-title">Online</div><div class="payment-sub">UPI • GPay • PhonePe</div></div>
         </div>
         <i class="fa-solid fa-circle-check payment-check"></i>
       </div>
       <div id="cod-payment-option" class="payment-method-option" data-method="cod" onclick="selectPaymentMethod('cod')" style="display:none;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="cod-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-          <div><div class="payment-title">Cash on Delivery</div><div class="payment-sub">Pay when your order arrives</div></div>
+          <div><div class="payment-title">Cash on Delivery</div><div class="payment-sub">Pay at your doorstep</div></div>
         </div>
         <i class="fa-regular fa-circle payment-check"></i>
       </div>
@@ -528,32 +715,63 @@
       if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
       document.getElementById('cart-restaurant-name').innerText = resName;
 
-      listEl.innerHTML = items.map(([name, info]) => `
+      listEl.innerHTML = items.map(([name, info]) => {
+        const price = Number(info.price || 0);
+        const original = Number(info.originalPrice || 0);
+        const hasDiscount = original > price;
+        const discountPct = hasDiscount ? Math.round(((original - price) / original) * 100) : 0;
+        const itemTotal = Number(info.quantity || 0) * price;
+        const itemSavings = hasDiscount ? Number(info.quantity || 0) * (original - price) : 0;
+        return `
         <div class="cart-item">
           <div class="item-info">
-            <div class="item-icon"></div>
-            <div class="item-name">${name}</div>
-            <div class="item-price">₹${info.price} ${Number(info.originalPrice) > Number(info.price) ? `<span style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-left:4px;">₹${info.originalPrice}</span>` : ''}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div class="counter-btn tap">
-              <button onclick="cartAdjust('${name}', -1)">−</button>
-              <span>${info.quantity}</span>
-              <button onclick="cartAdjust('${name}', 1)">+</button>
+            <div>
+              <span class="item-icon"></span>
+              <span class="item-name">${name}</span>
             </div>
-            <div class="item-total">₹${info.quantity * info.price}${Number(info.originalPrice) > Number(info.price) ? `<div style="font-size:10px;color:#16a34a;font-weight:800;text-align:right;">Save ₹${(info.quantity * (Number(info.originalPrice) - Number(info.price))).toFixed(0)}</div>` : ''}</div>
+            <div class="item-price">
+              <span class="item-selling">₹${price}</span>
+              ${hasDiscount ? `<span class="item-original">₹${original}</span><span class="discount-badge">${discountPct}% OFF</span>` : ''}
+            </div>
           </div>
-        </div>
-      `).join('');
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="counter-btn tap" aria-label="Quantity controls">
+              <button onclick="cartAdjust('${name}', -1)" aria-label="Decrease quantity">−</button>
+              <span>${info.quantity}</span>
+              <button onclick="cartAdjust('${name}', 1)" aria-label="Increase quantity">+</button>
+            </div>
+            <div class="item-total">
+              ₹${itemTotal}
+              ${hasDiscount ? `<div class="item-save">Save ₹${itemSavings.toFixed(0)}</div>` : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
 
       document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
       const originalCartTotal = items.reduce((sum, [, v]) => sum + Number(v.quantity || 0) * (Number(v.originalPrice) > Number(v.price) ? Number(v.originalPrice) : Number(v.price)), 0);
-      const savingsEl = document.getElementById('bill-savings');
-      if (savingsEl) {
-        const savings = Math.max(0, originalCartTotal - subtotal);
-        savingsEl.textContent = savings > 0 ? `You save ₹${savings.toFixed(0)}` : '';
-        savingsEl.style.display = savings > 0 ? 'block' : 'none';
+      const savings = Math.max(0, originalCartTotal - subtotal);
+
+      const mrpRow = document.getElementById('bill-mrp-row');
+      const mrpEl = document.getElementById('bill-mrp');
+      const savingsRow = document.getElementById('bill-savings-row');
+      const savingsVal = document.getElementById('bill-savings-val');
+
+      if (mrpRow && mrpEl) {
+        mrpRow.style.display = savings > 0 ? 'flex' : 'none';
+        mrpEl.textContent = '₹' + originalCartTotal.toFixed(0);
       }
+      if (savingsRow && savingsVal) {
+        savingsRow.style.display = savings > 0 ? 'flex' : 'none';
+        savingsVal.textContent = '₹' + savings.toFixed(0);
+      }
+
+      const legacySavings = document.getElementById('bill-savings');
+      if (legacySavings) {
+        legacySavings.textContent = '';
+        legacySavings.style.display = 'none';
+      }
+
       document.getElementById('bill-total').innerText = '₹' + total;
       document.getElementById('checkout-total').innerText = '₹' + total;
     }
