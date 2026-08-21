@@ -77,12 +77,6 @@
     .item-icon::after { content: ''; width: 6px; height: 6px; background: #16a34a; border-radius: 50%; }
     .item-name { font-size: 14px; font-weight: 700; color: var(--text-1); display: inline; }
     .item-price { font-size: 12px; font-weight: 800; color: var(--text-2); margin-top: 4px; }
-    .item-price-wrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px; }
-    .item-original-price { font-size:11px; font-weight:600; color:#94a3b8; text-decoration:line-through; }
-    .item-discount-badge { font-size:9px; font-weight:800; color:#15803d; background:#ecfdf5; padding:2px 5px; border-radius:5px; }
-    .item-total-wrap { width:70px; text-align:right; }
-    .item-total-original { display:block; font-size:10px; font-weight:600; color:#94a3b8; text-decoration:line-through; margin-top:2px; }
-    .savings-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; color:#15803d; font-weight:800; font-size:13px; }
     
     /* Native Add/Minus Button */
     .counter-btn {
@@ -133,6 +127,17 @@
       background: #f9fafb; padding: 12px 16px; border-radius: 12px;
       border: 1.5px solid var(--border);
     }
+    .payment-options { display:flex; flex-direction:column; gap:8px; }
+    .payment-method-option {
+      display:flex; justify-content:space-between; align-items:center;
+      background:#f9fafb; padding:11px 14px; border-radius:12px;
+      border:1.5px solid var(--border); cursor:pointer;
+    }
+    .payment-method-option.selected { border-color:var(--brand); background:#fff8f1; }
+    .payment-title { font-size:13px; font-weight:800; color:var(--text-1); }
+    .payment-sub { font-size:10px; font-weight:600; color:var(--text-3); margin-top:2px; }
+    .payment-check { color:var(--brand); font-size:17px; }
+    .cod-icon { background:#ecfdf5; color:#059669; width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; }
     .upi-icon {
       background: #f3e8ff; color: #9333ea;
       width: 26px; height: 26px; border-radius: 6px;
@@ -248,18 +253,11 @@
         <span class="bill-label">Item Total</span>
         <span class="bill-val" id="bill-subtotal">₹0</span>
       </div>
-      <div class="bill-row" id="bill-mrp" style="display:none;">
-        <span class="bill-label">Item MRP</span>
-        <span class="bill-val" id="bill-mrp-val">₹0</span>
-      </div>
-      <div class="savings-row" id="bill-savings" style="display:none;">
-        <span>You saved</span>
-        <span class="bill-val">-₹0</span>
-      </div>
       <div class="bill-row">
         <span class="bill-label">Delivery Fee</span>
         <span class="bill-val" id="bill-delivery-val">Calculating…</span>
       </div>
+      <div id="bill-savings" style="display:none;font-size:12px;font-weight:800;color:#16a34a;margin-top:8px;"></div>
       <div class="bill-total-row">
         <span class="total-label">To Pay</span>
         <span class="total-val" id="bill-total">₹0</span>
@@ -278,12 +276,21 @@
 
   <div class="checkout-footer" id="checkout-footer">
     
-    <div class="payment-method tap">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
-        <span>Pay via UPI (GPay, PhonePe)</span>
+    <div id="payment-options" class="payment-options">
+      <div class="payment-method-option selected" data-method="upi" onclick="selectPaymentMethod('upi')">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
+          <div><div class="payment-title">Online Payment</div><div class="payment-sub">UPI, GPay, PhonePe</div></div>
+        </div>
+        <i class="fa-solid fa-circle-check payment-check"></i>
       </div>
-      <span style="color:var(--brand); font-size:11px; font-weight:800;">CHANGE</span>
+      <div id="cod-payment-option" class="payment-method-option" data-method="cod" onclick="selectPaymentMethod('cod')" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="cod-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+          <div><div class="payment-title">Cash on Delivery</div><div class="payment-sub">Pay when your order arrives</div></div>
+        </div>
+        <i class="fa-regular fa-circle payment-check"></i>
+      </div>
     </div>
 
     <button class="btn-checkout locked" id="btn-checkout" onclick="placeOrder()">
@@ -377,6 +384,7 @@
           freeDeliveryEnabled: restaurant.freeDeliveryEnabled !== false,
           freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
           deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
+          codEnabled: restaurant.codEnabled === true,
         };
       } catch (error) {
         console.warn('Could not load restaurant GPS:', error);
@@ -419,18 +427,42 @@
       }
 
       if (!customerCoords || !restaurantCoords) {
-        return { fee: 30, distance: null, source: 'fallback' };
+        return { fee: 30, distance: null, source: 'fallback', codEnabled: restaurantInfo?.codEnabled === true };
       }
 
       const distance = distanceKm(restaurantCoords, customerCoords);
       const radius = Number(restaurantInfo?.deliveryRadiusKm);
       if (Number.isFinite(radius) && radius > 0 && distance > radius) {
-        return { fee: null, distance, source: 'gps', outsideRadius: true, radius };
+        return { fee: null, distance, source: 'gps', outsideRadius: true, radius, codEnabled: restaurantInfo?.codEnabled === true };
       }
 
       const baseFee = deliveryFeeForDistance(distance);
       const freeDelivery = restaurantInfo?.freeDeliveryEnabled && restaurantInfo?.freeDeliveryAbove > 0 && subtotal >= restaurantInfo.freeDeliveryAbove;
-      return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0 };
+      return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0, codEnabled: restaurantInfo?.codEnabled === true };
+    }
+
+    let selectedPaymentMethod = localStorage.getItem('nearbite_payment_method') || 'upi';
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method === 'cod' ? 'cod' : 'upi';
+      localStorage.setItem('nearbite_payment_method', selectedPaymentMethod);
+      document.querySelectorAll('.payment-method-option').forEach(el => {
+        const active = el.dataset.method === selectedPaymentMethod && el.style.display !== 'none';
+        el.classList.toggle('selected', active);
+        const icon = el.querySelector('.payment-check');
+        if (icon) icon.className = active ? 'fa-solid fa-circle-check payment-check' : 'fa-regular fa-circle payment-check';
+      });
+    }
+
+    function syncPaymentOptions(codEnabled) {
+      const codOption = document.getElementById('cod-payment-option');
+      if (!codOption) return;
+      codOption.style.display = codEnabled ? 'flex' : 'none';
+      if (!codEnabled && selectedPaymentMethod === 'cod') {
+        selectedPaymentMethod = 'upi';
+        localStorage.setItem('nearbite_payment_method', 'upi');
+      }
+      selectPaymentMethod(selectedPaymentMethod);
     }
 
     async function renderCart() {
@@ -460,6 +492,7 @@
       const items = Object.entries(savedCart);
       const subtotal = items.reduce((s, [, v]) => s + Number(v.quantity || 0) * Number(v.price || 0), 0);
       let delivery = await calculateCurrentDelivery();
+      syncPaymentOptions(delivery.codEnabled === true);
       let deliveryFee = delivery.fee;
 
       if (delivery.outsideRadius) {
@@ -495,31 +528,12 @@
       if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
       document.getElementById('cart-restaurant-name').innerText = resName;
 
-      const totalSavings = items.reduce((sum, [, info]) => {
-        const current = Number(info.price) || 0;
-        const original = Number(info.originalPrice);
-        const qty = Number(info.quantity) || 0;
-        return sum + (Number.isFinite(original) && original > current ? (original - current) * qty : 0);
-      }, 0);
-
-      const originalCartTotal = subtotal + totalSavings;
-
-      listEl.innerHTML = items.map(([name, info]) => {
-        const currentPrice = Number(info.price) || 0;
-        const originalPrice = Number(info.originalPrice);
-        const hasDiscount = Number.isFinite(originalPrice) && originalPrice > currentPrice;
-        const discountPercent = hasDiscount ? Math.round((1 - currentPrice / originalPrice) * 100) : 0;
-        const lineTotal = (Number(info.quantity) || 0) * currentPrice;
-        const originalLineTotal = hasDiscount ? (Number(info.quantity) || 0) * originalPrice : null;
-        return `
+      listEl.innerHTML = items.map(([name, info]) => `
         <div class="cart-item">
           <div class="item-info">
             <div class="item-icon"></div>
             <div class="item-name">${name}</div>
-            <div class="item-price-wrap">
-              <span class="item-price">₹${currentPrice}</span>
-              ${hasDiscount ? `<span class="item-original-price">₹${originalPrice}</span><span class="item-discount-badge">${discountPercent}% OFF</span>` : ''}
-            </div>
+            <div class="item-price">₹${info.price} ${Number(info.originalPrice) > Number(info.price) ? `<span style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-left:4px;">₹${info.originalPrice}</span>` : ''}</div>
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <div class="counter-btn tap">
@@ -527,24 +541,18 @@
               <span>${info.quantity}</span>
               <button onclick="cartAdjust('${name}', 1)">+</button>
             </div>
-            <div class="item-total-wrap">
-              <div class="item-total">₹${lineTotal}</div>
-              ${hasDiscount ? `<span class="item-total-original">₹${originalLineTotal}</span>` : ''}
-            </div>
+            <div class="item-total">₹${info.quantity * info.price}${Number(info.originalPrice) > Number(info.price) ? `<div style="font-size:10px;color:#16a34a;font-weight:800;text-align:right;">Save ₹${(info.quantity * (Number(info.originalPrice) - Number(info.price))).toFixed(0)}</div>` : ''}</div>
           </div>
-        </div>`;
-      }).join('');
+        </div>
+      `).join('');
 
       document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
+      const originalCartTotal = items.reduce((sum, [, v]) => sum + Number(v.quantity || 0) * (Number(v.originalPrice) > Number(v.price) ? Number(v.originalPrice) : Number(v.price)), 0);
       const savingsEl = document.getElementById('bill-savings');
       if (savingsEl) {
-        savingsEl.style.display = totalSavings > 0 ? 'flex' : 'none';
-        savingsEl.querySelector('.bill-val').innerText = '-₹' + totalSavings;
-      }
-      const mrpEl = document.getElementById('bill-mrp');
-      if (mrpEl) {
-        mrpEl.style.display = totalSavings > 0 ? 'flex' : 'none';
-        document.getElementById('bill-mrp-val').innerText = '₹' + originalCartTotal;
+        const savings = Math.max(0, originalCartTotal - subtotal);
+        savingsEl.textContent = savings > 0 ? `You save ₹${savings.toFixed(0)}` : '';
+        savingsEl.style.display = savings > 0 ? 'block' : 'none';
       }
       document.getElementById('bill-total').innerText = '₹' + total;
       document.getElementById('checkout-total').innerText = '₹' + total;
@@ -562,6 +570,8 @@ function cartAdjust(name, change) {
 
 function clearCart() {
   localStorage.removeItem('nearbite_cart');
+  localStorage.removeItem('nearbite_payment_method');
+  selectedPaymentMethod = 'upi';
   renderCart();
 }
 
@@ -738,7 +748,8 @@ async function placeOrder() {
       restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
       subtotal,
       deliveryFee,
-      total
+      total,
+      paymentMethod: selectedPaymentMethod
     };
 
     const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {

@@ -50,7 +50,7 @@
             menuItemId = payload.menuItem;
             image = payload.image;
             isVeg = payload.isVeg;
-            originalPrice = payload.originalPrice;
+            originalPrice = payload.originalPrice || null;
             inStock = true; 
         } catch(e) {
             console.error("Payload decode error", e);
@@ -93,7 +93,7 @@
     // Update the Payload
     if (!cartMemory[itemName]) {
         cartMemory[itemName] = {
-            quantity: 0, price: parseFloat(price), originalPrice: Number(originalPrice) > Number(price) ? Number(originalPrice) : null, resId: rId,
+            quantity: 0, price: parseFloat(price), originalPrice: (Number(originalPrice) > Number(price) ? Number(originalPrice) : null), resId: rId,
             menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg
         };
     } else {
@@ -120,7 +120,7 @@
                 container.innerHTML = `<button onclick="updateCart('${originalPayload}', 1)" style="width:72px;height:32px;background:#fff;border:1px solid #f9ded0;border-radius:8px;color:#FC8019;font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
             }
         } else if (typeof window.makeBtnHTML === 'function') {
-            container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg);
+            container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice);
         }
     }
     
