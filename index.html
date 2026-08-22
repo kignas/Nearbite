@@ -1,25 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>– Food Near You</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>– Food Near You</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
     *, *::before, *::after { box-sizing: border-box; }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #F6F6F9;
+      font-family: 'Poppins', sans-serif;
+      background: #fff;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
       padding-bottom: 80px;
       margin: 1;
+      padding-top: 0 !important;
     }
 
     /* ─── Utilities ─── */
@@ -30,16 +30,11 @@
 
     /* ══════════════════════════════════════════
        PER-SECTION SKELETONS
-       Each one lives inline inside its section's real container
-       (not a full-page overlay), matched to that section's current
-       CSS. It's replaced the instant that section's own fetch
-       resolves — sections never wait on each other.
     ══════════════════════════════════════════ */
     @keyframes shimmer {
       0%   { background-position: -600px 0; }
       100% { background-position:  600px 0; }
     }
-    /* Base shimmer tile */
     .sk {
       display: block;
       background: linear-gradient(90deg, #ececef 25%, #f6f6f9 50%, #ececef 75%);
@@ -47,34 +42,23 @@
       animation: shimmer 1.5s infinite linear;
       border-radius: 10px;
     }
-    /* stagger helpers */
     .sk.d1{animation-delay:.08s}.sk.d2{animation-delay:.16s}
     .sk.d3{animation-delay:.24s}.sk.d4{animation-delay:.32s}.sk.d5{animation-delay:.40s}
 
-    /* ── Category skeleton — mirrors the real .cat-scroll 2-row x 24vw grid ── */
     .cs-item { display:flex; flex-direction:column; align-items:center; width:100%; }
     .cs-ring { width:100%; aspect-ratio:1/1; border-radius:50%; }
     .cs-name { width:70%; height:11px; margin-top:8px; border-radius:5px; }
 
-    /* ── Restaurant card skeleton — mirrors the real .z-card (bordered, elevated container) ── */
-    .rs-card  { margin:0 16px 16px 16px; background:#fff; border-radius:20px; box-shadow:0 10px 24px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.05); overflow:hidden; padding-bottom:15px; }
-    .rs-img   { height:258px; border-radius:0; margin-bottom:13px; }
-    .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 16px 8px 16px; }
-    .rs-name  { height:20px; width:52%; border-radius:8px; }
-    .rs-badge { height:26px; width:56px; border-radius:999px; }
-    .rs-cuis  { height:13px; width:70%; border-radius:6px; margin:0 16px 10px 16px; }
-    .rs-meta  { height:12px; width:45%; border-radius:5px; margin:0 16px; }
-
-    /* ── 99-store card skeleton — mirrors the real .s99-card ── */
-    .ps-card  { width:132px; flex-shrink:0; padding:10px; border-radius:18px; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.03); }
-    .ps-img   { aspect-ratio:1; border-radius:12px; margin-bottom:10px; position:relative; }
-    .ps-add   { position:absolute; bottom:6px; right:6px; width:28px; height:28px; border-radius:8px; }
-    .ps-name  { height:13px; width:85%; border-radius:6px; margin-bottom:6px; }
-    .ps-price { height:12px; width:55%; border-radius:5px; margin-bottom:6px; }
-    .ps-rating{ height:11px; width:45%; border-radius:5px; }
+    .rs-card  { margin:0 16px 32px 16px; }
+    .rs-img   { height:220px; border-radius:16px; margin-bottom: 12px; }
+    .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 0 4px; }
+    .rs-name  { height:22px; width:60%; border-radius:8px; }
+    .rs-badge { height:22px; width:46px; border-radius:6px; }
+    .rs-cuis  { height:14px; width:50%; border-radius:6px; margin-bottom:8px; }
+    .rs-meta  { height:12px; width:70%; border-radius:5px; }
 
     /* ══════════════════════════════════════════
-       HERO HEADER (Static & Natural Scroll)
+       HERO HEADER
     ══════════════════════════════════════════ */
     .hero-header {
       background: linear-gradient(155deg, #FFE03A 0%, #FFCA00 40%, #FF9E00 75%, #FFD325 100%);
@@ -83,9 +67,9 @@
       border-bottom-left-radius: 28px;
       border-bottom-right-radius: 28px;
       padding: 16px 16px 0 16px;
-      position: relative;
-      z-index: 100;
-      /* Removed heavy shadow to eliminate floating look */
+      position: relative !important;
+      top: auto;
+      z-index: 100 !important;
       box-shadow: none; 
       isolation: isolate;
       overflow: hidden;
@@ -154,9 +138,8 @@
       padding-bottom: 24px;
       position: relative;
     }
-    /* RESPONSIVE FLUID TEXT */
     .pb-headline {
-      font-size: clamp(20px, 6vw, 26px) !important; /* Adapts to screen size */
+      font-size: clamp(20px, 6vw, 26px) !important;
       font-weight: 900; letter-spacing: -0.5px; margin-bottom: 2px;
       color: #1a1a1a; filter: drop-shadow(0 2px 6px rgba(255,255,255,0.4));
     }
@@ -194,7 +177,7 @@
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; margin-bottom: 14px; }
     .sec-title { font-size: 17px; font-weight: 900; color: #1a1a1a; letter-spacing: -0.3px; }
 
-    .cat-scroll { display: flex;8 overflow-x: auto; padding: 0 16px 6px; gap: 0; }
+    .cat-scroll { display: flex; overflow-x: auto; padding: 0 16px 6px; gap: 0; }
     .cat-item { flex-shrink: 0; width: 82px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: transform 0.13s; }
     .cat-item:active { transform: scale(0.92); }
     
@@ -202,804 +185,272 @@
     .cat-ring img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
     .cat-name { font-size: 11.5px; font-weight: 600; color: #333; text-align: center; }
 
-    .s99-wrap { 
-      padding: 16px 0 4px 0 !important; 
-      background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); 
-      border-bottom: 8px solid #F1F5F9 !important; /* Premium clean divider */
-    }
-    
-    /* Premium Card Depth */
-    .s99-card { 
-      width: 132px; flex-shrink: 0; text-decoration: none; display: flex; flex-direction: column; 
-      background: #fff; padding: 10px; border-radius: 18px; 
-      box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); 
-    }
-    
-    /* Clean Image without weird padding */
-    .s99-img-wrap { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 10px; background: #F1F5F9; }
-    .s99-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    
-    /* Glowing Green + Button */
-    .s99-add-circle { 
-      position: absolute; bottom: 6px; right: 6px; width: 28px; height: 28px; 
-      background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-      color: #1BA672; font-size: 20px; font-weight: 600; line-height: 1; 
-      box-shadow: 0 4px 12px rgba(27, 166, 114, 0.25); border: none; padding: 0; cursor: pointer; 
-    }
-    
-    /* Crisper Price Tags */
-    .s99-price-new { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 2px 5px; border-radius: 5px; }
+    /* ── STEP 1: EATCLUB PROMO BANNERS ── */
+    .promo-section { padding: 16px 0; background: #fff; }
+    .promo-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px 8px 16px; scrollbar-width: none; }
+    .promo-scroll::-webkit-scrollbar { display: none; }
+    .promo-card { width: 105px; height: 130px; flex-shrink: 0; border-radius: 16px; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 14px; text-decoration: none; overflow: hidden; }
+    .promo-card img { position: absolute; bottom: -5px; width: 85px; height: 85px; object-fit: contain; transition: transform 0.2s; }
+    .promo-card:active img { transform: scale(1.05); }
+    .pc-title { font-size: 14px; font-weight: 900; line-height: 1.1; text-align: center; z-index: 2; }
+    .pc-sub { font-size: 10px; font-weight: 800; opacity: 0.8; margin-bottom: 2px; z-index: 2; letter-spacing: 0.5px; text-transform: uppercase; }
+    .promo-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+    .promo-line { flex: 1; height: 1px; background: #E2E8F0; margin-left: 12px; }
 
-    /* Swiggy Image & Inner Button */
-    .s99-img-box { width: 100%; aspect-ratio: 1; border-radius: 12px; background: #F1F5F9; position: relative; margin-bottom: 8px; }
-    .s99-img-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-    .s99-add-btn { position: absolute; bottom: -8px; right: 4px; width: 30px; height: 30px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1BA672; font-size: 18px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid #f1f5f9; cursor: pointer; }
-    
-    /* Swiggy Text Match */
-    .s99-name { font-size: 13px; font-weight: 800; color: #1E293B; line-height: 1.2; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .s99-price-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-    .s99-price-old { font-size: 12px; color: #94A3B8; text-decoration: line-through; font-weight: 600; }
-    .s99-price-new { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 1px 4px; border-radius: 4px; }
-    .s99-rating { font-size: 11px; font-weight: 800; color: #1BA672; }
-    .s99-rating span { color: #94A3B8; font-weight: 600; }
-    .s99-rest { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    /* ── STEP 3: ZOMATO SMART FILTERS ── */
+    .filter-scroll { 
+      display: flex; gap: 8px; overflow-x: auto; 
+      padding: 12px 16px 16px 16px !important; 
+      scrollbar-width: none; background: #fff; margin-top: 0 !important; 
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .filter-pill { 
+      display: flex; align-items: center; gap: 6px; padding: 8px 14px; 
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; 
+      font-size: 13px; font-weight: 600; color: #334155; white-space: nowrap; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+    }
+    .filter-pill:active { transform: scale(0.95); }
+    .filter-pill.active { 
+      background: rgba(37, 99, 235, 0.08) !important; /* Soft blue tint */
+      color: #2563EB !important; 
+      border-color: #2563EB !important; 
+      box-shadow: none !important; 
+    }
 
     /* ── STEP 4: ZOMATO RESTAURANT CARDS ── */
-    /* Transparent so the page's light-gray backdrop shows through and the
-       white restaurant cards read as elevated, floating cards. */
-    .vrest-section { background: transparent; padding: 24px 0 8px 0; }
-    .vrest-section .sec-head { padding: 0 16px; margin-bottom: 12px; }
-    
-    .explore-title-row { display: flex; align-items: center; width: 100%; }
-    .explore-title-row span { font-size: 14px; font-weight: 800; color: #64748B; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; margin-right: 16px; }
-    .explore-line { flex-grow: 1; height: 1px; background: #E2E8F0; }
+    .vrest-section { background: #F8FAFC; padding: 20px 0 8px 0; }
+    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; box-sizing: border-box; width: 100%; }
+    .z-rest-title { font-size: 13px !important; font-weight: 800 !important; color: #64748B !important; letter-spacing: 1.5px !important; text-transform: uppercase !important; margin-right: 12px; white-space: nowrap; }
+    .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
 
-    /* ═══════════════════════════════════════════
-       PREMIUM RESTAURANT CARD
-       Self-contained elevated card (border + soft shadow) rather than a
-       bare image floating on the page background — image, gallery,
-       badges and info block all live inside one rounded container.
-    ═══════════════════════════════════════════ */
-    .z-card {
-      display: block; margin: 0 16px 16px 16px; text-decoration: none;
-      -webkit-tap-highlight-color: transparent;
-      background: #fff; border-radius: 20px; overflow: hidden;
-      box-shadow: 0 10px 24px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.05);
-    }
-    .z-img-wrap { width: 100%; height: 258px; overflow: hidden; position: relative; background: #F1F5F9; }
-    .z-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    /* Restaurant gallery: same card dimensions/layout, multiple admin-managed photos. */
+    .z-card { display: block; margin: 0 16px 24px 16px; background: #fff; border-radius: 16px; padding-bottom: 16px; text-decoration: none; -webkit-tap-highlight-color: transparent; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; }
+    .z-card:active { transform: scale(0.97) translateZ(0); }
+    
+    .z-img-wrap { width: 100%; height: 220px; position: relative; background: #F1F5F9; overflow: hidden; }
+    
+    /* Restaurant gallery */
     .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
     .z-gallery-track { display:flex; width:100%; height:100%; transition:transform .38s cubic-bezier(.25,1,.5,1); will-change:transform; }
     .z-gallery-slide { min-width:100%; width:100%; height:100%; object-fit:cover; flex:0 0 100%; }
-    .z-gallery-dots { position:absolute; left:50%; bottom:46px; transform:translateX(-50%); display:flex; gap:5px; z-index:4; padding:4px 7px; border-radius:999px; background:rgba(0,0,0,.24); backdrop-filter:blur(5px); }
-    .z-gallery-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.55); transition:all .2s ease; }
-    .z-gallery-dot.active { width:13px; border-radius:999px; background:#fff; }
-
-    /* Highlighted-dish pill, top-left over the photo — only rendered when
-       a restaurant supplies a featured item (res.featuredItem/topPick), so
-       cards never show fabricated pricing. */
-    .z-dish-pill {
-      position: absolute; top: 12px; left: 12px; z-index: 3; max-width: calc(100% - 56px);
-      display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(17,18,22,0.74); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      color: #fff; font-size: 13.5px; font-weight: 700;
-      padding: 6px 12px 6px 6px; border-radius: 999px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.22);
-    }
-    .z-dish-pill .dp-veg { width: 17px; height: 17px; border-radius: 5px; background: #fff; border: 1.5px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .z-dish-pill .dp-veg .dot { width: 7px; height: 7px; border-radius: 50%; }
-    .z-dish-pill .dp-veg.veg { border-color: #1BA672; } .z-dish-pill .dp-veg.veg .dot { background: #1BA672; }
-    .z-dish-pill .dp-veg.nonveg { border-color: #E23744; } .z-dish-pill .dp-veg.nonveg .dot { background: #E23744; }
-    .z-dish-pill .dp-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .z-dish-pill .dp-old { text-decoration: line-through; opacity: 0.55; font-weight: 500; margin-left: 2px; }
-
-    /* Bookmark, solid glyph for a crisper premium look */
-    .z-bookmark { position: absolute; top: 12px; right: 12px; z-index: 3; font-size: 19px; color: #fff; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.55)); }
-
-    /* Full-width bottom banner (replaces the old corner badge) */
-    .z-bottom-banner {
-      position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
-      display: flex; align-items: center; gap: 7px;
-      background: linear-gradient(90deg, #2E58D6 0%, #3B6EE8 100%);
-      color: #fff; font-size: 12.5px; font-weight: 700; letter-spacing: 0.1px;
-      padding: 10px 14px;
-    }
-    .z-bottom-banner i { font-size: 11.5px; opacity: 0.95; flex-shrink: 0; }
-    /* Free-delivery gets its own green treatment (same green used for
-       ratings/veg elsewhere) so it reads as good news, distinct from the
-       neutral blue "delivery available" informational banner. */
-    .z-bottom-banner.z-banner-free {
-      background: linear-gradient(90deg, #1BA672 0%, #17945F 100%);
-    }
-
-    .z-info-wrap { padding: 13px 16px 15px 16px; }
-    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; gap: 10px; }
-    .z-name { font-size: 19px; font-weight: 800; color: #13151B; letter-spacing: -0.3px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
-
-    .z-rating-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-    .z-rating { background: #2F6B45; color: #fff; font-size: 13px; font-weight: 800; padding: 4px 6px 4px 9px; border-radius: 999px; display: flex; align-items: center; gap: 5px; }
-    .z-rating .z-star-ring { width: 15px; height: 15px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
-    .z-rating .z-star-ring i { font-size: 8px; color: #2F6B45; }
-    .z-rating-sub { font-size: 9.5px; color: #94A3B8; font-weight: 700; margin-top: 3px; letter-spacing: 0.2px; }
-
-        /* Fixed Zomato Title Alignment */
-    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; }
-    .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
     
-        /* Fixed Zomato Title Alignment */
-    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; box-sizing: border-box; width: 100%; }
-    .z-rest-title { font-size: 13px; font-weight: 800; color: #1C1C1C; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 12px; }
+    /* Clean dots */
+    .z-gallery-dots { position:absolute; left:50%; bottom: 12px; transform:translateX(-50%); display:flex; gap: 6px; z-index:4; }
+    .z-gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all 0.3s ease; }
+    .z-gallery-dot.active { width: 18px; border-radius: 4px; background: #fff; }
+    
+    /* Gradients and Overlays */
+    .z-img-scrim { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 1; pointer-events: none; }
+    
+    /* Zomato Blue Badge */
+    .z-delivery-badge { position: absolute; bottom: 12px; left: 12px; background: #2563EB; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 4px; z-index: 2; letter-spacing: 0.3px; }
+    
+    .z-bookmark { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1E293B; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    
+    /* Card Info Area */
+    .z-info-area { padding: 12px 12px 0 12px; }
+    
+    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .z-name { font-size: 20px; font-weight: 800; color: #1E293B; letter-spacing: -0.3px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; line-height: 1.2; }
+    
+    /* Green Rating Badge */
+    .z-rating { background: #15803D; color: #fff; font-size: 13px; font-weight: 800; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; line-height: 1; box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2); }
+    .z-rating i { font-size: 10px; }
 
-    .z-cuisine { font-size: 13.5px; color: #64748B; font-weight: 500; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .z-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #475569; font-weight: 600; }
-    .z-meta i { color: #1BA672; font-size: 12px; } /* Green lightning bolt */
+    .z-cuisine { font-size: 14px; color: #64748B; font-weight: 500; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .z-meta-row { display: flex; align-items: center; font-size: 13px; color: #475569; font-weight: 600; gap: 6px; }
+    .z-meta-item { display: flex; align-items: center; gap: 4px; }
+    .z-meta-item i { color: #2563EB; font-size: 14px; }
+    .z-meta-dot { width: 4px; height: 4px; border-radius: 50%; background: #CBD5E1; margin: 0 2px; }
 
-    /* Offer row — only rendered when a restaurant supplies real offer text
-       (res.offerText/discountLabel), so no discount is ever invented. */
-    .z-offer-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #334155; font-weight: 700; margin-top: 9px; padding-top: 9px; border-top: 1px dashed #E2E8F0; }
-    .z-offer-badge { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #3B5BDB, #6C8CFF); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .z-offer-badge i { color: #fff; font-size: 10px; }
-
-    /* ═══ Restaurant Availability (closed_today / temporarily_closed / unavailable) ═══
-       Card markup and layout are untouched — this only layers a grayscale
-       treatment + centered status pill on top of the existing z-img-wrap,
-       and dims the text underneath. Removing the "is-unavailable" class on
-       the next render (once the restaurant is open again) reverses all of
-       it automatically, since nothing here is a one-way state. */
-    .z-img-wrap img {
-      transition: filter 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1);
-    }
-    .z-img-wrap.is-unavailable img {
-      filter: grayscale(1) contrast(0.94);
-      opacity: 0.5;
-    }
-    .z-card.is-unavailable { cursor: default; }
-    .z-card.is-unavailable .z-name,
-    .z-card.is-unavailable .z-cuisine,
-    .z-card.is-unavailable .z-meta {
-      opacity: 0.55;
-      transition: opacity 0.5s ease;
-    }
-    .z-card.is-unavailable .z-rating,
-    .z-card.is-unavailable .z-bottom-banner { opacity: 0.6; }
-    .z-card.is-unavailable:active { transform: none; opacity: 1; }
-
-    .z-availability-overlay {
-      position: absolute; inset: 0; z-index: 3;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(180deg, rgba(20,20,20,0.12), rgba(20,20,20,0.34));
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.45s ease;
-    }
+    /* Availability Overlay */
+    .z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
+    .z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine, .z-card.is-unavailable .z-meta-row { opacity: 0.6; }
+    .z-card.is-unavailable .z-rating, .z-card.is-unavailable .z-delivery-badge { opacity: 0.7; }
+    .z-availability-overlay { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
     .z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
-    .z-availability-pill {
-      display: flex; align-items: center; gap: 7px;
-      background: rgba(255,255,255,0.94);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      color: #1C1C1C; font-size: 12.5px; font-weight: 800; letter-spacing: 0.2px;
-      padding: 9px 18px; border-radius: 999px;
-      box-shadow: 0 8px 22px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.7);
-      transform: scale(0.9);
-      animation: zPillIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-    }
-    .z-availability-pill i { font-size: 12px; color: #E23744; }
-    @keyframes zPillIn { to { transform: scale(1); } }
+    .z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .z-availability-pill i { color: #E23744; }
 
-    /* Toast used when a closed restaurant's card or a closed restaurant's
-       99-store item is tapped */
     #es-availability-toast {
       position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
-      background: rgba(26,26,26,0.95); color: #fff; font-size: 13px; font-weight: 700;
-      padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+      background: rgba(30,41,59,0.95); color: #fff; font-size: 13px; font-weight: 700;
+      padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);
       opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-    .s99-add-circle.is-disabled { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
-
     /* ─── Bottom Nav ─── */
-    /* ULTRA-PREMIUM BOTTOM NAV */
     .bottom-nav { 
       position: fixed; bottom: 0; left: 0; right: 0; height: 68px; 
-      background: rgba(255, 255, 255, 0.82) !important; /* Highly transparent */
-      backdrop-filter: blur(24px) saturate(180%) !important; /* Blurs and boosts colors behind it */
-      -webkit-backdrop-filter: blur(24px) saturate(180%) !important; /* iOS support */
-      border-top: 1px solid rgba(0,0,0,0.03) !important; 
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      border-top: 1px solid rgba(0,0,0,0.05) !important; 
       display: flex; align-items: stretch; 
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.04) !important; /* Ultra-soft, tall shadow */
-      z-index: 100; padding-bottom: env(safe-area-inset-bottom); 
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.06) !important;
+      z-index: 100; padding-bottom: env(safe-area-bottom); 
       transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
     }
+    .bottom-nav-hidden { transform: translateY(100%); }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; color: #94a3b8; text-decoration: none; transition: color 0.2s ease; cursor: pointer; position: relative; }
-    .nav-item svg { width: 24px; height: 24px; }
+    .nav-item svg { width: 24px; height: 24px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .nav-item.active { color: #FC8019; }
     .nav-item.active svg { stroke: #FC8019; }
-    .nav-food-circle { width: 46px; height: 46px; background: #FC8019; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(252,128,25,0.4); margin-bottom: 2px; }
+    .nav-food-circle { width: 46px; height: 46px; background: #FC8019; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(252,128,25,0.4); margin-bottom: 2px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .nav-food-circle svg { width: 22px; height: 22px; color: #fff; stroke: #fff; }
+    .nav-item:active svg { transform: scale(0.75); transition: transform 0.1s ease-out; }
+    .nav-item:active .nav-food-circle { transform: scale(0.85); transition: transform 0.1s ease-out; }
     .nav-new-badge { position: absolute; top: 6px; right: 10px; background: #ef4444; color: #fff; font-size: 7px; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(239,68,68,0.4); }
-    
-/* =========================================
-   PREMIUM "WHAT'S ON YOUR MIND" SECTION
-========================================= */
 
-.section-card {
-  padding: 10px 0 0 0; /* 16px top, 0 right, 0 bottom, 0 left */
-  background: #fff;
-  font-family: inherit;
-}
+    /* ── PREMIIUM "WHAT'S ON YOUR MIND" SECTION ── */
+    .section-card { padding: 10px 0 0 0; background: #fff; }
+    .sec-head { display: flex; align-items: center; margin-bottom: 4px; padding: 0 16px; }
+    .sec-title { font-size: 13px !important; font-weight: 800 !important; color: #7A808D !important; text-transform: uppercase !important; letter-spacing: 1.2px !important; margin-right: 12px; white-space: nowrap; }
+    .sec-head::after { content: ""; flex-grow: 1; height: 1px; background-color: #E2E8EC; }
+    .cat-scroll { display: grid; grid-template-rows: repeat(2, auto); grid-auto-flow: column; grid-auto-columns: 24vw; justify-content: start; gap: 12px 12px; padding: 0 16px 16px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+    .cat-item { display: flex; flex-direction: column; align-items: center; width: 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease; will-change: transform; }
+    .cat-ring { width: 24vw; height: 24vw; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; background: transparent; }
+    .cat-ring img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.25) translateZ(0); will-change: transform; }
+    img[loading="lazy"] { opacity: 0; transition: opacity .25s ease; }
+    img[loading="lazy"].loaded { opacity: 1; }
+    .cat-empty-state { grid-column: 1 / -1; text-align: center; padding: 28px 0; color: #9aa0ab; font-size: 13px; font-weight: 600; }
+    .cat-name { font-size: 13px; font-weight: 700; color: #3e4152; text-align: center; line-height: 1.1; }
+    .cat-item:active { transform: scale(0.92); opacity: 0.75; transition: transform 0.1s ease-out, opacity 0.1s ease-out; }
 
+    /* ── UNIFIED HEADERS ── */
+    .sec-title, .promo-title, .z-rest-title { font-size: 13px !important; font-weight: 800 !important; color: #7A808D !important; letter-spacing: 1.2px !important; text-transform: uppercase !important; white-space: nowrap; }
 
-/* 1. Refined Premium Header */
-.sec-head {
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px; 
-  padding: 0 16px;
-}
-
-.sec-title {
-  font-size: 13px; /* Slightly smaller */
-  font-weight: 800;
-  color: #7A808D; /* Lighter, elegant grey to match EatClub */
-  text-transform: uppercase;
-  letter-spacing: 1.2px; /* Wider spacing feels more premium */
-  margin-right: 12px;
-  white-space: nowrap;
-}
-
-.sec-head::after {
-  content: "";
-  flex-grow: 1;
-  height: 1px; 
-  background-color: #E2E8EC; /* Softer, thinner line */
-}
-
-
-.cat-scroll {
-  display: grid;
-  grid-template-rows: repeat(2, auto); 
-  grid-auto-flow: column; 
-  grid-auto-columns: 24vw; /* Slightly tightened the columns */
-  justify-content: start; 
-  /* CRITICAL FIX: 12px vertical gap kills the "trench", 12px horizontal keeps them close */
-  gap: 12px 12px; 
-  padding: 0 16px 16px 16px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; 
-  scroll-behavior: smooth;
-}
-
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* 3. Tighter Item Cards */
-.cat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%; 
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  
-  /* The "Release" Animation: A bouncy spring effect when they let go */
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
-  will-change: transform; /* Hardware acceleration */
-}
-
-/* 4. Maximized Images & Clean Shadows */
-.cat-ring {
-  width: 24vw;
-  height: 24vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-  background: transparent; 
-}
-
-.cat-ring img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transform: scale(1.25) translateZ(0); 
-  will-change: transform;
-  /* Notice: I deleted the transition from here! We only animate the parent now. */
-}
-
-/* Every lazy-loaded photo fades in on top of its (already-colored) placeholder
-   background rather than popping in abruptly once downloaded. */
-img[loading="lazy"] { opacity: 0; transition: opacity .25s ease; }
-img[loading="lazy"].loaded { opacity: 1; }
-
-.cat-empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 28px 0;
-  color: #9aa0ab;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* 4. Richer Typography */
-.cat-name {
-  font-size: 13px;
-  font-weight: 700; 
-  color: #3e4152; /* A slightly darker, richer grey to ground the images visually */
-  text-align: center;
-  line-height: 1.1;
-}
-.cat-item:active {
-  /* Shrinks the entire card (image + text) natively */
-  transform: scale(0.92);
-  opacity: 0.75; /* Slight fade makes it feel like an iOS/Android native button */
-  
-  /* The "Press" Animation: Extremely fast down-state */
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-}
-    /* ─── Bottom Nav Base & Scroll Animation ─── */
-    .bottom-nav { 
-      position: fixed; bottom: 0; left: 0; right: 0; height: 68px; 
-      background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); 
-      border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch; 
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 100; 
-      padding-bottom: env(safe-area-inset-bottom);
-      
-      /* CRITICAL: Smooth slide animation */
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      will-change: transform;
-    }
-
-    /* Slides the bar off the bottom of the screen */
-    .bottom-nav-hidden {
-      transform: translateY(100%);
-    }
-
-    /* ─── Premium Icon Tap Bounce Animation ─── */
-    .nav-item svg, .nav-food-circle {
-      /* The springy bounce when you release your finger */
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      will-change: transform;
-    }
-
-    /* The quick 'squish' when you press down */
-    .nav-item:active svg {
-      transform: scale(0.75);
-      transition: transform 0.1s ease-out;
-    }
-    
-    .nav-item:active .nav-food-circle {
-      transform: scale(0.85);
-      transition: transform 0.1s ease-out;
-    }
-    
-        /* ── BULLETPROOF CLS FIX 1: 99 Store ── */
-    .slider-img { 
-      width: 100%; 
-      padding-top: 100%; /* Locks a perfect 1:1 square instantly */
-      position: relative; 
-      background: #f3f4f6; 
-      border-radius: 16px 16px 0 0; 
-      overflow: hidden; 
-    }
-    .slider-img img { 
-      position: absolute; /* Detaches image from layout flow */
-      top: 0; 
-      left: 0;
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-    }
-
-    /* ── BULLETPROOF CLS FIX 2: Main Restaurants ── */
-    .main-res-cover { 
-      width: 100%; 
-      padding-top: 50%; /* Locks a perfect 2:1 wide rectangle instantly */
-      border-radius: 20px; 
-      overflow: hidden; 
-      background: #f3f4f6; 
-      position: relative; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06); 
-    }
-    .main-res-cover img { 
-      position: absolute; /* Detaches image from layout flow */
-      top: 0; 
-      left: 0;
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-    }
-    
-    /* ── STEP 1: EATCLUB PROMO BANNERS ── */
-    .promo-section { padding: 16px 0; background: #fff; }
-    .promo-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px 8px 16px; scrollbar-width: none; }
-    .promo-scroll::-webkit-scrollbar { display: none; }
-    .promo-card {
-      width: 116px; flex-shrink: 0; border-radius: 18px;
-      background: #fff; border: 1px solid rgba(15,23,42,0.05);
-      position: relative; display: flex; flex-direction: column; align-items: center;
-      padding: 14px 10px 12px; text-decoration: none; overflow: hidden;
-    }
-    /* One shared card shell — the accent color now lives only on this small
-       icon badge, not the whole card face, so the row reads as one family
-       instead of five unrelated colors. */
-    .pc-icon-wrap { width: 68px; height: 68px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; overflow: hidden; flex-shrink: 0; }
-    .pc-icon-wrap img { width: 72%; height: 72%; object-fit: contain; transition: transform 0.2s; }
-    .promo-card:active .pc-icon-wrap img { transform: scale(1.08); }
-    .pc-title { font-size: 13px; font-weight: 900; line-height: 1.15; text-align: center; z-index: 2; color: #13151B; }
-    .pc-sub { font-size: 9.5px; font-weight: 800; opacity: 1; margin-bottom: 2px; z-index: 2; letter-spacing: 0.5px; text-transform: uppercase; color: #94A3B8; }
-
-    /* ── STEP 3: ZOMATO SMART FILTERS ── */
-     .filter-scroll { 
-      display: flex; gap: 8px; overflow-x: auto; 
-      padding: 20px 16px 16px 16px !important; 
-      scrollbar-width: none; background: #fff; margin-top: 0 !important; 
-    }
-    .filter-scroll::-webkit-scrollbar { display: none; }
-    /* PREMIUM SMART FILTERS */
-    .filter-pill { 
-      display: flex; align-items: center; gap: 6px; padding: 6px 12px; 
-      background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; 
-      font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-    }
-    .filter-pill:active { transform: scale(0.92); }
-    
-    /* Native Soft Active State */
-    .filter-pill.active { 
-      background: rgba(252, 128, 25, 0.08); /* Soft orange tint */
-      color: #FC8019; 
-      border-color: #FC8019; 
-      box-shadow: none; 
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       CORRECTED PRODUCTION POLISH & GPU PERFORMANCE 
-    ══════════════════════════════════════════════════════════ */
-
-    /* 1️⃣ SMOOTH SCROLLING (No background hacks) */
-    html {
-      scroll-behavior: smooth;
-    }
-
-    /* 2️⃣ GPU ACCELERATION & RENDER PIPELINE */
-    .cat-scroll, .promo-scroll, .s99-scroll, .filter-scroll {
-      -webkit-overflow-scrolling: touch; 
-      contain: layout paint; 
-    }
-    .z-card, .s99-card, .promo-card, .cat-item, .bottom-nav {
-      will-change: transform; 
-      transform: translateZ(0); 
-    }
-    img {
-      content-visibility: auto; 
-    }
-
-    /* 3️⃣ LAYERED DEPTH SYSTEM (CARDS & BUTTONS ONLY) */
-    
-    /* Level 2: Medium Elevation (Cards) — .z-card carries its own elevation
-       now that the restaurant card is a bordered container, so it's excluded
-       here to avoid a doubled-up shadow on .z-img-wrap. */
-    .s99-card, .promo-card {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 10px 24px rgba(0,0,0,0.04) !important;
-    }
-
-    /* Level 1: Light Elevation (Chips, Badges & Circular Buttons) */
-    .filter-pill, .s99-add-circle, .btn-profile, .z-rating {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
-    }
-    
-        /* Perfectly tucked button */
-    .s99-add-circle {
-      position: absolute; bottom: 6px; right: 6px; width: 28px; height: 28px;
-      background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-      color: #1BA672; font-size: 20px; font-weight: 600; line-height: 1;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 2; border: none; padding: 0; cursor: pointer;
-    }
-
-    /* 4️⃣ MICRO-ANIMATIONS & TOUCH PHYSICS */
-    
-    /* Physics for Cards */
-    .z-card, .s99-card, .promo-card, .cat-item {
-      transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                  box-shadow 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-    }
-    
-    /* Active Press State: Sinks into the page */
-    .z-card:active, .s99-card:active, .promo-card:active, .cat-item:active {
-      transform: scale(0.96) translateZ(0) !important;
-    }
-    
-    /* Active Shadow State */
-    .s99-card:active, .promo-card:active {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.06) !important;
-    }
-
-    /* Physics for Buttons */
-    .filter-pill, .s99-add-circle, .btn-profile, .z-bookmark {
-      transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-    }
-    .filter-pill:active, .s99-add-circle:active, .btn-profile:active, .z-bookmark:active {
-      transform: scale(0.92) translateZ(0) !important;
-    }
-    
-        /* UNIFIED PREMIUM HEADERS */
-    .sec-title, .promo-title, .z-rest-title { 
-      font-size: 13px !important; 
-      font-weight: 800 !important; 
-      color: #7A808D !important; 
-      letter-spacing: 1.2px !important; 
-      text-transform: uppercase !important; 
-      white-space: nowrap; 
-    }
-    
-    /* Give Promo Section the same line divider as Zomato */
-    .promo-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
-    .promo-line { flex: 1; height: 1px; background: #E2E8F0; margin-left: 12px; }
-    
-        /* ── MASTER POLISH OVERRIDE ── */
-    /* Fix the typo causing layout issues */
-    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start !important; margin-bottom: 2px; }
-    
-    /* Unified Premium Headers */
-    .sec-title, .promo-title, .z-rest-title { 
-      font-size: 13px !important; font-weight: 800 !important; color: #7A808D !important; 
-      letter-spacing: 1.2px !important; text-transform: uppercase !important; white-space: nowrap; 
-    }
-    .promo-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
-    .promo-line { flex: 1; height: 1px; background: #E2E8F0; margin-left: 12px; }
-
-    /* Soft Premium Smart Filters */
-    .filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px 16px 16px !important; scrollbar-width: none; background: #fff; margin-top: 0 !important; }
-    .filter-pill { display: flex; align-items: center; gap: 6px; padding: 6px 12px !important; background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-    .filter-pill:active { transform: scale(0.92); }
-    .filter-pill.active { background: rgba(252, 128, 25, 0.08) !important; color: #FC8019 !important; border-color: #FC8019 !important; box-shadow: none !important; }
-    
-        /* ════════ PREMIUM 99 STORE CSS ════════ */
-   .s99-wrap { 
-      padding: 10px 0 15px 0 !important; /* 16px adds more white space BELOW the cards */
-      background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); 
-      border-bottom: 12px solid #F1F5F9 !important; /* Thicker premium grey divider */
-    }
-    .s99-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 16px; margin-bottom: 16px; }
-    .s99-header-text { display: flex; flex-direction: column; gap: 2px; }
-    /* GRADIENT INK LOGO */
-    .s99-logo-text { 
-      font-size: 32px; font-weight: 900; letter-spacing: -1.5px; line-height: 1;
-      background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .s99-logo-text span { 
-      font-size: 24px; letter-spacing: -0.5px; 
-      background: linear-gradient(135deg, #FF6A00 0%, #EE0979 100%); /* Swiggy InstaMart style pop */
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .s99-sub-text { font-size: 13px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
-    .s99-see-all { font-size: 14px; font-weight: 800; color: #2563EB; text-decoration: none; margin-top: 8px; }
-
-    .s99-scroll { 
-      display: flex; gap: 12px; overflow-x: auto; 
-      padding: 0 16px 4px 16px !important; 
-      scrollbar-width: none; 
-    }
-    .s99-scroll::-webkit-scrollbar { display: none; }
-    
-    .s99-card { width: 132px; flex-shrink: 0; display: flex; flex-direction: column; background: #fff; padding: 10px; border-radius: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); text-decoration: none; -webkit-tap-highlight-color: transparent; }
-    .s99-img-wrap { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 10px; background: #F1F5F9; }
-    .s99-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    
-    /* Glowing Green + Button Tucked Inside Image */
-    .s99-add-circle { position: absolute; bottom: 6px; right: 6px; width: 28px; height: 28px; background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #1BA672; font-size: 20px; font-weight: 600; line-height: 1; box-shadow: 0 4px 12px rgba(27, 166, 114, 0.25); border: none; padding: 0; cursor: pointer; z-index: 5; }
-    
-    .s99-title-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; }
-    .s99-veg-icon { width: 12px; height: 12px; border-radius: 3px; border: 1px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-    .s99-veg-icon .dot { width: 6px; height: 6px; border-radius: 50%; }
-    .s99-veg-icon.veg { border-color: #1BA672; } .s99-veg-icon.veg .dot { background: #1BA672; }
-    .s99-veg-icon.nonveg { border-color: #E23744; } .s99-veg-icon.nonveg .dot { background: #E23744; }
-    
-    .s99-name { font-size: 13.5px; font-weight: 800; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .s99-price-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-    .s99-old-price { font-size: 12px; color: #94A3B8; text-decoration: line-through; font-weight: 600; }
-    .s99-new-price { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 2px 5px; border-radius: 5px; }
-    .s99-rating-row { font-size: 11px; font-weight: 800; color: #1BA672; display: flex; align-items: center; gap: 3px; margin-bottom: 2px; }
-    .s99-rest-name { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @keyframes cardFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
-
-<header id="hero" class="hero-header">
-  <div class="loc-row">
-    <div class="loc-left tap">
-      <div class="loc-name-row">
-        <i class="fa-solid fa-location-arrow loc-arrow" style="transform: rotate(-45deg)"></i>
-        <span class="loc-name">Maynaguri..</span>
-        <i class="fa-solid fa-chevron-down loc-chevron"></i>
-      </div>
-      <p class="loc-sub">Delivery Across Maynaguri Under 15 Km</p>
-    </div>
-    <div class="loc-right">
-      <button class="btn-buyone tap" onclick="window.location.href='under99.html'">
-        <div style="display:flex;flex-direction:column;align-items:center">
-          <span class="buyone-top">Buy</span>
-          <span class="buyone-bot">one</span>
-        </div>
-      </button>
-      <a href="profile.html" class="btn-profile tap">
-        <i class="fa-solid fa-user"></i>
-      </a>
-    </div>
-  </div>
-
-  <div class="search-row">
-    <div class="search-box tap" onclick="window.location.href='search.html'">
-      <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <span id="search-placeholder" class="search-text">Search for 'Biryani'</span>
-      <div class="search-divider"></div>
-      <i class="fa-solid fa-microphone search-mic"></i>
-    </div>
-    <div class="veg-box tap" onclick="toggleVegFilter()" id="veg-toggle-btn">
-      <span class="veg-label-txt">VEG</span>
-      <div class="veg-track" id="veg-track">
-        <div class="veg-thumb" id="veg-thumb">
-          <div class="veg-inner"><div class="veg-inner-dot"></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="banner-wrap">
-    <div class="pb-particle pb-p1">🍔</div>
-    <div class="pb-particle pb-p2">🍕</div>
-    <div class="pb-particle pb-p3">🥟</div>
-    <div class="pb-particle pb-p4">🍟</div>
-
-    <h2 class="pb-headline">Discover Amazing Food</h2>
-
-    <div class="pb-dynamic-row">
-      <span class="pb-static-text">Craving</span>
-      <div class="pb-scroller">
-        <span>Hot Biryani?</span>
-        <span>Fresh Pizza?</span>
-        <span>Crispy Momos?</span>
-        <span>Juicy Burgers?</span>
-        <span>Street Food?</span>
-        <span>Sweet Desserts?</span>
-        <span>Hot Biryani?</span>
-      </div>
-    </div>
-
-    <div class="pb-footer-line">
+<header class="hero-header" id="hero">
+<div class="loc-row">
+<div class="loc-left tap">
+<div class="loc-name-row">
+<i class="fa-solid fa-location-arrow loc-arrow" style="transform: rotate(-45deg)"></i>
+<span class="loc-name">Maynaguri..</span>
+<i class="fa-solid fa-chevron-down loc-chevron"></i>
+</div>
+<p class="loc-sub">Delivery Across Maynaguri Under 15 Km</p>
+</div>
+<div class="loc-right">
+<button class="btn-buyone tap" onclick="window.location.href='under99.html'">
+<div style="display:flex;flex-direction:column;align-items:center">
+<span class="buyone-top">Buy</span>
+<span class="buyone-bot">one</span>
+</div>
+</button>
+<a class="btn-profile tap" href="profile.html">
+<i class="fa-solid fa-user"></i>
+</a>
+</div>
+</div>
+<div class="search-row">
+<div class="search-box tap" onclick="window.location.href='search.html'">
+<i class="fa-solid fa-magnifying-glass search-icon"></i>
+<span class="search-text" id="search-placeholder">Search for 'Biryani'</span>
+<div class="search-divider"></div>
+<i class="fa-solid fa-microphone search-mic"></i>
+</div>
+<div class="veg-box tap" id="veg-toggle-btn" onclick="toggleVegFilter()">
+<span class="veg-label-txt">VEG</span>
+<div class="veg-track" id="veg-track">
+<div class="veg-thumb" id="veg-thumb">
+<div class="veg-inner"><div class="veg-inner-dot"></div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="banner-wrap">
+<div class="pb-particle pb-p1">🍔</div>
+<div class="pb-particle pb-p2">🍕</div>
+<div class="pb-particle pb-p3">🥟</div>
+<div class="pb-particle pb-p4">🍟</div>
+<h2 class="pb-headline">Discover Amazing Food</h2>
+<div class="pb-dynamic-row">
+<span class="pb-static-text">Craving</span>
+<div class="pb-scroller">
+<span>Hot Biryani?</span>
+<span>Fresh Pizza?</span>
+<span>Crispy Momos?</span>
+<span>Juicy Burgers?</span>
+<span>Street Food?</span>
+<span>Sweet Desserts?</span>
+<span>Hot Biryani?</span>
+</div>
+</div>
+<div class="pb-footer-line">
       Biryani • Pizza • Burgers • Momos • Rolls
     </div>
-  </div>
+</div>
 </header>
-
 <div class="section-card">
-  <div class="sec-head">
-    <span class="sec-title">What's on your mind?</span>
-  </div>
-  
-  <div class="cat-scroll no-scrollbar" id="cat-scroll">
-    <!-- Skeleton shown immediately on page load; loadCategories() below replaces
-         this innerHTML with real categories the moment /api/categories resolves. -->
-    <div class="cs-item"><div class="sk cs-ring"></div><div class="sk cs-name"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d4"></div><div class="sk cs-name d4"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>
-    <div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>
-  </div>
+<div class="sec-head">
+<span class="sec-title">What's on your mind?</span>
 </div>
-
-<div class="promo-section">
-  <div class="promo-header">
-    <span class="promo-title">More on EatSwada</span>
-    <div class="promo-line"></div>
-  </div>
-  <div class="promo-scroll">
-    <a href="under99.html" class="promo-card tap">
-      <div class="pc-icon-wrap" style="background: #E0F2FE;">
-        <img src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=200&q=80" alt="99" loading="lazy" onload="this.classList.add('loaded')">
-      </div>
-      <span class="pc-sub">Daily</span>
-      <span class="pc-title">99 Meals</span>
-    </a>
-    <a href="#" class="promo-card tap">
-      <div class="pc-icon-wrap" style="background: #FFEDD5;">
-        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=80" alt="Offers" loading="lazy" onload="this.classList.add('loaded')">
-      </div>
-      <span class="pc-sub">Value</span>
-      <span class="pc-title">Offers</span>
-    </a>
-    <a href="#" class="promo-card tap">
-      <div class="pc-icon-wrap" style="background: #DCFCE7;">
-        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&q=80" alt="Healthy" loading="lazy" onload="this.classList.add('loaded')">
-      </div>
-      <span class="pc-sub">Healthy</span>
-      <span class="pc-title">Guilt Free</span>
-    </a>
-    <a href="#" class="promo-card tap">
-      <div class="pc-icon-wrap" style="background: #F3E8FF;">
-        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&q=80" alt="Pizza" loading="lazy" onload="this.classList.add('loaded')">
-      </div>
-      <span class="pc-sub">Trending</span>
-      <span class="pc-title">Top Rated</span>
-    </a>
-    <a href="#" class="promo-card tap">
-      <div class="pc-icon-wrap" style="background: #FCE7F3;">
-        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&q=80" alt="Dessert" loading="lazy" onload="this.classList.add('loaded')">
-      </div>
-      <span class="pc-sub">Sweet</span>
-      <span class="pc-title">Desserts</span>
-    </a>
-  </div>
+<div class="cat-scroll no-scrollbar" id="cat-scroll">
+<div class="cs-item"><div class="sk cs-ring"></div><div class="sk cs-name"></div></div>
+<div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>
+<div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>
+<div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>
+<div class="cs-item"><div class="sk cs-ring d4"></div><div class="sk cs-name d4"></div></div>
+<div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>
+<div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>
+<div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>
 </div>
-
-  <div class="filter-scroll">
-    <div class="filter-pill tap"><i class="fa-solid fa-sliders"></i> Filter</div>
-    <div class="filter-pill tap">Sort by <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i></div>
-    <div class="filter-pill tap">⚡ Near & Fast</div>
-    <div id="filter-rating" class="filter-pill tap" onclick="toggleSmartFilter('rating', this)">⭐ Rating 4.0+</div>
-    <div id="filter-veg" class="filter-pill tap" onclick="toggleSmartFilter('veg', this)">Pure Veg</div>
-  </div>
-
-
+</div>
+<div class="filter-scroll">
+<div class="filter-pill tap"><i class="fa-solid fa-sliders"></i> Filters <i class="fa-solid fa-caret-down" style="margin-left: 4px; font-size: 10px;"></i></div>
+<div class="filter-pill tap"><i class="fa-solid fa-bolt" style="color: #22c55e;"></i> Near &amp; Fast</div>
+<div class="filter-pill tap">Under ₹100</div>
+<div class="filter-pill tap">Great offers</div>
+<div class="filter-pill tap" id="filter-rating" onclick="toggleSmartFilter('rating', this)">Rating 4.0+</div>
+<div class="filter-pill tap" id="filter-veg" onclick="toggleSmartFilter('veg', this)">Pure Veg</div>
+</div>
 <div class="vrest-section">
-  <div class="z-rest-header">
-    <span class="z-rest-title">Restaurants to explore</span>
-    <div class="z-rest-line"></div>
-  </div>
-  <div id="restaurant-list">
-    <!-- Skeleton shown immediately; displayRestaurants() below replaces this
-         innerHTML with real cards the moment /api/restaurants resolves. -->
-    <div class="rs-card"><div class="sk rs-img"></div><div class="rs-row"><div class="sk rs-name"></div><div class="sk rs-badge"></div></div><div class="sk rs-cuis"></div><div class="sk rs-meta"></div></div>
-    <div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-row"><div class="sk rs-name d1"></div><div class="sk rs-badge d1"></div></div><div class="sk rs-cuis d1"></div><div class="sk rs-meta d1"></div></div>
-    <div class="rs-card"><div class="sk rs-img d2"></div><div class="rs-row"><div class="sk rs-name d2"></div><div class="sk rs-badge d2"></div></div><div class="sk rs-cuis d2"></div><div class="sk rs-meta d2"></div></div>
-  </div>
+<div class="z-rest-header">
+<span class="z-rest-title">Recommended with deals</span>
+<div class="z-rest-line"></div>
 </div>
-
-
+<div id="restaurant-list">
+<!-- Skeletons -->
+<div class="rs-card"><div class="sk rs-img"></div><div class="rs-row"><div class="sk rs-name"></div><div class="sk rs-badge"></div></div><div class="sk rs-cuis"></div><div class="sk rs-meta"></div></div>
+<div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-row"><div class="sk rs-name d1"></div><div class="sk rs-badge d1"></div></div><div class="sk rs-cuis d1"></div><div class="sk rs-meta d1"></div></div>
+</div>
+</div>
 <nav class="bottom-nav">
-  <a href="index.html" class="nav-item" style="color:#FC8019">
-    <div class="nav-food-circle">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
-    </div>
-    <span style="color:#FC8019">Food</span>
-  </a>
-  <a href="under99.html" class="nav-item" style="color:#94a3b8">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <span style="color:#FC8019">99 store</span>
-    <span class="nav-new-badge">NEW</span>
-  </a>
-  <a href="orders.html" class="nav-item" style="color:#94a3b8">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-    <span>Orders</span>
-  </a>
+<a class="nav-item" href="index.html" style="color:#FC8019">
+<div class="nav-food-circle">
+<svg fill="currentColor" viewbox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"></path></svg>
+</div>
+<span style="color:#FC8019">Delivery</span>
+</a>
+<a class="nav-item" href="#">
+<i class="fa-solid fa-bell-concierge" style="font-size: 20px;"></i>
+<span>Dining</span>
+</a>
+<a class="nav-item" href="under99.html">
+<i class="fa-solid fa-store" style="font-size: 20px;"></i>
+<span>99 Store</span>
+<span class="nav-new-badge">NEW</span>
+</a>
 </nav>
-<script src="cart-bar.js"></script>
 <script>
-  let allRestaurants = []; // Global store for data
+  let allRestaurants = [];
 
   async function loadHomeData() {
     const list = document.getElementById('restaurant-list');
-
     const HOME_CACHE_KEY = 'es_home_restaurants_v2';
     const cachedData = sessionStorage.getItem(HOME_CACHE_KEY);
 
     if (cachedData) {
       allRestaurants = JSON.parse(cachedData);
       displayRestaurants();
-      display99Store(allRestaurants); // <--- ADDED HERE
     } else {
       try {
         const response = await fetch('https://eatswada.onrender.com/api/restaurants');
@@ -1008,9 +459,7 @@ img[loading="lazy"].loaded { opacity: 1; }
         if (response.ok && result.success) {
           allRestaurants = result.data;
           sessionStorage.setItem(HOME_CACHE_KEY, JSON.stringify(allRestaurants));
-          
           displayRestaurants();
-          display99Store(allRestaurants); // <--- ADDED HERE
         } else {
           throw new Error("Failed to load");
         }
@@ -1021,13 +470,7 @@ img[loading="lazy"].loaded { opacity: 1; }
     }
   }
 
-  // Fire the engine immediately
   window.addEventListener('DOMContentLoaded', loadHomeData);
-
-  // ── Dynamic "What's on your mind?" categories ──
-  // No hardcoded fallback — categories come from the database only.
-  // If the fetch fails or returns nothing, we show an explicit empty
-  // state rather than ever displaying made-up data.
 
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({
@@ -1038,12 +481,10 @@ img[loading="lazy"].loaded { opacity: 1; }
   function renderCategories(categories) {
     const container = document.getElementById('cat-scroll');
     if (!container) return;
-
     if (!categories.length) {
       container.innerHTML = `<div class="cat-empty-state">No categories available</div>`;
       return;
     }
-
     container.innerHTML = categories.map((cat, i) => {
       const safeType = escapeHtml(cat.type).replace(/'/g, "\\'");
       return `
@@ -1058,27 +499,16 @@ img[loading="lazy"].loaded { opacity: 1; }
     try {
       const response = await fetch('https://eatswada.onrender.com/api/categories');
       const result = await response.json();
-
-      if (!response.ok || !result.success || !Array.isArray(result.data)) {
-        throw new Error('Categories request failed');
-      }
-
-      const categories = result.data
-        .filter(cat => cat.isActive === true)
-        .sort((a, b) => a.order - b.order)
-        .map(cat => ({ name: cat.name, type: cat.name, image: cat.image }));
-
+      if (!response.ok || !result.success || !Array.isArray(result.data)) throw new Error('Categories request failed');
+      const categories = result.data.filter(cat => cat.isActive === true).sort((a, b) => a.order - b.order).map(cat => ({ name: cat.name, type: cat.name, image: cat.image }));
       renderCategories(categories);
     } catch (error) {
-      console.error('Failed to load categories:', error);
-      renderCategories([]); // empty state — never hardcoded data
+      renderCategories([]); 
     }
   }
-
   window.addEventListener('DOMContentLoaded', loadCategories);
 
-  // ── 2. Dynamic search placeholder ──
-  const phrases = ["Search for 'Biryani'", "Search for 'Pizza'", "Search for 'Momos'", "Search for 'Burger'", "Search for 'Sweets'", "Search for 'EatSwada'"];
+  const phrases = ["Search \"Date night\"", "Search \"Biryani\"", "Search \"Pizza\""];
   let pIdx = 0;
   const placeholder = document.getElementById('search-placeholder');
   setInterval(() => {
@@ -1091,52 +521,32 @@ img[loading="lazy"].loaded { opacity: 1; }
     }, 300);
   }, 2800);
 
-  function goCategory(type) {
-    window.location.href = 'category.html?type=' + encodeURIComponent(type);
-  }
+  function goCategory(type) { window.location.href = 'category.html?type=' + encodeURIComponent(type); }
 
-  // ── 3. VEG filter toggle ──
   let vegOnly = false;
   function toggleVegFilter() {
     vegOnly = !vegOnly;
     const track = document.getElementById('veg-track');
-    if (vegOnly) {
-      track.classList.add('on');
-    } else {
-      track.classList.remove('on');
-    }
+    vegOnly ? track.classList.add('on') : track.classList.remove('on');
     displayRestaurants(vegOnly);
   }
 
-  // Smart Filter Globals
   let isVegMode = false;
   let isRatingMode = false;
-
   window.toggleSmartFilter = function(type, element) {
-    // Toggle active visual class
     element.classList.toggle('active');
-    
-    // Toggle data mode
     if (type === 'veg') isVegMode = !isVegMode;
     if (type === 'rating') isRatingMode = !isRatingMode;
-    
-    // Re-render
     displayRestaurants();
   };
 
-  // ── Restaurant availability → Zomato/Swiggy style status ──
-  // Reads the existing backend fields only (availability.isOpen /
-  // availability.closedReason, falling back to the legacy top-level
-  // isOpen for any older records) — no new fields are introduced.
   function getAvailabilityStatus(res) {
     const avail = res.availability || {};
     const isOpen = typeof avail.isOpen === 'boolean' ? avail.isOpen : res.isOpen;
-    if (isOpen !== false) return null; // open (or unknown) → fully available
-
+    if (isOpen !== false) return null;
     const reason = avail.closedReason || res.closedReason || res.status || '';
     if (reason === 'closed_today') return 'closed_today';
     if (reason === 'temporarily_closed') return 'temporarily_closed';
-    // isOpen is explicitly false but no specific reason was recorded
     return 'unavailable';
   }
 
@@ -1146,38 +556,21 @@ img[loading="lazy"].loaded { opacity: 1; }
     return 'Temporarily Closed';
   }
 
-  // Ids of currently-unavailable restaurants, refreshed on every
-  // displayRestaurants() render — used so the 99-store list (further
-  // down the page) can also disable Add to Cart for those items.
   window.__unavailableRestaurantIds = new Set();
 
   function showAvailabilityToast(label) {
     let toast = document.getElementById('es-availability-toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'es-availability-toast';
-      document.body.appendChild(toast);
-    }
-    toast.textContent = label === 'Closed Today'
-      ? 'This restaurant is closed for today'
-      : label === 'Outside delivery area'
-        ? 'This restaurant does not deliver to your selected address'
-        : 'This restaurant is temporarily unavailable';
-    toast.classList.remove('show');
-    void toast.offsetWidth; // restart animation
-    toast.classList.add('show');
-    clearTimeout(window.__esToastTimer);
-    window.__esToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    if (!toast) { toast = document.createElement('div'); toast.id = 'es-availability-toast'; document.body.appendChild(toast); }
+    toast.textContent = label === 'Closed Today' ? 'This restaurant is closed for today' : label === 'Outside delivery area' ? 'This restaurant does not deliver to your selected address' : 'This restaurant is temporarily unavailable';
+    toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');
+    clearTimeout(window.__esToastTimer); window.__esToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
   }
 
-  // ── 4. Restaurant render (BULLETPROOF LAYOUT) ──
   function getSelectedCustomerCoordinates() {
     try {
       const address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
       const coords = address?.location?.coordinates;
-      if (Array.isArray(coords) && coords.length === 2 && Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]))) {
-        return { lng: Number(coords[0]), lat: Number(coords[1]) };
-      }
+      if (Array.isArray(coords) && coords.length === 2 && Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]))) return { lng: Number(coords[0]), lat: Number(coords[1]) };
     } catch (_) {}
     return null;
   }
@@ -1196,24 +589,16 @@ img[loading="lazy"].loaded { opacity: 1; }
     const list = document.getElementById('restaurant-list');
     if (!list || allRestaurants.length === 0) return;
 
-    // Apply Smart Filters
     let data = [...allRestaurants];
-    
-    if (isVegMode) {
-      data = data.filter(r => r.menu && r.menu.every(i => i.isVeg));
-    }
-    if (isRatingMode) {
-      data = data.filter(r => parseFloat(r.rating || 0) >= 4.0);
-    }
+    if (isVegMode) data = data.filter(r => r.menu && r.menu.every(i => i.isVeg));
+    if (isRatingMode) data = data.filter(r => parseFloat(r.rating || 0) >= 4.0);
 
     if (data.length === 0) {
       list.innerHTML = `<div style="text-align:center; padding:40px 0; color:#64748B; font-weight:600;">No restaurants match your filters.</div>`;
       return;
     }
 
-    // STEP 4: ZOMATO JS TEMPLATE
     window.__unavailableRestaurantIds = new Set();
-
     const customerCoords = getSelectedCustomerCoordinates();
 
     list.innerHTML = data.map((res, i) => {
@@ -1222,31 +607,17 @@ img[loading="lazy"].loaded { opacity: 1; }
       const restaurantCoords = res.location?.coordinates;
       if (customerCoords && Array.isArray(restaurantCoords) && restaurantCoords.length === 2) {
         const lng = Number(restaurantCoords[0]), lat = Number(restaurantCoords[1]);
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-          customerDistanceKm = calculateHaversineKm(customerCoords, { lng, lat });
-        }
+        if (Number.isFinite(lng) && Number.isFinite(lat)) customerDistanceKm = calculateHaversineKm(customerCoords, { lng, lat });
       }
-      const displayDistance = customerDistanceKm != null
-        ? `${customerDistanceKm.toFixed(1)} km`
-        : (res.distance || (res.distanceMeters != null ? `${(Number(res.distanceMeters) / 1000).toFixed(1)} km` : '—'));
+      const displayDistance = customerDistanceKm != null ? `${customerDistanceKm.toFixed(1)} km` : (res.distance || (res.distanceMeters != null ? `${(Number(res.distanceMeters) / 1000).toFixed(1)} km` : '—'));
       let status = getAvailabilityStatus(res);
-      // Admin controls each restaurant's delivery radius. When the selected
-      // customer address is outside that radius, keep the card visible but
-      // prevent ordering instead of silently charging an invalid delivery fee.
       const radiusKm = Number(res.deliveryRadiusKm);
-      if (!status && customerDistanceKm != null && Number.isFinite(radiusKm) && radiusKm > 0 && customerDistanceKm > radiusKm) {
-        status = 'outside_delivery_area';
-      }
+      if (!status && customerDistanceKm != null && Number.isFinite(radiusKm) && radiusKm > 0 && customerDistanceKm > radiusKm) status = 'outside_delivery_area';
       const isUnavailable = !!status;
       if (isUnavailable) window.__unavailableRestaurantIds.add(String(resId));
 
       const label = isUnavailable ? getAvailabilityLabel(status) : '';
-      // Closed restaurants keep their href (so the URL/markup shape is
-      // unchanged) but navigation is blocked via onclick, same as how
-      // Add to Cart gets blocked below for their 99-store items.
-      const guard = isUnavailable
-        ? ` onclick="event.preventDefault(); showAvailabilityToast('${label}');"`
-        : '';
+      const guard = isUnavailable ? ` onclick="event.preventDefault(); showAvailabilityToast('${label}');"` : '';
 
       return `
       <a href="restaurant.html?id=${resId}" class="z-card${isUnavailable ? ' is-unavailable' : ''}"${guard} aria-disabled="${isUnavailable}" style="animation: cardFadeUp 0.3s ease forwards ${i * 0.05}s; opacity: 0; transform: translateY(10px);">
@@ -1261,84 +632,35 @@ img[loading="lazy"].loaded { opacity: 1; }
               ${safeImages.length > 1 ? `<div class="z-gallery-dots">${safeImages.map((_, idx) => `<span class="z-gallery-dot${idx === 0 ? ' active' : ''}"></span>`).join('')}</div>` : ''}
             </div>`;
           })()}
-          ${(() => {
-            // Highlighted-dish pill (top-left) — only renders when the API
-            // actually supplies a featured item, so no dish/price is ever invented.
-            const featured = res.featuredItem || res.topPick || res.highlightDish;
-            if (!featured || !featured.name) return '';
-            const fName = escapeHtml(String(featured.name));
-            const fPrice = featured.price != null ? `₹${Number(featured.price).toLocaleString('en-IN')}` : '';
-            const fOld = (featured.originalPrice != null && featured.originalPrice > featured.price)
-              ? `<span class="dp-old">₹${Number(featured.originalPrice).toLocaleString('en-IN')}</span>` : '';
-            const vegClass = featured.isVeg === false ? 'nonveg' : 'veg';
-            return `<div class="z-dish-pill">
-              <span class="dp-veg ${vegClass}"><span class="dot"></span></span>
-              <span class="dp-name">${fName}${fPrice ? ` · ${fPrice}` : ''}</span>${fOld}
-            </div>`;
-          })()}
-          <div class="z-bookmark"><i class="fa-solid fa-bookmark"></i></div>
-          ${(() => {
-            const isFreeDelivery = res.freeDeliveryEnabled !== false;
-            const bannerText = isFreeDelivery
-              ? `Free delivery${res.freeDeliveryAbove > 0 ? ` above ₹${Number(res.freeDeliveryAbove).toLocaleString('en-IN')}` : ''}`
-              : 'Delivery available';
-            const bannerIcon = isFreeDelivery ? 'fa-solid fa-tag' : 'fa-solid fa-bicycle';
-            return `<div class="z-bottom-banner${isFreeDelivery ? ' z-banner-free' : ''}"><i class="${bannerIcon}"></i>${bannerText}</div>`;
-          })()}
-          ${isUnavailable ? `
-          <div class="z-availability-overlay">
-            <div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ${label}</div>
-          </div>` : ''}
+          <div class="z-img-scrim"></div>
+          <div class="z-delivery-badge">Free delivery with Gold</div>
+          <div class="z-bookmark"><i class="fa-regular fa-bookmark"></i></div>
+          ${isUnavailable ? `<div class="z-availability-overlay"><div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ${label}</div></div>` : ''}
         </div>
-
-        <div class="z-info-wrap">
+        
+        <div class="z-info-area">
           <div class="z-info-row">
             <div class="z-name">${res.name}</div>
-            <div class="z-rating-wrap">
-              <div class="z-rating">${res.rating || '4.2'} <span class="z-star-ring"><i class="fa-solid fa-star"></i></span></div>
-              <div class="z-rating-sub">For you</div>
-            </div>
+            <div class="z-rating">${res.rating || '4.2'} <i class="fa-solid fa-star"></i></div>
           </div>
-
           <div class="z-cuisine">${res.cuisine || res.cuisineDisplay || 'Indian, Fast Food'}</div>
-
-          <div class="z-meta">
-            <i class="fa-regular fa-clock"></i> ${res.estimatedDeliveryMin || 30}-${res.estimatedDeliveryMax || 40} mins
-            <span style="color: #CBD5E1;">|</span>
-            <i class="fa-solid fa-location-dot"></i> ${displayDistance}
-            <span style="color: #CBD5E1;">|</span>
-            ${res.minOrder > 0 ? `₹${Number(res.minOrder).toLocaleString('en-IN')} min order` : (res.cuisineDisplay || 'Order online')}
+          
+          <div class="z-meta-row">
+            <div class="z-meta-item"><i class="fa-solid fa-clock-rotate-left" style="color: #64748B;"></i> ${res.estimatedDeliveryMin || 30}-${res.estimatedDeliveryMax || 45} mins</div>
+            <div class="z-meta-dot"></div>
+            <div>${displayDistance}</div>
           </div>
-
-          ${(() => {
-            // Offer row — only renders when the API supplies real offer copy
-            // (res.offerText/discountLabel/offerDisplay); no discount is invented.
-            const offerText = res.offerText || res.discountLabel || res.offerDisplay;
-            if (!offerText) return '';
-            return `<div class="z-offer-row"><span class="z-offer-badge"><i class="fa-solid fa-percent"></i></span> ${escapeHtml(String(offerText))}</div>`;
-          })()}
         </div>
       </a>
     `;
     }).join('');
 
-    // The restaurant cards are rendered dynamically, so initialize the
-    // automatic gallery only AFTER the new gallery DOM exists. Without this
-    // call the gallery markup renders correctly but never starts its timer or
-    // swipe handlers.
     requestAnimationFrame(() => initRestaurantGalleries());
   }
-  
-  window.addEventListener('nearbite:address-changed', () => {
-    displayRestaurants();
-  });
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'nearbite_address' || e.key === 'nearbite_selected_address_id') displayRestaurants();
-  });
 
-  // ── Production-grade restaurant gallery ─────────────────────────────
-  // Uses the same image box/card dimensions; only the image content becomes
-  // swipeable. Four photos max are rendered exactly as configured by Admin.
+  window.addEventListener('nearbite:address-changed', () => displayRestaurants());
+  window.addEventListener('storage', (e) => { if (e.key === 'nearbite_address' || e.key === 'nearbite_selected_address_id') displayRestaurants(); });
+
   function initRestaurantGalleries() {
     document.querySelectorAll('.z-gallery').forEach(gallery => {
       if (gallery.dataset.initialized === '1') return;
@@ -1348,11 +670,8 @@ img[loading="lazy"].loaded { opacity: 1; }
       if (!track || slides.length <= 1) return;
       gallery.dataset.initialized = '1';
 
-      let index = 0;
-      let startX = 0;
-      let moved = false;
-      let timer = null;
-      const AUTO_DELAY = 5000; // slow, Zomato-style automatic rotation
+      let index = 0, startX = 0, moved = false, timer = null;
+      const AUTO_DELAY = 5000;
 
       const go = (next) => {
         index = (next + slides.length) % slides.length;
@@ -1360,160 +679,27 @@ img[loading="lazy"].loaded { opacity: 1; }
         dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
       };
 
-      const stop = () => {
-        if (timer) {
-          clearInterval(timer);
-          timer = null;
-        }
-      };
+      const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+      const restart = () => { stop(); timer = setInterval(() => go(index + 1), AUTO_DELAY); };
 
-      const restart = () => {
-        stop();
-        timer = setInterval(() => go(index + 1), AUTO_DELAY);
-      };
-
-      // Touch swipe: pause while the customer is interacting, then resume
-      // the automatic rotation after the gesture.
-      gallery.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-        moved = false;
-        stop();
-      }, { passive: true });
-
-      gallery.addEventListener('touchmove', e => {
-        if (Math.abs(e.touches[0].clientX - startX) > 10) moved = true;
-      }, { passive: true });
-
+      gallery.addEventListener('touchstart', e => { startX = e.touches[0].clientX; moved = false; stop(); }, { passive: true });
+      gallery.addEventListener('touchmove', e => { if (Math.abs(e.touches[0].clientX - startX) > 10) moved = true; }, { passive: true });
       gallery.addEventListener('touchend', e => {
-        const endX = e.changedTouches[0].clientX;
-        const delta = endX - startX;
+        const delta = e.changedTouches[0].clientX - startX;
         if (Math.abs(delta) > 35) {
           go(index + (delta < 0 ? 1 : -1));
-          // Prevent the enclosing restaurant link from navigating after a swipe.
-          gallery.dataset.swiped = '1';
-          setTimeout(() => { gallery.dataset.swiped = '0'; }, 450);
+          gallery.dataset.swiped = '1'; setTimeout(() => { gallery.dataset.swiped = '0'; }, 450);
         }
         restart();
       }, { passive: true });
+      gallery.addEventListener('click', e => { if (gallery.dataset.swiped === '1' || moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
 
-      gallery.addEventListener('click', e => {
-        if (gallery.dataset.swiped === '1' || moved) {
-          e.preventDefault();
-          e.stopPropagation();
-          moved = false;
-        }
-      }, true);
-
-      // Pause when the card is off-screen to avoid unnecessary timers.
       if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver(entries => {
-          entries.forEach(entry => entry.isIntersecting ? restart() : stop());
-        }, { threshold: 0.15 });
-        observer.observe(gallery);
-      } else {
-        restart();
-      }
+        new IntersectionObserver(entries => entries.forEach(entry => entry.isIntersecting ? restart() : stop()), { threshold: 0.15 }).observe(gallery);
+      } else { restart(); }
 
-      dots.forEach((dot, i) => dot.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        go(i);
-        restart();
-      }));
+      dots.forEach((dot, i) => dot.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); go(i); restart(); }));
     });
-  }
-
-  // ── AUTOMATIC 99 STORE RENDERER (PERFECTED API FALLBACK) ──
-  async function display99Store(allData) {
-    const list99 = document.getElementById('s99-list');
-    if (!list99) return;
-
-    let items99 = [];
-
-    // 1. Check if the restaurants object already contains the menu items
-    if (allData && Array.isArray(allData)) {
-      allData.forEach(restaurant => {
-        if (restaurant.menu && Array.isArray(restaurant.menu)) {
-          restaurant.menu.forEach(dish => {
-            let price = typeof dish.price === 'number' ? dish.price : parseFloat(String(dish.price).replace(/[^\d.]/g, '')) || 999;
-            if (price <= 99) {
-              items99.push({
-                name: dish.name, price: price, image: dish.image || dish.img, isVeg: dish.isVeg,
-                menuItem: dish._id || dish.id,
-                resId: restaurant._id || restaurant.id, resName: restaurant.name, resRating: restaurant.rating || 4.2
-              });
-            }
-          });
-        }
-      });
-    }
-
-    // 2. CRITICAL FIX: If no menus found, fetch directly from the 99 Store API
-    if (items99.length === 0) {
-      try {
-        const response = await fetch('https://eatswada.onrender.com/api/restaurants/under99');
-        const result = await response.json();
-        const rawData = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
-        
-        items99 = rawData.map(dbItem => {
-          let rId = 'unknown', rName = 'EatSwada Partner', rRating = 4.2;
-          if (dbItem.restaurant && typeof dbItem.restaurant === 'object') {
-            rId = dbItem.restaurant._id || dbItem.restaurant.id;
-            rName = dbItem.restaurant.name;
-            rRating = dbItem.restaurant.rating || 4.2;
-          } else if (dbItem.restaurant) { rId = dbItem.restaurant; }
-          
-          let cleanPrice = typeof dbItem.price === 'number' ? dbItem.price : parseFloat(String(dbItem.price).replace(/[^\d.]/g, '')) || 99;
-          
-          return {
-            name: dbItem.name, price: cleanPrice, image: dbItem.image || dbItem.img, isVeg: Boolean(dbItem.isVeg),
-            menuItem: dbItem._id || dbItem.id,
-            resId: rId, resName: rName, resRating: rRating
-          };
-        }).filter(item => item.price <= 99);
-      } catch(e) { console.error("Failed to load 99 items", e); }
-    }
-
-    // 3. Render the items
-    items99 = items99.slice(0, 8);
-
-    if (items99.length === 0) {
-      list99.innerHTML = `<div style="padding: 20px; color: #64748B; font-size: 13px; text-align: center; width: 100%;">Deals updating soon...</div>`;
-      return;
-    }
-
-    list99.innerHTML = items99.map((item, idx) => {
-      const safeName = item.name ? item.name.replace(/'/g, "\\'").replace(/"/g, '&quot;') : 'Item';
-      const safeId = String(item.resId).replace(/['"]/g, '');
-      // 🔧 FIX: menuItem/image/isVeg were never passed here before, so every cart
-      // entry added from this homepage strip was saved with menuItem: undefined —
-      // which the backend correctly rejects as "Corrupted items detected".
-      const safeMenuItemId = String(item.menuItem || '').replace(/['"]/g, '');
-      const safeImage = String(item.image || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-      const vegArg = item.isVeg ? 'true' : 'false';
-      const oldPrice = Math.floor(item.price * 1.4); 
-      const vegClass = item.isVeg ? 'veg' : 'nonveg';
-      const resUnavailable = window.__unavailableRestaurantIds && window.__unavailableRestaurantIds.has(safeId);
-      const addBtn = resUnavailable
-        ? `<button class="s99-add-circle is-disabled" disabled onclick="event.preventDefault(); showAvailabilityToast('Temporarily Closed');">+</button>`
-        : `<button class="s99-add-circle" onclick="event.preventDefault(); updateCart('${safeName}', 1, ${item.price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg})">+</button>`;
-
-      return `
-        <a href="under99.html" class="s99-card tap" style="animation: cardFadeUp 0.3s ease forwards ${idx * 0.05}s; opacity: 0;">
-          <div class="s99-img-wrap">
-            <img src="${item.image || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'}" alt="${safeName}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'; this.classList.add('loaded');">
-            ${addBtn}
-          </div>
-          <div class="s99-title-row">
-            <div class="s99-veg-icon ${vegClass}"><div class="dot"></div></div>
-            <span class="s99-name">${item.name}</span>
-          </div>
-          <div class="s99-price-row"><span class="s99-old-price">₹${oldPrice}</span><span class="s99-new-price">₹${item.price}</span></div>
-          <div class="s99-rating-row"><i class="fa-solid fa-star"></i> ${item.resRating} <span style="color:#94A3B8; font-weight:600; margin-left:3px;">(10+)</span></div>
-          <div class="s99-rest-name">${item.resName}</div>
-        </a>
-      `;
-    }).join('');
   }
 
   const bottomNav = document.querySelector('.bottom-nav'); 
@@ -1523,58 +709,20 @@ img[loading="lazy"].loaded { opacity: 1; }
   window.addEventListener('scroll', () => {
     let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
     if (Math.abs(lastScrollTop - currentScroll) <= scrollThreshold) return;
-
-    if (currentScroll > lastScrollTop && currentScroll > 180) {
-      if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); 
-    } else {
-      if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); 
-    }
+    if (currentScroll > lastScrollTop && currentScroll > 180) { if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); } 
+    else { if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); }
     lastScrollTop = currentScroll;
   }, { passive: true }); 
-  
-  // ── 6. AUTH STATE ──
-  document.addEventListener('DOMContentLoaded', () => {
-    checkAuthStatus();
-  });
 
+  document.addEventListener('DOMContentLoaded', checkAuthStatus);
   function checkAuthStatus() {
     const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
     const userStr = localStorage.getItem('nearbite_user');
-    
     if (token && userStr) {
       const user = JSON.parse(userStr);
       const profileBtn = document.querySelector('.btn-profile');
-      
-      if(profileBtn && user.name) {
-        profileBtn.innerHTML = `<span style="font-weight:900; font-size:16px; color:#FC8019;">${user.name.charAt(0).toUpperCase()}</span>`;
-      }
+      if(profileBtn && user.name) profileBtn.innerHTML = `<span style="font-weight:900; font-size:16px; color:#FC8019;">${user.name.charAt(0).toUpperCase()}</span>`;
     }
   }
 </script>
-
-<style>
-  @keyframes cardFadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  /* Reverted Hero Header: Natural scrolling, zero lag */
-  .hero-header {
-    position: relative !important;
-    top: auto;
-    z-index: 100 !important;
-    /* Removed all transform transitions so the GPU does no work here */
-  }
-  
-  /* Make sure body padding is reset to normal */
-  body {
-    padding-top: 0 !important;
-  }
-  
-  /* Kept the bottom nav slide class */
-  .bottom-nav-hidden { transform: translateY(100%); }
-</style>
-
-<script src="navigation.js"></script>
-</body>
-</html>
+</body></html>
