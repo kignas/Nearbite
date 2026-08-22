@@ -6,7 +6,6 @@
   <title>– Food Near You</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -14,7 +13,7 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: #fff;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
@@ -58,7 +57,7 @@
 
     /* ── Restaurant card skeleton — mirrors the real .z-card ── */
     .rs-card  { margin:0 16px 32px 16px; }
-    .rs-img   { height:200px; border-radius:16px; }
+    .rs-img   { height:220px; border-radius:16px; }
     .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:12px 0 8px; }
     .rs-name  { height:20px; width:52%; border-radius:8px; }
     .rs-badge { height:26px; width:56px; border-radius:6px; }
@@ -253,7 +252,7 @@
     .explore-line { flex-grow: 1; height: 1px; background: #E2E8F0; }
 
     .z-card { display: block; margin: 0 16px 32px 16px; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-    .z-img-wrap { width: 100%; height: 200px; border-radius: 16px; overflow: hidden; position: relative; background: #F1F5F9; margin-bottom: 12px; }
+    .z-img-wrap { width: 100%; height: 220px; border-radius: 16px; overflow: hidden; position: relative; background: #F1F5F9; margin-bottom: 12px; }
     .z-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
     /* Restaurant gallery: same card dimensions/layout, multiple admin-managed photos. */
     .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
@@ -748,6 +747,36 @@ img[loading="lazy"].loaded { opacity: 1; }
     .s99-new-price { background: #FACC15; color: #000; font-size: 11px; font-weight: 900; padding: 2px 5px; border-radius: 5px; }
     .s99-rating-row { font-size: 11px; font-weight: 800; color: #1BA672; display: flex; align-items: center; gap: 3px; margin-bottom: 2px; }
     .s99-rest-name { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ─── FINAL RESTAURANT LIST TYPOGRAPHY POLISH ─── */
+    .z-name,
+    .z-cuisine,
+    .z-meta,
+    .z-rating,
+    .z-rest-title {
+      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .z-name {
+      font-weight: 700;
+      letter-spacing: -0.25px;
+    }
+
+    .z-cuisine {
+      font-weight: 400;
+      letter-spacing: -0.1px;
+    }
+
+    .z-meta,
+    .z-rating {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .z-meta {
+      font-weight: 500;
+      letter-spacing: -0.05px;
+    }
   </style>
 </head>
 <body>
@@ -1190,7 +1219,6 @@ img[loading="lazy"].loaded { opacity: 1; }
           })()}
           <div class="z-img-scrim"></div>
           <div class="z-delivery-badge">${res.freeDeliveryEnabled === false ? 'Delivery available' : `FREE delivery${res.freeDeliveryAbove > 0 ? ` above ₹${Number(res.freeDeliveryAbove).toLocaleString('en-IN')}` : ''}`}</div>
-          <div class="z-bookmark"><i class="fa-regular fa-bookmark"></i></div>
           ${isUnavailable ? `
           <div class="z-availability-overlay">
             <div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ${label}</div>
