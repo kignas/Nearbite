@@ -7,9 +7,10 @@
   <title>Menu – EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
 
   <style>
     /* ============================================================
@@ -36,7 +37,7 @@
 
     body {
       background: var(--bg);
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: var(--font-sans), sans-serif;
       padding-bottom: 140px;
       -webkit-font-smoothing: antialiased;
     }
@@ -260,6 +261,7 @@
     }
 
 </style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -602,40 +604,39 @@
           else if (!inStock) overlayText = 'Out of Stock';
 
           return `
-            <div class="menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" style="display:flex; justify-content:space-between; padding:28px 0; border-bottom:1px dashed #e2e8f0; animation: fadeSlideUp 0.4s ease forwards ${delay}s; gap:16px;">
-              
-              <div style="flex:1; display:flex; flex-direction:column;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+            <div class="menu-item nb-menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" style="animation-delay:${delay}s;">
+
+              <div class="nb-item-main">
+                <div class="nb-item-tag-row">
                   ${vegIcon}
                   ${tagHTML}
                 </div>
-                <h3 style="font-size:17px; font-weight:800; color:#1e293b; line-height:1.3; margin-bottom:4px;">${item.name}</h3>
-                
-                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                  <span style="font-size:15px; font-weight:800; color:#0f172a;">₹${cleanPrice}</span>
-                  ${originalPrice ? `<span style="font-size:12px; font-weight:600; color:#94a3b8; text-decoration:line-through;">₹${originalPrice}</span><span style="font-size:10px; font-weight:800; color:#16a34a;">${discountPercent}% OFF</span>` : ''}
+                <h3 class="nb-item-title">${item.name}</h3>
+
+                <div class="nb-item-price-row">
+                  <span class="nb-item-current-price">₹${cleanPrice}</span>
+                  ${originalPrice ? `<span class="nb-item-original-price">₹${originalPrice}</span><span class="nb-item-discount">${discountPercent}% OFF</span>` : ''}
                 </div>
-                
-                <p style="font-size:13px; font-weight:500; color:#64748b; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}</p>
+
+                <p class="nb-item-desc">${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}</p>
               </div>
 
-              <div style="position:relative; width:140px; flex-shrink:0; display:flex; flex-direction:column; align-items:center;">
-                
-                <div style="width:100%; aspect-ratio:1; border-radius:16px; overflow:hidden; background:#f1f5f9; border:1px solid rgba(0,0,0,0.04); position:relative;">
+              <div class="nb-item-media">
+                <div class="nb-item-image-wrap">
                   ${imageSrc 
-                    ? `<img src="${imageSrc}" alt="${item.name}" loading="lazy" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; ${imageFilter}" onerror="this.style.display='none'">` 
-                    : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e1;"><i class="fa-solid fa-utensils" style="font-size:24px;"></i></div>`
+                    ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${imageSrc}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">` 
+                    : `<div class="nb-item-image-placeholder"><i class="fa-solid fa-utensils"></i></div>`
                   }
-                  ${overlayText ? `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.5);">
-                    <span style="background:#1e293b; color:#fff; font-size:10px; font-weight:800; letter-spacing:0.03em; padding:5px 10px; border-radius:6px; text-transform:uppercase;">${overlayText}</span>
+                  ${overlayText ? `<div class="nb-item-overlay">
+                    <span>${overlayText}</span>
                   </div>` : ''}
                 </div>
-                
-                <div id="btn-container-${key}" style="position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); z-index:10; width: 100%;">
+
+                <div id="btn-container-${key}" class="nb-item-cta">
                   ${window.makeBtnHTML(item.name, qty, cleanPrice, resId, inStock, item._id, imageSrc, item.isVeg, originalPrice)}
                 </div>
-                
-                ${isCustomisable(item.name) ? `<div style="font-size:10px; font-weight:600; color:#9ca3af; margin-top:24px;">Customisable</div>` : '<div style="margin-top:16px;"></div>'}
+
+                ${isCustomisable(item.name) ? `<div class="nb-item-customisable">Customisable</div>` : '<div class="nb-item-customisable nb-item-customisable-spacer"></div>'}
               </div>
 
             </div>`;

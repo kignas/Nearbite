@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#000000">
   <title>Log in – Nearbite</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
@@ -28,7 +29,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: var(--font-sans), sans-serif;
       background: #000000;
       color: var(--text-1);
       -webkit-tap-highlight-color: transparent;
@@ -61,7 +62,7 @@
     .slide-content.active { opacity: 1; z-index: 2; }
 
     .hero-title {
-      font-family: 'Plus Jakarta Sans', sans-serif; color: #fff;
+      font-family: var(--font-sans), sans-serif; color: #fff;
       font-size: 24px; font-weight: 900; line-height: 1.2;
       text-transform: uppercase; letter-spacing: -0.5px;
       text-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-bottom: 16px;
@@ -126,7 +127,7 @@
     .phone-input {
       border: none; outline: none; background: transparent; width: 100%;
       font-size: 16px; font-weight: 700; color: var(--text-1);
-      font-family: 'Plus Jakarta Sans', sans-serif; caret-color: var(--brand); letter-spacing: 1px;
+      font-family: var(--font-sans), sans-serif; caret-color: var(--brand); letter-spacing: 1px;
     }
     .phone-input::placeholder { color: #cbd5e1; font-weight: 500; letter-spacing: 0; }
 
@@ -225,11 +226,12 @@
 
     .auth-secondary { width:100%; background:#fff; color:var(--text-1); border:1.5px solid var(--border); border-radius:14px; padding:14px 16px; font-size:14px; font-weight:800; margin-top:12px; }
     .auth-link { display:inline-block; border:0; background:none; color:var(--brand); font-size:13px; font-weight:800; padding:10px 0; text-decoration:none; }
-    .auth-field { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:14px 16px; background:#fff; font:600 15px 'Plus Jakarta Sans',sans-serif; outline:none; margin-bottom:10px; }
+    .auth-field { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:14px 16px; background:#fff; font:600 15px var(--font-sans),sans-serif; outline:none; margin-bottom:10px; }
     .auth-field:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(252,128,25,.1); }
     .auth-label { display:block; font-size:12px; font-weight:800; color:var(--text-2); margin:14px 2px 7px; }
     .auth-note { text-align:center; color:var(--text-3); font-size:12px; line-height:1.5; margin-top:14px; }
   </style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 

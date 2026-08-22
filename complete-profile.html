@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#ffffff">
   <title>Complete Your Profile – Nearbite</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="config.js"></script>
   <style>
     :root {
@@ -16,7 +17,7 @@
       --border:#e5e7eb; --input:#f9fafb; --danger:#dc2626; --success:#059669;
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:var(--text);min-height:100dvh}
+    body{font-family:var(--font-sans),sans-serif;background:#fff;color:var(--text);min-height:100dvh}
     .header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;position:sticky;top:0;background:#fff;z-index:5}
     .back{width:40px;height:40px;border:0;border-radius:50%;background:#f3f4f6;font-size:16px}
     .title{font-size:18px;font-weight:800}
@@ -29,13 +30,13 @@
     .section-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:10px}
     .field{margin-bottom:14px}
     label{display:block;font-size:12px;font-weight:800;color:#374151;margin-bottom:7px}
-    input{width:100%;padding:15px;border:1.5px solid transparent;border-radius:14px;background:var(--input);font:600 14px 'Plus Jakarta Sans';outline:0;color:var(--text)}
+    input{width:100%;padding:15px;border:1.5px solid transparent;border-radius:14px;background:var(--input);font:600 14px var(--font-sans);outline:0;color:var(--text)}
     input:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 3px rgba(252,128,25,.1)}
     input[readonly]{background:#f1f5f9;color:#6b7280}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .hint{font-size:11px;color:#9ca3af;margin-top:7px;line-height:1.5}
     .footer{position:fixed;bottom:0;left:0;right:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--border);z-index:10}
-    .primary{display:block;width:100%;max-width:600px;margin:auto;border:0;border-radius:15px;padding:16px;background:var(--brand);color:#fff;font:800 14px 'Plus Jakarta Sans'}
+    .primary{display:block;width:100%;max-width:600px;margin:auto;border:0;border-radius:15px;padding:16px;background:var(--brand);color:#fff;font:800 14px var(--font-sans)}
     .primary:disabled{opacity:.45}
     .error{display:none;background:#fef2f2;color:var(--danger);border:1px solid #fecaca;border-radius:12px;padding:12px;font-size:12px;font-weight:700;margin-bottom:16px}
     .loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:20;align-items:center;justify-content:center;flex-direction:column}
@@ -43,6 +44,7 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     @media(max-width:430px){.row{grid-template-columns:1fr}.hero h1{font-size:23px}}
   </style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="header">

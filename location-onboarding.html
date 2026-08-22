@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>Choose delivery location · Nearbite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 :root{--brand:#fc8019;--ink:#111827;--muted:#6b7280;--line:#e7e8eb;--soft:#f7f7f8}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif;color:var(--ink);overflow:hidden}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:var(--font-sans);color:var(--ink);overflow:hidden}
 #map{position:absolute;inset:0;background:#e9eef2}
 .top{position:absolute;top:14px;left:14px;right:14px;z-index:1000;display:flex;align-items:center;gap:10px}
 .back,.locate{width:44px;height:44px;border:0;border-radius:14px;background:#fff;box-shadow:0 5px 20px #0002;color:#111827;font-size:16px}
@@ -29,6 +33,7 @@
 .actions{display:grid;grid-template-columns:1fr 1.2fr;gap:9px}.btn{height:48px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12px}.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn:disabled{opacity:.45}
 .leaflet-control-attribution{font-size:8px}
 </style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="map"></div>

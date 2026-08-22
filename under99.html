@@ -7,11 +7,12 @@
 <title>₹99 Store – Nearbite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{--orange:#fc8019;--ink:#171a21;--muted:#7c8490;--line:#eceef1;--bg:#f2f4f7;--green:#159a62; --red:#e53935;}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Poppins,sans-serif;padding-bottom:110px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans),sans-serif;padding-bottom:110px}
 
 .store-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
 .header-top{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -30,7 +31,7 @@
 
 .filter-row{display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto; background:#fff;}
 .filter-row::-webkit-scrollbar{display:none}
-.filter-pill{height:36px;padding:0 16px;border:1px solid #e8e8e8;border-radius:999px;background:#fff;color:#555;font:600 12px Poppins;white-space:nowrap; transition:all 0.2s; display:flex; align-items:center; gap:6px;}
+.filter-pill{height:36px;padding:0 16px;border:1px solid #e8e8e8;border-radius:999px;background:#fff;color:#555;font:600 12px var(--font-sans);white-space:nowrap; transition:all 0.2s; display:flex; align-items:center; gap:6px;}
 .filter-pill.active{background:#333;border-color:#333;color:#fff;}
 .filter-pill.orange-active{border-color:#fc8019;color:var(--orange);background:#fff9f5;}
 
@@ -58,7 +59,7 @@ main{padding:16px 14px 20px}
 .price-old{font-size:10px;color:#999;text-decoration:line-through}
 .price{font-size:15px;font-weight:800;color:#222;}
 
-.add-btn{height:32px;min-width:68px;border-radius:8px;border:1px solid #fc8019;background:#fffcf9;color:var(--orange);font:700 12px Poppins;box-shadow:0 2px 8px rgba(252,128,25,.1); cursor:pointer;}
+.add-btn{height:32px;min-width:68px;border-radius:8px;border:1px solid #fc8019;background:#fffcf9;color:var(--orange);font:700 12px var(--font-sans);box-shadow:0 2px 8px rgba(252,128,25,.1); cursor:pointer;}
 .add-btn:active{transform:scale(.96);}
 .restaurant-link{display:flex;align-items:center;gap:4px;margin-top:10px;color:#fc8019;font-size:11px;font-weight:700;text-decoration:none; justify-content:center; background:#fff5eb; padding:6px; border-radius:6px;}
 
@@ -94,6 +95,7 @@ main{padding:16px 14px 20px}
 .nav-item.active{color:var(--orange)}
 .nav-item i{font-size:20px}
 </style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -206,7 +208,7 @@ function render(){
     const id=encodeURIComponent(String(x.resId)), item=encodeURIComponent(x.name);
     return `<article class="card">
       <div class="image-wrap">
-        <img src="${esc(x.img)}" alt="${esc(x.name)}" loading="lazy" style="${x.img.includes('png') ? 'object-fit:contain; background:#fff;' : 'object-fit:cover;'}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x250?text=Food'">
+        <img src="${esc(x.img)}" alt="${esc(x.name)}" loading="lazy" class="food-img ${x.img.includes('png') ? 'food-img-contain' : ''}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x250?text=Food'">
         <span class="veg-dot ${x.isVeg?'veg':'non'}"><i class="fa-solid ${x.isVeg?'fa-circle':'fa-caret-up'}"></i></span>
       </div>
       <div class="card-body">
