@@ -15,7 +15,7 @@
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #fff;
+      background: #F6F6F9;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
       padding-bottom: 80px;
@@ -57,8 +57,8 @@
     .cs-name { width:70%; height:11px; margin-top:8px; border-radius:5px; }
 
     /* ── Restaurant card skeleton — mirrors the real .z-card (bordered, elevated container) ── */
-    .rs-card  { margin:0 16px 20px 16px; background:#fff; border-radius:22px; border:1px solid rgba(15,23,42,0.06); box-shadow:0 14px 32px rgba(15,23,42,0.09), 0 2px 8px rgba(15,23,42,0.05); overflow:hidden; padding-bottom:16px; }
-    .rs-img   { height:190px; border-radius:0; margin-bottom:14px; }
+    .rs-card  { margin:0 16px 16px 16px; background:#fff; border-radius:20px; box-shadow:0 10px 24px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.05); overflow:hidden; padding-bottom:15px; }
+    .rs-img   { height:178px; border-radius:0; margin-bottom:13px; }
     .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 16px 8px 16px; }
     .rs-name  { height:20px; width:52%; border-radius:8px; }
     .rs-badge { height:26px; width:56px; border-radius:999px; }
@@ -245,7 +245,9 @@
     .s99-rest { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
     /* ── STEP 4: ZOMATO RESTAURANT CARDS ── */
-    .vrest-section { background: #fff; padding: 24px 0 8px 0; }
+    /* Transparent so the page's light-gray backdrop shows through and the
+       white restaurant cards read as elevated, floating cards. */
+    .vrest-section { background: transparent; padding: 24px 0 8px 0; }
     .vrest-section .sec-head { padding: 0 16px; margin-bottom: 12px; }
     
     .explore-title-row { display: flex; align-items: center; width: 100%; }
@@ -259,13 +261,12 @@
        badges and info block all live inside one rounded container.
     ═══════════════════════════════════════════ */
     .z-card {
-      display: block; margin: 0 16px 20px 16px; text-decoration: none;
+      display: block; margin: 0 16px 16px 16px; text-decoration: none;
       -webkit-tap-highlight-color: transparent;
-      background: #fff; border-radius: 22px; overflow: hidden;
-      border: 1px solid rgba(15,23,42,0.06);
-      box-shadow: 0 14px 32px rgba(15,23,42,0.09), 0 2px 8px rgba(15,23,42,0.05);
+      background: #fff; border-radius: 20px; overflow: hidden;
+      box-shadow: 0 10px 24px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.05);
     }
-    .z-img-wrap { width: 100%; height: 190px; overflow: hidden; position: relative; background: #F1F5F9; }
+    .z-img-wrap { width: 100%; height: 178px; overflow: hidden; position: relative; background: #F1F5F9; }
     .z-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
     /* Restaurant gallery: same card dimensions/layout, multiple admin-managed photos. */
     .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
@@ -304,15 +305,15 @@
       padding: 9px 14px;
     }
 
-    .z-info-wrap { padding: 14px 16px 16px 16px; }
-    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; gap: 10px; }
-    .z-name { font-size: 21px; font-weight: 800; color: #13151B; letter-spacing: -0.4px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+    .z-info-wrap { padding: 13px 16px 15px 16px; }
+    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; gap: 10px; }
+    .z-name { font-size: 19px; font-weight: 800; color: #13151B; letter-spacing: -0.3px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
 
     .z-rating-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-    .z-rating { background: #2F6B45; color: #fff; font-size: 13.5px; font-weight: 800; padding: 5px 6px 5px 10px; border-radius: 999px; display: flex; align-items: center; gap: 6px; }
-    .z-rating .z-star-ring { width: 17px; height: 17px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
-    .z-rating .z-star-ring i { font-size: 9px; color: #2F6B45; }
-    .z-rating-sub { font-size: 10px; color: #94A3B8; font-weight: 700; margin-top: 4px; letter-spacing: 0.2px; }
+    .z-rating { background: #2F6B45; color: #fff; font-size: 13px; font-weight: 800; padding: 4px 6px 4px 9px; border-radius: 999px; display: flex; align-items: center; gap: 5px; }
+    .z-rating .z-star-ring { width: 15px; height: 15px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
+    .z-rating .z-star-ring i { font-size: 8px; color: #2F6B45; }
+    .z-rating-sub { font-size: 9.5px; color: #94A3B8; font-weight: 700; margin-top: 3px; letter-spacing: 0.2px; }
 
         /* Fixed Zomato Title Alignment */
     .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; }
@@ -322,13 +323,13 @@
     .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; box-sizing: border-box; width: 100%; }
     .z-rest-title { font-size: 13px; font-weight: 800; color: #1C1C1C; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 12px; }
 
-    .z-cuisine { font-size: 14px; color: #64748B; font-weight: 500; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .z-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; font-weight: 600; }
+    .z-cuisine { font-size: 13.5px; color: #64748B; font-weight: 500; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .z-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #475569; font-weight: 600; }
     .z-meta i { color: #1BA672; font-size: 12px; } /* Green lightning bolt */
 
     /* Offer row — only rendered when a restaurant supplies real offer text
        (res.offerText/discountLabel), so no discount is ever invented. */
-    .z-offer-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; font-weight: 700; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #E2E8F0; }
+    .z-offer-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #334155; font-weight: 700; margin-top: 9px; padding-top: 9px; border-top: 1px dashed #E2E8F0; }
     .z-offer-badge { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #3B5BDB, #6C8CFF); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .z-offer-badge i { color: #fff; font-size: 10px; }
 
