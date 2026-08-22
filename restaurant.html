@@ -259,7 +259,17 @@
       animation: slideOutRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
     }
 
-  </style>
+  
+
+    /* ================= VERIFIED REVIEWS ================= */
+    .reviews-section{margin:18px 14px 30px;background:#fff;border:1px solid #eef0f2;border-radius:22px;box-shadow:0 8px 28px rgba(15,23,42,.06);overflow:hidden}
+    .reviews-head{padding:20px 18px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+    .reviews-title{font-size:20px;font-weight:900;color:#111827;margin:0}.reviews-sub{font-size:12px;color:#8a94a6;margin-top:4px}
+    .reviews-score{min-width:74px;padding:10px 12px;border-radius:14px;background:#edf9f2;color:#16804f;text-align:center;font-weight:900}.reviews-score strong{display:block;font-size:20px}.reviews-score span{font-size:10px;font-weight:700}
+    .rating-bars{padding:0 18px 18px}.rating-bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:11px;color:#667085}.rating-bar .bar{height:6px;flex:1;background:#edf0f2;border-radius:999px;overflow:hidden}.rating-bar .fill{height:100%;background:#22a061;border-radius:999px}
+    .review-list{border-top:1px solid #f0f2f4}.review-item{padding:16px 18px;border-bottom:1px solid #f0f2f4}.review-item:last-child{border-bottom:0}.review-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.review-user{font-size:13px;font-weight:800;color:#1f2937}.review-date{font-size:10px;color:#98a2b3}.review-stars{color:#f5a623;font-size:11px;letter-spacing:1px;margin-top:6px}.review-comment{font-size:13px;line-height:1.55;color:#475467;margin:8px 0 0}.verified{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;font-weight:800;color:#188653;background:#edf9f2;padding:4px 7px;border-radius:999px}.reviews-more{display:block;width:calc(100% - 36px);margin:0 18px 18px;padding:11px;border:1px solid #e7e9ec;background:#fff;border-radius:12px;color:#344054;font-weight:800;font-size:12px}
+
+</style>
 </head>
 <body>
 
@@ -430,6 +440,42 @@
     window.scrollTo({ top, behavior: 'smooth' });
   }
 
+  const API_BASE_REVIEWS = 'https://eatswada.onrender.com/api';
+  const escapeReviewHtml = (str) => String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+
+  async function loadRestaurantReviews(resId, page = 1) {
+    const list = document.getElementById('review-list');
+    const more = document.getElementById('reviews-more');
+    try {
+      const response = await fetch(`${API_BASE_REVIEWS}/restaurants/${resId}/reviews?page=${page}&limit=5`);
+      if (!response.ok) throw new Error('Reviews unavailable');
+      const result = await response.json();
+      const s = result.summary || {};
+      document.getElementById('reviews-score').textContent = s.rating ? Number(s.rating).toFixed(1) : 'NEW';
+      document.getElementById('reviews-count').textContent = `${Number(s.reviewCount || 0).toLocaleString('en-IN')} reviews`;
+      const counts = s.breakdown || {};
+      const total = Number(s.reviewCount || 0);
+      document.getElementById('rating-bars').innerHTML = [5,4,3,2,1].map(star => {
+        const count = Number(counts[star] || 0); const pct = total ? Math.round(count/total*100) : 0;
+        return `<div class="rating-bar"><span>${star}★</span><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span>${count}</span></div>`;
+      }).join('');
+      if (!result.data?.length) {
+        list.innerHTML = '<div style="padding:26px 18px;text-align:center;color:#98a2b3;font-size:12px">No customer reviews yet. Be the first after your order.</div>';
+        more.style.display='none'; return;
+      }
+      list.innerHTML = result.data.map(r => {
+        const stars = '★★★★★'.split('').map((_,i)=>`<span style="opacity:${i < r.score ? 1 : .2}">★</span>`).join('');
+        const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+        return `<article class="review-item"><div class="review-top"><span class="review-user">${escapeReviewHtml(r.customer?.name || 'Customer')}</span><span class="review-date">${date}</span></div><div class="review-stars">${stars}</div>${r.comment ? `<p class="review-comment">${escapeHtml(r.comment)}</p>`:''}<span class="verified"><i class="fa-solid fa-circle-check"></i> Verified order</span></article>`;
+      }).join('');
+      more.style.display = result.page < result.pages ? 'block' : 'none';
+      more.onclick = () => loadRestaurantReviews(resId, result.page + 1);
+    } catch(e) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:#98a2b3;font-size:12px">Reviews could not be loaded.</div>';
+    }
+  }
+
   function isCustomisable(name) {
     return CUSTOMISABLE_ITEMS.some(c => name.toLowerCase().includes(c.toLowerCase()));
   }
@@ -494,6 +540,7 @@
       const menuResult = await menuResponse.json();
       
       const restaurant = resResult.data;
+      loadRestaurantReviews(resId);
       const groupedMenu = menuResult.data;
 
       // Track restaurant availability globally for menu item states
@@ -686,6 +733,17 @@
   // Navigation is provided centrally by navigation.js.
   
   </script>
+
+
+  <section class="reviews-section" id="reviews-section">
+    <div class="reviews-head">
+      <div><h2 class="reviews-title">Customer reviews</h2><div class="reviews-sub" id="reviews-sub">Verified reviews from delivered orders</div></div>
+      <div class="reviews-score"><strong id="reviews-score">—</strong><span id="reviews-count">0 reviews</span></div>
+    </div>
+    <div class="rating-bars" id="rating-bars"></div>
+    <div class="review-list" id="review-list"><div style="padding:24px;text-align:center;color:#98a2b3;font-size:12px">Loading reviews…</div></div>
+    <button class="reviews-more" id="reviews-more" style="display:none">View more reviews</button>
+  </section>
 
 <script src="navigation.js"></script>
 </body>

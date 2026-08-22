@@ -1151,15 +1151,33 @@
       }
 
       if (ratingSubmitBtn) {
-        ratingSubmitBtn.addEventListener('click', () => {
-          document.getElementById('rider-rating-stars').style.display = 'none';
-          document.getElementById('food-rating-stars').style.display = 'none';
-          document.querySelectorAll('.rating-block-label').forEach(l => l.style.display = 'none');
-          document.getElementById('review-text').style.display = 'none';
-          document.querySelector('.photo-upload-label').style.display = 'none';
-          previewRow.style.display = 'none';
-          ratingSubmitBtn.style.display = 'none';
-          document.getElementById('rating-thanks').style.display = 'block';
+        ratingSubmitBtn.addEventListener('click', async () => {
+          if (!currentOrder || !selectedFoodRating) return;
+          ratingSubmitBtn.disabled = true;
+          ratingSubmitBtn.textContent = 'Submitting…';
+          try {
+            const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token') || sessionStorage.getItem('nearbite_token') || '';
+            const response = await fetch(`${API_BASE_URL}/orders/${currentOrder._id}/review`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+              body: JSON.stringify({ score: selectedFoodRating, riderScore: selectedRiderRating || null, comment: document.getElementById('review-text').value.trim() })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Could not submit review');
+            document.getElementById('rider-rating-stars').style.display = 'none';
+            document.getElementById('food-rating-stars').style.display = 'none';
+            document.querySelectorAll('.rating-block-label').forEach(l => l.style.display = 'none');
+            document.getElementById('review-text').style.display = 'none';
+            document.querySelector('.photo-upload-label').style.display = 'none';
+            previewRow.style.display = 'none';
+            ratingSubmitBtn.style.display = 'none';
+            document.getElementById('rating-thanks').textContent = 'Thanks! Your verified review is live. 💛';
+            document.getElementById('rating-thanks').style.display = 'block';
+          } catch (err) {
+            ratingSubmitBtn.disabled = false;
+            ratingSubmitBtn.textContent = 'Submit Rating';
+            alert(err.message || 'Could not submit review.');
+          }
         });
       }
     }

@@ -920,7 +920,8 @@ img[loading="lazy"].loaded { opacity: 1; }
   async function loadHomeData() {
     const list = document.getElementById('restaurant-list');
 
-    const cachedData = sessionStorage.getItem('es_home_restaurants');
+    const HOME_CACHE_KEY = 'es_home_restaurants_v2';
+    const cachedData = sessionStorage.getItem(HOME_CACHE_KEY);
 
     if (cachedData) {
       allRestaurants = JSON.parse(cachedData);
@@ -933,7 +934,7 @@ img[loading="lazy"].loaded { opacity: 1; }
         
         if (response.ok && result.success) {
           allRestaurants = result.data;
-          sessionStorage.setItem('es_home_restaurants', JSON.stringify(allRestaurants));
+          sessionStorage.setItem(HOME_CACHE_KEY, JSON.stringify(allRestaurants));
           
           displayRestaurants();
           display99Store(allRestaurants); // <--- ADDED HERE
@@ -942,7 +943,7 @@ img[loading="lazy"].loaded { opacity: 1; }
         }
       } catch (error) {
         console.error(error);
-        list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="sessionStorage.removeItem('es_home_restaurants'); loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
+        list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="sessionStorage.removeItem('es_home_restaurants_v2'); loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
       }
     }
   }
