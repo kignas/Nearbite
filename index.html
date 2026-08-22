@@ -6,6 +6,7 @@
   <title>– Food Near You</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -13,7 +14,7 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     body {
-      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', sans-serif;
       background: #fff;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
@@ -57,7 +58,7 @@
 
     /* ── Restaurant card skeleton — mirrors the real .z-card ── */
     .rs-card  { margin:0 16px 32px 16px; }
-    .rs-img   { height:220px; border-radius:16px; }
+    .rs-img   { height:200px; border-radius:16px; }
     .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:12px 0 8px; }
     .rs-name  { height:20px; width:52%; border-radius:8px; }
     .rs-badge { height:26px; width:56px; border-radius:6px; }
@@ -251,8 +252,26 @@
     .explore-title-row span { font-size: 14px; font-weight: 800; color: #64748B; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; margin-right: 16px; }
     .explore-line { flex-grow: 1; height: 1px; background: #E2E8F0; }
 
-    .z-card { display: block; margin: 0 16px 32px 16px; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-    .z-img-wrap { width: 100%; height: 220px; border-radius: 16px; overflow: hidden; position: relative; background: #F1F5F9; margin-bottom: 12px; }
+    .z-card {
+      display: block;
+      margin: 0 16px 30px 16px;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      color: inherit;
+    }
+
+    /* Premium restaurant media frame — larger, cleaner and closer to modern
+       food-delivery card proportions. Gallery behaviour is unchanged. */
+    .z-img-wrap {
+      width: 100%;
+      height: 230px;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      background: #F1F5F9;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(15,23,42,.05);
+    }
     .z-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
     /* Restaurant gallery: same card dimensions/layout, multiple admin-managed photos. */
     .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
@@ -272,10 +291,67 @@
     .z-img-scrim { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(to top, rgba(0,0,0,0.3), transparent); z-index: 1; }
     
     /* Zomato Blue Free Delivery Badge */
-    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
-    .z-name { font-size: 20px; font-weight: 800; color: #1C1C1C; letter-spacing: -0.3px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
-    .z-rating { background: #24963F; color: #fff; font-size: 13px; font-weight: 800; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .z-rating i { font-size: 10px; }
+    .z-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .z-name {
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #1C1C1C;
+      letter-spacing: -0.45px;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 4px;
+    }
+
+    /* Reference-style premium rating badge: compact, crisp, no heavy shadow. */
+    .z-rating {
+      height: 27px;
+      min-width: 54px;
+      padding: 0 8px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex-shrink: 0;
+      color: #fff;
+      background: #168A3A;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.15px;
+      font-variant-numeric: tabular-nums;
+      box-shadow: none !important;
+      border: 0;
+    }
+
+    .z-rating i {
+      font-size: 11px;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .z-rating span {
+      display: inline-block;
+      line-height: 1;
+    }
+
+    /* Subtle rating tiers, matching the reference's visual hierarchy. */
+    .z-rating--excellent { background: #168A3A; }
+    .z-rating--good { background: #6FAF3A; }
+    .z-rating--average { background: #F2A900; }
+    .z-rating--low { background: #E86F00; }
+    .z-rating--poor { background: #E23744; }
         /* Fixed Zomato Title Alignment */
     .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 20px; }
     .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
@@ -287,6 +363,22 @@
     .z-cuisine { font-size: 14px; color: #64748B; font-weight: 500; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .z-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #64748B; font-weight: 500; }
     .z-meta i { color: #1BA672; font-size: 12px; } /* Green lightning bolt */
+
+    .z-cuisine {
+      font-size: 14px;
+      line-height: 1.35;
+      color: #697077;
+      font-weight: 500;
+      margin-bottom: 7px;
+    }
+
+    .z-meta {
+      font-size: 12.5px;
+      line-height: 1.35;
+      color: #697077;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
 
     /* ═══ Restaurant Availability (closed_today / temporarily_closed / unavailable) ═══
        Card markup and layout are untouched — this only layers a grayscale
@@ -748,34 +840,37 @@ img[loading="lazy"].loaded { opacity: 1; }
     .s99-rating-row { font-size: 11px; font-weight: 800; color: #1BA672; display: flex; align-items: center; gap: 3px; margin-bottom: 2px; }
     .s99-rest-name { font-size: 12px; font-weight: 500; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ─── FINAL RESTAURANT LIST TYPOGRAPHY POLISH ─── */
-    .z-name,
-    .z-cuisine,
-    .z-meta,
-    .z-rating,
-    .z-rest-title {
-      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
-                   "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* ══════════════════════════════════════════════════════════
+       RESTAURANT LIST — REFERENCE POLISH
+       Visual-only refinement. Existing gallery, loading, availability,
+       navigation and restaurant data behaviour are intentionally untouched.
+    ══════════════════════════════════════════════════════════ */
+    .z-card .z-img-wrap {
+      box-shadow: 0 1px 3px rgba(15,23,42,.05), 0 8px 22px rgba(15,23,42,.055) !important;
     }
 
-    .z-name {
-      font-weight: 700;
-      letter-spacing: -0.25px;
+    .z-card .z-info-row {
+      padding: 0 1px;
     }
 
-    .z-cuisine {
-      font-weight: 400;
-      letter-spacing: -0.1px;
+    .z-card .z-name,
+    .z-card .z-cuisine,
+    .z-card .z-meta {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', sans-serif;
     }
 
-    .z-meta,
     .z-rating {
-      font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
     }
 
-    .z-meta {
-      font-weight: 500;
-      letter-spacing: -0.05px;
+    @media (max-width: 360px) {
+      .z-img-wrap { height: 215px; }
+      .z-name { font-size: 19px; }
+    }
+
+    @media (min-width: 600px) {
+      .z-img-wrap { height: 260px; }
     }
   </style>
 </head>
@@ -1174,6 +1269,10 @@ img[loading="lazy"].loaded { opacity: 1; }
 
     list.innerHTML = data.map((res, i) => {
       const resId = res._id || res.id;
+      const numericRating = Number(res.rating);
+      const displayRating = Number.isFinite(numericRating) ? numericRating.toFixed(1) : '4.2';
+      const ratingForTier = Number.isFinite(numericRating) ? numericRating : 4.2;
+      const ratingTier = ratingForTier >= 4 ? 'excellent' : ratingForTier >= 3.5 ? 'good' : ratingForTier >= 3 ? 'average' : ratingForTier >= 2.5 ? 'low' : 'poor';
       let customerDistanceKm = null;
       const restaurantCoords = res.location?.coordinates;
       if (customerCoords && Array.isArray(restaurantCoords) && restaurantCoords.length === 2) {
@@ -1219,6 +1318,7 @@ img[loading="lazy"].loaded { opacity: 1; }
           })()}
           <div class="z-img-scrim"></div>
           <div class="z-delivery-badge">${res.freeDeliveryEnabled === false ? 'Delivery available' : `FREE delivery${res.freeDeliveryAbove > 0 ? ` above ₹${Number(res.freeDeliveryAbove).toLocaleString('en-IN')}` : ''}`}</div>
+          <div class="z-bookmark"><i class="fa-regular fa-bookmark"></i></div>
           ${isUnavailable ? `
           <div class="z-availability-overlay">
             <div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ${label}</div>
@@ -1227,7 +1327,7 @@ img[loading="lazy"].loaded { opacity: 1; }
         
         <div class="z-info-row">
           <div class="z-name">${res.name}</div>
-          <div class="z-rating">${res.rating || '4.2'} <i class="fa-solid fa-star"></i></div>
+          <div class="z-rating z-rating--${ratingTier}" aria-label="Rating ${displayRating} out of 5"><i class="fa-solid fa-star" aria-hidden="true"></i><span>${displayRating}</span></div>
         </div>
         
         <div class="z-cuisine">${res.cuisine || res.cuisineDisplay || 'Indian, Fast Food'}</div>
