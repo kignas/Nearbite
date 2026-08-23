@@ -41,11 +41,11 @@
       --nb-tab-muted: #90959D;
       --nb-tab-border: rgba(255,255,255,.65);
       --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
-      --nb-tab-bar-height: 68px;
-      --nb-tab-bar-bottom-offset: 14px;
-      --nb-tab-side-margin: 18px;
-      --nb-tab-radius: 24px;
-      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 14px + env(safe-area-inset-bottom, 0px));
+      --nb-tab-bar-height: 56px;
+      --nb-tab-bar-bottom-offset: 12px;
+      --nb-tab-side-margin: 16px;
+      --nb-tab-radius: 28px;
+      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
     }
 
     html {
@@ -70,11 +70,11 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
-      padding: 5px 7px;
+      padding: 3px 5px;
       background: linear-gradient(180deg, rgba(255,255,255,.88) 0%, rgba(248,249,251,.78) 100%);
       border: 1px solid rgba(255,255,255,.88);
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 18px 45px rgba(15,23,42,.16), 0 5px 16px rgba(15,23,42,.09), inset 0 1px 0 rgba(255,255,255,.95);
+      box-shadow: 0 10px 28px rgba(15,23,42,.12), 0 2px 8px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.95);
       backdrop-filter: blur(28px) saturate(185%);
       -webkit-backdrop-filter: blur(28px) saturate(185%);
       transform: translate3d(-50%, 0, 0);
@@ -101,8 +101,8 @@
     #nearbite-bottom-tabbar::after {
       content: "";
       position: absolute;
-      left: 18%;
-      right: 18%;
+      left: 24%;
+      right: 24%;
       top: 0;
       height: 1px;
       background: rgba(255,255,255,.95);
@@ -118,7 +118,7 @@
     .nb-tab {
       position: relative;
       min-width: 0;
-      min-height: 56px;
+      min-height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -137,15 +137,15 @@
       gap: 4px;
       width: min(100%, 104px);
       max-width: 104px;
-      min-height: 52px;
-      padding: 5px 9px;
-      border-radius: 18px;
+      min-height: 44px;
+      padding: 3px 8px;
+      border-radius: 22px;
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 19px;
+      font-size: 18px;
       line-height: 1;
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
@@ -153,7 +153,7 @@
 
     .nb-tab-label {
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 650;
       letter-spacing: -.1px;
       line-height: 1.1;
@@ -200,13 +200,13 @@
 
     @media (max-width: 380px) {
       :root {
-        --nb-tab-bar-height: 66px;
+        --nb-tab-bar-height: 54px;
         --nb-tab-side-margin: 14px;
-        --nb-tab-radius: 23px;
+        --nb-tab-radius: 27px;
       }
-      #nearbite-bottom-tabbar { padding: 5px 6px; }
-      .nb-tab { min-height: 54px; }
-      .nb-tab-pill { min-height: 50px; padding-inline: 8px; }
+      #nearbite-bottom-tabbar { padding: 3px 5px; }
+      .nb-tab { min-height: 46px; }
+      .nb-tab-pill { min-height: 42px; padding-inline: 7px; }
       .nb-tab i { font-size: 20px; }
       .nb-tab-label { font-size: 11.5px; }
     }
@@ -214,10 +214,10 @@
     @media (min-width: 600px) {
       #nearbite-bottom-tabbar {
         max-width: 520px;
-        min-height: 70px;
+        min-height: 58px;
       }
-      .nb-tab { min-height: 58px; }
-      .nb-tab-pill { min-height: 54px; max-width: 118px; }
+      .nb-tab { min-height: 48px; }
+      .nb-tab-pill { min-height: 44px; max-width: 118px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -322,7 +322,7 @@
         '--nb-cart-bottom',
         hidden
           ? `calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px))`
-          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 14px + env(safe-area-inset-bottom, 0px))`
+          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px))`
       );
     }
 
