@@ -136,20 +136,77 @@
       pointer-events:none;
     }
 
-    .z-delivery-badge {
+    /* Admin-controlled restaurant badge */
+    .z-best-seller {
       position:absolute;
       left:12px;
-      bottom:12px;
-      background:#1769e0;
-      color:#fff;
-      font-size:12px;
+      top:12px;
+      z-index:3;
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      max-width:calc(100% - 64px);
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.94);
+      color:#222831;
+      border:1px solid rgba(255,255,255,.72);
+      box-shadow:0 4px 12px rgba(15,23,42,.14);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      font-size:11px;
       line-height:1;
-      font-weight:750;
-      padding:8px 10px;
-      border-radius:7px;
-      z-index:2;
-      letter-spacing:-.05px;
-      box-shadow:0 2px 8px rgba(0,0,0,.14);
+      font-weight:800;
+      letter-spacing:.05px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .z-best-seller i {
+      font-size:10px;
+      color:#f59e0b;
+    }
+
+    /* Rating + "For you" is intentionally a small dynamic island */
+    .z-rating-island {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      gap:3px;
+      flex-shrink:0;
+      min-width:58px;
+    }
+
+    .z-rating {
+      min-width:48px;
+      height:28px;
+      padding:0 9px;
+      border-radius:999px;
+      background:#168544;
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      line-height:1;
+      box-shadow:0 3px 9px rgba(21,128,61,.18);
+      white-space:nowrap;
+    }
+
+    .z-rating i {
+      font-size:10px;
+    }
+
+    .z-for-you {
+      font-size:10px;
+      line-height:1;
+      color:#8a93a0;
+      font-weight:650;
+      white-space:nowrap;
     }
 
     .z-bookmark {
@@ -291,7 +348,7 @@
     /* Availability Overlay */
     .z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
     .z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine, .z-card.is-unavailable .z-meta-row { opacity: 0.6; }
-    .z-card.is-unavailable .z-rating, .z-card.is-unavailable .z-delivery-badge { opacity: 0.7; }
+    .z-card.is-unavailable .z-rating-island { opacity: 0.7; }
     .z-availability-overlay { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
     .z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
     .z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }

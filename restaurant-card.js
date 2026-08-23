@@ -215,6 +215,18 @@
       const cuisine = escapeCardHtml(
         res.cuisine || res.cuisineDisplay || 'Indian, Fast Food'
       );
+
+      // Admin-controlled badge. The backend can expose any of these
+      // compatible boolean fields without changing the card API.
+      const isBestSeller = Boolean(
+        res.isBestSeller === true ||
+        res.bestSeller === true ||
+        res.best_seller === true
+      );
+
+      const bestSellerLabel = escapeCardHtml(
+        res.bestSellerLabel || 'Best Seller'
+      );
       const deliveryMin = escapeCardHtml(res.estimatedDeliveryMin || 30);
       const deliveryMax = escapeCardHtml(res.estimatedDeliveryMax || 45);
 
@@ -285,7 +297,14 @@
             '</div>' +
 
             '<div class="z-img-scrim"></div>' +
-            '<div class="z-delivery-badge">Free delivery with Gold</div>' +
+            (
+              isBestSeller
+                ? '<div class="z-best-seller">' +
+                    '<i class="fa-solid fa-crown"></i> ' +
+                    bestSellerLabel +
+                  '</div>'
+                : ''
+            ) +
             '<div class="z-bookmark" aria-hidden="true"><i class="fa-regular fa-bookmark"></i></div>' +
 
             (
@@ -303,8 +322,11 @@
           '<div class="z-info-area">' +
             '<div class="z-info-row">' +
               '<div class="z-name">' + safeName + '</div>' +
-              '<div class="z-rating">' + rating +
-                ' <i class="fa-solid fa-star"></i>' +
+              '<div class="z-rating-island">' +
+                '<div class="z-rating">' + rating +
+                  ' <i class="fa-solid fa-star"></i>' +
+                '</div>' +
+                '<div class="z-for-you">For you</div>' +
               '</div>' +
             '</div>' +
 
