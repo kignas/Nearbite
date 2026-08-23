@@ -218,6 +218,33 @@
       const deliveryMin = escapeCardHtml(res.estimatedDeliveryMin || 30);
       const deliveryMax = escapeCardHtml(res.estimatedDeliveryMax || 45);
 
+      // Optional presentation fields. If the API does not provide them,
+      // the card simply omits these elements.
+      const rawMinOrder =
+        res.minimumOrder ??
+        res.minimumOrderAmount ??
+        res.minOrder ??
+        res.minOrderAmount ??
+        null;
+
+      const minOrderNumber = Number(rawMinOrder);
+      const hasMinOrder =
+        rawMinOrder !== null &&
+        rawMinOrder !== '' &&
+        Number.isFinite(minOrderNumber);
+
+      const offerText =
+        res.offerText ||
+        res.discountText ||
+        res.offer ||
+        res.offerLabel ||
+        '';
+
+      const safeOfferText = escapeCardHtml(offerText);
+      const safeMinOrder = hasMinOrder
+        ? '₹' + minOrderNumber.toLocaleString('en-IN') + ' minimum order'
+        : '';
+
       return (
         '<a href="restaurant.html?id=' + encodeURIComponent(resId) +
         '" class="z-card' + (isUnavailable ? ' is-unavailable' : '') + '"' +
@@ -291,6 +318,23 @@
               '<div class="z-meta-dot"></div>' +
               '<div>' + escapeCardHtml(displayDistance) + '</div>' +
             '</div>' +
+
+            (
+              (safeOfferText || hasMinOrder)
+                ? '<div class="z-extra-row">' +
+                    (safeOfferText
+                      ? '<span class="z-offer-text"><i class="fa-solid fa-tag"></i> ' +
+                        safeOfferText + '</span>'
+                      : '') +
+                    (safeOfferText && hasMinOrder
+                      ? '<span class="z-extra-separator"></span>'
+                      : '') +
+                    (hasMinOrder
+                      ? '<span class="z-min-order">' + safeMinOrder + '</span>'
+                      : '') +
+                  '</div>'
+                : ''
+            ) +
           '</div>' +
         '</a>'
       );

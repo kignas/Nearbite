@@ -11,51 +11,282 @@
     .rs-meta  { height:12px; width:70%; border-radius:5px; }
 
 
-    /* ── STEP 4: ZOMATO RESTAURANT CARDS ── */
-    .vrest-section { background: #F8FAFC; padding: 20px 0 8px 0; }
-    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; box-sizing: border-box; width: 100%; }
-    .z-rest-title { font-size: 13px !important; font-weight: 800 !important; color: #64748B !important; letter-spacing: 1.5px !important; text-transform: uppercase !important; margin-right: 12px; white-space: nowrap; }
-    .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
+    /* ── Nearbite production restaurant cards ──
+       Presentation only. Existing data, navigation, cart, gallery,
+       availability and loading behavior remain untouched. */
 
-    .z-card { display:block; margin:0 16px 20px; background:#fff; border-radius:20px; padding-bottom:14px; text-decoration:none; -webkit-tap-highlight-color:transparent; overflow:hidden; box-shadow:0 4px 18px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.04); border:1px solid rgba(226,232,240,.72); transition:transform .18s cubic-bezier(.25,.46,.45,.94), box-shadow .18s ease; will-change:transform; }
-    .z-card:active { transform:scale(.985) translateZ(0); box-shadow:0 2px 10px rgba(15,23,42,.06); }
-    
-    .z-img-wrap { width:100%; height:232px; position:relative; background:#F1F5F9; overflow:hidden; }
-    
-    /* Restaurant gallery */
-    .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
-    .z-gallery-track { display:flex; width:100%; height:100%; transition:transform .38s cubic-bezier(.25,1,.5,1); will-change:transform; }
-    .z-gallery-slide { min-width:100%; width:100%; height:100%; object-fit:cover; flex:0 0 100%; }
-    
-    /* Clean dots */
-    .z-gallery-dots { position:absolute; left:50%; bottom: 12px; transform:translateX(-50%); display:flex; gap: 6px; z-index:4; }
-    .z-gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all 0.3s ease; }
-    .z-gallery-dot.active { width: 18px; border-radius: 4px; background: #fff; }
-    
-    /* Gradients and Overlays */
-    .z-img-scrim { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 1; pointer-events: none; }
-    
-    /* Zomato Blue Badge */
-    .z-delivery-badge { position: absolute; bottom: 12px; left: 12px; background: #2563EB; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 4px; z-index: 2; letter-spacing: 0.3px; }
-    
-    .z-bookmark { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1E293B; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    
-    /* Card Info Area */
-    .z-info-area { padding:14px 16px 0; }
-    
-    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-    .z-name { font-size:19px; font-weight:750; color:#1F2937; letter-spacing:-.35px; flex:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; line-height: 1.2; }
-    
-    /* Green Rating Badge */
-    .z-rating { background:#168544; color:#fff; font-size:13px; font-weight:750; padding:5px 7px; border-radius:8px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; line-height: 1; box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2); }
-    .z-rating i { font-size: 10px; }
+    .vrest-section {
+      background:#f7f8fa;
+      padding:20px 0 12px;
+    }
 
-    .z-cuisine { font-size:13px; color:#6B7280; font-weight:500; margin-bottom:9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .z-meta-row { display:flex; align-items:center; font-size:13px; color:#475569; font-weight:600; gap:7px; font-variant-numeric:tabular-nums; }
-    .z-meta-item { display: flex; align-items: center; gap: 4px; }
-    .z-meta-item i { color: #2563EB; font-size: 14px; }
-    .z-meta-dot { width: 4px; height: 4px; border-radius: 50%; background: #CBD5E1; margin: 0 2px; }
+    .z-rest-header {
+      display:flex;
+      align-items:center;
+      padding:0 18px;
+      margin-bottom:16px;
+      box-sizing:border-box;
+      width:100%;
+    }
+
+    .z-rest-title {
+      font-size:13px !important;
+      font-weight:800 !important;
+      color:#6b7280 !important;
+      letter-spacing:1.45px !important;
+      text-transform:uppercase !important;
+      margin-right:12px;
+      white-space:nowrap;
+    }
+
+    .z-rest-line {
+      flex:1;
+      height:1px;
+      background:#dfe3e8;
+    }
+
+    /* Nearbite composition:
+       image -> offer/save controls -> name/rating -> cuisine ->
+       compact delivery metadata -> optional offer/min-order row. */
+    .z-card {
+      display:block;
+      margin:0 18px 22px;
+      background:#fff;
+      border-radius:22px;
+      padding:0 0 15px;
+      text-decoration:none;
+      -webkit-tap-highlight-color:transparent;
+      overflow:hidden;
+      border:1px solid rgba(15,23,42,.07);
+      box-shadow:0 5px 20px rgba(15,23,42,.075);
+      transition:transform .18s ease, box-shadow .18s ease;
+      will-change:transform;
+    }
+
+    .z-card:active {
+      transform:scale(.992) translateZ(0);
+      box-shadow:0 3px 13px rgba(15,23,42,.06);
+    }
+
+    .z-img-wrap {
+      width:100%;
+      height:210px;
+      position:relative;
+      background:#eef1f4;
+      overflow:hidden;
+    }
+
+    .z-gallery {
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      touch-action:pan-y;
+      z-index:0;
+    }
+
+    .z-gallery-track {
+      display:flex;
+      width:100%;
+      height:100%;
+      transition:transform .38s cubic-bezier(.25,1,.5,1);
+      will-change:transform;
+    }
+
+    .z-gallery-slide {
+      min-width:100%;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      flex:0 0 100%;
+    }
+
+    .z-gallery-dots {
+      position:absolute;
+      left:50%;
+      bottom:10px;
+      transform:translateX(-50%);
+      display:flex;
+      gap:5px;
+      z-index:4;
+    }
+
+    .z-gallery-dot {
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:rgba(255,255,255,.58);
+      transition:all .25s ease;
+      box-shadow:0 1px 3px rgba(0,0,0,.18);
+    }
+
+    .z-gallery-dot.active {
+      width:16px;
+      border-radius:4px;
+      background:#fff;
+    }
+
+    .z-img-scrim {
+      position:absolute;
+      bottom:0;
+      left:0;
+      right:0;
+      height:72px;
+      background:linear-gradient(to top,rgba(0,0,0,.48),transparent);
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .z-delivery-badge {
+      position:absolute;
+      left:12px;
+      bottom:12px;
+      background:#1769e0;
+      color:#fff;
+      font-size:12px;
+      line-height:1;
+      font-weight:750;
+      padding:8px 10px;
+      border-radius:7px;
+      z-index:2;
+      letter-spacing:-.05px;
+      box-shadow:0 2px 8px rgba(0,0,0,.14);
+    }
+
+    .z-bookmark {
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:2;
+      width:38px;
+      height:38px;
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(15,23,42,.06);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#334155;
+      font-size:17px;
+      box-shadow:0 4px 12px rgba(0,0,0,.12);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+    }
+
+    .z-info-area {
+      padding:13px 16px 0;
+    }
+
+    .z-info-row {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:3px;
+    }
+
+    .z-name {
+      font-size:20px;
+      font-weight:800;
+      color:#20242b;
+      letter-spacing:-.45px;
+      flex:1;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      padding-right:4px;
+      line-height:1.22;
+    }
+
+    .z-rating {
+      background:#168544;
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+      min-width:42px;
+      height:25px;
+      padding:0 7px;
+      border-radius:8px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      flex-shrink:0;
+      line-height:1;
+      box-shadow:0 2px 6px rgba(21,128,61,.18);
+    }
+
+    .z-rating i {
+      font-size:10px;
+    }
+
+    .z-cuisine {
+      font-size:14px;
+      line-height:1.25;
+      color:#687384;
+      font-weight:500;
+      margin-bottom:9px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .z-meta-row {
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      font-size:14px;
+      color:#5f6b7a;
+      font-weight:650;
+      gap:7px;
+      font-variant-numeric:tabular-nums;
+      line-height:1.25;
+    }
+
+    .z-meta-item {
+      display:flex;
+      align-items:center;
+      gap:4px;
+    }
+
+    .z-meta-item i {
+      color:#64748b;
+      font-size:14px;
+    }
+
+    .z-meta-dot {
+      width:4px;
+      height:4px;
+      border-radius:50%;
+      background:#cbd5e1;
+      margin:0 2px;
+    }
+
+    .z-extra-row {
+      display:flex;
+      align-items:center;
+      gap:7px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      font-size:13px;
+      font-weight:700;
+      line-height:1.2;
+    }
+
+    .z-offer-text { color:#168544; }
+    .z-min-order { color:#64748b; }
+
+    .z-extra-separator {
+      width:4px;
+      height:4px;
+      border-radius:50%;
+      background:#cbd5e1;
+    }
+
+    @media (min-width:700px) {
+      .z-card { margin-left:24px; margin-right:24px; }
+      .z-img-wrap { height:250px; }
+    }
 
     /* Availability Overlay */
     .z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
