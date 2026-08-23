@@ -28,6 +28,7 @@
       --nb-tab-shadow:
         0 18px 42px rgba(22,25,31,.14),
         0 4px 12px rgba(22,25,31,.07);
+      --nb-cart-bottom: calc(94px + env(safe-area-inset-bottom, 0px));
     }
 
     html {
@@ -288,14 +289,25 @@
     let lastY = Math.max(0, window.scrollY || window.pageYOffset || 0);
     let ticking = false;
     let hidden = false;
+    const VISIBLE_CART_BOTTOM = '94px';
+    const HIDDEN_CART_BOTTOM = '20px';
     const TOP_REVEAL = 80;
     const HIDE_AFTER = 140;
     const DELTA = 8;
 
     function setHidden(value) {
-      if (hidden === value) return;
-      hidden = value;
+      hidden = !!value;
       bar.classList.toggle('nb-hidden', hidden);
+      // Keep the floating cart docked to the tab bar. When the tab bar
+      // slides away, the cart follows it down instead of staying in the
+      // middle of the screen. This is the shared position used by both UI
+      // components, so their animations stay perfectly synchronized.
+      document.documentElement.style.setProperty(
+        '--nb-cart-bottom',
+        hidden
+          ? `calc(${HIDDEN_CART_BOTTOM} + env(safe-area-inset-bottom, 0px))`
+          : `calc(${VISIBLE_CART_BOTTOM} + env(safe-area-inset-bottom, 0px))`
+      );
     }
 
     function update() {
@@ -312,6 +324,8 @@
 
       lastY = y;
     }
+
+    setHidden(false);
 
     window.addEventListener('scroll', function () {
       if (!ticking) {
