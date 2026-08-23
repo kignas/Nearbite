@@ -155,8 +155,11 @@
 
     #white-cart-root {
       position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: var(--nb-cart-bottom, calc(20px + env(safe-area-inset-bottom, 0px)));
       width: min(250px, calc(100vw - 32px)); max-width: calc(100vw - 32px);
-      z-index: 9999; display: none;
+      z-index: 100000; display: none;
+      transition: bottom .32s cubic-bezier(.22,1,.36,1);
+      will-change: bottom, transform;
     }
     #white-cart-root.wc-enter {
       animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -363,14 +366,6 @@
     }, EXIT_MS);
   }
 
-  function syncBottom() {
-    const root = document.getElementById('white-cart-root');
-    if (!root) return;
-    const nav = document.querySelector('.bottom-nav');
-    const base = (nav && !nav.classList.contains('bottom-nav-hidden')) ? 84 : 20;
-    root.style.bottom = `calc(${base}px + env(safe-area-inset-bottom, 0px))`;
-  }
-
   window.updateGlobalCart = function () {
     if (isDismissed) return;
 
@@ -466,7 +461,6 @@
   function init() {
     injectCSS();
     document.body.appendChild(makeDOM());
-    syncBottom();
 
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button, .counter-btn, [onclick*="updateCart"]');
@@ -542,10 +536,6 @@
       window.location.reload(); 
     });
 
-    const nav = document.querySelector('.bottom-nav');
-    if (nav) new MutationObserver(syncBottom).observe(nav, { attributes: true, attributeFilter: ['class', 'style'] });
-    window.addEventListener('scroll', syncBottom, { passive: true });
-    
     window.updateGlobalCart();
   }
 
