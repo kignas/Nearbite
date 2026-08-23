@@ -282,30 +282,6 @@
     }
     #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-    /* ─── Bottom Nav ─── */
-    .bottom-nav { 
-      position: fixed; bottom: 0; left: 0; right: 0; height: 68px; 
-      background: rgba(255, 255, 255, 0.95) !important;
-      backdrop-filter: blur(24px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-      border-top: 1px solid rgba(0,0,0,0.05) !important; 
-      display: flex; align-items: stretch; 
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.06) !important;
-      z-index: 100; padding-bottom: env(safe-area-bottom); 
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      will-change: transform;
-    }
-    .bottom-nav-hidden { transform: translateY(100%); }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; color: #94a3b8; text-decoration: none; transition: color 0.2s ease; cursor: pointer; position: relative; }
-    .nav-item svg { width: 24px; height: 24px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .nav-item.active { color: #FC8019; }
-    .nav-item.active svg { stroke: #FC8019; }
-    .nav-food-circle { width: 46px; height: 46px; background: #FC8019; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(252,128,25,0.4); margin-bottom: 2px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .nav-food-circle svg { width: 22px; height: 22px; color: #fff; stroke: #fff; }
-    .nav-item:active svg { transform: scale(0.75); transition: transform 0.1s ease-out; }
-    .nav-item:active .nav-food-circle { transform: scale(0.85); transition: transform 0.1s ease-out; }
-    .nav-new-badge { position: absolute; top: 6px; right: 10px; background: #ef4444; color: #fff; font-size: 7px; font-weight: 900; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(239,68,68,0.4); }
-
     /* ── PREMIIUM "WHAT'S ON YOUR MIND" SECTION ── */
     .section-card { padding: 10px 0 0 0; background: #fff; }
     .sec-head { display: flex; align-items: center; margin-bottom: 4px; padding: 0 16px; }
@@ -685,18 +661,6 @@
     });
   }
 
-  const bottomNav = document.querySelector('.bottom-nav'); 
-  let lastScrollTop = 0;
-  const scrollThreshold = 15; 
-
-  window.addEventListener('scroll', () => {
-    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (Math.abs(lastScrollTop - currentScroll) <= scrollThreshold) return;
-    if (currentScroll > lastScrollTop && currentScroll > 180) { if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); } 
-    else { if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); }
-    lastScrollTop = currentScroll;
-  }, { passive: true }); 
-
   document.addEventListener('DOMContentLoaded', checkAuthStatus);
   function checkAuthStatus() {
     const token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
@@ -708,5 +672,6 @@
     }
   }
 </script>
-  <script src="Bottom%20Tab%20Bar.js"></script>
+  <script src="cart-bar.js"></script>
+<script src="Bottom%20Tab%20Bar.js"></script>
 </body></html>
