@@ -1,11 +1,18 @@
 /* ============================================================
-   NEARBITE — PREMIUM 3-WAY BOTTOM TAB BAR
-   Food • 99 Store • Orders
+   NEARBITE — QUICK-COMMERCE STYLE BOTTOM TAB BAR
+   Home • 99 Store • Orders • Cart
    Universal component for every Nearbite page.
 
+   Redesigned to match a flush, edge-to-edge quick-commerce tab
+   bar: a white bar sitting flat on the bottom edge, the active
+   tab marked with a soft grey pill behind its icon + label
+   (icon in brand red, label in bold dark ink), inactive tabs in
+   neutral grey with no background. Reverts to the original
+   floating rounded pill on wider (desktop) screens, since a
+   full-bleed bar only reads correctly at phone widths.
+
    Includes:
-   • Zomato-style pill navigation
-   • Active-tab animation
+   • Grey-pill active-tab highlight (icon red, label dark + bold)
    • Page switch transition
    • Auto hide on downward scroll
    • Auto reveal on upward scroll
@@ -21,14 +28,13 @@
   const CSS = `
     :root {
       --nb-tab-accent: #E23744;
-      --nb-tab-accent-soft: #FFF1F3;
+      --nb-tab-pill-bg: #F0F1F4;
       --nb-tab-ink: #20242B;
-      --nb-tab-muted: #8A9099;
-      --nb-tab-border: rgba(225,228,233,.96);
-      --nb-tab-shadow:
-        0 18px 42px rgba(22,25,31,.14),
-        0 4px 12px rgba(22,25,31,.07);
-      --nb-cart-bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+      --nb-tab-muted: #90959D;
+      --nb-tab-border: rgba(225,228,233,.9);
+      --nb-tab-shadow: 0 -6px 18px rgba(22,25,31,.05);
+      --nb-tab-bar-height: 66px;
+      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + 12px + env(safe-area-inset-bottom, 0px));
     }
 
     html {
@@ -36,7 +42,7 @@
     }
 
     body {
-      padding-bottom: calc(104px + env(safe-area-inset-bottom)) !important;
+      padding-bottom: calc(var(--nb-tab-bar-height) + env(safe-area-inset-bottom)) !important;
       overflow-x: hidden;
     }
 
@@ -60,126 +66,103 @@
       to   { opacity: .25; transform: translateY(-7px); }
     }
 
-    /* ---------------- Bottom bar ---------------- */
+    /* ---------------- Bottom bar: flush, edge-to-edge on mobile ---------------- */
     #nearbite-bottom-tabbar {
+      box-sizing: border-box;
       position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: calc(10px + env(safe-area-inset-bottom));
-      height: 72px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      min-height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       align-items: stretch;
-      padding: 4px;
-      background: rgba(255,255,255,.97);
-      border: 1px solid var(--nb-tab-border);
-      border-radius: 38px;
+      padding: 7px 4px 7px;
+      padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+      background: #FFFFFF;
+      border-top: 1px solid var(--nb-tab-border);
       box-shadow: var(--nb-tab-shadow);
-      backdrop-filter: blur(22px) saturate(1.35);
-      -webkit-backdrop-filter: blur(22px) saturate(1.35);
-      isolation: isolate;
       transform: translateY(0);
       opacity: 1;
       transition:
-        transform .34s cubic-bezier(.22,1,.36,1),
-        opacity .22s ease,
+        transform .32s cubic-bezier(.22,1,.36,1),
+        opacity .2s ease,
         box-shadow .25s ease;
       will-change: transform;
     }
 
-    #nearbite-bottom-tabbar::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      pointer-events: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.98);
-    }
-
-    /* Zomato-style: disappear while scrolling down, return while scrolling up */
     #nearbite-bottom-tabbar.nb-hidden {
-      transform: translate3d(0, calc(100% + 22px), 0);
+      transform: translate3d(0, 100%, 0);
       opacity: 0;
       pointer-events: none;
     }
 
     #nearbite-bottom-tabbar.nb-transitioning {
-      box-shadow:
-        0 22px 48px rgba(22,25,31,.18),
-        0 5px 14px rgba(22,25,31,.08);
+      box-shadow: 0 -8px 22px rgba(22,25,31,.09);
     }
 
     .nb-tab {
       position: relative;
       min-width: 0;
-      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      background: transparent;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .nb-tab-pill {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      padding: 6px 4px;
-      border: 0;
-      border-radius: 32px;
+      gap: 3px;
+      max-width: 100%;
+      padding: 6px 12px;
+      border-radius: 18px;
       background: transparent;
-      color: var(--nb-tab-muted);
-      text-decoration: none;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 12px;
-      font-weight: 650;
-      letter-spacing: -.1px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      transition:
-        background .26s cubic-bezier(.22,1,.36,1),
-        color .20s ease,
-        transform .18s ease;
+      transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 18px;
+      font-size: 19px;
       line-height: 1;
-      transition: transform .30s cubic-bezier(.175,.885,.32,1.275),
-                  filter .20s ease;
+      color: var(--nb-tab-muted);
+      transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
     }
 
-    .nb-tab span {
+    .nb-tab-label {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: -.1px;
       line-height: 1.1;
+      color: var(--nb-tab-muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 100%;
     }
 
-    .nb-tab.is-active {
-      background: var(--nb-tab-accent-soft);
-      color: var(--nb-tab-accent);
-      font-weight: 800;
+    .nb-tab.is-active .nb-tab-pill {
+      background: var(--nb-tab-pill-bg);
     }
 
     .nb-tab.is-active i {
-      transform: translateY(-1px) scale(1.06);
+      color: var(--nb-tab-accent);
+      transform: translateY(-1px) scale(1.05);
     }
 
-    .nb-tab.is-active::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: 4px;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: currentColor;
-      transform: translateX(-50%) scale(0);
-      animation: nbDotIn .28s .04s cubic-bezier(.175,.885,.32,1.275) forwards;
+    .nb-tab.is-active .nb-tab-label {
+      color: var(--nb-tab-ink);
+      font-weight: 800;
     }
 
-    @keyframes nbDotIn {
-      to { transform: translateX(-50%) scale(1); }
-    }
-
-    .nb-tab.nb-tap {
+    .nb-tab.nb-tap .nb-tab-pill {
       animation: nbTabTap .34s cubic-bezier(.175,.885,.32,1.275);
     }
 
@@ -189,22 +172,34 @@
       100% { transform: scale(1); }
     }
 
-    .nb-tab:active {
-      transform: scale(.965);
+    .nb-tab:active .nb-tab-pill {
+      transform: scale(.96);
     }
 
-    .nb-tab:focus-visible {
+    .nb-tab:focus-visible .nb-tab-pill {
       outline: 2px solid rgba(226,55,68,.35);
-      outline-offset: -2px;
+      outline-offset: 1px;
     }
 
+    /* ---------------- Wider screens: revert to the floating pill ---------------- */
     @media (min-width: 700px) {
+      :root {
+        --nb-tab-bar-height: 72px;
+      }
       #nearbite-bottom-tabbar {
-        max-width: 620px;
         left: 50%;
         right: auto;
+        bottom: calc(14px + env(safe-area-inset-bottom));
         width: calc(100% - 28px);
+        max-width: 480px;
         transform: translateX(-50%);
+        border: 1px solid var(--nb-tab-border);
+        border-radius: 34px;
+        box-shadow:
+          0 18px 42px rgba(22,25,31,.14),
+          0 4px 12px rgba(22,25,31,.07);
+        backdrop-filter: blur(18px) saturate(1.3);
+        -webkit-backdrop-filter: blur(18px) saturate(1.3);
       }
       #nearbite-bottom-tabbar.nb-hidden {
         transform: translate3d(-50%, calc(100% + 22px), 0);
@@ -214,8 +209,8 @@
     @media (prefers-reduced-motion: reduce) {
       body.nb-page-enter,
       body.nb-page-exit,
-      .nb-tab,
       .nb-tab i,
+      .nb-tab-pill,
       #nearbite-bottom-tabbar {
         animation: none !important;
         transition: none !important;
@@ -231,7 +226,8 @@
     const page = currentPage();
     if (page === 'under99.html') return 'store';
     if (page === 'orders.html' || page === 'track-order.html') return 'orders';
-    return 'food';
+    if (page === 'cart.html') return 'cart';
+    return 'home';
   }
 
   function removeLegacyBars() {
@@ -256,28 +252,38 @@
     bar.id = 'nearbite-bottom-tabbar';
     bar.setAttribute('aria-label', 'Main navigation');
 
+    // Adapted from the reference's Home / Categories / Buy Again / Offers
+    // to Nearbite's actual pages: Home, 99 Store, Orders and Cart.
     const tabs = [
-      { id: 'food',   label: 'Food',    href: 'index.html',   icon: 'fa-bowl-food' },
-      { id: 'store',  label: '99 Store',href: 'under99.html', icon: 'fa-tag' },
-      { id: 'orders', label: 'Orders',  href: 'orders.html',  icon: 'fa-receipt' }
+      { id: 'home',   label: 'Home',     href: 'index.html',   icon: 'fa-house' },
+      { id: 'store',  label: '99 Store', href: 'under99.html', icon: 'fa-tag' },
+      { id: 'orders', label: 'Orders',   href: 'orders.html',  icon: 'fa-receipt' },
+      { id: 'cart',   label: 'Cart',     href: 'cart.html',    icon: 'fa-cart-shopping' }
     ];
 
     tabs.forEach(function (tab) {
+      const isActive = active === tab.id;
+
       const a = document.createElement('a');
-      a.className = 'nb-tab' + (active === tab.id ? ' is-active' : '');
+      a.className = 'nb-tab' + (isActive ? ' is-active' : '');
       a.href = tab.href;
       a.dataset.tab = tab.id;
-      a.setAttribute('aria-current', active === tab.id ? 'page' : 'false');
+      a.setAttribute('aria-current', isActive ? 'page' : 'false');
+
+      const pill = document.createElement('span');
+      pill.className = 'nb-tab-pill';
 
       const icon = document.createElement('i');
       icon.className = 'fa-solid ' + tab.icon;
       icon.setAttribute('aria-hidden', 'true');
 
       const label = document.createElement('span');
+      label.className = 'nb-tab-label';
       label.textContent = tab.label;
 
-      a.appendChild(icon);
-      a.appendChild(label);
+      pill.appendChild(icon);
+      pill.appendChild(label);
+      a.appendChild(pill);
       bar.appendChild(a);
     });
 
@@ -289,8 +295,6 @@
     let lastY = Math.max(0, window.scrollY || window.pageYOffset || 0);
     let ticking = false;
     let hidden = false;
-    const VISIBLE_CART_BOTTOM = '94px';
-    const HIDDEN_CART_BOTTOM = '20px';
     const TOP_REVEAL = 80;
     const HIDE_AFTER = 140;
     const DELTA = 8;
@@ -298,15 +302,16 @@
     function setHidden(value) {
       hidden = !!value;
       bar.classList.toggle('nb-hidden', hidden);
-      // Keep the floating cart docked to the tab bar. When the tab bar
-      // slides away, the cart follows it down instead of staying in the
-      // middle of the screen. This is the shared position used by both UI
-      // components, so their animations stay perfectly synchronized.
+      // Keep a floating cart bar (if present elsewhere on the page) docked
+      // to the top edge of this tab bar via the shared --nb-cart-bottom
+      // variable, so both components stay in sync as this bar slides
+      // off-screen and back. Nudge the two constants below if your cart
+      // bar sits with a different gap once you see it live.
       document.documentElement.style.setProperty(
         '--nb-cart-bottom',
         hidden
-          ? `calc(${HIDDEN_CART_BOTTOM} + env(safe-area-inset-bottom, 0px))`
-          : `calc(${VISIBLE_CART_BOTTOM} + env(safe-area-inset-bottom, 0px))`
+          ? `calc(12px + env(safe-area-inset-bottom, 0px))`
+          : `calc(var(--nb-tab-bar-height) + 12px + env(safe-area-inset-bottom, 0px))`
       );
     }
 
