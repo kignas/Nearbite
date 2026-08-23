@@ -1,7 +1,13 @@
 /* ============================================================
    NEARBITE — QUICK-COMMERCE STYLE BOTTOM TAB BAR
-   Home • 99 Store • Orders • Cart
+   Home • 99 Store • Orders
    Universal component for every Nearbite page.
+
+   This bar owns ONLY the 3-column nav. The Cart is a separate
+   floating island owned by cart-bar.js, positioned above this
+   bar via the shared --nb-cart-bottom custom property (defined
+   below, updated live as this bar hides/reveals on scroll).
+   Do not add a Cart tab back into this grid — see cart-bar.js.
 
    Redesigned to match a flush, edge-to-edge quick-commerce tab
    bar: a white bar sitting flat on the bottom edge, the active
@@ -13,11 +19,12 @@
 
    Includes:
    • Grey-pill active-tab highlight (icon red, label dark + bold)
-   • Page switch transition
+   • Instant page navigation (no fade/slide transition)
    • Auto hide on downward scroll
    • Auto reveal on upward scroll
    • Android safe-area support
    • Removes legacy Delivery / Dining bars
+   • Publishes --nb-cart-bottom so cart-bar.js stays docked above
    ============================================================ */
 (function () {
   'use strict';
@@ -46,26 +53,6 @@
       overflow-x: hidden;
     }
 
-    /* ---------------- Page transition ---------------- */
-    body.nb-page-enter {
-      animation: nbPageEnter .34s cubic-bezier(.22,1,.36,1) both;
-    }
-
-    body.nb-page-exit {
-      animation: nbPageExit .20s ease both;
-      pointer-events: none;
-    }
-
-    @keyframes nbPageEnter {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes nbPageExit {
-      from { opacity: 1; transform: translateY(0); }
-      to   { opacity: .25; transform: translateY(-7px); }
-    }
-
     /* ---------------- Bottom bar: flush, edge-to-edge on mobile ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
@@ -76,7 +63,7 @@
       min-height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
       padding: 7px 4px 7px;
       padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
@@ -96,10 +83,6 @@
       transform: translate3d(0, 100%, 0);
       opacity: 0;
       pointer-events: none;
-    }
-
-    #nearbite-bottom-tabbar.nb-transitioning {
-      box-shadow: 0 -8px 22px rgba(22,25,31,.09);
     }
 
     .nb-tab {
@@ -207,8 +190,6 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      body.nb-page-enter,
-      body.nb-page-exit,
       .nb-tab i,
       .nb-tab-pill,
       #nearbite-bottom-tabbar {
@@ -226,7 +207,6 @@
     const page = currentPage();
     if (page === 'under99.html') return 'store';
     if (page === 'orders.html' || page === 'track-order.html') return 'orders';
-    if (page === 'cart.html') return 'cart';
     return 'home';
   }
 
@@ -252,13 +232,12 @@
     bar.id = 'nearbite-bottom-tabbar';
     bar.setAttribute('aria-label', 'Main navigation');
 
-    // Adapted from the reference's Home / Categories / Buy Again / Offers
-    // to Nearbite's actual pages: Home, 99 Store, Orders and Cart.
+    // 3 columns only — Home, 99 Store, Orders. Cart is a separate
+    // floating island (cart-bar.js), not a tab in this grid.
     const tabs = [
       { id: 'home',   label: 'Home',     href: 'index.html',   icon: 'fa-house' },
       { id: 'store',  label: '99 Store', href: 'under99.html', icon: 'fa-tag' },
-      { id: 'orders', label: 'Orders',   href: 'orders.html',  icon: 'fa-receipt' },
-      { id: 'cart',   label: 'Cart',     href: 'cart.html',    icon: 'fa-cart-shopping' }
+      { id: 'orders', label: 'Orders',   href: 'orders.html',  icon: 'fa-receipt' }
     ];
 
     tabs.forEach(function (tab) {
@@ -302,11 +281,11 @@
     function setHidden(value) {
       hidden = !!value;
       bar.classList.toggle('nb-hidden', hidden);
-      // Keep a floating cart bar (if present elsewhere on the page) docked
-      // to the top edge of this tab bar via the shared --nb-cart-bottom
-      // variable, so both components stay in sync as this bar slides
-      // off-screen and back. Nudge the two constants below if your cart
-      // bar sits with a different gap once you see it live.
+      // Keep the floating cart island (cart-bar.js) docked to the top
+      // edge of this tab bar via the shared --nb-cart-bottom variable,
+      // so both components stay in sync as this bar slides off-screen
+      // and back. Nudge the two constants below if your cart bar sits
+      // with a different gap once you see it live.
       document.documentElement.style.setProperty(
         '--nb-cart-bottom',
         hidden
@@ -344,45 +323,18 @@
     }, { passive: true });
   }
 
-  function setupPageTransitions(bar) {
-    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) return;
-
-    document.body.classList.add('nb-page-enter');
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        document.body.classList.remove('nb-page-enter');
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      const link = event.target.closest('a[href]');
+  function setupTapAnimation(bar) {
+    // Keeps the little bounce feedback on tap. Unlike the old page-transition
+    // system, this never calls preventDefault() and never delays the actual
+    // navigation — the link follows through immediately, the bounce just
+    // plays alongside it.
+    bar.addEventListener('click', function (event) {
+      const link = event.target.closest('.nb-tab');
       if (!link) return;
-      if (event.defaultPrevented) return;
-      if (link.target && link.target !== '_self') return;
-      if (link.hasAttribute('download')) return;
-      if (link.href.startsWith('mailto:') || link.href.startsWith('tel:') || link.href.startsWith('javascript:')) return;
-      if (link.origin !== location.origin) return;
-      if (link.pathname === location.pathname && link.hash) return;
-      if (link.dataset.noPageTransition === 'true') return;
-
-      const url = new URL(link.href, location.href);
-      if (!/\.html?$/i.test(url.pathname)) return;
-      if (url.href === location.href) return;
-
-      event.preventDefault();
-      bar.classList.remove('nb-hidden');
-      bar.classList.add('nb-transitioning');
       link.classList.remove('nb-tap');
       void link.offsetWidth;
       link.classList.add('nb-tap');
-      document.body.classList.remove('nb-page-enter');
-      document.body.classList.add('nb-page-exit');
-
-      window.setTimeout(function () {
-        location.href = url.href;
-      }, 185);
-    }, true);
+    });
   }
 
   function init() {
@@ -391,7 +343,7 @@
 
     const bar = createBar();
     setupScrollBehavior(bar);
-    setupPageTransitions(bar);
+    setupTapAnimation(bar);
   }
 
   if (document.readyState === 'loading') {
