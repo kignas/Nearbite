@@ -218,70 +218,6 @@
       box-shadow: none !important; 
     }
 
-    /* ── STEP 4: ZOMATO RESTAURANT CARDS ── */
-    .vrest-section { background: #F8FAFC; padding: 20px 0 8px 0; }
-    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; box-sizing: border-box; width: 100%; }
-    .z-rest-title { font-size: 13px !important; font-weight: 800 !important; color: #64748B !important; letter-spacing: 1.5px !important; text-transform: uppercase !important; margin-right: 12px; white-space: nowrap; }
-    .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
-
-    .z-card { display: block; margin: 0 16px 24px 16px; background: #fff; border-radius: 16px; padding-bottom: 16px; text-decoration: none; -webkit-tap-highlight-color: transparent; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; }
-    .z-card:active { transform: scale(0.97) translateZ(0); }
-    
-    .z-img-wrap { width: 100%; height: 220px; position: relative; background: #F1F5F9; overflow: hidden; }
-    
-    /* Restaurant gallery */
-    .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
-    .z-gallery-track { display:flex; width:100%; height:100%; transition:transform .38s cubic-bezier(.25,1,.5,1); will-change:transform; }
-    .z-gallery-slide { min-width:100%; width:100%; height:100%; object-fit:cover; flex:0 0 100%; }
-    
-    /* Clean dots */
-    .z-gallery-dots { position:absolute; left:50%; bottom: 12px; transform:translateX(-50%); display:flex; gap: 6px; z-index:4; }
-    .z-gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all 0.3s ease; }
-    .z-gallery-dot.active { width: 18px; border-radius: 4px; background: #fff; }
-    
-    /* Gradients and Overlays */
-    .z-img-scrim { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 1; pointer-events: none; }
-    
-    /* Zomato Blue Badge */
-    .z-delivery-badge { position: absolute; bottom: 12px; left: 12px; background: #2563EB; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 4px; z-index: 2; letter-spacing: 0.3px; }
-    
-    .z-bookmark { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1E293B; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    
-    /* Card Info Area */
-    .z-info-area { padding: 12px 12px 0 12px; }
-    
-    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-    .z-name { font-size: 20px; font-weight: 800; color: #1E293B; letter-spacing: -0.3px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; line-height: 1.2; }
-    
-    /* Green Rating Badge */
-    .z-rating { background: #15803D; color: #fff; font-size: 13px; font-weight: 800; padding: 4px 6px; border-radius: 6px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; line-height: 1; box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2); }
-    .z-rating i { font-size: 10px; }
-
-    .z-cuisine { font-size: 14px; color: #64748B; font-weight: 500; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .z-meta-row { display: flex; align-items: center; font-size: 13px; color: #475569; font-weight: 600; gap: 6px; }
-    .z-meta-item { display: flex; align-items: center; gap: 4px; }
-    .z-meta-item i { color: #2563EB; font-size: 14px; }
-    .z-meta-dot { width: 4px; height: 4px; border-radius: 50%; background: #CBD5E1; margin: 0 2px; }
-
-    /* Availability Overlay */
-    .z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
-    .z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine, .z-card.is-unavailable .z-meta-row { opacity: 0.6; }
-    .z-card.is-unavailable .z-rating, .z-card.is-unavailable .z-delivery-badge { opacity: 0.7; }
-    .z-availability-overlay { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
-    .z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
-    .z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .z-availability-pill i { color: #E23744; }
-
-    #es-availability-toast {
-      position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
-      background: rgba(30,41,59,0.95); color: #fff; font-size: 13px; font-weight: 700;
-      padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-      opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-    #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
-
     /* ── PREMIIUM "WHAT'S ON YOUR MIND" SECTION ── */
     .section-card { padding: 10px 0 0 0; background: #fff; }
     .sec-head { display: flex; align-items: center; margin-bottom: 4px; padding: 0 16px; }
@@ -302,6 +238,7 @@
 
     @keyframes cardFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
+  <link rel="stylesheet" href="restaurant-card.css">
 </head>
 <body>
 <header class="hero-header" id="hero">
@@ -399,8 +336,9 @@
 <div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-row"><div class="sk rs-name d1"></div><div class="sk rs-badge d1"></div></div><div class="sk rs-cuis d1"></div><div class="sk rs-meta d1"></div></div>
 </div>
 </div>
+<script src="restaurant-card.js"></script>
 <script>
-  let allRestaurants = [];
+  window.allRestaurants = window.allRestaurants || [];
 
   async function loadHomeData() {
     const list = document.getElementById('restaurant-list');
@@ -408,7 +346,7 @@
     const cachedData = sessionStorage.getItem(HOME_CACHE_KEY);
 
     if (cachedData) {
-      allRestaurants = JSON.parse(cachedData);
+      window.allRestaurants = JSON.parse(cachedData);
       displayRestaurants();
     } else {
       try {
@@ -416,8 +354,8 @@
         const result = await response.json();
         
         if (response.ok && result.success) {
-          allRestaurants = result.data;
-          sessionStorage.setItem(HOME_CACHE_KEY, JSON.stringify(allRestaurants));
+          window.allRestaurants = result.data;
+          sessionStorage.setItem(HOME_CACHE_KEY, JSON.stringify(window.allRestaurants));
           displayRestaurants();
         } else {
           throw new Error("Failed to load");
@@ -490,176 +428,14 @@
     displayRestaurants(vegOnly);
   }
 
-  let isVegMode = false;
-  let isRatingMode = false;
+  window.isVegMode = false;
+  window.isRatingMode = false;
   window.toggleSmartFilter = function(type, element) {
     element.classList.toggle('active');
-    if (type === 'veg') isVegMode = !isVegMode;
-    if (type === 'rating') isRatingMode = !isRatingMode;
+    if (type === 'veg') window.isVegMode = !window.isVegMode;
+    if (type === 'rating') window.isRatingMode = !window.isRatingMode;
     displayRestaurants();
   };
-
-  function getAvailabilityStatus(res) {
-    const avail = res.availability || {};
-    const isOpen = typeof avail.isOpen === 'boolean' ? avail.isOpen : res.isOpen;
-    if (isOpen !== false) return null;
-    const reason = avail.closedReason || res.closedReason || res.status || '';
-    if (reason === 'closed_today') return 'closed_today';
-    if (reason === 'temporarily_closed') return 'temporarily_closed';
-    return 'unavailable';
-  }
-
-  function getAvailabilityLabel(status) {
-    if (status === 'closed_today') return 'Closed Today';
-    if (status === 'outside_delivery_area') return 'Outside delivery area';
-    return 'Temporarily Closed';
-  }
-
-  window.__unavailableRestaurantIds = new Set();
-
-  function showAvailabilityToast(label) {
-    let toast = document.getElementById('es-availability-toast');
-    if (!toast) { toast = document.createElement('div'); toast.id = 'es-availability-toast'; document.body.appendChild(toast); }
-    toast.textContent = label === 'Closed Today' ? 'This restaurant is closed for today' : label === 'Outside delivery area' ? 'This restaurant does not deliver to your selected address' : 'This restaurant is temporarily unavailable';
-    toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');
-    clearTimeout(window.__esToastTimer); window.__esToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
-  }
-
-  function getSelectedCustomerCoordinates() {
-    try {
-      const address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
-      const coords = address?.location?.coordinates;
-      if (Array.isArray(coords) && coords.length === 2 && Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]))) return { lng: Number(coords[0]), lat: Number(coords[1]) };
-    } catch (_) {}
-    return null;
-  }
-
-  function calculateHaversineKm(a, b) {
-    const R = 6371;
-    const dLat = (b.lat - a.lat) * Math.PI / 180;
-    const dLng = (b.lng - a.lng) * Math.PI / 180;
-    const lat1 = a.lat * Math.PI / 180;
-    const lat2 = b.lat * Math.PI / 180;
-    const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-  }
-
-  function displayRestaurants() {
-    const list = document.getElementById('restaurant-list');
-    if (!list || allRestaurants.length === 0) return;
-
-    let data = [...allRestaurants];
-    if (isVegMode) data = data.filter(r => r.menu && r.menu.every(i => i.isVeg));
-    if (isRatingMode) data = data.filter(r => parseFloat(r.rating || 0) >= 4.0);
-
-    if (data.length === 0) {
-      list.innerHTML = `<div style="text-align:center; padding:40px 0; color:#64748B; font-weight:600;">No restaurants match your filters.</div>`;
-      return;
-    }
-
-    window.__unavailableRestaurantIds = new Set();
-    const customerCoords = getSelectedCustomerCoordinates();
-
-    list.innerHTML = data.map((res, i) => {
-      const resId = res._id || res.id;
-      let customerDistanceKm = null;
-      const restaurantCoords = res.location?.coordinates;
-      if (customerCoords && Array.isArray(restaurantCoords) && restaurantCoords.length === 2) {
-        const lng = Number(restaurantCoords[0]), lat = Number(restaurantCoords[1]);
-        if (Number.isFinite(lng) && Number.isFinite(lat)) customerDistanceKm = calculateHaversineKm(customerCoords, { lng, lat });
-      }
-      const displayDistance = customerDistanceKm != null ? `${customerDistanceKm.toFixed(1)} km` : (res.distance || (res.distanceMeters != null ? `${(Number(res.distanceMeters) / 1000).toFixed(1)} km` : '—'));
-      let status = getAvailabilityStatus(res);
-      const radiusKm = Number(res.deliveryRadiusKm);
-      if (!status && customerDistanceKm != null && Number.isFinite(radiusKm) && radiusKm > 0 && customerDistanceKm > radiusKm) status = 'outside_delivery_area';
-      const isUnavailable = !!status;
-      if (isUnavailable) window.__unavailableRestaurantIds.add(String(resId));
-
-      const label = isUnavailable ? getAvailabilityLabel(status) : '';
-      const guard = isUnavailable ? ` onclick="event.preventDefault(); showAvailabilityToast('${label}');"` : '';
-
-      return `
-      <a href="restaurant.html?id=${resId}" class="z-card${isUnavailable ? ' is-unavailable' : ''}"${guard} aria-disabled="${isUnavailable}" style="animation: cardFadeUp 0.3s ease forwards ${i * 0.05}s; opacity: 0; transform: translateY(10px);">
-        <div class="z-img-wrap${isUnavailable ? ' is-unavailable' : ''}">
-          ${(() => {
-            const gallery = (Array.isArray(res.images) && res.images.length ? res.images : [res.image || res.img]).filter(Boolean).slice(0,4);
-            const safeImages = gallery.length ? gallery : ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80'];
-            return `<div class="z-gallery" data-gallery="${resId}">
-              <div class="z-gallery-track">
-                ${safeImages.map((src, idx) => `<img class="z-gallery-slide" src="${escapeHtml(src)}" alt="${escapeHtml(res.name || 'Restaurant')}" loading="${idx === 0 ? 'eager' : 'lazy'}" onload="this.classList.add('loaded')" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80';">`).join('')}
-              </div>
-              ${safeImages.length > 1 ? `<div class="z-gallery-dots">${safeImages.map((_, idx) => `<span class="z-gallery-dot${idx === 0 ? ' active' : ''}"></span>`).join('')}</div>` : ''}
-            </div>`;
-          })()}
-          <div class="z-img-scrim"></div>
-          <div class="z-delivery-badge">Free delivery with Gold</div>
-          <div class="z-bookmark"><i class="fa-regular fa-bookmark"></i></div>
-          ${isUnavailable ? `<div class="z-availability-overlay"><div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ${label}</div></div>` : ''}
-        </div>
-        
-        <div class="z-info-area">
-          <div class="z-info-row">
-            <div class="z-name">${res.name}</div>
-            <div class="z-rating">${res.rating || '4.2'} <i class="fa-solid fa-star"></i></div>
-          </div>
-          <div class="z-cuisine">${res.cuisine || res.cuisineDisplay || 'Indian, Fast Food'}</div>
-          
-          <div class="z-meta-row">
-            <div class="z-meta-item"><i class="fa-solid fa-clock-rotate-left" style="color: #64748B;"></i> ${res.estimatedDeliveryMin || 30}-${res.estimatedDeliveryMax || 45} mins</div>
-            <div class="z-meta-dot"></div>
-            <div>${displayDistance}</div>
-          </div>
-        </div>
-      </a>
-    `;
-    }).join('');
-
-    requestAnimationFrame(() => initRestaurantGalleries());
-  }
-
-  window.addEventListener('nearbite:address-changed', () => displayRestaurants());
-  window.addEventListener('storage', (e) => { if (e.key === 'nearbite_address' || e.key === 'nearbite_selected_address_id') displayRestaurants(); });
-
-  function initRestaurantGalleries() {
-    document.querySelectorAll('.z-gallery').forEach(gallery => {
-      if (gallery.dataset.initialized === '1') return;
-      const track = gallery.querySelector('.z-gallery-track');
-      const slides = gallery.querySelectorAll('.z-gallery-slide');
-      const dots = gallery.querySelectorAll('.z-gallery-dot');
-      if (!track || slides.length <= 1) return;
-      gallery.dataset.initialized = '1';
-
-      let index = 0, startX = 0, moved = false, timer = null;
-      const AUTO_DELAY = 5000;
-
-      const go = (next) => {
-        index = (next + slides.length) % slides.length;
-        track.style.transform = `translate3d(-${index * 100}%,0,0)`;
-        dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-      };
-
-      const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
-      const restart = () => { stop(); timer = setInterval(() => go(index + 1), AUTO_DELAY); };
-
-      gallery.addEventListener('touchstart', e => { startX = e.touches[0].clientX; moved = false; stop(); }, { passive: true });
-      gallery.addEventListener('touchmove', e => { if (Math.abs(e.touches[0].clientX - startX) > 10) moved = true; }, { passive: true });
-      gallery.addEventListener('touchend', e => {
-        const delta = e.changedTouches[0].clientX - startX;
-        if (Math.abs(delta) > 35) {
-          go(index + (delta < 0 ? 1 : -1));
-          gallery.dataset.swiped = '1'; setTimeout(() => { gallery.dataset.swiped = '0'; }, 450);
-        }
-        restart();
-      }, { passive: true });
-      gallery.addEventListener('click', e => { if (gallery.dataset.swiped === '1' || moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
-
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(entries => entries.forEach(entry => entry.isIntersecting ? restart() : stop()), { threshold: 0.15 }).observe(gallery);
-      } else { restart(); }
-
-      dots.forEach((dot, i) => dot.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); go(i); restart(); }));
-    });
-  }
 
   document.addEventListener('DOMContentLoaded', checkAuthStatus);
   function checkAuthStatus() {

@@ -1,0 +1,77 @@
+/*
+ * Nearbite — Restaurant Card Component
+ * Presentation-only styles. Data, cart, navigation and loading flow remain owned by index.html.
+ */
+    .rs-card  { margin:0 16px 32px 16px; }
+    .rs-img   { height:220px; border-radius:16px; margin-bottom: 12px; }
+    .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 0 4px; }
+    .rs-name  { height:22px; width:60%; border-radius:8px; }
+    .rs-badge { height:22px; width:46px; border-radius:6px; }
+    .rs-cuis  { height:14px; width:50%; border-radius:6px; margin-bottom:8px; }
+    .rs-meta  { height:12px; width:70%; border-radius:5px; }
+
+
+    /* ── STEP 4: ZOMATO RESTAURANT CARDS ── */
+    .vrest-section { background: #F8FAFC; padding: 20px 0 8px 0; }
+    .z-rest-header { display: flex; align-items: center; padding: 0 16px; margin-bottom: 16px; box-sizing: border-box; width: 100%; }
+    .z-rest-title { font-size: 13px !important; font-weight: 800 !important; color: #64748B !important; letter-spacing: 1.5px !important; text-transform: uppercase !important; margin-right: 12px; white-space: nowrap; }
+    .z-rest-line { flex: 1; height: 1px; background: #E2E8F0; }
+
+    .z-card { display:block; margin:0 16px 20px; background:#fff; border-radius:20px; padding-bottom:14px; text-decoration:none; -webkit-tap-highlight-color:transparent; overflow:hidden; box-shadow:0 4px 18px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.04); border:1px solid rgba(226,232,240,.72); transition:transform .18s cubic-bezier(.25,.46,.45,.94), box-shadow .18s ease; will-change:transform; }
+    .z-card:active { transform:scale(.985) translateZ(0); box-shadow:0 2px 10px rgba(15,23,42,.06); }
+    
+    .z-img-wrap { width:100%; height:232px; position:relative; background:#F1F5F9; overflow:hidden; }
+    
+    /* Restaurant gallery */
+    .z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
+    .z-gallery-track { display:flex; width:100%; height:100%; transition:transform .38s cubic-bezier(.25,1,.5,1); will-change:transform; }
+    .z-gallery-slide { min-width:100%; width:100%; height:100%; object-fit:cover; flex:0 0 100%; }
+    
+    /* Clean dots */
+    .z-gallery-dots { position:absolute; left:50%; bottom: 12px; transform:translateX(-50%); display:flex; gap: 6px; z-index:4; }
+    .z-gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all 0.3s ease; }
+    .z-gallery-dot.active { width: 18px; border-radius: 4px; background: #fff; }
+    
+    /* Gradients and Overlays */
+    .z-img-scrim { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 1; pointer-events: none; }
+    
+    /* Zomato Blue Badge */
+    .z-delivery-badge { position: absolute; bottom: 12px; left: 12px; background: #2563EB; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 4px; z-index: 2; letter-spacing: 0.3px; }
+    
+    .z-bookmark { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1E293B; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    
+    /* Card Info Area */
+    .z-info-area { padding:14px 16px 0; }
+    
+    .z-info-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .z-name { font-size:19px; font-weight:750; color:#1F2937; letter-spacing:-.35px; flex:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; line-height: 1.2; }
+    
+    /* Green Rating Badge */
+    .z-rating { background:#168544; color:#fff; font-size:13px; font-weight:750; padding:5px 7px; border-radius:8px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; line-height: 1; box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2); }
+    .z-rating i { font-size: 10px; }
+
+    .z-cuisine { font-size:13px; color:#6B7280; font-weight:500; margin-bottom:9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .z-meta-row { display:flex; align-items:center; font-size:13px; color:#475569; font-weight:600; gap:7px; font-variant-numeric:tabular-nums; }
+    .z-meta-item { display: flex; align-items: center; gap: 4px; }
+    .z-meta-item i { color: #2563EB; font-size: 14px; }
+    .z-meta-dot { width: 4px; height: 4px; border-radius: 50%; background: #CBD5E1; margin: 0 2px; }
+
+    /* Availability Overlay */
+    .z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
+    .z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine, .z-card.is-unavailable .z-meta-row { opacity: 0.6; }
+    .z-card.is-unavailable .z-rating, .z-card.is-unavailable .z-delivery-badge { opacity: 0.7; }
+    .z-availability-overlay { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
+    .z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
+    .z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .z-availability-pill i { color: #E23744; }
+
+    #es-availability-toast {
+      position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
+      background: rgba(30,41,59,0.95); color: #fff; font-size: 13px; font-weight: 700;
+      padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
