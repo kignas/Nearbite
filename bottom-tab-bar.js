@@ -19,7 +19,7 @@
      radius, frosted backdrop blur, soft border + shadow
    • Subtle inner capsule highlight on the active tab (icon in
      brand red, label in bold dark ink) — not a full-bleed block
-   • Instant page navigation (no fade/slide transition)
+   • Instant page navigation (no page fade/slide transition; only a tiny tab press feedback)
    • Auto hide on downward scroll, auto reveal on upward scroll
    • Android safe-area support
    • Removes legacy Delivery / Dining bars
@@ -41,10 +41,10 @@
       --nb-tab-muted: #90959D;
       --nb-tab-border: rgba(255,255,255,.65);
       --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
-      --nb-tab-bar-height: 56px;
-      --nb-tab-bar-bottom-offset: 12px;
+      --nb-tab-bar-height: 62px;
+      --nb-tab-bar-bottom-offset: 14px;
       --nb-tab-side-margin: 16px;
-      --nb-tab-radius: 28px;
+      --nb-tab-radius: 31px;
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -71,12 +71,12 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
       padding: 3px 5px;
-      background: linear-gradient(180deg, rgba(255,255,255,.88) 0%, rgba(248,249,251,.78) 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.82) 0%, rgba(246,248,251,.70) 100%);
       border: 1px solid rgba(255,255,255,.88);
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 10px 28px rgba(15,23,42,.12), 0 2px 8px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.95);
-      backdrop-filter: blur(28px) saturate(185%);
-      -webkit-backdrop-filter: blur(28px) saturate(185%);
+      box-shadow: 0 14px 34px rgba(15,23,42,.15), 0 3px 10px rgba(15,23,42,.07), inset 0 1px 0 rgba(255,255,255,.95);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
       transform: translate3d(-50%, 0, 0);
       opacity: 1;
       isolation: isolate;
@@ -133,6 +133,13 @@
     #nearbite-help-center:active {
       transform: scale(.94);
     }
+
+    #nearbite-help-center.nb-help-hidden {
+      transform: translateY(calc(100% + 28px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
 
     #nearbite-help-center span {
       display: inline-flex;
@@ -217,7 +224,7 @@
 
     .nb-tab-label {
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 650;
       letter-spacing: -.1px;
       line-height: 1.1;
@@ -264,24 +271,25 @@
 
     @media (max-width: 380px) {
       :root {
-        --nb-tab-bar-height: 54px;
-        --nb-tab-side-margin: 14px;
-        --nb-tab-radius: 27px;
+        --nb-tab-bar-height: 60px;
+        --nb-tab-side-margin: 12px;
+        --nb-tab-radius: 30px;
       }
-      #nearbite-bottom-tabbar { padding: 3px 5px; }
-      .nb-tab { min-height: 46px; }
-      .nb-tab-pill { min-height: 42px; padding-inline: 7px; }
-      .nb-tab i { font-size: 20px; }
-      .nb-tab-label { font-size: 11.5px; }
+      #nearbite-bottom-tabbar { padding: 4px 5px; width: calc(100% - 68px); }
+      .nb-tab { min-height: 50px; }
+      .nb-tab-pill { min-height: 48px; padding-inline: 6px; }
+      .nb-tab i { font-size: 18px; }
+      .nb-tab-label { font-size: 10.5px; }
     }
 
     @media (min-width: 600px) {
       #nearbite-bottom-tabbar {
-        max-width: 520px;
-        min-height: 58px;
+        max-width: 620px;
+        height: 64px;
+        min-height: 64px;
       }
-      .nb-tab { min-height: 48px; }
-      .nb-tab-pill { min-height: 44px; max-width: 118px; }
+      .nb-tab { min-height: 54px; }
+      .nb-tab-pill { min-height: 52px; max-width: 132px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -376,6 +384,8 @@
     function setHidden(value) {
       hidden = !!value;
       bar.classList.toggle('nb-hidden', hidden);
+      const help = document.getElementById('nearbite-help-center');
+      if (help) help.classList.toggle('nb-help-hidden', hidden);
       // Keep the floating cart island (cart-bar.js) docked to the top
       // edge of this island via the shared --nb-cart-bottom variable,
       // so both components stay in sync as this bar slides off-screen
