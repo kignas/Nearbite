@@ -41,9 +41,11 @@
       --nb-tab-muted: #90959D;
       --nb-tab-border: rgba(255,255,255,.65);
       --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
-      --nb-tab-bar-height: 74px;
-      --nb-tab-bar-bottom-offset: 10px;
-      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px));
+      --nb-tab-bar-height: 82px;
+      --nb-tab-bar-bottom-offset: 14px;
+      --nb-tab-side-margin: 18px;
+      --nb-tab-radius: 28px;
+      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 14px + env(safe-area-inset-bottom, 0px));
     }
 
     html {
@@ -61,22 +63,24 @@
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: calc(100% - 24px);
-      max-width: 480px;
+      width: calc(100% - (var(--nb-tab-side-margin) * 2));
+      max-width: 430px;
       min-height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
-      padding: 8px 6px;
-      background: rgba(255, 255, 255, .78);
-      border: 1px solid var(--nb-tab-border);
-      border-radius: 24px;
-      box-shadow: var(--nb-tab-shadow);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      transform: translateX(-50%);
+      padding: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,.88) 0%, rgba(248,249,251,.78) 100%);
+      border: 1px solid rgba(255,255,255,.88);
+      border-radius: var(--nb-tab-radius);
+      box-shadow: 0 18px 45px rgba(15,23,42,.16), 0 5px 16px rgba(15,23,42,.09), inset 0 1px 0 rgba(255,255,255,.95);
+      backdrop-filter: blur(28px) saturate(185%);
+      -webkit-backdrop-filter: blur(28px) saturate(185%);
+      transform: translate3d(-50%, 0, 0);
       opacity: 1;
+      isolation: isolate;
+      overflow: hidden;
       transition:
         transform .32s cubic-bezier(.22,1,.36,1),
         opacity .2s ease,
@@ -84,8 +88,29 @@
       will-change: transform;
     }
 
+    #nearbite-bottom-tabbar::before {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: calc(var(--nb-tab-radius) - 1px);
+      background: linear-gradient(180deg, rgba(255,255,255,.38), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    #nearbite-bottom-tabbar::after {
+      content: "";
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 0;
+      height: 1px;
+      background: rgba(255,255,255,.95);
+      pointer-events: none;
+    }
+
     #nearbite-bottom-tabbar.nb-hidden {
-      transform: translate3d(-50%, calc(100% + 24px), 0);
+      transform: translate3d(-50%, calc(100% + 30px), 0);
       opacity: 0;
       pointer-events: none;
     }
@@ -93,6 +118,7 @@
     .nb-tab {
       position: relative;
       min-width: 0;
+      min-height: 66px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -108,16 +134,18 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      max-width: 100%;
-      padding: 6px 12px;
-      border-radius: 18px;
+      gap: 4px;
+      width: min(100%, 104px);
+      max-width: 104px;
+      min-height: 62px;
+      padding: 7px 10px;
+      border-radius: 21px;
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 19px;
+      font-size: 21px;
       line-height: 1;
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
@@ -125,8 +153,8 @@
 
     .nb-tab-label {
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 650;
       letter-spacing: -.1px;
       line-height: 1.1;
       color: var(--nb-tab-muted);
@@ -137,7 +165,8 @@
     }
 
     .nb-tab.is-active .nb-tab-pill {
-      background: var(--nb-tab-pill-bg);
+      background: rgba(255,255,255,.74);
+      box-shadow: 0 5px 14px rgba(15,23,42,.07), inset 0 1px 0 rgba(255,255,255,.9);
     }
 
     .nb-tab.is-active i {
@@ -167,6 +196,28 @@
     .nb-tab:focus-visible .nb-tab-pill {
       outline: 2px solid rgba(226,55,68,.35);
       outline-offset: 1px;
+    }
+
+    @media (max-width: 380px) {
+      :root {
+        --nb-tab-bar-height: 78px;
+        --nb-tab-side-margin: 14px;
+        --nb-tab-radius: 26px;
+      }
+      #nearbite-bottom-tabbar { padding: 7px; }
+      .nb-tab { min-height: 62px; }
+      .nb-tab-pill { min-height: 58px; padding-inline: 8px; }
+      .nb-tab i { font-size: 20px; }
+      .nb-tab-label { font-size: 11.5px; }
+    }
+
+    @media (min-width: 600px) {
+      #nearbite-bottom-tabbar {
+        max-width: 520px;
+        min-height: 84px;
+      }
+      .nb-tab { min-height: 68px; }
+      .nb-tab-pill { min-height: 64px; max-width: 118px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -271,7 +322,7 @@
         '--nb-cart-bottom',
         hidden
           ? `calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px))`
-          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px))`
+          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 14px + env(safe-area-inset-bottom, 0px))`
       );
     }
 
