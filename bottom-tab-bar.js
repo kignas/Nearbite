@@ -41,10 +41,10 @@
       --nb-tab-muted: #90959D;
       --nb-tab-border: rgba(255,255,255,.65);
       --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
-      --nb-tab-bar-height: 82px;
+      --nb-tab-bar-height: 68px;
       --nb-tab-bar-bottom-offset: 14px;
       --nb-tab-side-margin: 18px;
-      --nb-tab-radius: 28px;
+      --nb-tab-radius: 24px;
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 14px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -70,7 +70,7 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
-      padding: 8px;
+      padding: 5px 7px;
       background: linear-gradient(180deg, rgba(255,255,255,.88) 0%, rgba(248,249,251,.78) 100%);
       border: 1px solid rgba(255,255,255,.88);
       border-radius: var(--nb-tab-radius);
@@ -118,7 +118,7 @@
     .nb-tab {
       position: relative;
       min-width: 0;
-      min-height: 66px;
+      min-height: 56px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -137,15 +137,15 @@
       gap: 4px;
       width: min(100%, 104px);
       max-width: 104px;
-      min-height: 62px;
-      padding: 7px 10px;
-      border-radius: 21px;
+      min-height: 52px;
+      padding: 5px 9px;
+      border-radius: 18px;
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 21px;
+      font-size: 19px;
       line-height: 1;
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
@@ -153,7 +153,7 @@
 
     .nb-tab-label {
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 650;
       letter-spacing: -.1px;
       line-height: 1.1;
@@ -166,7 +166,7 @@
 
     .nb-tab.is-active .nb-tab-pill {
       background: rgba(255,255,255,.74);
-      box-shadow: 0 5px 14px rgba(15,23,42,.07), inset 0 1px 0 rgba(255,255,255,.9);
+      box-shadow: 0 3px 10px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.9);
     }
 
     .nb-tab.is-active i {
@@ -200,13 +200,13 @@
 
     @media (max-width: 380px) {
       :root {
-        --nb-tab-bar-height: 78px;
+        --nb-tab-bar-height: 66px;
         --nb-tab-side-margin: 14px;
-        --nb-tab-radius: 26px;
+        --nb-tab-radius: 23px;
       }
-      #nearbite-bottom-tabbar { padding: 7px; }
-      .nb-tab { min-height: 62px; }
-      .nb-tab-pill { min-height: 58px; padding-inline: 8px; }
+      #nearbite-bottom-tabbar { padding: 5px 6px; }
+      .nb-tab { min-height: 54px; }
+      .nb-tab-pill { min-height: 50px; padding-inline: 8px; }
       .nb-tab i { font-size: 20px; }
       .nb-tab-label { font-size: 11.5px; }
     }
@@ -214,10 +214,10 @@
     @media (min-width: 600px) {
       #nearbite-bottom-tabbar {
         max-width: 520px;
-        min-height: 84px;
+        min-height: 70px;
       }
-      .nb-tab { min-height: 68px; }
-      .nb-tab-pill { min-height: 64px; max-width: 118px; }
+      .nb-tab { min-height: 58px; }
+      .nb-tab-pill { min-height: 54px; max-width: 118px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
