@@ -1,7 +1,12 @@
 /* ============================================================
-   NEARBITE — QUICK-COMMERCE STYLE BOTTOM TAB BAR
+   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION
    Home • 99 Store • Orders
    Universal component for every Nearbite page.
+
+   TRUE floating glass island at every screen width — phone
+   included. There is no separate "flush mobile bar" mode; the
+   island geometry (side margins, bottom margin, rounded corners,
+   frosted glass) is the only mode.
 
    This bar owns ONLY the 3-column nav. The Cart is a separate
    floating island owned by cart-bar.js, positioned above this
@@ -9,22 +14,18 @@
    below, updated live as this bar hides/reveals on scroll).
    Do not add a Cart tab back into this grid — see cart-bar.js.
 
-   Redesigned to match a flush, edge-to-edge quick-commerce tab
-   bar: a white bar sitting flat on the bottom edge, the active
-   tab marked with a soft grey pill behind its icon + label
-   (icon in brand red, label in bold dark ink), inactive tabs in
-   neutral grey with no background. Reverts to the original
-   floating rounded pill on wider (desktop) screens, since a
-   full-bleed bar only reads correctly at phone widths.
-
    Includes:
-   • Grey-pill active-tab highlight (icon red, label dark + bold)
+   • Floating glass island: left/right/bottom margins, 24px
+     radius, frosted backdrop blur, soft border + shadow
+   • Subtle inner capsule highlight on the active tab (icon in
+     brand red, label in bold dark ink) — not a full-bleed block
    • Instant page navigation (no fade/slide transition)
-   • Auto hide on downward scroll
-   • Auto reveal on upward scroll
+   • Auto hide on downward scroll, auto reveal on upward scroll
    • Android safe-area support
    • Removes legacy Delivery / Dining bars
-   • Publishes --nb-cart-bottom so cart-bar.js stays docked above
+   • Publishes --nb-cart-bottom so cart-bar.js stays docked above,
+     accounting for this bar's own bottom offset from the screen
+     edge (it no longer sits flush at bottom: 0)
    ============================================================ */
 (function () {
   'use strict';
@@ -38,10 +39,11 @@
       --nb-tab-pill-bg: #F0F1F4;
       --nb-tab-ink: #20242B;
       --nb-tab-muted: #90959D;
-      --nb-tab-border: rgba(225,228,233,.9);
-      --nb-tab-shadow: 0 -6px 18px rgba(22,25,31,.05);
-      --nb-tab-bar-height: 66px;
-      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + 12px + env(safe-area-inset-bottom, 0px));
+      --nb-tab-border: rgba(255,255,255,.65);
+      --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
+      --nb-tab-bar-height: 74px;
+      --nb-tab-bar-bottom-offset: 10px;
+      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px));
     }
 
     html {
@@ -49,28 +51,31 @@
     }
 
     body {
-      padding-bottom: calc(var(--nb-tab-bar-height) + env(safe-area-inset-bottom)) !important;
+      padding-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 20px + env(safe-area-inset-bottom, 0px)) !important;
       overflow-x: hidden;
     }
 
-    /* ---------------- Bottom bar: flush, edge-to-edge on mobile ---------------- */
+    /* ---------------- True floating glass island — same geometry at every width ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: 50%;
+      bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
+      width: calc(100% - 24px);
+      max-width: 480px;
       min-height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
-      padding: 7px 4px 7px;
-      padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
-      background: #FFFFFF;
-      border-top: 1px solid var(--nb-tab-border);
+      padding: 8px 6px;
+      background: rgba(255, 255, 255, .78);
+      border: 1px solid var(--nb-tab-border);
+      border-radius: 24px;
       box-shadow: var(--nb-tab-shadow);
-      transform: translateY(0);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      transform: translateX(-50%);
       opacity: 1;
       transition:
         transform .32s cubic-bezier(.22,1,.36,1),
@@ -80,7 +85,7 @@
     }
 
     #nearbite-bottom-tabbar.nb-hidden {
-      transform: translate3d(0, 100%, 0);
+      transform: translate3d(-50%, calc(100% + 24px), 0);
       opacity: 0;
       pointer-events: none;
     }
@@ -162,31 +167,6 @@
     .nb-tab:focus-visible .nb-tab-pill {
       outline: 2px solid rgba(226,55,68,.35);
       outline-offset: 1px;
-    }
-
-    /* ---------------- Wider screens: revert to the floating pill ---------------- */
-    @media (min-width: 700px) {
-      :root {
-        --nb-tab-bar-height: 72px;
-      }
-      #nearbite-bottom-tabbar {
-        left: 50%;
-        right: auto;
-        bottom: calc(14px + env(safe-area-inset-bottom));
-        width: calc(100% - 28px);
-        max-width: 480px;
-        transform: translateX(-50%);
-        border: 1px solid var(--nb-tab-border);
-        border-radius: 34px;
-        box-shadow:
-          0 18px 42px rgba(22,25,31,.14),
-          0 4px 12px rgba(22,25,31,.07);
-        backdrop-filter: blur(18px) saturate(1.3);
-        -webkit-backdrop-filter: blur(18px) saturate(1.3);
-      }
-      #nearbite-bottom-tabbar.nb-hidden {
-        transform: translate3d(-50%, calc(100% + 22px), 0);
-      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -282,15 +262,16 @@
       hidden = !!value;
       bar.classList.toggle('nb-hidden', hidden);
       // Keep the floating cart island (cart-bar.js) docked to the top
-      // edge of this tab bar via the shared --nb-cart-bottom variable,
+      // edge of this island via the shared --nb-cart-bottom variable,
       // so both components stay in sync as this bar slides off-screen
-      // and back. Nudge the two constants below if your cart bar sits
-      // with a different gap once you see it live.
+      // and back. Both branches route through --nb-tab-bar-bottom-offset
+      // (this bar's own resting gap from the screen edge) so the two
+      // stay correct if that gap is ever tuned.
       document.documentElement.style.setProperty(
         '--nb-cart-bottom',
         hidden
-          ? `calc(12px + env(safe-area-inset-bottom, 0px))`
-          : `calc(var(--nb-tab-bar-height) + 12px + env(safe-area-inset-bottom, 0px))`
+          ? `calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px))`
+          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px))`
       );
     }
 
