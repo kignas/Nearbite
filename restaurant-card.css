@@ -70,7 +70,7 @@
 
     .z-img-wrap {
       width:100%;
-      height:210px;
+      aspect-ratio: 16 / 9;
       position:relative;
       background:#eef1f4;
       overflow:hidden;
@@ -319,30 +319,37 @@
       margin:0 2px;
     }
 
-    .z-extra-row {
-      display:flex;
-      align-items:center;
-      gap:7px;
-      flex-wrap:wrap;
-      margin-top:10px;
-      font-size:13px;
-      font-weight:700;
-      line-height:1.2;
+    /* Dedicated minimum order row */
+    .z-min-order-row {
+      font-size: 13px;
+      font-weight: 650;
+      color: #64748b;
+      margin-top: 8px;
     }
 
-    .z-offer-text { color:#168544; }
-    .z-min-order { color:#64748b; }
+    /* Dedicated reserved space for offers */
+    .z-offer-row {
+      min-height: 22px; 
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      overflow: hidden; 
+    }
 
-    .z-extra-separator {
-      width:4px;
-      height:4px;
-      border-radius:50%;
-      background:#cbd5e1;
+    .z-offer-text {
+      color: #168544;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
     }
 
     @media (min-width:700px) {
       .z-card { margin-left:24px; margin-right:24px; }
-      .z-img-wrap { height:250px; }
+      /* The static height override has been intentionally removed for 16:9 compliance */
     }
 
     /* Availability Overlay */
@@ -362,4 +369,3 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
-
