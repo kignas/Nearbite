@@ -13,8 +13,8 @@
       --nb-tab-accent: #000000;          /* Dark icon for active state */
       --nb-tab-active-bg: #FFC107;       /* Brand yellow for the active inner pill */
       --nb-tab-muted: #8B95A5;           /* Crisp grey for inactive icons */
-      --nb-tab-bar-height: 50px;         /* Slimmer height for a sleek capsule look */
-      --nb-tab-bar-bottom-offset: 16px;  /* Floating gap from the bottom */
+      --nb-tab-bar-height: 58px;         /* Slimmer height for a sleek capsule look */
+      --nb-tab-bar-bottom-offset: 10px;  /* Floating gap from the bottom */
       --nb-tab-radius: 42px;             /* The heavy "curve feel" */
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 16px + env(safe-area-inset-bottom, 0px));
     }
