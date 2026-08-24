@@ -15,7 +15,7 @@
       --nb-tab-muted: #8B95A5;           /* Crisp grey for inactive icons */
       --nb-tab-bar-height: 58px;         /* Slimmer height for a sleek capsule look */
       --nb-tab-bar-bottom-offset: 10px;  /* Floating gap from the bottom */
-      --nb-tab-radius: 42px;             /* The heavy "curve feel" */
+      --nb-tab-radius: 50px;             /* The heavy "curve feel" */
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 16px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -29,16 +29,16 @@
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
-      left: 50%;
+      left: 60%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
       width: calc(100% - 48px); /* Maintains the balanced length you approved */
-      max-width: 380px;
+      max-width: 390px;
       height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      padding: 6px;
+      gap: 4px;
+      padding: 5px;
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(0, 0, 0, 0.05);
       border-radius: var(--nb-tab-radius);
