@@ -1,7 +1,3 @@
-/* ============================================================
-   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION (SCALED UP)
-   Home • 99 Store • Orders
-   ============================================================ */
 (function () {
   'use strict';
 
@@ -10,49 +6,48 @@
 
   const CSS = `
     :root {
-      --nb-tab-accent: #000000; /* Dark icon for active state */
-      --nb-tab-active-bg: #FFC107; /* Matches the yellow top banner */
-      --nb-tab-muted: #8B95A5; /* Crisp grey for inactive icons */
-      --nb-tab-bar-height: 66px; /* Increased from 56px for a bolder look */
-      --nb-tab-bar-bottom-offset: 16px;
-      --nb-tab-radius: 40px;
-      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px));
+      --nb-tab-accent: #E23744;          /* Brand red for active accent */
+      --nb-tab-active-bg: #FFF3F4;       /* Soft tint for active capsule */
+      --nb-tab-ink: #1C1C1C;             /* Bold dark text for active tab */
+      --nb-tab-muted: #696969;           /* Clean grey for inactive tabs */
+      --nb-tab-bar-height: 62px;         /* Standard ergonomic mobile height */
+      --nb-tab-border: rgba(0, 0, 0, 0.08);
+      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + 12px + env(safe-area-inset-bottom, 0px));
     }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      padding-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 20px + env(safe-area-inset-bottom, 0px)) !important;
+      padding-bottom: calc(var(--nb-tab-bar-height) + 24px + env(safe-area-inset-bottom, 0px)) !important;
       overflow-x: hidden;
     }
 
-    /* ---------------- True floating glass island ---------------- */
+    /* ---------------- Full-Width Docked Bar (Zomato-Style) ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
-      left: 50%;
-      bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: max-content; 
-      min-width: 290px; /* Noticeably wider than the cart popup */
-      max-width: calc(100% - 76px); /* Ensures it doesn't overlap the Help button on small screens */
-      height: var(--nb-tab-bar-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: calc(var(--nb-tab-bar-height) + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       z-index: 99999;
-      display: flex;
-      justify-content: center;
-      gap: 12px; /* Increased gap to spread out the tabs */
-      padding: 8px 12px; /* Slightly thicker padding */
-      background: rgba(255, 255, 255, 0.88); /* Light frosted glass */
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: var(--nb-tab-radius);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      transform: translate3d(-50%, 0, 0);
-      transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      background: #FFFFFF;
+      border-top: 1px solid var(--nb-tab-border);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+      transform: translate3d(0, 0, 0);
+      transition: transform .3s cubic-bezier(.22, 1, .36, 1), opacity .2s ease;
       will-change: transform;
     }
 
     #nearbite-bottom-tabbar.nb-hidden {
-      transform: translate3d(-50%, calc(100% + 30px), 0);
+      transform: translate3d(0, 100%, 0);
       opacity: 0;
       pointer-events: none;
     }
@@ -60,12 +55,9 @@
     .nb-tab {
       position: relative;
       height: 100%;
-      width: 76px; /* Wider touch targets (increased from 64px) */
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 0;
-      background: transparent;
       text-decoration: none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
@@ -73,46 +65,53 @@
 
     .nb-tab-pill {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 100%;
-      height: 100%;
-      border-radius: 34px;
+      gap: 3px;
+      width: 82%;
+      max-width: 90px;
+      height: 46px;
+      border-radius: 16px;
       background: transparent;
-      transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
+      transition: background .2s ease, transform .15s ease;
     }
 
     .nb-tab i {
-      font-size: 22px; /* Scaled up icons for better visibility */
+      font-size: 19px;
+      line-height: 1;
       color: var(--nb-tab-muted);
-      transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
+      transition: color .2s ease, transform .2s ease;
     }
 
-    /* Visually hide labels for the icon-only minimalist look */
     .nb-tab-label {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--nb-tab-muted);
+      letter-spacing: -0.2px;
+      transition: color .2s ease;
     }
 
+    /* Active State Styling */
     .nb-tab.is-active .nb-tab-pill {
       background: var(--nb-tab-active-bg);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .nb-tab.is-active i {
       color: var(--nb-tab-accent);
-      transform: translateY(0) scale(1.1);
+      transform: scale(1.05);
     }
 
+    .nb-tab.is-active .nb-tab-label {
+      color: var(--nb-tab-accent);
+      font-weight: 700;
+    }
+
+    /* Tap feedback */
     .nb-tab.nb-tap .nb-tab-pill {
-      animation: nbTabTap .34s cubic-bezier(.175,.885,.32,1.275);
+      animation: nbTabTap .3s cubic-bezier(.175, .885, .32, 1.275);
     }
 
     @keyframes nbTabTap {
@@ -121,34 +120,32 @@
       100% { transform: scale(1); }
     }
 
-    .nb-tab:active .nb-tab-pill { transform: scale(.96); }
-
-    /* Floating Help Center Button */
+    /* Floating Help Center Button docked relative to bar */
     #nearbite-help-center {
       position: fixed;
-      right: 16px;
-      bottom: calc(var(--nb-tab-bar-bottom-offset) + 8px + env(safe-area-inset-bottom, 0px));
-      width: 48px; /* Slightly scaled up to match the beefier nav bar */
-      height: 48px;
-      z-index: 100000;
+      right: 14px;
+      bottom: calc(var(--nb-tab-bar-height) + 14px + env(safe-area-inset-bottom, 0px));
+      width: 42px;
+      height: 42px;
+      z-index: 99998;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.88);
-      color: #333333;
-      font-weight: 600;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      background: #FFFFFF;
+      color: #4A4A4A;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .2s ease;
+      transition: transform .25s ease, opacity .2s ease;
+      text-decoration: none;
     }
 
     #nearbite-help-center.nb-help-hidden {
-      transform: translateY(calc(100% + 28px));
+      transform: translateY(calc(100% + 40px));
       opacity: 0;
       pointer-events: none;
     }
@@ -188,8 +185,8 @@
     bar.setAttribute('aria-label', 'Main navigation');
 
     const tabs = [
-      { id: 'home',   label: 'Home',     href: 'index.html',   icon: 'fa-house' },
-      { id: 'store',  label: '99 Store', href: 'under99.html', icon: 'fa-tag' },
+      { id: 'home',   label: 'Delivery', href: 'index.html',   icon: 'fa-motorcycle' },
+      { id: 'store',  label: 'Under ₹99', href: 'under99.html', icon: 'fa-tags' },
       { id: 'orders', label: 'Orders',   href: 'orders.html',  icon: 'fa-receipt' }
     ];
 
@@ -236,12 +233,12 @@
       bar.classList.toggle('nb-hidden', hidden);
       const help = document.getElementById('nearbite-help-center');
       if (help) help.classList.toggle('nb-help-hidden', hidden);
-      
+
       document.documentElement.style.setProperty(
         '--nb-cart-bottom',
         hidden
-          ? `calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px))`
-          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px))`
+          ? `calc(12px + env(safe-area-inset-bottom, 0px))`
+          : `calc(var(--nb-tab-bar-height) + 12px + env(safe-area-inset-bottom, 0px))`
       );
     }
 
@@ -253,8 +250,8 @@
       if (y <= TOP_REVEAL) {
         setHidden(false);
       } else if (Math.abs(delta) >= DELTA) {
-        if (delta > 0 && y > HIDE_AFTER) setHidden(true);  
-        if (delta < 0) setHidden(false);                   
+        if (delta > 0 && y > HIDE_AFTER) setHidden(true);
+        if (delta < 0) setHidden(false);
       }
       lastY = y;
     }
@@ -288,7 +285,6 @@
     help.href = 'support.html';
     help.setAttribute('aria-label', 'Help Center');
     help.innerHTML = '<span aria-hidden="true">?</span>';
-    help.style.textDecoration = 'none';
     document.body.appendChild(help);
   }
 
