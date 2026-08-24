@@ -342,21 +342,17 @@
             '</div>' +
 
             (
-              (safeOfferText || hasMinOrder)
-                ? '<div class="z-extra-row">' +
-                    (safeOfferText
-                      ? '<span class="z-offer-text"><i class="fa-solid fa-tag"></i> ' +
-                        safeOfferText + '</span>'
-                      : '') +
-                    (safeOfferText && hasMinOrder
-                      ? '<span class="z-extra-separator"></span>'
-                      : '') +
-                    (hasMinOrder
-                      ? '<span class="z-min-order">' + safeMinOrder + '</span>'
-                      : '') +
-                  '</div>'
+              hasMinOrder
+                ? '<div class="z-min-order-row">' + safeMinOrder + '</div>'
                 : ''
             ) +
+            
+            '<div class="z-offer-row">' +
+              (safeOfferText 
+                ? '<span class="z-offer-text"><i class="fa-solid fa-tag"></i> ' + safeOfferText + '</span>' 
+                : '') +
+            '</div>' +
+
           '</div>' +
         '</a>'
       );
