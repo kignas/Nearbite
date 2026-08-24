@@ -1,5 +1,5 @@
 /* ============================================================
-   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION (COMPACT & LIGHT)
+   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION (SCALED UP)
    Home • 99 Store • Orders
    ============================================================ */
 (function () {
@@ -13,7 +13,7 @@
       --nb-tab-accent: #000000; /* Dark icon for active state */
       --nb-tab-active-bg: #FFC107; /* Matches the yellow top banner */
       --nb-tab-muted: #8B95A5; /* Crisp grey for inactive icons */
-      --nb-tab-bar-height: 56px; /* Smaller, compact height */
+      --nb-tab-bar-height: 66px; /* Increased from 56px for a bolder look */
       --nb-tab-bar-bottom-offset: 16px;
       --nb-tab-radius: 40px;
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px));
@@ -25,21 +25,22 @@
       overflow-x: hidden;
     }
 
-    /* ---------------- True floating compact glass island ---------------- */
+    /* ---------------- True floating glass island ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: max-content; /* Hugs the tabs tightly to reduce width */
-      min-width: 230px;
+      width: max-content; 
+      min-width: 290px; /* Noticeably wider than the cart popup */
+      max-width: calc(100% - 76px); /* Ensures it doesn't overlap the Help button on small screens */
       height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: flex;
       justify-content: center;
-      gap: 6px;
-      padding: 6px;
-      background: rgba(255, 255, 255, 0.85); /* Light frosted glass */
+      gap: 12px; /* Increased gap to spread out the tabs */
+      padding: 8px 12px; /* Slightly thicker padding */
+      background: rgba(255, 255, 255, 0.88); /* Light frosted glass */
       border: 1px solid rgba(0, 0, 0, 0.06);
       border-radius: var(--nb-tab-radius);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -59,7 +60,7 @@
     .nb-tab {
       position: relative;
       height: 100%;
-      width: 64px; /* Fixed width for uniform, smaller touch targets */
+      width: 76px; /* Wider touch targets (increased from 64px) */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -76,13 +77,13 @@
       justify-content: center;
       width: 100%;
       height: 100%;
-      border-radius: 30px;
+      border-radius: 34px;
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 19px; /* Slightly smaller icons */
+      font-size: 22px; /* Scaled up icons for better visibility */
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
     }
@@ -122,20 +123,20 @@
 
     .nb-tab:active .nb-tab-pill { transform: scale(.96); }
 
-    /* Floating Help Center Button (Light Theme & Sized Down) */
+    /* Floating Help Center Button */
     #nearbite-help-center {
       position: fixed;
       right: 16px;
-      bottom: calc(var(--nb-tab-bar-bottom-offset) + 6px + env(safe-area-inset-bottom, 0px));
-      width: 44px; /* Scaled down slightly */
-      height: 44px;
+      bottom: calc(var(--nb-tab-bar-bottom-offset) + 8px + env(safe-area-inset-bottom, 0px));
+      width: 48px; /* Slightly scaled up to match the beefier nav bar */
+      height: 48px;
       z-index: 100000;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border: 1px solid rgba(0, 0, 0, 0.06);
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       color: #333333;
       font-weight: 600;
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
