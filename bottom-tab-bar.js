@@ -1,5 +1,5 @@
 /* ============================================================
-   NEARBITE — FLOATING GLASS CAPSULE NAVIGATION
+   NEARBITE — FLOATING GLASS CAPSULE NAVIGATION (SLIM HEIGHT)
    Perfectly rounded "curve feel" matched to light UI
    ============================================================ */
 (function () {
@@ -13,7 +13,7 @@
       --nb-tab-accent: #000000;          /* Dark icon for active state */
       --nb-tab-active-bg: #FFC107;       /* Brand yellow for the active inner pill */
       --nb-tab-muted: #8B95A5;           /* Crisp grey for inactive icons */
-      --nb-tab-bar-height: 70px;         /* Tall enough to feel substantial */
+      --nb-tab-bar-height: 56px;         /* Slimmer height for a sleek capsule look */
       --nb-tab-bar-bottom-offset: 16px;  /* Floating gap from the bottom */
       --nb-tab-radius: 40px;             /* The heavy "curve feel" */
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 16px + env(safe-area-inset-bottom, 0px));
@@ -31,15 +31,15 @@
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: calc(100% - 48px); /* Wide enough to feel balanced */
-      max-width: 380px;         /* Prevents it from stretching on tablets */
+      width: calc(100% - 48px); /* Maintains the balanced length you approved */
+      max-width: 380px;
       height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
-      grid-template-columns: repeat(3, 1fr); /* 3 perfectly equal columns */
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
       padding: 6px;
-      background: rgba(255, 255, 255, 0.9); /* Premium frosted glass */
+      background: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(0, 0, 0, 0.05);
       border-radius: var(--nb-tab-radius);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
@@ -76,13 +76,13 @@
       justify-content: center;
       width: 100%;
       height: 100%;
-      border-radius: 34px; /* Inner pill perfectly mirrors the outer curve */
+      border-radius: 40px; /* Forces perfectly rounded inner pill ends */
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 24px; /* Larger icons since we removed the text */
+      font-size: 22px; /* Slightly smaller to fit the slimmer height */
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
     }
@@ -114,11 +114,10 @@
 
     .nb-tab:active .nb-tab-pill { transform: scale(.96); }
 
-    /* Floating Help Center Button - Shifted up alongside the Cart bar */
+    /* Floating Help Center Button */
     #nearbite-help-center {
       position: fixed;
       right: 16px;
-      /* Aligns vertically with the cart bar to prevent horizontal crowding */
       bottom: calc(var(--nb-tab-bar-bottom-offset) + var(--nb-tab-bar-height) + 16px + env(safe-area-inset-bottom, 0px));
       width: 46px; 
       height: 46px;
