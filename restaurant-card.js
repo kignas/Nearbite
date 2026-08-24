@@ -218,21 +218,23 @@
 
       // Admin-controlled badge. The backend can expose any of these
       // compatible boolean fields without changing the card API.
-      const isBestSeller = Boolean(
-        res.isBestSeller === true ||
-        res.bestSeller === true ||
-        res.best_seller === true
-      );
+      const flagEnabled = (value) =>
+        value === true || value === 1 || value === '1' ||
+        (typeof value === 'string' && value.toLowerCase() === 'true');
+
+      const isBestSeller =
+        flagEnabled(res.isBestSeller) ||
+        flagEnabled(res.bestSeller) ||
+        flagEnabled(res.best_seller);
 
       const bestSellerLabel = escapeCardHtml(
         res.bestSellerLabel || 'Best Seller'
       );
 
-      const isNearFast = Boolean(
-        res.isNearFast === true ||
-        res.nearFast === true ||
-        res.near_fast === true
-      );
+      const isNearFast =
+        flagEnabled(res.isNearFast) ||
+        flagEnabled(res.nearFast) ||
+        flagEnabled(res.near_fast);
 
       const nearFastLabel = escapeCardHtml(
         res.nearFastLabel || 'Near & Fast'

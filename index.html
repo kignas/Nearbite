@@ -342,7 +342,7 @@
 
   async function loadHomeData() {
     const list = document.getElementById('restaurant-list');
-    const HOME_CACHE_KEY = 'es_home_restaurants_v2';
+    const HOME_CACHE_KEY = 'es_home_restaurants_v3_badges';
     const cachedData = sessionStorage.getItem(HOME_CACHE_KEY);
 
     if (cachedData) {
@@ -362,7 +362,7 @@
         }
       } catch (error) {
         console.error(error);
-        list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="sessionStorage.removeItem('es_home_restaurants_v2'); loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
+        list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><button onclick="sessionStorage.removeItem('es_home_restaurants_v3_badges'); loadHomeData();" style="background:#FC8019; color:#fff; border:none; padding:12px 24px; border-radius:12px; font-weight:800;">Try Again</button></div>`;
       }
     }
   }
