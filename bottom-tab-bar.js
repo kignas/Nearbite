@@ -29,7 +29,7 @@
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
-      left: 60%;
+      left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
       width: calc(100% - 48px); /* Maintains the balanced length you approved */
       max-width: 390px;
