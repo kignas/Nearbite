@@ -1,31 +1,6 @@
 /* ============================================================
-   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION
+   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION (UPDATED)
    Home • 99 Store • Orders
-   Universal component for every Nearbite page.
-
-   TRUE floating glass island at every screen width — phone
-   included. There is no separate "flush mobile bar" mode; the
-   island geometry (side margins, bottom margin, rounded corners,
-   frosted glass) is the only mode.
-
-   This bar owns ONLY the 3-column nav. The Cart is a separate
-   floating island owned by cart-bar.js, positioned above this
-   bar via the shared --nb-cart-bottom custom property (defined
-   below, updated live as this bar hides/reveals on scroll).
-   Do not add a Cart tab back into this grid — see cart-bar.js.
-
-   Includes:
-   • Floating glass island: left/right/bottom margins, 24px
-     radius, frosted backdrop blur, soft border + shadow
-   • Subtle inner capsule highlight on the active tab (icon in
-     brand red, label in bold dark ink) — not a full-bleed block
-   • Instant page navigation (no page fade/slide transition; only a tiny tab press feedback)
-   • Auto hide on downward scroll, auto reveal on upward scroll
-   • Android safe-area support
-   • Removes legacy Delivery / Dining bars
-   • Publishes --nb-cart-bottom so cart-bar.js stays docked above,
-     accounting for this bar's own bottom offset from the screen
-     edge (it no longer sits flush at bottom: 0)
    ============================================================ */
 (function () {
   'use strict';
@@ -35,149 +10,46 @@
 
   const CSS = `
     :root {
-      --nb-tab-accent: #E23744;
-      --nb-tab-pill-bg: #F0F1F4;
-      --nb-tab-ink: #20242B;
-      --nb-tab-muted: #90959D;
-      --nb-tab-border: rgba(255,255,255,.65);
-      --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
-      --nb-tab-bar-height: 62px;
-      --nb-tab-bar-bottom-offset: 14px;
+      --nb-tab-accent: #FFFFFF;
+      --nb-tab-ink: #FFFFFF;
+      --nb-tab-muted: rgba(255, 255, 255, 0.55);
+      --nb-tab-active-bg: rgba(255, 255, 255, 0.15);
+      --nb-tab-bar-height: 72px;
+      --nb-tab-bar-bottom-offset: 24px;
       --nb-tab-side-margin: 16px;
-      --nb-tab-radius: 31px;
+      --nb-tab-radius: 50px;
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
+    html { scroll-behavior: smooth; }
     body {
       padding-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 20px + env(safe-area-inset-bottom, 0px)) !important;
       overflow-x: hidden;
     }
 
-    /* ---------------- True floating glass island — same geometry at every width ---------------- */
+    /* ---------------- True floating glass island ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: calc(100% - 56px);
-      max-width: 390px;
-      min-height: var(--nb-tab-bar-height);
+      width: calc(100% - 40px);
+      max-width: 420px;
+      height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      align-items: stretch;
-      padding: 3px 5px;
-      background: linear-gradient(180deg, rgba(255,255,255,.82) 0%, rgba(246,248,251,.70) 100%);
-      border: 1px solid rgba(255,255,255,.88);
+      align-items: center;
+      padding: 8px;
+      background: rgba(25, 30, 40, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 14px 34px rgba(15,23,42,.15), 0 3px 10px rgba(15,23,42,.07), inset 0 1px 0 rgba(255,255,255,.95);
-      backdrop-filter: blur(30px) saturate(180%);
-      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
       transform: translate3d(-50%, 0, 0);
-      opacity: 1;
-      isolation: isolate;
-      overflow: hidden;
-      transition:
-        transform .32s cubic-bezier(.22,1,.36,1),
-        opacity .2s ease,
-        box-shadow .25s ease;
+      transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
       will-change: transform;
-    }
-
-    #nearbite-bottom-tabbar::before {
-      content: "";
-      position: absolute;
-      inset: 1px;
-      border-radius: calc(var(--nb-tab-radius) - 1px);
-      background: linear-gradient(180deg, rgba(255,255,255,.38), rgba(255,255,255,0));
-      pointer-events: none;
-      z-index: -1;
-    }
-
-
-    #nearbite-help-center {
-      position: fixed;
-      right: 14px;
-      bottom: calc(var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
-      width: 48px;
-      height: 48px;
-      z-index: 100000;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255,255,255,.9);
-      border-radius: 50%;
-      background: rgba(255,255,255,.84);
-      color: #68717d;
-      box-shadow:
-        0 8px 22px rgba(15,23,42,.14),
-        inset 0 1px 0 rgba(255,255,255,.95);
-      backdrop-filter: blur(22px) saturate(180%);
-      -webkit-backdrop-filter: blur(22px) saturate(180%);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-
-    #nearbite-help-center:hover {
-      transform: translateY(-1px);
-      box-shadow:
-        0 10px 25px rgba(15,23,42,.17),
-        inset 0 1px 0 rgba(255,255,255,.95);
-    }
-
-    #nearbite-help-center:active {
-      transform: scale(.94);
-    }
-
-    #nearbite-help-center.nb-help-hidden {
-      transform: translateY(calc(100% + 28px));
-      opacity: 0;
-      pointer-events: none;
-    }
-
-
-    #nearbite-help-center span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 23px;
-      height: 23px;
-      border: 2px solid currentColor;
-      border-radius: 50%;
-      font-size: 15px;
-      line-height: 1;
-    }
-
-    #nearbite-help-center i,
-    #nearbite-help-center svg {
-      width: 21px;
-      height: 21px;
-      font-size: 21px;
-      line-height: 1;
-    }
-
-    @media (max-width: 380px) {
-      #nearbite-help-center {
-        right: 10px;
-        width: 44px;
-        height: 44px;
-      }
-    }
-
-    #nearbite-bottom-tabbar::after {
-      content: "";
-      position: absolute;
-      left: 24%;
-      right: 24%;
-      top: 0;
-      height: 1px;
-      background: rgba(255,255,255,.95);
-      pointer-events: none;
     }
 
     #nearbite-bottom-tabbar.nb-hidden {
@@ -188,8 +60,7 @@
 
     .nb-tab {
       position: relative;
-      min-width: 0;
-      min-height: 48px;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -202,52 +73,41 @@
 
     .nb-tab-pill {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      width: min(100%, 104px);
-      max-width: 104px;
-      min-height: 44px;
-      padding: 3px 8px;
-      border-radius: 22px;
+      width: 100%;
+      height: 100%;
+      border-radius: 40px;
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 18px;
-      line-height: 1;
+      font-size: 22px;
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
     }
 
+    /* Visually hide labels for the icon-only minimalist look */
     .nb-tab-label {
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 11px;
-      font-weight: 650;
-      letter-spacing: -.1px;
-      line-height: 1.1;
-      color: var(--nb-tab-muted);
-      white-space: nowrap;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
       overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .nb-tab.is-active .nb-tab-pill {
-      background: rgba(255,255,255,.74);
-      box-shadow: 0 3px 10px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.9);
+      background: var(--nb-tab-active-bg);
     }
 
     .nb-tab.is-active i {
       color: var(--nb-tab-accent);
-      transform: translateY(-1px) scale(1.05);
-    }
-
-    .nb-tab.is-active .nb-tab-label {
-      color: var(--nb-tab-ink);
-      font-weight: 800;
+      transform: translateY(0) scale(1.1);
     }
 
     .nb-tab.nb-tap .nb-tab-pill {
@@ -260,45 +120,35 @@
       100% { transform: scale(1); }
     }
 
-    .nb-tab:active .nb-tab-pill {
-      transform: scale(.96);
+    .nb-tab:active .nb-tab-pill { transform: scale(.96); }
+
+    /* Floating Help Center Button (Updated for Dark Theme) */
+    #nearbite-help-center {
+      position: fixed;
+      right: 20px;
+      bottom: calc(var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
+      width: 50px;
+      height: 50px;
+      z-index: 100000;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      background: rgba(25, 30, 40, 0.4);
+      color: rgba(255,255,255,.8);
+      box-shadow: 0 8px 22px rgba(0,0,0,.2);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .2s ease;
     }
 
-    .nb-tab:focus-visible .nb-tab-pill {
-      outline: 2px solid rgba(226,55,68,.35);
-      outline-offset: 1px;
-    }
-
-    @media (max-width: 380px) {
-      :root {
-        --nb-tab-bar-height: 60px;
-        --nb-tab-side-margin: 12px;
-        --nb-tab-radius: 30px;
-      }
-      #nearbite-bottom-tabbar { padding: 4px 5px; width: calc(100% - 68px); }
-      .nb-tab { min-height: 50px; }
-      .nb-tab-pill { min-height: 48px; padding-inline: 6px; }
-      .nb-tab i { font-size: 18px; }
-      .nb-tab-label { font-size: 10.5px; }
-    }
-
-    @media (min-width: 600px) {
-      #nearbite-bottom-tabbar {
-        max-width: 620px;
-        height: 64px;
-        min-height: 64px;
-      }
-      .nb-tab { min-height: 54px; }
-      .nb-tab-pill { min-height: 52px; max-width: 132px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .nb-tab i,
-      .nb-tab-pill,
-      #nearbite-bottom-tabbar {
-        animation: none !important;
-        transition: none !important;
-      }
+    #nearbite-help-center.nb-help-hidden {
+      transform: translateY(calc(100% + 28px));
+      opacity: 0;
+      pointer-events: none;
     }
   `;
 
@@ -335,8 +185,6 @@
     bar.id = 'nearbite-bottom-tabbar';
     bar.setAttribute('aria-label', 'Main navigation');
 
-    // 3 columns only — Home, 99 Store, Orders. Cart is a separate
-    // floating island (cart-bar.js), not a tab in this grid.
     const tabs = [
       { id: 'home',   label: 'Home',     href: 'index.html',   icon: 'fa-house' },
       { id: 'store',  label: '99 Store', href: 'under99.html', icon: 'fa-tag' },
@@ -386,12 +234,7 @@
       bar.classList.toggle('nb-hidden', hidden);
       const help = document.getElementById('nearbite-help-center');
       if (help) help.classList.toggle('nb-help-hidden', hidden);
-      // Keep the floating cart island (cart-bar.js) docked to the top
-      // edge of this island via the shared --nb-cart-bottom variable,
-      // so both components stay in sync as this bar slides off-screen
-      // and back. Both branches route through --nb-tab-bar-bottom-offset
-      // (this bar's own resting gap from the screen edge) so the two
-      // stay correct if that gap is ever tuned.
+      
       document.documentElement.style.setProperty(
         '--nb-cart-bottom',
         hidden
@@ -408,15 +251,13 @@
       if (y <= TOP_REVEAL) {
         setHidden(false);
       } else if (Math.abs(delta) >= DELTA) {
-        if (delta > 0 && y > HIDE_AFTER) setHidden(true);  // swipe down page
-        if (delta < 0) setHidden(false);                   // swipe up page
+        if (delta > 0 && y > HIDE_AFTER) setHidden(true);  
+        if (delta < 0) setHidden(false);                   
       }
-
       lastY = y;
     }
 
     setHidden(false);
-
     window.addEventListener('scroll', function () {
       if (!ticking) {
         ticking = true;
@@ -430,10 +271,6 @@
   }
 
   function setupTapAnimation(bar) {
-    // Keeps the little bounce feedback on tap. Unlike the old page-transition
-    // system, this never calls preventDefault() and never delays the actual
-    // navigation — the link follows through immediately, the bounce just
-    // plays alongside it.
     bar.addEventListener('click', function (event) {
       const link = event.target.closest('.nb-tab');
       if (!link) return;
@@ -443,23 +280,18 @@
     });
   }
 
-
-    // Separate floating Help Center button — intentionally not part of the 3-column nav.
-    if (!document.getElementById('nearbite-help-center')) {
-      const help = document.createElement('a');
-      help.id = 'nearbite-help-center';
-      help.href = 'support.html';
-      help.setAttribute('aria-label', 'Help Center');
-      help.title = 'Help Center';
-      help.innerHTML = '<span aria-hidden="true">?</span>';
-      help.style.textDecoration = 'none';
-      document.body.appendChild(help);
-    }
+  if (!document.getElementById('nearbite-help-center')) {
+    const help = document.createElement('a');
+    help.id = 'nearbite-help-center';
+    help.href = 'support.html';
+    help.setAttribute('aria-label', 'Help Center');
+    help.innerHTML = '<span aria-hidden="true">?</span>';
+    help.style.textDecoration = 'none';
+    document.body.appendChild(help);
+  }
 
   function init() {
-    // Remove any old Home-page / legacy bars BEFORE adding the universal bar.
     removeLegacyBars();
-
     const bar = createBar();
     setupScrollBehavior(bar);
     setupTapAnimation(bar);
