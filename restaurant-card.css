@@ -70,7 +70,7 @@
 
     .z-img-wrap {
       width:100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio:16 / 9;
       position:relative;
       background:#eef1f4;
       overflow:hidden;
@@ -319,37 +319,43 @@
       margin:0 2px;
     }
 
-    /* Dedicated minimum order row */
+    /* Minimum-order line — its own row beneath the delivery meta */
     .z-min-order-row {
-      font-size: 13px;
-      font-weight: 650;
-      color: #64748b;
-      margin-top: 8px;
+      margin-top:9px;
+      font-size:13px;
+      font-weight:700;
+      color:#64748b;
+      line-height:1.25;
     }
 
-    /* Dedicated reserved space for offers */
+    /* Dedicated, reserved-height offer space. This div always renders
+       (even with no offer) so every card keeps identical vertical
+       rhythm — offers never shift the layout below them. */
     .z-offer-row {
-      min-height: 22px; 
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      width: 100%;
-      overflow: hidden; 
+      min-height:20px;
+      margin-top:7px;
+      display:flex;
+      align-items:center;
+      overflow:hidden;
     }
 
     .z-offer-text {
-      color: #168544;
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      min-width:0;
+      max-width:100%;
+      color:#168544;
+      font-size:13px;
+      font-weight:700;
+      line-height:1.25;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     @media (min-width:700px) {
       .z-card { margin-left:24px; margin-right:24px; }
-      /* The static height override has been intentionally removed for 16:9 compliance */
     }
 
     /* Availability Overlay */
@@ -369,3 +375,4 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
+

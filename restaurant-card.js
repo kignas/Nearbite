@@ -346,13 +346,14 @@
                 ? '<div class="z-min-order-row">' + safeMinOrder + '</div>'
                 : ''
             ) +
-            
             '<div class="z-offer-row">' +
-              (safeOfferText 
-                ? '<span class="z-offer-text"><i class="fa-solid fa-tag"></i> ' + safeOfferText + '</span>' 
-                : '') +
+              (
+                safeOfferText
+                  ? '<span class="z-offer-text"><i class="fa-solid fa-tag"></i> ' +
+                    safeOfferText + '</span>'
+                  : ''
+              ) +
             '</div>' +
-
           '</div>' +
         '</a>'
       );
