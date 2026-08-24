@@ -1,5 +1,5 @@
 /* ============================================================
-   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION (UPDATED)
+   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION (COMPACT & LIGHT)
    Home • 99 Store • Orders
    ============================================================ */
 (function () {
@@ -10,15 +10,13 @@
 
   const CSS = `
     :root {
-      --nb-tab-accent: #FFFFFF;
-      --nb-tab-ink: #FFFFFF;
-      --nb-tab-muted: rgba(255, 255, 255, 0.55);
-      --nb-tab-active-bg: rgba(255, 255, 255, 0.15);
-      --nb-tab-bar-height: 72px;
-      --nb-tab-bar-bottom-offset: 24px;
-      --nb-tab-side-margin: 16px;
-      --nb-tab-radius: 50px;
-      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
+      --nb-tab-accent: #000000; /* Dark icon for active state */
+      --nb-tab-active-bg: #FFC107; /* Matches the yellow top banner */
+      --nb-tab-muted: #8B95A5; /* Crisp grey for inactive icons */
+      --nb-tab-bar-height: 56px; /* Smaller, compact height */
+      --nb-tab-bar-bottom-offset: 16px;
+      --nb-tab-radius: 40px;
+      --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px));
     }
 
     html { scroll-behavior: smooth; }
@@ -27,26 +25,26 @@
       overflow-x: hidden;
     }
 
-    /* ---------------- True floating glass island ---------------- */
+    /* ---------------- True floating compact glass island ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: calc(100% - 40px);
-      max-width: 420px;
+      width: max-content; /* Hugs the tabs tightly to reduce width */
+      min-width: 230px;
       height: var(--nb-tab-bar-height);
       z-index: 99999;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      align-items: center;
-      padding: 8px;
-      background: rgba(25, 30, 40, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.85); /* Light frosted glass */
+      border: 1px solid rgba(0, 0, 0, 0.06);
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(24px) saturate(150%);
-      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
       transform: translate3d(-50%, 0, 0);
       transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
       will-change: transform;
@@ -61,6 +59,7 @@
     .nb-tab {
       position: relative;
       height: 100%;
+      width: 64px; /* Fixed width for uniform, smaller touch targets */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -77,13 +76,13 @@
       justify-content: center;
       width: 100%;
       height: 100%;
-      border-radius: 40px;
+      border-radius: 30px;
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 22px;
+      font-size: 19px; /* Slightly smaller icons */
       color: var(--nb-tab-muted);
       transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
     }
@@ -103,6 +102,7 @@
 
     .nb-tab.is-active .nb-tab-pill {
       background: var(--nb-tab-active-bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .nb-tab.is-active i {
@@ -122,24 +122,25 @@
 
     .nb-tab:active .nb-tab-pill { transform: scale(.96); }
 
-    /* Floating Help Center Button (Updated for Dark Theme) */
+    /* Floating Help Center Button (Light Theme & Sized Down) */
     #nearbite-help-center {
       position: fixed;
-      right: 20px;
-      bottom: calc(var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
-      width: 50px;
-      height: 50px;
+      right: 16px;
+      bottom: calc(var(--nb-tab-bar-bottom-offset) + 6px + env(safe-area-inset-bottom, 0px));
+      width: 44px; /* Scaled down slightly */
+      height: 44px;
       z-index: 100000;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(255,255,255,.15);
+      border: 1px solid rgba(0, 0, 0, 0.06);
       border-radius: 50%;
-      background: rgba(25, 30, 40, 0.4);
-      color: rgba(255,255,255,.8);
-      box-shadow: 0 8px 22px rgba(0,0,0,.2);
-      backdrop-filter: blur(24px) saturate(150%);
-      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      background: rgba(255, 255, 255, 0.85);
+      color: #333333;
+      font-weight: 600;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: transform .2s ease;
@@ -239,7 +240,7 @@
         '--nb-cart-bottom',
         hidden
           ? `calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px))`
-          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px))`
+          : `calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 12px + env(safe-area-inset-bottom, 0px))`
       );
     }
 
