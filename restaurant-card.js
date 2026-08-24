@@ -227,6 +227,17 @@
       const bestSellerLabel = escapeCardHtml(
         res.bestSellerLabel || 'Best Seller'
       );
+
+      const isNearFast = Boolean(
+        res.isNearFast === true ||
+        res.nearFast === true ||
+        res.near_fast === true
+      );
+
+      const nearFastLabel = escapeCardHtml(
+        res.nearFastLabel || 'Near & Fast'
+      );
+
       const deliveryMin = escapeCardHtml(res.estimatedDeliveryMin || 30);
       const deliveryMax = escapeCardHtml(res.estimatedDeliveryMax || 45);
 
@@ -331,6 +342,14 @@
             '</div>' +
 
             '<div class="z-cuisine">' + cuisine + '</div>' +
+
+            (
+              isNearFast
+                ? '<div class="z-near-fast"><i class="fa-solid fa-bolt"></i> ' +
+                  nearFastLabel +
+                  '</div>'
+                : ''
+            ) +
 
             '<div class="z-meta-row">' +
               '<div class="z-meta-item">' +
