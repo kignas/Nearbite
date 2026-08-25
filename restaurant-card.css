@@ -105,7 +105,7 @@
 .z-gallery-dots {
   position:absolute;
   left:50%;
-  top:20px; /* Moved to top so it's not hidden by gradient */
+  top:20px; 
   transform:translateX(-50%);
   display:flex;
   gap:5px;
@@ -127,43 +127,16 @@
   background:#fff;
 }
 
-/* The Smooth Gradient Overlay */
+/* The Smooth Gradient Overlay - Adjusted to reveal more food */
 .z-gradient-overlay {
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height:80%; 
-  background:linear-gradient(to top, rgba(255,255,255,1) 45%, rgba(255,255,255,0.85) 65%, rgba(255,255,255,0) 100%);
-  z-index:2;
-  pointer-events:none;
-}
-
-/* Admin-controlled Badges & Icons */
-.z-best-seller {
-  position:absolute;
-  left:16px;
-  top:16px;
-  z-index:5;
-  display:inline-flex;
-  align-items:center;
-  gap:5px;
-  padding:7px 10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.94);
-  color:#222831;
-  border:1px solid rgba(255,255,255,.72);
-  box-shadow:0 4px 12px rgba(15,23,42,.14);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:.05px;
-}
-
-.z-best-seller i {
-  font-size:10px;
-  color:#f59e0b;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65%; /* Lowered from 80% */
+  background: linear-gradient(to top, #ffffff 55%, rgba(255,255,255,0.7) 75%, rgba(255,255,255,0) 100%);
+  z-index: 2;
+  pointer-events: none;
 }
 
 .z-bookmark {
