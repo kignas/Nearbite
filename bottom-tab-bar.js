@@ -1,6 +1,6 @@
 /* ============================================================
-   NEARBITE — FLOATING GLASS CAPSULE NAVIGATION (SLIM HEIGHT)
-   Perfectly rounded "curve feel" matched to light UI
+   NEARBITE — FLOATING GLASS CAPSULE NAVIGATION (DARK GLASS)
+   Matches the premium, translucent dark mode reference design.
    ============================================================ */
 (function () {
   'use strict';
@@ -10,12 +10,12 @@
 
   const CSS = `
     :root {
-      --nb-tab-accent: #000000;          /* Dark icon for active state */
-      --nb-tab-active-bg: #FFC107;       /* Brand yellow for the active inner pill */
-      --nb-tab-muted: #8B95A5;           /* Crisp grey for inactive icons */
-      --nb-tab-bar-height: 58px;         /* Slimmer height for a sleek capsule look */
-      --nb-tab-bar-bottom-offset: 10px;  /* Floating gap from the bottom */
-      --nb-tab-radius: 50px;             /* The heavy "curve feel" */
+      --nb-tab-accent: #ffffff;                   /* Pure white for active icon */
+      --nb-tab-active-bg: rgba(255, 255, 255, 0.2); /* Semi-transparent white highlight pill */
+      --nb-tab-muted: rgba(255, 255, 255, 0.55);  /* Faded white for inactive icons */
+      --nb-tab-bar-height: 64px;                  /* Slightly taller for elegance */
+      --nb-tab-bar-bottom-offset: 16px;           /* Floats slightly higher off the bottom */
+      --nb-tab-radius: 99px;                      /* Perfect pill shape */
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 16px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -25,26 +25,29 @@
       overflow-x: hidden;
     }
 
-    /* ---------------- True floating rounded capsule ---------------- */
+    /* ---------------- Dark Glassmorphic Capsule ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
-      width: calc(100% - 48px); /* Maintains the balanced length you approved */
+      width: calc(100% - 48px); 
       max-width: 390px;
       height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      padding: 5px;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(0, 0, 0, 0.05);
+      gap: 6px;
+      padding: 8px 10px; /* Tuned padding to match reference inner gap */
+      
+      /* The Dark Glass Effect */
+      background: rgba(20, 25, 35, 0.75); 
+      border: 1px solid rgba(255, 255, 255, 0.12); /* Subtle light rim */
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); /* Soft drop shadow */
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      
       transform: translate3d(-50%, 0, 0);
       transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
       will-change: transform;
@@ -76,30 +79,28 @@
       justify-content: center;
       width: 100%;
       height: 100%;
-      border-radius: 40px; /* Forces perfectly rounded inner pill ends */
+      border-radius: 99px; 
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 22px; /* Slightly smaller to fit the slimmer height */
+      font-size: 20px; 
       color: var(--nb-tab-muted);
-      transition: color .2s ease, transform .3s cubic-bezier(.175,.885,.32,1.275);
+      transition: color .2s ease;
     }
 
-    /* Visually hide labels to perfectly match the reference image */
     .nb-tab-label {
       display: none;
     }
 
     .nb-tab.is-active .nb-tab-pill {
       background: var(--nb-tab-active-bg);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .nb-tab.is-active i {
       color: var(--nb-tab-accent);
-      transform: scale(1.1);
     }
 
     .nb-tab.nb-tap .nb-tab-pill {
@@ -114,7 +115,7 @@
 
     .nb-tab:active .nb-tab-pill { transform: scale(.96); }
 
-    /* Floating Help Center Button */
+    /* Floating Help Center Button (Updated to match dark glass theme) */
     #nearbite-help-center {
       position: fixed;
       right: 16px;
@@ -125,14 +126,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(0, 0, 0, 0.06);
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.95);
-      color: #333333;
+      
+      /* Dark glass matching the bar */
+      background: rgba(20, 25, 35, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      
       font-weight: 600;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: transform .2s ease, opacity .2s ease;
