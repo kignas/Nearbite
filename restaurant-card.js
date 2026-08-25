@@ -261,9 +261,9 @@
         ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '"' +
         ' style="animation: cardFadeUp .3s ease forwards ' + (i * 0.05) + 's; opacity:0; transform:translateY(10px);">' +
 
-          /* Full Background Image Layer & 5-Sec Gallery */
+          /* Full Background Image Layer & Staggered Gallery */
           '<div class="z-img-wrap' + (isUnavailable ? ' is-unavailable' : '') + '">' +
-            '<div class="z-gallery" data-gallery="' + safeId + '">' +
+            '<div class="z-gallery" data-gallery="' + safeId + '" data-index="' + i + '">' +
               '<div class="z-gallery-track">' +
                 safeImages.map(function (src, idx) {
                   return (
@@ -285,11 +285,8 @@
           /* Smooth Gradient Fade */
           '<div class="z-gradient-overlay"></div>' +
 
-          /* Foreground Content Area */
+          /* Foreground Content Area (Avatar Removed) */
           '<div class="z-info-area">' +
-            '<div class="z-avatar-wrap">' +
-               '<img class="z-avatar" src="' + escapeCardHtml(safeImages[0]) + '" alt="logo">' +
-            '</div>' +
             
             '<div class="z-name">' + safeName + '</div>' +
             
@@ -348,7 +345,11 @@
       let moved = false;
       let timer = null;
 
-      const AUTO_DELAY = 5000;
+      // Staggered timing logic: Card 1 = 6s, Card 2 = 12s, Card 3 = 24s.
+      // We read the 'data-index' applied to the gallery HTML wrapper.
+      const cardIndex = parseInt(gallery.getAttribute('data-index') || '0', 10);
+      const staggerDelays = [6000, 12000, 24000];
+      const AUTO_DELAY = staggerDelays[cardIndex % staggerDelays.length];
 
       function go(next) {
         index = (next + slides.length) % slides.length;
