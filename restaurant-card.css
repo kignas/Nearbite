@@ -2,403 +2,339 @@
  * Nearbite — Restaurant Card Component
  * Presentation-only styles. Data, cart, navigation and loading flow remain owned by index.html.
  */
-    .rs-card  { margin:0 16px 32px 16px; }
-    .rs-img   { height:220px; border-radius:16px; margin-bottom: 12px; }
-    .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 0 4px; }
-    .rs-name  { height:22px; width:60%; border-radius:8px; }
-    .rs-badge { height:22px; width:46px; border-radius:6px; }
-    .rs-cuis  { height:14px; width:50%; border-radius:6px; margin-bottom:8px; }
-    .rs-meta  { height:12px; width:70%; border-radius:5px; }
+.rs-card  { margin:0 16px 32px 16px; }
+.rs-img   { height:220px; border-radius:16px; margin-bottom: 12px; }
+.rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 0 4px; }
+.rs-name  { height:22px; width:60%; border-radius:8px; }
+.rs-badge { height:22px; width:46px; border-radius:6px; }
+.rs-cuis  { height:14px; width:50%; border-radius:6px; margin-bottom:8px; }
+.rs-meta  { height:12px; width:70%; border-radius:5px; }
 
+/* ── Nearbite production restaurant cards ── */
 
-    /* ── Nearbite production restaurant cards ──
-       Presentation only. Existing data, navigation, cart, gallery,
-       availability and loading behavior remain untouched. */
+.vrest-section {
+  background:#f7f8fa;
+  padding:20px 0 12px;
+}
 
-    .vrest-section {
-      background:#f7f8fa;
-      padding:20px 0 12px;
-    }
+.z-rest-header {
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  margin-bottom:16px;
+  box-sizing:border-box;
+  width:100%;
+}
 
-    .z-rest-header {
-      display:flex;
-      align-items:center;
-      padding:0 18px;
-      margin-bottom:16px;
-      box-sizing:border-box;
-      width:100%;
-    }
+.z-rest-title {
+  font-size:13px !important;
+  font-weight:800 !important;
+  color:#6b7280 !important;
+  letter-spacing:1.45px !important;
+  text-transform:uppercase !important;
+  margin-right:12px;
+  white-space:nowrap;
+}
 
-    .z-rest-title {
-      font-size:13px !important;
-      font-weight:800 !important;
-      color:#6b7280 !important;
-      letter-spacing:1.45px !important;
-      text-transform:uppercase !important;
-      margin-right:12px;
-      white-space:nowrap;
-    }
+.z-rest-line {
+  flex:1;
+  height:1px;
+  background:#dfe3e8;
+}
 
-    .z-rest-line {
-      flex:1;
-      height:1px;
-      background:#dfe3e8;
-    }
+/* Modern Card Container */
+.z-card {
+  display:block;
+  margin:0 18px 22px;
+  background:#fff;
+  border-radius:24px;
+  position:relative;
+  height:360px; /* Forces image to be a tall background */
+  text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+  overflow:hidden;
+  border:1px solid rgba(15,23,42,.07);
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+  transition:transform .18s ease, box-shadow .18s ease;
+  will-change:transform;
+}
 
-    /* Nearbite composition:
-       image -> offer/save controls -> name/rating -> cuisine ->
-       compact delivery metadata -> optional offer/min-order row. */
-    .z-card {
-      display:block;
-      margin:0 18px 22px;
-      background:#fff;
-      border-radius:22px;
-      padding:0 0 15px;
-      text-decoration:none;
-      -webkit-tap-highlight-color:transparent;
-      overflow:hidden;
-      border:1px solid rgba(15,23,42,.07);
-      box-shadow:0 5px 20px rgba(15,23,42,.075);
-      transition:transform .18s ease, box-shadow .18s ease;
-      will-change:transform;
-    }
+.z-card:active {
+  transform:scale(.992) translateZ(0);
+  box-shadow:0 3px 13px rgba(15,23,42,.06);
+}
 
-    .z-card:active {
-      transform:scale(.992) translateZ(0);
-      box-shadow:0 3px 13px rgba(15,23,42,.06);
-    }
+@media (min-width:700px) {
+  .z-card { margin-left:24px; margin-right:24px; }
+}
 
-    .z-img-wrap {
-      width:100%;
-      aspect-ratio:16 / 9;
-      position:relative;
-      background:#eef1f4;
-      overflow:hidden;
-    }
+/* Image Wrapper & Gallery */
+.z-img-wrap {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  background:#eef1f4;
+}
 
-    .z-gallery {
-      position:absolute;
-      inset:0;
-      overflow:hidden;
-      touch-action:pan-y;
-      z-index:0;
-    }
+.z-gallery {
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  touch-action:pan-y;
+  z-index:0;
+}
 
-    .z-gallery-track {
-      display:flex;
-      width:100%;
-      height:100%;
-      transition:transform .38s cubic-bezier(.25,1,.5,1);
-      will-change:transform;
-    }
+.z-gallery-track {
+  display:flex;
+  width:100%;
+  height:100%;
+  transition:transform .38s cubic-bezier(.25,1,.5,1);
+  will-change:transform;
+}
 
-    .z-gallery-slide {
-      min-width:100%;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      flex:0 0 100%;
-    }
+.z-gallery-slide {
+  min-width:100%;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  flex:0 0 100%;
+}
 
-    .z-gallery-dots {
-      position:absolute;
-      left:50%;
-      bottom:10px;
-      transform:translateX(-50%);
-      display:flex;
-      gap:5px;
-      z-index:4;
-    }
+.z-gallery-dots {
+  position:absolute;
+  left:50%;
+  top:20px; /* Moved to top so it's not hidden by gradient */
+  transform:translateX(-50%);
+  display:flex;
+  gap:5px;
+  z-index:4;
+}
 
-    .z-gallery-dot {
-      width:6px;
-      height:6px;
-      border-radius:50%;
-      background:rgba(255,255,255,.58);
-      transition:all .25s ease;
-      box-shadow:0 1px 3px rgba(0,0,0,.18);
-    }
+.z-gallery-dot {
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:rgba(255,255,255,.58);
+  transition:all .25s ease;
+  box-shadow:0 1px 3px rgba(0,0,0,.18);
+}
 
-    .z-gallery-dot.active {
-      width:16px;
-      border-radius:4px;
-      background:#fff;
-    }
+.z-gallery-dot.active {
+  width:16px;
+  border-radius:4px;
+  background:#fff;
+}
 
-    .z-img-scrim {
-      position:absolute;
-      bottom:0;
-      left:0;
-      right:0;
-      height:72px;
-      background:linear-gradient(to top,rgba(0,0,0,.48),transparent);
-      z-index:1;
-      pointer-events:none;
-    }
+/* The Smooth Gradient Overlay */
+.z-gradient-overlay {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:80%; 
+  background:linear-gradient(to top, rgba(255,255,255,1) 45%, rgba(255,255,255,0.85) 65%, rgba(255,255,255,0) 100%);
+  z-index:2;
+  pointer-events:none;
+}
 
-    /* Admin-controlled restaurant badge */
-    .z-best-seller {
-      position:absolute;
-      left:12px;
-      top:12px;
-      z-index:3;
-      display:inline-flex;
-      align-items:center;
-      gap:5px;
-      max-width:calc(100% - 64px);
-      padding:7px 10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.94);
-      color:#222831;
-      border:1px solid rgba(255,255,255,.72);
-      box-shadow:0 4px 12px rgba(15,23,42,.14);
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      font-size:11px;
-      line-height:1;
-      font-weight:800;
-      letter-spacing:.05px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+/* Admin-controlled Badges & Icons */
+.z-best-seller {
+  position:absolute;
+  left:16px;
+  top:16px;
+  z-index:5;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.94);
+  color:#222831;
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:0 4px 12px rgba(15,23,42,.14);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.05px;
+}
 
-    .z-best-seller i {
-      font-size:10px;
-      color:#f59e0b;
-    }
+.z-best-seller i {
+  font-size:10px;
+  color:#f59e0b;
+}
 
-    /* Rating + "For you" is intentionally a small dynamic island */
-    .z-rating-island {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      gap:3px;
-      flex-shrink:0;
-      min-width:58px;
-    }
+.z-bookmark {
+  position:absolute;
+  top:16px;
+  right:16px;
+  z-index:5;
+  width:38px;
+  height:38px;
+  background:rgba(255,255,255,.94);
+  border:1px solid rgba(15,23,42,.06);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#334155;
+  font-size:17px;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
 
-    .z-rating {
-      min-width:48px;
-      height:28px;
-      padding:0 9px;
-      border-radius:999px;
-      background:#168544;
-      color:#fff;
-      font-size:13px;
-      font-weight:800;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-      line-height:1;
-      box-shadow:0 3px 9px rgba(21,128,61,.18);
-      white-space:nowrap;
-    }
+/* Content Area over the Gradient */
+.z-info-area {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:20px;
+  z-index:5;
+  display:flex;
+  flex-direction:column;
+}
 
-    .z-rating i {
-      font-size:10px;
-    }
+.z-avatar-wrap {
+  margin-bottom:8px;
+}
 
-    .z-for-you {
-      font-size:10px;
-      line-height:1;
-      color:#8a93a0;
-      font-weight:650;
-      white-space:nowrap;
-    }
+.z-avatar {
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  border:3px solid #fff;
+  background:#fff;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  object-fit:cover;
+}
 
-    .z-bookmark {
-      position:absolute;
-      top:12px;
-      right:12px;
-      z-index:2;
-      width:38px;
-      height:38px;
-      background:rgba(255,255,255,.94);
-      border:1px solid rgba(15,23,42,.06);
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#334155;
-      font-size:17px;
-      box-shadow:0 4px 12px rgba(0,0,0,.12);
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-    }
+.z-name {
+  font-size:22px;
+  font-weight:800;
+  color:#0f172a;
+  margin-bottom:4px;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 
-    .z-info-area {
-      padding:13px 16px 0;
-    }
+.z-cuisine-line {
+  font-size:13px;
+  color:#64748b;
+  font-weight:500;
+  margin-bottom:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 
-    .z-info-row {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:3px;
-    }
+.z-tags-row {
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
 
-    .z-name {
-      font-size:20px;
-      font-weight:800;
-      color:#20242b;
-      letter-spacing:-.45px;
-      flex:1;
-      min-width:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      padding-right:4px;
-      line-height:1.22;
-    }
+.z-tag-near {
+  background:#ecfdf3;
+  color:#168544;
+  font-size:11px;
+  font-weight:700;
+  padding:5px 10px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
 
-    .z-rating {
-      background:#168544;
-      color:#fff;
-      font-size:13px;
-      font-weight:800;
-      min-width:42px;
-      height:25px;
-      padding:0 7px;
-      border-radius:8px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-      flex-shrink:0;
-      line-height:1;
-      box-shadow:0 2px 6px rgba(21,128,61,.18);
-    }
+.z-tag-offer {
+  background:#fefce8;
+  color:#ca8a04;
+  font-size:11px;
+  font-weight:700;
+  padding:5px 10px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
 
-    .z-rating i {
-      font-size:10px;
-    }
+/* Stats Row Layout */
+.z-stats-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+}
 
-    .z-cuisine {
-      font-size:14px;
-      line-height:1.25;
-      color:#687384;
-      font-weight:500;
-      margin-bottom:8px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+.z-stats-group {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 
-    /* Admin-controlled restaurant-level Near & Fast badge. */
-    .z-near-fast {
-      display:inline-flex;
-      align-items:center;
-      width:max-content;
-      max-width:100%;
-      min-height:22px;
-      box-sizing:border-box;
-      padding:4px 8px;
-      margin:0 0 9px;
-      border-radius:999px;
-      background:#ecfdf3;
-      color:#168544;
-      font-size:12px;
-      font-weight:800;
-      line-height:1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      border:1px solid rgba(22,133,68,.10);
-    }
+.z-stat {
+  display:flex;
+  flex-direction:column;
+}
 
-    .z-near-fast i {
-      font-size:10px;
-    }
+.z-stat-val {
+  font-size:14px;
+  font-weight:800;
+  color:#0f172a;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
 
-    .z-meta-row {
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      font-size:14px;
-      color:#5f6b7a;
-      font-weight:650;
-      gap:7px;
-      font-variant-numeric:tabular-nums;
-      line-height:1.25;
-    }
+.z-stat-val i {
+  color:#168544;
+}
 
-    .z-meta-item {
-      display:flex;
-      align-items:center;
-      gap:4px;
-    }
+.z-stat-lbl {
+  font-size:11px;
+  color:#94a3b8;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
 
-    .z-meta-item i {
-      color:#64748b;
-      font-size:14px;
-    }
+.z-divider {
+  width:1px;
+  height:22px;
+  background:#e2e8f0;
+}
 
-    .z-meta-dot {
-      width:4px;
-      height:4px;
-      border-radius:50%;
-      background:#cbd5e1;
-      margin:0 2px;
-    }
+/* CTA Button */
+.z-btn-order {
+  background:#0f172a;
+  color:#fff;
+  padding:10px 20px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:700;
+  text-align:center;
+  box-shadow:0 4px 12px rgba(15,23,42,0.15);
+}
 
-    /* Minimum-order line — its own row beneath the delivery meta */
-    .z-min-order-row {
-      margin-top:9px;
-      font-size:13px;
-      font-weight:700;
-      color:#64748b;
-      line-height:1.25;
-    }
+/* Availability Overlay */
+.z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
+.z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine-line, .z-card.is-unavailable .z-stats-row { opacity: 0.6; }
+.z-availability-overlay { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
+.z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
+.z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.z-availability-pill i { color: #E23744; }
 
-    /* Dedicated, reserved-height offer space. This div always renders
-       (even with no offer) so every card keeps identical vertical
-       rhythm — offers never shift the layout below them. */
-    .z-offer-row {
-      min-height:20px;
-      margin-top:7px;
-      display:flex;
-      align-items:center;
-      overflow:hidden;
-    }
-
-    .z-offer-text {
-      display:inline-flex;
-      align-items:center;
-      gap:5px;
-      min-width:0;
-      max-width:100%;
-      color:#168544;
-      font-size:13px;
-      font-weight:700;
-      line-height:1.25;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    @media (min-width:700px) {
-      .z-card { margin-left:24px; margin-right:24px; }
-    }
-
-    /* Availability Overlay */
-    .z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
-    .z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine, .z-card.is-unavailable .z-meta-row { opacity: 0.6; }
-    .z-card.is-unavailable .z-rating-island { opacity: 0.7; }
-    .z-availability-overlay { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
-    .z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
-    .z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .z-availability-pill i { color: #E23744; }
-
-    #es-availability-toast {
-      position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
-      background: rgba(30,41,59,0.95); color: #fff; font-size: 13px; font-weight: 700;
-      padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-      opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-    #es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
-
+#es-availability-toast {
+  position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
+  background: rgba(30,41,59,0.95); color: #fff; font-size: 13px; font-weight: 700;
+  padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
