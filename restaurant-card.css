@@ -1,20 +1,18 @@
 /*
- * Nearbite — Restaurant Card Component
+ * Nearbite — Production Restaurant Card
  * Presentation-only styles. Data, cart, navigation and loading flow remain owned by index.html.
  */
 .rs-card  { margin:0 16px 32px 16px; }
-.rs-img   { height:220px; border-radius:16px; margin-bottom: 12px; }
+.rs-img   { height:220px; border-radius:16px; margin-bottom:12px; }
 .rs-row   { display:flex; justify-content:space-between; align-items:flex-start; margin:0 0 4px; }
 .rs-name  { height:22px; width:60%; border-radius:8px; }
 .rs-badge { height:22px; width:46px; border-radius:6px; }
 .rs-cuis  { height:14px; width:50%; border-radius:6px; margin-bottom:8px; }
 .rs-meta  { height:12px; width:70%; border-radius:5px; }
 
-/* ── Nearbite production restaurant cards ── */
-
 .vrest-section {
   background:#f7f8fa;
-  padding:20px 0 12px;
+  padding:20px 0 18px;
 }
 
 .z-rest-header {
@@ -25,7 +23,6 @@
   box-sizing:border-box;
   width:100%;
 }
-
 .z-rest-title {
   font-size:13px !important;
   font-weight:800 !important;
@@ -35,57 +32,43 @@
   margin-right:12px;
   white-space:nowrap;
 }
+.z-rest-line { flex:1; height:1px; background:#dfe3e8; }
 
-.z-rest-line {
-  flex:1;
-  height:1px;
-  background:#dfe3e8;
-}
-
-/* Modern Card Container */
+/* Main card: wider visual proportions, true 16:9 media area, compact information area. */
 .z-card {
   display:block;
+  position:relative;
   margin:0 18px 22px;
+  height:392px;
   background:#fff;
   border-radius:24px;
-  position:relative;
-  height:360px; /* Forces image to be a tall background */
   text-decoration:none;
   -webkit-tap-highlight-color:transparent;
   overflow:hidden;
   border:1px solid rgba(15,23,42,.07);
-  box-shadow:0 8px 24px rgba(15,23,42,.08);
-  transition:transform .18s ease, box-shadow .18s ease;
-  will-change:transform;
+  box-shadow:0 8px 24px rgba(15,23,42,.075);
+  isolation:isolate;
 }
+.z-card:active { transform:scale(.994); }
+@media (min-width:700px) { .z-card { margin-left:24px; margin-right:24px; } }
 
-.z-card:active {
-  transform:scale(.992) translateZ(0);
-  box-shadow:0 3px 13px rgba(15,23,42,.06);
-}
-
-@media (min-width:700px) {
-  .z-card { margin-left:24px; margin-right:24px; }
-}
-
-/* Image Wrapper & Gallery */
+/* Media is 16:9 relative to the card width. */
 .z-img-wrap {
   position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+  top:0;
+  left:0;
+  right:0;
+  height:calc((100vw - 36px) * .5625);
+  min-height:178px;
+  max-height:205px;
   z-index:1;
   background:#eef1f4;
-}
-
-.z-gallery {
-  position:absolute;
-  inset:0;
   overflow:hidden;
-  touch-action:pan-y;
-  z-index:0;
 }
-
+@media (min-width:700px) {
+  .z-img-wrap { height:calc((100vw - 48px) * .5625); }
+}
+.z-gallery { position:absolute; inset:0; overflow:hidden; touch-action:pan-y; z-index:0; }
 .z-gallery-track {
   display:flex;
   width:100%;
@@ -93,207 +76,190 @@
   transition:transform .38s cubic-bezier(.25,1,.5,1);
   will-change:transform;
 }
-
 .z-gallery-slide {
-  min-width:100%;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  flex:0 0 100%;
+  min-width:100%; width:100%; height:100%; object-fit:cover; flex:0 0 100%;
 }
-
 .z-gallery-dots {
   position:absolute;
   left:50%;
-  top:20px; 
+  bottom:10px;
   transform:translateX(-50%);
   display:flex;
+  align-items:center;
   gap:5px;
   z-index:4;
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(15,23,42,.18);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
 }
-
 .z-gallery-dot {
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:rgba(255,255,255,.58);
+  width:5px; height:5px; border-radius:50%;
+  background:rgba(255,255,255,.72);
   transition:all .25s ease;
-  box-shadow:0 1px 3px rgba(0,0,0,.18);
 }
+.z-gallery-dot.active { width:14px; border-radius:4px; background:#fff; }
 
-.z-gallery-dot.active {
-  width:16px;
-  border-radius:4px;
-  background:#fff;
-}
-
-/* The Smooth Gradient Overlay - Adjusted to reveal MUCH more food */
-.z-gradient-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 55%; 
-  background: linear-gradient(to top, #ffffff 40%, rgba(255,255,255,0.85) 75%, transparent 100%);
-  z-index: 2;
-  pointer-events: none;
+/* Soft fade only at the bottom edge of the image; food stays visible. */
+.z-image-shade {
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:42%;
+  z-index:2;
+  pointer-events:none;
+  background:linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.86) 82%, #fff 100%);
 }
 
 .z-bookmark {
   position:absolute;
-  top:16px;
-  right:16px;
-  z-index:5;
-  width:38px;
-  height:38px;
+  top:14px; right:14px; z-index:8;
+  width:42px; height:42px;
   background:rgba(255,255,255,.94);
   border:1px solid rgba(15,23,42,.06);
   border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#334155;
-  font-size:17px;
-  box-shadow:0 4px 12px rgba(0,0,0,.12);
+  display:flex; align-items:center; justify-content:center;
+  color:#334155; font-size:17px;
+  box-shadow:0 5px 14px rgba(0,0,0,.13);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
 }
 
-/* Content Area over the Gradient */
+/* Compact lower information panel. */
 .z-info-area {
   position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  padding:20px;
-  z-index:5;
+  left:0; right:0; bottom:0;
+  height:208px;
+  padding:16px 20px 15px;
+  box-sizing:border-box;
+  z-index:6;
   display:flex;
   flex-direction:column;
+  justify-content:flex-end;
+  background:linear-gradient(to bottom, rgba(255,255,255,0) 0, rgba(255,255,255,.94) 13%, #fff 27%);
 }
-
+.z-top-line { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.z-title-block { min-width:0; padding-top:5px; }
 .z-name {
-  font-size:22px;
-  font-weight:800;
-  color:#0f172a;
-  margin-bottom:4px;
-  line-height:1.2;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-size:23px; font-weight:850; color:#0f172a;
+  line-height:1.12; margin:0 0 5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  letter-spacing:-.25px;
+}
+.z-cuisine-line {
+  font-size:14px; color:#64748b; font-weight:600;
+  line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
-.z-cuisine-line {
-  font-size:13px;
-  color:#64748b;
-  font-weight:500;
-  margin-bottom:12px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+/* Dynamic rating island. */
+.z-rating-island {
+  flex:0 0 auto;
+  min-width:48px;
+  height:30px;
+  padding:0 10px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  background:#168544;
+  color:#fff;
+  font-size:14px;
+  font-weight:850;
+  box-shadow:0 4px 10px rgba(22,133,68,.18);
 }
+.z-rating-island i { font-size:10px; }
+
+.z-meta-line {
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap:8px;
+  margin-top:13px;
+  color:#64748b;
+  font-size:14px;
+  font-weight:700;
+}
+.z-meta-line i { color:#7b8797; font-size:12px; }
+.z-meta-dot { color:#cbd5e1; }
 
 .z-tags-row {
+  min-height:30px;
   display:flex;
-  gap:8px;
-  margin-bottom:16px;
+  align-items:center;
+  gap:7px;
   flex-wrap:wrap;
+  margin-top:11px;
 }
-
-.z-tag-near {
-  background:#ecfdf3;
-  color:#168544;
-  font-size:11px;
-  font-weight:700;
-  padding:5px 10px;
+.z-tag-best, .z-tag-near, .z-tag-offer {
+  display:inline-flex; align-items:center; gap:5px;
+  max-width:100%;
+  padding:5px 9px;
   border-radius:999px;
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-}
-
-.z-tag-offer {
-  background:#fefce8;
-  color:#ca8a04;
   font-size:11px;
-  font-weight:700;
-  padding:5px 10px;
-  border-radius:999px;
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-}
-
-/* Stats Row Layout */
-.z-stats-row {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  width:100%;
-}
-
-.z-stats-group {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.z-stat {
-  display:flex;
-  flex-direction:column;
-}
-
-.z-stat-val {
-  font-size:14px;
+  line-height:1;
   font-weight:800;
-  color:#0f172a;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.z-tag-best { background:#fff7df; color:#9a6b00; border:1px solid #f5df9b; }
+.z-tag-near { background:#ecfdf3; color:#168544; border:1px solid #c9f1d8; }
+.z-tag-offer { background:#fff1f2; color:#d92d4d; border:1px solid #ffd1d9; }
+.z-tag-best i, .z-tag-near i, .z-tag-offer i { font-size:10px; }
+
+.z-bottom-line {
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:13px;
+}
+.z-min-order { display:flex; flex-direction:column; min-width:0; }
+.z-min-order strong { font-size:16px; line-height:1.1; color:#0f172a; font-weight:850; }
+.z-min-order span { margin-top:3px; font-size:10px; color:#94a3b8; font-weight:750; text-transform:uppercase; letter-spacing:.45px; }
+.z-min-empty span { text-transform:none; letter-spacing:0; }
+
+.z-btn-order {
+  flex:0 0 auto;
+  min-width:82px;
+  height:40px;
+  padding:0 18px;
+  box-sizing:border-box;
   display:flex;
   align-items:center;
-  gap:4px;
-}
-
-.z-stat-val i {
-  color:#168544;
-}
-
-.z-stat-lbl {
-  font-size:11px;
-  color:#94a3b8;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:0.5px;
-}
-
-.z-divider {
-  width:1px;
-  height:22px;
-  background:#e2e8f0;
-}
-
-/* CTA Button */
-.z-btn-order {
+  justify-content:center;
   background:#0f172a;
   color:#fff;
-  padding:10px 20px;
   border-radius:999px;
   font-size:14px;
-  font-weight:700;
-  text-align:center;
-  box-shadow:0 4px 12px rgba(15,23,42,0.15);
+  font-weight:800;
+  box-shadow:0 6px 15px rgba(15,23,42,.18);
 }
 
-/* Availability Overlay */
-.z-img-wrap.is-unavailable img { filter: grayscale(1) contrast(0.9); opacity: 0.6; }
-.z-card.is-unavailable .z-name, .z-card.is-unavailable .z-cuisine-line, .z-card.is-unavailable .z-stats-row { opacity: 0.6; }
-.z-availability-overlay { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; }
-.z-img-wrap.is-unavailable .z-availability-overlay { opacity: 1; }
-.z-availability-pill { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); color: #1E293B; font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.z-availability-pill i { color: #E23744; }
+/* Availability */
+.z-img-wrap.is-unavailable img { filter:grayscale(1) contrast(.9); opacity:.6; }
+.z-card.is-unavailable .z-name,
+.z-card.is-unavailable .z-cuisine-line,
+.z-card.is-unavailable .z-meta-line,
+.z-card.is-unavailable .z-bottom-line { opacity:.6; }
+.z-availability-overlay { position:absolute; inset:0; z-index:6; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.2); opacity:0; transition:opacity .3s; }
+.z-img-wrap.is-unavailable .z-availability-overlay { opacity:1; }
+.z-availability-pill { background:rgba(255,255,255,.95); backdrop-filter:blur(8px); color:#1e293b; font-size:13px; font-weight:800; padding:8px 16px; border-radius:20px; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+.z-availability-pill i { color:#e23744; }
 
 #es-availability-toast {
-  position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 10px);
-  background: rgba(30,41,59,0.95); color: #fff; font-size: 13px; font-weight: 700;
-  padding: 12px 20px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-  opacity: 0; pointer-events: none; z-index: 999; max-width: 82%; text-align: center;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  position:fixed; left:50%; bottom:96px; transform:translate(-50%,10px);
+  background:rgba(30,41,59,.95); color:#fff; font-size:13px; font-weight:700;
+  padding:12px 20px; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,.2);
+  opacity:0; pointer-events:none; z-index:999; max-width:82%; text-align:center;
+  transition:opacity .3s ease, transform .3s ease;
 }
-#es-availability-toast.show { opacity: 1; transform: translate(-50%, 0); }
+#es-availability-toast.show { opacity:1; transform:translate(-50%,0); }
+
+@media (max-width:380px) {
+  .z-card { height:386px; border-radius:22px; }
+  .z-info-area { height:204px; padding-left:17px; padding-right:17px; }
+  .z-name { font-size:21px; }
+  .z-rating-island { height:29px; min-width:46px; padding:0 9px; }
+  .z-meta-line { font-size:13px; }
+  .z-btn-order { min-width:78px; height:38px; padding:0 15px; }
+}
