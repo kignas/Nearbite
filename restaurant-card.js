@@ -243,8 +243,6 @@
       const deliveryMin = escapeCardHtml(res.estimatedDeliveryMin || 30);
       const deliveryMax = escapeCardHtml(res.estimatedDeliveryMax || 45);
 
-      // Optional presentation fields. If the API does not provide them,
-      // the card simply omits these elements.
       const rawMinOrder =
         res.minimumOrder ??
         res.minimumOrderAmount ??
@@ -266,114 +264,76 @@
         '';
 
       const safeOfferText = escapeCardHtml(offerText);
-      const safeMinOrder = hasMinOrder
-        ? '₹' + minOrderNumber.toLocaleString('en-IN') + ' minimum order'
-        : '';
 
       return (
         '<a href="restaurant.html?id=' + encodeURIComponent(resId) +
         '" class="z-card' + (isUnavailable ? ' is-unavailable' : '') + '"' +
         guard +
         ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '"' +
-        ' style="animation: cardFadeUp .3s ease forwards ' + (i * 0.05) +
-        's; opacity:0; transform:translateY(10px);">' +
+        ' style="animation: cardFadeUp .3s ease forwards ' + (i * 0.05) + 's; opacity:0; transform:translateY(10px);">' +
 
+          /* Full Background Image Layer & 5-Sec Gallery */
           '<div class="z-img-wrap' + (isUnavailable ? ' is-unavailable' : '') + '">' +
-
             '<div class="z-gallery" data-gallery="' + safeId + '">' +
               '<div class="z-gallery-track">' +
                 safeImages.map(function (src, idx) {
                   return (
-                    '<img class="z-gallery-slide" src="' +
-                    escapeCardHtml(src) +
-                    '" alt="' + safeName +
+                    '<img class="z-gallery-slide" src="' + escapeCardHtml(src) + '" alt="' + safeName +
                     '" loading="' + (idx === 0 ? 'eager' : 'lazy') +
                     '" onload="this.classList.add(\'loaded\')" ' +
-                    'onerror="this.onerror=null;this.src=\'' +
-                    FALLBACK_IMAGE.replace(/'/g, '&#39;') +
-                    '\';">'
+                    'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMAGE.replace(/'/g, '&#39;') + '\';">'
                   );
                 }).join('') +
               '</div>' +
-
-              (
-                safeImages.length > 1
-                  ? '<div class="z-gallery-dots">' +
-                    safeImages.map(function (_, idx) {
-                      return '<span class="z-gallery-dot' +
-                        (idx === 0 ? ' active' : '') +
-                        '"></span>';
-                    }).join('') +
-                    '</div>'
-                  : ''
-              ) +
+              (safeImages.length > 1 ? '<div class="z-gallery-dots">' + safeImages.map(function (_, idx) { return '<span class="z-gallery-dot' + (idx === 0 ? ' active' : '') + '"></span>'; }).join('') + '</div>' : '') +
             '</div>' +
-
-            '<div class="z-img-scrim"></div>' +
-            (
-              isBestSeller
-                ? '<div class="z-best-seller">' +
-                    '<i class="fa-solid fa-crown"></i> ' +
-                    bestSellerLabel +
-                  '</div>'
-                : ''
-            ) +
-            '<div class="z-bookmark" aria-hidden="true"><i class="fa-regular fa-bookmark"></i></div>' +
-
-            (
-              isUnavailable
-                ? '<div class="z-availability-overlay">' +
-                  '<div class="z-availability-pill">' +
-                  '<i class="fa-regular fa-clock"></i> ' +
-                  escapeCardHtml(label) +
-                  '</div></div>'
-                : ''
-            ) +
-
+            (isUnavailable ? '<div class="z-availability-overlay"><div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ' + escapeCardHtml(label) + '</div></div>' : '') +
           '</div>' +
 
+          /* Best Seller Badge */
+          (isBestSeller ? '<div class="z-best-seller"><i class="fa-solid fa-crown"></i> ' + bestSellerLabel + '</div>' : '') +
+
+          /* Floating Bookmark (Top Right) */
+          '<div class="z-bookmark" aria-hidden="true"><i class="fa-regular fa-bookmark"></i></div>' +
+
+          /* Smooth Gradient Fade */
+          '<div class="z-gradient-overlay"></div>' +
+
+          /* Foreground Content Area */
           '<div class="z-info-area">' +
-            '<div class="z-info-row">' +
-              '<div class="z-name">' + safeName + '</div>' +
-              '<div class="z-rating-island">' +
-                '<div class="z-rating">' + rating +
-                  ' <i class="fa-solid fa-star"></i>' +
-                '</div>' +
-                '<div class="z-for-you">For you</div>' +
-              '</div>' +
+            '<div class="z-avatar-wrap">' +
+               '<img class="z-avatar" src="' + escapeCardHtml(safeImages[0]) + '" alt="logo">' +
+            '</div>' +
+            
+            '<div class="z-name">' + safeName + '</div>' +
+            
+            '<div class="z-cuisine-line">' +
+              '<i class="fa-solid fa-utensils" style="font-size:11px; color:#94a3b8;"></i> ' + cuisine +
+              ' &bull; <i class="fa-solid fa-location-dot" style="font-size:11px; color:#94a3b8;"></i> ' + escapeCardHtml(displayDistance) +
             '</div>' +
 
-            '<div class="z-cuisine">' + cuisine + '</div>' +
-
-            (
-              isNearFast
-                ? '<div class="z-near-fast"><i class="fa-solid fa-bolt"></i> ' +
-                  nearFastLabel +
-                  '</div>'
-                : ''
-            ) +
-
-            '<div class="z-meta-row">' +
-              '<div class="z-meta-item">' +
-                '<i class="fa-solid fa-clock-rotate-left" style="color:#64748B;"></i> ' +
-                deliveryMin + '-' + deliveryMax + ' mins' +
-              '</div>' +
-              '<div class="z-meta-dot"></div>' +
-              '<div>' + escapeCardHtml(displayDistance) + '</div>' +
+            /* Near & Fast and Offers Row */
+            '<div class="z-tags-row">' +
+               (isNearFast ? '<span class="z-tag-near"><i class="fa-solid fa-bolt"></i> ' + nearFastLabel + '</span>' : '') +
+               (safeOfferText ? '<span class="z-tag-offer"><i class="fa-solid fa-tag"></i> ' + safeOfferText + '</span>' : '') +
             '</div>' +
 
-            (
-              hasMinOrder
-                ? '<div class="z-min-order-row">' + safeMinOrder + '</div>'
-                : ''
-            ) +
-            '<div class="z-offer-row">' +
-              (
-                safeOfferText
-                  ? '<span class="z-offer-text"><i class="fa-solid fa-tag"></i> ' +
-                    safeOfferText + '</span>'
-                  : ''
-              ) +
+            /* Inspiration "Bottom Stats" Structure */
+            '<div class="z-stats-row">' +
+               '<div class="z-stats-group">' +
+                  '<div class="z-stat">' +
+                     '<span class="z-stat-val"><i class="fa-solid fa-star" style="font-size:10px;"></i> ' + rating + '</span>' +
+                     '<span class="z-stat-lbl">rating</span>' +
+                  '</div>' +
+                  '<div class="z-divider"></div>' +
+                  '<div class="z-stat">' +
+                     '<span class="z-stat-val">' + deliveryMin + '-' + deliveryMax + 'm</span>' +
+                     '<span class="z-stat-lbl">time</span>' +
+                  '</div>' +
+                  (hasMinOrder ? '<div class="z-divider"></div><div class="z-stat"><span class="z-stat-val">₹' + minOrderNumber + '</span><span class="z-stat-lbl">min order</span></div>' : '') +
+               '</div>' +
+               
+               '<div class="z-btn-order">Order</div>' +
             '</div>' +
           '</div>' +
         '</a>'
