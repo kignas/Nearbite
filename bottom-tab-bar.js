@@ -1,6 +1,6 @@
 /* ============================================================
-   NEARBITE — FLOATING GLASS CAPSULE NAVIGATION (DARK GLASS)
-   Matches the premium, translucent dark mode reference design.
+   NEARBITE — FLOATING GLASS CAPSULE NAVIGATION (LIGHT UI MATCH)
+   Slimmer proportions with frosted light glass to match the app.
    ============================================================ */
 (function () {
   'use strict';
@@ -10,12 +10,12 @@
 
   const CSS = `
     :root {
-      --nb-tab-accent: #ffffff;                   /* Pure white for active icon */
-      --nb-tab-active-bg: rgba(255, 255, 255, 0.2); /* Semi-transparent white highlight pill */
-      --nb-tab-muted: rgba(255, 255, 255, 0.55);  /* Faded white for inactive icons */
-      --nb-tab-bar-height: 64px;                  /* Slightly taller for elegance */
-      --nb-tab-bar-bottom-offset: 16px;           /* Floats slightly higher off the bottom */
-      --nb-tab-radius: 99px;                      /* Perfect pill shape */
+      --nb-tab-accent: #0f172a;                   /* Dark slate for active icon */
+      --nb-tab-active-bg: #ffffff;                /* Pure white pill for active state */
+      --nb-tab-muted: #94a3b8;                    /* Crisp grey for inactive icons */
+      --nb-tab-bar-height: 56px;                  /* Slimmer height to match reference */
+      --nb-tab-bar-bottom-offset: 16px;           /* Floats off the bottom */
+      --nb-tab-radius: 999px;                     /* Perfect capsule */
       --nb-cart-bottom: calc(var(--nb-tab-bar-height) + var(--nb-tab-bar-bottom-offset) + 16px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -25,28 +25,28 @@
       overflow-x: hidden;
     }
 
-    /* ---------------- Dark Glassmorphic Capsule ---------------- */
+    /* ---------------- Frosted Light Glass Capsule ---------------- */
     #nearbite-bottom-tabbar {
       box-sizing: border-box;
       position: fixed;
       left: 50%;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + env(safe-area-inset-bottom, 0px));
       width: calc(100% - 48px); 
-      max-width: 390px;
+      max-width: 320px; /* Tighter width for the true floating capsule look */
       height: var(--nb-tab-bar-height);
       z-index: 99999;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      padding: 8px 10px; /* Tuned padding to match reference inner gap */
+      gap: 4px;
+      padding: 6px; /* Matches the inner border gap of the reference */
       
-      /* The Dark Glass Effect */
-      background: rgba(20, 25, 35, 0.75); 
-      border: 1px solid rgba(255, 255, 255, 0.12); /* Subtle light rim */
+      /* Light Glass Effect matching your UI */
+      background: rgba(255, 255, 255, 0.75); 
+      border: 1px solid rgba(255, 255, 255, 0.9); 
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); /* Soft drop shadow */
-      backdrop-filter: blur(24px) saturate(150%);
-      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08); /* Soft floating shadow */
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
       
       transform: translate3d(-50%, 0, 0);
       transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .2s ease;
@@ -79,13 +79,13 @@
       justify-content: center;
       width: 100%;
       height: 100%;
-      border-radius: 99px; 
+      border-radius: 999px; 
       background: transparent;
       transition: background .26s cubic-bezier(.22,1,.36,1), transform .18s ease;
     }
 
     .nb-tab i {
-      font-size: 20px; 
+      font-size: 18px; /* Smaller, delicate icons like the reference */
       color: var(--nb-tab-muted);
       transition: color .2s ease;
     }
@@ -96,7 +96,7 @@
 
     .nb-tab.is-active .nb-tab-pill {
       background: var(--nb-tab-active-bg);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
     }
 
     .nb-tab.is-active i {
@@ -115,7 +115,7 @@
 
     .nb-tab:active .nb-tab-pill { transform: scale(.96); }
 
-    /* Floating Help Center Button (Updated to match dark glass theme) */
+    /* Floating Help Center Button (Updated to match light glass theme) */
     #nearbite-help-center {
       position: fixed;
       right: 16px;
@@ -128,15 +128,15 @@
       justify-content: center;
       border-radius: 50%;
       
-      /* Dark glass matching the bar */
-      background: rgba(20, 25, 35, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #ffffff;
+      /* Light glass matching the bar */
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      color: #0f172a;
       
       font-weight: 600;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
-      backdrop-filter: blur(24px) saturate(150%);
-      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: transform .2s ease, opacity .2s ease;
