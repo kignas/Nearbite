@@ -260,6 +260,37 @@
       animation: slideOutRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
     }
 
+    /* ── States and API-driven item chrome (Phase 1.1) ── */
+    .menu-state { text-align: center; padding: 56px 20px 64px; }
+    .menu-state i { font-size: 40px; color: #d7dbe2; display: block; margin-bottom: 14px; }
+    .menu-state-title { font-size: 16px; font-weight: 800; color: #303845; margin: 0 0 6px; }
+    .menu-state-sub { font-size: 13px; font-weight: 500; color: #6b7280; margin: 0 0 18px; line-height: 1.5; }
+    .menu-state-btn {
+      background: #FC8019; color: #fff; border: none; padding: 12px 26px;
+      border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+    }
+    .menu-state-btn:disabled { opacity: .6; cursor: default; }
+
+    .nb-item-badge {
+      color: #d97706; font-size: 10px; font-weight: 800; background: #fef3c7;
+      padding: 3px 6px; border-radius: 4px; width: max-content; margin-bottom: 6px;
+      display: inline-block;
+    }
+
+    .nb-veg-mark {
+      width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .nb-veg-mark.veg { border: 1.5px solid #16a34a; }
+    .nb-veg-mark.veg span { width: 6px; height: 6px; background: #16a34a; border-radius: 50%; }
+    .nb-veg-mark.nonveg { border: 1.5px solid #dc2626; }
+    .nb-veg-mark.nonveg span {
+      width: 0; height: 0; border-left: 4px solid transparent;
+      border-right: 4px solid transparent; border-bottom: 7px solid #dc2626;
+    }
+
+    .nb-item-image-wrap.no-image { background: linear-gradient(135deg,#edf0f4,#e2e7ee); }
+
 </style>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -268,8 +299,7 @@
   <div class="top-bar">
     <button class="icon-btn" onclick="window.nearbiteSafeBack()"><i class="fa-solid fa-chevron-left"></i></button>
     <div class="top-actions">
-      <button class="icon-btn" onclick="window.location.href='search.html'"><i class="fa-solid fa-magnifying-glass"></i></button>
-     <button class="icon-btn" onclick="premiumBack()"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
   </div>
 
@@ -280,7 +310,6 @@
           <h1 id="res-name" class="res-name">Loading…</h1>
           <p  id="res-cuisine" class="res-cuisine"></p>
         </div>
-        <button class="heart-btn" id="heart-btn"><i class="fa-regular fa-heart" id="heart-icon"></i></button>
       </div>
       <div class="res-meta-row">
         <div class="rating-pill">
@@ -301,8 +330,6 @@
     </div>
     <div class="delivery-strip">
       <div class="del-chip" id="res-free-delivery"><i class="fa-solid fa-motorcycle orange"></i> FREE delivery above ₹199</div>
-      <div class="del-sep"></div>
-      <div class="del-chip"><i class="fa-regular fa-clock blue"></i> On-time delivery</div>
     </div>
   </div>
 
@@ -348,15 +375,16 @@
     </div>
   </div>
 
-  <script src="home.js"></script>
+  <script src="config.js"></script>
+  <script src="api.js"></script>
   <script src="cart-bar.js"></script>
   <script>
-  const BESTSELLER_ITEMS = ['Veg Momos', 'Chicken Momos', 'Paneer Tikka', 'Butter Chicken', 'Biryani', 'Margherita Pizza'];
-  const MUSTTRY_ITEMS = ['Special Thali', 'Loaded Fries', 'Double Patty Burger'];
-  const CUSTOMISABLE_ITEMS = ['Veg Momos', 'Chicken Momos', 'Paneer Tikka', 'Butter Chicken', 'Pizza', 'Burger', 'Sandwich', 'Margherita Pizza', 'Double Patty Burger'];
-
-  let activeFilter = null; 
-  let isRestaurantOpen = true; // Added to track restaurant availability
+  /* Item badges come from the API only. There is no hardcoded list of
+     "bestsellers" — a badge is shown when the backend says so, never
+     because an item's name happens to match a string in the frontend. */
+  let activeFilter = null;
+  let isRestaurantOpen = true; // tracks restaurant availability for item states
+  let currentResId = null;
 
   function formatTime(timeStr) {
     if (!timeStr) return '';
@@ -378,22 +406,23 @@
   function applyFilter() {
     const items = document.querySelectorAll('.menu-item');
     let visible = 0;
+
     items.forEach(item => {
+      const vegKnown = item.dataset.vegKnown === 'true';
       const isVeg = item.dataset.veg === 'true';
       let show = true;
-      if (activeFilter === 'veg') show = isVeg;
-      if (activeFilter === 'nonveg') show = !isVeg;
+
+      // Items with no veg information are hidden by either veg filter
+      // rather than being silently classified as non-veg.
+      if (activeFilter === 'veg') show = vegKnown && isVeg;
+      if (activeFilter === 'nonveg') show = vegKnown && !isVeg;
+
       item.classList.toggle('hidden-by-filter', !show);
       if (show) visible++;
     });
-    document.getElementById('empty-filter-msg').style.display = (visible === 0) ? 'block' : 'none';
-  }
 
-  document.getElementById('heart-btn').addEventListener('click', function() {
-    this.classList.toggle('loved');
-    const icon = document.getElementById('heart-icon');
-    icon.className = this.classList.contains('loved') ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-  });
+    document.getElementById('empty-filter-msg').style.display = visible === 0 ? 'block' : 'none';
+  }
 
   const catNav = document.getElementById('cat-nav');
   const sentinel = document.getElementById('cat-nav-sentinel');
@@ -430,10 +459,6 @@
     const offset = 116;
     const top = el.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top, behavior: 'smooth' });
-  }
-
-  function isCustomisable(name) {
-    return CUSTOMISABLE_ITEMS.some(c => name.toLowerCase().includes(c.toLowerCase()));
   }
 
   window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
@@ -477,203 +502,397 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const resId = params.get('id');
-    const API_BASE_URL = 'https://eatswada.onrender.com/api';
+  /* ── Menu shape normaliser ───────────────────────────────────
+     The backend groups the menu as { "Starters": [...] }. This also
+     accepts a flat array (with a category field) so an API shape change
+     degrades into a working page instead of a blank one. */
+  function normalizeMenu(data) {
+    if (!data) return [];
 
-    if (!resId) return showErrorState();
-
-    try {
-      const [resResponse, menuResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/restaurants/${resId}`),
-        fetch(`${API_BASE_URL}/restaurants/${resId}/menu`)
-      ]);
-
-      if (!resResponse.ok || !menuResponse.ok) throw new Error("API Error");
-
-      const resResult = await resResponse.json();
-      const menuResult = await menuResponse.json();
-      
-      const restaurant = resResult.data;
-      const groupedMenu = menuResult.data;
-
-      // Track restaurant availability globally for menu item states
-      isRestaurantOpen = restaurant.isOpen !== false;
-
-      // Render the correct Warning Status Card if closed
-      if (!isRestaurantOpen) {
-        const reason = restaurant.availability?.closedReason;
-        const opensAt = restaurant.availability?.opensAt;
-        let warningHtml = '';
-        
-        if (reason === 'closed_today') {
-          const timeStr = opensAt ? `Opens tomorrow at ${formatTime(opensAt)}.` : `Not accepting orders today.`;
-          warningHtml = `
-            <div class="closed-warning-card closed-today">
-              <div class="closed-icon"><i class="fa-solid fa-moon"></i></div>
-              <div class="closed-text">
-                <h4>Closed Today</h4>
-                <p>The restaurant is taking a break. ${timeStr}</p>
-              </div>
-            </div>
-          `;
-        } else {
-          warningHtml = `
-            <div class="closed-warning-card temp-closed">
-              <div class="closed-icon"><i class="fa-solid fa-store-slash"></i></div>
-              <div class="closed-text">
-                <h4>Temporarily Closed</h4>
-                <p>This restaurant is currently unavailable. Please check back later.</p>
-              </div>
-            </div>
-          `;
-        }
-        document.querySelector('.res-card').insertAdjacentHTML('beforebegin', warningHtml);
+    if (Array.isArray(data)) {
+      // [{ category, items: [...] }] or a flat list of items.
+      if (data.length && data[0] && Array.isArray(data[0].items)) {
+        return data
+          .map(group => ({
+            name: group.category || group.name || 'Menu',
+            items: group.items.filter(Boolean)
+          }))
+          .filter(group => group.items.length);
       }
 
-      document.title = restaurant.name + ' – EatSwada';
-      document.getElementById('res-name').innerText = restaurant.name;
-      document.getElementById('res-cuisine').innerText = restaurant.cuisineDisplay || restaurant.cuisine.join(', ');
-      document.getElementById('res-rating-num').innerText = restaurant.rating || "NEW";
-      document.getElementById('res-rating-count').innerText = `${Number(restaurant.ratingCount || 0).toLocaleString('en-IN')} ratings`;
-      document.getElementById('res-time').innerHTML = '<i class="fa-regular fa-clock"></i> ' + (restaurant.time || `${restaurant.estimatedDeliveryMin || 30}-${restaurant.estimatedDeliveryMax || 40} mins`);
-      document.getElementById('res-distance').innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + (restaurant.distance || '2 km');
-      const freeDeliveryEl = document.getElementById('res-free-delivery');
-      if (freeDeliveryEl) {
-        freeDeliveryEl.innerHTML = restaurant.freeDeliveryEnabled === false
-          ? '<i class="fa-solid fa-motorcycle orange"></i> Delivery available'
-          : `<i class="fa-solid fa-motorcycle orange"></i> FREE delivery${restaurant.freeDeliveryAbove > 0 ? ` above ₹${Number(restaurant.freeDeliveryAbove).toLocaleString('en-IN')}` : ''}`;
+      const grouped = new Map();
+      data.filter(Boolean).forEach(item => {
+        const key = item.category || item.categoryName || 'Menu';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(item);
+      });
+      return Array.from(grouped, ([name, items]) => ({ name, items }));
+    }
+
+    if (typeof data === 'object') {
+      return Object.keys(data)
+        .map(name => ({
+          name,
+          items: Array.isArray(data[name]) ? data[name].filter(Boolean) : []
+        }))
+        .filter(group => group.items.length);
+    }
+
+    return [];
+  }
+
+  function cuisineText(restaurant) {
+    if (Array.isArray(restaurant.cuisine)) return restaurant.cuisine.filter(Boolean).join(', ');
+    if (typeof restaurant.cuisineDisplay === 'string' && restaurant.cuisineDisplay.trim()) {
+      return restaurant.cuisineDisplay.trim();
+    }
+    if (typeof restaurant.cuisine === 'string') return restaurant.cuisine.trim();
+    return '';
+  }
+
+  function setMetaChip(id, iconHtml, value) {
+    const node = document.getElementById(id);
+    if (!node) return;
+
+    // No real value means no chip — never a placeholder like "2 km".
+    if (!value) {
+      node.style.display = 'none';
+      const dot = node.previousElementSibling;
+      if (dot && dot.classList.contains('meta-dot')) dot.style.display = 'none';
+      return;
+    }
+
+    node.style.display = '';
+    node.innerHTML = iconHtml + ' ' + value;
+  }
+
+  function renderRestaurantHeader(restaurant) {
+    const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
+    document.title = restaurant.name + ' – ' + brand;
+    document.getElementById('res-name').innerText = restaurant.name || 'Restaurant';
+
+    const cuisine = cuisineText(restaurant);
+    const cuisineEl = document.getElementById('res-cuisine');
+    cuisineEl.innerText = cuisine;
+    cuisineEl.style.display = cuisine ? '' : 'none';
+
+    const ratingPill = document.querySelector('.rating-pill');
+    const rating = Number(restaurant.rating);
+
+    if (Number.isFinite(rating) && rating > 0) {
+      if (ratingPill) ratingPill.style.display = '';
+      document.getElementById('res-rating-num').innerText = rating.toFixed(1);
+
+      const count = Number(restaurant.ratingCount);
+      const countEl = document.getElementById('res-rating-count');
+      if (Number.isFinite(count) && count > 0) {
+        countEl.innerText = count.toLocaleString('en-IN') + ' ratings';
+        countEl.style.display = '';
+      } else {
+        countEl.style.display = 'none';
+        const divider = document.querySelector('.rating-divider');
+        if (divider) divider.style.display = 'none';
       }
+    } else if (ratingPill) {
+      // Genuinely unrated restaurants say so rather than showing a made-up score.
+      ratingPill.style.display = '';
+      document.getElementById('res-rating-num').innerText = 'New';
+      document.getElementById('res-rating-count').style.display = 'none';
+      const divider = document.querySelector('.rating-divider');
+      if (divider) divider.style.display = 'none';
+    }
 
-      if (restaurant.offer) {
-        document.getElementById('res-offer-text').innerText = restaurant.offer;
-        document.getElementById('res-offer-banner').style.display = 'flex';
-      }
+    const min = Number(restaurant.estimatedDeliveryMin);
+    const max = Number(restaurant.estimatedDeliveryMax);
+    let timeText = '';
+    if (Number.isFinite(min) && Number.isFinite(max)) timeText = min + '-' + max + ' mins';
+    else if (Number.isFinite(max)) timeText = max + ' mins';
+    else if (typeof restaurant.time === 'string' && restaurant.time.trim()) timeText = restaurant.time.trim();
+    setMetaChip('res-time', '<i class="fa-regular fa-clock"></i>', timeText);
 
-      const categories = Object.keys(groupedMenu);
-      const menuContainer = document.getElementById('menu-container');
+    let distanceText = '';
+    if (typeof restaurant.distance === 'string' && restaurant.distance.trim()) {
+      distanceText = restaurant.distance.trim();
+    } else if (Number.isFinite(Number(restaurant.distanceMeters))) {
+      distanceText = (Number(restaurant.distanceMeters) / 1000).toFixed(1) + ' km';
+    }
+    setMetaChip('res-distance', '<i class="fa-solid fa-location-dot"></i>', distanceText);
 
-      const navInner = document.getElementById('cat-nav-inner');
-      navInner.innerHTML = categories.map((cat, i) => {
-        const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
-        return `<div class="cat-nav-pill ${i===0?'active':''}" data-target="${catId}" onclick="scrollToCategory('${catId}')">${cat}</div>`;
-      }).join('');
+    const freeDeliveryEl = document.getElementById('res-free-delivery');
+    if (freeDeliveryEl) {
+      freeDeliveryEl.innerHTML = restaurant.freeDeliveryEnabled === false
+        ? '<i class="fa-solid fa-motorcycle orange"></i> Delivery available'
+        : '<i class="fa-solid fa-motorcycle orange"></i> FREE delivery' +
+          (Number(restaurant.freeDeliveryAbove) > 0
+            ? ' above ₹' + Number(restaurant.freeDeliveryAbove).toLocaleString('en-IN')
+            : '');
+    }
 
-      let globalIdx = 0;
-      menuContainer.innerHTML = categories.map(cat => {
-        const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
-        const items = groupedMenu[cat];
+    const offer = restaurant.offer || restaurant.offerText || '';
+    if (offer) {
+      document.getElementById('res-offer-text').innerText = offer;
+      document.getElementById('res-offer-banner').style.display = 'flex';
+    } else {
+      document.getElementById('res-offer-banner').style.display = 'none';
+    }
+  }
 
-        const itemsHTML = items.map(item => {
-          const key = item.name.replace(/\s+/g, '');
-          
-          let cartMemory = {};
-          try { cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch(e){}
-          const qty = cartMemory[item.name] ? cartMemory[item.name].quantity : 0;
-          
-          const cleanPrice = typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^\d.]/g, '')) || 0;
-          const rawOriginalPrice = Number(item.originalPrice);
-          const originalPrice = Number.isFinite(rawOriginalPrice) && rawOriginalPrice > cleanPrice ? rawOriginalPrice : null;
-          const discountPercent = originalPrice ? Math.round((1 - cleanPrice / originalPrice) * 100) : 0;
+  function renderClosedWarning(restaurant) {
+    const existing = document.querySelector('.closed-warning-card');
+    if (existing) existing.remove();
+    if (isRestaurantOpen) return;
 
-          const isBest = BESTSELLER_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
-          const isMust = MUSTTRY_ITEMS.some(b => item.name.toLowerCase().includes(b.toLowerCase()));
-          
-          const tagHTML = isBest 
-            ? `<span style="color:#d97706;font-size:10px;font-weight:800;display:flex;align-items:center;gap:4px;background:#fef3c7;padding:3px 6px;border-radius:4px;width:max-content;margin-bottom:6px;"><i class="fa-solid fa-star" style="font-size:8px;"></i> Bestseller</span>` 
-            : isMust 
-              ? `<span style="color:#1a8a5f;font-size:10px;font-weight:800;display:flex;align-items:center;gap:4px;background:#e8f8f1;padding:3px 6px;border-radius:4px;width:max-content;margin-bottom:6px;"><i class="fa-solid fa-star" style="font-size:8px;"></i> Must Try</span>`
-              : '';
+    const reason = restaurant.availability && restaurant.availability.closedReason;
+    const opensAt = restaurant.availability && restaurant.availability.opensAt;
+    let warningHtml;
 
-          const vegIcon = item.isVeg 
-            ? `<div style="width:14px;height:14px;border:1.5px solid #16a34a;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;background:#16a34a;border-radius:50%;"></div></div>`
-            : `<div style="width:14px;height:14px;border:1.5px solid #dc2626;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #dc2626;"></div></div>`;
+    if (reason === 'closed_today') {
+      const timeStr = opensAt
+        ? `Opens tomorrow at ${formatTime(opensAt)}.`
+        : 'Not accepting orders today.';
+      warningHtml = `
+        <div class="closed-warning-card closed-today">
+          <div class="closed-icon"><i class="fa-solid fa-moon"></i></div>
+          <div class="closed-text">
+            <h4>Closed Today</h4>
+            <p>The restaurant is taking a break. ${timeStr}</p>
+          </div>
+        </div>`;
+    } else {
+      warningHtml = `
+        <div class="closed-warning-card temp-closed">
+          <div class="closed-icon"><i class="fa-solid fa-store-slash"></i></div>
+          <div class="closed-text">
+            <h4>Temporarily Closed</h4>
+            <p>This restaurant is currently unavailable. Please check back later.</p>
+          </div>
+        </div>`;
+    }
 
-          const delay = (globalIdx++ * 0.04).toFixed(2);
-          const imageSrc = item.image || item.img || '';
-          
-          const inStock = item.inStock !== false;
-          const isItemAvailable = inStock && isRestaurantOpen;
-          
-          // Apply slight grayscale if the restaurant or item is unavailable
-          const imageFilter = !isItemAvailable ? 'filter:grayscale(90%); opacity:0.8;' : '';
-          
-          let overlayText = '';
-          if (!isRestaurantOpen) overlayText = 'Unavailable';
-          else if (!inStock) overlayText = 'Out of Stock';
+    document.querySelector('.res-card').insertAdjacentHTML('beforebegin', warningHtml);
+  }
 
-          return `
-            <div class="menu-item nb-menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" style="animation-delay:${delay}s;">
+  function renderMenu(groups, resId) {
+    const menuContainer = document.getElementById('menu-container');
+    const navInner = document.getElementById('cat-nav-inner');
+    const categories = groups.map(group => group.name);
 
-              <div class="nb-item-main">
-                <div class="nb-item-tag-row">
-                  ${vegIcon}
-                  ${tagHTML}
-                </div>
-                <h3 class="nb-item-title">${item.name}</h3>
+    navInner.innerHTML = categories.map((cat, i) => {
+      const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+      return `<div class="cat-nav-pill ${i === 0 ? 'active' : ''}" data-target="${catId}" onclick="scrollToCategory('${catId}')">${escapeMenuHtml(cat)}</div>`;
+    }).join('');
 
-                <div class="nb-item-price-row">
-                  <span class="nb-item-current-price">₹${cleanPrice}</span>
-                  ${originalPrice ? `<span class="nb-item-original-price">₹${originalPrice}</span><span class="nb-item-discount">${discountPercent}% OFF</span>` : ''}
-                </div>
+    let cartMemory = {};
+    try { cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
 
-                <p class="nb-item-desc">${item.desc || 'Premium quality ' + item.name + ' prepared with authentic ingredients.'}</p>
-              </div>
+    let globalIdx = 0;
 
-              <div class="nb-item-media">
-                <div class="nb-item-image-wrap">
-                  ${imageSrc 
-                    ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${imageSrc}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">` 
-                    : `<div class="nb-item-image-placeholder"><i class="fa-solid fa-utensils"></i></div>`
-                  }
-                  ${overlayText ? `<div class="nb-item-overlay">
-                    <span>${overlayText}</span>
-                  </div>` : ''}
-                </div>
+    menuContainer.innerHTML = groups.map(group => {
+      const catId = 'cat-' + group.name.replace(/\s+/g, '-').toLowerCase();
 
-                <div id="btn-container-${key}" class="nb-item-cta">
-                  ${window.makeBtnHTML(item.name, qty, cleanPrice, resId, inStock, item._id, imageSrc, item.isVeg, originalPrice)}
-                </div>
+      const itemsHTML = group.items.map(item => {
+        const key = String(item.name).replace(/\s+/g, '');
+        const qty = cartMemory[item.name] ? cartMemory[item.name].quantity : 0;
 
-                ${isCustomisable(item.name) ? `<div class="nb-item-customisable">Customisable</div>` : '<div class="nb-item-customisable nb-item-customisable-spacer"></div>'}
-              </div>
+        const cleanPrice = typeof item.price === 'number'
+          ? item.price
+          : parseFloat(String(item.price).replace(/[^\d.]/g, '')) || 0;
 
-            </div>`;
-        }).join('');
+        const rawOriginalPrice = Number(item.originalPrice);
+        const originalPrice = Number.isFinite(rawOriginalPrice) && rawOriginalPrice > cleanPrice
+          ? rawOriginalPrice
+          : null;
+        const discountPercent = originalPrice
+          ? Math.round((1 - cleanPrice / originalPrice) * 100)
+          : 0;
+
+        // Badges come from the API only.
+        const badgeLabel = item.badge || item.tag ||
+          (item.isBestseller === true || item.bestseller === true ? 'Bestseller' : '') ||
+          (item.isMustTry === true || item.mustTry === true ? 'Must Try' : '');
+
+        const tagHTML = badgeLabel
+          ? `<span class="nb-item-badge">${escapeMenuHtml(badgeLabel)}</span>`
+          : '';
+
+        const vegKnown = typeof item.isVeg === 'boolean';
+        const vegIcon = !vegKnown
+          ? ''
+          : item.isVeg
+            ? `<span class="nb-veg-mark veg" title="Veg" aria-label="Veg"><span></span></span>`
+            : `<span class="nb-veg-mark nonveg" title="Non-veg" aria-label="Non-veg"><span></span></span>`;
+
+        const delay = (globalIdx++ * 0.04).toFixed(2);
+        const imageSrc = item.image || item.img || '';
+        const inStock = item.inStock !== false;
+        const isItemAvailable = inStock && isRestaurantOpen;
+
+        let overlayText = '';
+        if (!isRestaurantOpen) overlayText = 'Unavailable';
+        else if (!inStock) overlayText = 'Out of Stock';
+
+        const description = typeof item.desc === 'string' && item.desc.trim()
+          ? item.desc.trim()
+          : (typeof item.description === 'string' ? item.description.trim() : '');
+
+        const isCustomisable = item.isCustomisable === true || item.customisable === true;
 
         return `
-          <div class="menu-cat-group" id="${catId}">
-            <div class="menu-cat-header" onclick="toggleCategory(this)">
-              <span class="menu-cat-title">${cat} <span class="menu-cat-count">(${items.length})</span></span>
-              <i class="fa-solid fa-chevron-down menu-cat-chevron"></i>
+          <div class="menu-item nb-menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" data-veg-known="${vegKnown ? 'true' : 'false'}" style="animation-delay:${delay}s;">
+
+            <div class="nb-item-main">
+              <div class="nb-item-tag-row">
+                ${vegIcon}
+                ${tagHTML}
+              </div>
+              <h3 class="nb-item-title">${escapeMenuHtml(item.name)}</h3>
+
+              <div class="nb-item-price-row">
+                <span class="nb-item-current-price">₹${cleanPrice}</span>
+                ${originalPrice ? `<span class="nb-item-original-price">₹${originalPrice}</span><span class="nb-item-discount">${discountPercent}% OFF</span>` : ''}
+              </div>
+
+              ${description ? `<p class="nb-item-desc">${escapeMenuHtml(description)}</p>` : ''}
             </div>
-            <div class="menu-cat-items">${itemsHTML}</div>
+
+            <div class="nb-item-media">
+              <div class="nb-item-image-wrap">
+                ${imageSrc
+                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(imageSrc)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" onerror="this.closest('.nb-item-image-wrap').classList.add('no-image'); this.remove();">`
+                  : `<div class="nb-item-image-placeholder"><i class="fa-solid fa-utensils"></i></div>`
+                }
+                ${overlayText ? `<div class="nb-item-overlay"><span>${overlayText}</span></div>` : ''}
+              </div>
+
+              <div id="btn-container-${key}" class="nb-item-cta">
+                ${window.makeBtnHTML(item.name, qty, cleanPrice, resId, inStock, item._id, imageSrc, item.isVeg, originalPrice)}
+              </div>
+
+              ${isCustomisable ? `<div class="nb-item-customisable">Customisable</div>` : '<div class="nb-item-customisable nb-item-customisable-spacer"></div>'}
+            </div>
+
           </div>`;
       }).join('');
 
-      document.getElementById('menu-skeleton').style.display = 'none';
-      document.getElementById('menu-container').style.display = 'block';
-      setupScrollSpy(categories);
-      
-      if (typeof window.renderCartBar === 'function') window.renderCartBar();
-
-    } catch (error) {
-      console.error(error);
-      showErrorState();
-    }
-  });
-
-  function showErrorState() {
-     document.getElementById('menu-skeleton').style.display = 'none';
-     document.getElementById('menu-container').style.display = 'block';
-     document.getElementById('menu-container').innerHTML = `
-        <div style="text-align:center;padding:60px 20px">
-          <i class="fa-solid fa-server" style="font-size:48px;color:#e0e0e0;display:block;margin-bottom:16px"></i>
-          <p style="font-size:17px;font-weight:800;color:#555">Server Connection Error</p>
-          <button onclick="location.reload()" style="margin-top:20px;background:#FC8019;color:#fff;font-weight:800;font-size:13px;border:none;padding:12px 24px;border-radius:14px;">Try Again</button>
+      return `
+        <div class="menu-cat-group" id="${catId}">
+          <div class="menu-cat-header" onclick="toggleCategory(this)">
+            <span class="menu-cat-title">${escapeMenuHtml(group.name)} <span class="menu-cat-count">(${group.items.length})</span></span>
+            <i class="fa-solid fa-chevron-down menu-cat-chevron"></i>
+          </div>
+          <div class="menu-cat-items">${itemsHTML}</div>
         </div>`;
+    }).join('');
+
+    document.getElementById('menu-skeleton').style.display = 'none';
+    menuContainer.style.display = 'block';
+    setupScrollSpy(categories);
+    syncVegFilterAvailability();
   }
+
+  function escapeMenuHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  /* Hide the veg/non-veg filter when the menu carries no veg information,
+     so it can never be a chip that filters nothing. */
+  function syncVegFilterAvailability() {
+    const bar = document.querySelector('.filter-bar');
+    if (!bar) return;
+    const known = document.querySelectorAll('.menu-item[data-veg-known="true"]').length;
+    bar.style.display = known ? '' : 'none';
+  }
+
+  async function loadRestaurantPage() {
+    const params = new URLSearchParams(window.location.search);
+    const resId = params.get('id');
+    currentResId = resId;
+
+    if (!resId) {
+      return showErrorState('This link is missing a restaurant ID.', false);
+    }
+
+    showMenuSkeleton();
+
+    try {
+      const [restaurant, menuPayload] = await Promise.all([
+        window.API.getObject(window.API.routes.restaurant(resId)),
+        window.API.request(window.API.routes.restaurantMenu(resId))
+      ]);
+
+      isRestaurantOpen = restaurant.isOpen !== false &&
+        !(restaurant.availability && restaurant.availability.isOpen === false);
+
+      renderClosedWarning(restaurant);
+      renderRestaurantHeader(restaurant);
+
+      const groups = normalizeMenu(window.API.unwrap(menuPayload));
+
+      if (!groups.length) {
+        return showEmptyMenuState();
+      }
+
+      renderMenu(groups, resId);
+
+      if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+    } catch (error) {
+      console.error('[restaurant] load failed:', error);
+      showErrorState(error && error.message ? error.message : 'Please try again.', true);
+    }
+  }
+
+  function showMenuSkeleton() {
+    const skeleton = document.getElementById('menu-skeleton');
+    const container = document.getElementById('menu-container');
+    if (skeleton) skeleton.style.display = 'block';
+    if (container) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+    }
+  }
+
+  function showEmptyMenuState() {
+    document.getElementById('menu-skeleton').style.display = 'none';
+    const container = document.getElementById('menu-container');
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="menu-state">
+        <i class="fa-solid fa-utensils"></i>
+        <p class="menu-state-title">Menu not available</p>
+        <p class="menu-state-sub">This restaurant hasn't published its menu yet.</p>
+      </div>`;
+    const bar = document.querySelector('.filter-bar');
+    if (bar) bar.style.display = 'none';
+  }
+
+  function showErrorState(message, canRetry) {
+    document.getElementById('menu-skeleton').style.display = 'none';
+    const container = document.getElementById('menu-container');
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="menu-state">
+        <i class="fa-solid fa-plug-circle-xmark"></i>
+        <p class="menu-state-title">Couldn't load this restaurant</p>
+        <p class="menu-state-sub">${escapeMenuHtml(message || 'Please try again.')}</p>
+        ${canRetry ? '<button type="button" class="menu-state-btn" id="menu-retry-btn">Try Again</button>' : ''}
+      </div>`;
+
+    const retry = document.getElementById('menu-retry-btn');
+    if (retry) {
+      retry.addEventListener('click', () => {
+        retry.disabled = true;
+        retry.textContent = 'Retrying…';
+        loadRestaurantPage();
+      });
+    }
+
+    const bar = document.querySelector('.filter-bar');
+    if (bar) bar.style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', loadRestaurantPage);
 
   function toggleCategory(headerEl) {
     headerEl.classList.toggle('collapsed');

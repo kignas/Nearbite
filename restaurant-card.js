@@ -1,18 +1,21 @@
 /*
- * Nearbite — Restaurant Card Component
- * Handles restaurant-card rendering, availability state and gallery interaction.
- * It intentionally does NOT own API fetching, filters, cart state or navigation.
+ * EatSwada — Restaurant Card Component
+ * Renders restaurant cards from real API data only.
+ *
+ * Ownership boundaries (deliberate):
+ *   - This file owns card MARKUP, availability state and the image gallery.
+ *   - It does NOT own API fetching, filter state, cart state or navigation.
+ *   - Every field is omitted when the API does not supply it. There are no
+ *     placeholder ratings, cuisines or delivery times.
  */
 (function () {
   'use strict';
 
-  if (window.__nearbiteRestaurantCardComponent) return;
-  window.__nearbiteRestaurantCardComponent = true;
+  if (window.RestaurantCard) return;
 
-  const FALLBACK_IMAGE =
-    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80';
+  /* ── Small helpers ──────────────────────────────────────────── */
 
-  function escapeCardHtml(value) {
+  function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
       return {
         '&': '&amp;',
@@ -24,12 +27,219 @@
     });
   }
 
+  function firstText() {
+    for (var i = 0; i < arguments.length; i++) {
+      var value = arguments[i];
+      if (typeof value === 'string' && value.trim()) return value.trim();
+      if (Array.isArray(value) && value.length) {
+        var joined = value
+          .map(function (v) { return String(v == null ? '' : v).trim(); })
+          .filter(Boolean)
+          .join(', ');
+        if (joined) return joined;
+      }
+    }
+    return '';
+  }
+
+  function firstNumber() {
+    for (var i = 0; i < arguments.length; i++) {
+      var raw = arguments[i];
+      if (raw === null || raw === undefined || raw === '') continue;
+      var n = Number(raw);
+      if (Number.isFinite(n)) return n;
+    }
+    return null;
+  }
+
+  /* ── Field readers — the single interpretation of the API shape ─ */
+
+  var read = {
+    id: function (res) {
+      var id = res._id || res.id || res.slug;
+      return id == null ? '' : String(id);
+    },
+
+    name: function (res) {
+      return firstText(res.name, res.restaurantName);
+    },
+
+    cuisine: function (res) {
+      return firstText(res.cuisineDisplay, res.cuisine, res.cuisines, res.categories);
+    },
+
+    rating: function (res) {
+      var n = firstNumber(res.rating, res.avgRating, res.averageRating);
+      if (n == null || n <= 0) return null;
+      return n;
+    },
+
+    deliveryTime: function (res) {
+      var min = firstNumber(res.estimatedDeliveryMin, res.deliveryTimeMin);
+      var max = firstNumber(res.estimatedDeliveryMax, res.deliveryTimeMax);
+
+      if (min != null && max != null) {
+        return { min: min, max: max, text: min + '-' + max + ' min' };
+      }
+      if (max != null) return { min: max, max: max, text: max + ' min' };
+      if (min != null) return { min: min, max: min, text: min + ' min' };
+
+      var text = firstText(res.time, res.deliveryTime);
+      if (!text) return null;
+
+      // "25-35 mins" → keep the numbers so sorting/filtering still work.
+      var numbers = text.match(/\d+/g);
+      return {
+        min: numbers ? Number(numbers[0]) : null,
+        max: numbers ? Number(numbers[numbers.length - 1]) : null,
+        text: text
+      };
+    },
+
+    minimumOrder: function (res) {
+      return firstNumber(
+        res.minimumOrder, res.minimumOrderAmount, res.minOrder, res.minOrderAmount
+      );
+    },
+
+    offer: function (res) {
+      return firstText(res.offerText, res.discountText, res.offer, res.offerLabel);
+    },
+
+    images: function (res) {
+      var list = Array.isArray(res.images) && res.images.length
+        ? res.images
+        : [res.image, res.img, res.coverImage, res.thumbnail];
+
+      return list
+        .filter(function (src) { return typeof src === 'string' && src.trim(); })
+        .slice(0, 4);
+    },
+
+    coordinates: function (res) {
+      var coords = res.location && res.location.coordinates;
+      if (!Array.isArray(coords) || coords.length !== 2) return null;
+      var lng = Number(coords[0]);
+      var lat = Number(coords[1]);
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+      return { lng: lng, lat: lat };
+    },
+
+    /* true / false / null(unknown) — never guessed. */
+    nearFastFlag: function (res) {
+      var candidates = [res.isNearFast, res.nearFast, res.near_fast];
+      for (var i = 0; i < candidates.length; i++) {
+        var v = candidates[i];
+        if (v === true || v === 1 || v === '1') return true;
+        if (v === false || v === 0 || v === '0') return false;
+        if (typeof v === 'string') {
+          if (v.toLowerCase() === 'true') return true;
+          if (v.toLowerCase() === 'false') return false;
+        }
+      }
+      return null;
+    },
+
+    /* true / false / null(unknown) — never guessed. */
+    pureVeg: function (res) {
+      var flags = [res.isPureVeg, res.pureVeg, res.isVegOnly, res.vegOnly];
+      for (var i = 0; i < flags.length; i++) {
+        if (typeof flags[i] === 'boolean') return flags[i];
+      }
+
+      if (Array.isArray(res.menu) && res.menu.length) {
+        var known = res.menu.filter(function (item) {
+          return item && typeof item.isVeg === 'boolean';
+        });
+        if (known.length === res.menu.length) {
+          return known.every(function (item) { return item.isVeg; });
+        }
+      }
+
+      return null;
+    },
+
+    /* Cheapest real menu price, or null when the payload carries no menu. */
+    lowestItemPrice: function (res) {
+      if (!Array.isArray(res.menu) || !res.menu.length) return null;
+
+      var prices = res.menu.map(function (item) {
+        if (!item) return null;
+        var n = Number(item.price);
+        if (Number.isFinite(n) && n > 0) return n;
+        var parsed = parseFloat(String(item.price == null ? '' : item.price).replace(/[^\d.]/g, ''));
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+      }).filter(function (n) { return n != null; });
+
+      return prices.length ? Math.min.apply(null, prices) : null;
+    }
+  };
+
+  /* ── Distance ───────────────────────────────────────────────── */
+
+  function getSelectedCustomerCoordinates() {
+    try {
+      var address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
+      var coords = address && address.location && address.location.coordinates;
+
+      if (Array.isArray(coords) && coords.length === 2 &&
+          Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]))) {
+        return { lng: Number(coords[0]), lat: Number(coords[1]) };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function haversineKm(a, b) {
+    var R = 6371;
+    var dLat = (b.lat - a.lat) * Math.PI / 180;
+    var dLng = (b.lng - a.lng) * Math.PI / 180;
+    var lat1 = a.lat * Math.PI / 180;
+    var lat2 = b.lat * Math.PI / 180;
+
+    var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  }
+
+  /* Distance in km, or null when it genuinely cannot be known. */
+  function getDistanceKm(res, customerCoords) {
+    var customer = customerCoords !== undefined
+      ? customerCoords
+      : getSelectedCustomerCoordinates();
+
+    var restaurantCoords = read.coordinates(res);
+    if (customer && restaurantCoords) return haversineKm(customer, restaurantCoords);
+
+    var meters = firstNumber(res.distanceMeters);
+    if (meters != null) return meters / 1000;
+
+    var km = firstNumber(res.distanceKm);
+    if (km != null) return km;
+
+    if (typeof res.distance === 'string') {
+      var parsed = parseFloat(res.distance.replace(/[^\d.]/g, ''));
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return firstNumber(res.distance);
+  }
+
+  function formatDistance(km) {
+    if (km == null) return '';
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    return km.toFixed(1) + ' km';
+  }
+
+  /* ── Availability ───────────────────────────────────────────── */
+
   function getAvailabilityStatus(res) {
-    const avail = res.availability || {};
-    const isOpen = typeof avail.isOpen === 'boolean' ? avail.isOpen : res.isOpen;
+    var avail = res.availability || {};
+    var isOpen = typeof avail.isOpen === 'boolean' ? avail.isOpen : res.isOpen;
+
     if (isOpen !== false) return null;
 
-    const reason = avail.closedReason || res.closedReason || res.status || '';
+    var reason = avail.closedReason || res.closedReason || res.status || '';
     if (reason === 'closed_today') return 'closed_today';
     if (reason === 'temporarily_closed') return 'temporarily_closed';
     return 'unavailable';
@@ -42,7 +252,7 @@
   }
 
   function showAvailabilityToast(label) {
-    let toast = document.getElementById('es-availability-toast');
+    var toast = document.getElementById('es-availability-toast');
 
     if (!toast) {
       toast = document.createElement('div');
@@ -67,312 +277,209 @@
     }, 2200);
   }
 
-  window.showAvailabilityToast = showAvailabilityToast;
+  /* Availability including the customer's delivery radius. */
+  function resolveAvailability(res, customerCoords) {
+    var status = getAvailabilityStatus(res);
+    if (status) return status;
 
-  function getSelectedCustomerCoordinates() {
-    try {
-      const address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
-      const coords = address && address.location && address.location.coordinates;
+    var radiusKm = firstNumber(res.deliveryRadiusKm);
+    if (radiusKm == null || radiusKm <= 0) return null;
 
-      if (
-        Array.isArray(coords) &&
-        coords.length === 2 &&
-        Number.isFinite(Number(coords[0])) &&
-        Number.isFinite(Number(coords[1]))
-      ) {
-        return {
-          lng: Number(coords[0]),
-          lat: Number(coords[1])
-        };
-      }
-    } catch (_) {}
+    var restaurantCoords = read.coordinates(res);
+    if (!customerCoords || !restaurantCoords) return null;
 
-    return null;
+    return haversineKm(customerCoords, restaurantCoords) > radiusKm
+      ? 'outside_delivery_area'
+      : null;
   }
 
-  function calculateHaversineKm(a, b) {
-    const R = 6371;
-    const dLat = (b.lat - a.lat) * Math.PI / 180;
-    const dLng = (b.lng - a.lng) * Math.PI / 180;
-    const lat1 = a.lat * Math.PI / 180;
-    const lat2 = b.lat * Math.PI / 180;
+  /* ── Card markup ────────────────────────────────────────────── */
 
-    const x =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1) *
-        Math.cos(lat2) *
-        Math.sin(dLng / 2) ** 2;
+  function buildCard(res, index, customerCoords) {
+    var id = read.id(res);
+    var name = read.name(res);
 
-    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    // A card we cannot navigate from is not a card — skip it rather than
+    // render something that looks tappable and isn't.
+    if (!id || !name) return '';
+
+    var status = resolveAvailability(res, customerCoords);
+    var isUnavailable = !!status;
+    var label = isUnavailable ? getAvailabilityLabel(status) : '';
+
+    var images = read.images(res);
+    var cuisine = read.cuisine(res);
+    var distanceText = formatDistance(getDistanceKm(res, customerCoords));
+    var rating = read.rating(res);
+    var time = read.deliveryTime(res);
+    var minOrder = read.minimumOrder(res);
+    var offer = read.offer(res);
+    var nearFast = read.nearFastFlag(res) === true;
+
+    var guard = isUnavailable
+      ? ' onclick="event.preventDefault(); RestaurantCard.showAvailabilityToast(\'' +
+        esc(label).replace(/'/g, '&#39;') + '\');"'
+      : '';
+
+    var media = images.length
+      ? '<div class="z-gallery" data-gallery="' + esc(id) + '" data-index="' + index + '">' +
+          '<div class="z-gallery-track">' +
+            images.map(function (src, idx) {
+              return '<img class="z-gallery-slide" src="' + esc(src) + '" alt="' + esc(name) +
+                '" loading="' + (idx === 0 ? 'eager' : 'lazy') + '"' +
+                ' onload="this.classList.add(\'loaded\')"' +
+                ' onerror="RestaurantCard.handleImageError(this)">';
+            }).join('') +
+          '</div>' +
+          (images.length > 1
+            ? '<div class="z-gallery-dots">' + images.map(function (_, idx) {
+                return '<span class="z-gallery-dot' + (idx === 0 ? ' active' : '') + '"></span>';
+              }).join('') + '</div>'
+            : '') +
+        '</div>'
+      : '<div class="z-img-placeholder"><i class="fa-solid fa-utensils"></i></div>';
+
+    // Meta line: only the parts we actually have.
+    var metaParts = [];
+    if (cuisine) {
+      metaParts.push('<i class="fa-solid fa-utensils z-meta-icon"></i> ' + esc(cuisine));
+    }
+    if (distanceText) {
+      metaParts.push('<i class="fa-solid fa-location-dot z-meta-icon"></i> ' + esc(distanceText));
+    }
+
+    var tags = '';
+    if (nearFast) {
+      tags += '<span class="z-tag-near"><i class="fa-solid fa-bolt"></i> Near &amp; Fast</span>';
+    }
+    if (offer) {
+      tags += '<span class="z-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
+    }
+
+    var stats = '';
+    function addStat(valueHtml, labelText) {
+      if (stats) stats += '<div class="z-divider"></div>';
+      stats += '<div class="z-stat"><span class="z-stat-val">' + valueHtml +
+        '</span><span class="z-stat-lbl">' + labelText + '</span></div>';
+    }
+
+    if (rating != null) {
+      addStat('<i class="fa-solid fa-star z-star"></i> ' + esc(rating.toFixed(1)), 'rating');
+    }
+    if (time) {
+      addStat(esc(time.text), 'delivery');
+    }
+    if (minOrder != null) {
+      addStat('₹' + esc(minOrder), 'min order');
+    }
+
+    return '<a href="restaurant.html?id=' + encodeURIComponent(id) +
+      '" class="z-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
+      ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '"' +
+      ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
+      's; opacity:0;">' +
+
+      '<div class="z-img-wrap' + (isUnavailable ? ' is-unavailable' : '') + '">' +
+        media +
+        (isUnavailable
+          ? '<div class="z-availability-overlay"><div class="z-availability-pill">' +
+            '<i class="fa-regular fa-clock"></i> ' + esc(label) + '</div></div>'
+          : '') +
+      '</div>' +
+
+      '<div class="z-gradient-overlay"></div>' +
+
+      '<div class="z-info-area">' +
+        '<div class="z-name">' + esc(name) + '</div>' +
+        (metaParts.length
+          ? '<div class="z-cuisine-line">' + metaParts.join(' &bull; ') + '</div>'
+          : '') +
+        (tags ? '<div class="z-tags-row">' + tags + '</div>' : '') +
+        '<div class="z-stats-row">' +
+          '<div class="z-stats-group">' + stats + '</div>' +
+          '<div class="z-btn-order">' + (isUnavailable ? 'View menu' : 'Order') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</a>';
   }
 
-  function displayRestaurants() {
-    const list = document.getElementById('restaurant-list');
-    const restaurants = Array.isArray(window.allRestaurants)
-      ? window.allRestaurants
-      : [];
+  /* Render a list of restaurants into a container.
+     Returns how many cards were actually rendered, so the caller can
+     react to an empty result instead of leaving a skeleton behind. */
+  function renderList(container, restaurants) {
+    if (!container) return 0;
 
-    if (!list || restaurants.length === 0) return;
+    var list = Array.isArray(restaurants) ? restaurants : [];
+    var customerCoords = getSelectedCustomerCoordinates();
+    var unavailable = new Set();
+    var rendered = 0;
 
-    let data = restaurants.slice();
-
-    // These flags are still owned by index.html.
-    const vegMode = typeof window.isVegMode === 'boolean' ? window.isVegMode : false;
-    const ratingMode = typeof window.isRatingMode === 'boolean' ? window.isRatingMode : false;
-
-    if (vegMode) {
-      data = data.filter(function (r) {
-        return r.menu && r.menu.every(function (i) { return i.isVeg; });
-      });
-    }
-
-    if (ratingMode) {
-      data = data.filter(function (r) {
-        return parseFloat(r.rating || 0) >= 4.0;
-      });
-    }
-
-    if (data.length === 0) {
-      list.innerHTML =
-        '<div style="text-align:center;padding:40px 0;color:#64748B;font-weight:600;">No restaurants match your filters.</div>';
-      return;
-    }
-
-    window.__unavailableRestaurantIds = new Set();
-    const customerCoords = getSelectedCustomerCoordinates();
-
-    list.innerHTML = data.map(function (res, i) {
-      const resId = res._id || res.id;
-      let customerDistanceKm = null;
-      const restaurantCoords = res.location && res.location.coordinates;
-
-      if (
-        customerCoords &&
-        Array.isArray(restaurantCoords) &&
-        restaurantCoords.length === 2
-      ) {
-        const lng = Number(restaurantCoords[0]);
-        const lat = Number(restaurantCoords[1]);
-
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-          customerDistanceKm = calculateHaversineKm(
-            customerCoords,
-            { lng: lng, lat: lat }
-          );
-        }
+    var html = list.map(function (res, i) {
+      var markup = buildCard(res, i, customerCoords);
+      if (markup) {
+        rendered++;
+        if (resolveAvailability(res, customerCoords)) unavailable.add(read.id(res));
       }
-
-      const displayDistance =
-        customerDistanceKm != null
-          ? customerDistanceKm.toFixed(1) + ' km'
-          : (
-              res.distance ||
-              (
-                res.distanceMeters != null
-                  ? (Number(res.distanceMeters) / 1000).toFixed(1) + ' km'
-                  : '—'
-              )
-            );
-
-      let status = getAvailabilityStatus(res);
-      const radiusKm = Number(res.deliveryRadiusKm);
-
-      if (
-        !status &&
-        customerDistanceKm != null &&
-        Number.isFinite(radiusKm) &&
-        radiusKm > 0 &&
-        customerDistanceKm > radiusKm
-      ) {
-        status = 'outside_delivery_area';
-      }
-
-      const isUnavailable = !!status;
-
-      if (isUnavailable) {
-        window.__unavailableRestaurantIds.add(String(resId));
-      }
-
-      const label = isUnavailable ? getAvailabilityLabel(status) : '';
-      const safeId = escapeCardHtml(resId);
-      const safeLabel = escapeCardHtml(label);
-
-      const guard = isUnavailable
-        ? " onclick=\"event.preventDefault(); showAvailabilityToast('" +
-          safeLabel.replace(/'/g, '&#39;') +
-          "');\""
-        : '';
-
-      const gallery = (
-        Array.isArray(res.images) && res.images.length
-          ? res.images
-          : [res.image || res.img]
-      ).filter(Boolean).slice(0, 4);
-
-      const safeImages = gallery.length ? gallery : [FALLBACK_IMAGE];
-      const safeName = escapeCardHtml(res.name || 'Restaurant');
-      const rating = escapeCardHtml(res.rating || '4.2');
-      const cuisine = escapeCardHtml(
-        res.cuisine || res.cuisineDisplay || 'Indian, Fast Food'
-      );
-
-      const flagEnabled = (value) =>
-        value === true || value === 1 || value === '1' ||
-        (typeof value === 'string' && value.toLowerCase() === 'true');
-
-      const isNearFast =
-        flagEnabled(res.isNearFast) ||
-        flagEnabled(res.nearFast) ||
-        flagEnabled(res.near_fast);
-
-      const nearFastLabel = escapeCardHtml(
-        res.nearFastLabel || 'Near & Fast'
-      );
-
-      const deliveryMin = escapeCardHtml(res.estimatedDeliveryMin || 30);
-      const deliveryMax = escapeCardHtml(res.estimatedDeliveryMax || 45);
-
-      const rawMinOrder =
-        res.minimumOrder ??
-        res.minimumOrderAmount ??
-        res.minOrder ??
-        res.minOrderAmount ??
-        null;
-
-      const minOrderNumber = Number(rawMinOrder);
-      const hasMinOrder =
-        rawMinOrder !== null &&
-        rawMinOrder !== '' &&
-        Number.isFinite(minOrderNumber);
-
-      const offerText =
-        res.offerText ||
-        res.discountText ||
-        res.offer ||
-        res.offerLabel ||
-        '';
-
-      const safeOfferText = escapeCardHtml(offerText);
-
-      return (
-        '<a href="restaurant.html?id=' + encodeURIComponent(resId) +
-        '" class="z-card' + (isUnavailable ? ' is-unavailable' : '') + '"' +
-        guard +
-        ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '"' +
-        ' style="animation: cardFadeUp .3s ease forwards ' + (i * 0.05) + 's; opacity:0; transform:translateY(10px);">' +
-
-          /* Full Background Image Layer & Staggered Gallery */
-          '<div class="z-img-wrap' + (isUnavailable ? ' is-unavailable' : '') + '">' +
-            '<div class="z-gallery" data-gallery="' + safeId + '" data-index="' + i + '">' +
-              '<div class="z-gallery-track">' +
-                safeImages.map(function (src, idx) {
-                  return (
-                    '<img class="z-gallery-slide" src="' + escapeCardHtml(src) + '" alt="' + safeName +
-                    '" loading="' + (idx === 0 ? 'eager' : 'lazy') +
-                    '" onload="this.classList.add(\'loaded\')" ' +
-                    'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMAGE.replace(/'/g, '&#39;') + '\';">'
-                  );
-                }).join('') +
-              '</div>' +
-              (safeImages.length > 1 ? '<div class="z-gallery-dots">' + safeImages.map(function (_, idx) { return '<span class="z-gallery-dot' + (idx === 0 ? ' active' : '') + '"></span>'; }).join('') + '</div>' : '') +
-            '</div>' +
-            (isUnavailable ? '<div class="z-availability-overlay"><div class="z-availability-pill"><i class="fa-regular fa-clock"></i> ' + escapeCardHtml(label) + '</div></div>' : '') +
-          '</div>' +
-
-          /* Floating Bookmark (Top Right) */
-          '<div class="z-bookmark" aria-hidden="true"><i class="fa-regular fa-bookmark"></i></div>' +
-
-          /* Smooth Gradient Fade */
-          '<div class="z-gradient-overlay"></div>' +
-
-          /* Foreground Content Area (Avatar Removed) */
-          '<div class="z-info-area">' +
-            
-            '<div class="z-name">' + safeName + '</div>' +
-            
-            '<div class="z-cuisine-line">' +
-              '<i class="fa-solid fa-utensils" style="font-size:11px; color:#94a3b8;"></i> ' + cuisine +
-              ' &bull; <i class="fa-solid fa-location-dot" style="font-size:11px; color:#94a3b8;"></i> ' + escapeCardHtml(displayDistance) +
-            '</div>' +
-
-            /* Near & Fast and Offers Row */
-            '<div class="z-tags-row">' +
-               (isNearFast ? '<span class="z-tag-near"><i class="fa-solid fa-bolt"></i> ' + nearFastLabel + '</span>' : '') +
-               (safeOfferText ? '<span class="z-tag-offer"><i class="fa-solid fa-tag"></i> ' + safeOfferText + '</span>' : '') +
-            '</div>' +
-
-            /* Inspiration "Bottom Stats" Structure */
-            '<div class="z-stats-row">' +
-               '<div class="z-stats-group">' +
-                  '<div class="z-stat">' +
-                     '<span class="z-stat-val"><i class="fa-solid fa-star" style="font-size:10px;"></i> ' + rating + '</span>' +
-                     '<span class="z-stat-lbl">rating</span>' +
-                  '</div>' +
-                  '<div class="z-divider"></div>' +
-                  '<div class="z-stat">' +
-                     '<span class="z-stat-val">' + deliveryMin + '-' + deliveryMax + 'm</span>' +
-                     '<span class="z-stat-lbl">time</span>' +
-                  '</div>' +
-                  (hasMinOrder ? '<div class="z-divider"></div><div class="z-stat"><span class="z-stat-val">₹' + minOrderNumber + '</span><span class="z-stat-lbl">min order</span></div>' : '') +
-               '</div>' +
-               
-               '<div class="z-btn-order">Order</div>' +
-            '</div>' +
-          '</div>' +
-        '</a>'
-      );
+      return markup;
     }).join('');
 
-    requestAnimationFrame(initRestaurantGalleries);
+    window.__unavailableRestaurantIds = unavailable;
+    container.innerHTML = html;
+
+    if (rendered) requestAnimationFrame(initGalleries);
+    return rendered;
   }
 
-  window.displayRestaurants = displayRestaurants;
+  function handleImageError(img) {
+    img.onerror = null;
+    var wrap = img.closest('.z-img-wrap');
+    var gallery = img.closest('.z-gallery');
+    img.remove();
 
-  function initRestaurantGalleries() {
+    if (gallery && !gallery.querySelector('.z-gallery-slide') && wrap) {
+      gallery.remove();
+      var placeholder = document.createElement('div');
+      placeholder.className = 'z-img-placeholder';
+      placeholder.innerHTML = '<i class="fa-solid fa-utensils"></i>';
+      wrap.insertBefore(placeholder, wrap.firstChild);
+    }
+  }
+
+  /* ── Image gallery ──────────────────────────────────────────── */
+
+  function initGalleries() {
     document.querySelectorAll('.z-gallery').forEach(function (gallery) {
       if (gallery.dataset.initialized === '1') return;
 
-      const track = gallery.querySelector('.z-gallery-track');
-      const slides = gallery.querySelectorAll('.z-gallery-slide');
-      const dots = gallery.querySelectorAll('.z-gallery-dot');
+      var track = gallery.querySelector('.z-gallery-track');
+      var slides = gallery.querySelectorAll('.z-gallery-slide');
+      var dots = gallery.querySelectorAll('.z-gallery-dot');
 
       if (!track || slides.length <= 1) return;
-
       gallery.dataset.initialized = '1';
 
-      let index = 0;
-      let startX = 0;
-      let moved = false;
-      let timer = null;
+      var index = 0;
+      var startX = 0;
+      var moved = false;
+      var timer = null;
 
-      // Staggered timing logic: Card 1 = 6s, Card 2 = 12s, Card 3 = 24s.
-      // We read the 'data-index' applied to the gallery HTML wrapper.
-      const cardIndex = parseInt(gallery.getAttribute('data-index') || '0', 10);
-      const staggerDelays = [6000, 12000, 24000];
-      const AUTO_DELAY = staggerDelays[cardIndex % staggerDelays.length];
+      var cardIndex = parseInt(gallery.getAttribute('data-index') || '0', 10);
+      var staggerDelays = [6000, 12000, 24000];
+      var AUTO_DELAY = staggerDelays[cardIndex % staggerDelays.length];
 
       function go(next) {
         index = (next + slides.length) % slides.length;
-        track.style.transform =
-          'translate3d(-' + (index * 100) + '%,0,0)';
-
-        dots.forEach(function (dot, i) {
-          dot.classList.toggle('active', i === index);
-        });
+        track.style.transform = 'translate3d(-' + (index * 100) + '%,0,0)';
+        dots.forEach(function (dot, i) { dot.classList.toggle('active', i === index); });
       }
 
       function stop() {
-        if (timer) {
-          clearInterval(timer);
-          timer = null;
-        }
+        if (timer) { clearInterval(timer); timer = null; }
       }
 
       function restart() {
         stop();
-        timer = setInterval(function () {
-          go(index + 1);
-        }, AUTO_DELAY);
+        timer = setInterval(function () { go(index + 1); }, AUTO_DELAY);
       }
 
       gallery.addEventListener('touchstart', function (e) {
@@ -382,23 +489,16 @@
       }, { passive: true });
 
       gallery.addEventListener('touchmove', function (e) {
-        if (Math.abs(e.touches[0].clientX - startX) > 10) {
-          moved = true;
-        }
+        if (Math.abs(e.touches[0].clientX - startX) > 10) moved = true;
       }, { passive: true });
 
       gallery.addEventListener('touchend', function (e) {
-        const delta = e.changedTouches[0].clientX - startX;
-
+        var delta = e.changedTouches[0].clientX - startX;
         if (Math.abs(delta) > 35) {
           go(index + (delta < 0 ? 1 : -1));
           gallery.dataset.swiped = '1';
-
-          setTimeout(function () {
-            gallery.dataset.swiped = '0';
-          }, 450);
+          setTimeout(function () { gallery.dataset.swiped = '0'; }, 450);
         }
-
         restart();
       }, { passive: true });
 
@@ -431,14 +531,18 @@
     });
   }
 
-  window.addEventListener('nearbite:address-changed', displayRestaurants);
+  window.RestaurantCard = {
+    read: read,
+    renderList: renderList,
+    getDistanceKm: getDistanceKm,
+    formatDistance: formatDistance,
+    getCustomerCoordinates: getSelectedCustomerCoordinates,
+    resolveAvailability: resolveAvailability,
+    showAvailabilityToast: showAvailabilityToast,
+    handleImageError: handleImageError,
+    escape: esc
+  };
 
-  window.addEventListener('storage', function (e) {
-    if (
-      e.key === 'nearbite_address' ||
-      e.key === 'nearbite_selected_address_id'
-    ) {
-      displayRestaurants();
-    }
-  });
+  // Kept for inline handlers elsewhere in the app.
+  window.showAvailabilityToast = showAvailabilityToast;
 })();

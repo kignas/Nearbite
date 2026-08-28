@@ -93,6 +93,13 @@ main{padding:16px 14px 20px}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:#9aa2ad;font-size:10px;font-weight:700}
 .nav-item.active{color:var(--orange)}
 .nav-item i{font-size:20px}
+
+  .image-wrap.no-image, .img-fallback {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg,#edf0f4,#e2e7ee); color: #b7bfcb; font-size: 22px;
+  }
+  .filter-pill[hidden] { display: none; }
 </style>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -112,7 +119,6 @@ main{padding:16px 14px 20px}
     </div>
   </div>
   <div class="filter-row">
-    <button class="filter-pill active" id="price99">₹99 & Under</button>
     <button class="filter-pill" id="vegBtn" onclick="toggleVeg()">Veg Only</button>
     <button class="filter-pill" id="ratingBtn" onclick="toggleRating()">⭐ 4.0+</button>
   </div>
@@ -121,7 +127,7 @@ main{padding:16px 14px 20px}
 <div class="hero">
   <div class="hero-copy">
     <strong>Big cravings.<br>Small prices.</strong>
-    <span>Top food deals starting from ₹49</span>
+    <span id="hero-sub">Top food deals under ₹99</span>
   </div>
   <div class="hero-badge"><i class="fa-solid fa-fire"></i></div>
 </div>
@@ -135,153 +141,234 @@ main{padding:16px 14px 20px}
   <div id="under99-list" class="product-grid" style="display:none"></div>
 </main>
 
-<!-- Floating Cart Bar -->
-<div id="floatingCart" class="floating-cart">
-  <div class="cart-info">
-    <span id="cartItemCount">1 item</span> | <span id="cartTotal">₹99</span>
-    <small id="cartResName">Restaurant Name</small>
-  </div>
-  <a href="checkout.html" class="cart-btn">View Cart <i class="fa-solid fa-arrow-right"></i></a>
-</div>
-
-<!-- Cart Multi-Restaurant Modal -->
-<div id="cartModal" class="modal-overlay">
-  <div class="modal-box">
-    <h3>Different Restaurant</h3>
-    <p>Your cart contains items from another restaurant. Would you like to clear your cart and start a new order?</p>
-    <div class="modal-actions">
-      <button class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="modal-btn btn-confirm" onclick="confirmNewCart()">Start New Cart</button>
-    </div>
-  </div>
-</div>
+<script src="config.js"></script>
+<script src="api.js"></script>
 <script>
-const API='https://eatswada.onrender.com/api';
-let allItems=[], vegOnly=false, ratingOnly=false;
-let cart = JSON.parse(localStorage.getItem('nearbite_cart') || '{"items":[], "resId": null, "resName": null}');
-let pendingItem = null;
+/* ================================================================
+   ₹99 STORE
+   Uses the ONE shared cart engine (cart-bar.js -> window.updateCart).
+   This page previously wrote a different cart shape into the same
+   localStorage key, which corrupted the cart for every other page.
+   ================================================================ */
+(function () {
+  'use strict';
 
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  var state = { items: [], vegOnly: false, ratingOnly: false };
 
-function mapItem(x){
- let price=Number(x.price);if(!Number.isFinite(price))price=parseFloat(String(x.price||'').replace(/[^\d.]/g,''))||99;
- let r=x.restaurant;let rid=x.restaurantId||x.resId||x.restaurant_id||'unknown',rn=x.resName||x.restaurantName||'Nearbite partner',rr=x.resRating||x.restaurantRating||4.2;
- if(r&&typeof r==='object'){rid=r._id||r.id||rid;rn=r.name||rn;rr=r.rating||rr} else if(typeof r==='string'&&r)rid=r;
- return {id:x._id||x.id||Math.random().toString(),name:x.name||'Special Deal',price,isVeg:!!x.isVeg,img:x.image||x.img||'',resId:rid,resName:rn,resRating:Number(rr)||4.2};
-}
+  var esc = function (v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
 
-async function load(){
- const list=document.getElementById('under99-list'),sk=document.getElementById('skeleton');
- try{
-  const r=await fetch(`${API}/restaurants/under99`,{cache:'no-store'});const j=await r.json();
-  const raw=Array.isArray(j?.data)?j.data:(Array.isArray(j)?j:[]);
-  allItems=raw.map(mapItem).filter(x=>x.price<=99&&x.resId!=='unknown');
-  render();sk.style.display='none';
-  updateFloatingCart();
- }catch(e){
-  sk.style.display='none';list.style.display='grid';
-  list.innerHTML=`<div class="empty"><i class="fa-solid fa-wifi"></i><strong>Couldn't load deals</strong><span>Check your connection and try again.</span><button class="add-btn" style="margin-top:16px" onclick="load()">Try Again</button></div>`
- }
-}
+  function el(id) { return document.getElementById(id); }
 
-function render(){
- const list=document.getElementById('under99-list');
- let data=allItems.filter(x=>(!vegOnly||x.isVeg)&&(!ratingOnly||x.resRating>=4.0));
- data=[...data].sort((a,b)=>a.price-b.price);
- 
- list.style.display='grid';
- if(!data.length){
-    list.innerHTML=`<div class="empty"><i class="fa-solid fa-tag"></i><strong>No deals available right now</strong><span>Check back soon for fresh offers.</span></div>`;
-    return;
- }
- list.innerHTML=data.map((x)=>{
-    const old=Math.max(Math.ceil(x.price*1.4),x.price+20);
-    const id=encodeURIComponent(String(x.resId)), item=encodeURIComponent(x.name);
-    return `<article class="card">
-      <div class="image-wrap">
-        <img src="${esc(x.img)}" alt="${esc(x.name)}" loading="lazy" class="food-img ${x.img.includes('png') ? 'food-img-contain' : ''}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x250?text=Food'">
-        <span class="veg-dot ${x.isVeg?'veg':'non'}"><i class="fa-solid ${x.isVeg?'fa-circle':'fa-caret-up'}"></i></span>
-      </div>
-      <div class="card-body">
-        <div class="item-name">${esc(x.name)}</div>
-        <div class="restaurant">${esc(x.resName)}</div>
-        <div class="rating"><i class="fa-solid fa-star"></i> ${x.resRating.toFixed(1)}</div>
-        <div class="meta">
-          <div class="price-box">
-            <span class="price-old">₹${old}</span>
-            <span class="price">₹${x.price}</span>
-          </div>
-          <button class="add-btn" onclick='handleAddToCart(${JSON.stringify(x).replace(/'/g, "&apos;")})'>ADD</button>
-        </div>
-        <a class="restaurant-link" href="restaurant.html?id=${id}">View restaurant &rarr;</a>
-      </div>
-    </article>`
- }).join('');
-}
+  function toNumber(value) {
+    var n = Number(value);
+    if (Number.isFinite(n)) return n;
+    var parsed = parseFloat(String(value == null ? '' : value).replace(/[^\d.]/g, ''));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
 
-/* Multi-Restaurant Cart Logic */
-function handleAddToCart(item) {
-    if (cart.items.length > 0 && cart.resId !== item.resId) {
-        pendingItem = item;
-        document.getElementById('cartModal').classList.add('active');
-    } else {
-        addItemToCart(item);
+  /* Maps an API deal onto the fields the shared cart needs.
+     Anything the API does not supply stays null — no invented ratings,
+     no invented "original" prices, no random menu item ids. */
+  function mapItem(raw) {
+    var price = toNumber(raw.price);
+    if (price == null) return null;
+
+    var menuItemId = raw._id || raw.id || raw.menuItem || '';
+
+    var restaurant = raw.restaurant;
+    var resId = raw.restaurantId || raw.resId || raw.restaurant_id || '';
+    var resName = raw.resName || raw.restaurantName || '';
+    var resRating = toNumber(raw.resRating != null ? raw.resRating : raw.restaurantRating);
+
+    if (restaurant && typeof restaurant === 'object') {
+      resId = restaurant._id || restaurant.id || resId;
+      resName = restaurant.name || resName;
+      if (resRating == null) resRating = toNumber(restaurant.rating);
+    } else if (typeof restaurant === 'string' && restaurant) {
+      resId = restaurant;
     }
-}
 
-function addItemToCart(item) {
-    if (cart.items.length === 0) {
-        cart.resId = item.resId;
-        cart.resName = item.resName;
+    if (!resId || !menuItemId) return null; // cannot be ordered — do not show ADD
+
+    var originalPrice = toNumber(raw.originalPrice);
+    if (originalPrice == null || originalPrice <= price) originalPrice = null;
+
+    return {
+      menuItemId: String(menuItemId),
+      name: raw.name || '',
+      price: price,
+      originalPrice: originalPrice,
+      isVeg: typeof raw.isVeg === 'boolean' ? raw.isVeg : null,
+      image: raw.image || raw.img || '',
+      resId: String(resId),
+      resName: resName,
+      resRating: resRating
+    };
+  }
+
+  function cartPayload(item) {
+    return encodeURIComponent(JSON.stringify({
+      name: item.name,
+      price: item.price,
+      originalPrice: item.originalPrice,
+      resId: item.resId,
+      menuItem: item.menuItemId,
+      image: item.image,
+      isVeg: item.isVeg === true
+    }));
+  }
+
+  function readCart() {
+    try {
+      var parsed = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+      return parsed;
+    } catch (e) { return {}; }
+  }
+
+  function containerKey(item) { return String(item.name).replace(/\s+/g, ''); }
+
+  /* Markup matches what cart-bar.js re-renders after every change, so the
+     button never falls out of sync with the cart. */
+  function buttonHtml(item, qty) {
+    var payload = cartPayload(item);
+    if (qty > 0) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);">' +
+        '<button onclick="updateCart(\'' + payload + '\', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>' +
+        '<span style="font-size:13px;font-weight:800;color:#FC8019;">' + qty + '</span>' +
+        '<button onclick="updateCart(\'' + payload + '\', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button>' +
+        '</div>';
     }
-    
-    const existing = cart.items.find(i => i.id === item.id);
-    if(existing) existing.quantity += 1;
-    else cart.items.push({...item, quantity: 1});
-    
-    saveCart();
-    updateFloatingCart();
-    showToast("Item added to cart");
-}
+    return '<button class="add-btn" onclick="updateCart(\'' + payload + '\', 1)">ADD</button>';
+  }
 
-function confirmNewCart() {
-    cart = { items: [], resId: null, resName: null };
-    addItemToCart(pendingItem);
-    closeModal();
-}
+  function render() {
+    var list = el('under99-list');
 
-function closeModal() {
-    document.getElementById('cartModal').classList.remove('active');
-    pendingItem = null;
-}
+    var data = state.items.filter(function (item) {
+      if (state.vegOnly && item.isVeg !== true) return false;
+      if (state.ratingOnly && (item.resRating == null || item.resRating < 4)) return false;
+      return true;
+    }).sort(function (a, b) { return a.price - b.price; });
 
-function saveCart() {
-    localStorage.setItem('nearbite_cart', JSON.stringify(cart));
-}
+    list.style.display = 'grid';
 
-function updateFloatingCart() {
-    const floatBar = document.getElementById('floatingCart');
-    if (cart.items.length > 0) {
-        const count = cart.items.reduce((acc, i) => acc + i.quantity, 0);
-        const total = cart.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-        document.getElementById('cartItemCount').innerText = `${count} item${count > 1 ? 's' : ''}`;
-        document.getElementById('cartTotal').innerText = `₹${total}`;
-        document.getElementById('cartResName').innerText = cart.resName || '';
-        floatBar.classList.add('visible');
-    } else {
-        floatBar.classList.remove('visible');
+    if (!data.length) {
+      list.innerHTML = '<div class="empty"><i class="fa-solid fa-tag"></i>' +
+        '<strong>No deals available right now</strong>' +
+        '<span>Check back soon for fresh offers.</span></div>';
+      return;
     }
-}
 
-function showToast(msg) {
-    // Simple native visual feedback fallback if needed, but float updates instantly
-}
+    var cart = readCart();
 
-function toggleVeg(){vegOnly=!vegOnly;document.getElementById('vegBtn').classList.toggle('orange-active',vegOnly);render()}
-function toggleRating(){ratingOnly=!ratingOnly;document.getElementById('ratingBtn').classList.toggle('orange-active',ratingOnly);render()}
+    list.innerHTML = data.map(function (item) {
+      var qty = cart[item.name] ? cart[item.name].quantity : 0;
+      var vegDot = item.isVeg === null
+        ? ''
+        : '<span class="veg-dot ' + (item.isVeg ? 'veg' : 'non') + '">' +
+          '<i class="fa-solid ' + (item.isVeg ? 'fa-circle' : 'fa-caret-up') + '"></i></span>';
 
-document.addEventListener('DOMContentLoaded', load);
+      return '<article class="card">' +
+        '<div class="image-wrap">' +
+          (item.image
+            ? '<img src="' + esc(item.image) + '" alt="' + esc(item.name) +
+              '" loading="lazy" class="food-img' + (item.image.indexOf('png') !== -1 ? ' food-img-contain' : '') +
+              '" onerror="this.closest(\'.image-wrap\').classList.add(\'no-image\'); this.remove();">'
+            : '<div class="img-fallback"><i class="fa-solid fa-utensils"></i></div>') +
+          vegDot +
+        '</div>' +
+        '<div class="card-body">' +
+          '<div class="item-name">' + esc(item.name) + '</div>' +
+          (item.resName ? '<div class="restaurant">' + esc(item.resName) + '</div>' : '') +
+          (item.resRating != null
+            ? '<div class="rating"><i class="fa-solid fa-star"></i> ' + item.resRating.toFixed(1) + '</div>'
+            : '') +
+          '<div class="meta">' +
+            '<div class="price-box">' +
+              (item.originalPrice ? '<span class="price-old">₹' + item.originalPrice + '</span>' : '') +
+              '<span class="price">₹' + item.price + '</span>' +
+            '</div>' +
+            '<span id="btn-container-' + esc(containerKey(item)) + '">' + buttonHtml(item, qty) + '</span>' +
+          '</div>' +
+          '<a class="restaurant-link" href="restaurant.html?id=' + encodeURIComponent(item.resId) + '">View restaurant &rarr;</a>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    var counter = el('item-count');
+    if (counter) counter.textContent = data.length + ' deal' + (data.length !== 1 ? 's' : '');
+
+    var heroSub = el('hero-sub');
+    if (heroSub && data.length) {
+      heroSub.textContent = 'Top food deals starting from ₹' + data[0].price;
+    }
+  }
+
+  function syncFilters() {
+    var hasVeg = state.items.some(function (i) { return i.isVeg !== null; });
+    var hasRating = state.items.some(function (i) { return i.resRating != null; });
+    if (el('vegBtn')) el('vegBtn').hidden = !hasVeg;
+    if (el('ratingBtn')) el('ratingBtn').hidden = !hasRating;
+  }
+
+  function showError(message) {
+    var list = el('under99-list');
+    list.style.display = 'grid';
+    list.innerHTML = '<div class="empty"><i class="fa-solid fa-wifi"></i>' +
+      '<strong>Couldn\u2019t load deals</strong><span>' + esc(message || 'Please try again.') + '</span>' +
+      '<button class="add-btn" style="margin-top:16px" id="u99-retry">Try Again</button></div>';
+
+    var retry = el('u99-retry');
+    if (retry) {
+      retry.addEventListener('click', function () {
+        retry.disabled = true;
+        retry.textContent = 'Retrying…';
+        load();
+      });
+    }
+  }
+
+  function load() {
+    var skeleton = el('skeleton');
+
+    return window.API.getList(window.API.routes.under99)
+      .then(function (data) {
+        state.items = data.map(mapItem).filter(function (item) {
+          return item && item.price <= 99;
+        });
+        if (skeleton) skeleton.style.display = 'none';
+        syncFilters();
+        render();
+        if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+      })
+      .catch(function (error) {
+        console.error('[under99] load failed:', error);
+        if (skeleton) skeleton.style.display = 'none';
+        showError(error && error.message);
+      });
+  }
+
+  window.toggleVeg = function () {
+    state.vegOnly = !state.vegOnly;
+    el('vegBtn').classList.toggle('orange-active', state.vegOnly);
+    render();
+  };
+
+  window.toggleRating = function () {
+    state.ratingOnly = !state.ratingOnly;
+    el('ratingBtn').classList.toggle('orange-active', state.ratingOnly);
+    render();
+  };
+
+  document.addEventListener('DOMContentLoaded', load);
+})();
 </script>
+  <script src="cart-bar.js"></script>
   <script src="bottom-tab-bar.js"></script>
 </body>
 </html>

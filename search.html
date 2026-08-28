@@ -61,6 +61,8 @@
   @media (min-width:600px){.mind-grid{grid-template-columns:repeat(6,1fr)}}
 </style>
 <link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="api.js"></script>
 </head>
 <body class="bg-white pb-24">
 
@@ -123,7 +125,6 @@
 </nav>
 
 <script>
-  const API_BASE = 'https://eatswada.onrender.com/api';
   const searchInput = document.getElementById('search-input');
   const mindSection = document.getElementById('mind-section');
   const mindGrid = document.getElementById('mind-grid');
@@ -133,28 +134,26 @@
   const chipsSection = document.getElementById('suggestion-chips');
   let restaurants = [];
 
-  const FALLBACK_CATEGORIES = [
-    {name:'Biryani',type:'Biryani',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029853/PC_Creative%20refresh/3D_folders/food/biryani.png'},
-    {name:'North Indian',type:'North Indian',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029850/PC_Creative%20refresh/3D_folders/food/north_indian.png'},
-    {name:'Thali',type:'Thali',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029853/PC_Creative%20refresh/3D_folders/food/thali.png'},
-    {name:'Chicken',type:'Chicken',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029845/PC_Creative%20refresh/3D_folders/food/chicken.png'},
-    {name:'Fried Rice',type:'Fried Rice',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029858/PC_Creative%20refresh/3D_folders/food/fried_rice.png'},
-    {name:'Chinese',type:'Chinese',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029846/PC_Creative%20refresh/3D_folders/food/chinese.png'},
-    {name:'Paneer',type:'Paneer',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029852/PC_Creative%20refresh/3D_folders/food/paneer.png'},
-    {name:'Cake',type:'Cake',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029845/PC_Creative%20refresh/3D_folders/food/cake.png'},
-    {name:'Pizza',type:'Pizza',image:'https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_288,h_360/v1674029856/PC_Creative%20refresh/3D_folders/food/pizza.png'}
-  ];
 
   function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
   function renderMind(categories){
-    const cats = (categories || []).filter(c=>c && c.image).slice(0,12);
-    const data = cats.length ? cats : FALLBACK_CATEGORIES;
-    mindGrid.innerHTML = data.map((cat,i)=>`
-      <button class="mind-item" type="button" onclick="quickSearch('${esc(cat.type).replace(/'/g,"\'")}')" aria-label="Search ${esc(cat.name)}">
+    // Real categories only. With none, the section hides rather than
+    // showing a hardcoded stand-in list that doesn't match the menu.
+    const data = (categories || []).filter(c=>c && c.image && c.name).slice(0,12);
+
+    if(!data.length){
+      if(mindSection) mindSection.classList.add('hidden');
+      mindGrid.innerHTML='';
+      return;
+    }
+
+    if(mindSection) mindSection.classList.remove('hidden');
+    mindGrid.innerHTML = data.map(cat=>`
+      <button class="mind-item" type="button" onclick="quickSearch('${esc(cat.type).replace(/'/g,"\\'")}')" aria-label="Search ${esc(cat.name)}">
         <div class="mind-image-wrap">
           <img src="${esc(cat.image)}" alt="${esc(cat.name)}" loading="lazy"
-               onerror="this.onerror=null;this.src='${esc(FALLBACK_CATEGORIES[i % FALLBACK_CATEGORIES.length].image)}'">
+               onerror="this.closest('.mind-item').remove()">
         </div>
         <span>${esc(cat.name)}</span>
       </button>`).join('');
@@ -162,24 +161,26 @@
 
   async function loadCategories(){
     try{
-      const r=await fetch(`${API_BASE}/categories`,{cache:'no-store'});
-      const j=await r.json();
-      const cats=(j && j.success && Array.isArray(j.data)) ? j.data.filter(c=>c.isActive!==false).sort((a,b)=>(a.order??0)-(b.order??0)).map(c=>({name:c.name,type:c.name,image:c.image})) : [];
+      const data = await window.API.getList(window.API.routes.categories);
+      const cats = data.filter(c=>c && c.isActive!==false && c.name && c.image)
+        .sort((a,b)=>(a.order??0)-(b.order??0))
+        .map(c=>({name:c.name,type:c.name,image:c.image}));
       renderMind(cats);
     }catch(e){renderMind([]);}
   }
 
   async function loadRestaurants(){
+    // Shares the one restaurant cache used by the home and category pages.
+    const cached = window.API.cache.readList(window.API.CACHE_KEYS.restaurants, 10*60*1000);
+    if (cached) restaurants = cached;
+
     try{
-      const cached=sessionStorage.getItem('es_home_restaurants');
-      if(cached) restaurants=JSON.parse(cached);
-      if(!Array.isArray(restaurants) || !restaurants.length){
-        const r=await fetch(`${API_BASE}/restaurants`,{cache:'no-store'});
-        const j=await r.json();
-        restaurants=(j && j.success && Array.isArray(j.data)) ? j.data : [];
-        sessionStorage.setItem('es_home_restaurants',JSON.stringify(restaurants));
-      }
-    }catch(e){restaurants=[];}
+      restaurants = await window.API.getList(window.API.routes.restaurants);
+      window.API.cache.writeList(window.API.CACHE_KEYS.restaurants, restaurants);
+    }catch(e){
+      console.warn('[search] restaurant load failed:', e.message);
+      if(!Array.isArray(restaurants)) restaurants=[];
+    }
   }
 
   function quickSearch(q){

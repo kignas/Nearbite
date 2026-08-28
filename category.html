@@ -91,7 +91,13 @@
       background: #FC8019; color: #fff; font-size: 13px; font-weight: 900; padding: 12px 32px;
       border-radius: 16px; border: none; box-shadow: 0 4px 12px rgba(252,128,25,0.2); cursor: pointer;
     }
-  </style>
+  
+    .res-img-wrap.no-image, .res-img-fallback {
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg,#edf0f4,#e2e7ee); color: #b7bfcb; font-size: 22px;
+      width: 100%; height: 100%;
+    }
+</style>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -110,15 +116,12 @@
   </button>
 </div>
 
-<div class="filter-bar">
-  <button class="filter-pill">
-    <i class="fa-solid fa-sliders" style="font-size:10px; margin-right:4px;"></i> Filter
+<div class="filter-bar" id="cat-filter-bar" hidden>
+  <button type="button" onclick="toggleCategorySort()" id="sort-cat-btn" class="filter-pill" hidden>
+    Top rated first
   </button>
-  <button onclick="toggleCategorySort()" id="sort-cat-btn" class="filter-pill">
-    Sort By <i class="fa-solid fa-chevron-down" style="font-size:9px; margin-left:4px;"></i>
-  </button>
-  <button onclick="toggleCategoryRating()" id="rating-cat-btn" class="filter-pill">Ratings 4.0+</button>
-  <button onclick="toggleCategoryVeg()" id="veg-cat-btn" class="filter-pill">Pure Veg</button>
+  <button type="button" onclick="toggleCategoryRating()" id="rating-cat-btn" class="filter-pill" hidden>Ratings 4.0+</button>
+  <button type="button" onclick="toggleCategoryVeg()" id="veg-cat-btn" class="filter-pill" hidden>Pure Veg</button>
 </div>
 
 <div id="results-list" class="results-container">
@@ -145,109 +148,232 @@
   <div id="cat-results" style="display:none;"></div>
 </div>
 
-<nav class="bottom-nav">
-  <a href="index.html" class="nav-item" style="color:#FC8019">
-    <div class="nav-food-circle">
-      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-5.87-11.31-7.95-15.03-3.89V21h15.03v-6.01z"/></svg>
-    </div>
-    <span style="color:#FC8019">Food</span>
-  </a>
-  <a href="under99.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-    <span>99 store</span>
-  </a>
-  <a href="orders.html" class="nav-item">
-    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-    <span>Orders</span>
-    <span class="nav-new-badge">NEW</span>
-  </a>
-</nav>
 
-<script src="home.js"></script>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="restaurant-card.js"></script>
 <script>
-  let catSortRating = false, catRatingFilter = false, catVegOnly = false;
-  let baseCategory = '';
+/* ================================================================
+   CATEGORY RESULTS
+   Loads real restaurants from the shared API layer. Previously this
+   page read a global `restaurants` array from a home.js file that no
+   longer exists, so it threw on load and the skeleton never cleared.
+   ================================================================ */
+(function () {
+  'use strict';
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    baseCategory = params.get('type') || '';
-    const titleEl = document.getElementById('category-title');
-    if (baseCategory) titleEl.innerText = baseCategory;
-    setTimeout(renderCategory, 400);
-  });
+  var read = window.RestaurantCard.read;
+  var esc = window.RestaurantCard.escape;
 
-  function renderCategory() {
-    const skeleton = document.getElementById('cat-skeleton');
-    const container = document.getElementById('cat-results');
-    if (!container) return;
+  var state = {
+    restaurants: [],
+    category: '',
+    sortByRating: false,
+    ratingOnly: false,
+    vegOnly: false,
+    status: 'loading'
+  };
 
-    const term = baseCategory.toLowerCase();
-    let filtered = restaurants.filter(res => {
-      const nameMatch  = res.name.toLowerCase().includes(term);
-      const cuisineMatch = res.cuisine && res.cuisine.toLowerCase().includes(term);
-      const menuMatch  = res.menu && res.menu.some(item => item.name.toLowerCase().includes(term));
-      const vegMatch   = !catVegOnly || (res.menu && res.menu.every(item => item.isVeg));
-      const ratingMatch = !catRatingFilter || parseFloat(res.rating) >= 4.0;
-      return (nameMatch || cuisineMatch || menuMatch) && vegMatch && ratingMatch;
+  function el(id) { return document.getElementById(id); }
+
+  function matchesCategory(res) {
+    var term = state.category.toLowerCase();
+    if (!term) return true;
+
+    if (String(read.name(res)).toLowerCase().indexOf(term) !== -1) return true;
+    if (String(read.cuisine(res)).toLowerCase().indexOf(term) !== -1) return true;
+
+    if (Array.isArray(res.menu)) {
+      return res.menu.some(function (item) {
+        return item && String(item.name || '').toLowerCase().indexOf(term) !== -1;
+      });
+    }
+    return false;
+  }
+
+  function visible() {
+    var list = state.restaurants.filter(function (res) {
+      if (!matchesCategory(res)) return false;
+      if (state.ratingOnly) {
+        var rating = read.rating(res);
+        if (rating == null || rating < 4) return false;
+      }
+      if (state.vegOnly && read.pureVeg(res) !== true) return false;
+      return true;
     });
 
-    if (catSortRating) {
-      filtered.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+    if (state.sortByRating) {
+      list = list.slice().sort(function (a, b) {
+        return (read.rating(b) || 0) - (read.rating(a) || 0);
+      });
     }
+    return list;
+  }
+
+  /* Only show a control the loaded data can actually answer. */
+  function syncFilterBar() {
+    var bar = el('cat-filter-bar');
+    if (!bar) return;
+
+    var hasRating = state.restaurants.some(function (r) { return read.rating(r) != null; });
+    var hasVeg = state.restaurants.some(function (r) { return read.pureVeg(r) !== null; });
+
+    el('sort-cat-btn').hidden = !hasRating;
+    el('rating-cat-btn').hidden = !hasRating;
+    el('veg-cat-btn').hidden = !hasVeg;
+
+    bar.hidden = !(hasRating || hasVeg);
+  }
+
+  function stateBlock(icon, title, sub, buttonHtml) {
+    return '<div class="empty-state">' +
+      '<div class="empty-icon-wrap"><i class="fa-solid ' + icon + '"></i></div>' +
+      '<h2 class="empty-title">' + esc(title) + '</h2>' +
+      '<p class="empty-sub">' + esc(sub) + '</p>' +
+      (buttonHtml || '') +
+      '</div>';
+  }
+
+  function render() {
+    var skeleton = el('cat-skeleton');
+    var container = el('cat-results');
+    if (!container) return;
 
     if (skeleton) skeleton.style.display = 'none';
     container.style.display = 'block';
 
-    if (filtered.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon-wrap"><i class="fa-solid fa-utensils"></i></div>
-          <h2 class="empty-title">No restaurants found</h2>
-          <p class="empty-sub">We couldn't find any places serving "${baseCategory}" nearby.</p>
-          <button onclick="window.nearbiteSafeBack()" class="btn-back-home">Go Back</button>
-        </div>`;
+    if (state.status === 'error') {
+      container.innerHTML = stateBlock(
+        'fa-plug-circle-xmark',
+        "Couldn't load restaurants",
+        state.errorMessage || 'Please try again.',
+        '<button type="button" class="btn-back-home" id="cat-retry">Try Again</button>'
+      );
+      var retry = el('cat-retry');
+      if (retry) {
+        retry.addEventListener('click', function () {
+          retry.disabled = true;
+          retry.textContent = 'Retrying…';
+          load();
+        });
+      }
       return;
     }
 
-    container.innerHTML = `
-      <p class="res-count">${filtered.length} restaurant${filtered.length !== 1 ? 's' : ''} found</p>
-      ${filtered.map(res => `
-        <a href="restaurant.html?id=${res._id || res.id}" class="res-card">
-          <div class="res-img-wrap">
-            <img src="${res.image}" alt="${res.name}" onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&auto=format&fit=crop&q=80'">
-            ${res.offer ? `<div class="res-offer">${res.offer}</div>` : ''}
-          </div>
-          <div class="res-info">
-            <div class="res-top">
-              <h3 class="res-name">${res.name}</h3>
-              <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
-            </div>
-            <div class="res-meta-row">
-              <div class="res-rating"><i class="fa-solid fa-star" style="font-size:8px;"></i> ${res.rating}</div>
-              <span class="res-time">· ${res.time}</span>
-            </div>
-            <p class="res-cuisine">${res.cuisine || 'Restaurant'}</p>
-            <p class="res-loc"><i class="fa-solid fa-location-dot" style="color:#FC8019; font-size:9px;"></i> Maynaguri · ${res.distance}</p>
-          </div>
-        </a>`).join('')}`;
+    var list = visible();
+
+    if (!list.length) {
+      container.innerHTML = stateBlock(
+        'fa-utensils',
+        'No restaurants found',
+        state.category
+          ? 'We couldn\u2019t find any places serving "' + state.category + '" nearby.'
+          : 'Nothing available here right now.',
+        '<button type="button" onclick="window.nearbiteSafeBack()" class="btn-back-home">Go Back</button>'
+      );
+      return;
+    }
+
+    container.innerHTML =
+      '<p class="res-count">' + list.length + ' restaurant' + (list.length !== 1 ? 's' : '') + ' found</p>' +
+      list.map(function (res) {
+        var id = read.id(res);
+        var name = read.name(res);
+        var images = read.images(res);
+        var rating = read.rating(res);
+        var time = read.deliveryTime(res);
+        var cuisine = read.cuisine(res);
+        var offer = read.offer(res);
+        var distance = window.RestaurantCard.formatDistance(window.RestaurantCard.getDistanceKm(res));
+
+        var meta = [];
+        if (rating != null) {
+          meta.push('<div class="res-rating"><i class="fa-solid fa-star" style="font-size:8px;"></i> ' +
+            esc(rating.toFixed(1)) + '</div>');
+        }
+        if (time) meta.push('<span class="res-time">' + esc(time.text) + '</span>');
+
+        return '<a href="restaurant.html?id=' + encodeURIComponent(id) + '" class="res-card">' +
+          '<div class="res-img-wrap">' +
+            (images.length
+              ? '<img src="' + esc(images[0]) + '" alt="' + esc(name) +
+                '" loading="lazy" onerror="this.closest(\'.res-img-wrap\').classList.add(\'no-image\'); this.remove();">'
+              : '<div class="res-img-fallback"><i class="fa-solid fa-utensils"></i></div>') +
+            (offer ? '<div class="res-offer">' + esc(offer) + '</div>' : '') +
+          '</div>' +
+          '<div class="res-info">' +
+            '<div class="res-top"><h3 class="res-name">' + esc(name) + '</h3></div>' +
+            (meta.length ? '<div class="res-meta-row">' + meta.join(' · ') + '</div>' : '') +
+            (cuisine ? '<p class="res-cuisine">' + esc(cuisine) + '</p>' : '') +
+            (distance
+              ? '<p class="res-loc"><i class="fa-solid fa-location-dot" style="color:#FC8019; font-size:9px;"></i> ' +
+                esc(distance) + '</p>'
+              : '') +
+          '</div>' +
+        '</a>';
+      }).join('');
   }
-  function toggleCategorySort() {
-    catSortRating = !catSortRating;
-    document.getElementById('sort-cat-btn').classList.toggle('active', catSortRating);
-    renderCategory();
+
+  function load() {
+    var cached = window.API.cache.readList(window.API.CACHE_KEYS.restaurants, 10 * 60 * 1000);
+
+    if (cached) {
+      state.restaurants = cached;
+      state.status = 'ready';
+      syncFilterBar();
+      render();
+    }
+
+    return window.API.getList(window.API.routes.restaurants)
+      .then(function (data) {
+        state.restaurants = data.filter(function (res) {
+          return res && (res._id || res.id || res.slug);
+        });
+        state.status = 'ready';
+        window.API.cache.writeList(window.API.CACHE_KEYS.restaurants, state.restaurants);
+        syncFilterBar();
+        render();
+      })
+      .catch(function (error) {
+        console.error('[category] load failed:', error);
+        if (!state.restaurants.length) {
+          state.status = 'error';
+          state.errorMessage = error && error.message ? error.message : 'Please try again.';
+          render();
+        }
+      });
   }
-  function toggleCategoryRating() {
-    catRatingFilter = !catRatingFilter;
-    document.getElementById('rating-cat-btn').classList.toggle('active', catRatingFilter);
-    renderCategory();
-  }
-  function toggleCategoryVeg() {
-    catVegOnly = !catVegOnly;
-    document.getElementById('veg-cat-btn').classList.toggle('active', catVegOnly);
-    renderCategory();
-  }
+
+  window.toggleCategorySort = function () {
+    state.sortByRating = !state.sortByRating;
+    el('sort-cat-btn').classList.toggle('active', state.sortByRating);
+    render();
+  };
+
+  window.toggleCategoryRating = function () {
+    state.ratingOnly = !state.ratingOnly;
+    el('rating-cat-btn').classList.toggle('active', state.ratingOnly);
+    render();
+  };
+
+  window.toggleCategoryVeg = function () {
+    state.vegOnly = !state.vegOnly;
+    el('veg-cat-btn').classList.toggle('active', state.vegOnly);
+    render();
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    state.category = new URLSearchParams(window.location.search).get('type') || '';
+    var titleEl = el('category-title');
+    if (state.category && titleEl) titleEl.innerText = state.category;
+    load();
+  });
+})();
 </script>
 
 <script src="navigation.js"></script>
+<script src="cart-bar.js"></script>
+<script src="bottom-tab-bar.js"></script>
 </body>
 </html>
