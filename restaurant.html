@@ -24,7 +24,7 @@
       --brand-dark:  #e0700f;
       --green:       #1ba672;
       --red:         #e63946;
-      --bg:          #f4f4f6;
+      --bg:          #ffffff;
       --card:        #ffffff;
       --text-1:      #111111;
       --text-2:      #555555;
@@ -291,6 +291,26 @@
 
     .nb-item-image-wrap.no-image { background: linear-gradient(135deg,#edf0f4,#e2e7ee); }
 
+
+    .coupon-strip{margin:10px 0 0;padding:10px 12px;background:#f3f0ff;border:1px solid #e3ddff;border-radius:14px;display:flex;align-items:center;gap:10px;color:#4f46e5;}
+    .coupon-icon{width:30px;height:30px;border-radius:9px;background:#635bff;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .coupon-strip strong{display:block;font-size:12px;font-weight:800;}
+    .coupon-strip span{display:block;font-size:11px;color:#6b63a8;margin-top:2px;font-weight:600;}
+    .restaurant-details-section,.reviews-section{margin:14px 14px 0;background:#fff;border:1px solid #eceef1;border-radius:20px;box-shadow:0 3px 16px rgba(15,23,42,.05);padding:16px;}
+    .details-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .detail-cell{padding:12px;background:#f8f9fa;border-radius:14px;}
+    .detail-label{font-size:10px;color:#89919c;text-transform:uppercase;letter-spacing:.7px;font-weight:800;}
+    .detail-value{margin-top:4px;font-size:12px;color:#20252b;font-weight:700;line-height:1.35;}
+    .reviews-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .reviews-head h2{font-size:18px;font-weight:900;}
+    #reviews-summary{font-size:11px;color:#7b8490;font-weight:700;}
+    .review-card{padding:13px 0;border-top:1px solid #eef0f2;}
+    .review-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .review-user{font-size:12px;font-weight:800;color:#20252b;}
+    .review-score{font-size:11px;font-weight:800;color:#168544;}
+    .review-text{font-size:12px;line-height:1.5;color:#606a75;margin-top:6px;}
+    .review-photo{width:88px;height:88px;border-radius:12px;object-fit:cover;margin-top:9px;border:1px solid #eee;}
+    .review-empty{font-size:12px;color:#89919c;padding:6px 0;}
 </style>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -299,6 +319,7 @@
   <div class="top-bar">
     <button class="icon-btn" onclick="window.nearbiteSafeBack()"><i class="fa-solid fa-chevron-left"></i></button>
     <div class="top-actions">
+      <button class="icon-btn" id="restaurant-info-btn" type="button" aria-label="Restaurant details"><i class="fa-solid fa-circle-info"></i></button>
       <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
   </div>
@@ -327,6 +348,10 @@
         <div class="offer-icon"><i class="fa-solid fa-tag"></i></div>
         <span id="res-offer-text" class="offer-text"></span>
       </div>
+      <div id="res-coupon-banner" class="coupon-strip" hidden>
+        <div class="coupon-icon"><i class="fa-solid fa-ticket"></i></div>
+        <div><strong id="res-coupon-title">Coupon available</strong><span id="res-coupon-text"></span></div>
+      </div>
     </div>
     <div class="delivery-strip">
       <div class="del-chip" id="res-free-delivery"><i class="fa-solid fa-motorcycle orange"></i> FREE delivery above ₹199</div>
@@ -343,6 +368,15 @@
       <div class="veg-chip nonveg-type" id="filter-nonveg" onclick="toggleFilter('nonveg')"><span class="veg-dot-icon"></span>Non-veg</div>
     </div>
   </div>
+
+  <section class="restaurant-details-section" id="restaurant-details-section" hidden>
+    <div class="details-grid" id="restaurant-details-grid"></div>
+  </section>
+
+  <section class="reviews-section" id="reviews-section" hidden>
+    <div class="reviews-head"><h2>Reviews</h2><span id="reviews-summary"></span></div>
+    <div class="reviews-list" id="reviews-list"></div>
+  </section>
 
   <div class="menu-section">
     <div id="menu-skeleton">
@@ -566,6 +600,100 @@
     node.innerHTML = iconHtml + ' ' + value;
   }
 
+  function selectedCustomerCoords() {
+    try {
+      const address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
+      const c = address && address.location && address.location.coordinates;
+      if (Array.isArray(c) && c.length === 2 && Number.isFinite(Number(c[0])) && Number.isFinite(Number(c[1]))) {
+        return { lng: Number(c[0]), lat: Number(c[1]) };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function restaurantCoords(restaurant) {
+    const c = restaurant && restaurant.location && restaurant.location.coordinates;
+    if (!Array.isArray(c) || c.length !== 2) return null;
+    if (!Number.isFinite(Number(c[0])) || !Number.isFinite(Number(c[1]))) return null;
+    return { lng: Number(c[0]), lat: Number(c[1]) };
+  }
+
+  function distanceKm(a, b) {
+    const R = 6371;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const lat1 = a.lat * Math.PI / 180;
+    const lat2 = b.lat * Math.PI / 180;
+    const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+  }
+
+  function formatRestaurantDistance(restaurant) {
+    const customer = selectedCustomerCoords();
+    const target = restaurantCoords(restaurant);
+    if (customer && target) {
+      const km = distanceKm(customer, target);
+      return km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1) + ' km';
+    }
+    const meters = Number(restaurant.distanceMeters);
+    if (Number.isFinite(meters)) return meters < 1000 ? Math.round(meters) + ' m' : (meters/1000).toFixed(1) + ' km';
+    return typeof restaurant.distance === 'string' ? restaurant.distance : '';
+  }
+
+  function couponTextFrom(data) {
+    if (!data) return '';
+    if (Array.isArray(data.coupons) && data.coupons.length) {
+      const c = data.coupons[0];
+      if (c && typeof c === 'object') return c.code || c.couponCode || c.title || c.description || '';
+      return String(c || '');
+    }
+    return data.coupon || data.couponText || data.couponCode || data.couponLabel || '';
+  }
+
+  function renderRestaurantDetails(restaurant) {
+    const section = document.getElementById('restaurant-details-section');
+    const grid = document.getElementById('restaurant-details-grid');
+    if (!section || !grid) return;
+    const rows = [];
+    const address = restaurant.address || (restaurant.location && restaurant.location.address);
+    const cuisine = restaurant.cuisineDisplay || restaurant.cuisine || (Array.isArray(restaurant.cuisines) ? restaurant.cuisines.join(', ') : '');
+    const hours = restaurant.autoHours || restaurant.hours || '';
+    const radius = Number(restaurant.deliveryRadiusKm);
+    if (address) rows.push(['Address', address]);
+    if (cuisine) rows.push(['Cuisine', cuisine]);
+    if (hours) rows.push(['Hours', typeof hours === 'string' ? hours : JSON.stringify(hours)]);
+    if (Number.isFinite(radius) && radius > 0) rows.push(['Delivery radius', radius + ' km']);
+    if (restaurant.phone) rows.push(['Phone', restaurant.phone]);
+    if (!rows.length) { section.hidden = true; return; }
+    grid.innerHTML = rows.map(r => '<div class="detail-cell"><div class="detail-label">'+escapeMenuHtml(r[0])+'</div><div class="detail-value">'+escapeMenuHtml(r[1])+'</div></div>').join('');
+    section.hidden = false;
+  }
+
+  async function loadRestaurantReviews(resId, restaurant) {
+    const section = document.getElementById('reviews-section');
+    const list = document.getElementById('reviews-list');
+    const summary = document.getElementById('reviews-summary');
+    if (!section || !list) return;
+    try {
+      const payload = await window.API.request('/restaurants/' + encodeURIComponent(resId) + '/reviews');
+      const data = window.API.unwrap(payload);
+      const reviews = Array.isArray(data) ? data : (data && Array.isArray(data.reviews) ? data.reviews : []);
+      if (!reviews.length) { section.hidden = true; return; }
+      if (summary) summary.textContent = reviews.length + (reviews.length === 1 ? ' review' : ' reviews');
+      list.innerHTML = reviews.slice(0, 8).map(function (r) {
+        const user = (r.user && (r.user.name || r.user.fullName)) || r.userName || r.name || 'Customer';
+        const score = Number(r.score || r.rating || r.foodRating);
+        const text = r.comment || r.text || r.review || '';
+        const photo = r.image || r.photo || r.foodImage || r.imageUrl || '';
+        return '<article class="review-card"><div class="review-top"><span class="review-user">'+escapeMenuHtml(user)+'</span><span class="review-score">'+(Number.isFinite(score) ? '★ '+score.toFixed(1) : '')+'</span></div>'+(text?'<p class="review-text">'+escapeMenuHtml(text)+'</p>':'')+(photo?'<img class="review-photo" src="'+escapeMenuHtml(photo)+'" alt="Customer food photo" loading="lazy">':'')+'</article>';
+      }).join('');
+      section.hidden = false;
+    } catch (e) {
+      // Reviews are optional. A missing endpoint must not break restaurant/menu loading.
+      section.hidden = true;
+    }
+  }
+
   function renderRestaurantHeader(restaurant) {
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
@@ -610,12 +738,7 @@
     else if (typeof restaurant.time === 'string' && restaurant.time.trim()) timeText = restaurant.time.trim();
     setMetaChip('res-time', '<i class="fa-regular fa-clock"></i>', timeText);
 
-    let distanceText = '';
-    if (typeof restaurant.distance === 'string' && restaurant.distance.trim()) {
-      distanceText = restaurant.distance.trim();
-    } else if (Number.isFinite(Number(restaurant.distanceMeters))) {
-      distanceText = (Number(restaurant.distanceMeters) / 1000).toFixed(1) + ' km';
-    }
+    const distanceText = formatRestaurantDistance(restaurant);
     setMetaChip('res-distance', '<i class="fa-solid fa-location-dot"></i>', distanceText);
 
     const freeDeliveryEl = document.getElementById('res-free-delivery');
@@ -635,6 +758,13 @@
     } else {
       document.getElementById('res-offer-banner').style.display = 'none';
     }
+    const coupon = couponTextFrom(restaurant);
+    const couponBanner = document.getElementById('res-coupon-banner');
+    if (couponBanner) {
+      couponBanner.hidden = !coupon;
+      if (coupon) document.getElementById('res-coupon-text').textContent = coupon;
+    }
+    renderRestaurantDetails(restaurant);
   }
 
   function renderClosedWarning(restaurant) {
@@ -710,10 +840,10 @@
         const badgeLabel = item.badge || item.tag ||
           (item.isBestseller === true || item.bestseller === true ? 'Bestseller' : '') ||
           (item.isMustTry === true || item.mustTry === true ? 'Must Try' : '');
+        const itemCoupon = item.coupon || item.couponText || item.couponCode || item.couponLabel || '';
 
-        const tagHTML = badgeLabel
-          ? `<span class="nb-item-badge">${escapeMenuHtml(badgeLabel)}</span>`
-          : '';
+        const tagHTML = (badgeLabel ? `<span class="nb-item-badge">${escapeMenuHtml(badgeLabel)}</span>` : '') +
+          (itemCoupon ? `<span class="nb-item-coupon"><i class="fa-solid fa-ticket"></i> ${escapeMenuHtml(itemCoupon)}</span>` : '');
 
         const vegKnown = typeof item.isVeg === 'boolean';
         const vegIcon = !vegKnown
@@ -835,6 +965,7 @@
       }
 
       renderMenu(groups, resId);
+      loadRestaurantReviews(resId, restaurant);
 
       if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
     } catch (error) {
@@ -892,7 +1023,14 @@
     if (bar) bar.style.display = 'none';
   }
 
-  document.addEventListener('DOMContentLoaded', loadRestaurantPage);
+  document.addEventListener('DOMContentLoaded', function () {
+    loadRestaurantPage();
+    const infoBtn = document.getElementById('restaurant-info-btn');
+    if (infoBtn) infoBtn.addEventListener('click', function () {
+      const section = document.getElementById('restaurant-details-section');
+      if (section) { section.hidden = !section.hidden; if (!section.hidden) section.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
 
   function toggleCategory(headerEl) {
     headerEl.classList.toggle('collapsed');

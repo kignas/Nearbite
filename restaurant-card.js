@@ -106,6 +106,16 @@
       return firstText(res.offerText, res.discountText, res.offer, res.offerLabel);
     },
 
+    coupon: function (res) {
+      var raw = res.coupon || res.couponText || res.couponCode || res.couponLabel;
+      if (Array.isArray(res.coupons) && res.coupons.length) {
+        var first = res.coupons[0];
+        if (first && typeof first === 'object') raw = first.code || first.couponCode || first.title || first.description;
+        else raw = first;
+      }
+      return firstText(raw);
+    },
+
     images: function (res) {
       var list = Array.isArray(res.images) && res.images.length
         ? res.images
@@ -314,6 +324,7 @@
     var time = read.deliveryTime(res);
     var minOrder = read.minimumOrder(res);
     var offer = read.offer(res);
+    var coupon = read.coupon(res);
     var nearFast = read.nearFastFlag(res) === true;
 
     var guard = isUnavailable
@@ -354,6 +365,9 @@
     }
     if (offer) {
       tags += '<span class="z-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
+    }
+    if (coupon) {
+      tags += '<span class="z-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
     }
 
     var stats = '';
