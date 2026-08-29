@@ -6,6 +6,7 @@
 <title>EatSwada – Food Near You</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<!-- Switched to Manrope for a more space-efficient, native-app feel -->
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
@@ -71,8 +72,8 @@
   .sk.d4 { animation-delay: .32s; }
 
   .cs-item { display: flex; flex-direction: column; align-items: center; width: 100%; }
-  .cs-ring { width: 100%; aspect-ratio: 1/1; border-radius: 50%; margin-bottom: 4px; }
-  .cs-name { width: 85%; height: 11px; border-radius: 5px; }
+  .cs-ring { width: 100%; aspect-ratio: 1/1; border-radius: 50%; }
+  .cs-name { width: 70%; height: 11px; margin-top: 8px; border-radius: 5px; }
 
   /* ══════════════════════════════════════════════════════════════
      3. HERO HEADER (VISUALLY UPGRADED)
@@ -251,80 +252,50 @@
   .section { padding: 20px 0 4px; }
   .section[hidden] { display: none; }
 
-  .sec-head { display: flex; align-items: center; gap: 12px; padding: 0 18px; margin-bottom: 16px; }
+  .sec-head { display: flex; align-items: center; gap: 12px; padding: 0 18px; margin-bottom: 14px; }
+
+  /* Upgraded to Zomato-style section titles */
   .sec-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 800;
-    color: #475569;
-    letter-spacing: 1.2px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748B;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     white-space: nowrap;
   }
-  .sec-head::after { content: ""; flex: 1; height: 1px; background: #E2E8F0; }
+  .sec-head::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
   /* ── What's on your mind ── */
   .cat-scroll {
     display: grid;
     grid-template-rows: repeat(2, auto);
     grid-auto-flow: column;
-    grid-auto-columns: clamp(74px, 22vw, 86px);
+    grid-auto-columns: 25vw;
     justify-content: start;
-    gap: 12px 12px;
-    padding: 0 18px 16px;
+    gap: 18px 14px;
+    padding: 4px 18px 20px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    scroll-padding-left: 18px;
+    scroll-snap-type: x proximity;
     overscroll-behavior-x: contain;
   }
-  .cat-scroll::-webkit-scrollbar { display: none; }
-  @media (min-width: 620px) { .cat-scroll { grid-auto-columns: 110px; } }
+  @media (min-width: 620px) { .cat-scroll { grid-auto-columns: 120px; } }
 
   .cat-item {
     display: flex; flex-direction: column; align-items: center; width: 100%;
     text-decoration: none; scroll-snap-align: start;
     -webkit-tap-highlight-color: transparent;
-    transition: transform .2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity .2s ease;
-    outline: none;
+    transition: transform .18s ease, opacity .18s ease;
   }
-  .cat-item:active { transform: scale(.92); opacity: .85; }
+  .cat-item:active { transform: scale(.93); opacity: .8; }
 
-  .cat-ring {
-    width: 100%;
-    aspect-ratio: 1/1;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 4px;
-  }
-  .cat-ring img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transform: scale(1.05);
-    opacity: 0;
-    transition: opacity .3s ease, transform .4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
-  }
-  .cat-ring img.loaded {
-    opacity: 1;
-    transform: scale(1);
-  }
+  .cat-ring { width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .cat-ring img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.2); opacity: 0; transition: opacity .25s ease; }
+  .cat-ring img.loaded { opacity: 1; }
 
-  .cat-name {
-    font-size: 12.5px;
-    font-weight: 800;
-    color: #1E293B;
-    text-align: center;
-    line-height: 1.25;
-    letter-spacing: -0.2px;
-    width: 100%;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .cat-name { font-size: 13.5px; font-weight: 700; color: #2A2F3A; text-align: center; line-height: 1.2; }
 
   /* ── Filter bar ── */
   .filter-bar {
