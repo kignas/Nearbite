@@ -1,12 +1,10 @@
 /*
  * EatSwada — Restaurant Card Component
- * Renders restaurant cards from real API data only.
+ * Renders stacked restaurant cards from real API data only.
  *
- * Ownership boundaries (deliberate):
- *   - This file owns card MARKUP, availability state and the image gallery.
- *   - It does NOT own API fetching, filter state, cart state or navigation.
- *   - Every field is omitted when the API does not supply it. There are no
- *     placeholder ratings, cuisines or delivery times.
+ * Ownership boundaries:
+ *   - Owns strictly markup structure (.es-card), image gallery logic.
+ *   - NEVER guesses missing fields.
  */
 (function () {
   'use strict';
@@ -86,8 +84,6 @@
 
       var text = firstText(res.time, res.deliveryTime);
       if (!text) return null;
-
-      // "25-35 mins" → keep the numbers so sorting/filtering still work.
       var numbers = text.match(/\d+/g);
       return {
         min: numbers ? Number(numbers[0]) : null,
@@ -97,6 +93,7 @@
     },
 
     minimumOrder: function (res) {
+      // Intentionally separated from lowestItemPrice.
       return firstNumber(
         res.minimumOrder, res.minimumOrderAmount, res.minOrder, res.minOrderAmount
       );
@@ -135,7 +132,6 @@
       return { lng: lng, lat: lat };
     },
 
-    /* true / false / null(unknown) — never guessed. */
     nearFastFlag: function (res) {
       var candidates = [res.isNearFast, res.nearFast, res.near_fast];
       for (var i = 0; i < candidates.length; i++) {
@@ -150,13 +146,11 @@
       return null;
     },
 
-    /* true / false / null(unknown) — never guessed. */
     pureVeg: function (res) {
       var flags = [res.isPureVeg, res.pureVeg, res.isVegOnly, res.vegOnly];
       for (var i = 0; i < flags.length; i++) {
         if (typeof flags[i] === 'boolean') return flags[i];
       }
-
       if (Array.isArray(res.menu) && res.menu.length) {
         var known = res.menu.filter(function (item) {
           return item && typeof item.isVeg === 'boolean';
@@ -165,14 +159,11 @@
           return known.every(function (item) { return item.isVeg; });
         }
       }
-
       return null;
     },
 
-    /* Cheapest real menu price, or null when the payload carries no menu. */
     lowestItemPrice: function (res) {
       if (!Array.isArray(res.menu) || !res.menu.length) return null;
-
       var prices = res.menu.map(function (item) {
         if (!item) return null;
         var n = Number(item.price);
@@ -180,7 +171,6 @@
         var parsed = parseFloat(String(item.price == null ? '' : item.price).replace(/[^\d.]/g, ''));
         return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
       }).filter(function (n) { return n != null; });
-
       return prices.length ? Math.min.apply(null, prices) : null;
     }
   };
@@ -206,14 +196,11 @@
     var dLng = (b.lng - a.lng) * Math.PI / 180;
     var lat1 = a.lat * Math.PI / 180;
     var lat2 = b.lat * Math.PI / 180;
-
     var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-
     return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
   }
 
-  /* Distance in km, or null when it genuinely cannot be known. */
   function getDistanceKm(res, customerCoords) {
     var customer = customerCoords !== undefined
       ? customerCoords
@@ -263,13 +250,11 @@
 
   function showAvailabilityToast(label) {
     var toast = document.getElementById('es-availability-toast');
-
     if (!toast) {
       toast = document.createElement('div');
       toast.id = 'es-availability-toast';
       document.body.appendChild(toast);
     }
-
     toast.textContent =
       label === 'Closed Today'
         ? 'This restaurant is closed for today'
@@ -287,7 +272,6 @@
     }, 2200);
   }
 
-  /* Availability including the customer's delivery radius. */
   function resolveAvailability(res, customerCoords) {
     var status = getAvailabilityStatus(res);
     if (status) return status;
@@ -309,8 +293,6 @@
     var id = read.id(res);
     var name = read.name(res);
 
-    // A card we cannot navigate from is not a card — skip it rather than
-    // render something that looks tappable and isn't.
     if (!id || !name) return '';
 
     var status = resolveAvailability(res, customerCoords);
@@ -333,96 +315,72 @@
       : '';
 
     var media = images.length
-      ? '<div class="z-gallery" data-gallery="' + esc(id) + '" data-index="' + index + '">' +
-          '<div class="z-gallery-track">' +
+      ? '<div class="es-gallery" data-gallery="' + esc(id) + '" data-index="' + index + '">' +
+          '<div class="es-gallery-track">' +
             images.map(function (src, idx) {
-              return '<img class="z-gallery-slide" src="' + esc(src) + '" alt="' + esc(name) +
+              return '<img class="es-gallery-slide" src="' + esc(src) + '" alt="' + esc(name) +
                 '" loading="' + (idx === 0 ? 'eager' : 'lazy') + '"' +
                 ' onload="this.classList.add(\'loaded\')"' +
                 ' onerror="RestaurantCard.handleImageError(this)">';
             }).join('') +
           '</div>' +
           (images.length > 1
-            ? '<div class="z-gallery-dots">' + images.map(function (_, idx) {
-                return '<span class="z-gallery-dot' + (idx === 0 ? ' active' : '') + '"></span>';
+            ? '<div class="es-gallery-dots">' + images.map(function (_, idx) {
+                return '<span class="es-gallery-dot' + (idx === 0 ? ' active' : '') + '"></span>';
               }).join('') + '</div>'
             : '') +
         '</div>'
-      : '<div class="z-img-placeholder"><i class="fa-solid fa-utensils"></i></div>';
+      : '<div class="es-img-placeholder"><i class="fa-solid fa-utensils"></i></div>';
 
-    // Meta line: only the parts we actually have.
     var metaParts = [];
-    if (cuisine) {
-      metaParts.push('<i class="fa-solid fa-utensils z-meta-icon"></i> ' + esc(cuisine));
-    }
-    if (distanceText) {
-      metaParts.push('<i class="fa-solid fa-location-dot z-meta-icon"></i> ' + esc(distanceText));
-    }
+    if (cuisine) metaParts.push(esc(cuisine));
+    if (distanceText) metaParts.push(esc(distanceText));
+    var subtitleHtml = metaParts.length ? metaParts.join(' &bull; ') : '';
 
-    var tags = '';
-    if (nearFast) {
-      tags += '<span class="z-tag-near"><i class="fa-solid fa-bolt"></i> Near &amp; Fast</span>';
-    }
-    if (offer) {
-      tags += '<span class="z-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
-    }
-    if (coupon) {
-      tags += '<span class="z-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
-    }
+    var tagsHtml = '';
+    if (nearFast) tagsHtml += '<span class="es-tag es-tag-near"><i class="fa-solid fa-bolt"></i> Near & Fast</span>';
+    if (offer) tagsHtml += '<span class="es-tag es-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
+    if (coupon) tagsHtml += '<span class="es-tag es-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
 
-    var stats = '';
-    function addStat(valueHtml, labelText) {
-      if (stats) stats += '<div class="z-divider"></div>';
-      stats += '<div class="z-stat"><span class="z-stat-val">' + valueHtml +
-        '</span><span class="z-stat-lbl">' + labelText + '</span></div>';
-    }
-
+    var statsHtml = '';
     if (rating != null) {
-      addStat('<i class="fa-solid fa-star z-star"></i> ' + esc(rating.toFixed(1)), 'rating');
+      statsHtml += '<span class="es-stat es-stat-rating"><i class="fa-solid fa-star"></i> ' + esc(rating.toFixed(1)) + '</span>';
     }
     if (time) {
-      addStat(esc(time.text), 'delivery');
+      statsHtml += '<span class="es-stat es-stat-time">' + esc(time.text) + '</span>';
     }
     if (minOrder != null) {
-      addStat('₹' + esc(minOrder), 'min order');
+      statsHtml += '<span class="es-stat es-stat-min">Min ₹' + esc(minOrder) + '</span>';
     }
 
     return '<a href="restaurant.html?id=' + encodeURIComponent(id) +
-      '" class="z-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
+      '" class="es-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
       ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '"' +
       ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
       's; opacity:0;">' +
 
-      '<div class="z-img-wrap' + (isUnavailable ? ' is-unavailable' : '') + '">' +
+      '<div class="es-card-media">' +
         media +
         (isUnavailable
-          ? '<div class="z-availability-overlay"><div class="z-availability-pill">' +
+          ? '<div class="es-availability-overlay"><div class="es-availability-pill">' +
             '<i class="fa-regular fa-clock"></i> ' + esc(label) + '</div></div>'
           : '') +
       '</div>' +
 
-      '<div class="z-gradient-overlay"></div>' +
-
-      '<div class="z-info-area">' +
-        '<div class="z-name">' + esc(name) + '</div>' +
-        (metaParts.length
-          ? '<div class="z-cuisine-line">' + metaParts.join(' &bull; ') + '</div>'
-          : '') +
-        (tags ? '<div class="z-tags-row">' + tags + '</div>' : '') +
-        '<div class="z-stats-row">' +
-          '<div class="z-stats-group">' + stats + '</div>' +
-          '<div class="z-btn-order">' + (isUnavailable ? 'View menu' : 'Order') + '</div>' +
+      '<div class="es-card-content">' +
+        '<h3 class="es-name">' + esc(name) + '</h3>' +
+        (subtitleHtml ? '<div class="es-subtitle">' + subtitleHtml + '</div>' : '') +
+        (tagsHtml ? '<div class="es-tags-row">' + tagsHtml + '</div>' : '') +
+        '<div class="es-bottom-row">' +
+          '<div class="es-stats">' + statsHtml + '</div>' +
+          '<div class="es-btn-order">' + (isUnavailable ? 'View Menu' : 'Order') + '</div>' +
         '</div>' +
       '</div>' +
     '</a>';
   }
 
-  /* Render a list of restaurants into a container.
-     Returns how many cards were actually rendered, so the caller can
-     react to an empty result instead of leaving a skeleton behind. */
   function renderList(container, restaurants) {
     if (!container) return 0;
-
     var list = Array.isArray(restaurants) ? restaurants : [];
     var customerCoords = getSelectedCustomerCoordinates();
     var unavailable = new Set();
@@ -446,14 +404,14 @@
 
   function handleImageError(img) {
     img.onerror = null;
-    var wrap = img.closest('.z-img-wrap');
-    var gallery = img.closest('.z-gallery');
+    var wrap = img.closest('.es-card-media');
+    var gallery = img.closest('.es-gallery');
     img.remove();
 
-    if (gallery && !gallery.querySelector('.z-gallery-slide') && wrap) {
+    if (gallery && !gallery.querySelector('.es-gallery-slide') && wrap) {
       gallery.remove();
       var placeholder = document.createElement('div');
-      placeholder.className = 'z-img-placeholder';
+      placeholder.className = 'es-img-placeholder';
       placeholder.innerHTML = '<i class="fa-solid fa-utensils"></i>';
       wrap.insertBefore(placeholder, wrap.firstChild);
     }
@@ -462,12 +420,12 @@
   /* ── Image gallery ──────────────────────────────────────────── */
 
   function initGalleries() {
-    document.querySelectorAll('.z-gallery').forEach(function (gallery) {
+    document.querySelectorAll('.es-gallery').forEach(function (gallery) {
       if (gallery.dataset.initialized === '1') return;
 
-      var track = gallery.querySelector('.z-gallery-track');
-      var slides = gallery.querySelectorAll('.z-gallery-slide');
-      var dots = gallery.querySelectorAll('.z-gallery-dot');
+      var track = gallery.querySelector('.es-gallery-track');
+      var slides = gallery.querySelectorAll('.es-gallery-slide');
+      var dots = gallery.querySelectorAll('.es-gallery-dot');
 
       if (!track || slides.length <= 1) return;
       gallery.dataset.initialized = '1';
@@ -516,6 +474,7 @@
         restart();
       }, { passive: true });
 
+      /* Isolation: Prevent card link navigation when swiping or tapping dots */
       gallery.addEventListener('click', function (e) {
         if (gallery.dataset.swiped === '1' || moved) {
           e.preventDefault();
@@ -557,6 +516,5 @@
     escape: esc
   };
 
-  // Kept for inline handlers elsewhere in the app.
   window.showAvailabilityToast = showAvailabilityToast;
 })();
