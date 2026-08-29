@@ -36,3 +36,90 @@
 - Inline JavaScript syntax checked with Node.js.
 - CSS brace balance checked.
 - Backend files were not modified.
+
+## Phase 1.2 — Stabilization + restaurant details
+
+- Unified old-stack page background to white.
+- Home header now derives a real minimum delivery estimate from loaded restaurant data.
+- Restaurant card and restaurant page now use the same customer-address coordinate calculation for distance, avoiding conflicting values.
+- Added real restaurant details panel from API-provided address/cuisine/hours/radius/phone fields only.
+- Added restaurant info action to open the details panel.
+- Added optional restaurant coupon display when the API supplies coupon data.
+- Added optional menu-item coupon badge when the API supplies coupon data.
+- Added optional restaurant review rendering with customer food photos when the review endpoint/data provides them; review failure never blocks menu loading.
+- Kept all optional UI data-driven: no fake offers, coupons, ratings, reviews, or details are fabricated.
+- Existing API/cache/cart behavior remains intact.
+
+## Phase 2.1 — Home page UI upgrade
+
+Scope: home page only. Old HTML/CSS/JS stack kept. No framework migration,
+no backend or API-contract change, no new dependencies.
+
+### Files changed
+- `index.html` — header/hero/search markup and all page CSS
+- `home.js` — header estimate, search hint source, category markup, result count
+- `restaurant-card.css` — image-on-top card layout
+- `restaurant-card.js` — card markup only (`buildCard`, `handleImageError`)
+- `cart-bar.js` — floating-cart / help-button collision fix
+
+### UI
+- Header leads with the real minimum delivery estimate derived from loaded
+  restaurants; place name and saved address sit underneath. With no estimate
+  available the line is hidden and the place name is promoted — no dash.
+- Hero reduced to one compact amber block (~205–225px). Removed the looping
+  gradient animation, the 12s text scroller and the floating emoji particles.
+- Search hint now rotates through real category names from `/categories`.
+- "What's on your mind?" is a single-row snap rail: fixed 76px tiles,
+  `object-fit: contain`, 2-line centred names, every category reachable.
+- Filter pills unified at 36px, rounded, horizontally scrollable. Filter
+  registry unchanged: a pill is only rendered when the data can answer it.
+- Restaurant cards rebuilt: 16:10 image on top, content below.
+  `#restaurant-list` uses `grid-auto-rows: 1fr` so every card is the same
+  height, with the Order button pinned to the bottom.
+- Page background is a light neutral (#F5F6F8) with white cards only.
+- Section heading shows a live count that follows the active filters.
+
+### Bugs fixed
+- Floating cart overlapped the floating help button below 375px width. The
+  help button now lifts above the cart bar whenever the cart is visible.
+- Category images could escape their container (`scale(1.2)` on a `contain`
+  image with no clipping).
+
+### Known / deferred
+- `search.html` still shows a microphone icon with no handler (Phase 2.2).
+
+## Phase 2.2 — Home page visual polish
+
+Visual pass only. No architecture, API, or data-logic change.
+
+### Files changed
+- `index.html` — white page system, token scale, hero/search/rail/filter styles, header markup
+- `home.js` — combined address line, sticky-filter state observer
+- `restaurant-card.css` — card polish, facts row, CTA
+- `restaurant-card.js` — meta/facts markup, CTA on unavailable cards
+- `bottom-tab-bar.js` — contrast on a white page
+
+### Visual
+- Page and cards are both #FFFFFF. Separation now comes from spacing,
+  1px hairlines and one soft card shadow — no grey section blocks.
+- Token scale added: `--r-lg/md/sm`, `--line`, `--hairline`, `--shadow-card`,
+  `--tile`, so radii and borders stay consistent across components.
+- Header: estimate at 18px/800, place and address merged into one truncating
+  secondary line. Decorative pin dropped; the chevron carries the affordance.
+- Search field: 48px, 1px border, tighter shadow, fixed-width icon.
+- Category rail: 20px tiles, 8px image inset, 14px gaps, 12px names,
+  press feedback on the tile.
+- Filter bar: 38px pills, sticky to the top of the viewport while scrolling,
+  with a hairline that appears only once stuck (IntersectionObserver).
+- Cards: 20px radius, hairline border, softer shadow, 16.5px name,
+  icon-aligned cuisine/distance, and a facts row (rating / delivery time /
+  minimum order) separated by 1px vertical rules.
+- Bottom nav: 19px icons, amber active pill, defined edge against white.
+
+### Bugs fixed
+- Unavailable cards showed a "View menu" button that could not open a menu —
+  the click was intercepted by the availability guard. The CTA is now omitted
+  on unavailable cards; the state stays on the image overlay.
+- The Order button drifted left on cards with no facts to show.
+- The image readability gradient also darkened the no-image placeholder;
+  it is now scoped to real photos.

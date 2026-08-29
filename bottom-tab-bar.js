@@ -11,8 +11,8 @@
   const CSS = `
     :root {
       --nb-tab-accent: #0f172a;                   /* Dark slate for active icon */
-      --nb-tab-active-bg: #ffffff;                /* Pure white pill for active state */
-      --nb-tab-muted: #94a3b8;                    /* Crisp grey for inactive icons */
+      --nb-tab-active-bg: #FFF1DE;                /* Warm brand pill — visible on a white page */
+      --nb-tab-muted: #9aa3b2;                    /* Crisp grey for inactive icons */
       --nb-tab-bar-height: 56px;                  /* Slimmer height to match reference */
       --nb-tab-bar-bottom-offset: 16px;           /* Floats off the bottom */
       --nb-tab-radius: 999px;                     /* Perfect capsule */
@@ -40,11 +40,11 @@
       gap: 4px;
       padding: 6px; /* Matches the inner border gap of the reference */
       
-      /* Light Glass Effect matching your UI */
-      background: rgba(255, 255, 255, 0.75); 
-      border: 1px solid rgba(255, 255, 255, 0.9); 
+      /* Light glass, defined enough to read against a white page */
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(16, 24, 40, 0.07);
       border-radius: var(--nb-tab-radius);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08); /* Soft floating shadow */
+      box-shadow: 0 8px 28px rgba(16, 24, 40, 0.12);
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       
@@ -85,7 +85,7 @@
     }
 
     .nb-tab i {
-      font-size: 18px; /* Smaller, delicate icons like the reference */
+      font-size: 19px;
       color: var(--nb-tab-muted);
       transition: color .2s ease;
     }
@@ -96,7 +96,6 @@
 
     .nb-tab.is-active .nb-tab-pill {
       background: var(--nb-tab-active-bg);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
     }
 
     .nb-tab.is-active i {
@@ -129,12 +128,12 @@
       border-radius: 50%;
       
       /* Light glass matching the bar */
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(16, 24, 40, 0.07);
       color: #0f172a;
-      
-      font-weight: 600;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       cursor: pointer;
