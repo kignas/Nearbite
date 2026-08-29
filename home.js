@@ -148,6 +148,19 @@
       }
     },
     {
+      id: 'under300',
+      label: 'Under ₹300',
+      group: 'MINIMUM ORDER',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
+      },
+      match: function (res) {
+        var price = card.read.lowestItemPrice(res);
+        return price != null && price <= 300;
+      }
+    },
+    {
       id: 'offers',
       label: 'Offers available',
       group: 'OFFERS',
@@ -161,11 +174,21 @@
       id: 'veg',
       label: 'Pure Veg',
       group: 'FOOD TYPE',
-      showInBar: false, // In bar it's managed via hero search area toggle
+      showInBar: false, 
       supported: function (list) {
-        return list.some(function (r) { return card.read.pureVeg(r) !== null; });
+        return list.some(function (r) { return card.read.pureVeg(r) === true; });
       },
       match: function (res) { return card.read.pureVeg(res) === true; }
+    },
+    {
+      id: 'nonveg',
+      label: 'Non-Veg',
+      group: 'FOOD TYPE',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.pureVeg(r) === false; });
+      },
+      match: function (res) { return card.read.pureVeg(res) === false; }
     }
   ];
 
@@ -328,7 +351,6 @@
 
     var rendered = card.renderList(list, visible);
 
-    // Defensive: if every record was unusable we must not leave a blank area.
     if (!rendered) {
       state.status = 'empty';
       renderRestaurants();
@@ -388,8 +410,6 @@
     syncVegToggle();
   }
 
-  /* The header VEG switch and the "Pure Veg" filter are controls over
-     the SAME filter state — never two independent booleans. */
   function syncVegToggle() {
     var box = el('veg-toggle-btn');
     var track = el('veg-track');
@@ -398,7 +418,6 @@
     var vegFilter = filterById('veg');
     var supported = vegFilter && vegFilter.supported(state.restaurants);
 
-    // Hidden until data proves it can work, so it is never a dead switch.
     box.hidden = !supported;
     if (!supported) return;
 
@@ -499,10 +518,9 @@
     }
 
     if (filters.length) {
-      // Group filters dynamically based on assigned group property
       var groupedFilters = {};
       filters.forEach(function(f) {
-        if (f.id === 'nearfast') return; // Skip Quick Filter in sheet to save vertical space
+        if (f.id === 'nearfast') return; 
         var group = f.group || 'OTHER';
         if (!groupedFilters[group]) groupedFilters[group] = [];
         groupedFilters[group].push(f);
@@ -794,7 +812,6 @@
       if (event.key === 'Escape') closeFilterSheet();
     });
 
-    // A saved address changes distances and delivery-radius availability.
     function onAddressChanged() {
       renderSavedAddress();
       renderRestaurants();
@@ -830,7 +847,6 @@
     init();
   }
 
-  /* Exposed for debugging and for other scripts that need a re-render. */
   window.Home = {
     state: state,
     refresh: refresh,
@@ -839,6 +855,5 @@
     render: renderRestaurants
   };
 
-  // Back-compat for any inline handler that still calls this name.
   window.displayRestaurants = renderRestaurants;
 })();
