@@ -243,13 +243,6 @@
       .wc-close:hover { background: #e9e9e9; }
     }
 
-    /* The centred cart bar and the floating help button share the same
-       band above the tab bar, and they collide on narrow phones. While the
-       cart bar is on screen the help button moves above it. */
-    html.wc-visible #nearbite-help-center {
-      bottom: calc(var(--nb-cart-bottom, 88px) + 74px);
-    }
-
     @media (max-width: 340px) {
       #white-cart-root { width: calc(100vw - 24px); }
       #white-cart-container { padding: 7px; height: 58px; }
@@ -341,14 +334,9 @@
     el.classList.add('wc-bump');
   }
 
-  function markVisible(isVisible) {
-    document.documentElement.classList.toggle('wc-visible', !!isVisible);
-  }
-
   function showCartBar(root) {
     if (!root) return;
     if (exitTimer) { clearTimeout(exitTimer); exitTimer = null; }
-    markVisible(true);
     root.classList.remove('wc-exiting');
     if (root.style.display === 'none' || root.style.display === '') {
       root.style.display = 'block';
@@ -362,7 +350,6 @@
 
   function hideCartBar(root) {
     if (!root) return;
-    markVisible(false);
     if (root.style.display === 'none' || root.style.display === '') return;
     if (exitTimer) { clearTimeout(exitTimer); exitTimer = null; }
     root.classList.remove('wc-enter');

@@ -207,22 +207,11 @@
     if (retry) retry.addEventListener('click', function () { refresh(true); });
   }
 
-  /* Small count beside the section heading. Always the number of cards the
-     user can actually see right now, so it stays true while filtering. */
-  function renderVisibleCount(count) {
-    var node = el('restaurants-count');
-    if (!node) return;
-    node.textContent = count > 0
-      ? count + (count === 1 ? ' restaurant' : ' restaurants')
-      : '';
-  }
-
   function renderRestaurants() {
     var list = el('restaurant-list');
     if (!list) return;
 
     if (state.status === 'error') {
-      renderVisibleCount(0);
       list.innerHTML =
         '<div class="state-block">' +
           '<i class="fa-solid fa-plug-circle-xmark state-icon"></i>' +
@@ -243,7 +232,6 @@
     }
 
     if (state.status === 'empty') {
-      renderVisibleCount(0);
       list.innerHTML =
         '<div class="state-block">' +
           '<i class="fa-solid fa-store state-icon"></i>' +
@@ -260,7 +248,6 @@
     }
 
     var visible = visibleRestaurants();
-    renderVisibleCount(visible.length);
 
     if (!visible.length) {
       list.innerHTML =
@@ -469,9 +456,9 @@
     scroll.innerHTML = state.categories.map(function (cat, i) {
       return '<a class="cat-item" href="category.html?type=' + encodeURIComponent(cat.type) +
         '" style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
-        '<span class="cat-tile">' +
-          '<img src="' + card.escape(cat.image) + '" alt="" loading="lazy" decoding="async"' +
-          ' onload="this.classList.add(\'loaded\')"' +
+        '<span class="cat-ring">' +
+          '<img src="' + card.escape(cat.image) + '" alt="' + card.escape(cat.name) +
+          '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
           ' onerror="this.closest(\'.cat-item\').remove()">' +
         '</span>' +
         '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
@@ -516,8 +503,22 @@
   function applyRestaurants(list) {
     state.restaurants = list;
     state.status = list.length ? 'ready' : 'empty';
+    renderSectionTitle();
     renderFilterBar();
     renderRestaurants();
+  }
+
+  /* "Recommended with deals" is only true when the data actually carries
+     offers, so the heading follows the data instead of asserting it. */
+  function renderSectionTitle() {
+    var title = el('restaurants-title');
+    if (!title) return;
+
+    var hasOffers = state.restaurants.some(function (res) {
+      return !!card.read.offer(res);
+    });
+
+    title.textContent = hasOffers ? 'Recommended with deals' : 'Restaurants near you';
   }
 
   function refresh(isUserInitiated) {
@@ -573,12 +574,12 @@
     var list = el('restaurant-list');
     if (!list) return;
     list.innerHTML =
-      '<div class="rs-card"><div class="sk rs-img"></div><div class="rs-body">' +
-        '<div class="sk rs-name"></div><div class="sk rs-cuis"></div>' +
-        '<div class="sk rs-meta"></div></div></div>' +
-      '<div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-body">' +
-        '<div class="sk rs-name d1"></div><div class="sk rs-cuis d1"></div>' +
-        '<div class="sk rs-meta d1"></div></div></div>';
+      '<div class="rs-card"><div class="sk rs-img"></div><div class="rs-row">' +
+        '<div class="sk rs-name"></div><div class="sk rs-badge"></div></div>' +
+        '<div class="sk rs-cuis"></div><div class="sk rs-meta"></div></div>' +
+      '<div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-row">' +
+        '<div class="sk rs-name d1"></div><div class="sk rs-badge d1"></div></div>' +
+        '<div class="sk rs-cuis d1"></div><div class="sk rs-meta d1"></div></div>';
   }
 
   function loadRestaurants() {
@@ -595,27 +596,14 @@
 
   /* ── Search placeholder rotation ────────────────────────────── */
 
-  /* The rotating hint is read from the live category list, so it never
-     advertises a cuisine this storefront does not actually carry. Until
-     categories load, the static placeholder in the HTML stays put. */
-  function searchPhrases() {
-    return state.categories
-      .map(function (cat) { return cat && cat.name ? String(cat.name) : ''; })
-      .filter(Boolean)
-      .slice(0, 8)
-      .map(function (name) { return 'Search "' + name + '"'; });
-  }
-
   function startSearchPlaceholder() {
     var placeholder = el('search-placeholder');
     if (!placeholder) return;
 
-    var index = -1;
+    var phrases = ['Search "Biryani"', 'Search "Pizza"', 'Search "Momos"', 'Search "Rolls"'];
+    var index = 0;
 
     setInterval(function () {
-      var phrases = searchPhrases();
-      if (phrases.length < 2) return;
-
       placeholder.style.opacity = '0';
       setTimeout(function () {
         index = (index + 1) % phrases.length;
@@ -627,29 +615,18 @@
 
   /* ── Saved delivery address ─────────────────────────────────── */
 
-  /* The header headline is a real number derived from loaded restaurants —
-     the soonest quoted delivery. With no data to derive it from, the line is
-     hidden and the place name is promoted instead of showing a dash. */
   function renderDeliveryEstimate() {
     var node = el('delivery-time-value');
-    var line = el('eta-line');
-    var block = el('eta-block');
-    if (!node || !line) return;
-
+    if (!node) return;
     var mins = state.restaurants.map(function (r) {
       var t = card.read.deliveryTime(r);
       return t && t.min != null ? Number(t.min) : null;
     }).filter(function (v) { return Number.isFinite(v) && v > 0; });
-
     if (!mins.length) {
-      line.hidden = true;
-      if (block) block.classList.add('no-eta');
+      node.textContent = '—';
       return;
     }
-
     node.textContent = String(Math.min.apply(null, mins));
-    line.hidden = false;
-    if (block) block.classList.remove('no-eta');
   }
 
   function renderSavedAddress() {
@@ -666,9 +643,7 @@
         .filter(Boolean).join(', ');
 
       if (label) nameEl.textContent = label;
-
-      subEl.textContent = detail;
-      subEl.hidden = !detail;
+      if (detail) subEl.textContent = detail;
     } catch (e) {}
   }
 
@@ -733,7 +708,6 @@
 
     bindStaticControls();
     renderSavedAddress();
-    renderDeliveryEstimate();
     showProfileInitial();
     startSearchPlaceholder();
     loadRestaurants();

@@ -337,7 +337,7 @@
           '<div class="z-gallery-track">' +
             images.map(function (src, idx) {
               return '<img class="z-gallery-slide" src="' + esc(src) + '" alt="' + esc(name) +
-                '" loading="' + (idx === 0 ? 'eager' : 'lazy') + '" decoding="async"' +
+                '" loading="' + (idx === 0 ? 'eager' : 'lazy') + '"' +
                 ' onload="this.classList.add(\'loaded\')"' +
                 ' onerror="RestaurantCard.handleImageError(this)">';
             }).join('') +
@@ -352,25 +352,39 @@
 
     // Meta line: only the parts we actually have.
     var metaParts = [];
-    if (cuisine) metaParts.push(esc(cuisine));
-    if (distanceText) metaParts.push(esc(distanceText));
+    if (cuisine) {
+      metaParts.push('<i class="fa-solid fa-utensils z-meta-icon"></i> ' + esc(cuisine));
+    }
+    if (distanceText) {
+      metaParts.push('<i class="fa-solid fa-location-dot z-meta-icon"></i> ' + esc(distanceText));
+    }
 
     var tags = '';
     if (nearFast) {
-      tags += '<span class="z-tag z-tag-near"><i class="fa-solid fa-bolt"></i> Near &amp; Fast</span>';
+      tags += '<span class="z-tag-near"><i class="fa-solid fa-bolt"></i> Near &amp; Fast</span>';
     }
     if (offer) {
-      tags += '<span class="z-tag z-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
+      tags += '<span class="z-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
     }
     if (coupon) {
-      tags += '<span class="z-tag z-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
+      tags += '<span class="z-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
     }
 
-    // Facts line: delivery time and minimum order, only when supplied.
-    var facts = [];
-    if (time) facts.push(esc(time.text));
+    var stats = '';
+    function addStat(valueHtml, labelText) {
+      if (stats) stats += '<div class="z-divider"></div>';
+      stats += '<div class="z-stat"><span class="z-stat-val">' + valueHtml +
+        '</span><span class="z-stat-lbl">' + labelText + '</span></div>';
+    }
+
+    if (rating != null) {
+      addStat('<i class="fa-solid fa-star z-star"></i> ' + esc(rating.toFixed(1)), 'rating');
+    }
+    if (time) {
+      addStat(esc(time.text), 'delivery');
+    }
     if (minOrder != null) {
-      facts.push('<span class="z-fact-lbl">Min</span> ₹' + esc(minOrder));
+      addStat('₹' + esc(minOrder), 'min order');
     }
 
     return '<a href="restaurant.html?id=' + encodeURIComponent(id) +
@@ -379,7 +393,7 @@
       ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
       's; opacity:0;">' +
 
-      '<div class="z-media' + (isUnavailable ? ' is-unavailable' : '') + '">' +
+      '<div class="z-img-wrap' + (isUnavailable ? ' is-unavailable' : '') + '">' +
         media +
         (isUnavailable
           ? '<div class="z-availability-overlay"><div class="z-availability-pill">' +
@@ -387,21 +401,17 @@
           : '') +
       '</div>' +
 
-      '<div class="z-body">' +
-        '<div class="z-head">' +
-          '<h3 class="z-name">' + esc(name) + '</h3>' +
-          (rating != null
-            ? '<span class="z-rating"><i class="fa-solid fa-star"></i>' +
-              esc(rating.toFixed(1)) + '</span>'
-            : '') +
-        '</div>' +
+      '<div class="z-gradient-overlay"></div>' +
+
+      '<div class="z-info-area">' +
+        '<div class="z-name">' + esc(name) + '</div>' +
         (metaParts.length
-          ? '<p class="z-meta">' + metaParts.join('<span class="z-meta-dot">&bull;</span>') + '</p>'
+          ? '<div class="z-cuisine-line">' + metaParts.join(' &bull; ') + '</div>'
           : '') +
-        (tags ? '<div class="z-tags">' + tags + '</div>' : '') +
-        '<div class="z-foot">' +
-          '<div class="z-facts">' + facts.join('<span class="z-meta-dot">&bull;</span>') + '</div>' +
-          '<span class="z-order">' + (isUnavailable ? 'View menu' : 'Order') + '</span>' +
+        (tags ? '<div class="z-tags-row">' + tags + '</div>' : '') +
+        '<div class="z-stats-row">' +
+          '<div class="z-stats-group">' + stats + '</div>' +
+          '<div class="z-btn-order">' + (isUnavailable ? 'View menu' : 'Order') + '</div>' +
         '</div>' +
       '</div>' +
     '</a>';
@@ -436,7 +446,7 @@
 
   function handleImageError(img) {
     img.onerror = null;
-    var wrap = img.closest('.z-media');
+    var wrap = img.closest('.z-img-wrap');
     var gallery = img.closest('.z-gallery');
     img.remove();
 
