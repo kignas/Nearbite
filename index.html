@@ -88,7 +88,20 @@
     z-index: 10;
     isolation: isolate;
     overflow: hidden;
+    box-shadow: 0 6px 20px -14px rgba(120, 64, 0, .45);
   }
+
+  /* Keyboard focus for the header controls (no layout impact) */
+  .hero-header .loc-left:focus-visible,
+  .hero-header .btn-store:focus-visible,
+  .hero-header .btn-profile:focus-visible,
+  .hero-header .search-box:focus-visible,
+  .hero-header .veg-box:focus-visible {
+    outline: 2px solid #1A1A1A;
+    outline-offset: 3px;
+    border-radius: 14px;
+  }
+  .hero-header .btn-profile:focus-visible { border-radius: 50%; }
 
   @keyframes headerGradientDrift {
     0%   { background-position: 0%   40%; }
@@ -106,59 +119,84 @@
 
   .loc-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
   .loc-left { flex: 1; min-width: 0; padding-right: 12px; text-decoration: none; display: block; }
-  .loc-name-row { display: flex; align-items: center; gap: 6px; }
-  .loc-arrow { font-size: 15px; color: #1a1a1a; flex-shrink: 0; transform: rotate(-45deg); }
-  .loc-name {
-    font-size: 17px; font-weight: 800; color: #1a1a1a; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; max-width: 190px;
-  }
-  .loc-chevron { font-size: 12px; color: rgba(0,0,0,.4); flex-shrink: 0; }
+
+  /* Primary line — real delivery time, filled by the existing #delivery-time-value logic.
+     Row heights are pinned (26px + 2px + 17px = 45px) to match the original block height. */
   .loc-sub {
-    font-size: 11.5px; color: rgba(0,0,0,.5); font-weight: 500; margin: 2px 0 0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;
+    font-size: clamp(14.8px, 4.4vw, 17px);
+    font-weight: 800; color: #17181A;
+    letter-spacing: -.3px; line-height: 26px; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
   }
+
+  /* Secondary line — the address selector */
+  .loc-name-row { display: flex; align-items: center; gap: 5px; margin-top: 2px; max-width: 100%; }
+  .loc-arrow { font-size: 11px; color: rgba(0,0,0,.55); flex-shrink: 0; transform: rotate(-45deg); }
+  .loc-name {
+    font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,.62);
+    line-height: 17px; letter-spacing: -.1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 100%;
+  }
+  .loc-chevron {
+    font-size: 10px; color: rgba(0,0,0,.42); flex-shrink: 0;
+    transition: transform .18s ease;
+  }
+  .loc-left:active .loc-chevron { transform: translateY(1px); }
 
   .loc-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
   .btn-store {
-    background: rgba(255,255,255,.92); border: 1px solid rgba(255,255,255,.6);
+    background: #FFFFFF; border: 1px solid rgba(0,0,0,.05);
     border-radius: 24px; height: 38px; padding: 0 13px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 3px 14px rgba(0,0,0,.13); cursor: pointer; text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 5px 14px -6px rgba(0,0,0,.28);
+    cursor: pointer; text-decoration: none; flex-shrink: 0;
+    transition: box-shadow .18s ease;
   }
-  .store-top { font-size: 9px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: .5px; line-height: 1; }
-  .store-bot { font-size: 14px; font-weight: 900; color: var(--brand); line-height: 1.15; }
+  .btn-store:active { box-shadow: 0 1px 2px rgba(0,0,0,.10); }
+  .store-top { font-size: 9px; font-weight: 700; color: #79808C; text-transform: uppercase; letter-spacing: .5px; line-height: 1; }
+  .store-bot { font-size: 14px; font-weight: 900; color: #D9660A; line-height: 1.15; }
 
   .btn-profile {
-    width: 38px; height: 38px; background: rgba(0,0,0,.18); border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,.35); display: flex; align-items: center;
+    width: 38px; height: 38px; background: #FFFFFF; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.05); display: flex; align-items: center;
     justify-content: center; text-decoration: none; flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 5px 14px -6px rgba(0,0,0,.28);
+    transition: box-shadow .18s ease;
   }
-  .btn-profile i { font-size: 17px; color: #1a1a1a; }
-  .profile-initial { font-weight: 900; font-size: 16px; color: var(--brand); }
+  .btn-profile:active { box-shadow: 0 1px 2px rgba(0,0,0,.10); }
+  .btn-profile i { font-size: 16px; color: #2A2F3A; }
+  .profile-initial { font-weight: 900; font-size: 16px; color: #D9660A; }
 
   .search-row { display: flex; gap: 10px; margin-bottom: 8px; }
   .search-box {
-    flex: 1; background: rgba(255,255,255,.95); border-radius: 16px; height: 52px;
+    flex: 1; min-width: 0; background: #FFFFFF; border-radius: 16px; height: 52px;
     display: flex; align-items: center; padding: 0 16px; gap: 10px;
-    border: 1px solid rgba(255,255,255,.8); box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    border: 1px solid rgba(0,0,0,.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 18px -10px rgba(0,0,0,.30);
     text-decoration: none; overflow: hidden;
+    transition: box-shadow .18s ease;
   }
-  .search-icon { font-size: 17px; color: #A9AFBA; flex-shrink: 0; }
+  .search-box:active { box-shadow: 0 1px 3px rgba(0,0,0,.10); }
+  .search-icon { font-size: 16px; color: #6F7784; flex-shrink: 0; }
   .search-text {
-    flex: 1; font-size: 14px; color: rgba(0,0,0,.4); font-weight: 500;
+    flex: 1; min-width: 0; font-size: 14px; color: rgba(0,0,0,.55); font-weight: 500;
+    letter-spacing: -.1px;
     transition: opacity .3s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
   .veg-box {
-    background: rgba(255,255,255,.95); border-radius: 16px; width: 60px; height: 52px;
+    background: #FFFFFF; border-radius: 16px; width: 60px; height: 52px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 5px; border: 1px solid rgba(255,255,255,.8); box-shadow: 0 4px 20px rgba(0,0,0,.08);
-    cursor: pointer; flex-shrink: 0;
+    gap: 5px; border: 1px solid rgba(0,0,0,.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 18px -10px rgba(0,0,0,.30);
+    cursor: pointer; flex-shrink: 0; font-family: inherit;
+    transition: box-shadow .18s ease;
   }
   .veg-box[hidden] { display: none; }
-  .veg-label-txt { font-size: 9px; font-weight: 900; letter-spacing: .8px; color: #2a2a2a; }
-  .veg-track { width: 32px; height: 16px; background: #D1D5DB; border-radius: 999px; position: relative; transition: background .25s; }
+  .veg-box:active { box-shadow: 0 1px 3px rgba(0,0,0,.10); }
+  .veg-label-txt { font-size: 9px; font-weight: 900; letter-spacing: .8px; color: #3A414D; }
+  .veg-track { width: 32px; height: 16px; background: #D6DAE1; border-radius: 999px; position: relative; transition: background .25s; }
   .veg-track.on { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,.22); }
   .veg-thumb {
     position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: #fff;
@@ -384,12 +422,12 @@
 <header class="hero-header">
   <div class="loc-row">
     <a class="loc-left tap" href="address.html">
+      <p class="loc-sub" id="loc-sub">Delivery in <span id="delivery-time-value">—</span> minutes</p>
       <span class="loc-name-row">
         <i class="fa-solid fa-location-arrow loc-arrow"></i>
         <span class="loc-name" id="loc-name">Maynaguri</span>
         <i class="fa-solid fa-chevron-down loc-chevron"></i>
       </span>
-      <p class="loc-sub" id="loc-sub">Delivery in <span id="delivery-time-value">—</span> minutes</p>
     </a>
 
     <div class="loc-right">
