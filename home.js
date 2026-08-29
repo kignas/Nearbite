@@ -82,8 +82,8 @@
     },
     {
       id: 'under100',
-      label: 'Under ₹100',
-      group: 'MINIMUM ORDER',
+      label: 'Items under ₹100',
+      group: 'PRICE',
       showInBar: true,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
@@ -136,8 +136,8 @@
     },
     {
       id: 'under200',
-      label: 'Under ₹200',
-      group: 'MINIMUM ORDER',
+      label: 'Items under ₹200',
+      group: 'PRICE',
       showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
@@ -149,8 +149,8 @@
     },
     {
       id: 'under300',
-      label: 'Under ₹300',
-      group: 'MINIMUM ORDER',
+      label: 'Items under ₹300',
+      group: 'PRICE',
       showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
