@@ -12,29 +12,23 @@
 <style>
   /* ══════════════════════════════════════════════════════════════
      1. BASE
-     One continuous white surface. Sections are separated by spacing
-     and hairlines only — never by their own background colour.
+     One page background (light neutral). Cards are the only white
+     surfaces, so every section reads as part of the same sheet.
      ══════════════════════════════════════════════════════════════ */
   *, *::before, *::after { box-sizing: border-box; }
 
   :root {
-    --page:       #FFFFFF;
+    --page:       #F5F6F8;
     --card:       #FFFFFF;
-    --ink:        #101420;
+    --ink:        #131722;
     --ink-soft:   #5C6675;
     --ink-mute:   #8B94A3;
-    --line:       #E9ECF1;   /* card + control borders */
-    --hairline:   #F1F3F6;   /* section separators */
+    --line:       #E6E9EE;
     --brand:      #FC8019;
-    --brand-soft: #FFF4E9;
-    --brand-ink:  #B9540A;
+    --brand-soft: #FFF3E8;
+    --brand-ink:  #C2560A;
     --cta:        #0F172A;
     --amber-ink:  #241A00;
-    --tile:       #FFF5E8;   /* category tile wash */
-    --r-lg: 24px;            /* hero */
-    --r-md: 20px;            /* cards, tiles */
-    --r-sm: 14px;            /* search, inputs */
-    --shadow-card: 0 1px 2px rgba(16,24,40,.04), 0 6px 16px rgba(16,24,40,.05);
   }
 
   html { background: var(--page); }
@@ -88,8 +82,8 @@
   .sk.d4 { animation-delay: .32s; }
 
   .cs-item { width: 76px; flex: 0 0 76px; }
-  .cs-tile { width: 76px; height: 76px; border-radius: var(--r-md); }
-  .cs-name { width: 62%; height: 10px; margin: 10px auto 0; border-radius: 5px; }
+  .cs-tile { width: 76px; height: 76px; border-radius: 22px; }
+  .cs-name { width: 60%; height: 11px; margin: 9px auto 0; border-radius: 5px; }
 
   /* ══════════════════════════════════════════════════════════════
      3. HERO  (header + copy + search — one compact amber block)
@@ -99,8 +93,8 @@
     isolation: isolate;
     overflow: hidden;
     background: linear-gradient(158deg, #FFD756 0%, #FFC42F 52%, #FFB825 100%);
-    border-radius: 0 0 var(--r-lg) var(--r-lg);
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 18px 20px;
+    border-radius: 0 0 26px 26px;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 18px;
   }
 
   /* Decoration: two soft light pools. No animation, no extra requests. */
@@ -117,74 +111,75 @@
   .hero > * { position: relative; z-index: 1; }
 
   /* ── Row 1: delivery estimate + actions ── */
-  .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 
   .eta { flex: 1; min-width: 0; text-decoration: none; display: block; color: inherit; }
   .eta-time {
-    margin: 0; font-size: 18px; font-weight: 800; line-height: 1.22;
-    letter-spacing: -.35px; color: var(--amber-ink);
+    margin: 0; font-size: 17px; font-weight: 800; line-height: 1.25;
+    letter-spacing: -.2px; color: var(--amber-ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .eta-time[hidden] { display: none; }
-
-  /* Place and address share one truncating line, so the estimate always
-     stays the tallest thing in the header. */
   .eta-place {
-    display: flex; align-items: center; gap: 4px; margin: 3px 0 0;
-    font-size: 12px; font-weight: 500; color: rgba(36,26,0,.6);
+    display: flex; align-items: center; gap: 5px; margin: 1px 0 0;
+    font-size: 12.5px; font-weight: 700; color: rgba(36,26,0,.62);
   }
-  .eta-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .eta-chev { font-size: 9px; flex-shrink: 0; opacity: .7; }
+  .eta-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+  .eta-pin { font-size: 11px; flex-shrink: 0; }
+  .eta-chev { font-size: 9px; flex-shrink: 0; opacity: .75; }
+  .eta-addr {
+    margin: 1px 0 0; font-size: 11px; font-weight: 500; color: rgba(36,26,0,.52);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+  }
+  .eta-addr[hidden] { display: none; }
   /* No live estimate yet — the place name takes the lead line instead of
      leaving a dash where the headline should be. */
   .eta.no-eta .eta-place { font-size: 16px; font-weight: 800; color: var(--amber-ink); }
 
-  .hero-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .hero-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
   .btn-store {
-    background: rgba(255,255,255,.96); border-radius: 999px; height: 40px; padding: 0 12px;
+    background: rgba(255,255,255,.94); border-radius: 22px; height: 38px; padding: 0 13px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(120,80,0,.12); cursor: pointer; text-decoration: none;
+    box-shadow: 0 2px 10px rgba(120,80,0,.13); cursor: pointer; text-decoration: none;
   }
-  .store-top { font-size: 8.5px; font-weight: 700; color: #8A929E; text-transform: uppercase; letter-spacing: .6px; line-height: 1; }
+  .store-top { font-size: 8.5px; font-weight: 700; color: #7A828E; text-transform: uppercase; letter-spacing: .6px; line-height: 1; }
   .store-bot { font-size: 14px; font-weight: 900; color: var(--brand); line-height: 1.2; }
 
   .btn-profile {
-    width: 40px; height: 40px; background: rgba(255,255,255,.96); border-radius: 50%;
+    width: 38px; height: 38px; background: rgba(255,255,255,.94); border-radius: 50%;
     display: flex; align-items: center; justify-content: center; text-decoration: none;
-    flex-shrink: 0; box-shadow: 0 2px 8px rgba(120,80,0,.12);
+    flex-shrink: 0; box-shadow: 0 2px 10px rgba(120,80,0,.13);
   }
   .btn-profile i { font-size: 15px; color: #4B5563; }
   .profile-initial { font-weight: 900; font-size: 16px; color: var(--brand); }
 
   /* ── Row 2: headline ── */
-  .hero-copy { margin: 18px 0 16px; }
+  .hero-copy { margin: 16px 0 14px; }
   .hero-title {
-    margin: 0; font-size: clamp(19px, 5.5vw, 22px); line-height: 1.24;
-    font-weight: 800; letter-spacing: -.45px; color: var(--amber-ink);
+    margin: 0; font-size: clamp(19px, 5.6vw, 23px); line-height: 1.22;
+    font-weight: 800; letter-spacing: -.4px; color: var(--amber-ink);
   }
-  .hero-sub { margin: 6px 0 0; font-size: 12.5px; font-weight: 500; color: rgba(36,26,0,.62); }
+  .hero-sub { margin: 5px 0 0; font-size: 12.5px; font-weight: 600; color: rgba(36,26,0,.6); }
 
   /* ── Row 3: search ── */
   .search-row { display: flex; gap: 10px; }
   .search-box {
-    flex: 1; min-width: 0; background: #fff; border-radius: var(--r-sm); height: 48px;
-    display: flex; align-items: center; gap: 11px; padding: 0 14px;
-    text-decoration: none; border: 1px solid rgba(36,26,0,.06);
-    box-shadow: 0 4px 12px rgba(120,80,0,.09);
+    flex: 1; min-width: 0; background: #fff; border-radius: 15px; height: 50px;
+    display: flex; align-items: center; gap: 10px; padding: 0 15px;
+    text-decoration: none; box-shadow: 0 6px 16px rgba(120,80,0,.10);
   }
-  .search-icon { font-size: 15px; color: #A7AEBB; flex-shrink: 0; width: 16px; text-align: center; }
+  .search-icon { font-size: 16px; color: #B0B7C3; flex-shrink: 0; }
   .search-text {
-    flex: 1; min-width: 0; font-size: 13.5px; font-weight: 500; color: #98A0AD;
+    flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: #98A0AD;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     transition: opacity .25s ease;
   }
 
   .veg-box {
-    background: #fff; border-radius: var(--r-sm); width: 54px; height: 48px;
+    background: #fff; border-radius: 15px; width: 56px; height: 50px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 5px; border: 1px solid rgba(36,26,0,.06);
-    box-shadow: 0 4px 12px rgba(120,80,0,.09);
+    gap: 5px; border: none; box-shadow: 0 6px 16px rgba(120,80,0,.10);
     cursor: pointer; flex-shrink: 0; font-family: inherit;
   }
   .veg-box[hidden] { display: none; }
@@ -204,28 +199,28 @@
   /* ══════════════════════════════════════════════════════════════
      4. SECTIONS — shared, transparent, one background
      ══════════════════════════════════════════════════════════════ */
-  .page { padding-top: 4px; }
+  .page { padding-top: 6px; }
 
-  .section { padding: 20px 0 2px; }
+  .section { padding: 18px 0 2px; }
   .section[hidden] { display: none; }
 
   .sec-head {
     display: flex; align-items: center; gap: 10px;
-    padding: 0 18px; margin-bottom: 14px; overflow: hidden;
+    padding: 0 18px; margin-bottom: 12px; overflow: hidden;
   }
   .sec-title {
-    margin: 0; font-size: 14.5px; font-weight: 800; letter-spacing: .7px;
-    text-transform: uppercase; color: #232936; white-space: nowrap;
+    margin: 0; font-size: 14px; font-weight: 800; letter-spacing: .9px;
+    text-transform: uppercase; color: #333A45; white-space: nowrap;
   }
-  .sec-count { font-size: 11.5px; font-weight: 600; color: var(--ink-mute); white-space: nowrap; flex-shrink: 0; }
+  .sec-count { font-size: 11.5px; font-weight: 700; color: var(--ink-mute); white-space: nowrap; flex-shrink: 0; }
   .sec-count:empty { display: none; }
-  .sec-head::after { content: ""; flex: 1 1 auto; min-width: 0; height: 1px; background: var(--hairline); }
+  .sec-head::after { content: ""; flex: 1 1 auto; min-width: 0; height: 1px; background: var(--line); }
 
   /* ── What's on your mind — one touch rail, every category reachable ── */
   .cat-rail {
     display: flex;
     gap: 14px;
-    padding: 2px 18px 10px;
+    padding: 2px 18px 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
@@ -243,22 +238,20 @@
   .cat-item:active { transform: scale(.94); opacity: .85; }
 
   .cat-tile {
-    width: 76px; height: 76px; border-radius: var(--r-md); overflow: hidden;
-    background: var(--tile);
+    width: 76px; height: 76px; border-radius: 22px; overflow: hidden;
+    background: #FFF1DC;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    transition: background .18s ease;
   }
-  .cat-item:active .cat-tile { background: #FFEBD2; }
   .cat-tile img {
-    width: 100%; height: 100%; object-fit: contain; padding: 8px;
+    width: 100%; height: 100%; object-fit: contain; padding: 6px;
     opacity: 0; transition: opacity .25s ease;
   }
   .cat-tile img.loaded { opacity: 1; }
 
   .cat-name {
-    margin-top: 10px; font-size: 12px; font-weight: 600; color: #3A414F;
-    text-align: center; line-height: 1.3; width: 100%;
+    margin-top: 9px; font-size: 12.5px; font-weight: 700; color: #333A45;
+    text-align: center; line-height: 1.25; width: 100%;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     overflow: hidden; word-break: break-word;
   }
@@ -269,40 +262,31 @@
     .cat-rail, .sec-head { padding-left: 24px; padding-right: 24px; }
   }
 
-  /* ── Filter bar — sticks to the top of the viewport while scrolling the
-     restaurant list. Same scroll container as the page, so normal page
-     scrolling is untouched. ── */
+  /* ── Filter bar ── */
   .filter-bar {
-    position: sticky;
-    top: 0;
-    z-index: 30;
     display: flex; gap: 8px; overflow-x: auto;
-    padding: 12px 18px;
-    background: var(--page);
-    border-bottom: 1px solid transparent;
+    padding: 2px 18px 14px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
   }
-  .filter-bar.is-stuck { border-bottom-color: var(--hairline); }
   .filter-bar[hidden] { display: none; }
   .filter-bar::-webkit-scrollbar { display: none; }
   @media (min-width: 700px) { .filter-bar { padding-left: 24px; padding-right: 24px; } }
 
   .filter-pill {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    height: 38px; padding: 0 15px; flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 15px; flex-shrink: 0;
     background: var(--card); border: 1px solid var(--line); border-radius: 999px;
     font-family: inherit; font-size: 13px; font-weight: 600; color: #3B4453;
     white-space: nowrap; cursor: pointer;
     transition: background .18s ease, border-color .18s ease, color .18s ease, transform .12s ease;
   }
-  .filter-pill i { font-size: 12px; line-height: 1; }
   .filter-pill:active { transform: scale(.95); }
   .filter-pill.active {
     background: var(--brand-soft);
     color: var(--brand-ink);
-    border-color: #FFCFA6;
+    border-color: #FFC79A;
   }
   .filter-count {
     display: inline-flex; align-items: center; justify-content: center;
@@ -315,7 +299,7 @@
   #restaurant-list {
     display: grid;
     grid-auto-rows: 1fr;      /* every card ends up the same height */
-    gap: 18px;
+    gap: 16px;
     padding: 0 18px 4px;
   }
   @media (min-width: 700px) {
@@ -339,7 +323,7 @@
   /* ── Empty / error blocks ── */
   .state-block {
     text-align: center; padding: 40px 24px 44px;
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+    background: var(--card); border: 1px solid var(--line); border-radius: 20px;
   }
   .state-icon { font-size: 38px; color: #C3C9D4; display: block; margin-bottom: 14px; }
   .state-title { font-size: 16px; font-weight: 800; color: #303845; margin: 0 0 6px; }
@@ -418,9 +402,11 @@
     <a class="eta tap" id="eta-block" href="address.html">
       <p class="eta-time" id="eta-line" hidden>Delivery in <span id="delivery-time-value"></span> minutes</p>
       <p class="eta-place">
-        <span class="eta-text"><span id="loc-name">Maynaguri</span><span id="loc-sub" hidden></span></span>
+        <i class="fa-solid fa-location-dot eta-pin"></i>
+        <span class="eta-name" id="loc-name">Maynaguri</span>
         <i class="fa-solid fa-chevron-down eta-chev"></i>
       </p>
+      <p class="eta-addr" id="loc-sub" hidden></p>
     </a>
 
     <div class="hero-actions">

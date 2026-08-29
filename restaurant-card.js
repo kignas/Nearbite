@@ -352,11 +352,8 @@
 
     // Meta line: only the parts we actually have.
     var metaParts = [];
-    if (cuisine) metaParts.push('<span class="z-cuisine">' + esc(cuisine) + '</span>');
-    if (distanceText) {
-      metaParts.push('<span class="z-distance"><i class="fa-solid fa-location-dot z-meta-icon"></i>' +
-        esc(distanceText) + '</span>');
-    }
+    if (cuisine) metaParts.push(esc(cuisine));
+    if (distanceText) metaParts.push(esc(distanceText));
 
     var tags = '';
     if (nearFast) {
@@ -369,15 +366,11 @@
       tags += '<span class="z-tag z-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
     }
 
-    // Facts row: rating, delivery time and minimum order — only when supplied.
+    // Facts line: delivery time and minimum order, only when supplied.
     var facts = [];
-    if (rating != null) {
-      facts.push('<span class="z-fact"><i class="fa-solid fa-star z-star"></i>' +
-        esc(rating.toFixed(1)) + '</span>');
-    }
-    if (time) facts.push('<span class="z-fact">' + esc(time.text) + '</span>');
+    if (time) facts.push(esc(time.text));
     if (minOrder != null) {
-      facts.push('<span class="z-fact"><span class="z-fact-lbl">Min</span> ₹' + esc(minOrder) + '</span>');
+      facts.push('<span class="z-fact-lbl">Min</span> ₹' + esc(minOrder));
     }
 
     return '<a href="restaurant.html?id=' + encodeURIComponent(id) +
@@ -395,16 +388,20 @@
       '</div>' +
 
       '<div class="z-body">' +
-        '<h3 class="z-name">' + esc(name) + '</h3>' +
+        '<div class="z-head">' +
+          '<h3 class="z-name">' + esc(name) + '</h3>' +
+          (rating != null
+            ? '<span class="z-rating"><i class="fa-solid fa-star"></i>' +
+              esc(rating.toFixed(1)) + '</span>'
+            : '') +
+        '</div>' +
         (metaParts.length
           ? '<p class="z-meta">' + metaParts.join('<span class="z-meta-dot">&bull;</span>') + '</p>'
           : '') +
         (tags ? '<div class="z-tags">' + tags + '</div>' : '') +
         '<div class="z-foot">' +
-          '<div class="z-facts">' + facts.join('<span class="z-sep"></span>') + '</div>' +
-          // An unavailable card cannot be opened, so it gets no call to
-          // action — the state is already stated over the image.
-          (isUnavailable ? '' : '<span class="z-order">Order</span>') +
+          '<div class="z-facts">' + facts.join('<span class="z-meta-dot">&bull;</span>') + '</div>' +
+          '<span class="z-order">' + (isUnavailable ? 'View menu' : 'Order') + '</span>' +
         '</div>' +
       '</div>' +
     '</a>';

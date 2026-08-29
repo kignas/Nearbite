@@ -667,7 +667,7 @@
 
       if (label) nameEl.textContent = label;
 
-      subEl.textContent = detail ? ', ' + detail : '';
+      subEl.textContent = detail;
       subEl.hidden = !detail;
     } catch (e) {}
   }
@@ -691,20 +691,7 @@
 
   /* ── Wiring ─────────────────────────────────────────────────── */
 
-  /* The filter bar is sticky in CSS; this only tells it when it has left
-     its resting position so it can show a separator. */
-  function setupStickyFilter() {
-    var bar = el('filter-bar');
-    if (!bar || !('IntersectionObserver' in window)) return;
-
-    new IntersectionObserver(function (entries) {
-      bar.classList.toggle('is-stuck', entries[0].intersectionRatio < 1);
-    }, { threshold: [1], rootMargin: '-1px 0px 0px 0px' }).observe(bar);
-  }
-
   function bindStaticControls() {
-    setupStickyFilter();
-
     var vegBox = el('veg-toggle-btn');
     if (vegBox) {
       vegBox.addEventListener('click', function () { toggleFilter('veg'); });
