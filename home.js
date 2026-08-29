@@ -49,10 +49,13 @@
   var card = window.RestaurantCard;
 
   var FILTERS = [
+    // QUICK FILTERS (Show in top horizontal bar)
     {
       id: 'nearfast',
       label: 'Near & Fast',
       icon: '<i class="fa-solid fa-bolt" style="color:#16a34a"></i> ',
+      group: 'QUICK FILTERS',
+      showInBar: true,
       supported: function (list) {
         return list.some(function (r) {
           return card.read.nearFastFlag(r) !== null || card.read.deliveryTime(r) !== null;
@@ -60,15 +63,28 @@
       },
       match: function (res) {
         if (card.read.nearFastFlag(res) === true) return true;
-        // No explicit flag: "fast" means the quoted delivery window ends
-        // within 30 minutes. Uses only real values from the API.
         var time = card.read.deliveryTime(res);
         return !!(time && time.max != null && time.max <= 30);
       }
     },
     {
+      id: 'rating',
+      label: 'Rating 4.0+',
+      group: 'RATING',
+      showInBar: true,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.rating(r) != null; });
+      },
+      match: function (res) {
+        var rating = card.read.rating(res);
+        return rating != null && rating >= 4.0;
+      }
+    },
+    {
       id: 'under100',
       label: 'Under ₹100',
+      group: 'MINIMUM ORDER',
+      showInBar: true,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
       },
@@ -77,28 +93,75 @@
         return price != null && price <= 100;
       }
     },
+    
+    // SHEET ONLY FILTERS
+    {
+      id: 'under30m',
+      label: 'Under 30 min',
+      group: 'DELIVERY TIME',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.deliveryTime(r) != null; });
+      },
+      match: function (res) {
+        var time = card.read.deliveryTime(res);
+        return !!(time && time.max != null && time.max <= 30);
+      }
+    },
+    {
+      id: 'under45m',
+      label: 'Under 45 min',
+      group: 'DELIVERY TIME',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.deliveryTime(r) != null; });
+      },
+      match: function (res) {
+        var time = card.read.deliveryTime(res);
+        return !!(time && time.max != null && time.max <= 45);
+      }
+    },
+    {
+      id: 'rating45',
+      label: '4.5+',
+      group: 'RATING',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.rating(r) != null; });
+      },
+      match: function (res) {
+        var rating = card.read.rating(res);
+        return rating != null && rating >= 4.5;
+      }
+    },
+    {
+      id: 'under200',
+      label: 'Under ₹200',
+      group: 'MINIMUM ORDER',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
+      },
+      match: function (res) {
+        var price = card.read.lowestItemPrice(res);
+        return price != null && price <= 200;
+      }
+    },
     {
       id: 'offers',
-      label: 'Great offers',
+      label: 'Offers available',
+      group: 'OFFERS',
+      showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return !!card.read.offer(r); });
       },
       match: function (res) { return !!card.read.offer(res); }
     },
     {
-      id: 'rating',
-      label: 'Rating 4.0+',
-      supported: function (list) {
-        return list.some(function (r) { return card.read.rating(r) != null; });
-      },
-      match: function (res) {
-        var rating = card.read.rating(res);
-        return rating != null && rating >= 4;
-      }
-    },
-    {
       id: 'veg',
       label: 'Pure Veg',
+      group: 'FOOD TYPE',
+      showInBar: false, // In bar it's managed via hero search area toggle
       supported: function (list) {
         return list.some(function (r) { return card.read.pureVeg(r) !== null; });
       },
@@ -107,10 +170,10 @@
   ];
 
   var SORTS = [
-    { id: 'recommended', label: 'Recommended', supported: function () { return true; } },
+    { id: 'recommended', label: 'Relevance', supported: function () { return true; } },
     {
       id: 'rating',
-      label: 'Rating: high to low',
+      label: 'Rating: High to Low',
       supported: function (list) {
         return list.some(function (r) { return card.read.rating(r) != null; });
       },
@@ -120,7 +183,7 @@
     },
     {
       id: 'delivery',
-      label: 'Delivery time',
+      label: 'Delivery Time: Fast to Slow',
       supported: function (list) {
         return list.some(function (r) { return card.read.deliveryTime(r) != null; });
       },
@@ -134,7 +197,7 @@
     },
     {
       id: 'distance',
-      label: 'Distance: near to far',
+      label: 'Distance: Near to Far',
       supported: function (list) {
         return list.some(function (r) { return card.getDistanceKm(r) != null; });
       },
@@ -254,6 +317,7 @@
         '<div class="state-block">' +
           '<i class="fa-solid fa-filter-circle-xmark state-icon"></i>' +
           '<p class="state-title">No restaurants match your filters</p>' +
+          '<p class="state-sub">Try changing or clearing your filters.</p>' +
           '<button type="button" class="state-btn" id="home-clear-filters">Clear filters</button>' +
         '</div>';
 
@@ -278,10 +342,11 @@
     if (!bar) return;
 
     var available = supportedFilters();
+    var barFilters = available.filter(function(f) { return f.showInBar; });
     var sorts = supportedSorts();
     var showSheetButton = available.length > 0 || sorts.length > 1;
 
-    if (!available.length && !showSheetButton) {
+    if (!barFilters.length && !showSheetButton) {
       bar.hidden = true;
       bar.innerHTML = '';
       return;
@@ -299,7 +364,7 @@
         '</button>';
     }
 
-    html += available.map(function (filter) {
+    html += barFilters.map(function (filter) {
       return '<button type="button" class="filter-pill' +
         (isFilterActive(filter.id) ? ' active' : '') +
         '" data-filter="' + filter.id + '" aria-pressed="' +
@@ -323,7 +388,7 @@
     syncVegToggle();
   }
 
-  /* The header VEG switch and the "Pure Veg" pill are two controls over
+  /* The header VEG switch and the "Pure Veg" filter are controls over
      the SAME filter state — never two independent booleans. */
   function syncVegToggle() {
     var box = el('veg-toggle-btn');
@@ -342,6 +407,41 @@
     box.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
 
+  /* ── URL Sync ───────────────────────────────────────────────── */
+  function updateURL() {
+    try {
+      var url = new URL(window.location);
+      if (state.filter.sort === 'recommended') {
+        url.searchParams.delete('sort');
+      } else {
+        url.searchParams.set('sort', state.filter.sort);
+      }
+      if (state.filter.active.length === 0) {
+        url.searchParams.delete('filters');
+      } else {
+        url.searchParams.set('filters', state.filter.active.join(','));
+      }
+      window.history.replaceState({}, '', url);
+    } catch (e) {
+      // Ignore URL modifications in sandboxed environments
+    }
+  }
+
+  function parseURL() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var sort = params.get('sort');
+      if (sort && sortById(sort)) state.filter.sort = sort;
+      
+      var filters = params.get('filters');
+      if (filters) {
+        filters.split(',').forEach(function(fId) {
+          if (filterById(fId)) state.filter.active.push(fId);
+        });
+      }
+    } catch (e) { }
+  }
+
   /* ── Filter actions ─────────────────────────────────────────── */
 
   function toggleFilter(id) {
@@ -351,6 +451,7 @@
     if (index === -1) state.filter.active.push(id);
     else state.filter.active.splice(index, 1);
 
+    updateURL();
     renderFilterBar();
     renderRestaurants();
     renderSheetBody();
@@ -359,6 +460,8 @@
   function setSort(id) {
     if (!sortById(id)) return;
     state.filter.sort = id;
+    
+    updateURL();
     renderFilterBar();
     renderRestaurants();
     renderSheetBody();
@@ -367,6 +470,8 @@
   function clearFilters() {
     state.filter.active = [];
     state.filter.sort = 'recommended';
+    
+    updateURL();
     renderFilterBar();
     renderRestaurants();
     renderSheetBody();
@@ -394,14 +499,25 @@
     }
 
     if (filters.length) {
-      html += '<h4 class="sheet-group-title">Filter by</h4><div class="sheet-options">';
-      html += filters.map(function (filter) {
-        return '<button type="button" class="sheet-option' +
-          (isFilterActive(filter.id) ? ' selected' : '') +
-          '" data-sheet-filter="' + filter.id + '">' + card.escape(filter.label) +
-          '<i class="fa-solid fa-check"></i></button>';
-      }).join('');
-      html += '</div>';
+      // Group filters dynamically based on assigned group property
+      var groupedFilters = {};
+      filters.forEach(function(f) {
+        if (f.id === 'nearfast') return; // Skip Quick Filter in sheet to save vertical space
+        var group = f.group || 'OTHER';
+        if (!groupedFilters[group]) groupedFilters[group] = [];
+        groupedFilters[group].push(f);
+      });
+
+      Object.keys(groupedFilters).forEach(function(groupName) {
+        html += '<h4 class="sheet-group-title">' + card.escape(groupName) + '</h4><div class="sheet-options">';
+        html += groupedFilters[groupName].map(function (filter) {
+          return '<button type="button" class="sheet-option' +
+            (isFilterActive(filter.id) ? ' selected' : '') +
+            '" data-sheet-filter="' + filter.id + '">' + card.escape(filter.label) +
+            '<i class="fa-solid fa-check"></i></button>';
+        }).join('');
+        html += '</div>';
+      });
     }
 
     body.innerHTML = html;
@@ -444,8 +560,6 @@
     if (!scroll) return;
 
     if (!state.categories.length) {
-      // Nothing to show and nothing to tap — hide the section rather than
-      // leave an empty strip on the page.
       if (section) section.hidden = true;
       scroll.innerHTML = '';
       return;
@@ -493,7 +607,6 @@
       })
       .catch(function (error) {
         console.warn('[home] categories unavailable:', error.message);
-        // Keep whatever the cache gave us; otherwise the section stays hidden.
         renderCategories();
       });
   }
@@ -542,8 +655,6 @@
         if (list.length) {
           window.API.cache.writeList(CACHE_KEY, list);
         } else {
-          // An empty response is authoritative: drop the cache so we never
-          // show yesterday's restaurants as if they were live.
           window.API.cache.clear(CACHE_KEY);
         }
 
@@ -555,8 +666,6 @@
         console.error('[home] restaurant load failed:', error);
 
         if (state.restaurants.length) {
-          // Data is on screen — keep it. Never replace working content with
-          // an error screen; just say the refresh failed.
           state.staleNotice = 'Showing saved results — couldn\'t refresh.';
         } else {
           state.status = 'error';
@@ -586,7 +695,6 @@
     var cached = window.API.cache.readList(CACHE_KEY, CACHE_MAX_AGE_MS);
 
     if (cached) {
-      // Cache is only ever a head start; the network call below still runs.
       applyRestaurants(cached);
       renderDeliveryEstimate();
     }
@@ -705,6 +813,8 @@
     if (window.CONFIG && window.CONFIG.BRAND_NAME) {
       document.title = window.CONFIG.BRAND_NAME + ' – Food Near You';
     }
+    
+    parseURL();
 
     bindStaticControls();
     renderSavedAddress();
