@@ -6,7 +6,6 @@
 <title>EatSwada – Food Near You</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<!-- Switched to Manrope for a more space-efficient, native-app feel -->
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
@@ -72,8 +71,8 @@
   .sk.d4 { animation-delay: .32s; }
 
   .cs-item { display: flex; flex-direction: column; align-items: center; width: 100%; }
-  .cs-ring { width: 90%; aspect-ratio: 1/1; border-radius: 50%; margin-bottom: 8px; }
-  .cs-name { width: 75%; height: 11px; border-radius: 5px; }
+  .cs-ring { width: 100%; aspect-ratio: 1/1; border-radius: 50%; margin-bottom: 4px; }
+  .cs-name { width: 85%; height: 11px; border-radius: 5px; }
 
   /* ══════════════════════════════════════════════════════════════
      3. HERO HEADER (VISUALLY UPGRADED)
@@ -252,7 +251,6 @@
   .section { padding: 20px 0 4px; }
   .section[hidden] { display: none; }
 
-  /* Upgraded to Zomato-style section headers */
   .sec-head { display: flex; align-items: center; gap: 12px; padding: 0 18px; margin-bottom: 16px; }
   .sec-title {
     margin: 0;
@@ -270,14 +268,15 @@
     display: grid;
     grid-template-rows: repeat(2, auto);
     grid-auto-flow: column;
-    grid-auto-columns: clamp(72px, 21vw, 88px);
+    grid-auto-columns: clamp(74px, 22vw, 86px);
     justify-content: start;
-    gap: 22px 14px;
-    padding: 4px 18px 26px;
+    gap: 12px 12px;
+    padding: 0 18px 16px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    scroll-snap-type: x proximity;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 18px;
     overscroll-behavior-x: contain;
   }
   .cat-scroll::-webkit-scrollbar { display: none; }
@@ -285,7 +284,7 @@
 
   .cat-item {
     display: flex; flex-direction: column; align-items: center; width: 100%;
-    text-decoration: none; scroll-snap-align: center;
+    text-decoration: none; scroll-snap-align: start;
     -webkit-tap-highlight-color: transparent;
     transition: transform .2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity .2s ease;
     outline: none;
@@ -296,11 +295,11 @@
     width: 100%;
     aspect-ratio: 1/1;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   .cat-ring img {
-    width: 90%;
-    height: 90%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     transform: scale(1.05);
     opacity: 0;
@@ -314,8 +313,8 @@
 
   .cat-name {
     font-size: 12.5px;
-    font-weight: 700;
-    color: #334155;
+    font-weight: 800;
+    color: #1E293B;
     text-align: center;
     line-height: 1.25;
     letter-spacing: -0.2px;
