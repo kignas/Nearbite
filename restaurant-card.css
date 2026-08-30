@@ -473,13 +473,19 @@
   box-shadow: 0 0 0 4px rgba(244, 123, 32, .55);
 }
 
-.es-fav.is-pressed { animation: es-fav-pop .28s ease; }
+.es-fav.is-pressed { animation: es-fav-pop .34s cubic-bezier(.34, 1.56, .64, 1); }
 
+/* Press in, overshoot, settle — the icon swap lands on the overshoot. */
 @keyframes es-fav-pop {
   0%   { transform: scale(1); }
-  38%  { transform: scale(.82); }
+  28%  { transform: scale(.76); }
+  62%  { transform: scale(1.16); }
   100% { transform: scale(1); }
 }
+
+/* The heart itself fades between outline and filled. */
+.es-fav i { transition: transform .2s ease; }
+.es-fav.is-active i { transform: scale(1.06); }
 
 /* ── Media badge ────────────────────────────────────────────────────
    Bottom-left, so it clears the centred gallery dots and the top-right

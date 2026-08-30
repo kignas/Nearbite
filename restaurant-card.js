@@ -400,14 +400,22 @@
       ? '<span class="es-media-badge"><i class="fa-solid fa-leaf"></i>Pure Veg</span>'
       : '';
 
-    var isFav = !!(window.Favorites && window.Favorites.isFavorite(id));
-    var favHtml =
-      '<button type="button" class="es-fav' + (isFav ? ' is-active' : '') + '"' +
-        ' data-fav-id="' + esc(id) + '"' +
-        ' aria-pressed="' + (isFav ? 'true' : 'false') + '"' +
-        ' aria-label="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' +
-        '<i class="' + (isFav ? 'fa-solid' : 'fa-regular') + ' fa-heart" aria-hidden="true"></i>' +
-      '</button>';
+    /* No Favorites store means the heart could not persist anything, so it
+       is not rendered at all rather than shown as a control that does
+       nothing when tapped. */
+    var favHtml = '';
+    if (window.Favorites) {
+      var isFav = !!window.Favorites.isFavorite(id);
+      favHtml =
+        '<button type="button" class="es-fav' + (isFav ? ' is-active' : '') + '"' +
+          ' data-fav-id="' + esc(id) + '"' +
+          ' aria-pressed="' + (isFav ? 'true' : 'false') + '"' +
+          ' aria-label="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' +
+          '<i class="' + (isFav ? 'fa-solid' : 'fa-regular') + ' fa-heart" aria-hidden="true"></i>' +
+        '</button>';
+    } else {
+      warnMissingFavorites();
+    }
 
     /* The heart is a sibling of the <a>, not a child: interactive content
        cannot legally nest inside a link, and keeping them separate means
@@ -486,6 +494,18 @@
 
   /* ── Favorites wiring ───────────────────────────────────────── */
 
+  var warnedNoFavorites = false;
+
+  function warnMissingFavorites() {
+    if (warnedNoFavorites) return;
+    warnedNoFavorites = true;
+    console.error(
+      '[restaurant-card] window.Favorites is missing, so the favourite ' +
+      'button is hidden. Add <script src="favorites.js"></' + 'script> ' +
+      'before restaurant-card.js on this page.'
+    );
+  }
+
   function applyFavoriteState(button, on) {
     button.classList.toggle('is-active', on);
     button.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -516,13 +536,18 @@
     e.stopPropagation();
 
     var id = button.getAttribute('data-fav-id');
-    if (!id || !window.Favorites) return;
 
-    applyFavoriteState(button, window.Favorites.toggleFavorite(id));
+    if (!id || !window.Favorites) {
+      warnMissingFavorites();
+      return;
+    }
 
+    /* Restart the pop even on rapid repeat taps. */
     button.classList.remove('is-pressed');
     void button.offsetWidth;
     button.classList.add('is-pressed');
+
+    applyFavoriteState(button, window.Favorites.toggleFavorite(id));
   });
 
   window.addEventListener('eatswada:favorites-changed', syncFavoriteButtons);
