@@ -224,7 +224,7 @@
 .es-card-content {
   display: flex;
   flex-direction: column;
-  padding: 12px 14px 13px;
+  padding: 11px 14px 12px;
   min-width: 0;
 }
 
@@ -234,7 +234,7 @@
   line-height: 1.25;
   letter-spacing: -.3px;
   color: #101828;
-  margin: 0 0 4px;
+  margin: 0 0 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -291,7 +291,7 @@
   gap: 6px;
   min-width: 0;
   overflow: hidden;
-  margin: 8px 0 0;
+  margin: 7px 0 0;
 }
 
 .es-tag {
@@ -324,8 +324,8 @@
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
-  margin-top: 12px;
-  padding-top: 11px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid #F2F4F7;
 }
 
@@ -412,7 +412,7 @@
 
 /* ── Narrow phones (360 / 375 / 384) ────────────────────────────── */
 @media (max-width: 384px) {
-  .es-card-content { padding: 11px 12px 12px; }
+  .es-card-content { padding: 10px 12px 11px; }
   .rs-card { padding-bottom: 12px; }
   .rs-row, .rs-cuis, .rs-meta { margin-left: 12px; margin-right: 12px; }
 
@@ -498,22 +498,36 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  max-width: calc(100% - 96px);
+  min-width: 0;
+  /* Stops short of the centred dots even at 360px. */
+  max-width: calc(100% - 108px);
   padding: 4px 8px;
   border-radius: 7px;
   background: rgba(255, 255, 255, .94);
-  color: #0E7C4C;
+  color: #1F2937;
   font-size: 10px;
   font-weight: 800;
   line-height: 1.4;
   letter-spacing: .4px;
   text-transform: uppercase;
   white-space: nowrap;
-  overflow: hidden;
   box-shadow: 0 2px 6px rgba(15, 23, 42, .16);
 }
 
-.es-media-badge i { font-size: 9px; }
+/* One badge shape, one text colour. Only the icon carries the meaning,
+   so four variants never read as four different components. */
+.es-media-badge i { font-size: 9px; flex: 0 0 auto; }
+
+.es-media-badge-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.es-badge-near  i { color: #F47B20; }
+.es-badge-top   i { color: #E8A33D; }
+.es-badge-veg   i { color: #0E7C4C; }
+.es-badge-offer i { color: #B45309; }
 
 .es-card.is-unavailable .es-media-badge { opacity: .55; }
 

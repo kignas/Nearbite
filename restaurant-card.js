@@ -376,9 +376,42 @@
     if (cuisineDisplay) subtitleHtml += '<span class="es-cuisine">' + esc(cuisineDisplay) + '</span>';
     if (distanceText) subtitleHtml += '<span class="es-distance">' + esc(distanceText) + '</span>';
 
+    /* Floating badge — priority chain, first match wins, at most one.
+       Every branch is backed by a field the card already reads; nothing
+       here is derived from data that does not exist.
+         Near & Fast  read.nearFastFlag(res) === true
+         Top Rated    read.rating(res) >= 4.5
+         Pure Veg     read.pureVeg(res) === true
+         Offer        read.offer(res) non-empty
+       "New" is absent on purpose: no createdAt / isNew field is read
+       anywhere in the frontend, so it cannot be supported honestly. */
+    var TOP_RATED_MIN = 4.5;
+    var badge = null;
+
+    if (nearFast) {
+      badge = { key: 'near', cls: 'es-badge-near', icon: 'fa-bolt', text: 'Near & Fast' };
+    } else if (rating != null && rating >= TOP_RATED_MIN) {
+      badge = { key: 'top', cls: 'es-badge-top', icon: 'fa-star', text: 'Top Rated' };
+    } else if (read.pureVeg(res) === true) {
+      badge = { key: 'veg', cls: 'es-badge-veg', icon: 'fa-leaf', text: 'Pure Veg' };
+    } else if (offer) {
+      badge = { key: 'offer', cls: 'es-badge-offer', icon: 'fa-tag', text: offer };
+    }
+
+    var badgeHtml = badge
+      ? '<span class="es-media-badge ' + badge.cls + '">' +
+          '<i class="fa-solid ' + badge.icon + '" aria-hidden="true"></i>' +
+          '<span class="es-media-badge-label">' + esc(badge.text) + '</span>' +
+        '</span>'
+      : '';
+
+    /* A signal promoted to the image badge is not repeated below it —
+       the same fact twice on one card is noise, not hierarchy. Anything
+       the badge did NOT take still renders here exactly as before. */
+    var badgeKey = badge ? badge.key : '';
     var tagsHtml = '';
-    if (nearFast) tagsHtml += '<span class="es-tag es-tag-near"><i class="fa-solid fa-bolt"></i> Near & Fast</span>';
-    if (offer) tagsHtml += '<span class="es-tag es-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
+    if (nearFast && badgeKey !== 'near') tagsHtml += '<span class="es-tag es-tag-near"><i class="fa-solid fa-bolt"></i> Near & Fast</span>';
+    if (offer && badgeKey !== 'offer') tagsHtml += '<span class="es-tag es-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
     if (coupon) tagsHtml += '<span class="es-tag es-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
 
     var statsHtml = '';
@@ -394,11 +427,6 @@
       statsHtml += '<span class="es-stat es-stat-min">Min ₹' + esc(minOrder) + '</span>';
     }
 
-    /* Pure Veg is the only badge the card does not already show elsewhere
-       and that the data can genuinely support. See the phase report. */
-    var badgeHtml = read.pureVeg(res) === true
-      ? '<span class="es-media-badge"><i class="fa-solid fa-leaf"></i>Pure Veg</span>'
-      : '';
 
     /* No Favorites store means the heart could not persist anything, so it
        is not rendered at all rather than shown as a control that does
