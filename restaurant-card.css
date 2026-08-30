@@ -1,95 +1,104 @@
 /*
- * EatSwada — Restaurant Card (Phase 2.3 refinement)
+ * EatSwada — Restaurant Card (Phase 2.3 premium upgrade)
  * ------------------------------------------------------------------
- * VISUAL REFINEMENT ONLY. This file is a full replacement for the
- * previous restaurant-card.css.
+ * Full replacement for restaurant-card.css.
+ * Scope: .es-card subtree + .rs-* loading skeleton. Nothing here
+ * targets the header, location row, search, hero, categories, filter
+ * pills, bottom nav or help button.
  *
- * Scope: .es-card (+ children) and the .rs-* loading skeleton.
- * Nothing here targets the header, location row, search bar, hero,
- * "What's on your mind", categories, filter pills, bottom nav or help
- * button. No layout rule reaches outside the card.
+ * COMPOSITION CHANGE (this is the actual upgrade, not value tweaks):
+ *   before -> floating image, then loose text stacked underneath
+ *   after  -> one enclosed surface; image flush to the card edge;
+ *             identity block (name / cuisine / badge) padded inside;
+ *             hairline rule splitting off a dedicated action band
+ *             that pairs metadata with the CTA.
+ *
+ * Type scale     17 / 12.5 / 11.5 / 13
+ * Spacing scale  4 / 8 / 12 / 14
+ * Colour roles   brand orange -> CTA only
+ *                green        -> rating + Near & Fast (positive)
+ *                #4A5567      -> neutral metadata
+ *                #79828F      -> quiet secondary (cuisine)
+ *                #D5DBE4      -> separators
  * ------------------------------------------------------------------
- * Spacing scale used inside the card: 3 / 6 / 8 / 10 / 20
  */
 
-/* ── List skeleton — mirrors the real card's metrics so there is no
-      jump when the API resolves ─────────────────────────────────── */
-.rs-card  { margin: 0 18px 20px; }
-.rs-img   { height: 182px; border-radius: 18px; margin-bottom: 10px; }
-.rs-row   { display: flex; justify-content: space-between; align-items: flex-start; margin: 0 0 6px; }
-.rs-name  { height: 20px; width: 58%; border-radius: 8px; }
-.rs-badge { height: 20px; width: 44px; border-radius: 999px; }
-.rs-cuis  { height: 13px; width: 50%; border-radius: 6px; margin-bottom: 10px; }
-.rs-meta  { height: 12px; width: 66%; border-radius: 5px; }
+/* ── Loading skeleton — mirrors the real card so nothing jumps ───── */
+.rs-card {
+  margin: 0 18px 14px;
+  padding-bottom: 13px;
+  background: #FFFFFF;
+  border: 1px solid #EFF1F5;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
+}
 
-/* ── Card shell ─────────────────────────────────────────────────── */
+.rs-img   { height: 182px; border-radius: 0; margin: 0 0 12px; }
+.rs-row   { display: flex; justify-content: space-between; align-items: flex-start; margin: 0 14px 6px; }
+.rs-name  { height: 19px; width: 58%; border-radius: 8px; }
+.rs-badge { height: 19px; width: 44px; border-radius: 7px; }
+.rs-cuis  { height: 12px; width: 52%; border-radius: 6px; margin: 0 14px 12px; }
+.rs-meta  { height: 12px; width: 66%; border-radius: 5px; margin: 0 14px; }
+
+/* ── Card surface ───────────────────────────────────────────────── */
 .es-card {
   display: flex;
   flex-direction: column;
   position: relative;
-  margin: 0 18px 20px;              /* was 28px bottom — tighter rhythm */
-  background: transparent;
+  overflow: hidden;                 /* clips the flush image to the radius */
+  margin: 0 18px 14px;
+  background: #FFFFFF;
+  border: 1px solid #EFF1F5;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
   text-decoration: none;
   color: inherit;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease;
 }
 
 @media (min-width: 700px) {
   .es-card { margin-left: 24px; margin-right: 24px; }
 }
 
-/* Hairline between consecutive cards so the next card no longer
-   "starts abruptly". Sits in the gap, never inside the card. */
-.es-card + .es-card::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 2px;
-  right: 2px;
-  height: 1px;
-  background: #EFF2F6;
-  pointer-events: none;
+.es-card:active {
+  transform: scale(.99);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
 }
-
-.es-card:active { transform: scale(.985); }
 
 .es-card:focus-visible {
-  outline: 2px solid #159A62;
-  outline-offset: 3px;
-  border-radius: 20px;
+  outline: 2px solid #F47B20;
+  outline-offset: 2px;
 }
 
-/* ── Image layer ────────────────────────────────────────────────── */
+/* ── Image — flush to the card edge, fixed 16:9 band ─────────────── */
 .es-card-media {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 18px;
-  margin-bottom: 10px;
+  margin: 0;
+  border-radius: 0;
   background: #F1F3F7;
 
-  /* Balanced ratio instead of a flat 200px block. The min/max clamp
-     keeps every card within a 176–188px band at 360–430px, so card
-     heights stay consistent and nothing gets unnecessarily tall. */
+  /* Clamped so every card lands in a 176–188px band at 360–430px.
+     No card can become dramatically taller than another. */
   aspect-ratio: 16 / 9;
   height: auto;
   min-height: 176px;
   max-height: 188px;
-
-  box-shadow: 0 6px 18px rgba(15, 23, 42, .09);
 }
 
-/* Bottom scrim: anchors the photo, keeps the dots legible and ties the
-   image to the text block below it. */
+/* Soft scrim: gives the photo depth and keeps the dots legible
+   without a dark pill behind them. */
 .es-card-media::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 44%;
-  background: linear-gradient(to top, rgba(9, 14, 26, .32), rgba(9, 14, 26, 0));
+  height: 38%;
+  background: linear-gradient(to top, rgba(9, 14, 26, .30), rgba(9, 14, 26, 0));
   pointer-events: none;
   z-index: 2;
 }
@@ -140,10 +149,10 @@
 
 @keyframes es-img-reveal-fallback { to { opacity: 1; } }
 
-/* Dots: the scrim replaces the old dark pill, so they read cleaner. */
+/* ── Gallery dots — minimal, no pill ────────────────────────────── */
 .es-gallery-dots {
   position: absolute;
-  bottom: 9px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -165,8 +174,8 @@
   transition: width .25s ease, background .25s ease;
 }
 
-/* Invisible hit area — same dot, easier to tap. Existing dot click
-   handler is unchanged; events still target the dot itself. */
+/* Invisible hit area. Same dot, easier to tap. The existing dot
+   click handler is untouched; events still target the dot. */
 .es-gallery-dot::after {
   content: '';
   position: absolute;
@@ -179,41 +188,37 @@
   background: #fff;
 }
 
-/* ── Content area ───────────────────────────────────────────────── */
+/* ── Identity block ─────────────────────────────────────────────── */
 .es-card-content {
   display: flex;
   flex-direction: column;
-  padding: 0 2px;                   /* was 4px — sits closer to the image */
+  padding: 12px 14px 13px;
   min-width: 0;
 }
 
 .es-name {
   font-size: 17px;
   font-weight: 800;
-  line-height: 1.22;
-  letter-spacing: -.2px;
-  color: #0F172A;
-  margin: 0 0 3px;
+  line-height: 1.25;
+  letter-spacing: -.3px;
+  color: #101828;
+  margin: 0 0 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Cuisine • distance. Cuisine shrinks and ellipsises; distance never
-   gets pushed out. */
+/* Cuisine shrinks and ellipsises; distance is pinned and never
+   pushed off. Distance is deliberately a shade stronger than cuisine. */
 .es-subtitle {
   display: flex;
   align-items: baseline;
-  gap: 0;
   min-width: 0;
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.35;
-  color: #6B7788;
+  line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .es-cuisine {
@@ -222,28 +227,31 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
+  color: #79828F;
 }
 
 .es-distance {
   flex: 0 0 auto;
-  color: #8A94A6;
   font-weight: 700;
+  color: #4A5567;
   white-space: nowrap;
 }
 
 .es-cuisine + .es-distance::before {
   content: '\2022';
   margin: 0 6px;
-  color: #C7CEDA;
+  color: #D5DBE4;
+  font-weight: 700;
 }
 
 .es-subtitle i {
   font-size: 11px;
   margin-right: 3px;
-  color: #94A3B8;
+  color: #9AA3B0;
 }
 
-/* ── Status / offer tags ────────────────────────────────────────── */
+/* ── Status / offer badges ──────────────────────────────────────── */
 .es-tags-row {
   display: flex;
   align-items: center;
@@ -251,7 +259,7 @@
   gap: 6px;
   min-width: 0;
   overflow: hidden;
-  margin: 0 0 10px;
+  margin: 8px 0 0;
 }
 
 .es-tag {
@@ -260,8 +268,8 @@
   gap: 4px;
   min-width: 0;
   max-width: 100%;
-  padding: 4px 8px;                 /* compact — supports, doesn't dominate */
-  border-radius: 999px;
+  padding: 4px 8px;
+  border-radius: 7px;
   font-size: 10px;
   font-weight: 800;
   line-height: 1.4;
@@ -269,23 +277,24 @@
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .es-tag i { font-size: 9px; }
 
 .es-tag-near   { background: #E7F6EE; color: #0E7C4C; flex: 0 0 auto; }
-.es-tag-offer  { background: #FFF5E3; color: #B45309; flex: 0 1 auto; }
+.es-tag-offer  { background: #FFF3E0; color: #B45309; flex: 0 1 auto; }
 .es-tag-coupon { background: #EEF1FF; color: #4338CA; flex: 0 1 auto; }
 
-/* ── Metadata row + primary CTA ─────────────────────────────────── */
+/* ── Action band: metadata + CTA, split off by a hairline ───────── */
 .es-bottom-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
-  margin-top: 0;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #F2F4F7;
 }
 
 .es-stats {
@@ -295,10 +304,10 @@
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  gap: 7px;
+  gap: 0;                           /* separators carry the spacing */
   font-size: 12.5px;
-  font-weight: 700;
-  color: #3A4657;
+  font-weight: 600;
+  color: #4A5567;
 }
 
 .es-stat {
@@ -309,55 +318,85 @@
   white-space: nowrap;
 }
 
-/* Scannable "★ 4.0 • 35–58 min • Min ₹200" — separators are drawn by
-   CSS, so a missing value simply drops its bullet with it. */
 .es-stat + .es-stat::before {
   content: '\2022';
-  margin-right: 7px;
-  color: #C7CEDA;
+  margin: 0 7px;
+  color: #D5DBE4;
   font-weight: 700;
 }
 
 .es-stat i { font-size: 10px; }
 
-.es-stat-rating { color: #0E7C4C; }
-.es-stat-rating i { color: #16A34A; }
+/* Rating reads as positive at a glance — the one emphasised value
+   in an otherwise neutral row. */
+.es-stat-rating {
+  gap: 2px;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: #159A62;
+  color: #FFFFFF;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .1px;
+}
+
+.es-stat-rating i { font-size: 9px; color: #FFFFFF; }
+
+/* Last-resort shrink target: if the row still can't fit, minimum
+   order truncates rather than colliding with or overflowing the CTA. */
+.es-stat-min {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .es-btn-order {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-height: 38px;
-  padding: 0 18px;
+  min-height: 36px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #FB8C3C 0%, #F26F1F 100%);
-  color: #fff;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #FFA23C 0%, #F47B20 100%);
+  color: #FFFFFF;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: .2px;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(242, 111, 31, .26);
+  box-shadow: 0 4px 10px rgba(244, 123, 32, .28),
+              inset 0 1px 0 rgba(255, 255, 255, .28);
   transition: filter .16s ease, box-shadow .16s ease;
 }
 
 .es-card:active .es-btn-order {
-  filter: brightness(.95);
-  box-shadow: 0 2px 6px rgba(242, 111, 31, .22);
+  filter: brightness(.96);
+  box-shadow: 0 2px 5px rgba(244, 123, 32, .22),
+              inset 0 1px 0 rgba(255, 255, 255, .28);
 }
 
-/* Narrow phones (360 / 375 / 384). Buys ~28px of headroom in the
-   bottom row so a long delivery range + "View Menu" still can't
-   collide with or clip against the CTA. */
+/* ── Narrow phones (360 / 375 / 384) ────────────────────────────── */
 @media (max-width: 384px) {
-  .es-stats { font-size: 11.5px; gap: 6px; }
-  .es-stat + .es-stat::before { margin-right: 6px; }
+  .es-card-content { padding: 11px 12px 12px; }
+  .rs-card { padding-bottom: 12px; }
+  .rs-row, .rs-cuis, .rs-meta { margin-left: 12px; margin-right: 12px; }
+
+  .es-name { font-size: 16.5px; }
   .es-subtitle { font-size: 12px; }
-  .es-btn-order { padding: 0 14px; font-size: 12.5px; }
+  .es-stats { font-size: 11.5px; }
+  .es-stat + .es-stat::before { margin: 0 6px; }
+  .es-stat-rating { font-size: 11px; padding: 4px 6px; }
+  .es-btn-order { min-height: 35px; padding: 0 13px; font-size: 12.5px; }
 }
 
 /* ── Unavailable state ──────────────────────────────────────────── */
+.es-card.is-unavailable {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+}
+
 .es-card.is-unavailable .es-card-media {
   filter: grayscale(1) contrast(.95);
   opacity: .6;
@@ -370,9 +409,13 @@
   opacity: .55;
 }
 
+.es-card.is-unavailable .es-stat-rating {
+  background: #98A2B3;
+}
+
 .es-card.is-unavailable .es-btn-order {
   background: #EEF1F5;
-  color: #6B7788;
+  color: #667085;
   box-shadow: none;
 }
 
