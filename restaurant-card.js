@@ -498,6 +498,8 @@
     window.__unavailableRestaurantIds = unavailable;
     container.innerHTML = html;
 
+    pruneGalleries();
+
     if (rendered) requestAnimationFrame(function () {
       initGalleries();
       syncFavoriteButtons();
@@ -580,7 +582,46 @@
 
   window.addEventListener('eatswada:favorites-changed', syncFavoriteButtons);
 
+  /* ── Order button press feedback ────────────────────────────────
+     Two delegated listeners for the whole page, not one per card.
+     Purely visual — the click itself still does exactly what it did. */
+
+  function clearOrderPressed() {
+    var pressed = document.querySelectorAll('.es-btn-order.is-pressed');
+    for (var i = 0; i < pressed.length; i++) {
+      pressed[i].classList.remove('is-pressed');
+    }
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    var button = e.target && e.target.closest ? e.target.closest('.es-btn-order') : null;
+    if (button) button.classList.add('is-pressed');
+  }, { passive: true });
+
+  document.addEventListener('pointerup', clearOrderPressed, { passive: true });
+  document.addEventListener('pointercancel', clearOrderPressed, { passive: true });
+
   /* ── Image gallery ──────────────────────────────────────────── */
+
+  /* Every initialised gallery owns an interval and an IntersectionObserver.
+     renderList() replaces the list on every filter/sort/refresh, which
+     detaches those galleries — without this they keep their timer alive and
+     hold the detached DOM in memory. Handles for galleries still on the
+     page are left untouched. */
+  var galleryHandles = [];
+
+  function pruneGalleries() {
+    var kept = [];
+    for (var i = 0; i < galleryHandles.length; i++) {
+      var handle = galleryHandles[i];
+      if (document.contains(handle.gallery)) {
+        kept.push(handle);
+        continue;
+      }
+      try { handle.dispose(); } catch (e) {}
+    }
+    galleryHandles = kept;
+  }
 
   function initGalleries() {
     document.querySelectorAll('.es-gallery').forEach(function (gallery) {
@@ -598,6 +639,7 @@
       var moved = false;
       var timer = null;
 
+      var card = gallery.closest ? gallery.closest('.es-card') : null;
       var cardIndex = parseInt(gallery.getAttribute('data-index') || '0', 10);
       var staggerDelays = [6000, 12000, 24000];
       var AUTO_DELAY = staggerDelays[cardIndex % staggerDelays.length];
@@ -624,7 +666,12 @@
       }, { passive: true });
 
       gallery.addEventListener('touchmove', function (e) {
-        if (Math.abs(e.touches[0].clientX - startX) > 10) moved = true;
+        if (Math.abs(e.touches[0].clientX - startX) > 10) {
+          moved = true;
+          /* A horizontal drag is a swipe, not a press — drop the card's
+             pressed appearance so it does not look tapped mid-swipe. */
+          if (card) card.classList.add('is-swiping');
+        }
       }, { passive: true });
 
       gallery.addEventListener('touchend', function (e) {
@@ -634,6 +681,12 @@
           gallery.dataset.swiped = '1';
           setTimeout(function () { gallery.dataset.swiped = '0'; }, 450);
         }
+        if (card) card.classList.remove('is-swiping');
+        restart();
+      }, { passive: true });
+
+      gallery.addEventListener('touchcancel', function () {
+        if (card) card.classList.remove('is-swiping');
         restart();
       }, { passive: true });
 
@@ -646,15 +699,26 @@
         }
       }, true);
 
+      var observer = null;
+
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (entries) {
+        observer = new IntersectionObserver(function (entries) {
           entries.forEach(function (entry) {
             entry.isIntersecting ? restart() : stop();
           });
-        }, { threshold: 0.15 }).observe(gallery);
+        }, { threshold: 0.15 });
+        observer.observe(gallery);
       } else {
         restart();
       }
+
+      galleryHandles.push({
+        gallery: gallery,
+        dispose: function () {
+          stop();
+          if (observer) observer.disconnect();
+        }
+      });
 
       dots.forEach(function (dot, i) {
         dot.addEventListener('click', function (e) {

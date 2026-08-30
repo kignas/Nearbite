@@ -82,6 +82,13 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
 }
 
+/* A swipe is not a press. Set by the gallery's touchmove handler. */
+.es-card.is-swiping,
+.es-card.is-swiping:active {
+  transform: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
+}
+
 .es-card:focus-visible {
   outline: 2px solid #F47B20;
   outline-offset: 2px;
@@ -168,13 +175,17 @@
   object-position: center center;
 }
 
-.es-gallery-slide[loading="lazy"] {
+/* Applies to every slide, not just the lazy ones. The first image is
+   eager and used to appear instantly while the rest faded — same photo
+   box either way, so the reveal should match. The 900ms animation is a
+   safety net for a load event that never arrives. */
+.es-gallery-slide {
   opacity: 0;
   transition: opacity .25s ease;
   animation: es-img-reveal-fallback 0s linear 900ms forwards;
 }
 
-.es-gallery-slide[loading="lazy"].loaded {
+.es-gallery-slide.loaded {
   opacity: 1;
   animation: none;
 }
@@ -401,7 +412,16 @@
   white-space: nowrap;
   box-shadow: 0 4px 10px rgba(244, 123, 32, .28),
               inset 0 1px 0 rgba(255, 255, 255, .28);
-  transition: filter .16s ease, box-shadow .16s ease;
+  transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+}
+
+/* Direct press on the button: slightly darker and compressed.
+   Colour, size, radius, shadow design and text are all unchanged. */
+.es-btn-order.is-pressed {
+  transform: scale(.96);
+  filter: brightness(.94);
+  box-shadow: 0 2px 5px rgba(244, 123, 32, .22),
+              inset 0 1px 0 rgba(255, 255, 255, .28);
 }
 
 .es-card:active .es-btn-order {
@@ -616,7 +636,18 @@
   .es-gallery-track,
   .es-gallery-dot,
   .es-gallery-slide,
+  .es-btn-order,
   .es-fav { transition: none !important; }
+
   .es-card-wrap,
   .es-fav.is-pressed { animation: none !important; opacity: 1 !important; }
+
+  /* Slides reveal instantly rather than fading, and never sit hidden. */
+  .es-gallery-slide { opacity: 1 !important; animation: none !important; }
+
+  /* Press feedback stays, as a colour change only — the interaction is
+     still confirmed, nothing moves. */
+  .es-card:active { transform: none; }
+  .es-btn-order.is-pressed { transform: none; }
+  .es-fav:active { transform: none; }
 }
