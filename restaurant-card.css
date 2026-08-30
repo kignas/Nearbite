@@ -97,16 +97,17 @@
   .rs-img { height: 0; padding-top: 60%; }
 }
 
-/* Soft scrim: gives the photo depth and keeps the dots legible
-   without a dark pill behind them. */
+/* Scrim, sized to its job. It exists to keep the dots legible, and the
+   dots sit 10px off the bottom — so it only needs to reach a little
+   past them. At 38% it was shading the lower third of every dish. */
 .es-card-media::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 38%;
-  background: linear-gradient(to top, rgba(9, 14, 26, .30), rgba(9, 14, 26, 0));
+  height: 24%;
+  background: linear-gradient(to top, rgba(9, 14, 26, .26), rgba(9, 14, 26, 0));
   pointer-events: none;
   z-index: 2;
 }
@@ -142,6 +143,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  /* Explicit, not inherited. Centre is the only safe generic crop:
+     no focal-point data exists for these images (see read.images —
+     it filters to plain URL strings), so any other value would be a
+     guess applied to every restaurant at once. If the API ever
+     returns a focal point per image, this is the single property
+     to drive from it. */
+  object-position: center center;
 }
 
 .es-gallery-slide[loading="lazy"] {
