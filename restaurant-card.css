@@ -34,7 +34,7 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
 }
 
-.rs-img   { height: 182px; border-radius: 0; margin: 0 0 12px; }
+.rs-img   { aspect-ratio: 5 / 3; height: auto; border-radius: 0; margin: 0 0 12px; }
 .rs-row   { display: flex; justify-content: space-between; align-items: flex-start; margin: 0 14px 6px; }
 .rs-name  { height: 19px; width: 58%; border-radius: 8px; }
 .rs-badge { height: 19px; width: 44px; border-radius: 7px; }
@@ -81,12 +81,20 @@
   border-radius: 0;
   background: #F1F3F7;
 
-  /* Clamped so every card lands in a 176–188px band at 360–430px.
-     No card can become dramatically taller than another. */
-  aspect-ratio: 16 / 9;
+  /* 5:3 — the ratio alone sets the height, so the photo scales with the
+     card and keeps real vertical presence. No clamp: a max-height was
+     what made it read short and stretched. Consistency across cards
+     comes from every card being the same width, not from a fixed px. */
+  aspect-ratio: 5 / 3;
   height: auto;
-  min-height: 176px;
-  max-height: 188px;
+}
+
+/* Legacy fallback only. The gallery is absolutely positioned, so
+   without aspect-ratio support the media would collapse to zero.
+   60% padding = 3/5, the same ratio. Modern browsers never hit this. */
+@supports not (aspect-ratio: 1 / 1) {
+  .es-card-media,
+  .rs-img { height: 0; padding-top: 60%; }
 }
 
 /* Soft scrim: gives the photo depth and keeps the dots legible
