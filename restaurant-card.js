@@ -228,6 +228,45 @@
     return km.toFixed(1) + ' km';
   }
 
+  /* ── Cuisine display formatting ─────────────────────────────────
+   * Presentation only. Never mutates the source data and is never used
+   * for filtering or sorting — read.cuisine() still returns the raw
+   * value so home.js keeps behaving exactly as before.
+   *
+   * "Momo.samosa biryani. Roll" -> "Momo • Samosa • Biryani • Roll"
+   */
+
+  var CUISINE_SPLIT = /\s*[|/•·,;]\s*|\s*\.\s*|\s+-\s+|\r?\n/;
+  var CUISINE_TRIM = /^[\s.,;|/•·-]+|[\s.,;|/•·-]+$/g;
+
+  function capitalizeToken(word) {
+    if (!word) return word;
+    // Leave intentional casing alone (BBQ, KFC, McDonald's).
+    if (word !== word.toLowerCase()) return word;
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+
+  function formatCuisineDisplay(raw) {
+    if (!raw) return '';
+
+    var parts = String(raw).split(CUISINE_SPLIT);
+    var seen = Object.create(null);
+    var out = [];
+
+    for (var i = 0; i < parts.length; i++) {
+      var token = parts[i].replace(CUISINE_TRIM, '').replace(/\s+/g, ' ');
+      if (!token) continue;
+
+      var key = token.toLowerCase();
+      if (seen[key]) continue;
+      seen[key] = true;
+
+      out.push(token.split(' ').map(capitalizeToken).join(' '));
+    }
+
+    return out.join(' \u2022 ');
+  }
+
   /* ── Availability ───────────────────────────────────────────── */
 
   function getAvailabilityStatus(res) {
@@ -332,10 +371,10 @@
         '</div>'
       : '<div class="es-img-placeholder"><i class="fa-solid fa-utensils"></i></div>';
 
-    var metaParts = [];
-    if (cuisine) metaParts.push(esc(cuisine));
-    if (distanceText) metaParts.push(esc(distanceText));
-    var subtitleHtml = metaParts.length ? metaParts.join(' &bull; ') : '';
+    var cuisineDisplay = formatCuisineDisplay(cuisine);
+    var subtitleHtml = '';
+    if (cuisineDisplay) subtitleHtml += '<span class="es-cuisine">' + esc(cuisineDisplay) + '</span>';
+    if (distanceText) subtitleHtml += '<span class="es-distance">' + esc(distanceText) + '</span>';
 
     var tagsHtml = '';
     if (nearFast) tagsHtml += '<span class="es-tag es-tag-near"><i class="fa-solid fa-bolt"></i> Near & Fast</span>';
@@ -347,7 +386,9 @@
       statsHtml += '<span class="es-stat es-stat-rating"><i class="fa-solid fa-star"></i> ' + esc(rating.toFixed(1)) + '</span>';
     }
     if (time) {
-      statsHtml += '<span class="es-stat es-stat-time">' + esc(time.text) + '</span>';
+      // Display only: 35-58 min -> 35–58 min. time.text itself is untouched.
+      var timeText = String(time.text).replace(/(\d)\s*-\s*(\d)/, '$1\u2013$2');
+      statsHtml += '<span class="es-stat es-stat-time">' + esc(timeText) + '</span>';
     }
     if (minOrder != null) {
       statsHtml += '<span class="es-stat es-stat-min">Min ₹' + esc(minOrder) + '</span>';

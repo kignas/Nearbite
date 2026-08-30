@@ -1,59 +1,97 @@
-Here is the complete, component-only upgrade for the restaurant cards. It strictly adheres to your locked layout, utilizes actual data fields exclusively, and improves the visual hierarchy to follow a modern, stacked layout without disrupting existing interactions.
-
-### 1. Files Changed
-*   `restaurant-card.css`
-*   `restaurant-card.js`
-
-No other files (such as `home.js` or `index.html`) were modified.
-
-### 2. `restaurant-card.css`
-```css
 /*
- * EatSwada — Restaurant Card Component Upgrade
- * Presentation only. Strictly scoped to .es-card elements and the skeleton.
- * Does not bleed into or modify the Header, Hero, or Filter areas.
+ * EatSwada — Restaurant Card (Phase 2.3 refinement)
+ * ------------------------------------------------------------------
+ * VISUAL REFINEMENT ONLY. This file is a full replacement for the
+ * previous restaurant-card.css.
+ *
+ * Scope: .es-card (+ children) and the .rs-* loading skeleton.
+ * Nothing here targets the header, location row, search bar, hero,
+ * "What's on your mind", categories, filter pills, bottom nav or help
+ * button. No layout rule reaches outside the card.
+ * ------------------------------------------------------------------
+ * Spacing scale used inside the card: 3 / 6 / 8 / 10 / 20
  */
 
-/* ── List skeleton (Must match standard layout spacing) ── */
-.rs-card  { margin: 0 18px 26px; }
-.rs-img   { height: 210px; border-radius: 20px; margin-bottom: 12px; }
+/* ── List skeleton — mirrors the real card's metrics so there is no
+      jump when the API resolves ─────────────────────────────────── */
+.rs-card  { margin: 0 18px 20px; }
+.rs-img   { height: 182px; border-radius: 18px; margin-bottom: 10px; }
 .rs-row   { display: flex; justify-content: space-between; align-items: flex-start; margin: 0 0 6px; }
-.rs-name  { height: 22px; width: 60%; border-radius: 8px; }
-.rs-badge { height: 22px; width: 46px; border-radius: 6px; }
-.rs-cuis  { height: 14px; width: 50%; border-radius: 6px; margin-bottom: 8px; }
-.rs-meta  { height: 12px; width: 70%; border-radius: 5px; }
+.rs-name  { height: 20px; width: 58%; border-radius: 8px; }
+.rs-badge { height: 20px; width: 44px; border-radius: 999px; }
+.rs-cuis  { height: 13px; width: 50%; border-radius: 6px; margin-bottom: 10px; }
+.rs-meta  { height: 12px; width: 66%; border-radius: 5px; }
 
-/* ── Card Shell ── */
+/* ── Card shell ─────────────────────────────────────────────────── */
 .es-card {
   display: flex;
   flex-direction: column;
-  margin: 0 18px 28px;
+  position: relative;
+  margin: 0 18px 20px;              /* was 28px bottom — tighter rhythm */
   background: transparent;
   text-decoration: none;
   color: inherit;
   -webkit-tap-highlight-color: transparent;
-  position: relative;
-  transition: transform 0.18s ease;
+  transition: transform .18s ease;
 }
 
 @media (min-width: 700px) {
   .es-card { margin-left: 24px; margin-right: 24px; }
 }
 
-.es-card:active {
-  transform: scale(0.98);
+/* Hairline between consecutive cards so the next card no longer
+   "starts abruptly". Sits in the gap, never inside the card. */
+.es-card + .es-card::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 2px;
+  right: 2px;
+  height: 1px;
+  background: #EFF2F6;
+  pointer-events: none;
 }
 
-/* ── Image Layer ── */
-.es-card-media {
-  height: 200px;
+.es-card:active { transform: scale(.985); }
+
+.es-card:focus-visible {
+  outline: 2px solid #159A62;
+  outline-offset: 3px;
   border-radius: 20px;
+}
+
+/* ── Image layer ────────────────────────────────────────────────── */
+.es-card-media {
   position: relative;
   overflow: hidden;
-  margin-bottom: 12px;
-  background: #F3F4F7;
-  box-shadow: 0 4px 14px rgba(15,23,42,0.06);
   isolation: isolate;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  background: #F1F3F7;
+
+  /* Balanced ratio instead of a flat 200px block. The min/max clamp
+     keeps every card within a 176–188px band at 360–430px, so card
+     heights stay consistent and nothing gets unnecessarily tall. */
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 176px;
+  max-height: 188px;
+
+  box-shadow: 0 6px 18px rgba(15, 23, 42, .09);
+}
+
+/* Bottom scrim: anchors the photo, keeps the dots legible and ties the
+   image to the text block below it. */
+.es-card-media::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44%;
+  background: linear-gradient(to top, rgba(9, 14, 26, .32), rgba(9, 14, 26, 0));
+  pointer-events: none;
+  z-index: 2;
 }
 
 .es-img-placeholder {
@@ -62,9 +100,9 @@ No other files (such as `home.js` or `index.html`) were modified.
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #EDF0F4 0%, #E2E7EE 100%);
+  background: linear-gradient(135deg, #EDF0F4 0%, #E1E6ED 100%);
   color: #B7BFCB;
-  font-size: 38px;
+  font-size: 34px;
 }
 
 .es-gallery {
@@ -78,7 +116,7 @@ No other files (such as `home.js` or `index.html`) were modified.
   display: flex;
   width: 100%;
   height: 100%;
-  transition: transform 0.38s cubic-bezier(0.25,1,0.5,1);
+  transition: transform .38s cubic-bezier(.25, 1, .5, 1);
 }
 
 .es-gallery-slide {
@@ -91,7 +129,7 @@ No other files (such as `home.js` or `index.html`) were modified.
 
 .es-gallery-slide[loading="lazy"] {
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity .25s ease;
   animation: es-img-reveal-fallback 0s linear 900ms forwards;
 }
 
@@ -99,160 +137,243 @@ No other files (such as `home.js` or `index.html`) were modified.
   opacity: 1;
   animation: none;
 }
+
 @keyframes es-img-reveal-fallback { to { opacity: 1; } }
 
+/* Dots: the scrim replaces the old dark pill, so they read cleaner. */
 .es-gallery-dots {
   position: absolute;
-  bottom: 10px;
+  bottom: 9px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 5px;
+  gap: 4px;
   z-index: 5;
-  background: rgba(0,0,0,0.25);
-  padding: 4px 8px;
-  border-radius: 12px;
-  backdrop-filter: blur(4px);
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  backdrop-filter: none;
 }
 
 .es-gallery-dot {
+  position: relative;
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.5);
-  transition: all 0.25s ease;
+  background: rgba(255, 255, 255, .55);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  transition: width .25s ease, background .25s ease;
+}
+
+/* Invisible hit area — same dot, easier to tap. Existing dot click
+   handler is unchanged; events still target the dot itself. */
+.es-gallery-dot::after {
+  content: '';
+  position: absolute;
+  inset: -10px -4px;
 }
 
 .es-gallery-dot.active {
-  width: 14px;
+  width: 13px;
   border-radius: 3px;
   background: #fff;
 }
 
-/* ── Content Area ── */
+/* ── Content area ───────────────────────────────────────────────── */
 .es-card-content {
   display: flex;
   flex-direction: column;
-  padding: 0 4px; /* Slight inset relative to image */
+  padding: 0 2px;                   /* was 4px — sits closer to the image */
+  min-width: 0;
 }
 
 .es-name {
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -.2px;
   color: #0F172A;
-  margin: 0 0 2px 0;
-  line-height: 1.25;
+  margin: 0 0 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Cuisine • distance. Cuisine shrinks and ellipsises; distance never
+   gets pushed out. */
 .es-subtitle {
-  font-size: 13.5px;
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  min-width: 0;
+  margin: 0 0 8px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #64748B;
-  margin-bottom: 10px;
+  line-height: 1.35;
+  color: #6B7788;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.es-cuisine {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.es-distance {
+  flex: 0 0 auto;
+  color: #8A94A6;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.es-cuisine + .es-distance::before {
+  content: '\2022';
+  margin: 0 6px;
+  color: #C7CEDA;
 }
 
 .es-subtitle i {
   font-size: 11px;
-  margin-right: 2px;
+  margin-right: 3px;
   color: #94A3B8;
 }
 
-/* ── Tags (Near & Fast, Offers, Coupons) ── */
+/* ── Status / offer tags ────────────────────────────────────────── */
 .es-tags-row {
   display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
   gap: 6px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
+  min-width: 0;
+  overflow: hidden;
+  margin: 0 0 10px;
 }
 
 .es-tag {
-  font-size: 11px;
-  font-weight: 800;
-  padding: 5px 9px;
-  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  min-width: 0;
   max-width: 100%;
+  padding: 4px 8px;                 /* compact — supports, doesn't dominate */
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.es-tag-near   { background: #ECFDF3; color: #16A34A; }
-.es-tag-offer  { background: #FEFCE8; color: #D97706; }
-.es-tag-coupon { background: #EEF2FF; color: #4F46E5; }
+.es-tag i { font-size: 9px; }
 
-/* ── Stats & Order CTA ── */
+.es-tag-near   { background: #E7F6EE; color: #0E7C4C; flex: 0 0 auto; }
+.es-tag-offer  { background: #FFF5E3; color: #B45309; flex: 0 1 auto; }
+.es-tag-coupon { background: #EEF1FF; color: #4338CA; flex: 0 1 auto; }
+
+/* ── Metadata row + primary CTA ─────────────────────────────────── */
 .es-bottom-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-top: 2px;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  margin-top: 0;
 }
 
 .es-stats {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 13.5px;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  gap: 7px;
+  font-size: 12.5px;
   font-weight: 700;
-  color: #334155;
-  flex-wrap: wrap;
+  color: #3A4657;
 }
 
 .es-stat {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  flex: 0 0 auto;
+  gap: 4px;
   white-space: nowrap;
 }
 
-.es-stat-rating { color: #16A34A; }
-.es-stat i { font-size: 11px; }
+/* Scannable "★ 4.0 • 35–58 min • Min ₹200" — separators are drawn by
+   CSS, so a missing value simply drops its bullet with it. */
+.es-stat + .es-stat::before {
+  content: '\2022';
+  margin-right: 7px;
+  color: #C7CEDA;
+  font-weight: 700;
+}
+
+.es-stat i { font-size: 10px; }
+
+.es-stat-rating { color: #0E7C4C; }
+.es-stat-rating i { color: #16A34A; }
 
 .es-btn-order {
-  background: #FFF3E8;
-  color: #EA580C;
-  border: 1px solid #FFDDC1;
-  padding: 7px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 18px;
+  border: 0;
   border-radius: 12px;
+  background: linear-gradient(180deg, #FB8C3C 0%, #F26F1F 100%);
+  color: #fff;
   font-size: 13px;
   font-weight: 800;
+  letter-spacing: .2px;
   white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.2s;
+  box-shadow: 0 4px 12px rgba(242, 111, 31, .26);
+  transition: filter .16s ease, box-shadow .16s ease;
 }
 
 .es-card:active .es-btn-order {
-  background: #FFE4CC;
+  filter: brightness(.95);
+  box-shadow: 0 2px 6px rgba(242, 111, 31, .22);
 }
 
-/* ── Unavailable State ── */
+/* Narrow phones (360 / 375 / 384). Buys ~28px of headroom in the
+   bottom row so a long delivery range + "View Menu" still can't
+   collide with or clip against the CTA. */
+@media (max-width: 384px) {
+  .es-stats { font-size: 11.5px; gap: 6px; }
+  .es-stat + .es-stat::before { margin-right: 6px; }
+  .es-subtitle { font-size: 12px; }
+  .es-btn-order { padding: 0 14px; font-size: 12.5px; }
+}
+
+/* ── Unavailable state ──────────────────────────────────────────── */
 .es-card.is-unavailable .es-card-media {
-  filter: grayscale(1) contrast(0.95);
-  opacity: 0.6;
+  filter: grayscale(1) contrast(.95);
+  opacity: .6;
 }
 
 .es-card.is-unavailable .es-name,
 .es-card.is-unavailable .es-subtitle,
+.es-card.is-unavailable .es-tags-row,
 .es-card.is-unavailable .es-bottom-row {
-  opacity: 0.55;
+  opacity: .55;
 }
 
 .es-card.is-unavailable .es-btn-order {
-  background: #F1F5F9;
-  color: #64748B;
-  border-color: #E2E8F0;
+  background: #EEF1F5;
+  color: #6B7788;
+  box-shadow: none;
 }
 
 .es-availability-overlay {
@@ -262,46 +383,55 @@ No other files (such as `home.js` or `index.html`) were modified.
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.15);
+  background: rgba(0, 0, 0, .15);
 }
 
 .es-availability-pill {
-  background: rgba(255,255,255,0.95);
-  color: #1E293B;
-  font-size: 13px;
-  font-weight: 800;
-  padding: 8px 16px;
-  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .95);
+  color: #1E293B;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
 }
 
 .es-availability-pill i { color: #E23744; }
 
-/* ── Toast ── */
+/* ── Toast ──────────────────────────────────────────────────────── */
 #es-availability-toast {
   position: fixed;
   left: 50%;
   bottom: 96px;
   transform: translate(-50%, 10px);
-  background: rgba(30,41,59,0.95);
+  max-width: 82%;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: rgba(30, 41, 59, .95);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
-  padding: 12px 20px;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
   opacity: 0;
   pointer-events: none;
   z-index: 999;
-  max-width: 82%;
-  text-align: center;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity .3s ease, transform .3s ease;
 }
 
 #es-availability-toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* ── Motion preference ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .es-card,
+  .es-btn-order,
+  .es-gallery-track,
+  .es-gallery-dot,
+  .es-gallery-slide { transition: none !important; }
 }
