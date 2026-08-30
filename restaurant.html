@@ -19,21 +19,47 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
+      /* Action colour. The Home page Order CTA is orange, so the menu ADD
+         stays orange for cross-page consistency. To follow the brief's
+         "green as the main action colour" instead, change --action and
+         --action-dark to #159A62 / #0E7C4C — nothing else needs editing. */
+      --action:      #FC8019;
+      --action-dark: #E0700F;
+      --action-soft: #FFF4EA;
+      --action-line: #FFD9B8;
+
       --brand:       #FC8019;
       --brand-light: #fff4ea;
       --brand-dark:  #e0700f;
-      --green:       #1ba672;
-      --red:         #e63946;
-      --bg:          #f4f4f6;
-      --card:        #ffffff;
-      --text-1:      #111111;
-      --text-2:      #555555;
-      --text-3:      #aaaaaa;
-      --border:      #f0f0f2;
-      --shadow-sm:   0 1px 4px rgba(0,0,0,0.06);
-      --shadow-md:   0 4px 20px rgba(0,0,0,0.08);
+
+      /* Positive / veg signals. */
+      --green:       #159A62;
+      --green-soft:  #E7F6EE;
+      --green-line:  #C4E9D6;
+      --red:         #E23744;
+      --red-soft:    #FEF2F2;
+
+      --bg:          #F5F6F8;
+      --card:        #FFFFFF;
+      --text-1:      #101828;
+      --text-2:      #4A5567;
+      --text-3:      #98A2B3;
+      --border:      #EFF1F5;
+      --line-soft:   #F2F4F7;
+
+      --shadow-sm:   0 1px 2px rgba(16,24,40,.04);
+      --shadow-md:   0 1px 2px rgba(16,24,40,.04), 0 6px 16px rgba(16,24,40,.05);
+      --shadow-lg:   0 8px 28px rgba(16,24,40,.10);
       --ease:        cubic-bezier(0.25, 1, 0.5, 1);
+
+      /* Single source of truth for the food image box. The skeleton uses
+         the same token, so skeleton and loaded item cannot drift. */
+      --item-img:    128px;
+      --gutter:      14px;
     }
+
+    @media (max-width: 374px) { :root { --item-img: 112px; --gutter: 12px; } }
+    @media (min-width: 412px) { :root { --item-img: 136px; } }
 
     body {
       background: var(--bg);
@@ -65,60 +91,86 @@
     .top-actions { display: flex; gap: 10px; }
 
     .res-card {
-      margin: 14px 14px 0; background: var(--card);
-      border-radius: 20px; overflow: hidden;
-      box-shadow: var(--shadow-md); border: 1px solid rgba(0,0,0,0.04);
+      margin: var(--gutter) var(--gutter) 0;
+      background: var(--card);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
     }
-    .res-card-body { padding: 18px 18px 0; }
+    .res-card-body { padding: 16px 16px 0; }
     .res-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-    .res-name { font-size: 21px; font-weight: 900; color: var(--text-1); line-height: 1.2; }
-    .res-cuisine { font-size: 12px; color: var(--text-3); font-weight: 600; margin-top: 3px; }
+    .res-name {
+      font-size: 22px; font-weight: 800; color: var(--text-1);
+      line-height: 1.18; letter-spacing: -.5px;
+    }
+    .res-cuisine {
+      font-size: 12.5px; color: var(--text-3); font-weight: 500;
+      margin-top: 5px; line-height: 1.4;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
 
     .heart-btn {
       width: 36px; height: 36px; border-radius: 50%;
-      border: 1.5px solid #f0f0f0; background: #fafafa;
+      border: 1px solid var(--border); background: #FAFBFC;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; cursor: pointer; transition: transform 0.2s var(--ease);
+      flex-shrink: 0; cursor: pointer; transition: transform .18s var(--ease);
     }
-    .heart-btn:active { transform: scale(0.85); }
-    .heart-btn.loved { border-color: #ffd6d6; background: #fff0f0; }
+    .heart-btn:active { transform: scale(.88); }
+    .heart-btn.loved { border-color: #FFD6D6; background: var(--red-soft); }
     .heart-btn.loved i { color: var(--red) !important; }
-    .heart-btn i { font-size: 14px; color: #ccc; transition: color 0.2s; }
+    .heart-btn i { font-size: 14px; color: #CBD2DC; transition: color .2s; }
 
-    .res-meta-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    /* Rating leads the row as a solid chip; everything else is neutral. */
+    .res-meta-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 13px; flex-wrap: wrap;
+    }
     .rating-pill {
       display: inline-flex; align-items: center; gap: 5px;
-      background: var(--card); border: 1.5px solid #e8e8e8;
-      border-radius: 10px; padding: 4px 10px; box-shadow: var(--shadow-sm);
+      background: var(--green); border: 0;
+      border-radius: 8px; padding: 5px 9px; box-shadow: none;
     }
-    .rating-star { color: var(--green); font-size: 11px; }
-    .rating-num { font-size: 13px; font-weight: 800; color: var(--text-1); }
-    .rating-divider { width: 1px; height: 12px; background: #e2e2e2; }
-    .rating-count { font-size: 11px; font-weight: 600; color: var(--text-3); }
-    .meta-chip { font-size: 12px; font-weight: 700; color: var(--text-2); display: flex; align-items: center; gap: 5px; }
-    .meta-chip i { color: var(--brand); font-size: 11px; }
-    .meta-dot { color: #ddd; }
+    .rating-star { color: #fff; font-size: 10px; }
+    .rating-num { font-size: 12.5px; font-weight: 800; color: #fff; letter-spacing: .1px; }
+    .rating-divider { width: 1px; height: 11px; background: rgba(255,255,255,.4); }
+    .rating-count { font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,.9); }
+    .meta-chip {
+      font-size: 12.5px; font-weight: 600; color: var(--text-2);
+      display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    }
+    .meta-chip i { color: var(--text-3); font-size: 11px; }
+    .meta-dot { color: #D5DBE4; font-weight: 700; }
 
     .offer-strip {
-      margin: 14px 0 0; padding: 11px 14px;
-      background: #fff9f2; border-radius: 14px;
-      border: 1.5px solid #ffe5cc; display: none; align-items: center; gap: 10px;
+      margin: 13px 0 0; padding: 10px 12px;
+      background: var(--action-soft); border-radius: 12px;
+      border: 1px solid var(--action-line);
+      display: none; align-items: center; gap: 10px;
     }
     .offer-icon {
-      width: 30px; height: 30px; background: var(--brand); border-radius: 9px;
+      width: 28px; height: 28px; background: var(--action); border-radius: 8px;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .offer-icon i { font-size: 13px; color: #fff; }
-    .offer-text { font-size: 12px; font-weight: 800; color: #b85e00; }
+    .offer-icon i { font-size: 12px; color: #fff; }
+    .offer-text {
+      font-size: 12px; font-weight: 800; color: #B45309; line-height: 1.35;
+      min-width: 0; overflow: hidden; text-overflow: ellipsis;
+    }
 
     .delivery-strip {
-      padding: 12px 18px; margin-top: 14px; border-top: 1.5px dashed #f2f2f2;
-      display: flex; align-items: center; gap: 14px;
+      padding: 11px 16px; margin-top: 14px;
+      border-top: 1px solid var(--line-soft);
+      background: #FCFCFD;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
     }
-    .del-chip { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #777; }
-    .del-chip .orange { color: var(--brand); }
-    .del-chip .blue { color: #60a5fa; }
-    .del-sep { width: 1px; height: 14px; background: #eee; }
+    .del-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11.5px; font-weight: 700; color: var(--text-2);
+    }
+    .del-chip .orange { color: var(--action); }
+    .del-chip .blue { color: #60A5FA; }
+    .del-sep { width: 1px; height: 13px; background: var(--border); }
 
     /* ============================================================
        STICKY CATEGORY NAV & FILTERS
@@ -126,70 +178,277 @@
     .cat-nav-sentinel { height: 1px; margin: 0; padding: 0; }
     .cat-nav {
       position: fixed; top: 62px; left: 0; right: 0; z-index: 150;
-      background: rgba(255,255,255,0.98); backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border); box-shadow: 0 3px 14px rgba(0,0,0,0.07);
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(16,24,40,.06);
       transform: translateY(-110%); opacity: 0; pointer-events: none;
-      transition: transform 0.3s var(--ease), opacity 0.25s ease;
+      transition: transform .3s var(--ease), opacity .25s ease;
     }
     .cat-nav.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
     .cat-nav-inner {
-      display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 10px 14px; scrollbar-width: none;
+      display: flex; align-items: center; gap: 8px;
+      overflow-x: auto; padding: 10px var(--gutter);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      scroll-snap-type: x proximity;
+      overscroll-behavior-x: contain;
     }
     .cat-nav-inner::-webkit-scrollbar { display: none; }
     .cat-nav-pill {
-      flex-shrink: 0; padding: 6px 16px; border-radius: 20px;
-      font-size: 12px; font-weight: 700; color: var(--text-2); background: #f5f5f5;
-      cursor: pointer; white-space: nowrap; transition: all 0.18s var(--ease);
+      flex-shrink: 0; scroll-snap-align: center;
+      padding: 8px 15px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 700; letter-spacing: -.1px;
+      color: var(--text-2); background: #F2F4F7;
+      border: 1px solid transparent;
+      cursor: pointer; white-space: nowrap;
+      transition: background .18s var(--ease), color .18s var(--ease),
+                  border-color .18s var(--ease), transform .12s var(--ease);
     }
-    .cat-nav-pill.active { background: var(--brand-light); color: var(--brand); }
+    .cat-nav-pill:active { transform: scale(.95); }
+    .cat-nav-pill.active {
+      background: var(--text-1); color: #fff; border-color: var(--text-1);
+    }
 
     .filter-bar {
-      margin: 12px 14px 0; display: flex; align-items: center; justify-content: space-between;
-      background: var(--card); border-radius: 16px; padding: 10px 16px;
+      margin: 12px var(--gutter) 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: var(--card); border-radius: 16px; padding: 10px 14px;
       box-shadow: var(--shadow-sm); border: 1px solid var(--border);
     }
-    .filter-label { font-size: 13px; font-weight: 800; color: var(--text-1); }
-    .veg-toggle-row { display: flex; align-items: center; gap: 10px; }
-    .veg-chip {
-      display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; cursor: pointer; border: 1.5px solid transparent; transition: all 0.18s var(--ease);
+    .filter-label {
+      font-size: 11px; font-weight: 800; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: .1em;
     }
+    .veg-toggle-row { display: flex; align-items: center; gap: 8px; }
+    .veg-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 13px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 800; cursor: pointer;
+      border: 1px solid transparent; user-select: none;
+      transition: background .18s var(--ease), color .18s var(--ease),
+                  border-color .18s var(--ease), transform .12s var(--ease);
+    }
+    .veg-chip:active { transform: scale(.95); }
     .veg-dot-icon {
-      width: 10px; height: 10px; border-radius: 2px; border: 1.5px solid;
-      display: flex; align-items: center; justify-content: center;
+      width: 11px; height: 11px; border-radius: 3px; border: 1.5px solid;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .veg-dot-icon::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-    .veg-chip.veg-type { color: var(--green); border-color: #d4edda; background: #f0faf5; }
+    .veg-chip.veg-type { color: var(--green); border-color: var(--green-line); background: var(--green-soft); }
     .veg-chip.veg-type.active { background: var(--green); color: #fff; border-color: var(--green); }
-    .veg-chip.nonveg-type { color: var(--red); border-color: #fdd; background: #fff5f5; }
+    .veg-chip.nonveg-type { color: var(--red); border-color: #FBD5D5; background: var(--red-soft); }
     .veg-chip.nonveg-type.active { background: var(--red); color: #fff; border-color: var(--red); }
 
     /* ============================================================
        MENU SECTION
     ============================================================ */
-    .menu-section { padding: 0 14px; margin-top: 22px; }
-    .menu-cat-group { margin-bottom: 8px; }
+    .menu-section { padding: 0 var(--gutter); margin-top: 20px; }
+    .menu-cat-group { margin-bottom: 4px; }
+
     .menu-cat-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 0 10px; cursor: pointer; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 18px 0 12px; cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      user-select: none;
     }
-    .menu-cat-title { font-size: 16px; font-weight: 900; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
-    .menu-cat-count { font-size: 13px; font-weight: 700; color: var(--text-3); }
-    .menu-cat-chevron { font-size: 12px; color: var(--text-3); transition: transform 0.25s; }
+    .menu-cat-title {
+      font-size: 16.5px; font-weight: 800; color: var(--text-1);
+      letter-spacing: -.35px; display: flex; align-items: baseline; gap: 7px;
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .menu-cat-count {
+      font-size: 12.5px; font-weight: 700; color: var(--text-3);
+      flex-shrink: 0;
+    }
+    .menu-cat-chevron {
+      font-size: 11px; color: var(--text-3); flex-shrink: 0;
+      transition: transform .25s var(--ease);
+    }
     .menu-cat-header.collapsed .menu-cat-chevron { transform: rotate(-90deg); }
-    .menu-cat-items { overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s; max-height: 9999px; opacity: 1; }
+    .menu-cat-items { overflow: hidden; transition: max-height .35s ease, opacity .3s; max-height: 9999px; opacity: 1; }
     .menu-cat-items.collapsed { max-height: 0; opacity: 0; }
     .hidden-by-filter { display: none !important; }
 
-    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-    /* Skeleton Loader */
-    .skel-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 24px 0; border-bottom: 1px dashed #e2e8f0; gap: 14px; }
-    .skel-left { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+    /* ============================================================
+       MENU ITEM SYSTEM  (Phase 3.0)
+       NOTE: these components are also styled in style.css, which was not
+       supplied. Every layout-critical property is declared explicitly so
+       an unseen rule cannot half-apply. These rules should eventually be
+       moved into style.css so there is one source of truth.
+    ============================================================ */
+    .menu-section .nb-menu-item {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: var(--gutter);
+      padding: 18px 0; margin: 0;
+      border: 0; border-bottom: 1px solid var(--line-soft);
+      background: transparent;
+      animation: fadeSlideUp .32s var(--ease) forwards; opacity: 0;
+    }
+    .menu-section .menu-cat-group .nb-menu-item:last-child { border-bottom: 0; }
 
-    .empty-filter-msg { text-align: center; padding: 48px 24px; display: none; }
-    .empty-filter-msg i { font-size: 40px; color: #e0e0e0; display: block; margin-bottom: 12px; }
-    .empty-filter-msg p { font-size: 14px; font-weight: 700; color: #aaa; }
+    .menu-section .nb-item-main {
+      flex: 1 1 auto; min-width: 0;
+      display: flex; flex-direction: column; align-items: flex-start;
+      padding: 0; margin: 0;
+    }
+
+    .menu-section .nb-item-tag-row {
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      margin: 0 0 7px; min-height: 14px;
+    }
+
+    .menu-section .nb-item-title {
+      font-size: 15px; font-weight: 700; color: var(--text-1);
+      line-height: 1.32; letter-spacing: -.2px;
+      margin: 0 0 6px; padding: 0;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .menu-section .nb-item-price-row {
+      display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
+      margin: 0 0 7px;
+    }
+    .menu-section .nb-item-current-price {
+      font-size: 14.5px; font-weight: 800; color: var(--text-1); letter-spacing: -.2px;
+    }
+    .menu-section .nb-item-original-price {
+      font-size: 12.5px; font-weight: 600; color: var(--text-3);
+      text-decoration: line-through;
+    }
+    .menu-section .nb-item-discount {
+      font-size: 10px; font-weight: 800; letter-spacing: .3px;
+      color: var(--green); background: var(--green-soft);
+      padding: 3px 6px; border-radius: 5px;
+    }
+
+    .menu-section .nb-item-desc {
+      font-size: 12.5px; font-weight: 400; color: var(--text-2);
+      line-height: 1.5; margin: 0; padding: 0;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ── Food image: one square box for every item ── */
+    .menu-section .nb-item-media {
+      flex: 0 0 var(--item-img);
+      width: var(--item-img);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0; margin: 0;
+    }
+
+    .menu-section .nb-item-image-wrap {
+      position: relative;
+      width: 100%; height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 16px; overflow: hidden;
+      background: #F1F3F7;
+      box-shadow: var(--shadow-sm);
+      flex: none;
+    }
+
+    .menu-section .nb-item-image {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center center;
+      display: block; border-radius: 0;
+    }
+    .menu-section .nb-item-image.is-unavailable { filter: grayscale(1); opacity: .55; }
+
+    .menu-section .nb-item-image-placeholder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg,#EDF0F4,#E2E7EE);
+      color: #B7BFCB; font-size: 26px;
+    }
+
+    .menu-section .nb-item-overlay {
+      position: absolute; inset: 0; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(16,24,40,.52);
+      color: #fff; font-size: 11px; font-weight: 800;
+      text-align: center; padding: 6px; line-height: 1.3;
+    }
+
+    /* CTA overlaps the image edge — connected to the food, clear of it. */
+    .menu-section .nb-item-cta {
+      position: relative; z-index: 3;
+      width: 100%; margin: -18px 0 0;
+      display: flex; justify-content: center;
+    }
+
+    .menu-section .nb-item-customisable {
+      font-size: 10px; font-weight: 700; color: var(--text-3);
+      text-align: center; margin-top: 7px; letter-spacing: .1px;
+    }
+    .menu-section .nb-item-customisable-spacer { min-height: 15px; }
+
+    /* ── ADD button / quantity stepper ── */
+    .nb-add-btn {
+      width: 104px; height: 38px;
+      display: block; margin: 0 auto;
+      background: #fff; border: 1px solid var(--action-line);
+      border-radius: 12px;
+      color: var(--action); font-family: inherit;
+      font-size: 14px; font-weight: 800; letter-spacing: .3px;
+      box-shadow: 0 4px 12px rgba(16,24,40,.10);
+      cursor: pointer;
+      transition: transform .14s var(--ease), box-shadow .14s var(--ease), filter .14s var(--ease);
+    }
+    .nb-add-btn:active { transform: scale(.95); box-shadow: 0 2px 6px rgba(16,24,40,.10); }
+    .nb-add-btn:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+    .nb-add-btn.is-disabled {
+      background: #F2F4F7; border-color: var(--border); color: var(--text-3);
+      box-shadow: none; cursor: not-allowed; font-size: 12px;
+    }
+    .nb-add-btn.is-disabled:active { transform: none; }
+
+    .nb-qty {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 104px; height: 38px; margin: 0 auto;
+      background: #fff; border: 1px solid var(--action);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 12px rgba(252,128,25,.16);
+    }
+    .nb-qty.is-disabled { border-color: var(--border); box-shadow: none; }
+    .nb-qty-btn {
+      width: 34px; height: 100%; border: 0; background: transparent;
+      color: var(--action); font-family: inherit; font-weight: 900; font-size: 17px;
+      line-height: 1; cursor: pointer;
+      transition: background .14s var(--ease);
+    }
+    .nb-qty-btn:active { background: var(--action-soft); }
+    .nb-qty-btn.is-disabled { color: #CBD5E1; cursor: not-allowed; }
+    .nb-qty-btn.is-disabled:active { background: transparent; }
+    .nb-qty-val {
+      font-size: 14px; font-weight: 800; color: var(--action);
+      min-width: 22px; text-align: center;
+    }
+    .nb-qty.is-disabled .nb-qty-val { color: var(--text-3); }
+
+    /* ── Skeleton: same tokens as the real item, so no layout shift ── */
+    .skeleton {
+      background: linear-gradient(90deg,#EEF0F3 25%,#F7F8FA 50%,#EEF0F3 75%);
+      background-size: 300px 100%;
+      animation: nbShimmer 1.2s linear infinite;
+      border-radius: 8px;
+    }
+    @keyframes nbShimmer { to { background-position: 300px 0; } }
+
+    .skel-item {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 18px 0; border-bottom: 1px solid var(--line-soft); gap: var(--gutter);
+    }
+    .skel-left { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+    .skel-media { flex: 0 0 var(--item-img); width: var(--item-img); }
+    .skel-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 16px; }
+
+    .empty-filter-msg { text-align: center; padding: 52px 24px; display: none; }
+    .empty-filter-msg i { font-size: 34px; color: #D5DBE4; display: block; margin-bottom: 14px; }
+    .empty-filter-msg p { font-size: 13.5px; font-weight: 700; color: var(--text-3); }
     
     /* ============================================================
        WARNING CARDS
@@ -261,20 +520,24 @@
     }
 
     /* ── States and API-driven item chrome (Phase 1.1) ── */
-    .menu-state { text-align: center; padding: 56px 20px 64px; }
-    .menu-state i { font-size: 40px; color: #d7dbe2; display: block; margin-bottom: 14px; }
-    .menu-state-title { font-size: 16px; font-weight: 800; color: #303845; margin: 0 0 6px; }
-    .menu-state-sub { font-size: 13px; font-weight: 500; color: #6b7280; margin: 0 0 18px; line-height: 1.5; }
+    .menu-state { text-align: center; padding: 52px 22px 60px; }
+    .menu-state i { font-size: 34px; color: #D5DBE4; display: block; margin-bottom: 16px; }
+    .menu-state-title { font-size: 16px; font-weight: 800; color: var(--text-1); margin: 0 0 6px; letter-spacing: -.3px; }
+    .menu-state-sub { font-size: 13px; font-weight: 500; color: var(--text-2); margin: 0 0 20px; line-height: 1.5; }
     .menu-state-btn {
-      background: #FC8019; color: #fff; border: none; padding: 12px 26px;
-      border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+      background: var(--action); color: #fff; border: none; padding: 12px 26px;
+      border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 4px 12px rgba(252,128,25,.24);
+      transition: transform .14s var(--ease), filter .14s var(--ease);
     }
-    .menu-state-btn:disabled { opacity: .6; cursor: default; }
+    .menu-state-btn:active { transform: scale(.96); filter: brightness(.96); }
+    .menu-state-btn:disabled { opacity: .6; cursor: default; transform: none; }
 
     .nb-item-badge {
-      color: #d97706; font-size: 10px; font-weight: 800; background: #fef3c7;
-      padding: 3px 6px; border-radius: 4px; width: max-content; margin-bottom: 6px;
-      display: inline-block;
+      color: #B45309; font-size: 10px; font-weight: 800; letter-spacing: .3px;
+      background: #FFF5E3; border: 1px solid #FCE7C4;
+      padding: 3px 7px; border-radius: 6px; width: max-content;
+      margin: 0; display: inline-flex; align-items: center; line-height: 1.4;
     }
 
     .nb-veg-mark {
@@ -291,7 +554,27 @@
 
     .nb-item-image-wrap.no-image { background: linear-gradient(135deg,#edf0f4,#e2e7ee); }
 
-    .nb-item-coupon{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;background:#EEF2FF;color:#4F46E5;font-family:var(--font-micro);font-size:10px;font-weight:800;line-height:1.2;}
+    .nb-item-coupon{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;background:#EEF1FF;color:#4338CA;border:1px solid #DDE3FF;font-family:var(--font-micro);font-size:10px;font-weight:800;letter-spacing:.2px;line-height:1.4;}
+
+    /* ============================================================
+       REDUCED MOTION
+    ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      .res-card, .delivery-strip, .filter-bar, .menu-section,
+      .closed-warning-card, .menu-section .nb-menu-item {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .skeleton { animation: none !important; background: #EEF0F3; }
+      .cat-nav, .cat-nav-pill, .veg-chip, .nb-add-btn, .nb-qty-btn,
+      .menu-state-btn, .icon-btn, .heart-btn, .menu-cat-chevron,
+      .menu-cat-items { transition: none !important; }
+      .cat-nav-inner { scroll-behavior: auto; }
+      .nb-add-btn:active, .nb-qty-btn:active, .veg-chip:active,
+      .cat-nav-pill:active, .icon-btn:active, .heart-btn:active,
+      .menu-state-btn:active { transform: none; }
+    }
 </style>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -348,24 +631,24 @@
 
   <div class="menu-section">
     <div id="menu-skeleton">
-      <div style="height:20px;width:130px;border-radius:8px;margin-bottom:18px;" class="skeleton"></div>
+      <div class="skeleton" style="height:20px;width:130px;margin-bottom:16px;"></div>
       <div class="skel-item">
         <div class="skel-left">
-          <div class="skeleton" style="height:14px;width:36px;border-radius:4px;"></div>
-          <div class="skeleton" style="height:18px;width:58%;"></div>
-          <div class="skeleton" style="height:16px;width:42px;"></div>
-          <div class="skeleton" style="height:12px;width:90%;"></div>
+          <div class="skeleton" style="height:14px;width:56px;border-radius:6px;"></div>
+          <div class="skeleton" style="height:16px;width:62%;"></div>
+          <div class="skeleton" style="height:15px;width:52px;"></div>
+          <div class="skeleton" style="height:12px;width:92%;"></div>
         </div>
-        <div class="skeleton" style="width:130px;height:130px;border-radius:18px;flex-shrink:0;"></div>
+        <div class="skel-media"><div class="skeleton skel-img"></div></div>
       </div>
       <div class="skel-item">
         <div class="skel-left">
-          <div class="skeleton" style="height:14px;width:36px;border-radius:4px;"></div>
-          <div class="skeleton" style="height:18px;width:50%;"></div>
-          <div class="skeleton" style="height:16px;width:42px;"></div>
-          <div class="skeleton" style="height:12px;width:80%;"></div>
+          <div class="skeleton" style="height:14px;width:56px;border-radius:6px;"></div>
+          <div class="skeleton" style="height:16px;width:48%;"></div>
+          <div class="skeleton" style="height:15px;width:52px;"></div>
+          <div class="skeleton" style="height:12px;width:78%;"></div>
         </div>
-        <div class="skeleton" style="width:130px;height:130px;border-radius:18px;flex-shrink:0;"></div>
+        <div class="skel-media"><div class="skeleton skel-img"></div></div>
       </div>
     </div>
 
@@ -475,25 +758,25 @@
       // Disables adding if unavailable. Allows removing if the restaurant is OPEN but the item is out of stock.
       // If the restaurant is CLOSED, all changes (add and remove) are disabled.
       const plusBtn = !isItemAvailable
-        ? `<button onclick="notifyItemUnavailable()" style="width:32px;height:100%;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:16px;cursor:not-allowed;">+</button>`
-        : `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">+</button>`;
+        ? `<button class="nb-qty-btn is-disabled" onclick="notifyItemUnavailable()" aria-label="Item unavailable">+</button>`
+        : `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" class="nb-qty-btn" aria-label="Increase quantity">+</button>`;
       
       const minusBtn = !isRestaurantOpen
-        ? `<button onclick="notifyItemUnavailable()" style="width:32px;height:100%;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:18px;cursor:not-allowed;">−</button>`
-        : `<button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" style="width:32px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:18px;cursor:pointer;">−</button>`;
+        ? `<button class="nb-qty-btn is-disabled" onclick="notifyItemUnavailable()" aria-label="Item unavailable">−</button>`
+        : `<button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" class="nb-qty-btn" aria-label="Decrease quantity">−</button>`;
 
       return `
-        <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid ${!isItemAvailable ? '#e2e8f0' : '#FC8019'};border-radius:10px;width:100px;height:36px;overflow:hidden;box-shadow:0 4px 12px rgba(252,128,25,0.15); margin: 0 auto;">
+        <div class="nb-qty${!isItemAvailable ? ' is-disabled' : ''}" role="group" aria-label="Quantity">
            ${minusBtn}
-           <span style="font-size:14px;font-weight:800;color:${!isItemAvailable ? '#94a3b8' : '#FC8019'};">${qty}</span>
+           <span class="nb-qty-val">${qty}</span>
            ${plusBtn}
          </div>`;
     }
 
     if (!isItemAvailable) {
-      return `<button disabled style="width:100px;height:36px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;color:#94a3b8;font-weight:800;font-size:12px;cursor:not-allowed; margin: 0 auto; display: block;">Unavailable</button>`;
+      return `<button class="nb-add-btn is-disabled" disabled>Unavailable</button>`;
     }
-    return `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" style="width:100px;height:36px;background:#fff;border:1px solid #f9ded0;border-radius:10px;color:#FC8019;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06);cursor:pointer; margin: 0 auto; display: block;">ADD</button>`;
+    return `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" class="nb-add-btn" aria-label="Add ${safeName} to cart">ADD</button>`;
   };
 
   function notifyItemUnavailable() {
