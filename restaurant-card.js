@@ -394,14 +394,35 @@
       statsHtml += '<span class="es-stat es-stat-min">Min ₹' + esc(minOrder) + '</span>';
     }
 
-    return '<a href="restaurant.html?id=' + encodeURIComponent(id) +
-      '" class="es-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
-      ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '"' +
+    /* Pure Veg is the only badge the card does not already show elsewhere
+       and that the data can genuinely support. See the phase report. */
+    var badgeHtml = read.pureVeg(res) === true
+      ? '<span class="es-media-badge"><i class="fa-solid fa-leaf"></i>Pure Veg</span>'
+      : '';
+
+    var isFav = !!(window.Favorites && window.Favorites.isFavorite(id));
+    var favHtml =
+      '<button type="button" class="es-fav' + (isFav ? ' is-active' : '') + '"' +
+        ' data-fav-id="' + esc(id) + '"' +
+        ' aria-pressed="' + (isFav ? 'true' : 'false') + '"' +
+        ' aria-label="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' +
+        '<i class="' + (isFav ? 'fa-solid' : 'fa-regular') + ' fa-heart" aria-hidden="true"></i>' +
+      '</button>';
+
+    /* The heart is a sibling of the <a>, not a child: interactive content
+       cannot legally nest inside a link, and keeping them separate means
+       no click on the heart can ever reach the card's navigation. */
+    return '<div class="es-card-wrap"' +
       ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
       's; opacity:0;">' +
 
+      '<a href="restaurant.html?id=' + encodeURIComponent(id) +
+      '" class="es-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
+      ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '">' +
+
       '<div class="es-card-media">' +
         media +
+        badgeHtml +
         (isUnavailable
           ? '<div class="es-availability-overlay"><div class="es-availability-pill">' +
             '<i class="fa-regular fa-clock"></i> ' + esc(label) + '</div></div>'
@@ -417,7 +438,9 @@
           '<div class="es-btn-order">' + (isUnavailable ? 'View Menu' : 'Order') + '</div>' +
         '</div>' +
       '</div>' +
-    '</a>';
+    '</a>' +
+    favHtml +
+    '</div>';
   }
 
   function renderList(container, restaurants) {
@@ -439,7 +462,10 @@
     window.__unavailableRestaurantIds = unavailable;
     container.innerHTML = html;
 
-    if (rendered) requestAnimationFrame(initGalleries);
+    if (rendered) requestAnimationFrame(function () {
+      initGalleries();
+      syncFavoriteButtons();
+    });
     return rendered;
   }
 
@@ -457,6 +483,49 @@
       wrap.insertBefore(placeholder, wrap.firstChild);
     }
   }
+
+  /* ── Favorites wiring ───────────────────────────────────────── */
+
+  function applyFavoriteState(button, on) {
+    button.classList.toggle('is-active', on);
+    button.setAttribute('aria-pressed', on ? 'true' : 'false');
+    button.setAttribute('aria-label', on ? 'Remove from favorites' : 'Add to favorites');
+
+    var icon = button.querySelector('i');
+    if (icon) icon.className = (on ? 'fa-solid' : 'fa-regular') + ' fa-heart';
+  }
+
+  function syncFavoriteButtons() {
+    if (!window.Favorites) return;
+    var buttons = document.querySelectorAll('.es-fav');
+    for (var i = 0; i < buttons.length; i++) {
+      applyFavoriteState(buttons[i], window.Favorites.isFavorite(
+        buttons[i].getAttribute('data-fav-id')
+      ));
+    }
+  }
+
+  /* Delegated once on the document, so it survives every re-render
+     (filters, sorting, refresh) without rebinding. */
+  document.addEventListener('click', function (e) {
+    var target = e.target;
+    var button = target && target.closest ? target.closest('.es-fav') : null;
+    if (!button) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    var id = button.getAttribute('data-fav-id');
+    if (!id || !window.Favorites) return;
+
+    applyFavoriteState(button, window.Favorites.toggleFavorite(id));
+
+    button.classList.remove('is-pressed');
+    void button.offsetWidth;
+    button.classList.add('is-pressed');
+  });
+
+  window.addEventListener('eatswada:favorites-changed', syncFavoriteButtons);
 
   /* ── Image gallery ──────────────────────────────────────────── */
 
@@ -554,6 +623,7 @@
     resolveAvailability: resolveAvailability,
     showAvailabilityToast: showAvailabilityToast,
     handleImageError: handleImageError,
+    syncFavoriteButtons: syncFavoriteButtons,
     escape: esc
   };
 

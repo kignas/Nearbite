@@ -41,13 +41,28 @@
 .rs-cuis  { height: 12px; width: 52%; border-radius: 6px; margin: 0 14px 12px; }
 .rs-meta  { height: 12px; width: 66%; border-radius: 5px; margin: 0 14px; }
 
+/* ── Card wrapper ───────────────────────────────────────────────────
+   Exists so the favourite button can sit OUTSIDE the <a> (a link may not
+   contain a button) while still being positioned over the image. It
+   carries the list margin the card used to own, so card dimensions and
+   spacing are byte-for-byte what they were. */
+.es-card-wrap {
+  position: relative;
+  margin: 0 18px 14px;
+}
+
+@keyframes cardFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
 /* ── Card surface ───────────────────────────────────────────────── */
 .es-card {
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;                 /* clips the flush image to the radius */
-  margin: 0 18px 14px;
+  margin: 0;
   background: #FFFFFF;
   border: 1px solid #EFF1F5;
   border-radius: 20px;
@@ -59,7 +74,7 @@
 }
 
 @media (min-width: 700px) {
-  .es-card { margin-left: 24px; margin-right: 24px; }
+  .es-card-wrap { margin-left: 24px; margin-right: 24px; }
 }
 
 .es-card:active {
@@ -409,6 +424,93 @@
   .es-btn-order { min-height: 35px; padding: 0 13px; font-size: 12.5px; }
 }
 
+
+/* ── Favourite button ───────────────────────────────────────────────
+   Sibling of the card link, positioned over the top-right of the image.
+   Sized for a 40px touch target while reading as a compact 34px control. */
+.es-fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 7;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .92);
+  color: #8A94A6;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .18);
+  transition: transform .16s ease, color .16s ease, background .16s ease;
+}
+
+/* Expands the hit area to 44px without changing the painted size. */
+.es-fav::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+}
+
+.es-fav.is-active {
+  background: #FFFFFF;
+  color: #E23744;
+}
+
+.es-fav:active { transform: scale(.9); }
+
+.es-fav:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(244, 123, 32, .55);
+}
+
+.es-fav.is-pressed { animation: es-fav-pop .28s ease; }
+
+@keyframes es-fav-pop {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(.82); }
+  100% { transform: scale(1); }
+}
+
+/* ── Media badge ────────────────────────────────────────────────────
+   Bottom-left, so it clears the centred gallery dots and the top-right
+   heart. Absolute, so it cannot change card height. */
+.es-media-badge {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 96px);
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .94);
+  color: #0E7C4C;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, .16);
+}
+
+.es-media-badge i { font-size: 9px; }
+
+.es-card.is-unavailable .es-media-badge { opacity: .55; }
+
 /* ── Unavailable state ──────────────────────────────────────────── */
 .es-card.is-unavailable {
   box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
@@ -493,5 +595,8 @@
   .es-btn-order,
   .es-gallery-track,
   .es-gallery-dot,
-  .es-gallery-slide { transition: none !important; }
+  .es-gallery-slide,
+  .es-fav { transition: none !important; }
+  .es-card-wrap,
+  .es-fav.is-pressed { animation: none !important; opacity: 1 !important; }
 }

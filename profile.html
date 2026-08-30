@@ -69,10 +69,20 @@ a{text-decoration:none;color:inherit}
 .nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#9ca3af;font-size:10px;font-weight:800}
 .nav a.active{color:var(--brand)}
 .nav i{font-size:18px}
+.fav-list{margin-top:2px}
+.fav-list .es-card-wrap{margin-left:0;margin-right:0;margin-bottom:12px}
+.fav-list .es-card-wrap:last-child{margin-bottom:0}
+.fav-empty{padding:26px 18px 24px;text-align:center}
+.fav-empty i{font-size:22px;color:#c9cdd4}
+.fav-empty h3{margin:11px 0 0;font-size:14px;font-weight:800}
+.fav-empty p{margin:5px 0 14px;font-size:11px;color:var(--muted)}
+.fav-cta{display:inline-block;border:0;background:var(--brand);color:#fff;border-radius:12px;padding:11px 18px;font-size:12px;font-weight:800}
+.fav-note{padding:18px;text-align:center;font-size:11px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:#111827;color:#fff;padding:11px 14px;border-radius:12px;font-size:11px;z-index:120;transition:.2s;white-space:nowrap}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 </style>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="restaurant-card.css">
 <script src="config.js"></script>
 </head>
 <body>
@@ -129,6 +139,14 @@ a{text-decoration:none;color:inherit}
         <div class="row-main"><div class="row-title">Saved delivery addresses</div><div class="row-sub" id="addressSummary">Manage your saved locations</div></div>
         <i class="fa-solid fa-chevron-right chev"></i>
       </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">Favourites</div>
+    <div class="card" id="favoritesCard">
+      <div class="fav-note" id="favoritesStatus">Loading your saved restaurants…</div>
+      <div class="fav-list" id="favoritesList" hidden></div>
     </div>
   </section>
 
@@ -302,12 +320,80 @@ $('logoutBtn').onclick=()=>{
   localStorage.removeItem('nearbite_address');
   location.replace('login.html');
 };
-document.addEventListener('DOMContentLoaded',async()=>{await loadProfile();await loadAddresses()});
+/* ── Favourites ─────────────────────────────────────────────────────
+   IDs come from window.Favorites (localStorage). They are resolved against
+   the SAME restaurant list Home uses — window.API.getList(routes.restaurants)
+   — reading API's cache first so the section paints without a round trip.
+   Cards are rendered by the real RestaurantCard component, not a copy. */
+const FAV_CACHE_MAX_AGE_MS=5*60*1000;
+let favRestaurants=null;
+
+function favDeps(){
+  return !!(window.Favorites&&window.RestaurantCard&&window.API&&
+            window.API.getList&&window.API.routes&&window.API.routes.restaurants);
+}
+function showFavStatus(html){
+  $('favoritesList').hidden=true;
+  $('favoritesList').innerHTML='';
+  $('favoritesStatus').hidden=false;
+  $('favoritesStatus').innerHTML=html;
+}
+function renderFavorites(){
+  if(!favDeps()){
+    showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>Favourites unavailable</h3><p>Saved restaurants can\'t be loaded right now.</p></div>');
+    return;
+  }
+  const ids=window.Favorites.getFavorites();
+  if(!ids.length){
+    showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>No saved restaurants yet</h3><p>Tap the heart on any restaurant to save it here.</p><a class="fav-cta" href="index.html">Explore restaurants</a></div>');
+    return;
+  }
+  if(!Array.isArray(favRestaurants)){
+    showFavStatus('Loading your saved restaurants…');
+    return;
+  }
+  const read=window.RestaurantCard.read;
+  const idSet=new Set(ids.map(String));
+  const matched=favRestaurants.filter(r=>idSet.has(String(read.id(r))));
+  if(!matched.length){
+    showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>Saved restaurants unavailable</h3><p>These restaurants aren\'t in the current listing.</p><a class="fav-cta" href="index.html">Explore restaurants</a></div>');
+    return;
+  }
+  $('favoritesStatus').hidden=true;
+  $('favoritesList').hidden=false;
+  window.RestaurantCard.renderList($('favoritesList'),matched);
+}
+async function loadFavorites(){
+  if(!favDeps()){renderFavorites();return}
+  if(!window.Favorites.getFavorites().length){renderFavorites();return}
+  try{
+    const cached=window.API.cache&&window.API.cache.readList
+      ?window.API.cache.readList(window.API.CACHE_KEYS.restaurants,FAV_CACHE_MAX_AGE_MS):null;
+    if(Array.isArray(cached)&&cached.length){favRestaurants=cached;renderFavorites()}
+  }catch{}
+  try{
+    const list=await window.API.getList(window.API.routes.restaurants);
+    favRestaurants=Array.isArray(list)?list:[];
+    renderFavorites();
+  }catch(e){
+    if(!Array.isArray(favRestaurants)){
+      showFavStatus('<div class="fav-empty"><i class="fa-solid fa-plug-circle-xmark"></i><h3>Couldn\'t load favourites</h3><p>Check your connection and try again.</p><a class="fav-cta" href="profile.html">Retry</a></div>');
+    }
+  }
+}
+/* Un-hearting a card here removes the ID, which fires this and drops the
+   card from the list immediately. Same event keeps Home in sync. */
+window.addEventListener('eatswada:favorites-changed',renderFavorites);
+
+document.addEventListener('DOMContentLoaded',async()=>{loadFavorites();await loadProfile();await loadAddresses()});
 // Keep the account summary in sync if the selected delivery address changes
 // elsewhere (Address/Cart) without a full page reload.
 window.addEventListener('nearbite:address-changed',loadAddresses);
 </script>
 
+<script src="api.js"></script>
+<script src="favorites.js"></script>
+<script src="restaurant-card.js"></script>
 <script src="navigation.js"></script>
 </body>
 </html>
