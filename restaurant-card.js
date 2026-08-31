@@ -129,6 +129,10 @@
       var lng = Number(coords[0]);
       var lat = Number(coords[1]);
       if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+      /* [0, 0] is an unwritten field, not a real place in the Gulf of
+         Guinea. Reading it as real would put the restaurant thousands of
+         km away and wrongly mark it as not delivering. */
+      if (lng === 0 && lat === 0) return null;
       return { lng: lng, lat: lat };
     },
 
@@ -177,16 +181,42 @@
 
   /* ── Distance ───────────────────────────────────────────────── */
 
-  function getSelectedCustomerCoordinates() {
+  /* Eatswada's maximum delivery distance. At or under 10.00 km a
+     restaurant delivers; beyond it, it does not. A restaurant may declare
+     a smaller radius of its own, never a larger one.
+     Display only — POST /orders is where this is actually enforced. */
+  var MAX_DELIVERY_KM = 10;
+
+  function getAddressCoordinates() {
     try {
       var address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
       var coords = address && address.location && address.location.coordinates;
 
       if (Array.isArray(coords) && coords.length === 2 &&
-          Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]))) {
+          Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1])) &&
+          !(Number(coords[0]) === 0 && Number(coords[1]) === 0)) {
         return { lng: Number(coords[0]), lat: Number(coords[1]) };
       }
     } catch (e) {}
+    return null;
+  }
+
+  /* The selected address always wins. Only when it carries no coordinates
+     does a device fix stand in for it, and only on pages that provide one
+     — everywhere else this behaves exactly as it did before. */
+  function getSelectedCustomerCoordinates() {
+    var fromAddress = getAddressCoordinates();
+    if (fromAddress) return fromAddress;
+
+    var provider = window.EatswadaLocation;
+    if (provider && typeof provider.deviceCoordinates === 'function') {
+      var device = provider.deviceCoordinates();
+      var lat = device ? Number(device.lat) : NaN;
+      var lng = device ? Number(device.lng) : NaN;
+      if (Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)) {
+        return { lng: lng, lat: lat };
+      }
+    }
     return null;
   }
 
@@ -283,7 +313,7 @@
 
   function getAvailabilityLabel(status) {
     if (status === 'closed_today') return 'Closed Today';
-    if (status === 'outside_delivery_area') return 'Outside delivery area';
+    if (status === 'outside_delivery_area') return 'Not delivering to your location';
     return 'Temporarily Closed';
   }
 
@@ -297,8 +327,8 @@
     toast.textContent =
       label === 'Closed Today'
         ? 'This restaurant is closed for today'
-        : label === 'Outside delivery area'
-          ? 'This restaurant does not deliver to your selected address'
+        : label === 'Not delivering to your location'
+          ? 'This restaurant does not deliver to your location'
           : 'This restaurant is temporarily unavailable';
 
     toast.classList.remove('show');
@@ -315,11 +345,17 @@
     var status = getAvailabilityStatus(res);
     if (status) return status;
 
-    var radiusKm = firstNumber(res.deliveryRadiusKm);
-    if (radiusKm == null || radiusKm <= 0) return null;
-
     var restaurantCoords = read.coordinates(res);
     if (!customerCoords || !restaurantCoords) return null;
+
+    /* A restaurant may narrow its own radius, but never widen it past the
+       platform maximum. With no declared radius the platform maximum is
+       the rule. The comparison is strictly greater-than, so a restaurant
+       at exactly 10.00 km still delivers. */
+    var declared = firstNumber(res.deliveryRadiusKm);
+    var radiusKm = declared != null && declared > 0
+      ? Math.min(declared, MAX_DELIVERY_KM)
+      : MAX_DELIVERY_KM;
 
     return haversineKm(customerCoords, restaurantCoords) > radiusKm
       ? 'outside_delivery_area'
@@ -347,6 +383,11 @@
     var offer = read.offer(res);
     var coupon = read.coupon(res);
     var nearFast = read.nearFastFlag(res) === true;
+
+    /* A clock explains a closure; it does not explain a distance. */
+    var pillIcon = status === 'outside_delivery_area'
+      ? 'fa-solid fa-location-dot'
+      : 'fa-regular fa-clock';
 
     var guard = isUnavailable
       ? ' onclick="event.preventDefault(); RestaurantCard.showAvailabilityToast(\'' +
@@ -461,7 +502,7 @@
         badgeHtml +
         (isUnavailable
           ? '<div class="es-availability-overlay"><div class="es-availability-pill">' +
-            '<i class="fa-regular fa-clock"></i> ' + esc(label) + '</div></div>'
+            '<i class="' + pillIcon + '" aria-hidden="true"></i> ' + esc(label) + '</div></div>'
           : '') +
       '</div>' +
 
@@ -737,6 +778,8 @@
     getDistanceKm: getDistanceKm,
     formatDistance: formatDistance,
     getCustomerCoordinates: getSelectedCustomerCoordinates,
+    getAddressCoordinates: getAddressCoordinates,
+    MAX_DELIVERY_KM: MAX_DELIVERY_KM,
     resolveAvailability: resolveAvailability,
     showAvailabilityToast: showAvailabilityToast,
     handleImageError: handleImageError,

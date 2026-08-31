@@ -405,6 +405,71 @@
     font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     6. LOCATION — permission sheet, status banner, card availability
+     Additive only. Reuses the sheet shell, tokens and type above so
+     the existing Home layout is untouched.
+     ══════════════════════════════════════════════════════════════ */
+  .loc-sheet { position: fixed; inset: 0; z-index: 100002; }
+  .loc-sheet[hidden] { display: none; }
+  .loc-sheet .sheet-backdrop { opacity: 0; transition: opacity .22s ease; }
+  .loc-sheet.open .sheet-backdrop { opacity: 1; }
+  .loc-sheet .sheet-panel {
+    transform: translateY(100%);
+    transition: transform .24s cubic-bezier(.22,1,.36,1);
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .loc-sheet.open .sheet-panel { transform: translateY(0); }
+
+  .loc-sheet-pin {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: #FFF3E8; color: #C2560A;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin: 4px 0 12px;
+  }
+  .loc-sheet-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); margin: 0 0 8px; }
+  .loc-sheet-text { font-size: 13.5px; font-weight: 500; line-height: 1.55; color: var(--text-soft); margin: 0 0 20px; }
+
+  .loc-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; min-height: 50px; padding: 14px 16px; margin-bottom: 10px;
+    border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 800;
+    cursor: pointer; text-decoration: none; border: none;
+  }
+  .loc-btn:active { transform: scale(.98); }
+  .loc-btn-primary { background: var(--brand); color: #fff; }
+  .loc-btn-primary:disabled { opacity: .65; cursor: default; transform: none; }
+  .loc-btn-secondary { background: var(--surface); color: #333A45; border: 1px solid var(--line); }
+  .loc-btn-quiet {
+    background: transparent; border: none; color: var(--text-mute);
+    font-family: inherit; font-size: 13.5px; font-weight: 700;
+    width: 100%; min-height: 44px; margin-bottom: 0; cursor: pointer;
+  }
+  .loc-sheet .loc-btn:focus-visible,
+  .loc-sheet .loc-btn-quiet:focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 2px; }
+
+  /* ── Location status banner (above the restaurant list) ── */
+  #location-banner {
+    display: flex; align-items: center; gap: 12px;
+    margin: 0 18px 14px; padding: 12px 14px;
+    background: #F6F7F9; border: 1px solid var(--line); border-radius: 12px;
+  }
+  #location-banner[hidden] { display: none; }
+  .lb-icon { font-size: 14px; color: #8A93A2; flex-shrink: 0; }
+  .lb-text { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; color: #3B4453; line-height: 1.45; }
+  .lb-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .lb-btn {
+    border: none; background: transparent; color: #C2560A;
+    font-family: inherit; font-size: 12.5px; font-weight: 800;
+    text-decoration: underline; cursor: pointer;
+    padding: 10px 6px; min-height: 40px; white-space: nowrap;
+  }
+  .lb-btn:disabled { color: var(--text-mute); text-decoration: none; cursor: default; }
+
+  /* Per-card delivery status is not styled here — restaurant-card.css
+     already owns .es-card.is-unavailable, .es-availability-overlay and
+     the toast. */
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: .001ms !important;
@@ -424,7 +489,7 @@
       <p class="loc-sub" id="loc-sub">Delivery in <span id="delivery-time-value">—</span> minutes</p>
       <span class="loc-name-row">
         <i class="fa-solid fa-location-arrow loc-arrow"></i>
-        <span class="loc-name" id="loc-name">Maynaguri</span>
+        <span class="loc-name" id="loc-name">Set delivery location</span>
         <i class="fa-solid fa-chevron-down loc-chevron"></i>
       </span>
     </a>
@@ -504,6 +569,7 @@
     </div>
 
     <div id="home-notice" role="status" hidden></div>
+    <div id="location-banner" role="status" hidden></div>
 
     <div id="restaurant-list">
       <div class="rs-card"><div class="sk rs-img"></div><div class="rs-row"><div class="sk rs-name"></div><div class="sk rs-badge"></div></div><div class="sk rs-cuis"></div><div class="sk rs-meta"></div></div>
@@ -523,6 +589,20 @@
     </div>
     <div id="filter-sheet-body"></div>
     <button type="button" class="sheet-done" data-close-sheet="1">Show results</button>
+  </div>
+</div>
+
+<div class="loc-sheet" id="location-sheet" role="dialog" aria-modal="true"
+     aria-labelledby="location-sheet-title" aria-describedby="location-sheet-text" hidden>
+  <div class="sheet-backdrop" data-close-location-sheet="1"></div>
+  <div class="sheet-panel">
+    <div class="sheet-grabber"></div>
+    <div class="loc-sheet-pin" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>
+    <h3 class="loc-sheet-title" id="location-sheet-title">Allow location to continue</h3>
+    <p class="loc-sheet-text" id="location-sheet-text">We use your location to show restaurants that can deliver to you and calculate your delivery distance.</p>
+    <button type="button" class="loc-btn loc-btn-primary" id="location-allow-btn">Allow location</button>
+    <a class="loc-btn loc-btn-secondary" id="location-address-btn" href="address.html">Choose address</a>
+    <button type="button" class="loc-btn-quiet" id="location-sheet-close" data-close-location-sheet="1">Not now</button>
   </div>
 </div>
 

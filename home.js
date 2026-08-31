@@ -25,6 +25,15 @@
   var CACHE_KEY = window.API.CACHE_KEYS.restaurants;
   var CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 
+  /* Location keys. The delivery radius, the distance maths and the
+     restaurant/address coordinate readers all live in restaurant-card.js
+     and are used from there — this page only acquires a location and
+     tells the card layer to repaint. */
+  var DEVICE_LOC_KEY = 'eatswada_device_location';
+  var DEVICE_LOC_MAX_AGE_MS = 30 * 60 * 1000;
+  var PROMPT_DISMISSED_KEY = 'eatswada_location_prompt_dismissed';
+  var GPS_OPTIONS = { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 };
+
   /* ── State ──────────────────────────────────────────────────── */
 
   var state = {
@@ -36,7 +45,16 @@
     },
     status: 'loading',       // loading | ready | empty | error
     isRefreshing: false,
-    staleNotice: ''          // non-empty when live refresh failed but data is shown
+    staleNotice: '',         // non-empty when live refresh failed but data is shown
+
+    /* Where the customer is. Read once per page load, never per
+       restaurant. The verdict for each restaurant is not stored here —
+       RestaurantCard.resolveAvailability() is the only thing that decides
+       it, at render time, from these coordinates. */
+    loc: {
+      status: 'idle',        // idle | locating | ready | denied | unavailable
+      source: null           // 'address' | 'device'
+    }
   };
 
   /* ── Filter registry ────────────────────────────────────────────
@@ -221,12 +239,16 @@
     {
       id: 'distance',
       label: 'Distance: Near to Far',
+      /* getDistanceKm() takes the customer coordinates as an argument, so
+         they are resolved once here rather than re-read from storage on
+         every comparison. */
       supported: function (list) {
-        return list.some(function (r) { return card.getDistanceKm(r) != null; });
+        var coords = card.getCustomerCoordinates();
+        return list.some(function (r) { return card.getDistanceKm(r, coords) != null; });
       },
       compare: function (a, b) {
-        var da = card.getDistanceKm(a);
-        var db = card.getDistanceKm(b);
+        var da = card.getDistanceKm(a, sortCoords);
+        var db = card.getDistanceKm(b, sortCoords);
         return (da == null ? Infinity : da) - (db == null ? Infinity : db);
       }
     }
@@ -252,6 +274,10 @@
     return state.filter.active.indexOf(id) !== -1;
   }
 
+  /* Coordinates for the current sort pass, resolved once in
+     visibleRestaurants() and read by the distance comparator. */
+  var sortCoords = null;
+
   /* Filters are independent predicates combined with AND. Because each one
      only narrows the list, they cannot contradict each other. */
   function visibleRestaurants() {
@@ -263,7 +289,10 @@
     });
 
     var sort = sortById(state.filter.sort);
-    if (sort && sort.compare) list = list.slice().sort(sort.compare);
+    if (sort && sort.compare) {
+      sortCoords = card.getCustomerCoordinates();
+      list = list.slice().sort(sort.compare);
+    }
 
     return list;
   }
@@ -694,6 +723,7 @@
       })
       .then(function () {
         state.isRefreshing = false;
+        maybePromptForLocation();
       });
   }
 
@@ -739,6 +769,346 @@
     }, 3000);
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     CUSTOMER LOCATION
+
+     This module acquires a location and repaints. It deliberately owns
+     no geometry: restaurant-card.js already holds the coordinate
+     readers, the Haversine, the 10 km radius rule and the unavailable
+     card treatment, and every verdict on screen comes from
+     RestaurantCard.resolveAvailability() at render time.
+
+     Two real sources, in order:
+       1. the selected address, when it carries GeoJSON coordinates
+          (RestaurantCard.getAddressCoordinates)
+       2. one browser Geolocation fix, cached for 30 minutes and handed
+          back to the card layer through window.EatswadaLocation
+     ══════════════════════════════════════════════════════════════ */
+
+  /* Validation only — this is the one place a raw device reading enters
+     the app, and it is the shape restaurant-card.js expects back. */
+  function validCoords(lat, lng) {
+    lat = Number(lat);
+    lng = Number(lng);
+    if (!isFinite(lat) || !isFinite(lng)) return null;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+    if (lat === 0 && lng === 0) return null;
+    return { lat: lat, lng: lng };
+  }
+
+  function readDeviceLocation() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(DEVICE_LOC_KEY) || 'null');
+      if (!saved || !saved.ts) return null;
+      if ((Date.now() - saved.ts) > DEVICE_LOC_MAX_AGE_MS) return null;
+      return validCoords(saved.lat, saved.lng);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeDeviceLocation(point) {
+    try {
+      localStorage.setItem(DEVICE_LOC_KEY, JSON.stringify({
+        lat: point.lat, lng: point.lng, ts: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  /* The card layer asks for this when the selected address has no
+     coordinates of its own. Pages without this provider keep using the
+     address alone, exactly as before. */
+  window.EatswadaLocation = {
+    deviceCoordinates: readDeviceLocation,
+    status: function () { return state.loc.status; },
+    request: function () { requestDeviceLocation(); }
+  };
+
+  function readSavedAddress() {
+    try {
+      return JSON.parse(localStorage.getItem('nearbite_address') || 'null');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function promptDismissed() {
+    try { return sessionStorage.getItem(PROMPT_DISMISSED_KEY) === '1'; }
+    catch (e) { return false; }
+  }
+
+  function markPromptDismissed() {
+    try { sessionStorage.setItem(PROMPT_DISMISSED_KEY, '1'); } catch (e) {}
+  }
+
+  /* ── State transitions ──────────────────────────────────────── */
+
+  function setLocationStatus(status, source) {
+    state.loc.status = status;
+    state.loc.source = source || null;
+
+    renderSavedAddress();
+    renderLocationBanner();
+
+    /* Before the first payload arrives the skeleton owns the list, so
+       repainting here would replace it with an empty state. */
+    if (state.status !== 'loading') {
+      renderFilterBar();   // the Distance sort appears once a location exists
+      renderRestaurants(); // re-reads the coordinates and re-decides every card
+    }
+  }
+
+  /* Looks only at locations that already exist. Never prompts. */
+  function resolveStoredLocation() {
+    if (card.getAddressCoordinates()) return setLocationStatus('ready', 'address');
+    if (readDeviceLocation()) return setLocationStatus('ready', 'device');
+    return setLocationStatus('idle');
+  }
+
+  function requestDeviceLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus('unavailable');
+      updateSheetForState();
+      return;
+    }
+
+    setLocationStatus('locating');
+    updateSheetForState();
+
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        var point = validCoords(position.coords.latitude, position.coords.longitude);
+
+        if (!point) {
+          setLocationStatus('unavailable');
+          updateSheetForState();
+          return;
+        }
+
+        writeDeviceLocation(point);
+        setLocationStatus('ready', 'device');
+        closeLocationSheet();
+      },
+      function (error) {
+        var denied = error && error.code === 1;
+        if (denied) markPromptDismissed();
+        setLocationStatus(denied ? 'denied' : 'unavailable');
+        updateSheetForState();
+      },
+      GPS_OPTIONS
+    );
+  }
+
+  /* ── Location banner ────────────────────────────────────────── */
+
+  var BANNER_COPY = {
+    idle: {
+      icon: 'fa-location-dot',
+      text: 'Set your location to see delivery availability.',
+      actions: [{ id: 'set', label: 'Set location' }]
+    },
+    locating: {
+      icon: 'fa-circle-notch fa-spin',
+      text: 'Checking which restaurants deliver to you…',
+      actions: []
+    },
+    denied: {
+      icon: 'fa-location-crosshairs',
+      text: 'Location access is needed to check delivery availability.',
+      actions: [
+        { id: 'retry', label: 'Try again' },
+        { id: 'address', label: 'Choose address' }
+      ]
+    },
+    unavailable: {
+      icon: 'fa-triangle-exclamation',
+      text: 'Location unavailable. We can\'t check delivery availability right now.',
+      actions: [
+        { id: 'retry', label: 'Try again' },
+        { id: 'address', label: 'Choose address' }
+      ]
+    }
+  };
+
+  function renderLocationBanner() {
+    var host = el('location-banner');
+    if (!host) return;
+
+    var copy = BANNER_COPY[state.loc.status];
+    if (!copy) {
+      host.hidden = true;
+      host.innerHTML = '';
+      return;
+    }
+
+    host.innerHTML =
+      '<i class="fa-solid ' + copy.icon + ' lb-icon" aria-hidden="true"></i>' +
+      '<span class="lb-text">' + card.escape(copy.text) + '</span>' +
+      (copy.actions.length
+        ? '<span class="lb-actions">' + copy.actions.map(function (action) {
+            return '<button type="button" class="lb-btn" data-loc-action="' +
+              action.id + '">' + card.escape(action.label) + '</button>';
+          }).join('') + '</span>'
+        : '');
+    host.hidden = false;
+
+    host.querySelectorAll('[data-loc-action]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var action = button.getAttribute('data-loc-action');
+        if (action === 'address') window.location.href = 'address.html';
+        else if (action === 'retry') requestDeviceLocation();
+        else openLocationSheet();
+      });
+    });
+  }
+
+  /* ── Location sheet ─────────────────────────────────────────── */
+
+  var SHEET_COPY = {
+    ask: {
+      title: 'Allow location to continue',
+      text: 'We use your location to show restaurants that can deliver to you and calculate your delivery distance.',
+      primary: 'Allow location'
+    },
+    locating: {
+      title: 'Getting your location',
+      text: 'This only takes a moment.',
+      primary: 'Getting location…'
+    },
+    denied: {
+      title: 'Location access is needed',
+      text: 'Location access is needed to check delivery availability. You can allow it in your browser settings, or pick a saved address instead.',
+      primary: 'Try again'
+    },
+    unavailable: {
+      title: 'Location unavailable',
+      text: 'We couldn\'t get your location. Try again, or pick a saved address instead.',
+      primary: 'Try again'
+    }
+  };
+
+  var sheetReturnFocus = null;
+
+  function updateSheetForState() {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden) return;
+
+    var mode = state.loc.status === 'denied' ? 'denied'
+             : state.loc.status === 'unavailable' ? 'unavailable'
+             : state.loc.status === 'locating' ? 'locating'
+             : 'ask';
+
+    var copy = SHEET_COPY[mode];
+    var title = el('location-sheet-title');
+    var text = el('location-sheet-text');
+    var allow = el('location-allow-btn');
+
+    if (title) title.textContent = copy.title;
+    if (text) text.textContent = copy.text;
+    if (allow) {
+      allow.textContent = copy.primary;
+      allow.disabled = mode === 'locating';
+    }
+  }
+
+  function openLocationSheet() {
+    var sheet = el('location-sheet');
+    if (!sheet || !sheet.hidden) return;
+
+    sheetReturnFocus = document.activeElement;
+    sheet.hidden = false;
+    updateSheetForState();
+
+    requestAnimationFrame(function () { sheet.classList.add('open'); });
+    document.body.style.overflow = 'hidden';
+
+    var allow = el('location-allow-btn');
+    if (allow) allow.focus();
+  }
+
+  function closeLocationSheet(dismissedByUser) {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden) return;
+
+    if (dismissedByUser) markPromptDismissed();
+
+    sheet.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(function () { sheet.hidden = true; }, 220);
+
+    if (sheetReturnFocus && typeof sheetReturnFocus.focus === 'function') {
+      sheetReturnFocus.focus();
+    }
+    sheetReturnFocus = null;
+  }
+
+  function trapSheetFocus(event) {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden || event.key !== 'Tab') return;
+
+    var focusable = sheet.querySelectorAll(
+      'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusable.length) return;
+
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function bindLocationSheet() {
+    var sheet = el('location-sheet');
+    if (!sheet) return;
+
+    sheet.addEventListener('click', function (event) {
+      if (event.target.hasAttribute('data-close-location-sheet')) {
+        closeLocationSheet(true);
+      }
+    });
+
+    var allow = el('location-allow-btn');
+    if (allow) allow.addEventListener('click', requestDeviceLocation);
+
+    document.addEventListener('keydown', function (event) {
+      if (sheet.hidden) return;
+      if (event.key === 'Escape') {
+        closeLocationSheet(true);
+        return;
+      }
+      trapSheetFocus(event);
+    });
+  }
+
+  /* Asks only when the answer would change something: no location yet,
+     not already dismissed or denied, and at least one restaurant carries
+     coordinates to compare against. */
+  function maybePromptForLocation() {
+    if (state.loc.status !== 'idle') return;
+    if (promptDismissed()) return;
+    if (state.status !== 'ready') return;
+    if (!state.restaurants.some(function (res) { return !!card.read.coordinates(res); })) return;
+
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' })
+        .then(function (result) {
+          if (result.state === 'granted') requestDeviceLocation();  // no popup needed
+          else if (result.state === 'denied') setLocationStatus('denied');
+          else openLocationSheet();
+        })
+        .catch(function () { openLocationSheet(); });
+      return;
+    }
+
+    openLocationSheet();
+  }
+
   /* ── Saved delivery address ─────────────────────────────────── */
 
   function renderDeliveryEstimate() {
@@ -755,22 +1125,32 @@
     node.textContent = String(Math.min.apply(null, mins));
   }
 
+  /* Same header, same two lines — the text now follows the real location
+     instead of a hardcoded city. */
   function renderSavedAddress() {
     var nameEl = el('loc-name');
     var subEl = el('loc-sub');
     if (!nameEl || !subEl) return;
 
-    try {
-      var address = JSON.parse(localStorage.getItem('nearbite_address') || 'null');
-      if (!address) return;
+    var address = readSavedAddress();
 
+    if (address) {
       var label = address.tag || address.city || 'Delivering to';
       var detail = [address.house, address.area, address.landmark]
         .filter(Boolean).join(', ');
 
       if (label) nameEl.textContent = label;
       if (detail) subEl.textContent = detail;
-    } catch (e) {}
+      return;
+    }
+
+    if (state.loc.status === 'ready' && state.loc.source === 'device') {
+      nameEl.textContent = 'Current location';
+    } else if (state.loc.status === 'locating') {
+      nameEl.textContent = 'Getting location…';
+    } else {
+      nameEl.textContent = 'Set delivery location';
+    }
   }
 
   /* ── Signed-in avatar ───────────────────────────────────────── */
@@ -812,9 +1192,11 @@
       if (event.key === 'Escape') closeFilterSheet();
     });
 
+    /* A new address invalidates every verdict on screen. Reading the new
+       coordinates is synchronous, so the list is recalculated and repainted
+       in one pass — the old verdicts are never left standing. */
     function onAddressChanged() {
-      renderSavedAddress();
-      renderRestaurants();
+      resolveStoredLocation();
     }
 
     window.addEventListener('nearbite:address-changed', onAddressChanged);
@@ -834,7 +1216,11 @@
     parseURL();
 
     bindStaticControls();
-    renderSavedAddress();
+    bindLocationSheet();
+
+    /* One location read per page load, before any distance is shown. */
+    resolveStoredLocation();
+
     showProfileInitial();
     startSearchPlaceholder();
     loadRestaurants();
@@ -852,7 +1238,9 @@
     refresh: refresh,
     toggleFilter: toggleFilter,
     clearFilters: clearFilters,
-    render: renderRestaurants
+    render: renderRestaurants,
+    requestLocation: requestDeviceLocation,
+    openLocationSheet: openLocationSheet
   };
 
   window.displayRestaurants = renderRestaurants;
