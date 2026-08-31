@@ -607,6 +607,11 @@
     color:var(--ct-ink); line-height:1.45; overflow-wrap:anywhere;
   }
   .ct-dd-val.is-empty{ font-weight:600; color:var(--ct-muted); }
+  .ct-dd-address{
+    display:block; margin-top:4px; font-size:12.5px; font-weight:500;
+    line-height:1.45; color:var(--ct-muted); overflow-wrap:anywhere;
+  }
+  .ct-dd-address.is-empty{ color:var(--ct-muted); }
 
   /* ── Coupon empty state ───────────────────────────────────────────── */
   .ct-empty-mini{ text-align:center; padding:20px 8px 4px; }
@@ -881,10 +886,8 @@
           <span class="ct-total-val" id="bill-total">₹0</span>
         </div>
 
-        <!-- Delivery details. Every value is read from data the cart already
-             holds (restaurant record, selected address, profile). Anything
-             genuinely missing renders as "Not available" — never invented. -->
-        <div class="ct-sheet-section">
+        <!-- Delivery details first: ETA -> delivery location -> customer -> phone. -->
+        <div class="ct-sheet-section ct-delivery-section">
           <div class="ct-sheet-section-head"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Delivery details</div>
 
           <div class="ct-dd-row">
@@ -896,9 +899,18 @@
           </div>
 
           <div class="ct-dd-row">
+            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+            <span>
+              <span class="ct-dd-label">Delivery at</span>
+              <span class="ct-dd-val" id="dd-tag">&mdash;</span>
+              <span class="ct-dd-address" id="dd-address">&mdash;</span>
+            </span>
+          </div>
+
+          <div class="ct-dd-row">
             <span class="ct-dd-ic" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
             <span>
-              <span class="ct-dd-label">Name</span>
+              <span class="ct-dd-label">Customer name</span>
               <span class="ct-dd-val" id="dd-name">&mdash;</span>
             </span>
           </div>
@@ -906,16 +918,8 @@
           <div class="ct-dd-row">
             <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
             <span>
-              <span class="ct-dd-label">Phone</span>
+              <span class="ct-dd-label">Phone number</span>
               <span class="ct-dd-val" id="dd-phone">&mdash;</span>
-            </span>
-          </div>
-
-          <div class="ct-dd-row">
-            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
-            <span>
-              <span class="ct-dd-label">Delivery address</span>
-              <span class="ct-dd-val" id="dd-address">&mdash;</span>
             </span>
           </div>
         </div>
@@ -1080,33 +1084,37 @@ let ctResCache = { id: null, data: null };
 function ctEtaText(restaurant) {
   if (!restaurant || typeof restaurant !== 'object') return '';
 
-  const direct = restaurant.deliveryTime != null ? restaurant.deliveryTime
-               : restaurant.deliveryTimeText != null ? restaurant.deliveryTimeText
-               : restaurant.estimatedDeliveryTime != null ? restaurant.estimatedDeliveryTime
-               : restaurant.eta;
+  // Read the ETA from the backend restaurant record without inventing a value.
+  const sources = [restaurant, restaurant.delivery, restaurant.deliveryInfo,
+                   restaurant.deliveryDetails, restaurant.timings]
+    .filter(v => v && typeof v === 'object');
 
-  // Already a display string, e.g. "25-35 mins"
-  if (typeof direct === 'string' && direct.trim()) {
-    const text = direct.trim().replace(/-/g, '–');
-    return /min|hr|hour/i.test(text) ? text : text + ' mins';
+  for (const source of sources) {
+    const direct = source.deliveryTime != null ? source.deliveryTime
+                 : source.deliveryTimeText != null ? source.deliveryTimeText
+                 : source.estimatedDeliveryTime != null ? source.estimatedDeliveryTime
+                 : source.eta != null ? source.eta
+                 : source.etaText;
+
+    if (typeof direct === 'string' && direct.trim()) {
+      const text = direct.trim().replace(/-/g, '–');
+      return /min|hr|hour/i.test(text) ? text : text + ' mins';
+    }
+
+    const pair = (direct && typeof direct === 'object') ? direct : source;
+    const min = Number(pair.deliveryTimeMin != null ? pair.deliveryTimeMin :
+                       pair.minMinutes != null ? pair.minMinutes : pair.min);
+    const max = Number(pair.deliveryTimeMax != null ? pair.deliveryTimeMax :
+                       pair.maxMinutes != null ? pair.maxMinutes : pair.max);
+    if (Number.isFinite(min) && min > 0 && Number.isFinite(max) && max > 0 && max >= min) {
+      return Math.round(min) + '–' + Math.round(max) + ' mins';
+    }
+
+    const single = Number(typeof direct === 'number' ? direct :
+      source.deliveryTimeMinutes != null ? source.deliveryTimeMinutes :
+      source.avgDeliveryTime != null ? source.avgDeliveryTime : source.averageDeliveryTime);
+    if (Number.isFinite(single) && single > 0) return Math.round(single) + ' mins';
   }
-
-  // A real min/max pair on the record
-  const pair = (direct && typeof direct === 'object') ? direct : restaurant;
-  const min = Number(pair.deliveryTimeMin != null ? pair.deliveryTimeMin : pair.min);
-  const max = Number(pair.deliveryTimeMax != null ? pair.deliveryTimeMax : pair.max);
-  if (Number.isFinite(min) && min > 0 && Number.isFinite(max) && max > 0 && max >= min) {
-    return Math.round(min) + '–' + Math.round(max) + ' mins';
-  }
-
-  // A single number of minutes
-  const single = Number(
-    typeof direct === 'number' ? direct
-    : restaurant.deliveryTimeMinutes != null ? restaurant.deliveryTimeMinutes
-    : restaurant.avgDeliveryTime
-  );
-  if (Number.isFinite(single) && single > 0) return Math.round(single) + ' mins';
-
   return '';
 }
 
@@ -1117,10 +1125,17 @@ const ctProfile = { name: '', phone: '', fetched: false };
 
 function ctCaptureProfile(user) {
   if (!user || typeof user !== 'object') return;
-  const name = user.name || user.fullName || user.customerName || '';
-  const phone = user.phone || user.mobile || user.phoneNumber || '';
-  if (name) ctProfile.name = String(name).trim();
-  if (phone) ctProfile.phone = String(phone).trim();
+  const sources = [user, user.user, user.customer, user.profile]
+    .filter(v => v && typeof v === 'object');
+  for (const source of sources) {
+    const name = source.name || source.fullName || source.customerName ||
+                 source.receiverName || source.displayName || '';
+    const phone = source.phone || source.mobile || source.phoneNumber ||
+                  source.mobileNumber || source.receiverPhone || '';
+    if (!ctProfile.name && name) ctProfile.name = String(name).trim();
+    if (!ctProfile.phone && phone) ctProfile.phone = String(phone).trim();
+    if (ctProfile.name && ctProfile.phone) break;
+  }
   ctProfile.fetched = true;
 }
 
@@ -1133,6 +1148,7 @@ async function getRestaurantLocation(restaurantId, force) {
     if (!response.ok || !result.success) return null;
     const restaurant = result.data || {};
     const parsed = {
+      ...restaurant,
       coords: normalizeCoords(restaurant.location),
       freeDeliveryEnabled: restaurant.freeDeliveryEnabled !== false,
       freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
@@ -2272,33 +2288,43 @@ function ctSetDetail(id, value, emptyText) {
 
 /* The receiver on the selected address is who the rider actually calls, so
    it wins over the account holder; the profile is the fallback. */
+function ctSelectedAddress() {
+  try { return JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) { return null; }
+}
+
 function ctCustomerContact() {
-  let address = null;
-  try { address = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+  const address = ctSelectedAddress();
   return {
-    name:  (address && address.receiverName)  || ctProfile.name  || '',
-    phone: (address && address.receiverPhone) || ctProfile.phone || ''
+    name: (address && (address.receiverName || address.name || address.contactName)) || ctProfile.name || '',
+    phone: (address && (address.receiverPhone || address.phone || address.mobile || address.contactPhone)) || ctProfile.phone || ''
   };
 }
 
+function ctAddressTag() {
+  const address = ctSelectedAddress();
+  return address ? (address.tag || address.label || 'Home') : '';
+}
+
 function ctAddressLine() {
-  let address = null;
-  try { address = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+  const address = ctSelectedAddress();
   if (!hasAddress() || !address) return '';
   return [address.house, address.area, address.landmark, address.city, address.pincode]
     .filter(Boolean).join(', ');
 }
 
 function paintDeliverySummary() {
-  // ETA comes from the restaurant record already cached for this cart.
   const eta = (ctResCache.data && ctResCache.data.etaText) || '';
   ctSetDetail('dd-eta', eta);
+
+  ctSetDetail('dd-tag', ctAddressTag(),
+    ctState.loggedIn ? 'Delivery location not selected' : 'Log in to add a delivery address');
+
+  ctSetDetail('dd-address', ctAddressLine(),
+    ctState.loggedIn ? 'No delivery address selected yet' : 'Log in to add a delivery address');
 
   const contact = ctCustomerContact();
   ctSetDetail('dd-name', contact.name);
   ctSetDetail('dd-phone', contact.phone);
-  ctSetDetail('dd-address', ctAddressLine(),
-    ctState.loggedIn ? 'No delivery address selected yet' : 'Log in to add a delivery address');
 }
 
 /* Only fires if the customer is logged in and neither earlier /profile call
@@ -2319,11 +2345,15 @@ async function ctEnsureProfile() {
   }
 }
 
-function openBillSheet() {
+async function openBillSheet() {
   openSheet('ct-bill-sheet', paintDeliverySummary);
-  ctEnsureProfile().then(() => {
-    if (ctSheet.openId === 'ct-bill-sheet') paintDeliverySummary();
-  });
+  const savedCart = readCart();
+  const restaurantId = getCartRestaurantId(savedCart);
+  const restaurantPromise = restaurantId
+    ? getRestaurantLocation(restaurantId, false)
+    : Promise.resolve(null);
+  await Promise.all([restaurantPromise, ctEnsureProfile()]);
+  if (ctSheet.openId === 'ct-bill-sheet') paintDeliverySummary();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
