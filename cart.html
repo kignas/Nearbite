@@ -570,6 +570,44 @@
   }
   .ct-btn-remove[hidden]{ display:none; }
 
+  /* ── Compact bill row + delivery details (Phase 3.1a) ─────────────── */
+  .ct-bill-peek{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .ct-bill-peek-val{
+    font-size:14.5px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink);
+    font-family:var(--font-micro); font-variant-numeric:tabular-nums;
+  }
+  .ct-bill-peek-val.is-pending{ color:var(--ct-muted); }
+
+  .ct-sheet-section{
+    margin-top:18px; padding-top:15px;
+    border-top:1px solid var(--ct-line-soft);
+  }
+  .ct-sheet-section-head{
+    display:flex; align-items:center; gap:7px; margin-bottom:2px;
+    font-size:12px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--ct-muted);
+  }
+  .ct-dd-row{
+    display:grid; grid-template-columns:26px 1fr; gap:0 11px;
+    align-items:start; padding:12px 0;
+    border-bottom:1px solid var(--ct-line-soft);
+  }
+  .ct-dd-row:last-child{ border-bottom:none; padding-bottom:2px; }
+  .ct-dd-ic{
+    width:26px; height:26px; border-radius:8px;
+    background:var(--ct-green-soft); color:var(--ct-green);
+    display:flex; align-items:center; justify-content:center; font-size:11px;
+  }
+  .ct-dd-label{
+    font-size:10.5px; font-weight:700; letter-spacing:.4px;
+    text-transform:uppercase; color:var(--ct-muted); line-height:1;
+  }
+  .ct-dd-val{
+    margin-top:5px; font-size:13px; font-weight:700;
+    color:var(--ct-ink); line-height:1.45; overflow-wrap:anywhere;
+  }
+  .ct-dd-val.is-empty{ font-weight:600; color:var(--ct-muted); }
+
   /* ── Coupon empty state ───────────────────────────────────────────── */
   .ct-empty-mini{ text-align:center; padding:20px 8px 4px; }
   .ct-empty-mini-ic{
@@ -698,45 +736,21 @@
       </div>
     </div>
 
-    <div class="ct-card">
-      <div class="ct-card-head"><i class="fa-solid fa-receipt"></i> Bill details</div>
-
-      <div class="ct-bill-row">
-        <span class="ct-bill-label">Item total</span>
-        <span class="ct-bill-val" id="bill-subtotal">₹0</span>
-      </div>
-
-      <div class="ct-bill-row" id="bill-mrp-row" style="display:none;">
-        <span class="ct-bill-label">Item MRP</span>
-        <span class="ct-bill-val" id="bill-mrp">₹0</span>
-      </div>
-
-      <div class="ct-bill-row is-saving" id="bill-savings-row" style="display:none;">
-        <span class="ct-bill-label">You save</span>
-        <span class="ct-bill-val" id="bill-savings-val">₹0</span>
-      </div>
-
-      <div class="ct-bill-row">
-        <span class="ct-bill-label">Delivery fee</span>
-        <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
-      </div>
-
-      <!-- Tip is the only new bill line. It appears only when the customer
-           actually selects one. There is deliberately no GST / packaging /
-           platform-fee row: the backend exposes no such value, and a real
-           coupon row can be added here when the coupon system has data. -->
-      <div class="ct-bill-row" id="bill-tip-row" style="display:none;">
-        <span class="ct-bill-label">Delivery partner tip</span>
-        <span class="ct-bill-val" id="bill-tip-val">&#8377;0</span>
-      </div>
-
-      <div id="bill-savings" style="display:none;"></div>
-
-      <div class="ct-bill-total">
-        <span class="ct-total-label">To pay</span>
-        <span class="ct-total-val" id="bill-total">₹0</span>
-      </div>
-    </div>
+    <!-- ── Bill details (compact) ─────────────────────────────────────
+         The full breakdown moved into #ct-bill-sheet. Every bill element id
+         is unchanged and simply lives inside the sheet now, so paintBill(),
+         applyTotals() and applyDelivery() keep writing to the same nodes. -->
+    <button type="button" class="ct-line-card tap" id="bill-card" aria-haspopup="dialog">
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-receipt"></i></span>
+      <span class="ct-line-copy">
+        <span class="ct-line-title">Bill details</span>
+        <span class="ct-line-sub" id="bill-compact-line">Item total &middot; Delivery fee</span>
+      </span>
+      <span class="ct-bill-peek">
+        <span class="ct-bill-peek-val" id="bill-peek-total">&#8377;0</span>
+        <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
+      </span>
+    </button>
   </div>
 
   <div class="ct-empty" id="empty-cart">
@@ -818,6 +832,98 @@
         <button type="button" class="ct-btn ct-btn-primary" id="note-save">Save note</button>
       </div>
       <button type="button" class="ct-btn-remove" id="note-remove" hidden>Remove note</button>
+    </div>
+  </div>
+
+  <div class="ct-sheet-root" id="ct-bill-sheet" hidden>
+    <div class="ct-scrim" data-sheet-close></div>
+    <div class="ct-sheet" role="dialog" aria-modal="true" aria-labelledby="bill-sheet-title">
+      <div class="ct-sheet-grab" aria-hidden="true"></div>
+      <div class="ct-sheet-head">
+        <h2 class="ct-sheet-title" id="bill-sheet-title">Bill details</h2>
+        <button type="button" class="ct-sheet-x" data-sheet-close data-autofocus aria-label="Close bill details"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      </div>
+
+      <div class="ct-sheet-body">
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Item total</span>
+          <span class="ct-bill-val" id="bill-subtotal">₹0</span>
+        </div>
+
+        <div class="ct-bill-row" id="bill-mrp-row" style="display:none;">
+          <span class="ct-bill-label">Item MRP</span>
+          <span class="ct-bill-val" id="bill-mrp">₹0</span>
+        </div>
+
+        <div class="ct-bill-row is-saving" id="bill-savings-row" style="display:none;">
+          <span class="ct-bill-label">You save</span>
+          <span class="ct-bill-val" id="bill-savings-val">₹0</span>
+        </div>
+
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Delivery fee</span>
+          <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
+        </div>
+
+        <!-- Tip is the only new bill line. It appears only when the customer
+             actually selects one. There is deliberately no GST / packaging /
+             platform-fee row: the backend exposes no such value, and a real
+             coupon row can be added here when the coupon system has data. -->
+        <div class="ct-bill-row" id="bill-tip-row" style="display:none;">
+          <span class="ct-bill-label">Delivery partner tip</span>
+          <span class="ct-bill-val" id="bill-tip-val">&#8377;0</span>
+        </div>
+
+        <div id="bill-savings" style="display:none;"></div>
+
+        <div class="ct-bill-total">
+          <span class="ct-total-label">To pay</span>
+          <span class="ct-total-val" id="bill-total">₹0</span>
+        </div>
+
+        <!-- Delivery details. Every value is read from data the cart already
+             holds (restaurant record, selected address, profile). Anything
+             genuinely missing renders as "Not available" — never invented. -->
+        <div class="ct-sheet-section">
+          <div class="ct-sheet-section-head"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Delivery details</div>
+
+          <div class="ct-dd-row">
+            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+            <span>
+              <span class="ct-dd-label">Estimated delivery time</span>
+              <span class="ct-dd-val" id="dd-eta">&mdash;</span>
+            </span>
+          </div>
+
+          <div class="ct-dd-row">
+            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
+            <span>
+              <span class="ct-dd-label">Name</span>
+              <span class="ct-dd-val" id="dd-name">&mdash;</span>
+            </span>
+          </div>
+
+          <div class="ct-dd-row">
+            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
+            <span>
+              <span class="ct-dd-label">Phone</span>
+              <span class="ct-dd-val" id="dd-phone">&mdash;</span>
+            </span>
+          </div>
+
+          <div class="ct-dd-row">
+            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+            <span>
+              <span class="ct-dd-label">Delivery address</span>
+              <span class="ct-dd-val" id="dd-address">&mdash;</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ct-sheet-foot is-single">
+        <button type="button" class="ct-btn ct-btn-ghost" data-sheet-close>Close</button>
+      </div>
     </div>
   </div>
 
@@ -967,6 +1073,57 @@ function getCartRestaurantId(savedCart) {
    as before. Only repeated +/- taps are spared the round trip. */
 let ctResCache = { id: null, data: null };
 
+/* The restaurant document is the only source for the ETA. Field naming
+   varies across the collection, so the known shapes are read in order and
+   anything unrecognised yields '' (rendered as "Not available"). No range,
+   padding or default is ever synthesised here. */
+function ctEtaText(restaurant) {
+  if (!restaurant || typeof restaurant !== 'object') return '';
+
+  const direct = restaurant.deliveryTime != null ? restaurant.deliveryTime
+               : restaurant.deliveryTimeText != null ? restaurant.deliveryTimeText
+               : restaurant.estimatedDeliveryTime != null ? restaurant.estimatedDeliveryTime
+               : restaurant.eta;
+
+  // Already a display string, e.g. "25-35 mins"
+  if (typeof direct === 'string' && direct.trim()) {
+    const text = direct.trim().replace(/-/g, '–');
+    return /min|hr|hour/i.test(text) ? text : text + ' mins';
+  }
+
+  // A real min/max pair on the record
+  const pair = (direct && typeof direct === 'object') ? direct : restaurant;
+  const min = Number(pair.deliveryTimeMin != null ? pair.deliveryTimeMin : pair.min);
+  const max = Number(pair.deliveryTimeMax != null ? pair.deliveryTimeMax : pair.max);
+  if (Number.isFinite(min) && min > 0 && Number.isFinite(max) && max > 0 && max >= min) {
+    return Math.round(min) + '–' + Math.round(max) + ' mins';
+  }
+
+  // A single number of minutes
+  const single = Number(
+    typeof direct === 'number' ? direct
+    : restaurant.deliveryTimeMinutes != null ? restaurant.deliveryTimeMinutes
+    : restaurant.avgDeliveryTime
+  );
+  if (Number.isFinite(single) && single > 0) return Math.round(single) + ' mins';
+
+  return '';
+}
+
+/* Name and phone are captured from the /profile responses the cart already
+   makes. No extra request is added to the render path; the bill sheet tops
+   this up lazily only if it is still empty. */
+const ctProfile = { name: '', phone: '', fetched: false };
+
+function ctCaptureProfile(user) {
+  if (!user || typeof user !== 'object') return;
+  const name = user.name || user.fullName || user.customerName || '';
+  const phone = user.phone || user.mobile || user.phoneNumber || '';
+  if (name) ctProfile.name = String(name).trim();
+  if (phone) ctProfile.phone = String(phone).trim();
+  ctProfile.fetched = true;
+}
+
 async function getRestaurantLocation(restaurantId, force) {
   if (!restaurantId) return null;
   if (!force && ctResCache.id === restaurantId && ctResCache.data) return ctResCache.data;
@@ -981,6 +1138,7 @@ async function getRestaurantLocation(restaurantId, force) {
       freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
       deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
       codEnabled: restaurant.codEnabled === true,
+      etaText: ctEtaText(restaurant),
     };
     ctResCache = { id: restaurantId, data: parsed };
     return parsed;
@@ -1018,6 +1176,7 @@ async function calculateCurrentDelivery(options) {
       const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
       const result = await response.json();
       if (response.ok && result.success) {
+        ctCaptureProfile(result.data);
         const list = Array.isArray(result.data?.addresses) ? result.data.addresses : [];
         const selected = list.find(a => String(a._id) === String(selectedAddressId));
         if (selected) {
@@ -1324,8 +1483,34 @@ function applyTotals() {
     tipVal.textContent = '₹' + tip;
   }
 
+  // One number, written everywhere it appears: the sheet's "To pay", the
+  // compact row and the checkout CTA can never disagree.
   document.getElementById('bill-total').innerText = '₹' + total;
   document.getElementById('checkout-total').innerText = '₹' + total;
+  updateBillCompact(total);
+}
+
+/* Collapsed summary of the same figures shown in the sheet. */
+function updateBillCompact(total) {
+  const peek = document.getElementById('bill-peek-total');
+  if (peek) {
+    peek.textContent = '₹' + total;
+    peek.classList.toggle('is-pending', !ctState.deliveryReady);
+  }
+
+  const line = document.getElementById('bill-compact-line');
+  if (!line) return;
+
+  const parts = ['Item total ₹' + ctState.subtotal];
+  if (ctState.unavailable)          parts.push('Delivery unavailable');
+  else if (!ctState.deliveryReady)  parts.push('Delivery …');
+  else if (ctState.deliveryFee === 0) parts.push('Free delivery');
+  else                              parts.push('Delivery ₹' + ctState.deliveryFee);
+
+  const tip = ctCleanTip(ctState.tipAmount);
+  if (tip > 0) parts.push('Tip ₹' + tip);
+
+  line.textContent = parts.join(' · ');
 }
 
 /* ── Delivery presentation ──────────────────────────────────────────────── */
@@ -1560,6 +1745,7 @@ async function loadAddress() {
       const result = await response.json();
       if (response.ok && result.success) {
         const user = result.data || {};
+        ctCaptureProfile(user);
         const selectedId = localStorage.getItem('nearbite_selected_address_id');
         const addressList = Array.isArray(user.addresses) ? user.addresses : [];
         const address = (selectedId && addressList.find(a => String(a._id) === String(selectedId))) ||
@@ -2068,6 +2254,79 @@ function removeTipSheet() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   BILL DETAILS SHEET
+   The bill rows themselves are painted by the existing paintBill() /
+   applyTotals() / applyDelivery() — this only fills the delivery-details
+   block, from data the cart already has. Nothing here is fabricated: a
+   missing value renders as "Not available".
+   ═══════════════════════════════════════════════════════════════════════ */
+const CT_UNAVAILABLE = 'Not available';
+
+function ctSetDetail(id, value, emptyText) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = (value == null ? '' : String(value)).trim();
+  el.textContent = text || (emptyText || CT_UNAVAILABLE);
+  el.classList.toggle('is-empty', !text);
+}
+
+/* The receiver on the selected address is who the rider actually calls, so
+   it wins over the account holder; the profile is the fallback. */
+function ctCustomerContact() {
+  let address = null;
+  try { address = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+  return {
+    name:  (address && address.receiverName)  || ctProfile.name  || '',
+    phone: (address && address.receiverPhone) || ctProfile.phone || ''
+  };
+}
+
+function ctAddressLine() {
+  let address = null;
+  try { address = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+  if (!hasAddress() || !address) return '';
+  return [address.house, address.area, address.landmark, address.city, address.pincode]
+    .filter(Boolean).join(', ');
+}
+
+function paintDeliverySummary() {
+  // ETA comes from the restaurant record already cached for this cart.
+  const eta = (ctResCache.data && ctResCache.data.etaText) || '';
+  ctSetDetail('dd-eta', eta);
+
+  const contact = ctCustomerContact();
+  ctSetDetail('dd-name', contact.name);
+  ctSetDetail('dd-phone', contact.phone);
+  ctSetDetail('dd-address', ctAddressLine(),
+    ctState.loggedIn ? 'No delivery address selected yet' : 'Log in to add a delivery address');
+}
+
+/* Only fires if the customer is logged in and neither earlier /profile call
+   happened to run. Reuses the existing endpoint; failure is silent and the
+   fields simply stay unavailable. */
+async function ctEnsureProfile() {
+  if (ctProfile.fetched) return;
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  if (!token) return;
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const result = await response.json();
+    if (response.ok && result.success) ctCaptureProfile(result.data);
+  } catch (e) {
+    console.warn('Could not load customer details for the bill sheet:', e);
+  }
+}
+
+function openBillSheet() {
+  openSheet('ct-bill-sheet', paintDeliverySummary);
+  ctEnsureProfile().then(() => {
+    if (ctSheet.openId === 'ct-bill-sheet') paintDeliverySummary();
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    WIRING — one delegated listener for every new control.
    ═══════════════════════════════════════════════════════════════════════ */
 document.addEventListener('click', (event) => {
@@ -2089,6 +2348,8 @@ document.addEventListener('click', (event) => {
 
   const noteCard = target.closest('.ct-line-card[data-note-field]');
   if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
+
+  if (target.closest('#bill-card')) { openBillSheet(); return; }
 
   if (target.closest('#coupon-card')) { openSheet('ct-coupon-sheet'); return; }
 
@@ -2130,6 +2391,7 @@ window.addEventListener('storage',(e)=>{
 window.addEventListener('nearbite:address-changed',()=>{
   ctAddrHydratedFor = null;
   loadAddress(); renderCart();
+  if (ctSheet.openId === 'ct-bill-sheet') paintDeliverySummary();
 });
 window.addEventListener('resize', syncFooterOffset);
 
