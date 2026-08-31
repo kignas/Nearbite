@@ -11,75 +11,265 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
+/* ==================================================================
+   PROFILE PAGE — page-scoped styles.
+   Loaded BEFORE style.css, so style.css wins every tie. Two rules
+   were colliding and have been resolved by scoping, not by !important:
+     .card     -> style.css forces border-radius:16px !important and its
+                  own shadow, so this page's --radius/--shadow were dead.
+                  Renamed to .pf-card here; the global .card is untouched
+                  for every other page that uses it.
+     .skeleton -> style.css owns the shimmer. This page no longer
+                  redefines it, it only adds sizing where it is used.
+   ================================================================== */
+
 :root{
-  --brand:#fc8019;--brand-soft:#fff3e9;--ink:#111827;--muted:#6b7280;
-  --soft:#f7f7f8;--line:#eceef1;--danger:#dc2626;--white:#fff;
-  --shadow:0 8px 30px rgba(17,24,39,.06);--radius:20px
+  --brand:#FC8019;--brand-soft:#FFF3E9;--brand-ink:#C2570B;
+  --ink:#111827;--ink-2:#374151;--muted:#6B7280;--faint:#9CA3AF;
+  --soft:#F6F7F9;--line:#ECEEF1;--line-soft:#F3F4F6;
+  --ok:#15803D;--ok-soft:#E9F7EF;--danger:#DC2626;--danger-soft:#FEF2F2;
+  --white:#fff;
+  --pf-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 16px rgba(17,24,39,.05);
+  --pf-radius:18px;
+  --pf-gutter:14px;
 }
+@media (max-width:374px){ :root{ --pf-gutter:12px } }
+
 *{box-sizing:border-box}
-html{background:var(--soft)}
-body{margin:0;background:var(--soft);color:var(--ink);font-family:var(--font-sans),sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:92px}
+html{background:var(--soft);scroll-behavior:smooth}
+body{
+  margin:0;background:var(--soft);color:var(--ink);
+  font-family:var(--font-sans),sans-serif;-webkit-font-smoothing:antialiased;
+  padding-bottom:calc(70px + 26px + env(safe-area-inset-bottom));
+}
 button,a,input{font:inherit}
 button{cursor:pointer}
 a{text-decoration:none;color:inherit}
 .app{max-width:720px;margin:auto;min-height:100dvh}
-.header{background:var(--white);padding:14px 16px 18px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
+
+/* ---------- Header + identity ---------------------------------- */
+/* Not sticky: it contains the hero, so pinning it would hold ~150px
+   of the viewport for the whole scroll. */
+.header{
+  background:var(--white);
+  padding:14px var(--pf-gutter) 20px;
+  border-bottom:1px solid var(--line);
+}
 .top{display:flex;align-items:center;justify-content:space-between}
-.title{font-size:17px;font-weight:800}
+.title{font-size:16px;font-weight:800;letter-spacing:-.2px}
 .top-actions{display:flex;gap:8px}
-.icon-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#4b5563;display:grid;place-items:center}
-.profile-hero{margin-top:16px;display:flex;align-items:center;gap:14px}
-.avatar{width:64px;height:64px;border-radius:20px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:800;overflow:hidden;flex:none}
+.icon-btn{
+  width:38px;height:38px;border:1px solid var(--line);border-radius:12px;
+  background:#fff;color:#4B5563;display:grid;place-items:center;
+  transition:background .15s ease,transform .12s ease;
+}
+.icon-btn:active{transform:scale(.94);background:var(--soft)}
+.icon-btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+.profile-hero{margin-top:18px;display:flex;align-items:center;gap:14px;min-width:0}
+.avatar{
+  width:62px;height:62px;border-radius:20px;flex:none;
+  background:linear-gradient(145deg,#FF9B45,#F2760C);
+  color:#fff;display:grid;place-items:center;
+  font-size:24px;font-weight:800;letter-spacing:-.5px;
+  overflow:hidden;box-shadow:0 6px 16px rgba(242,118,12,.28);
+}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.user h1{margin:0;font-size:21px;letter-spacing:-.4px}
-.user p{margin:5px 0 0;color:var(--muted);font-size:12px}
-.verified{display:inline-flex;align-items:center;gap:5px;margin-top:8px;color:#15803d;font-size:10px;font-weight:800}
-.content{padding:14px 14px 24px}
-.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.section{margin-top:18px}
+.user{min-width:0;flex:1}
+.user h1{
+  margin:0;font-size:21px;font-weight:800;letter-spacing:-.45px;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.user p{
+  margin:4px 0 0;color:var(--muted);font-size:12.5px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+/* Verified reads as a status pill, not loose green text. */
+.verified{
+  display:inline-flex;align-items:center;gap:5px;margin-top:9px;
+  padding:4px 9px;border-radius:999px;
+  background:var(--ok-soft);color:var(--ok);
+  font-size:10.5px;font-weight:800;letter-spacing:.2px;
+  max-width:100%;overflow:hidden;
+}
+.verified i{font-size:10px;flex:none}
+.verified span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- Quick actions -------------------------------------- */
+/* A light shortcut strip, not a dashboard. Every tile points at a
+   destination that already exists. */
+.quick{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:9px;
+  padding:0 var(--pf-gutter);margin-top:-16px;position:relative;z-index:1;
+}
+.quick-tile{
+  background:var(--white);border:1px solid var(--line);border-radius:15px;
+  box-shadow:var(--pf-shadow);
+  padding:13px 8px 11px;display:flex;flex-direction:column;
+  align-items:center;gap:7px;min-width:0;
+  transition:transform .13s ease,box-shadow .13s ease;
+}
+.quick-tile:active{transform:scale(.97);box-shadow:0 1px 2px rgba(17,24,39,.05)}
+.quick-tile:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.quick-ico{
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:var(--brand-soft);color:var(--brand-ink);font-size:14px;
+}
+.quick-tile span{
+  font-size:11.5px;font-weight:700;color:var(--ink-2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;
+}
+
+/* ---------- Sections + rows ------------------------------------ */
+.content{padding:18px var(--pf-gutter) 26px}
+.pf-card{
+  background:var(--white);border:1px solid var(--line);
+  border-radius:var(--pf-radius);box-shadow:var(--pf-shadow);overflow:hidden;
+}
+.section{margin-top:20px;scroll-margin-top:14px}
 .section:first-child{margin-top:0}
-.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#9ca3af;font-weight:800;margin:0 4px 9px}
-.row{display:flex;align-items:center;gap:13px;padding:16px;border-bottom:1px solid var(--line);min-height:68px}
+.section-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--faint);font-weight:800;margin:0 4px 9px;
+}
+
+.row{
+  display:flex;align-items:center;gap:13px;
+  padding:14px 15px;border-bottom:1px solid var(--line-soft);min-height:64px;
+  transition:background .13s ease;
+}
 .row:last-child{border-bottom:0}
-.row-icon{width:40px;height:40px;border-radius:13px;background:#f7f7f8;display:grid;place-items:center;color:#4b5563;flex:none}
+a.row:active,button.row:active{background:var(--soft)}
+a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.row-icon{
+  width:38px;height:38px;border-radius:12px;background:var(--soft);
+  display:grid;place-items:center;color:#4B5563;font-size:14px;flex:none;
+}
 .row-main{min-width:0;flex:1}
-.row-title{font-size:13px;font-weight:800}
-.row-sub{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chev{color:#c4c8ce;font-size:11px}
-.edit-btn{border:0;background:var(--brand-soft);color:#d8610d;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800}
-.skeleton{height:14px;width:150px;border-radius:8px;background:linear-gradient(90deg,#f1f1f2 25%,#fafafa 50%,#f1f1f2 75%);background-size:300px 100%;animation:sh 1.2s infinite}
-@keyframes sh{to{background-position:300px 0}}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;padding:12px}
-.modal.show{display:flex}
-.sheet{width:min(520px,100%);margin:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.sheet h2{font-size:18px;margin:0}
-.sheet p{font-size:12px;color:var(--muted);line-height:1.5}
-.field{margin-top:14px}
-.field label{display:block;font-size:11px;font-weight:800;color:#4b5563;margin-bottom:7px}
-.field input{width:100%;height:48px;border:1px solid var(--line);border-radius:13px;padding:0 13px;outline:none;background:#fafafa}
-.field input:focus{border-color:#f5a36d;background:#fff}
-.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
-.btn{height:46px;border-radius:13px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12px}
-.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
-.btn:disabled{opacity:.5}
-.error{color:var(--danger);font-size:11px;margin-top:9px;min-height:15px}
-.logout{color:var(--danger)}
-.bottom{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-.nav{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);height:70px}
-.nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#9ca3af;font-size:10px;font-weight:800}
-.nav a.active{color:var(--brand)}
-.nav i{font-size:18px}
-.fav-list{margin-top:2px}
-.fav-list .es-card-wrap{margin-left:0;margin-right:0;margin-bottom:12px}
+
+/* Label above, value below — the value is what the user is scanning for,
+   so it carries the weight. Markup and IDs are unchanged. */
+.row-title{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:.02em}
+.row-sub{
+  font-size:13.5px;font-weight:700;color:var(--ink);margin-top:3px;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* Navigation rows read the other way round: title leads, sub describes. */
+.row.is-nav .row-title{font-size:13.5px;font-weight:700;color:var(--ink);letter-spacing:-.1px}
+.row.is-nav .row-sub{font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+
+.row-sub .skeleton{display:inline-block;height:13px;width:150px;vertical-align:middle}
+
+.chev{color:#C8CDD4;font-size:11px;flex:none}
+.edit-btn{
+  border:1px solid #F6DCC6;background:var(--brand-soft);color:var(--brand-ink);
+  border-radius:10px;padding:7px 12px;font-size:11.5px;font-weight:800;flex:none;
+  transition:transform .12s ease,filter .12s ease;
+}
+.edit-btn:active{transform:scale(.94);filter:brightness(.97)}
+.edit-btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+/* The phone is verified and deliberately not editable — say so, quietly. */
+.locked{
+  display:inline-flex;align-items:center;gap:5px;flex:none;
+  color:var(--faint);font-size:10.5px;font-weight:700;
+}
+.locked i{font-size:10px}
+
+/* ---------- Logout --------------------------------------------- */
+.logout{width:100%;background:#fff;border:0;text-align:left}
+.logout .row-icon{background:var(--danger-soft);color:var(--danger)}
+.logout .row-title{color:var(--danger);font-size:13.5px;font-weight:700;letter-spacing:-.1px}
+.logout .row-sub{font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+.logout:active{background:var(--danger-soft)}
+
+/* ---------- Favourites ----------------------------------------- */
+.fav-list{padding:4px}
+.fav-list .es-card-wrap{margin:0 0 10px}
 .fav-list .es-card-wrap:last-child{margin-bottom:0}
-.fav-empty{padding:26px 18px 24px;text-align:center}
-.fav-empty i{font-size:22px;color:#c9cdd4}
-.fav-empty h3{margin:11px 0 0;font-size:14px;font-weight:800}
-.fav-empty p{margin:5px 0 14px;font-size:11px;color:var(--muted)}
-.fav-cta{display:inline-block;border:0;background:var(--brand);color:#fff;border-radius:12px;padding:11px 18px;font-size:12px;font-weight:800}
-.fav-note{padding:18px;text-align:center;font-size:11px;color:var(--muted)}
-.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:#111827;color:#fff;padding:11px 14px;border-radius:12px;font-size:11px;z-index:120;transition:.2s;white-space:nowrap}
+
+.fav-empty{padding:34px 22px 30px;text-align:center}
+.fav-empty i{
+  display:grid;place-items:center;width:52px;height:52px;margin:0 auto;
+  border-radius:50%;background:var(--brand-soft);color:#E8863A;font-size:20px;
+}
+.fav-empty h3{margin:14px 0 0;font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
+.fav-empty p{margin:6px auto 16px;font-size:12px;font-weight:500;color:var(--muted);line-height:1.5;max-width:34ch}
+.fav-cta{
+  display:inline-block;border:0;background:var(--brand);color:#fff;
+  border-radius:12px;padding:11px 20px;font-size:12.5px;font-weight:800;
+  box-shadow:0 4px 12px rgba(252,128,25,.26);
+  transition:transform .13s ease,filter .13s ease;
+}
+.fav-cta:active{transform:scale(.96);filter:brightness(.96)}
+.fav-cta:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* Loading state: a calm shimmer bar rather than bare text. */
+.fav-note{
+  padding:26px 18px;text-align:center;
+  font-size:12px;font-weight:600;color:var(--muted);
+}
+.fav-note::before{
+  content:'';display:block;width:110px;height:9px;margin:0 auto 12px;
+  border-radius:6px;
+  background:linear-gradient(90deg,#F0F0F2 25%,#E6E6EA 50%,#F0F0F2 75%);
+  background-size:1200px 100%;animation:shimmer 1.5s infinite linear;
+}
+
+/* ---------- Edit sheet ----------------------------------------- */
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:100;display:none;align-items:flex-end;padding:12px}
+.modal.show{display:flex}
+.sheet{
+  width:min(520px,100%);margin:auto;background:#fff;border-radius:22px;
+  padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.sheet h2{font-size:18px;font-weight:800;margin:0;letter-spacing:-.3px}
+.sheet p{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0}
+.field{margin-top:14px}
+.field label{display:block;font-size:11px;font-weight:800;color:#4B5563;margin-bottom:7px}
+.field input{width:100%;height:48px;border:1px solid var(--line);border-radius:13px;padding:0 13px;outline:none;background:#FAFAFB}
+.field input:focus{border-color:#F5A36D;background:#fff;box-shadow:0 0 0 3px rgba(252,128,25,.12)}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
+.btn{height:46px;border-radius:13px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12.5px}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;transform:none}
+.error{color:var(--danger);font-size:11.5px;font-weight:600;margin-top:9px;min-height:15px}
+
+/* ---------- Bottom nav ----------------------------------------- */
+.bottom{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(18px);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
+}
+.nav{max-width:720px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);height:70px}
+.nav a{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  color:var(--faint);font-size:10px;font-weight:700;position:relative;
+}
+.nav a.active{color:var(--brand);font-weight:800}
+.nav a.active::before{
+  content:'';position:absolute;top:0;width:26px;height:3px;border-radius:0 0 3px 3px;
+  background:var(--brand);
+}
+.nav i{font-size:18px}
+.nav a:focus-visible{outline:2px solid var(--brand);outline-offset:-4px}
+
+.toast{
+  position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));
+  transform:translate(-50%,15px);opacity:0;pointer-events:none;
+  background:#111827;color:#fff;padding:11px 15px;border-radius:12px;
+  font-size:11.5px;font-weight:600;z-index:120;transition:.2s;white-space:nowrap;
+}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- Reduced motion ------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .icon-btn,.quick-tile,.edit-btn,.fav-cta,.btn,.row{transition:none}
+  .icon-btn:active,.quick-tile:active,.edit-btn:active,
+  .fav-cta:active,.btn:active{transform:none}
+  .fav-note::before{animation:none;background:#F0F0F2}
+}
 </style>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="restaurant-card.css">
@@ -99,27 +289,33 @@ a{text-decoration:none;color:inherit}
     <div class="user">
       <h1 id="userName">Nearbite User</h1>
       <p id="userPhone">Loading account…</p>
-      <div class="verified"><i class="fa-solid fa-circle-check"></i><span id="verifiedText">Verified phone account</span></div>
+      <div class="verified"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span id="verifiedText">Verified phone account</span></div>
     </div>
   </div>
 </header>
 
+<div class="quick">
+  <a class="quick-tile" href="orders.html"><span class="quick-ico"><i class="fa-solid fa-receipt" aria-hidden="true"></i></span><span>Orders</span></a>
+  <a class="quick-tile" href="address.html"><span class="quick-ico"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span><span>Addresses</span></a>
+  <a class="quick-tile" href="#favSection"><span class="quick-ico"><i class="fa-solid fa-heart" aria-hidden="true"></i></span><span>Favourites</span></a>
+</div>
+
 <main class="content">
   <section class="section">
     <div class="section-title">Your account</div>
-    <div class="card">
+    <div class="pf-card">
       <div class="row">
-        <div class="row-icon"><i class="fa-regular fa-user"></i></div>
+        <div class="row-icon"><i class="fa-regular fa-user" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Name</div><div class="row-sub" id="nameValue"><span class="skeleton"></span></div></div>
         <button class="edit-btn" id="editProfileBtn">Edit</button>
       </div>
       <div class="row">
-        <div class="row-icon"><i class="fa-solid fa-phone"></i></div>
+        <div class="row-icon"><i class="fa-solid fa-phone" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Mobile number</div><div class="row-sub" id="phoneValue"><span class="skeleton"></span></div></div>
-        <i class="fa-solid fa-lock" style="color:#c4c8ce;font-size:11px"></i>
+        <span class="locked"><i class="fa-solid fa-lock" aria-hidden="true"></i>Verified</span>
       </div>
       <div class="row">
-        <div class="row-icon"><i class="fa-regular fa-envelope"></i></div>
+        <div class="row-icon"><i class="fa-regular fa-envelope" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Email</div><div class="row-sub" id="emailValue">Not added</div></div>
         <button class="edit-btn" id="editEmailBtn">Edit</button>
       </div>
@@ -128,23 +324,23 @@ a{text-decoration:none;color:inherit}
 
   <section class="section">
     <div class="section-title">Orders & delivery</div>
-    <div class="card">
-      <a class="row" href="orders.html">
-        <div class="row-icon"><i class="fa-solid fa-receipt"></i></div>
+    <div class="pf-card">
+      <a class="row is-nav" href="orders.html">
+        <div class="row-icon"><i class="fa-solid fa-receipt" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Your orders</div><div class="row-sub">Track previous orders and reorder</div></div>
-        <i class="fa-solid fa-chevron-right chev"></i>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
-      <a class="row" href="address.html">
-        <div class="row-icon"><i class="fa-solid fa-location-dot"></i></div>
+      <a class="row is-nav" href="address.html">
+        <div class="row-icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Saved delivery addresses</div><div class="row-sub" id="addressSummary">Manage your saved locations</div></div>
-        <i class="fa-solid fa-chevron-right chev"></i>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="favSection">
     <div class="section-title">Favourites</div>
-    <div class="card" id="favoritesCard">
+    <div class="pf-card" id="favoritesCard">
       <div class="fav-note" id="favoritesStatus">Loading your saved restaurants…</div>
       <div class="fav-list" id="favoritesList" hidden></div>
     </div>
@@ -152,26 +348,26 @@ a{text-decoration:none;color:inherit}
 
   <section class="section">
     <div class="section-title">Help & policies</div>
-    <div class="card">
-      <a class="row" href="support.html">
-        <div class="row-icon"><i class="fa-solid fa-headset"></i></div>
+    <div class="pf-card">
+      <a class="row is-nav" href="support.html">
+        <div class="row-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Help & customer care</div><div class="row-sub">Get help with an order or account</div></div>
-        <i class="fa-solid fa-chevron-right chev"></i>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
-      <a class="row" href="legal.html">
-        <div class="row-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <a class="row is-nav" href="legal.html">
+        <div class="row-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Terms, privacy & refunds</div><div class="row-sub">Read Nearbite policies</div></div>
-        <i class="fa-solid fa-chevron-right chev"></i>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
     </div>
   </section>
 
   <section class="section">
-    <div class="card">
-      <button class="row logout" id="logoutBtn" style="width:100%;background:#fff;border:0;text-align:left">
-        <div class="row-icon" style="background:#fff1f2;color:#dc2626"><i class="fa-solid fa-right-from-bracket"></i></div>
+    <div class="pf-card">
+      <button class="row is-nav logout" id="logoutBtn" type="button">
+        <div class="row-icon"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></div>
         <div class="row-main"><div class="row-title">Log out</div><div class="row-sub">Sign out of this device</div></div>
-        <i class="fa-solid fa-chevron-right chev"></i>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </button>
     </div>
   </section>
@@ -181,7 +377,7 @@ a{text-decoration:none;color:inherit}
   <div class="nav">
     <a href="index.html"><i class="fa-solid fa-bowl-food"></i><span>Explore</span></a>
     <a href="under99.html"><i class="fa-solid fa-tag"></i><span>99 Store</span></a>
-    <a href="orders.html"><i class="fa-solid fa-receipt"></i><span>Orders</span></a>
+    <a href="orders.html"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Orders</span></a>
     <a href="profile.html" class="active"><i class="fa-solid fa-circle-user"></i><span>Account</span></a>
   </div>
 </nav>
