@@ -570,48 +570,54 @@
   }
   .ct-btn-remove[hidden]{ display:none; }
 
-  /* ── Compact bill row + delivery details (Phase 3.1a) ─────────────── */
+  /* ── Checkout delivery summary ─────────────────────────────────────── */
+  .ct-delivery-eta-card{
+    display:flex; align-items:center; gap:13px;
+    min-height:72px;
+    padding:14px 16px;
+  }
+  .ct-delivery-eta-icon,
+  .ct-customer-icon{
+    width:40px; height:40px; flex:0 0 40px;
+    border-radius:13px;
+    background:var(--ct-green-soft);
+    color:var(--ct-green);
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px;
+  }
+  .ct-delivery-eta-copy{ min-width:0; }
+  .ct-delivery-eta-title{
+    font-size:15px; line-height:1.35; color:var(--ct-ink);
+    font-weight:600;
+  }
+  .ct-delivery-eta-title strong{ font-weight:800; }
+  .ct-delivery-eta-sub{
+    margin-top:3px; font-size:11.5px; color:var(--ct-muted); font-weight:500;
+  }
+  .ct-customer-card{
+    display:flex; align-items:center; gap:12px;
+    min-height:70px;
+    padding:13px 16px;
+  }
+  .ct-customer-copy{ min-width:0; flex:1; }
+  .ct-customer-name{
+    font-size:14px; font-weight:800; color:var(--ct-ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-customer-phone{
+    margin-top:3px; font-size:12px; font-weight:600; color:var(--ct-muted);
+  }
+  .ct-customer-chevron{
+    color:#aeb6bd; font-size:12px; padding-left:4px;
+  }
+
+  /* ── Compact bill row ───────────────────────────────────────────────── */
   .ct-bill-peek{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
   .ct-bill-peek-val{
     font-size:14.5px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink);
     font-family:var(--font-micro); font-variant-numeric:tabular-nums;
   }
   .ct-bill-peek-val.is-pending{ color:var(--ct-muted); }
-
-  .ct-sheet-section{
-    margin-top:18px; padding-top:15px;
-    border-top:1px solid var(--ct-line-soft);
-  }
-  .ct-sheet-section-head{
-    display:flex; align-items:center; gap:7px; margin-bottom:2px;
-    font-size:12px; font-weight:800; letter-spacing:.5px;
-    text-transform:uppercase; color:var(--ct-muted);
-  }
-  .ct-dd-row{
-    display:grid; grid-template-columns:26px 1fr; gap:0 11px;
-    align-items:start; padding:12px 0;
-    border-bottom:1px solid var(--ct-line-soft);
-  }
-  .ct-dd-row:last-child{ border-bottom:none; padding-bottom:2px; }
-  .ct-dd-ic{
-    width:26px; height:26px; border-radius:8px;
-    background:var(--ct-green-soft); color:var(--ct-green);
-    display:flex; align-items:center; justify-content:center; font-size:11px;
-  }
-  .ct-dd-label{
-    font-size:10.5px; font-weight:700; letter-spacing:.4px;
-    text-transform:uppercase; color:var(--ct-muted); line-height:1;
-  }
-  .ct-dd-val{
-    margin-top:5px; font-size:13px; font-weight:700;
-    color:var(--ct-ink); line-height:1.45; overflow-wrap:anywhere;
-  }
-  .ct-dd-val.is-empty{ font-weight:600; color:var(--ct-muted); }
-  .ct-dd-address{
-    display:block; margin-top:4px; font-size:12.5px; font-weight:500;
-    line-height:1.45; color:var(--ct-muted); overflow-wrap:anywhere;
-  }
-  .ct-dd-address.is-empty{ color:var(--ct-muted); }
 
   /* ── Coupon empty state ───────────────────────────────────────────── */
   .ct-empty-mini{ text-align:center; padding:20px 8px 4px; }
@@ -670,6 +676,17 @@
 
   <div id="cart-has-items">
 
+    <!-- ── Delivery ETA ─────────────────────────────────────────────────── -->
+    <div class="ct-card ct-delivery-eta-card" id="delivery-eta-card" aria-live="polite">
+      <div class="ct-delivery-eta-icon" aria-hidden="true">
+        <i class="fa-regular fa-clock"></i>
+      </div>
+      <div class="ct-delivery-eta-copy">
+        <div class="ct-delivery-eta-title">Delivery in <strong id="checkout-eta">35–40 mins</strong></div>
+        <div class="ct-delivery-eta-sub">Estimated delivery time</div>
+      </div>
+    </div>
+
     <div class="ct-card tap" id="address-block" onclick="window.location.href='address.html?return=cart'">
       <div class="ct-addr">
         <div class="ct-addr-pin"><i class="fa-solid fa-location-dot"></i></div>
@@ -680,6 +697,16 @@
         <span class="ct-change">CHANGE <i class="fa-solid fa-chevron-right" style="font-size:9px;"></i></span>
         <div class="ct-addr-text ct-prompt" id="address-display-text">Tap to add your delivery address</div>
       </div>
+    </div>
+
+    <!-- ── Customer contact ─────────────────────────────────────────────── -->
+    <div class="ct-card ct-customer-card" id="customer-contact-card">
+      <div class="ct-customer-icon" aria-hidden="true"><i class="fa-regular fa-user"></i></div>
+      <div class="ct-customer-copy">
+        <div class="ct-customer-name" id="checkout-customer-name">Customer</div>
+        <div class="ct-customer-phone" id="checkout-customer-phone">Phone number</div>
+      </div>
+      <i class="fa-solid fa-chevron-right ct-customer-chevron" aria-hidden="true"></i>
     </div>
 
     <div class="ct-card" id="cart-items-list"></div>
@@ -886,43 +913,6 @@
           <span class="ct-total-val" id="bill-total">₹0</span>
         </div>
 
-        <!-- Delivery details first: ETA -> delivery location -> customer -> phone. -->
-        <div class="ct-sheet-section ct-delivery-section">
-          <div class="ct-sheet-section-head"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Delivery details</div>
-
-          <div class="ct-dd-row">
-            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
-            <span>
-              <span class="ct-dd-label">Estimated delivery time</span>
-              <span class="ct-dd-val" id="dd-eta">&mdash;</span>
-            </span>
-          </div>
-
-          <div class="ct-dd-row">
-            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
-            <span>
-              <span class="ct-dd-label">Delivery at</span>
-              <span class="ct-dd-val" id="dd-tag">&mdash;</span>
-              <span class="ct-dd-address" id="dd-address">&mdash;</span>
-            </span>
-          </div>
-
-          <div class="ct-dd-row">
-            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
-            <span>
-              <span class="ct-dd-label">Customer name</span>
-              <span class="ct-dd-val" id="dd-name">&mdash;</span>
-            </span>
-          </div>
-
-          <div class="ct-dd-row">
-            <span class="ct-dd-ic" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
-            <span>
-              <span class="ct-dd-label">Phone number</span>
-              <span class="ct-dd-val" id="dd-phone">&mdash;</span>
-            </span>
-          </div>
-        </div>
       </div>
 
       <div class="ct-sheet-foot is-single">
@@ -1154,7 +1144,7 @@ async function getRestaurantLocation(restaurantId, force) {
       freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
       deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
       codEnabled: restaurant.codEnabled === true,
-      etaText: ctEtaText(restaurant),
+      etaText: '35–40 mins',
     };
     ctResCache = { id: restaurantId, data: parsed };
     return parsed;
@@ -1696,6 +1686,8 @@ async function renderCart() {
   paintBill(savedCart);    // instant
   syncFooterOffset();
   await refreshDelivery(); // network, guarded
+  paintCheckoutDeliverySummary();
+  await ctEnsureProfile();
 }
 
 /* Repaints only — used by +/- so the tap never waits on a request. */
@@ -1704,6 +1696,7 @@ function repaintCart() {
   if (!savedCart || Object.keys(savedCart).length === 0) { renderCart(); return; }
   paintItems(savedCart);
   paintBill(savedCart);
+  paintCheckoutDeliverySummary();
   syncFooterOffset();
 }
 
@@ -2312,48 +2305,58 @@ function ctAddressLine() {
     .filter(Boolean).join(', ');
 }
 
-function paintDeliverySummary() {
-  const eta = (ctResCache.data && ctResCache.data.etaText) || '';
-  ctSetDetail('dd-eta', eta);
+function paintCheckoutDeliverySummary() {
+  const etaEl = document.getElementById('checkout-eta');
+  if (etaEl) etaEl.textContent = '35–40 mins';
 
-  ctSetDetail('dd-tag', ctAddressTag(),
-    ctState.loggedIn ? 'Delivery location not selected' : 'Log in to add a delivery address');
+  const address = ctSelectedAddress();
+  const tag = address ? (address.tag || address.label || 'Home') : '';
+  const addressText = ctAddressLine();
 
-  ctSetDetail('dd-address', ctAddressLine(),
-    ctState.loggedIn ? 'No delivery address selected yet' : 'Log in to add a delivery address');
+  const tagLabel = document.getElementById('address-tag-label');
+  const addressDisplay = document.getElementById('address-display-text');
+  if (tagLabel && tag) tagLabel.textContent = tag;
+  if (addressDisplay && addressText) {
+    addressDisplay.textContent = addressText.replace(/,\s*[^,]+$/, '');
+  }
 
   const contact = ctCustomerContact();
-  ctSetDetail('dd-name', contact.name);
-  ctSetDetail('dd-phone', contact.phone);
+  const nameEl = document.getElementById('checkout-customer-name');
+  const phoneEl = document.getElementById('checkout-customer-phone');
+
+  if (nameEl) nameEl.textContent = contact.name || 'Customer name not available';
+  if (phoneEl) phoneEl.textContent = contact.phone || 'Phone number not available';
 }
 
-/* Only fires if the customer is logged in and neither earlier /profile call
-   happened to run. Reuses the existing endpoint; failure is silent and the
-   fields simply stay unavailable. */
+/* Profile is only needed for the visible customer contact card when the
+   selected address does not already contain receiver details. */
 async function ctEnsureProfile() {
-  if (ctProfile.fetched) return;
+  if (ctProfile.fetched) {
+    paintCheckoutDeliverySummary();
+    return;
+  }
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-  if (!token) return;
+  if (!token) {
+    paintCheckoutDeliverySummary();
+    return;
+  }
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store'
     });
     const result = await response.json();
     if (response.ok && result.success) ctCaptureProfile(result.data);
   } catch (e) {
-    console.warn('Could not load customer details for the bill sheet:', e);
+    console.warn('Could not load customer details:', e);
   }
+  paintCheckoutDeliverySummary();
 }
 
-async function openBillSheet() {
-  openSheet('ct-bill-sheet', paintDeliverySummary);
-  const savedCart = readCart();
-  const restaurantId = getCartRestaurantId(savedCart);
-  const restaurantPromise = restaurantId
-    ? getRestaurantLocation(restaurantId, false)
-    : Promise.resolve(null);
-  await Promise.all([restaurantPromise, ctEnsureProfile()]);
-  if (ctSheet.openId === 'ct-bill-sheet') paintDeliverySummary();
+function openBillSheet() {
+  /* IMPORTANT: Bill details opens ONLY the bill breakdown. */
+  openSheet('ct-bill-sheet');
+  applyTotals();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2405,11 +2408,11 @@ document.getElementById('tip-input').addEventListener('keydown', (event) => {
 });
 
 /* ── Lifecycle (listeners preserved) ────────────────────────────────────── */
-window.addEventListener('pageshow',()=>{ loadCartExtras(); loadAddress(); renderCart(); });
+window.addEventListener('pageshow',()=>{ loadCartExtras(); loadAddress().then(()=>paintCheckoutDeliverySummary()); renderCart(); });
 window.addEventListener('storage',(e)=>{
   if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
     ctAddrHydratedFor = null;
-    loadAddress(); renderCart();
+    loadAddress().then(()=>paintCheckoutDeliverySummary()); renderCart();
   }
   if(e.key === CT_EXTRAS_KEY){
     loadCartExtras();
@@ -2420,8 +2423,8 @@ window.addEventListener('storage',(e)=>{
 // address text + recalculate distance/fee/total using the existing pipeline.
 window.addEventListener('nearbite:address-changed',()=>{
   ctAddrHydratedFor = null;
-  loadAddress(); renderCart();
-  if (ctSheet.openId === 'ct-bill-sheet') paintDeliverySummary();
+  loadAddress().then(()=>paintCheckoutDeliverySummary()); renderCart();
+  paintCheckoutDeliverySummary();
 });
 window.addEventListener('resize', syncFooterOffset);
 
@@ -2433,6 +2436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (footer) new ResizeObserver(syncFooterOffset).observe(footer);
   }
   await loadAddress();
+  paintCheckoutDeliverySummary();
   await renderCart();
 });
 </script>
