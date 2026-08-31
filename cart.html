@@ -2,789 +2,1055 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Checkout – Nearbite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Checkout – Eatswada</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
-    :root {
-      --brand:   #FC8019;
-      --text-1:  #111827;
-      --text-2:  #374151;
-      --text-3:  #6b7280;
-      --bg:      #f2f3f5;
-      --border:  #e5e7eb;
-      --surface: #ffffff;
-      --ease:    cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: var(--font-sans), sans-serif;
-      background: var(--bg);
-      color: var(--text-1);
-      -webkit-tap-highlight-color: transparent;
-      padding-bottom: 140px; 
-      margin: 0;
-    }
-
-    .tap { cursor: pointer; transition: transform 0.1s var(--ease); }
-    .tap:active { transform: scale(0.96); }
-
-    /* ── Header ── */
-    .header {
-      position: sticky; top: 0; z-index: 50;
-      background: var(--surface); padding: 16px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    }
-    .header-left { display: flex; align-items: center; gap: 12px; }
-    .btn-back {
-      width: 36px; height: 36px; background: #f9fafb;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--border); font-size: 14px; color: var(--text-1);
-    }
-    .header-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.1; color: var(--text-1); }
-    .header-sub { font-size: 11px; color: var(--text-3); font-weight: 600; }
-    .btn-clear {
-      font-size: 12px; font-weight: 700; color: #ef4444; background: #fef2f2;
-      padding: 6px 12px; border-radius: 8px; border: none;
-    }
-
-    /* ── Address Block ── */
-    .section-block {
-      background: var(--surface);
-      margin: 12px 16px; border-radius: 20px;
-      padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.02);
-    }
-    .address-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .address-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; }
-    .btn-change { font-size: 12px; font-weight: 800; color: var(--brand); text-decoration: none; }
-    .address-text { font-size: 12px; color: var(--text-3); font-weight: 500; line-height: 1.5; padding-left: 24px; }
-
-    /* ── Cart Items ── */
-    .cart-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 16px 0; border-bottom: 1px dashed var(--border);
-    }
-    .cart-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .item-info { flex: 1; padding-right: 12px; }
-    .item-icon { width: 12px; height: 12px; border: 1px solid #16a34a; display: inline-flex; align-items: center; justify-content: center; margin-right: 6px; border-radius: 2px; }
-    .item-icon::after { content: ''; width: 6px; height: 6px; background: #16a34a; border-radius: 50%; }
-    .item-name { font-size: 14px; font-weight: 700; color: var(--text-1); display: inline; }
-    .item-price { font-size: 12px; font-weight: 800; color: var(--text-2); margin-top: 4px; }
-    
-    /* Native Add/Minus Button */
-    .counter-btn {
-      display: flex; align-items: center; background: #fff4ec;
-      border: 1px solid rgba(252, 128, 25, 0.3); border-radius: 8px;
-      overflow: hidden; box-shadow: 0 2px 4px rgba(252, 128, 25, 0.05);
-    }
-    .counter-btn button {
-      width: 28px; height: 32px; background: transparent; border: none;
-      color: var(--brand); font-size: 16px; font-weight: 800;
-    }
-    .counter-btn span {
-      width: 24px; text-align: center; font-size: 13px; font-weight: 800; color: var(--brand);
-    }
-    .item-total { width: 50px; text-align: right; font-size: 14px; font-weight: 800; }
-
-    /* ── Bill Summary ── */
-    .bill-title { font-size: 13px; font-weight: 800; color: var(--text-1); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-    .bill-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
-    .bill-label { color: var(--text-3); font-weight: 500; }
-    .bill-val { font-weight: 700; color: var(--text-1); }
-    .bill-val.free { color: #16a34a; }
-    .bill-total-row {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-top: 12px; padding-top: 12px; border-top: 1.5px dashed var(--border);
-    }
-    .total-label { font-size: 15px; font-weight: 800; color: var(--text-1); }
-    .total-val { font-size: 16px; font-weight: 900; color: var(--text-1); }
-
-    /* ── Empty State ── */
-    .empty-state { text-align: center; padding: 60px 20px; display: none; }
-    .empty-img { width: 120px; opacity: 0.5; margin-bottom: 16px; }
-    .empty-title { font-family: var(--font-sans), sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-    .empty-sub { font-size: 13px; color: var(--text-3); font-weight: 500; margin-bottom: 24px; }
-    .btn-explore { background: var(--brand); color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-size: 15px; font-weight: 800; }
-
-    /* ── Fixed Footer with UPI Payment ── */
-    .checkout-footer {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: var(--surface); padding: 12px 20px 20px;
-      border-top: 1px solid var(--border);
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
-      display: flex; flex-direction: column; gap: 12px; z-index: 100;
-    }
-    .payment-method {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 13px; font-weight: 700; color: var(--text-1);
-      background: #f9fafb; padding: 12px 16px; border-radius: 12px;
-      border: 1.5px solid var(--border);
-    }
-    .payment-options { display:flex; flex-direction:column; gap:8px; }
-    .payment-method-option {
-      display:flex; justify-content:space-between; align-items:center;
-      background:#f9fafb; padding:11px 14px; border-radius:12px;
-      border:1.5px solid var(--border); cursor:pointer;
-    }
-    .payment-method-option.selected { border-color:var(--brand); background:#fff8f1; }
-    .payment-title { font-size:13px; font-weight:800; color:var(--text-1); }
-    .payment-sub { font-size:10px; font-weight:600; color:var(--text-3); margin-top:2px; }
-    .payment-check { color:var(--brand); font-size:17px; }
-    .cod-icon { background:#ecfdf5; color:#059669; width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; }
-    .upi-icon {
-      background: #f3e8ff; color: #9333ea;
-      width: 26px; height: 26px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center; font-size: 13px;
-    }
-    
-    .btn-checkout {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--brand); color: #fff; border: none;
-      padding: 16px 20px; border-radius: 16px; width: 100%;
-      box-shadow: 0 4px 14px rgba(252, 128, 25, 0.3);
-      transition: transform 0.1s var(--ease), background 0.2s ease, box-shadow 0.2s ease;
-      cursor: pointer;
-    }
-    .btn-checkout:active { transform: scale(0.97); }
-    .btn-checkout-text { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
-    .btn-checkout-val  { font-size: 16px; font-weight: 900; }
-
-    /* ── LOCKED state: no address ── */
-    .btn-checkout.locked {
-      background: #e5e7eb;
-      color: #9ca3af;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-    .btn-checkout.locked .btn-checkout-val { color: #9ca3af; }
-
-    /* ── Address card pulse when no address ── */
-    @keyframes cardPulse {
-      0%   { box-shadow: 0 0 0 0   rgba(252,128,25,0.5); }
-      60%  { box-shadow: 0 0 0 8px rgba(252,128,25,0); }
-      100% { box-shadow: 0 0 0 0   rgba(252,128,25,0); }
-    }
-    .address-pulse { animation: cardPulse 0.6s ease-out; }
-
-    /* ── Shake animation for locked button tap ── */
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      20%     { transform: translateX(-7px); }
-      40%     { transform: translateX(7px); }
-      60%     { transform: translateX(-5px); }
-      80%     { transform: translateX(5px); }
-    }
-    .shake { animation: shake 0.4s ease; }
-
-    /* ── Toast notification ── */
-    #addr-toast {
-      position: fixed;
-      bottom: 160px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: #1c1c1e;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 11px 20px;
-      border-radius: 999px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 9999;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    #addr-toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    #addr-toast i { color: #FC8019; }
-
-    /* =========================================================
-       Nearbite production checkout polish
-       ========================================================= */
-    .checkout-footer{
-      padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-      background:rgba(255,255,255,.97);
-      border-top:1px solid #eceef1;
-      box-shadow:0 -10px 30px rgba(17,24,39,.10);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      gap:10px;
-    }
-
-    .payment-options{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:9px;
-    }
-
-    .payment-options::before{
-      content:'Payment method';
-      grid-column:1 / -1;
-      font-size:11px;
-      line-height:1;
-      font-weight:800;
-      color:#6b7280;
-      letter-spacing:.7px;
-      text-transform:uppercase;
-      margin:0 2px 1px;
-    }
-
-    .payment-method-option{
-      min-height:68px;
-      padding:11px 12px;
-      border:1.5px solid #e7e9ed;
-      border-radius:16px;
-      background:#fff;
-      box-shadow:0 2px 7px rgba(17,24,39,.035);
-      transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .12s ease;
-    }
-
-    .payment-method-option:active{transform:scale(.985)}
-    .payment-method-option.selected{
-      border-color:var(--brand);
-      background:linear-gradient(180deg,#fffaf5 0%,#fff6ee 100%);
-      box-shadow:0 4px 14px rgba(252,128,25,.10);
-    }
-
-    .payment-method-option > div:first-child{
-      min-width:0;
-      gap:9px !important;
-    }
-
-    .payment-title{
-      font-size:12px;
-      line-height:1.25;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .payment-sub{
-      font-size:9.5px;
-      line-height:1.35;
-      font-weight:600;
-      margin-top:3px;
-      white-space:nowrap;
-    }
-
-    .payment-check{
-      flex:0 0 auto;
-      font-size:15px;
-    }
-
-    .upi-icon,.cod-icon{
-      width:32px;
-      height:32px;
-      border-radius:10px;
-      flex:0 0 32px;
-      font-size:13px;
-    }
-
-    .btn-checkout{
-      min-height:54px;
-      padding:15px 18px;
-      border-radius:16px;
-      background:linear-gradient(135deg,#ff8a1f 0%,#fc8019 100%);
-      box-shadow:0 7px 18px rgba(252,128,25,.25);
-    }
-
-    .btn-checkout-text{
-      font-size:14px;
-      letter-spacing:.2px;
-    }
-
-    .btn-checkout-val{
-      font-size:17px;
-    }
-
-    .btn-checkout.locked{
-      background:#e5e7eb;
-      box-shadow:none;
-    }
-
-    /* More premium checkout cards */
-    .section-block{
-      border:1px solid rgba(229,231,235,.72);
-      box-shadow:0 3px 14px rgba(17,24,39,.035);
-    }
-
-    .address-title{font-size:15px}
-    .address-text{font-size:12px}
-
-    .cart-item{
-      padding:17px 0;
-      border-bottom:1px solid #f0f1f3;
-    }
-
-    .item-name{font-size:14px;line-height:1.3}
-    .item-price{
-      display:flex;
-      align-items:center;
-      gap:5px;
-      flex-wrap:wrap;
-      margin-top:5px;
-    }
-
-    .discount-badge{
-      display:inline-flex;
-      align-items:center;
-      min-height:18px;
-      padding:2px 6px;
-      border-radius:6px;
-      background:#ecfdf3;
-      color:#15803d;
-      font-size:9px;
-      line-height:1;
-      font-weight:800;
-    }
-
-    .item-original{
-      color:#9ca3af;
-      text-decoration:line-through;
-      font-size:11px;
-      font-weight:700;
-    }
-
-    .item-selling{
-      color:#111827;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .item-total{
-      width:64px;
-      font-size:15px;
-    }
-
-    .item-save{
-      margin-top:3px;
-      font-size:9px;
-      color:#16a34a;
-      font-weight:800;
-    }
-
-    .bill-row{margin-bottom:11px}
-    .bill-row.savings-row .bill-label,
-    .bill-row.savings-row .bill-val{color:#16a34a;font-weight:800}
-
-    @media (max-width:380px){
-      .checkout-footer{padding-left:12px;padding-right:12px}
-      .payment-options{gap:7px}
-      .payment-method-option{padding:10px 9px;min-height:64px}
-      .payment-title{font-size:11px}
-      .payment-sub{font-size:8.5px}
-      .upi-icon,.cod-icon{width:29px;height:29px;flex-basis:29px}
-      .payment-method-option > div:first-child{gap:7px !important}
-    }
-
-  </style>
+<!-- Global sheet FIRST so cart-scoped rules below can win without !important. -->
 <link rel="stylesheet" href="style.css">
-</head>
-<body>
 
-  <div class="header">
-    <div class="header-left">
-      <button class="btn-back tap" onclick="window.nearbiteSafeBack()"><i class="fa-solid fa-arrow-left"></i></button>
-      <div>
-        <div class="header-title">Checkout</div>
-        <div class="header-sub" id="cart-restaurant-name">Loading...</div>
+  <style>
+  /* ==========================================================================
+     EATSWADA — CART / CHECKOUT  (Phase 3.1)
+     Single consolidated block. Replaces the two duplicate cart CSS blocks.
+
+     Namespacing note: style.css defines global .item-name (nowrap + ellipsis
+     + !important sizing), .discount-badge / [class*="discount"] (amber),
+     .header-title / .header-sub (!important), .card / .card-body (!important)
+     and body{background:#fff}. Cart-specific classes are therefore prefixed
+     `ct-` and the page is scoped with body.ct-page. No !important is used.
+
+     Deliberate exception: money elements keep "total"/"price" in their class
+     stems so they inherit tabular-nums from style.css [class*="total"].
+     ========================================================================== */
+
+  :root{
+    --ct-green:      #159A62;   /* Eatswada primary action */
+    --ct-green-deep: #0E7A4C;
+    --ct-green-soft: #E9F7F0;
+    --ct-ink:        #1C2024;
+    --ct-ink-2:      #3D4349;
+    --ct-muted:      #697077;
+    --ct-line:       #E7EAED;
+    --ct-line-soft:  #F0F2F4;
+    --ct-surface:    #FFFFFF;
+    --ct-bg:         #F4F5F7;
+    --ct-save:       #15803D;
+    --ct-save-bg:    #ECFDF3;
+    --ct-danger:     #DC2626;
+    --ct-danger-bg:  #FEF2F2;
+    --ct-r-sm: 10px;
+    --ct-r-md: 14px;
+    --ct-r-lg: 18px;
+    --ct-shadow: 0 2px 12px rgba(28,32,36,.06);
+    --ct-ease: cubic-bezier(.25,1,.5,1);
+
+    --ct-footer-h: 176px;       /* measured at runtime, see syncFooterOffset */
+    --ct-media: 56px;
+    --ct-right: 96px;
+  }
+
+  /* body{background:#fff} in style.css beats a bare `body` selector here,
+     so the page is scoped with a class to raise specificity legitimately. */
+  body.ct-page{
+    background: var(--ct-bg);
+    color: var(--ct-ink);
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: calc(var(--ct-footer-h) + 12px);
+    overflow-x: hidden;
+  }
+
+  .tap{ cursor:pointer; transition: transform .1s var(--ct-ease); }
+  .tap:active{ transform: scale(.97); }
+
+  .ct-num{ font-family: var(--font-micro); font-variant-numeric: tabular-nums; }
+
+  /* ── Header ───────────────────────────────────────────────────────── */
+  .ct-header{
+    position: sticky; top: 0; z-index: 50;
+    background: var(--ct-surface);
+    padding: 12px 14px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--ct-line);
+  }
+  .ct-header-left{ display:flex; align-items:center; gap:11px; min-width:0; flex:1; }
+  .ct-back{
+    width:36px; height:36px; flex:0 0 36px;
+    background:#F6F7F8; border:1px solid var(--ct-line); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--ct-ink);
+  }
+  .ct-head-copy{ min-width:0; }
+  .ct-head-title{
+    font-size:17px; font-weight:800; letter-spacing:-.3px;
+    line-height:1.15; color:var(--ct-ink);
+  }
+  .ct-head-sub{
+    font-size:11.5px; font-weight:600; color:var(--ct-muted);
+    line-height:1.3; margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-clear{
+    flex:0 0 auto;
+    font-size:12px; font-weight:700; color:var(--ct-danger);
+    background:var(--ct-danger-bg); border:1px solid #FCDCDC;
+    padding:7px 13px; border-radius:9px;
+  }
+
+  /* ── Card shell (NOT .card — that carries !important in style.css) ── */
+  .ct-card{
+    background: var(--ct-surface);
+    margin: 12px 14px;
+    border: 1px solid var(--ct-line);
+    border-radius: var(--ct-r-lg);
+    padding: 14px;
+    box-shadow: var(--ct-shadow);
+  }
+
+  /* ── Address ──────────────────────────────────────────────────────── */
+  .ct-addr{ display:grid; grid-template-columns:28px 1fr auto; gap:0 10px; align-items:start; }
+  .ct-addr-pin{
+    width:28px; height:28px; border-radius:9px;
+    background:var(--ct-green-soft); color:var(--ct-green);
+    display:flex; align-items:center; justify-content:center; font-size:12px;
+  }
+  .ct-addr-eyebrow{
+    font-size:10.5px; font-weight:700; letter-spacing:.4px;
+    color:var(--ct-muted); text-transform:uppercase; line-height:1;
+  }
+  .ct-addr-tag{
+    display:block; margin-top:5px;
+    font-size:14.5px; font-weight:800; color:var(--ct-ink);
+    line-height:1.2; overflow-wrap:anywhere;
+  }
+  .ct-addr-text{
+    grid-column:2 / -1; margin-top:4px;
+    font-size:12.5px; font-weight:500; line-height:1.5; color:var(--ct-muted);
+    overflow-wrap:anywhere;
+  }
+  .ct-addr-text.ct-prompt{ color:var(--ct-green); font-weight:700; }
+  .ct-change{
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:11.5px; font-weight:800; letter-spacing:.3px;
+    color:var(--ct-green); background:var(--ct-green-soft);
+    border:1px solid rgba(21,154,98,.18);
+    padding:6px 10px; border-radius:999px; white-space:nowrap;
+  }
+
+  /* ── Section heading inside cards ─────────────────────────────────── */
+  .ct-card-head{
+    display:flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--ct-muted);
+    padding-bottom:11px; margin-bottom:2px;
+    border-bottom:1px solid var(--ct-line-soft);
+  }
+
+  /* ── Item rows ────────────────────────────────────────────────────── */
+  #cart-items-list{ padding-top:2px; padding-bottom:2px; }
+
+  .ct-row{
+    display:grid;
+    grid-template-columns:1fr var(--ct-right);
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid var(--ct-line-soft);
+    align-items:start;
+  }
+  .ct-row.has-media{ grid-template-columns:var(--ct-media) 1fr var(--ct-right); }
+  .ct-row:last-child{ border-bottom:none; padding-bottom:2px; }
+
+  .ct-media{
+    width:var(--ct-media); height:var(--ct-media);
+    border-radius:var(--ct-r-md); overflow:hidden;
+    background:#F5F6F7; border:1px solid rgba(28,32,36,.06);
+    position:relative; flex:0 0 var(--ct-media);
+  }
+  .ct-media img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    position:relative; z-index:1;
+  }
+  .ct-media-fallback{
+    position:absolute; inset:0; display:flex;
+    align-items:center; justify-content:center;
+    color:#C2C8CE; font-size:16px; background:#F5F6F7;
+  }
+
+  .ct-info{ min-width:0; }
+  .ct-name-row{ display:flex; align-items:flex-start; gap:6px; }
+  .ct-name-row .nb-veg-mark{ margin-top:2px; }
+  /* Wraps, unlike the global .item-name which is nowrap + ellipsis. */
+  .ct-name{
+    font-size:14px; font-weight:700; line-height:1.3;
+    color:var(--ct-ink); letter-spacing:-.1px;
+    min-width:0; overflow-wrap:anywhere;
+  }
+  .ct-custom{
+    margin-top:4px; font-size:11px; font-weight:500; line-height:1.4;
+    color:var(--ct-muted); overflow-wrap:anywhere;
+  }
+  .ct-price-line{
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    margin-top:6px;
+  }
+  .ct-unit-price{ font-size:12.5px; font-weight:800; color:var(--ct-ink-2); }
+  .ct-was-price{ font-size:11px; font-weight:600; color:#9CA3AF; text-decoration:line-through; }
+  /* Named ct-off-badge, not *discount*, to escape the global amber rule. */
+  .ct-off-badge{
+    display:inline-flex; align-items:center; height:17px; padding:0 6px;
+    border-radius:5px; background:var(--ct-save-bg); color:var(--ct-save);
+    font-size:9.5px; font-weight:800; letter-spacing:.2px;
+    font-family:var(--font-micro);
+  }
+
+  .ct-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .ct-item-total{ font-size:14.5px; font-weight:800; color:var(--ct-ink); line-height:1.1; }
+  .ct-item-save{ font-size:9.5px; font-weight:800; color:var(--ct-save); margin-top:3px; text-align:right; }
+
+  .ct-stepper{
+    display:inline-flex; align-items:center;
+    background:var(--ct-green-soft);
+    border:1px solid rgba(21,154,98,.25);
+    border-radius:10px; overflow:hidden;
+  }
+  .ct-stepper button{
+    width:32px; height:32px; flex:0 0 32px;
+    background:transparent; border:none; padding:0;
+    color:var(--ct-green); font-size:16px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease;
+  }
+  .ct-stepper button:active{ background:rgba(21,154,98,.12); }
+  .ct-stepper button:focus-visible{ outline:2px solid var(--ct-green); outline-offset:-2px; }
+  .ct-qty{
+    min-width:26px; text-align:center;
+    font-size:13px; font-weight:800; color:var(--ct-green);
+    font-family:var(--font-micro); font-variant-numeric:tabular-nums;
+  }
+
+  /* ── Delivery status strip ────────────────────────────────────────── */
+  .ct-strip{
+    display:flex; align-items:center; gap:9px;
+    margin:0 14px 12px; padding:11px 13px;
+    border-radius:var(--ct-r-md);
+    background:var(--ct-green-soft);
+    border:1px solid rgba(21,154,98,.2);
+    font-size:12px; font-weight:700; line-height:1.4; color:#0F5F3D;
+  }
+  .ct-strip i{ font-size:14px; flex:0 0 auto; color:var(--ct-green); }
+  .ct-strip.is-error{ background:var(--ct-danger-bg); border-color:#F6C9C9; color:#9F1D1D; }
+  .ct-strip.is-error i{ color:var(--ct-danger); }
+  .ct-strip.is-neutral{ background:#F6F7F8; border-color:var(--ct-line); color:var(--ct-muted); }
+  .ct-strip.is-neutral i{ color:var(--ct-muted); }
+
+  /* ── Bill ─────────────────────────────────────────────────────────── */
+  .ct-bill-row{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:12px; font-size:13px; margin-top:11px;
+  }
+  .ct-bill-label{ color:var(--ct-muted); font-weight:500; }
+  .ct-bill-val{ font-weight:700; color:var(--ct-ink-2); font-variant-numeric:tabular-nums; }
+  .ct-bill-val.is-free{ color:var(--ct-save); font-weight:800; }
+  .ct-bill-val.is-off{ color:var(--ct-danger); font-weight:800; }
+  .ct-bill-row.is-saving .ct-bill-label,
+  .ct-bill-row.is-saving .ct-bill-val{ color:var(--ct-save); font-weight:800; }
+
+  .ct-bill-total{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    margin-top:13px; padding-top:13px;
+    border-top:1px dashed var(--ct-line);
+  }
+  .ct-total-label{ font-size:14.5px; font-weight:800; color:var(--ct-ink); }
+  .ct-total-val{ font-size:18px; font-weight:800; color:var(--ct-ink); letter-spacing:-.4px; }
+
+  /* .skeleton (shimmer + reduced-motion) comes from style.css; this is the
+     flat fallback if that sheet ever fails to load. */
+  .ct-skel{
+    display:inline-block; width:58px; height:13px;
+    border-radius:5px; vertical-align:middle;
+    background:#EDEFF1;
+  }
+
+  /* ── Empty state ──────────────────────────────────────────────────── */
+  .ct-empty{ display:none; padding:64px 32px 40px; text-align:center; }
+  .ct-empty-art{ width:104px; height:104px; margin:0 auto 20px; display:block; }
+  .ct-empty-title{ font-size:19px; font-weight:800; letter-spacing:-.3px; color:var(--ct-ink); }
+  .ct-empty-sub{
+    font-size:13px; font-weight:500; color:var(--ct-muted);
+    line-height:1.55; margin:8px auto 24px; max-width:36ch;
+  }
+  .ct-empty-btn{
+    background:var(--ct-green); color:#fff; border:none;
+    padding:14px 26px; border-radius:13px;
+    font-size:14.5px; font-weight:800; letter-spacing:.2px;
+    box-shadow:0 6px 16px rgba(21,154,98,.24);
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────────── */
+  .ct-footer{
+    position:fixed; left:0; right:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column; gap:11px;
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--ct-line);
+    box-shadow:0 -8px 28px rgba(28,32,36,.10);
+    padding:13px 14px calc(13px + env(safe-area-inset-bottom));
+  }
+
+  .ct-pay{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ct-pay.is-single{ grid-template-columns:1fr; }
+  .ct-pay-label{
+    grid-column:1 / -1; margin:0 2px;
+    font-size:11px; font-weight:700; color:var(--ct-muted); line-height:1;
+  }
+
+  .payment-method-option{
+    position:relative;
+    display:flex; flex-direction:column; gap:7px;
+    padding:11px 12px;
+    background:var(--ct-surface);
+    border:1.5px solid var(--ct-line);
+    border-radius:var(--ct-r-md);
+    cursor:pointer; min-width:0;
+    transition:border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .12s ease;
+  }
+  .payment-method-option:active{ transform:scale(.985); }
+  .payment-method-option.selected{
+    border-color:var(--ct-green);
+    background:var(--ct-green-soft);
+    box-shadow:0 3px 12px rgba(21,154,98,.12);
+  }
+  .ct-pay-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .upi-icon, .cod-icon{
+    width:30px; height:30px; flex:0 0 30px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .upi-icon{ background:#F3E8FF; color:#9333EA; }
+  .cod-icon{ background:#ECFDF5; color:#059669; }
+  .payment-check{ font-size:16px; color:var(--ct-muted); flex:0 0 auto; }
+  .payment-method-option.selected .payment-check{ color:var(--ct-green); }
+  .payment-title{ font-size:12.5px; font-weight:800; color:var(--ct-ink); line-height:1.25; }
+  .payment-sub{ font-size:10px; font-weight:600; color:var(--ct-muted); line-height:1.3; margin-top:2px; }
+
+  .ct-cta{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; min-height:54px; padding:13px 18px;
+    background:var(--ct-green); color:#fff; border:none;
+    border-radius:var(--ct-r-md);
+    box-shadow:0 6px 18px rgba(21,154,98,.26);
+    cursor:pointer;
+    transition:transform .1s var(--ct-ease), background .2s ease, box-shadow .2s ease;
+  }
+  .ct-cta:active{ transform:scale(.98); background:var(--ct-green-deep); }
+  .ct-cta:focus-visible{ outline:3px solid rgba(21,154,98,.4); outline-offset:2px; }
+  .ct-cta-text{
+    font-size:14px; font-weight:800; letter-spacing:.3px;
+    text-align:left; line-height:1.2;
+  }
+  .ct-cta-sub{
+    display:block; font-size:10px; font-weight:600;
+    letter-spacing:.2px; opacity:.85; margin-top:2px;
+  }
+  .ct-cta-val{ font-size:17px; font-weight:800; letter-spacing:-.2px; }
+
+  .ct-cta.locked{
+    background:#E3E6E9; color:#98A0A8; box-shadow:none; cursor:not-allowed;
+  }
+  .ct-cta.locked .ct-cta-val{ color:#98A0A8; }
+  .ct-cta.locked:active{ transform:none; background:#E3E6E9; }
+
+  @keyframes ctShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(6px); }
+    60%{ transform:translateX(-4px); }
+    80%{ transform:translateX(4px); }
+  }
+  .ct-shake{ animation:ctShake .4s ease; }
+
+  /* ── Toast ────────────────────────────────────────────────────────── */
+  #addr-toast{
+    position:fixed; left:50%; z-index:9999;
+    bottom:calc(var(--ct-footer-h) + 14px);
+    transform:translateX(-50%) translateY(14px);
+    display:flex; align-items:center; gap:9px;
+    max-width:calc(100vw - 40px);
+    background:#1C2024; color:#fff;
+    font-size:12.5px; font-weight:700; line-height:1.35;
+    padding:11px 18px; border-radius:14px;
+    box-shadow:0 10px 30px rgba(28,32,36,.3);
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  #addr-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #addr-toast i{ color:#5BD39B; flex:0 0 auto; }
+  #addr-toast.is-error i{ color:#FCA5A5; }
+
+  /* ── Narrow phones (360 / 375) ────────────────────────────────────── */
+  @media (max-width:380px){
+    :root{ --ct-media:50px; --ct-right:92px; }
+    .ct-card{ margin:12px 12px; padding:13px; }
+    .ct-strip{ margin:0 12px 12px; }
+    .ct-footer{ padding-left:12px; padding-right:12px; }
+    .ct-pay{ gap:7px; }
+    .ct-stepper button{ width:30px; flex:0 0 30px; }
+    .ct-cta{ padding:13px 15px; }
+    .ct-cta-text{ font-size:13px; }
+    .ct-cta-val{ font-size:16px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    body.ct-page{ animation:none; }
+    .tap, .ct-cta, .payment-method-option, .ct-stepper button{ transition:none; }
+    .tap:active, .ct-cta:active, .payment-method-option:active{ transform:none; }
+    .ct-shake{ animation:none; }
+    #addr-toast{ transition:opacity .01s linear; }
+  }
+  </style>
+</head>
+
+<body class="ct-page">
+
+  <div class="ct-header">
+    <div class="ct-header-left">
+      <button class="ct-back tap" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="ct-head-copy">
+        <div class="ct-head-title">Checkout</div>
+        <div class="ct-head-sub" id="cart-restaurant-name">Loading…</div>
       </div>
     </div>
-    <button class="btn-clear tap" onclick="clearCart()">Clear</button>
+    <button class="ct-clear tap" id="btn-clear-cart" onclick="clearCart()">Clear</button>
   </div>
 
   <div id="cart-has-items">
-    
-    <div class="section-block tap" id="address-block" onclick="window.location.href='address.html?return=cart'">
-      <div class="address-top">
-        <div class="address-title">
-          <i class="fa-solid fa-location-dot" style="color:var(--brand);"></i>
-          <span id="address-tag-label">Add Delivery Address</span>
+
+    <div class="ct-card tap" id="address-block" onclick="window.location.href='address.html?return=cart'">
+      <div class="ct-addr">
+        <div class="ct-addr-pin"><i class="fa-solid fa-location-dot"></i></div>
+        <div>
+          <div class="ct-addr-eyebrow">Deliver to</div>
+          <span class="ct-addr-tag" id="address-tag-label">Add delivery address</span>
         </div>
-        <span class="btn-change">CHANGE</span>
-      </div>
-      <div class="address-text" id="address-display-text" style="color:#FC8019; font-weight:700;">
-        Tap to add your delivery address →
+        <span class="ct-change">CHANGE <i class="fa-solid fa-chevron-right" style="font-size:9px;"></i></span>
+        <div class="ct-addr-text ct-prompt" id="address-display-text">Tap to add your delivery address</div>
       </div>
     </div>
 
-    <div class="section-block" id="cart-items-list">
+    <div class="ct-card" id="cart-items-list"></div>
+
+    <div class="ct-strip" id="free-delivery-nudge" style="display:none;">
+      <i class="fa-solid fa-motorcycle" aria-hidden="true"></i>
+      <span id="nudge-text"></span>
     </div>
 
-    <div id="free-delivery-nudge" style="display:none; align-items:center; gap:10px; background:#fff7ed; border:1.5px dashed #FC8019; border-radius:16px; margin:0 16px 12px; padding:11px 14px;">
-      <i class="fa-solid fa-scooter" style="color:#FC8019; font-size:16px; flex-shrink:0;"></i>
-      <span id="nudge-text" style="font-size:12px; font-weight:700; color:#92400e; line-height:1.4;"></span>
-    </div>
+    <div class="ct-card">
+      <div class="ct-card-head"><i class="fa-solid fa-receipt"></i> Bill details</div>
 
-    <div class="section-block">
-      <div class="bill-title"><i class="fa-solid fa-receipt" style="color:var(--text-3); margin-right:6px;"></i> Bill Summary</div>
-      <div class="bill-row">
-        <span class="bill-label">Item Total</span>
-        <span class="bill-val" id="bill-subtotal">₹0</span>
+      <div class="ct-bill-row">
+        <span class="ct-bill-label">Item total</span>
+        <span class="ct-bill-val" id="bill-subtotal">₹0</span>
       </div>
-      <div class="bill-row" id="bill-mrp-row" style="display:none;">
-        <span class="bill-label">Item MRP</span>
-        <span class="bill-val" id="bill-mrp">₹0</span>
+
+      <div class="ct-bill-row" id="bill-mrp-row" style="display:none;">
+        <span class="ct-bill-label">Item MRP</span>
+        <span class="ct-bill-val" id="bill-mrp">₹0</span>
       </div>
-      <div class="bill-row savings-row" id="bill-savings-row" style="display:none;">
-        <span class="bill-label">You save</span>
-        <span class="bill-val" id="bill-savings-val">₹0</span>
+
+      <div class="ct-bill-row is-saving" id="bill-savings-row" style="display:none;">
+        <span class="ct-bill-label">You save</span>
+        <span class="ct-bill-val" id="bill-savings-val">₹0</span>
       </div>
-      <div class="bill-row">
-        <span class="bill-label">Delivery Fee</span>
-        <span class="bill-val" id="bill-delivery-val">Calculating…</span>
+
+      <div class="ct-bill-row">
+        <span class="ct-bill-label">Delivery fee</span>
+        <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
       </div>
-      <div id="bill-savings" style="display:none;font-size:12px;font-weight:800;color:#16a34a;margin-top:8px;"></div>
-      <div class="bill-total-row">
-        <span class="total-label">To Pay</span>
-        <span class="total-val" id="bill-total">₹0</span>
+
+      <div id="bill-savings" style="display:none;"></div>
+
+      <div class="ct-bill-total">
+        <span class="ct-total-label">To pay</span>
+        <span class="ct-total-val" id="bill-total">₹0</span>
       </div>
     </div>
   </div>
 
-  <div class="empty-state" id="empty-cart">
-    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055183.png" alt="Empty Cart" class="empty-img">
-    <div class="empty-title">Your cart is empty</div>
-    <div class="empty-sub">Add items from a restaurant to start your order.</div>
-    <button class="btn-explore tap" onclick="window.location.href='index.html'">Explore Restaurants</button>
+  <div class="ct-empty" id="empty-cart">
+    <svg class="ct-empty-art" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M22 32h52l-5 44a8 8 0 0 1-8 7H35a8 8 0 0 1-8-7L22 32Z" fill="#EFF2F4" stroke="#CBD3DA" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M36 32v-6a12 12 0 0 1 24 0v6" stroke="#159A62" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="39" cy="55" r="3" fill="#CBD3DA"/>
+      <circle cx="57" cy="55" r="3" fill="#CBD3DA"/>
+      <path d="M39 68c4.5-4 13.5-4 18 0" stroke="#CBD3DA" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <div class="ct-empty-title">Your cart is empty</div>
+    <div class="ct-empty-sub">Pick a restaurant and add a few dishes — your order will show up here.</div>
+    <button class="ct-empty-btn tap" onclick="window.location.href='index.html'">Browse restaurants</button>
   </div>
 
-  <div id="addr-toast"><i class="fa-solid fa-location-dot"></i> Please add a delivery address first</div>
+  <div id="addr-toast" role="status" aria-live="polite">
+    <i class="fa-solid fa-circle-info"></i><span id="addr-toast-text">Add a delivery address first</span>
+  </div>
 
-  <div class="checkout-footer" id="checkout-footer">
-    
-    <div id="payment-options" class="payment-options">
+  <div class="ct-footer" id="checkout-footer">
+    <div id="payment-options" class="ct-pay">
+      <div class="ct-pay-label">Payment method</div>
+
       <div class="payment-method-option selected" data-method="upi" onclick="selectPaymentMethod('upi')">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div class="ct-pay-head">
           <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
-          <div><div class="payment-title">Online</div><div class="payment-sub">UPI • GPay • PhonePe</div></div>
+          <i class="fa-solid fa-circle-check payment-check"></i>
         </div>
-        <i class="fa-solid fa-circle-check payment-check"></i>
+        <div>
+          <div class="payment-title">Online</div>
+          <div class="payment-sub">UPI · GPay · PhonePe</div>
+        </div>
       </div>
+
       <div id="cod-payment-option" class="payment-method-option" data-method="cod" onclick="selectPaymentMethod('cod')" style="display:none;">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div class="ct-pay-head">
           <div class="cod-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-          <div><div class="payment-title">Cash on Delivery</div><div class="payment-sub">Pay at your doorstep</div></div>
+          <i class="fa-regular fa-circle payment-check"></i>
         </div>
-        <i class="fa-regular fa-circle payment-check"></i>
+        <div>
+          <div class="payment-title">Cash on delivery</div>
+          <div class="payment-sub">Pay at your doorstep</div>
+        </div>
       </div>
     </div>
 
-    <button class="btn-checkout locked" id="btn-checkout" onclick="placeOrder()">
-      <span class="btn-checkout-text">PLACE ORDER <i class="fa-solid fa-caret-right" style="margin-left:4px;"></i></span>
-      <span class="btn-checkout-val" id="checkout-total">₹0</span>
+    <button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
+      <span class="ct-cta-text" id="checkout-label">Place order</span>
+      <span class="ct-cta-val" id="checkout-total">₹0</span>
     </button>
   </div>
 
-    <script src="config.js"></script>
-    <script>
+<script src="config.js"></script>
+<script>
+/* ============================================================================
+   EATSWADA CART — Phase 3.1
+   Preserved verbatim in behaviour: cart schema, localStorage keys, the three
+   API endpoints, Haversine distance, fee tiers, free-delivery rule, radius
+   validation, MRP/savings/total math, COD gating, payment persistence,
+   guest-login stash, address flow, OTP storage, track-order redirect.
+   ========================================================================= */
 
-      (function sanitizeLegacyCarts() {
-    try {
-        const cart = JSON.parse(localStorage.getItem('nearbite_cart'));
-        if (!cart) return;
+(function sanitizeLegacyCarts() {
+  try {
+      const cart = JSON.parse(localStorage.getItem('nearbite_cart'));
+      if (!cart) return;
 
-        let isCorrupted = false;
-        
-        // Scan all items in the cart object
-        for (const itemName in cart) {
-            const item = cart[itemName];
-            if (!item.resId || item.resId === "undefined" || item.resId === "null") {
-                isCorrupted = true;
-                break;
-            }
-        }
+      let isCorrupted = false;
 
-        if (isCorrupted) {
-            console.warn("Corrupted legacy cart detected. Flushing storage to prevent Mongoose crash.");
-            localStorage.removeItem('nearbite_cart');
-            alert("We updated our system and had to reset your cart. Please add your items again.");
-            window.location.reload();
-        }
-    } catch (error) {
-        console.error("Error sanitizing cart:", error);
-    }
+      // Scan all items in the cart object
+      for (const itemName in cart) {
+          const item = cart[itemName];
+          if (!item.resId || item.resId === "undefined" || item.resId === "null") {
+              isCorrupted = true;
+              break;
+          }
+      }
+
+      if (isCorrupted) {
+          console.warn("Corrupted legacy cart detected. Flushing storage to prevent Mongoose crash.");
+          localStorage.removeItem('nearbite_cart');
+          alert("We updated our system and had to reset your cart. Please add your items again.");
+          window.location.reload();
+      }
+  } catch (error) {
+      console.error("Error sanitizing cart:", error);
+  }
 })();
 
-    function normalizeCoords(value) {
-      // GeoJSON: { type: 'Point', coordinates: [lng, lat] }
-      if (value && Array.isArray(value.coordinates) && value.coordinates.length === 2) {
-        const lng = Number(value.coordinates[0]);
-        const lat = Number(value.coordinates[1]);
-        if (Number.isFinite(lng) && Number.isFinite(lat) && Math.abs(lng) <= 180 && Math.abs(lat) <= 90) {
-          return [lng, lat];
+/* ── Escaping ────────────────────────────────────────────────────────────
+   The old build interpolated raw item names into onclick="" and innerHTML,
+   which broke on apostrophes and injected on angle brackets. Names are now
+   escaped for display and carried on data-name for delegated handlers. */
+const CT_ESC = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
+function esc(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, ch => CT_ESC[ch]);
+}
+
+/* ── Geo + fee primitives (unchanged) ───────────────────────────────────── */
+function normalizeCoords(value) {
+  // GeoJSON: { type: 'Point', coordinates: [lng, lat] }
+  if (value && Array.isArray(value.coordinates) && value.coordinates.length === 2) {
+    const lng = Number(value.coordinates[0]);
+    const lat = Number(value.coordinates[1]);
+    if (Number.isFinite(lng) && Number.isFinite(lat) && Math.abs(lng) <= 180 && Math.abs(lat) <= 90) {
+      return [lng, lat];
+    }
+  }
+  // Legacy/local format: { longitude, latitude }
+  if (value && Number.isFinite(Number(value.longitude)) && Number.isFinite(Number(value.latitude))) {
+    const lng = Number(value.longitude);
+    const lat = Number(value.latitude);
+    if (Math.abs(lng) <= 180 && Math.abs(lat) <= 90) return [lng, lat];
+  }
+  return null;
+}
+
+function distanceKm(from, to) {
+  const [fromLng, fromLat] = from;
+  const [toLng, toLat] = to;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(toLat - fromLat);
+  const dLng = toRad(toLng - fromLng);
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function deliveryFeeForDistance(distance) {
+  if (!Number.isFinite(distance) || distance < 0) return null;
+  if (distance < 10) return 30;
+  if (distance <= 15) return 40;
+  return 50;
+}
+
+function getCartRestaurantId(savedCart) {
+  for (const [, info] of Object.entries(savedCart || {})) {
+    if (info && info.resId && info.resId !== 'undefined' && info.resId !== 'null') return String(info.resId);
+  }
+  return null;
+}
+
+/* ── Restaurant lookup, now cached for UI reads ──────────────────────────
+   Same request, same parsed shape. force:true bypasses the cache and is
+   what placeOrder() uses, so the order path still hits the network exactly
+   as before. Only repeated +/- taps are spared the round trip. */
+let ctResCache = { id: null, data: null };
+
+async function getRestaurantLocation(restaurantId, force) {
+  if (!restaurantId) return null;
+  if (!force && ctResCache.id === restaurantId && ctResCache.data) return ctResCache.data;
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(restaurantId)}`, { cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok || !result.success) return null;
+    const restaurant = result.data || {};
+    const parsed = {
+      coords: normalizeCoords(restaurant.location),
+      freeDeliveryEnabled: restaurant.freeDeliveryEnabled !== false,
+      freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
+      deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
+      codEnabled: restaurant.codEnabled === true,
+    };
+    ctResCache = { id: restaurantId, data: parsed };
+    return parsed;
+  } catch (error) {
+    console.warn('Could not load restaurant GPS:', error);
+    return null;
+  }
+}
+
+/* Address hydration is likewise cached per selected address id. */
+let ctAddrHydratedFor = null;
+
+async function calculateCurrentDelivery(options) {
+  const force = !!(options && options.force);
+  let savedCart = {};
+  let savedAddress = null;
+  try { savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
+  try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+  // Current checkout address is distinct from the user's default address.
+  // The address page updates both the selected ID and its local cache.
+  const selectedAddressId = localStorage.getItem('nearbite_selected_address_id');
+
+  const restaurantId = getCartRestaurantId(savedCart);
+  const subtotal = Object.entries(savedCart).reduce((sum, [, item]) => sum + Number(item.quantity || 0) * Number(item.price || 0), 0);
+  let customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
+  const restaurantInfo = await getRestaurantLocation(restaurantId, force);
+  const restaurantCoords = restaurantInfo?.coords;
+
+  // If a selected server-side address exists, hydrate its coordinates before
+  // calculating delivery. This prevents Home/Work switches from using stale GPS.
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  const needsHydration = force || ctAddrHydratedFor !== selectedAddressId;
+  if (token && selectedAddressId && needsHydration) {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        const list = Array.isArray(result.data?.addresses) ? result.data.addresses : [];
+        const selected = list.find(a => String(a._id) === String(selectedAddressId));
+        if (selected) {
+          customerCoords = normalizeCoords(selected.location || selected);
+          localStorage.setItem('nearbite_address', JSON.stringify(selected));
+          savedAddress = selected;
+          ctAddrHydratedFor = selectedAddressId;
         }
       }
-      // Legacy/local format: { longitude, latitude }
-      if (value && Number.isFinite(Number(value.longitude)) && Number.isFinite(Number(value.latitude))) {
-        const lng = Number(value.longitude);
-        const lat = Number(value.latitude);
-        if (Math.abs(lng) <= 180 && Math.abs(lat) <= 90) return [lng, lat];
-      }
-      return null;
-    }
+    } catch (e) { console.warn('Could not refresh selected delivery address:', e); }
+  }
 
-    function distanceKm(from, to) {
-      const [fromLng, fromLat] = from;
-      const [toLng, toLat] = to;
-      const toRad = d => d * Math.PI / 180;
-      const dLat = toRad(toLat - fromLat);
-      const dLng = toRad(toLng - fromLng);
-      const a = Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) ** 2;
-      return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
+  if (!customerCoords || !restaurantCoords) {
+    return { fee: 30, distance: null, source: 'fallback', codEnabled: restaurantInfo?.codEnabled === true };
+  }
 
-    function deliveryFeeForDistance(distance) {
-      if (!Number.isFinite(distance) || distance < 0) return null;
-      if (distance < 10) return 30;
-      if (distance <= 15) return 40;
-      return 50;
-    }
+  const distance = distanceKm(restaurantCoords, customerCoords);
+  const radius = Number(restaurantInfo?.deliveryRadiusKm);
+  if (Number.isFinite(radius) && radius > 0 && distance > radius) {
+    return { fee: null, distance, source: 'gps', outsideRadius: true, radius, codEnabled: restaurantInfo?.codEnabled === true };
+  }
 
-    function getCartRestaurantId(savedCart) {
-      for (const [, info] of Object.entries(savedCart || {})) {
-        if (info && info.resId && info.resId !== 'undefined' && info.resId !== 'null') return String(info.resId);
-      }
-      return null;
-    }
+  const baseFee = deliveryFeeForDistance(distance);
+  const freeDelivery = restaurantInfo?.freeDeliveryEnabled && restaurantInfo?.freeDeliveryAbove > 0 && subtotal >= restaurantInfo.freeDeliveryAbove;
+  return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0, codEnabled: restaurantInfo?.codEnabled === true };
+}
 
-    async function getRestaurantLocation(restaurantId) {
-      if (!restaurantId) return null;
-      try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(restaurantId)}`, { cache: 'no-store' });
-        const result = await response.json();
-        if (!response.ok || !result.success) return null;
-        const restaurant = result.data || {};
-        return {
-          coords: normalizeCoords(restaurant.location),
-          freeDeliveryEnabled: restaurant.freeDeliveryEnabled !== false,
-          freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
-          deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
-          codEnabled: restaurant.codEnabled === true,
-        };
-      } catch (error) {
-        console.warn('Could not load restaurant GPS:', error);
-        return null;
-      }
-    }
+/* ── Payment (behaviour unchanged) ──────────────────────────────────────── */
+let selectedPaymentMethod = localStorage.getItem('nearbite_payment_method') || 'upi';
 
-    async function calculateCurrentDelivery() {
-      let savedCart = {};
-      let savedAddress = null;
-      try { savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
-      try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
-      // Current checkout address is distinct from the user's default address.
-      // The address page updates both the selected ID and its local cache.
-      const selectedAddressId = localStorage.getItem('nearbite_selected_address_id');
+function selectPaymentMethod(method) {
+  selectedPaymentMethod = method === 'cod' ? 'cod' : 'upi';
+  localStorage.setItem('nearbite_payment_method', selectedPaymentMethod);
+  document.querySelectorAll('.payment-method-option').forEach(el => {
+    const active = el.dataset.method === selectedPaymentMethod && el.style.display !== 'none';
+    el.classList.toggle('selected', active);
+    const icon = el.querySelector('.payment-check');
+    if (icon) icon.className = active ? 'fa-solid fa-circle-check payment-check' : 'fa-regular fa-circle payment-check';
+  });
+}
 
-      const restaurantId = getCartRestaurantId(savedCart);
-      const subtotal = Object.entries(savedCart).reduce((sum, [, item]) => sum + Number(item.quantity || 0) * Number(item.price || 0), 0);
-      let customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
-      const restaurantInfo = await getRestaurantLocation(restaurantId);
-      const restaurantCoords = restaurantInfo?.coords;
+function syncPaymentOptions(codEnabled) {
+  const codOption = document.getElementById('cod-payment-option');
+  if (!codOption) return;
+  codOption.style.display = codEnabled ? 'flex' : 'none';
+  const grid = document.getElementById('payment-options');
+  if (grid) grid.classList.toggle('is-single', !codEnabled);
+  if (!codEnabled && selectedPaymentMethod === 'cod') {
+    selectedPaymentMethod = 'upi';
+    localStorage.setItem('nearbite_payment_method', 'upi');
+  }
+  selectPaymentMethod(selectedPaymentMethod);
+}
 
-      // If a selected server-side address exists, hydrate its coordinates before
-      // calculating delivery. This prevents Home/Work switches from using stale GPS.
-      const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-      if(token && selectedAddressId){
-        try{
-          const response = await fetch(`${CONFIG.API_BASE_URL}/profile`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
-          const result = await response.json();
-          if(response.ok && result.success){
-            const list=Array.isArray(result.data?.addresses)?result.data.addresses:[];
-            const selected=list.find(a=>String(a._id)===String(selectedAddressId));
-            if(selected){
-              customerCoords=normalizeCoords(selected.location||selected);
-              localStorage.setItem('nearbite_address',JSON.stringify(selected));
-              savedAddress=selected;
-            }
-          }
-        }catch(e){ console.warn('Could not refresh selected delivery address:',e); }
-      }
+/* ── Shared UI state ────────────────────────────────────────────────────── */
+const ctState = {
+  subtotal: 0,
+  units: 0,
+  loggedIn: false,
+  addressOk: false,
+  unavailable: false,
+  deliveryReady: false,
+  deliveryFee: 0
+};
 
-      if (!customerCoords || !restaurantCoords) {
-        return { fee: 30, distance: null, source: 'fallback', codEnabled: restaurantInfo?.codEnabled === true };
-      }
+function readCart() {
+  try { return JSON.parse(localStorage.getItem('nearbite_cart')) || null; }
+  catch (e) { return null; }
+}
 
-      const distance = distanceKm(restaurantCoords, customerCoords);
-      const radius = Number(restaurantInfo?.deliveryRadiusKm);
-      if (Number.isFinite(radius) && radius > 0 && distance > radius) {
-        return { fee: null, distance, source: 'gps', outsideRadius: true, radius, codEnabled: restaurantInfo?.codEnabled === true };
-      }
+/* Optional media: rendered only when the cart object actually carries an
+   image. Nothing is invented when the field is absent. */
+function itemImage(info) {
+  const url = info && (info.image || info.imageUrl);
+  return (typeof url === 'string' && url.trim()) ? url.trim() : '';
+}
 
-      const baseFee = deliveryFeeForDistance(distance);
-      const freeDelivery = restaurantInfo?.freeDeliveryEnabled && restaurantInfo?.freeDeliveryAbove > 0 && subtotal >= restaurantInfo.freeDeliveryAbove;
-      return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0, codEnabled: restaurantInfo?.codEnabled === true };
-    }
+/* Veg mark: strictly boolean. Unknown/null/undefined renders nothing. */
+function vegMark(info) {
+  if (!info) return '';
+  const flag = info.isVeg;
+  if (flag === true)  return '<span class="nb-veg-mark veg" title="Veg"><span></span></span>';
+  if (flag === false) return '<span class="nb-veg-mark nonveg" title="Non-veg"><span></span></span>';
+  return '';
+}
 
-    let selectedPaymentMethod = localStorage.getItem('nearbite_payment_method') || 'upi';
+/* Customizations exist in the cart schema; shape is not guaranteed. */
+function customLine(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  const flat = v => {
+    if (v == null || v === '' || v === false) return '';
+    if (Array.isArray(v)) return v.map(flat).filter(Boolean).join(', ');
+    if (typeof v === 'object') return String(v.name || v.label || v.title || v.value || '');
+    return String(v);
+  };
+  if (Array.isArray(value)) return value.map(flat).filter(Boolean).join(', ');
+  if (typeof value === 'object') {
+    return Object.entries(value).map(([key, v]) => {
+      if (v === true) return key;
+      return flat(v);
+    }).filter(Boolean).join(', ');
+  }
+  return '';
+}
 
-    function selectPaymentMethod(method) {
-      selectedPaymentMethod = method === 'cod' ? 'cod' : 'upi';
-      localStorage.setItem('nearbite_payment_method', selectedPaymentMethod);
-      document.querySelectorAll('.payment-method-option').forEach(el => {
-        const active = el.dataset.method === selectedPaymentMethod && el.style.display !== 'none';
-        el.classList.toggle('selected', active);
-        const icon = el.querySelector('.payment-check');
-        if (icon) icon.className = active ? 'fa-solid fa-circle-check payment-check' : 'fa-regular fa-circle payment-check';
-      });
-    }
+/* ── Item painting: synchronous, never waits on the network ─────────────── */
+function paintItems(savedCart) {
+  const listEl = document.getElementById('cart-items-list');
+  const items = Object.entries(savedCart);
+  const anyMedia = items.some(([, info]) => itemImage(info));
 
-    function syncPaymentOptions(codEnabled) {
-      const codOption = document.getElementById('cod-payment-option');
-      if (!codOption) return;
-      codOption.style.display = codEnabled ? 'flex' : 'none';
-      if (!codEnabled && selectedPaymentMethod === 'cod') {
-        selectedPaymentMethod = 'upi';
-        localStorage.setItem('nearbite_payment_method', 'upi');
-      }
-      selectPaymentMethod(selectedPaymentMethod);
-    }
+  listEl.innerHTML = items.map(([name, info]) => {
+    const price = Number(info.price || 0);
+    const original = Number(info.originalPrice || 0);
+    const hasDiscount = original > price;
+    const discountPct = hasDiscount ? Math.round(((original - price) / original) * 100) : 0;
+    const quantity = Number(info.quantity || 0);
+    const itemTotal = quantity * price;
+    const itemSavings = hasDiscount ? quantity * (original - price) : 0;
 
-    async function renderCart() {
-      let savedCart;
-      try {
-        savedCart = JSON.parse(localStorage.getItem('nearbite_cart'));
-      } catch(e) {
-        savedCart = null;
-      }
+    const img = itemImage(info);
+    const media = anyMedia ? `
+        <div class="ct-media">
+          <div class="ct-media-fallback"><i class="fa-solid fa-utensils"></i></div>
+          ${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+        </div>` : '';
 
-      const emptyEl = document.getElementById('empty-cart');
-      const hasItemsEl = document.getElementById('cart-has-items');
-      const listEl  = document.getElementById('cart-items-list');
-      const footerEl = document.getElementById('checkout-footer');
+    const custom = customLine(info.customizations);
 
-      if (!savedCart || Object.keys(savedCart).length === 0) {
-        emptyEl.style.display = 'block';
-        hasItemsEl.style.display = 'none';
-        footerEl.style.display = 'none';
-        return;
-      }
-
-      emptyEl.style.display = 'none';
-      hasItemsEl.style.display = 'block';
-      footerEl.style.display = 'flex';
-
-      const items = Object.entries(savedCart);
-      const subtotal = items.reduce((s, [, v]) => s + Number(v.quantity || 0) * Number(v.price || 0), 0);
-      let delivery = await calculateCurrentDelivery();
-      syncPaymentOptions(delivery.codEnabled === true);
-      let deliveryFee = delivery.fee;
-
-      if (delivery.outsideRadius) {
-        deliveryFee = 0;
-      } else if (deliveryFee == null) {
-        deliveryFee = 30;
-      }
-      const total = subtotal + deliveryFee;
-
-      const deliveryValEl = document.getElementById('bill-delivery-val');
-      deliveryValEl.textContent = '₹' + deliveryFee;
-      deliveryValEl.className = 'bill-val';
-
-      const nudgeEl = document.getElementById('free-delivery-nudge');
-      const nudgeText = document.getElementById('nudge-text');
-      if (delivery.outsideRadius) {
-        nudgeText.textContent = `${delivery.distance.toFixed(1)} km — outside this restaurant's ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km delivery area`;
-        nudgeEl.style.display = 'flex';
-        nudgeEl.style.borderColor = '#ef4444';
-      } else if (delivery.distance != null) {
-        nudgeText.textContent = delivery.freeDelivery
-          ? `${delivery.distance.toFixed(1)} km delivery distance • FREE delivery`
-          : `${delivery.distance.toFixed(1)} km delivery distance • ₹${deliveryFee} delivery fee`;
-        nudgeEl.style.display = 'flex';
-        nudgeEl.style.borderColor = '';
-      } else {
-        nudgeText.textContent = 'Delivery fee calculated from restaurant and delivery GPS.';
-        nudgeEl.style.display = 'flex';
-        nudgeEl.style.borderColor = '';
-      }
-
-      let resName = 'Nearbite Restaurant';
-      if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
-      document.getElementById('cart-restaurant-name').innerText = resName;
-
-      listEl.innerHTML = items.map(([name, info]) => {
-        const price = Number(info.price || 0);
-        const original = Number(info.originalPrice || 0);
-        const hasDiscount = original > price;
-        const discountPct = hasDiscount ? Math.round(((original - price) / original) * 100) : 0;
-        const itemTotal = Number(info.quantity || 0) * price;
-        const itemSavings = hasDiscount ? Number(info.quantity || 0) * (original - price) : 0;
-        return `
-        <div class="cart-item">
-          <div class="item-info">
-            <div>
-              <span class="item-icon"></span>
-              <span class="item-name">${name}</span>
-            </div>
-            <div class="item-price">
-              <span class="item-selling">₹${price}</span>
-              ${hasDiscount ? `<span class="item-original">₹${original}</span><span class="discount-badge">${discountPct}% OFF</span>` : ''}
-            </div>
+    return `
+      <div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
+        ${media}
+        <div class="ct-info">
+          <div class="ct-name-row">
+            ${vegMark(info)}
+            <span class="ct-name">${esc(name)}</span>
           </div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="counter-btn tap" aria-label="Quantity controls">
-              <button onclick="cartAdjust('${name}', -1)" aria-label="Decrease quantity">−</button>
-              <span>${info.quantity}</span>
-              <button onclick="cartAdjust('${name}', 1)" aria-label="Increase quantity">+</button>
-            </div>
-            <div class="item-total">
-              ₹${itemTotal}
-              ${hasDiscount ? `<div class="item-save">Save ₹${itemSavings.toFixed(0)}</div>` : ''}
-            </div>
+          ${custom ? `<div class="ct-custom">${esc(custom)}</div>` : ''}
+          <div class="ct-price-line">
+            <span class="ct-unit-price ct-num">₹${price}</span>
+            ${hasDiscount ? `<span class="ct-was-price ct-num">₹${original}</span><span class="ct-off-badge">${discountPct}% OFF</span>` : ''}
           </div>
-        </div>`;
-      }).join('');
+        </div>
+        <div class="ct-right">
+          <div>
+            <div class="ct-item-total ct-num">₹${itemTotal}</div>
+            ${hasDiscount ? `<div class="ct-item-save ct-num">Save ₹${itemSavings.toFixed(0)}</div>` : ''}
+          </div>
+          <div class="ct-stepper" role="group" aria-label="Quantity for ${esc(name)}">
+            <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
+            <span class="ct-qty">${quantity}</span>
+            <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 
-      document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
-      const originalCartTotal = items.reduce((sum, [, v]) => sum + Number(v.quantity || 0) * (Number(v.originalPrice) > Number(v.price) ? Number(v.originalPrice) : Number(v.price)), 0);
-      const savings = Math.max(0, originalCartTotal - subtotal);
+  let resName = 'Eatswada Restaurant';
+  if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
+  document.getElementById('cart-restaurant-name').innerText = resName;
+}
 
-      const mrpRow = document.getElementById('bill-mrp-row');
-      const mrpEl = document.getElementById('bill-mrp');
-      const savingsRow = document.getElementById('bill-savings-row');
-      const savingsVal = document.getElementById('bill-savings-val');
+/* ── Bill painting: money math identical to the previous build ───────────── */
+function paintBill(savedCart) {
+  const items = Object.entries(savedCart);
+  const subtotal = items.reduce((s, [, v]) => s + Number(v.quantity || 0) * Number(v.price || 0), 0);
+  ctState.subtotal = subtotal;
+  ctState.units = items.reduce((s, [, v]) => s + Number(v.quantity || 0), 0);
 
-      if (mrpRow && mrpEl) {
-        mrpRow.style.display = savings > 0 ? 'flex' : 'none';
-        mrpEl.textContent = '₹' + originalCartTotal.toFixed(0);
-      }
-      if (savingsRow && savingsVal) {
-        savingsRow.style.display = savings > 0 ? 'flex' : 'none';
-        savingsVal.textContent = '₹' + savings.toFixed(0);
-      }
+  document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
 
-      const legacySavings = document.getElementById('bill-savings');
-      if (legacySavings) {
-        legacySavings.textContent = '';
-        legacySavings.style.display = 'none';
-      }
+  const originalCartTotal = items.reduce((sum, [, v]) => sum + Number(v.quantity || 0) * (Number(v.originalPrice) > Number(v.price) ? Number(v.originalPrice) : Number(v.price)), 0);
+  const savings = Math.max(0, originalCartTotal - subtotal);
 
-      document.getElementById('bill-total').innerText = '₹' + total;
-      document.getElementById('checkout-total').innerText = '₹' + total;
-    }
+  const mrpRow = document.getElementById('bill-mrp-row');
+  const mrpEl = document.getElementById('bill-mrp');
+  const savingsRow = document.getElementById('bill-savings-row');
+  const savingsVal = document.getElementById('bill-savings-val');
 
+  if (mrpRow && mrpEl) {
+    mrpRow.style.display = savings > 0 ? 'flex' : 'none';
+    mrpEl.textContent = '₹' + originalCartTotal.toFixed(0);
+  }
+  if (savingsRow && savingsVal) {
+    savingsRow.style.display = savings > 0 ? 'flex' : 'none';
+    savingsVal.textContent = '₹' + savings.toFixed(0);
+  }
+
+  const legacySavings = document.getElementById('bill-savings');
+  if (legacySavings) {
+    legacySavings.textContent = '';
+    legacySavings.style.display = 'none';
+  }
+
+  // Totals stay on the last known fee until the delivery refresh resolves.
+  applyTotals();
+  updateCheckoutCta();
+}
+
+function applyTotals() {
+  const total = ctState.subtotal + ctState.deliveryFee;
+  document.getElementById('bill-total').innerText = '₹' + total;
+  document.getElementById('checkout-total').innerText = '₹' + total;
+}
+
+/* ── Delivery presentation ──────────────────────────────────────────────── */
+function setDeliveryPending() {
+  ctState.deliveryReady = false;
+  const feeEl = document.getElementById('bill-delivery-val');
+  feeEl.className = 'ct-bill-val';
+  feeEl.innerHTML = '<span class="ct-skel skeleton"></span>';
+
+  const strip = document.getElementById('free-delivery-nudge');
+  strip.className = 'ct-strip is-neutral';
+  strip.style.display = 'flex';
+  document.getElementById('nudge-text').textContent = 'Checking delivery for this address…';
+}
+
+function applyDelivery(delivery) {
+  // Fee resolution is byte-for-byte the previous rule set.
+  let deliveryFee = delivery.fee;
+  if (delivery.outsideRadius) {
+    deliveryFee = 0;
+  } else if (deliveryFee == null) {
+    deliveryFee = 30;
+  }
+
+  ctState.deliveryFee = deliveryFee;
+  ctState.unavailable = !!delivery.outsideRadius;
+  ctState.deliveryReady = true;
+
+  const feeEl = document.getElementById('bill-delivery-val');
+  const strip = document.getElementById('free-delivery-nudge');
+  const stripText = document.getElementById('nudge-text');
+
+  if (delivery.outsideRadius) {
+    // ₹0 here means "not deliverable", never "free". Say so.
+    feeEl.className = 'ct-bill-val is-off';
+    feeEl.textContent = 'Unavailable';
+    strip.className = 'ct-strip is-error';
+    strip.style.display = 'flex';
+    stripText.textContent = `Delivery unavailable at this address — ${delivery.distance.toFixed(1)} km away, outside this restaurant's ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km area.`;
+  } else if (delivery.freeDelivery) {
+    feeEl.className = 'ct-bill-val is-free';
+    feeEl.textContent = 'FREE';
+    strip.className = 'ct-strip';
+    strip.style.display = 'flex';
+    stripText.textContent = delivery.distance != null
+      ? `Free delivery on this order · ${delivery.distance.toFixed(1)} km away`
+      : 'Free delivery on this order';
+  } else if (delivery.distance != null) {
+    feeEl.className = 'ct-bill-val';
+    feeEl.textContent = '₹' + deliveryFee;
+    strip.className = 'ct-strip';
+    strip.style.display = 'flex';
+    stripText.textContent = `${delivery.distance.toFixed(1)} km away · ₹${deliveryFee} delivery fee`;
+  } else {
+    feeEl.className = 'ct-bill-val';
+    feeEl.textContent = '₹' + deliveryFee;
+    strip.className = 'ct-strip is-neutral';
+    strip.style.display = 'flex';
+    stripText.textContent = 'Delivery fee is calculated from the restaurant and your address GPS.';
+  }
+
+  applyTotals();
+  updateCheckoutCta();
+}
+
+/* Monotonic request id: a slow reply from an older cart state can never
+   overwrite a newer one. */
+let ctDeliveryReq = 0;
+let ctDeliveryTimer = null;
+
+async function refreshDelivery(options) {
+  const myReq = ++ctDeliveryReq;
+  setDeliveryPending();
+  updateCheckoutCta();
+  try {
+    const delivery = await calculateCurrentDelivery(options);
+    if (myReq !== ctDeliveryReq) return;          // superseded, drop it
+    syncPaymentOptions(delivery.codEnabled === true);
+    applyDelivery(delivery);
+  } catch (e) {
+    if (myReq !== ctDeliveryReq) return;
+    console.warn('Delivery refresh failed:', e);
+    applyDelivery({ fee: null, distance: null, source: 'fallback' });
+  }
+}
+
+function scheduleDelivery() {
+  clearTimeout(ctDeliveryTimer);
+  ctDeliveryTimer = setTimeout(() => refreshDelivery(), 320);
+}
+
+/* ── CTA ─────────────────────────────────────────────────────────────────── */
+function updateCheckoutCta() {
+  const btn = document.getElementById('btn-checkout');
+  const label = document.getElementById('checkout-label');
+  if (!btn || !label) return;
+
+  const plural = ctState.units === 1 ? 'item' : 'items';
+
+  if (ctState.unavailable) {
+    btn.classList.add('locked');
+    btn.setAttribute('aria-disabled', 'true');
+    label.innerHTML = 'Delivery unavailable<span class="ct-cta-sub">Change your address to continue</span>';
+    return;
+  }
+  if (!ctState.loggedIn) {
+    btn.classList.remove('locked');
+    btn.setAttribute('aria-disabled', 'false');
+    label.innerHTML = `Log in to order<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
+    return;
+  }
+  if (!ctState.addressOk) {
+    btn.classList.add('locked');
+    btn.setAttribute('aria-disabled', 'true');
+    label.innerHTML = 'Add address<span class="ct-cta-sub">Needed before you can order</span>';
+    return;
+  }
+  btn.classList.remove('locked');
+  btn.setAttribute('aria-disabled', 'false');
+  label.innerHTML = `Place order<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
+}
+
+/* ── Render ─────────────────────────────────────────────────────────────── */
+async function renderCart() {
+  const savedCart = readCart();
+
+  const emptyEl = document.getElementById('empty-cart');
+  const hasItemsEl = document.getElementById('cart-has-items');
+  const footerEl = document.getElementById('checkout-footer');
+  const clearBtn = document.getElementById('btn-clear-cart');
+
+  if (!savedCart || Object.keys(savedCart).length === 0) {
+    ctDeliveryReq++;                       // cancel any in-flight refresh
+    clearTimeout(ctDeliveryTimer);
+    emptyEl.style.display = 'block';
+    hasItemsEl.style.display = 'none';
+    footerEl.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  hasItemsEl.style.display = 'block';
+  footerEl.style.display = 'flex';
+  if (clearBtn) clearBtn.style.display = '';
+
+  paintItems(savedCart);   // instant
+  paintBill(savedCart);    // instant
+  syncFooterOffset();
+  await refreshDelivery(); // network, guarded
+}
+
+/* Repaints only — used by +/- so the tap never waits on a request. */
+function repaintCart() {
+  const savedCart = readCart();
+  if (!savedCart || Object.keys(savedCart).length === 0) { renderCart(); return; }
+  paintItems(savedCart);
+  paintBill(savedCart);
+  syncFooterOffset();
+}
+
+/* ── Quantity / remove (schema + semantics unchanged) ───────────────────── */
 function cartAdjust(name, change) {
   let savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
   if (savedCart[name]) {
     savedCart[name].quantity += change;
     if (savedCart[name].quantity <= 0) delete savedCart[name];
     localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
-    renderCart();
+    repaintCart();       // instant feedback
+    scheduleDelivery();  // debounced; free-delivery threshold depends on subtotal
   }
 }
 
@@ -795,6 +1061,16 @@ function clearCart() {
   renderCart();
 }
 
+/* Delegated stepper handling — no name interpolation into markup. */
+document.getElementById('cart-items-list').addEventListener('click', (event) => {
+  const button = event.target.closest('button[data-step]');
+  if (!button) return;
+  const row = button.closest('.ct-row');
+  if (!row) return;
+  cartAdjust(row.dataset.name, Number(button.dataset.step));
+});
+
+/* ── Address (logic unchanged; presentation centralised) ────────────────── */
 function hasAddress() {
   let saved;
   try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
@@ -808,8 +1084,6 @@ async function loadAddress() {
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
   const tagLabel = document.getElementById('address-tag-label');
   const addrText = document.getElementById('address-display-text');
-  const checkoutBtn = document.getElementById('btn-checkout');
-  const checkoutText = checkoutBtn ? checkoutBtn.querySelector('.btn-checkout-text') : null;
 
   // Returning customers may have their address on the server but not in this
   // browser's localStorage. Hydrate the local cart UI from their saved profile.
@@ -852,45 +1126,71 @@ async function loadAddress() {
     }
   }
 
-  if (hasAddress() && saved) {
+  ctState.loggedIn = !!token;
+  ctState.addressOk = hasAddress();
+
+  if (ctState.addressOk && saved) {
     const tag = saved.tag || 'Home';
     const parts = [saved.house, saved.area, saved.landmark, saved.city].filter(Boolean);
-    tagLabel.textContent = 'Delivering to ' + tag;
+    tagLabel.textContent = tag;
     addrText.textContent = parts.join(', ');
-    addrText.style.color = '';
-    addrText.style.fontWeight = '';
-    checkoutBtn.classList.remove('locked');
-    checkoutBtn.setAttribute('aria-disabled', 'false');
-    if (checkoutText) checkoutText.innerHTML = 'PLACE ORDER <i class="fa-solid fa-caret-right" style="margin-left:4px;"></i>';
+    addrText.classList.remove('ct-prompt');
   } else if (!token) {
     // Guest users can browse and build a cart. Login is required only here.
-    tagLabel.textContent = 'Login to order';
-    addrText.textContent = 'Login with your phone to add your delivery address →';
-    addrText.style.color = '#FC8019';
-    addrText.style.fontWeight = '700';
-    checkoutBtn.classList.remove('locked');
-    checkoutBtn.setAttribute('aria-disabled', 'false');
-    if (checkoutText) checkoutText.innerHTML = 'LOGIN TO ORDER <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>';
+    tagLabel.textContent = 'Log in to order';
+    addrText.textContent = 'Log in with your phone to add a delivery address';
+    addrText.classList.add('ct-prompt');
   } else {
-    tagLabel.textContent = 'Add Delivery Address';
-    addrText.textContent = 'Tap to add your delivery address →';
-    addrText.style.color = '#FC8019';
-    addrText.style.fontWeight = '700';
-    checkoutBtn.classList.add('locked');
-    checkoutBtn.setAttribute('aria-disabled', 'true');
-    if (checkoutText) checkoutText.innerHTML = 'ADD ADDRESS <i class="fa-solid fa-location-dot" style="margin-left:4px;"></i>';
+    tagLabel.textContent = 'Add delivery address';
+    addrText.textContent = 'Tap to add your delivery address';
+    addrText.classList.add('ct-prompt');
   }
+
+  updateCheckoutCta();
 }
 
-function showToast(msg) {
+/* ── Toast (now actually wired up) ──────────────────────────────────────── */
+function showToast(msg, tone) {
   const toast = document.getElementById('addr-toast');
+  const text = document.getElementById('addr-toast-text');
+  if (!toast) return;
+  if (text && msg) text.textContent = msg;
+  toast.classList.toggle('is-error', tone === 'error');
+  const icon = toast.querySelector('i');
+  if (icon) icon.className = tone === 'error' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-info';
   toast.classList.add('show');
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
+function shakeCheckout() {
+  const btn = document.getElementById('btn-checkout');
+  if (!btn) return;
+  btn.classList.remove('ct-shake');
+  void btn.offsetWidth;
+  btn.classList.add('ct-shake');
+  setTimeout(() => btn.classList.remove('ct-shake'), 450);
+}
+
+/* Footer height drives body padding and toast offset, so the footer can
+   never sit on top of cart content at any width or COD state. */
+function syncFooterOffset() {
+  const footer = document.getElementById('checkout-footer');
+  if (!footer || footer.style.display === 'none') return;
+  const height = Math.ceil(footer.getBoundingClientRect().height);
+  if (height > 0) document.documentElement.style.setProperty('--ct-footer-h', height + 'px');
+}
+
+/* ── Checkout ───────────────────────────────────────────────────────────── */
 async function placeOrder() {
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+
+  // UI guard only. Backend validation below is untouched.
+  if (ctState.unavailable) {
+    shakeCheckout();
+    showToast('This restaurant does not deliver to your address', 'error');
+    return;
+  }
 
   // Guest cart is allowed. Authentication starts only when they press Order.
   if (!token) {
@@ -912,7 +1212,7 @@ async function placeOrder() {
   const btn = document.getElementById('btn-checkout');
   const originalHTML = btn.innerHTML;
 
-  btn.innerHTML = '<span class="btn-checkout-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> PLACING ORDER...</span>';
+  btn.innerHTML = '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Placing order…</span>';
   btn.style.pointerEvents = 'none';
 
   try {
@@ -944,8 +1244,9 @@ async function placeOrder() {
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     // The backend is the final authority, but the checkout preview must use
     // the SAME restaurant GPS + customer GPS pricing so the customer sees
-    // the amount that will actually be charged.
-    const delivery = await calculateCurrentDelivery();
+    // the amount that will actually be charged. force:true keeps this path
+    // on live data, exactly as before.
+    const delivery = await calculateCurrentDelivery({ force: true });
     if (delivery.outsideRadius) {
       throw new Error(`This restaurant does not deliver to your selected address (${delivery.distance.toFixed(1)} km away; limit ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km).`);
     }
@@ -963,7 +1264,7 @@ async function placeOrder() {
     const payload = {
       items: itemsArray,
       deliveryAddress: savedAddress,
-       addressId: localStorage.getItem('nearbite_selected_address_id') || (savedAddress && savedAddress._id) || null,
+      addressId: localStorage.getItem('nearbite_selected_address_id') || (savedAddress && savedAddress._id) || null,
       restaurantId: restaurantId,
       restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
       subtotal,
@@ -998,28 +1299,39 @@ async function placeOrder() {
     }
   } catch (error) {
     console.error(error);
-    alert("Wait: " + error.message);
+    showToast(error.message, 'error');
+    shakeCheckout();
     btn.innerHTML = originalHTML;
     btn.style.pointerEvents = 'auto';
   }
 }
 
-
+/* ── Lifecycle (listeners preserved) ────────────────────────────────────── */
 window.addEventListener('pageshow',()=>{ loadAddress(); renderCart(); });
 window.addEventListener('storage',(e)=>{
   if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
+    ctAddrHydratedFor = null;
     loadAddress(); renderCart();
   }
 });
 // address.html dispatches this when the selected address changes; refresh
 // address text + recalculate distance/fee/total using the existing pipeline.
-window.addEventListener('nearbite:address-changed',()=>{ loadAddress(); renderCart(); });
+window.addEventListener('nearbite:address-changed',()=>{
+  ctAddrHydratedFor = null;
+  loadAddress(); renderCart();
+});
+window.addEventListener('resize', syncFooterOffset);
 
 document.addEventListener('DOMContentLoaded', async () => {
+  syncFooterOffset();
+  if (window.ResizeObserver) {
+    const footer = document.getElementById('checkout-footer');
+    if (footer) new ResizeObserver(syncFooterOffset).observe(footer);
+  }
   await loadAddress();
   await renderCart();
 });
-  </script>
+</script>
 
 <script src="navigation.js"></script>
 </body>
