@@ -1515,18 +1515,29 @@ function applyTotals() {
 function updateBillCompact(total) {
   const peek = document.getElementById('bill-peek-total');
   if (peek) {
-    peek.textContent = '₹' + total;
-    peek.classList.toggle('is-pending', !ctState.deliveryReady);
+    // Never expose a stale/placeholder total while delivery pricing is unresolved.
+    if (!ctState.deliveryReady) {
+      peek.textContent = '—';
+      peek.classList.add('is-pending');
+    } else {
+      peek.textContent = '₹' + total;
+      peek.classList.remove('is-pending');
+    }
   }
 
   const line = document.getElementById('bill-compact-line');
   if (!line) return;
 
   const parts = ['Item total ₹' + ctState.subtotal];
-  if (ctState.unavailable)          parts.push('Delivery unavailable');
-  else if (!ctState.deliveryReady)  parts.push('Delivery …');
-  else if (ctState.deliveryFee === 0) parts.push('Free delivery');
-  else                              parts.push('Delivery ₹' + ctState.deliveryFee);
+  if (!ctState.deliveryReady) {
+    parts.push('Checking delivery…');
+  } else if (ctState.unavailable) {
+    parts.push('Delivery unavailable');
+  } else if (ctState.deliveryFee === 0) {
+    parts.push('Free delivery');
+  } else {
+    parts.push('Delivery ₹' + ctState.deliveryFee);
+  }
 
   const tip = ctCleanTip(ctState.tipAmount);
   if (tip > 0) parts.push('Tip ₹' + tip);
