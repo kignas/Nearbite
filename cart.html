@@ -52,6 +52,7 @@
     --ct-footer-h: 176px;       /* measured at runtime, see syncFooterOffset */
     --ct-media: 56px;
     --ct-right: 96px;
+    --ct-kb: 0px;               /* visual-viewport keyboard inset, see ctSyncKeyboardInset */
   }
 
   /* body{background:#fff} in style.css beats a bare `body` selector here,
@@ -247,6 +248,11 @@
   .ct-strip.is-error i{ color:var(--ct-danger); }
   .ct-strip.is-neutral{ background:#F6F7F8; border-color:var(--ct-line); color:var(--ct-muted); }
   .ct-strip.is-neutral i{ color:var(--ct-muted); }
+  .ct-strip.has-sub{ align-items:flex-start; }
+  .ct-strip.has-sub i{ margin-top:1px; }
+  .ct-strip-copy{ min-width:0; }
+  .ct-strip-sub{ display:block; margin-top:3px; font-weight:600; opacity:.92; }
+  .ct-strip-sub[hidden]{ display:none; }
 
   /* ── Bill ─────────────────────────────────────────────────────────── */
   .ct-bill-row{
@@ -391,6 +397,192 @@
   #addr-toast i{ color:#5BD39B; flex:0 0 auto; }
   #addr-toast.is-error i{ color:#FCA5A5; }
 
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 3.1 ADDITIONS — note / instructions / tip / coupon
+     Same `ct-` namespace, same tokens, no !important, no new colours.
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── Tappable line cards (restaurant note, instructions, coupon) ─── */
+  .ct-line-card{
+    display:flex; align-items:center; gap:12px;
+    width:auto; box-sizing:border-box;
+    margin:12px 14px; padding:14px;
+    font:inherit; text-align:left; color:inherit;
+    background:var(--ct-surface);
+    border:1px solid var(--ct-line);
+    border-radius:var(--ct-r-lg);
+    box-shadow:var(--ct-shadow);
+    min-height:66px;
+  }
+  .ct-line-card:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
+  .ct-line-ic{
+    width:34px; height:34px; flex:0 0 34px; border-radius:11px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; background:#F3F5F6; color:var(--ct-ink-2);
+    transition:background .18s ease, color .18s ease;
+  }
+  .ct-line-card.is-set .ct-line-ic{ background:var(--ct-green-soft); color:var(--ct-green); }
+  .ct-line-copy{ flex:1; min-width:0; }
+  .ct-line-title{
+    display:block; font-size:13.5px; font-weight:800;
+    color:var(--ct-ink); line-height:1.25; letter-spacing:-.1px;
+  }
+  .ct-line-sub{
+    margin-top:3px; font-size:11.5px; font-weight:500; line-height:1.45;
+    color:var(--ct-muted); overflow-wrap:anywhere;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .ct-line-act{
+    flex:0 0 auto; white-space:nowrap;
+    font-size:11.5px; font-weight:800; letter-spacing:.3px; color:var(--ct-green);
+  }
+  .ct-line-act[hidden]{ display:none; }
+  .ct-line-chev{ flex:0 0 auto; font-size:11px; color:#B6BDC4; }
+  .ct-line-chev[hidden]{ display:none; }
+
+  /* ── Tip ──────────────────────────────────────────────────────────── */
+  .ct-tip-note{
+    margin:11px 0 0; font-size:11.5px; font-weight:500;
+    line-height:1.5; color:var(--ct-muted);
+  }
+  .ct-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .ct-chip{
+    font:inherit; font-size:12.5px; font-weight:800;
+    color:var(--ct-ink-2); background:var(--ct-surface);
+    border:1.5px solid var(--ct-line); border-radius:999px;
+    padding:9px 15px; min-height:40px;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition:border-color .16s ease, background .16s ease, color .16s ease;
+  }
+  .ct-chip:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
+  .ct-chip[aria-pressed="true"]{
+    border-color:var(--ct-green);
+    background:var(--ct-green-soft);
+    color:var(--ct-green-deep);
+  }
+
+  /* ── Bottom sheets ────────────────────────────────────────────────── */
+  body.ct-sheet-open{ overflow:hidden; }
+
+  .ct-sheet-root{
+    position:fixed; inset:0; z-index:1200;
+    display:flex; align-items:flex-end; justify-content:center;
+    padding-bottom:var(--ct-kb, 0px);
+  }
+  .ct-sheet-root[hidden]{ display:none; }
+  .ct-scrim{
+    position:absolute; inset:0; background:rgba(16,20,24,.5);
+    opacity:0; transition:opacity .22s var(--ct-ease);
+  }
+  .ct-sheet-root.is-open .ct-scrim{ opacity:1; }
+  .ct-sheet{
+    position:relative; width:100%; max-width:520px;
+    background:var(--ct-surface);
+    border-radius:22px 22px 0 0;
+    padding:8px 16px calc(14px + env(safe-area-inset-bottom));
+    max-height:88vh;
+    max-height:calc(88dvh - var(--ct-kb, 0px));
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    box-shadow:0 -14px 40px rgba(16,20,24,.22);
+    transform:translateY(100%);
+    transition:transform .26s var(--ct-ease);
+  }
+  .ct-sheet-root.is-open .ct-sheet{ transform:translateY(0); }
+  .ct-sheet-grab{
+    width:40px; height:4px; border-radius:999px;
+    background:#DDE1E5; margin:6px auto 12px;
+  }
+  .ct-sheet-head{
+    display:flex; align-items:flex-start; gap:12px;
+    padding-bottom:12px; border-bottom:1px solid var(--ct-line-soft);
+  }
+  .ct-sheet-title{
+    flex:1; margin:0; font-size:16px; font-weight:800;
+    letter-spacing:-.2px; line-height:1.3; color:var(--ct-ink);
+  }
+  .ct-sheet-x{
+    flex:0 0 32px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--ct-line); background:#F6F7F8;
+    color:var(--ct-ink-2); font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ct-sheet-x:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
+  .ct-sheet-body{ padding:14px 0 2px; }
+
+  .ct-field-label{
+    display:block; margin-bottom:7px;
+    font-size:11px; font-weight:800; letter-spacing:.4px;
+    text-transform:uppercase; color:var(--ct-muted);
+  }
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  .ct-textarea, .ct-input{
+    width:100%; box-sizing:border-box; font:inherit;
+    font-size:16px; font-weight:500; line-height:1.5; color:var(--ct-ink);
+    background:#FAFBFB; border:1.5px solid var(--ct-line);
+    border-radius:var(--ct-r-md); padding:12px 13px; resize:none;
+  }
+  .ct-textarea:focus, .ct-input:focus{
+    outline:none; border-color:var(--ct-green); background:#fff;
+    box-shadow:0 0 0 3px rgba(21,154,98,.12);
+  }
+  .ct-field-foot{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:12px; margin-top:7px;
+  }
+  .ct-field-help{ font-size:11.5px; font-weight:500; line-height:1.45; color:var(--ct-muted); }
+  .ct-count{
+    flex:0 0 auto; font-family:var(--font-micro); font-variant-numeric:tabular-nums;
+    font-size:11px; font-weight:700; color:var(--ct-muted);
+  }
+  .ct-count.is-max{ color:var(--ct-danger); }
+
+  .ct-sug-row{ display:flex; flex-wrap:wrap; gap:7px; margin-top:13px; }
+  .ct-sug{
+    font:inherit; font-size:12px; font-weight:700; color:var(--ct-ink-2);
+    background:#F4F6F7; border:1px solid var(--ct-line);
+    border-radius:999px; padding:8px 12px; min-height:36px;
+  }
+  .ct-sug:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
+
+  .ct-sheet-err{ margin:11px 0 0; font-size:12px; font-weight:700; color:var(--ct-danger); }
+  .ct-sheet-err[hidden]{ display:none; }
+
+  .ct-sheet-foot{ display:grid; grid-template-columns:1fr 1.4fr; gap:9px; margin-top:16px; }
+  .ct-sheet-foot.is-single{ grid-template-columns:1fr; }
+  .ct-btn{
+    font:inherit; font-size:14px; font-weight:800;
+    min-height:48px; padding:13px 16px;
+    border:1.5px solid transparent; border-radius:var(--ct-r-md);
+  }
+  .ct-btn:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
+  .ct-btn-ghost{ background:#F4F6F7; border-color:var(--ct-line); color:var(--ct-ink-2); }
+  .ct-btn-primary{
+    background:var(--ct-green); color:#fff;
+    box-shadow:0 5px 14px rgba(21,154,98,.22);
+  }
+  .ct-btn-primary:active{ background:var(--ct-green-deep); }
+  .ct-btn-remove{
+    display:block; width:100%; margin-top:9px; min-height:44px;
+    font:inherit; font-size:13px; font-weight:800;
+    color:var(--ct-danger); background:transparent;
+    border:none; border-radius:var(--ct-r-md);
+  }
+  .ct-btn-remove[hidden]{ display:none; }
+
+  /* ── Coupon empty state ───────────────────────────────────────────── */
+  .ct-empty-mini{ text-align:center; padding:20px 8px 4px; }
+  .ct-empty-mini-ic{
+    width:56px; height:56px; margin:0 auto 14px; border-radius:18px;
+    background:var(--ct-green-soft); color:var(--ct-green);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .ct-empty-mini-title{ font-size:15px; font-weight:800; color:var(--ct-ink); }
+  .ct-empty-mini-sub{
+    margin:7px auto 0; max-width:34ch;
+    font-size:12.5px; font-weight:500; line-height:1.55; color:var(--ct-muted);
+  }
+
   /* ── Narrow phones (360 / 375) ────────────────────────────────────── */
   @media (max-width:380px){
     :root{ --ct-media:50px; --ct-right:92px; }
@@ -402,6 +594,10 @@
     .ct-cta{ padding:13px 15px; }
     .ct-cta-text{ font-size:13px; }
     .ct-cta-val{ font-size:16px; }
+    .ct-line-card{ margin:12px 12px; padding:13px; }
+    .ct-chip{ padding:9px 13px; font-size:12px; }
+    .ct-sheet{ padding-left:14px; padding-right:14px; }
+    .ct-sheet-foot{ grid-template-columns:1fr 1.3fr; gap:8px; }
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -410,6 +606,8 @@
     .tap:active, .ct-cta:active, .payment-method-option:active{ transform:none; }
     .ct-shake{ animation:none; }
     #addr-toast{ transition:opacity .01s linear; }
+    .ct-scrim, .ct-chip, .ct-line-ic, .ct-btn{ transition:none; }
+    .ct-sheet{ transition:none; transform:translateY(0); }
   }
   </style>
 </head>
@@ -443,9 +641,61 @@
 
     <div class="ct-card" id="cart-items-list"></div>
 
-    <div class="ct-strip" id="free-delivery-nudge" style="display:none;">
-      <i class="fa-solid fa-motorcycle" aria-hidden="true"></i>
-      <span id="nudge-text"></span>
+    <div class="ct-strip" id="free-delivery-nudge" style="display:none;" role="status" aria-live="polite">
+      <i class="fa-solid fa-motorcycle" id="nudge-icon" aria-hidden="true"></i>
+      <span class="ct-strip-copy">
+        <span id="nudge-text"></span>
+        <span class="ct-strip-sub" id="nudge-sub" hidden></span>
+      </span>
+    </div>
+
+    <!-- ── Apply coupon ──────────────────────────────────────────────────
+         Real control, honest content: it opens a real sheet that reports the
+         real state of the coupon system (currently: none active). No fake
+         code field, no fake APPLY button, nothing added to the order. -->
+    <button type="button" class="ct-line-card tap" id="coupon-card" aria-haspopup="dialog">
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-ticket"></i></span>
+      <span class="ct-line-copy">
+        <span class="ct-line-title">Apply coupon</span>
+        <span class="ct-line-sub">No coupons are active for this order right now</span>
+      </span>
+      <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
+    </button>
+
+    <!-- ── Note for the restaurant ───────────────────────────────────── -->
+    <button type="button" class="ct-line-card tap" data-note-field="restaurantNote" aria-haspopup="dialog">
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>
+      <span class="ct-line-copy">
+        <span class="ct-line-title" data-role="title">Add a note for the restaurant</span>
+        <span class="ct-line-sub" data-role="sub">Spice level, allergies, packaging &mdash; anything the kitchen should know</span>
+      </span>
+      <span class="ct-line-act" data-role="act" hidden>Edit</span>
+      <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
+    </button>
+
+    <!-- ── Delivery instructions (separate field, separate sheet) ─────── -->
+    <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-motorcycle"></i></span>
+      <span class="ct-line-copy">
+        <span class="ct-line-title" data-role="title">Add delivery instructions</span>
+        <span class="ct-line-sub" data-role="sub">Tell your delivery partner how to reach you</span>
+      </span>
+      <span class="ct-line-act" data-role="act" hidden>Edit</span>
+      <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
+    </button>
+
+    <!-- ── Tip ───────────────────────────────────────────────────────── -->
+    <div class="ct-card">
+      <div class="ct-card-head" id="tip-heading"><i class="fa-solid fa-hand-holding-heart"></i> Tip your delivery partner</div>
+      <p class="ct-tip-note">A tip is added to your order total and goes to the partner who delivers this order.</p>
+      <div class="ct-chip-row" id="tip-options" role="group" aria-labelledby="tip-heading">
+        <button type="button" class="ct-chip" data-tip="0" aria-pressed="true">No tip</button>
+        <button type="button" class="ct-chip" data-tip="10" aria-pressed="false">&#8377;10</button>
+        <button type="button" class="ct-chip" data-tip="20" aria-pressed="false">&#8377;20</button>
+        <button type="button" class="ct-chip" data-tip="30" aria-pressed="false">&#8377;30</button>
+        <button type="button" class="ct-chip" data-tip="50" aria-pressed="false">&#8377;50</button>
+        <button type="button" class="ct-chip" data-tip="custom" id="tip-custom-chip" aria-pressed="false" aria-haspopup="dialog">Custom</button>
+      </div>
     </div>
 
     <div class="ct-card">
@@ -469,6 +719,15 @@
       <div class="ct-bill-row">
         <span class="ct-bill-label">Delivery fee</span>
         <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
+      </div>
+
+      <!-- Tip is the only new bill line. It appears only when the customer
+           actually selects one. There is deliberately no GST / packaging /
+           platform-fee row: the backend exposes no such value, and a real
+           coupon row can be added here when the coupon system has data. -->
+      <div class="ct-bill-row" id="bill-tip-row" style="display:none;">
+        <span class="ct-bill-label">Delivery partner tip</span>
+        <span class="ct-bill-val" id="bill-tip-val">&#8377;0</span>
       </div>
 
       <div id="bill-savings" style="display:none;"></div>
@@ -528,6 +787,88 @@
       <span class="ct-cta-text" id="checkout-label">Place order</span>
       <span class="ct-cta-val" id="checkout-total">₹0</span>
     </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       BOTTOM SHEETS
+       One generic note sheet (configured for restaurant note OR delivery
+       instructions), one custom-tip sheet, one coupon sheet.
+       ══════════════════════════════════════════════════════════════════ -->
+
+  <div class="ct-sheet-root" id="ct-note-sheet" hidden>
+    <div class="ct-scrim" data-sheet-close></div>
+    <div class="ct-sheet" role="dialog" aria-modal="true" aria-labelledby="note-sheet-title">
+      <div class="ct-sheet-grab" aria-hidden="true"></div>
+      <div class="ct-sheet-head">
+        <h2 class="ct-sheet-title" id="note-sheet-title">Add a note for the restaurant</h2>
+        <button type="button" class="ct-sheet-x" data-sheet-close aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      </div>
+      <div class="ct-sheet-body">
+        <label class="ct-field-label" for="note-input" id="note-field-label">Your note</label>
+        <textarea id="note-input" class="ct-textarea" rows="3" maxlength="250"
+                  data-autofocus aria-describedby="note-help note-count"></textarea>
+        <div class="ct-field-foot">
+          <span class="ct-field-help" id="note-help">Example: Please make it less spicy</span>
+          <span class="ct-count" id="note-count" aria-live="off">0/250</span>
+        </div>
+        <div class="ct-sug-row" id="note-suggestions"></div>
+      </div>
+      <div class="ct-sheet-foot">
+        <button type="button" class="ct-btn ct-btn-ghost" data-sheet-close>Cancel</button>
+        <button type="button" class="ct-btn ct-btn-primary" id="note-save">Save note</button>
+      </div>
+      <button type="button" class="ct-btn-remove" id="note-remove" hidden>Remove note</button>
+    </div>
+  </div>
+
+  <div class="ct-sheet-root" id="ct-tip-sheet" hidden>
+    <div class="ct-scrim" data-sheet-close></div>
+    <div class="ct-sheet" role="dialog" aria-modal="true" aria-labelledby="tip-sheet-title">
+      <div class="ct-sheet-grab" aria-hidden="true"></div>
+      <div class="ct-sheet-head">
+        <h2 class="ct-sheet-title" id="tip-sheet-title">Custom tip</h2>
+        <button type="button" class="ct-sheet-x" data-sheet-close aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      </div>
+      <div class="ct-sheet-body">
+        <label class="ct-field-label" for="tip-input">Tip amount (&#8377;)</label>
+        <input id="tip-input" class="ct-input" type="number" inputmode="numeric"
+               min="1" max="1000" step="1" data-autofocus
+               aria-describedby="tip-help tip-error">
+        <div class="ct-field-foot">
+          <span class="ct-field-help" id="tip-help">Whole rupees, between &#8377;1 and &#8377;1000.</span>
+        </div>
+        <p class="ct-sheet-err" id="tip-error" role="alert" hidden></p>
+      </div>
+      <div class="ct-sheet-foot">
+        <button type="button" class="ct-btn ct-btn-ghost" data-sheet-close>Cancel</button>
+        <button type="button" class="ct-btn ct-btn-primary" id="tip-save">Save tip</button>
+      </div>
+      <button type="button" class="ct-btn-remove" id="tip-remove" hidden>Remove tip</button>
+    </div>
+  </div>
+
+  <div class="ct-sheet-root" id="ct-coupon-sheet" hidden>
+    <div class="ct-scrim" data-sheet-close></div>
+    <div class="ct-sheet" role="dialog" aria-modal="true" aria-labelledby="coupon-sheet-title">
+      <div class="ct-sheet-grab" aria-hidden="true"></div>
+      <div class="ct-sheet-head">
+        <h2 class="ct-sheet-title" id="coupon-sheet-title">Apply coupon</h2>
+        <button type="button" class="ct-sheet-x" data-sheet-close aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      </div>
+      <!-- Honest empty state. When the backend starts serving active coupons,
+           this container is the only markup that changes: the trigger, the
+           sheet shell, the a11y wiring and the bill row slot already exist. -->
+      <div class="ct-sheet-body" id="coupon-sheet-body">
+        <div class="ct-empty-mini">
+          <div class="ct-empty-mini-ic" aria-hidden="true"><i class="fa-solid fa-ticket"></i></div>
+          <div class="ct-empty-mini-title">No coupons available</div>
+          <p class="ct-empty-mini-sub">We don&rsquo;t have any active coupons for this order right now.</p>
+        </div>
+      </div>
+      <div class="ct-sheet-foot is-single">
+        <button type="button" class="ct-btn ct-btn-ghost" data-sheet-close data-autofocus>Close</button>
+      </div>
+    </div>
   </div>
 
 <script src="config.js"></script>
@@ -739,8 +1080,98 @@ const ctState = {
   addressOk: false,
   unavailable: false,
   deliveryReady: false,
-  deliveryFee: 0
+  deliveryFee: 0,
+  // Phase 3.1 — sent to the existing POST /orders endpoint.
+  restaurantNote: '',
+  deliveryInstructions: '',
+  tipAmount: 0
 };
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CART EXTRAS — restaurant note, delivery instructions, tip
+   These live on ctState, so every existing repaint (+/-, address change,
+   delivery refresh, payment change) already preserves them. They are ALSO
+   mirrored to localStorage, because the cart legitimately leaves the page
+   during checkout (address.html, login.html) and returns on a fresh load;
+   without the mirror, "address changes preserve note/instructions/tip"
+   cannot hold. localStorage is the durability layer only — the values are
+   sent to the backend on POST /orders, which is what actually persists them.
+   ═══════════════════════════════════════════════════════════════════════ */
+const CT_EXTRAS_KEY  = 'nearbite_cart_extras';
+const CT_NOTE_MAX    = 250;
+const CT_TIP_MIN     = 1;
+const CT_TIP_MAX     = 1000;     // frontend sanity bound; the backend validates too
+const CT_TIP_PRESETS = [10, 20, 30, 50];
+
+const CT_NOTE_CFG = {
+  restaurantNote: {
+    idleTitle:    'Add a note for the restaurant',
+    idleSub:      'Spice level, allergies, packaging — anything the kitchen should know',
+    setTitle:     'Note added',
+    sheetTitle:   'Add a note for the restaurant',
+    fieldLabel:   'Your note for the restaurant',
+    help:         'Example: Please make it less spicy',
+    saveLabel:    'Save note',
+    removeLabel:  'Remove note',
+    savedToast:   'Note saved for the restaurant',
+    removedToast: 'Restaurant note removed',
+    suggestions:  ['Please make it less spicy', 'Extra napkins, please', 'No onion', 'Pack the sauces separately']
+  },
+  deliveryInstructions: {
+    idleTitle:    'Add delivery instructions',
+    idleSub:      'Tell your delivery partner how to reach you',
+    setTitle:     'Instructions added',
+    sheetTitle:   'Delivery instructions',
+    fieldLabel:   'Instructions for your delivery partner',
+    help:         'Example: Call when you arrive',
+    saveLabel:    'Save instructions',
+    removeLabel:  'Remove instructions',
+    savedToast:   'Delivery instructions saved',
+    removedToast: 'Delivery instructions removed',
+    suggestions:  ['Call when you arrive', 'Leave at the gate', 'Ring the bell', "Don't call, just deliver"]
+  }
+};
+
+/* Notes are single-line by intent: newlines and control characters are
+   collapsed, so a long note can never break the card or the sheet layout. */
+function ctCleanNote(value) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, CT_NOTE_MAX);
+}
+
+function ctCleanTip(value) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n) || n < CT_TIP_MIN) return 0;   // 0 means "no tip"
+  return Math.min(n, CT_TIP_MAX);
+}
+
+function loadCartExtras() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(CT_EXTRAS_KEY)); } catch (e) {}
+  const data = (raw && typeof raw === 'object') ? raw : {};
+  ctState.restaurantNote       = ctCleanNote(data.restaurantNote);
+  ctState.deliveryInstructions = ctCleanNote(data.deliveryInstructions);
+  ctState.tipAmount            = ctCleanTip(data.tipAmount);
+}
+
+function saveCartExtras() {
+  try {
+    localStorage.setItem(CT_EXTRAS_KEY, JSON.stringify({
+      restaurantNote: ctState.restaurantNote,
+      deliveryInstructions: ctState.deliveryInstructions,
+      tipAmount: ctState.tipAmount
+    }));
+  } catch (e) { console.warn('Could not persist cart extras:', e); }
+}
+
+function clearCartExtras() {
+  ctState.restaurantNote = '';
+  ctState.deliveryInstructions = '';
+  ctState.tipAmount = 0;
+  try { localStorage.removeItem(CT_EXTRAS_KEY); } catch (e) {}
+}
+
+loadCartExtras();
 
 function readCart() {
   try { return JSON.parse(localStorage.getItem('nearbite_cart')) || null; }
@@ -873,12 +1304,26 @@ function paintBill(savedCart) {
   }
 
   // Totals stay on the last known fee until the delivery refresh resolves.
+  paintNoteCards();
+  paintTipChips();
   applyTotals();
   updateCheckoutCta();
 }
 
+/* Display-only preview of what the customer expects to pay, including the
+   selected tip. The backend recalculates and stays authoritative for what
+   is actually charged. */
 function applyTotals() {
-  const total = ctState.subtotal + ctState.deliveryFee;
+  const tip = ctCleanTip(ctState.tipAmount);
+  const total = ctState.subtotal + ctState.deliveryFee + tip;
+
+  const tipRow = document.getElementById('bill-tip-row');
+  const tipVal = document.getElementById('bill-tip-val');
+  if (tipRow && tipVal) {
+    tipRow.style.display = tip > 0 ? 'flex' : 'none';
+    tipVal.textContent = '₹' + tip;
+  }
+
   document.getElementById('bill-total').innerText = '₹' + total;
   document.getElementById('checkout-total').innerText = '₹' + total;
 }
@@ -891,9 +1336,13 @@ function setDeliveryPending() {
   feeEl.innerHTML = '<span class="ct-skel skeleton"></span>';
 
   const strip = document.getElementById('free-delivery-nudge');
+  const stripSub = document.getElementById('nudge-sub');
+  const stripIcon = document.getElementById('nudge-icon');
   strip.className = 'ct-strip is-neutral';
   strip.style.display = 'flex';
+  if (stripIcon) stripIcon.className = 'fa-solid fa-motorcycle';
   document.getElementById('nudge-text').textContent = 'Checking delivery for this address…';
+  if (stripSub) { stripSub.textContent = ''; stripSub.hidden = true; }
 }
 
 function applyDelivery(delivery) {
@@ -912,34 +1361,46 @@ function applyDelivery(delivery) {
   const feeEl = document.getElementById('bill-delivery-val');
   const strip = document.getElementById('free-delivery-nudge');
   const stripText = document.getElementById('nudge-text');
+  const stripSub = document.getElementById('nudge-sub');
+  const stripIcon = document.getElementById('nudge-icon');
+
+  const setStrip = (tone, icon, title, sub) => {
+    strip.className = 'ct-strip' + (tone ? ' ' + tone : '') + (sub ? ' has-sub' : '');
+    strip.style.display = 'flex';
+    if (stripIcon) stripIcon.className = icon;
+    stripText.textContent = title;
+    if (stripSub) {
+      stripSub.textContent = sub || '';
+      stripSub.hidden = !sub;
+    }
+  };
 
   if (delivery.outsideRadius) {
     // ₹0 here means "not deliverable", never "free". Say so.
+    // The limit shown is the restaurant's real deliveryRadiusKm from the
+    // backend (15 km by default) — it is not a hardcoded frontend number.
+    const limit = delivery.radius.toFixed(1).replace(/\.0$/, '');
     feeEl.className = 'ct-bill-val is-off';
     feeEl.textContent = 'Unavailable';
-    strip.className = 'ct-strip is-error';
-    strip.style.display = 'flex';
-    stripText.textContent = `Delivery unavailable at this address — ${delivery.distance.toFixed(1)} km away, outside this restaurant's ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km area.`;
+    setStrip('is-error', 'fa-solid fa-circle-exclamation',
+      'Delivery unavailable',
+      `You are ${delivery.distance.toFixed(1)} km away. This restaurant currently delivers within ${limit} km.`);
   } else if (delivery.freeDelivery) {
     feeEl.className = 'ct-bill-val is-free';
     feeEl.textContent = 'FREE';
-    strip.className = 'ct-strip';
-    strip.style.display = 'flex';
-    stripText.textContent = delivery.distance != null
+    setStrip('', 'fa-solid fa-motorcycle', delivery.distance != null
       ? `Free delivery on this order · ${delivery.distance.toFixed(1)} km away`
-      : 'Free delivery on this order';
+      : 'Free delivery on this order', '');
   } else if (delivery.distance != null) {
     feeEl.className = 'ct-bill-val';
     feeEl.textContent = '₹' + deliveryFee;
-    strip.className = 'ct-strip';
-    strip.style.display = 'flex';
-    stripText.textContent = `${delivery.distance.toFixed(1)} km away · ₹${deliveryFee} delivery fee`;
+    setStrip('', 'fa-solid fa-motorcycle',
+      `${delivery.distance.toFixed(1)} km away · ₹${deliveryFee} delivery fee`, '');
   } else {
     feeEl.className = 'ct-bill-val';
     feeEl.textContent = '₹' + deliveryFee;
-    strip.className = 'ct-strip is-neutral';
-    strip.style.display = 'flex';
-    stripText.textContent = 'Delivery fee is calculated from the restaurant and your address GPS.';
+    setStrip('is-neutral', 'fa-solid fa-motorcycle',
+      'Delivery fee is calculated from the restaurant and your address GPS.', '');
   }
 
   applyTotals();
@@ -1015,6 +1476,9 @@ async function renderCart() {
   if (!savedCart || Object.keys(savedCart).length === 0) {
     ctDeliveryReq++;                       // cancel any in-flight refresh
     clearTimeout(ctDeliveryTimer);
+    // A note/tip belongs to a cart. No cart, no extras.
+    clearCartExtras();
+    closeSheet(true);
     emptyEl.style.display = 'block';
     hasItemsEl.style.display = 'none';
     footerEl.style.display = 'none';
@@ -1057,6 +1521,7 @@ function cartAdjust(name, change) {
 function clearCart() {
   localStorage.removeItem('nearbite_cart');
   localStorage.removeItem('nearbite_payment_method');
+  clearCartExtras();
   selectedPaymentMethod = 'upi';
   renderCart();
 }
@@ -1270,7 +1735,14 @@ async function placeOrder() {
       subtotal,
       deliveryFee,
       total,
-      paymentMethod: selectedPaymentMethod
+      paymentMethod: selectedPaymentMethod,
+      // Phase 3.1 — read from ctState, not from the DOM, so they are exactly
+      // what the customer saved. subtotal/deliveryFee/total above keep their
+      // existing pre-tip meaning; the tip is a separate field and the backend
+      // folds it into the authoritative total.
+      restaurantNote: ctState.restaurantNote || '',
+      deliveryInstructions: ctState.deliveryInstructions || '',
+      tipAmount: ctCleanTip(ctState.tipAmount)
     };
 
     const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
@@ -1286,6 +1758,7 @@ async function placeOrder() {
 
     if (response.ok && result.success) {
       localStorage.removeItem('nearbite_cart');
+      clearCartExtras();
 
       // Keep the one-time delivery PIN returned by the backend so the
       // tracking page can display it even though the backend stores only a hash.
@@ -1306,12 +1779,350 @@ async function placeOrder() {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   BOTTOM SHEETS
+   One controller for all three sheets: scrim + Escape + close button, focus
+   trap, focus restore, background scroll lock, aria-hidden on the page
+   behind, and a visual-viewport inset so the on-screen keyboard never sits
+   on top of the textarea. The fixed checkout footer is below the scrim in
+   the stacking order, so it can never cover sheet content.
+   ═══════════════════════════════════════════════════════════════════════ */
+const ctSheet = { openId: null, lastFocus: null };
+const CT_BG_NODES = ['.ct-header', '#cart-has-items', '#empty-cart', '#checkout-footer', '#addr-toast'];
+
+function ctReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function ctSetBackgroundHidden(hidden) {
+  CT_BG_NODES.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    if (hidden) el.setAttribute('aria-hidden', 'true');
+    else el.removeAttribute('aria-hidden');
+  });
+}
+
+/* iOS does not resize the layout viewport for the keyboard, so the sheet is
+   lifted by the measured visual-viewport inset instead. */
+function ctSyncKeyboardInset() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const inset = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+  document.documentElement.style.setProperty('--ct-kb', inset + 'px');
+}
+function ctAttachViewportSync() {
+  if (!window.visualViewport) return;
+  window.visualViewport.addEventListener('resize', ctSyncKeyboardInset);
+  window.visualViewport.addEventListener('scroll', ctSyncKeyboardInset);
+  ctSyncKeyboardInset();
+}
+function ctDetachViewportSync() {
+  if (window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', ctSyncKeyboardInset);
+    window.visualViewport.removeEventListener('scroll', ctSyncKeyboardInset);
+  }
+  document.documentElement.style.setProperty('--ct-kb', '0px');
+}
+
+function ctFocusables(root) {
+  const sel = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  return Array.from(root.querySelectorAll(sel))
+    .filter(el => !el.hasAttribute('hidden') && el.offsetParent !== null);
+}
+
+function openSheet(id, prepare) {
+  const root = document.getElementById(id);
+  if (!root) return;
+  if (ctSheet.openId) closeSheet(true);
+  if (typeof prepare === 'function') prepare(root);
+
+  ctSheet.lastFocus = document.activeElement;
+  if (ctSheet.lastFocus && typeof ctSheet.lastFocus.blur === 'function') ctSheet.lastFocus.blur();
+  ctSheet.openId = id;
+  root.hidden = false;
+  document.body.classList.add('ct-sheet-open');
+  ctSetBackgroundHidden(true);
+  ctAttachViewportSync();
+  requestAnimationFrame(() => root.classList.add('is-open'));
+
+  const target = root.querySelector('[data-autofocus]') || root.querySelector('.ct-sheet-x');
+  if (target) setTimeout(() => { try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }, 80);
+}
+
+function closeSheet(immediate) {
+  const id = ctSheet.openId;
+  if (!id) return;
+  const root = document.getElementById(id);
+  ctSheet.openId = null;
+
+  document.body.classList.remove('ct-sheet-open');
+  ctSetBackgroundHidden(false);
+  ctDetachViewportSync();
+
+  if (root) {
+    root.classList.remove('is-open');
+    if (immediate || ctReducedMotion()) root.hidden = true;
+    else setTimeout(() => { if (!ctSheet.openId) root.hidden = true; }, 240);
+  }
+
+  const back = ctSheet.lastFocus;
+  ctSheet.lastFocus = null;
+  if (!immediate && back && document.contains(back)) {
+    setTimeout(() => { try { back.focus({ preventScroll: true }); } catch (e) { back.focus(); } }, 0);
+  }
+}
+
+/* Escape closes; Tab is trapped inside the open sheet. */
+document.addEventListener('keydown', (event) => {
+  if (!ctSheet.openId) return;
+
+  if (event.key === 'Escape') { event.preventDefault(); closeSheet(); return; }
+  if (event.key !== 'Tab') return;
+
+  const root = document.getElementById(ctSheet.openId);
+  if (!root) return;
+  const items = ctFocusables(root);
+  if (!items.length) return;
+
+  const first = items[0];
+  const last = items[items.length - 1];
+  const active = document.activeElement;
+
+  if (!root.contains(active)) { event.preventDefault(); first.focus(); return; }
+  if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
+});
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESTAURANT NOTE + DELIVERY INSTRUCTIONS
+   Two independent fields sharing one sheet. Which field is being edited is
+   held in ctNoteField, and the value is written back to ctState[field] —
+   never read out of the DOM at checkout time.
+   ═══════════════════════════════════════════════════════════════════════ */
+let ctNoteField = null;
+
+function paintNoteCards() {
+  Object.keys(CT_NOTE_CFG).forEach(field => {
+    const card = document.querySelector('.ct-line-card[data-note-field="' + field + '"]');
+    if (!card) return;
+    const cfg = CT_NOTE_CFG[field];
+    const value = ctState[field];
+
+    const title = card.querySelector('[data-role="title"]');
+    const sub   = card.querySelector('[data-role="sub"]');
+    const act   = card.querySelector('[data-role="act"]');
+    const chev  = card.querySelector('[data-role="chev"]');
+
+    card.classList.toggle('is-set', !!value);
+    if (title) title.textContent = value ? cfg.setTitle : cfg.idleTitle;
+    if (sub)   sub.textContent   = value || cfg.idleSub;   // textContent: no injection path
+    if (act)   act.hidden  = !value;
+    if (chev)  chev.hidden = !!value;
+
+    card.setAttribute('aria-label', value
+      ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.'
+      : cfg.idleTitle);
+  });
+}
+
+function updateNoteCount() {
+  const input = document.getElementById('note-input');
+  const count = document.getElementById('note-count');
+  if (!input || !count) return;
+  const length = input.value.length;
+  count.textContent = length + '/' + CT_NOTE_MAX;
+  count.classList.toggle('is-max', length >= CT_NOTE_MAX);
+}
+
+function openNoteSheet(field) {
+  const cfg = CT_NOTE_CFG[field];
+  if (!cfg) return;
+  ctNoteField = field;
+
+  openSheet('ct-note-sheet', () => {
+    document.getElementById('note-sheet-title').textContent = cfg.sheetTitle;
+    document.getElementById('note-field-label').textContent = cfg.fieldLabel;
+    document.getElementById('note-help').textContent = cfg.help;
+    document.getElementById('note-save').textContent = cfg.saveLabel;
+
+    const input = document.getElementById('note-input');
+    input.value = ctState[field] || '';
+    input.setAttribute('maxlength', String(CT_NOTE_MAX));
+    updateNoteCount();
+
+    const removeBtn = document.getElementById('note-remove');
+    removeBtn.textContent = cfg.removeLabel;
+    removeBtn.hidden = !ctState[field];
+
+    const suggestions = document.getElementById('note-suggestions');
+    suggestions.innerHTML = cfg.suggestions
+      .map(text => '<button type="button" class="ct-sug" data-suggest="' + esc(text) + '">' + esc(text) + '</button>')
+      .join('');
+  });
+}
+
+function saveNoteSheet() {
+  const field = ctNoteField;
+  const cfg = CT_NOTE_CFG[field];
+  if (!cfg) { closeSheet(); return; }
+
+  const input = document.getElementById('note-input');
+  const value = ctCleanNote(input ? input.value : '');
+  const had = !!ctState[field];
+
+  ctState[field] = value;         // saving an empty field is a removal
+  saveCartExtras();
+  paintNoteCards();
+  closeSheet();
+
+  if (value) showToast(cfg.savedToast);
+  else if (had) showToast(cfg.removedToast);
+}
+
+function removeNoteSheet() {
+  const field = ctNoteField;
+  const cfg = CT_NOTE_CFG[field];
+  if (!cfg) { closeSheet(); return; }
+  ctState[field] = '';
+  saveCartExtras();
+  paintNoteCards();
+  closeSheet();
+  showToast(cfg.removedToast);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TIP
+   The amount is state, not markup. Nothing here claims the tip is paid —
+   that only becomes true when the existing order flow succeeds.
+   ═══════════════════════════════════════════════════════════════════════ */
+function setTip(amount) {
+  ctState.tipAmount = ctCleanTip(amount);
+  saveCartExtras();
+  paintTipChips();
+  applyTotals();
+}
+
+function paintTipChips() {
+  const row = document.getElementById('tip-options');
+  if (!row) return;
+
+  const tip = ctCleanTip(ctState.tipAmount);
+  const isPreset = CT_TIP_PRESETS.indexOf(tip) !== -1;
+  const isCustom = tip > 0 && !isPreset;
+
+  const customChip = document.getElementById('tip-custom-chip');
+  if (customChip) {
+    customChip.textContent = isCustom ? ('₹' + tip) : 'Custom';
+    customChip.setAttribute('aria-label', isCustom
+      ? 'Custom tip of ₹' + tip + '. Tap to change.'
+      : 'Enter a custom tip amount');
+  }
+
+  row.querySelectorAll('.ct-chip').forEach(chip => {
+    const raw = chip.dataset.tip;
+    const active = raw === 'custom' ? isCustom : (Number(raw) === tip);
+    chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function setTipError(message) {
+  const el = document.getElementById('tip-error');
+  if (!el) return;
+  el.textContent = message || '';
+  el.hidden = !message;
+}
+
+function openTipSheet() {
+  openSheet('ct-tip-sheet', () => {
+    const tip = ctCleanTip(ctState.tipAmount);
+    const isCustom = tip > 0 && CT_TIP_PRESETS.indexOf(tip) === -1;
+    const input = document.getElementById('tip-input');
+    input.value = isCustom ? String(tip) : '';
+    setTipError('');
+    document.getElementById('tip-remove').hidden = tip <= 0;
+  });
+}
+
+function saveTipSheet() {
+  const input = document.getElementById('tip-input');
+  const raw = (input ? input.value : '').trim();
+  const refocus = () => { if (input) input.focus(); };
+
+  if (!raw) { setTipError('Enter a tip amount, or choose Remove tip.'); refocus(); return; }
+  const value = Number(raw);
+  if (!Number.isFinite(value))  { setTipError('Enter a valid amount in rupees.'); refocus(); return; }
+  if (!Number.isInteger(value)) { setTipError('Enter a whole rupee amount, with no paise.'); refocus(); return; }
+  if (value < CT_TIP_MIN) { setTipError('The smallest tip is ₹' + CT_TIP_MIN + '. Choose Remove tip if you would rather not tip.'); refocus(); return; }
+  if (value > CT_TIP_MAX) { setTipError('The largest tip you can add here is ₹' + CT_TIP_MAX + '.'); refocus(); return; }
+
+  setTip(value);
+  closeSheet();
+  showToast('₹' + value + ' tip added for your delivery partner');
+}
+
+function removeTipSheet() {
+  setTip(0);
+  closeSheet();
+  showToast('Tip removed');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   WIRING — one delegated listener for every new control.
+   ═══════════════════════════════════════════════════════════════════════ */
+document.addEventListener('click', (event) => {
+  const target = event.target;
+  if (!target || typeof target.closest !== 'function') return;
+
+  if (target.closest('[data-sheet-close]')) { closeSheet(); return; }
+
+  const suggestion = target.closest('.ct-sug[data-suggest]');
+  if (suggestion) {
+    const input = document.getElementById('note-input');
+    if (input) {
+      input.value = ctCleanNote(suggestion.dataset.suggest);
+      updateNoteCount();
+      input.focus();
+    }
+    return;
+  }
+
+  const noteCard = target.closest('.ct-line-card[data-note-field]');
+  if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
+
+  if (target.closest('#coupon-card')) { openSheet('ct-coupon-sheet'); return; }
+
+  const chip = target.closest('#tip-options .ct-chip');
+  if (chip) {
+    if (chip.dataset.tip === 'custom') { openTipSheet(); return; }
+    const value = ctCleanTip(chip.dataset.tip);
+    if (value === ctCleanTip(ctState.tipAmount)) return;    // already selected
+    setTip(value);
+    showToast(value > 0 ? '₹' + value + ' tip added for your delivery partner' : 'Tip removed');
+    return;
+  }
+});
+
+document.getElementById('note-input').addEventListener('input', updateNoteCount);
+document.getElementById('note-save').addEventListener('click', saveNoteSheet);
+document.getElementById('note-remove').addEventListener('click', removeNoteSheet);
+document.getElementById('tip-save').addEventListener('click', saveTipSheet);
+document.getElementById('tip-remove').addEventListener('click', removeTipSheet);
+document.getElementById('tip-input').addEventListener('input', () => setTipError(''));
+document.getElementById('tip-input').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') { event.preventDefault(); saveTipSheet(); }
+});
+
 /* ── Lifecycle (listeners preserved) ────────────────────────────────────── */
-window.addEventListener('pageshow',()=>{ loadAddress(); renderCart(); });
+window.addEventListener('pageshow',()=>{ loadCartExtras(); loadAddress(); renderCart(); });
 window.addEventListener('storage',(e)=>{
   if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
     ctAddrHydratedFor = null;
     loadAddress(); renderCart();
+  }
+  if(e.key === CT_EXTRAS_KEY){
+    loadCartExtras();
+    paintNoteCards(); paintTipChips(); applyTotals();
   }
 });
 // address.html dispatches this when the selected address changes; refresh
@@ -1323,6 +2134,7 @@ window.addEventListener('nearbite:address-changed',()=>{
 window.addEventListener('resize', syncFooterOffset);
 
 document.addEventListener('DOMContentLoaded', async () => {
+  loadCartExtras();
   syncFooterOffset();
   if (window.ResizeObserver) {
     const footer = document.getElementById('checkout-footer');
