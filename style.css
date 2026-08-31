@@ -770,7 +770,7 @@ main{
   --nb-item-gap:14px;
   --nb-cta-w:96px;
   --nb-cta-h:36px;
-  --nb-cta-overlap:20px;   /* how far the CTA sits over the image */
+  --nb-cta-overlap:26px;   /* how far the CTA sits over the image */
 }
 
 .nb-menu-item{
@@ -778,7 +778,7 @@ main{
   justify-content:space-between;
   align-items:flex-start;
   gap:var(--nb-item-gap);
-  padding:16px 0;
+  padding:14px 0;
   border-bottom:1px solid #ECEFF1;
   animation:fadeSlideUp .4s ease forwards;
 }
@@ -971,7 +971,7 @@ main{
 }
 
 .nb-item-customisable{
-  margin-top:5px;
+  margin-top:4px;
   color:#8A9299;
   font-family:var(--font-micro);
   font-size:10px;
@@ -979,7 +979,11 @@ main{
   line-height:1.4;
   text-align:center;
 }
-.nb-item-customisable-spacer{min-height:14px;}
+/* Collapsed to zero. It previously reserved 14px + 4px margin on EVERY
+   item so customisable and non-customisable items matched height — but
+   these rows are a single vertical column, so nothing is aligned across
+   them and the reservation bought nothing. Height is now content-driven. */
+.nb-item-customisable-spacer{min-height:0;margin-top:0;}
 
 /* ---------- ADD button / quantity stepper ----------
    Identical footprint so swapping one for the other cannot shift
@@ -1048,7 +1052,7 @@ main{
   justify-content:space-between;
   align-items:flex-start;
   gap:var(--nb-item-gap);
-  padding:16px 0;
+  padding:14px 0;
   border-bottom:1px solid #ECEFF1;
 }
 .skel-left{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:9px;}
