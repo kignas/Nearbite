@@ -848,6 +848,7 @@
 
         const delay = (globalIdx++ * 0.04).toFixed(2);
         const imageSrc = item.image || item.img || '';
+        const displayImage = resolveMenuImage(imageSrc);
         const inStock = item.inStock !== false;
         const isItemAvailable = inStock && isRestaurantOpen;
 
@@ -880,10 +881,11 @@
             </div>
 
             <div class="nb-item-media">
-              <div class="nb-item-image-wrap">
-                ${imageSrc
-                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(imageSrc)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" onerror="this.closest('.nb-item-image-wrap').classList.add('no-image'); this.remove();">`
-                  : `<div class="nb-item-image-placeholder"><i class="fa-solid fa-utensils"></i></div>`
+              <div class="nb-item-image-wrap${displayImage ? ' is-loading' : ''}">
+                <div class="nb-item-image-placeholder" aria-hidden="true"><i class="fa-solid fa-utensils" aria-hidden="true"></i></div>
+                ${displayImage
+                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(displayImage)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
+                  : ''
                 }
                 ${overlayText ? `<div class="nb-item-overlay"><span>${overlayText}</span></div>` : ''}
               </div>
@@ -912,6 +914,24 @@
     menuContainer.style.display = 'block';
     setupScrollSpy(categories);
     syncVegFilterAvailability();
+  }
+
+  /* Decides whether a value is worth putting in <img src>. Returns the URL
+     or '' to render the placeholder instead. Purely a display guard — the
+     value passed to updateCart() is left exactly as the API sent it. */
+  const MENU_IMAGE_REJECT = ['null', 'undefined', 'nan', 'none', 'false', '0'];
+
+  function resolveMenuImage(raw) {
+    if (typeof raw !== 'string') return '';
+
+    const url = raw.trim();
+    if (!url || MENU_IMAGE_REJECT.indexOf(url.toLowerCase()) !== -1) return '';
+
+    if (/^https?:\/\//i.test(url)) return url;                       // absolute
+    if (/^\/\//.test(url)) return url;                               // protocol-relative
+    if (/^data:image\/[a-z0-9.+-]+;base64,/i.test(url)) return url;   // inline image
+    if (/^[a-z][a-z0-9.+-]*:/i.test(url)) return '';                  // any other scheme
+    return url;                                                       // relative path
   }
 
   function escapeMenuHtml(value) {
