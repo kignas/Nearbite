@@ -1113,21 +1113,36 @@ function ctEtaText(restaurant) {
    this up lazily only if it is still empty. */
 const ctProfile = { name: '', phone: '', fetched: false };
 
+/* Backend /profile returns the authenticated User document directly in
+   result.data. The User model uses the exact fields: name and phone. */
 function ctCaptureProfile(user) {
   if (!user || typeof user !== 'object') return;
-  const sources = [user, user.user, user.customer, user.profile]
-    .filter(v => v && typeof v === 'object');
-  for (const source of sources) {
-    const name = source.name || source.fullName || source.customerName ||
-                 source.receiverName || source.displayName || '';
-    const phone = source.phone || source.mobile || source.phoneNumber ||
-                  source.mobileNumber || source.receiverPhone || '';
-    if (!ctProfile.name && name) ctProfile.name = String(name).trim();
-    if (!ctProfile.phone && phone) ctProfile.phone = String(phone).trim();
-    if (ctProfile.name && ctProfile.phone) break;
-  }
+
+  const name = typeof user.name === 'string' ? user.name.trim() : '';
+  const phone = typeof user.phone === 'string' ? user.phone.trim() : '';
+
+  // Never replace a real profile name with the OTP onboarding placeholder.
+  if (name && name !== 'Nearbite User') ctProfile.name = name;
+  if (phone) ctProfile.phone = phone;
   ctProfile.fetched = true;
 }
+
+/* Login already stores the same backend User object in localStorage. Use it
+   immediately so the card can paint without waiting for the network; the
+   authenticated /profile request below remains the authoritative refresh. */
+(function hydrateCachedCustomer() {
+  try {
+    const cached = JSON.parse(localStorage.getItem('nearbite_user') || 'null');
+    if (cached && typeof cached === 'object') {
+      if (typeof cached.name === 'string' && cached.name.trim() && cached.name.trim() !== 'Nearbite User') {
+        ctProfile.name = cached.name.trim();
+      }
+      if (typeof cached.phone === 'string' && cached.phone.trim()) {
+        ctProfile.phone = cached.phone.trim();
+      }
+    }
+  } catch (_) {}
+})();
 
 async function getRestaurantLocation(restaurantId, force) {
   if (!restaurantId) return null;
@@ -2331,11 +2346,14 @@ function paintCheckoutDeliverySummary() {
 /* Profile is only needed for the visible customer contact card when the
    selected address does not already contain receiver details. */
 async function ctEnsureProfile() {
-  if (ctProfile.fetched) {
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  // A cached login profile is enough to paint immediately, but when a token is
+  // present always refresh from the authenticated backend so edited profile
+  // data is reflected on Cart.
+  if (!token) {
     paintCheckoutDeliverySummary();
     return;
   }
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
   if (!token) {
     paintCheckoutDeliverySummary();
     return;
