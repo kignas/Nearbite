@@ -51,15 +51,11 @@
       --shadow-md:   0 1px 2px rgba(16,24,40,.04), 0 6px 16px rgba(16,24,40,.05);
       --shadow-lg:   0 8px 28px rgba(16,24,40,.10);
       --ease:        cubic-bezier(0.25, 1, 0.5, 1);
-
-      /* Single source of truth for the food image box. The skeleton uses
-         the same token, so skeleton and loaded item cannot drift. */
-      --item-img:    128px;
       --gutter:      14px;
     }
 
-    @media (max-width: 374px) { :root { --item-img: 112px; --gutter: 12px; } }
-    @media (min-width: 412px) { :root { --item-img: 136px; } }
+    /* Menu image sizing is owned by style.css (--nb-item-img). */
+    @media (max-width: 380px) { :root { --gutter: 12px; } }
 
     body {
       background: var(--bg);
@@ -244,20 +240,16 @@
     /* ============================================================
        MENU SECTION
     ============================================================ */
-    .menu-section { padding: 0 var(--gutter); margin-top: 20px; }
-    .menu-cat-group { margin-bottom: 4px; }
+    .menu-section { padding: 0 var(--gutter); margin-top: 18px; }
+    .menu-cat-group { margin-bottom: 2px; }
 
     .menu-cat-header {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 18px 0 12px; cursor: pointer;
+      padding: 16px 0 10px; cursor: pointer;
       border-bottom: 1px solid var(--border);
       user-select: none;
     }
-    .menu-cat-title {
-      font-size: 16.5px; font-weight: 800; color: var(--text-1);
-      letter-spacing: -.35px; display: flex; align-items: baseline; gap: 7px;
-      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
+    /* .menu-cat-title is owned by style.css. */
     .menu-cat-count {
       font-size: 12.5px; font-weight: 700; color: var(--text-3);
       flex-shrink: 0;
@@ -273,178 +265,9 @@
 
     @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-    /* ============================================================
-       MENU ITEM SYSTEM  (Phase 3.0)
-       NOTE: these components are also styled in style.css, which was not
-       supplied. Every layout-critical property is declared explicitly so
-       an unseen rule cannot half-apply. These rules should eventually be
-       moved into style.css so there is one source of truth.
-    ============================================================ */
-    .menu-section .nb-menu-item {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: var(--gutter);
-      padding: 18px 0; margin: 0;
-      border: 0; border-bottom: 1px solid var(--line-soft);
-      background: transparent;
-      animation: fadeSlideUp .32s var(--ease) forwards; opacity: 0;
-    }
-    .menu-section .menu-cat-group .nb-menu-item:last-child { border-bottom: 0; }
-
-    .menu-section .nb-item-main {
-      flex: 1 1 auto; min-width: 0;
-      display: flex; flex-direction: column; align-items: flex-start;
-      padding: 0; margin: 0;
-    }
-
-    .menu-section .nb-item-tag-row {
-      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-      margin: 0 0 7px; min-height: 14px;
-    }
-
-    .menu-section .nb-item-title {
-      font-size: 15px; font-weight: 700; color: var(--text-1);
-      line-height: 1.32; letter-spacing: -.2px;
-      margin: 0 0 6px; padding: 0;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .menu-section .nb-item-price-row {
-      display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
-      margin: 0 0 7px;
-    }
-    .menu-section .nb-item-current-price {
-      font-size: 14.5px; font-weight: 800; color: var(--text-1); letter-spacing: -.2px;
-    }
-    .menu-section .nb-item-original-price {
-      font-size: 12.5px; font-weight: 600; color: var(--text-3);
-      text-decoration: line-through;
-    }
-    .menu-section .nb-item-discount {
-      font-size: 10px; font-weight: 800; letter-spacing: .3px;
-      color: var(--green); background: var(--green-soft);
-      padding: 3px 6px; border-radius: 5px;
-    }
-
-    .menu-section .nb-item-desc {
-      font-size: 12.5px; font-weight: 400; color: var(--text-2);
-      line-height: 1.5; margin: 0; padding: 0;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* ── Food image: one square box for every item ── */
-    .menu-section .nb-item-media {
-      flex: 0 0 var(--item-img);
-      width: var(--item-img);
-      display: flex; flex-direction: column; align-items: center;
-      padding: 0; margin: 0;
-    }
-
-    .menu-section .nb-item-image-wrap {
-      position: relative;
-      width: 100%; height: auto;
-      aspect-ratio: 1 / 1;
-      border-radius: 16px; overflow: hidden;
-      background: #F1F3F7;
-      box-shadow: var(--shadow-sm);
-      flex: none;
-    }
-
-    .menu-section .nb-item-image {
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: center center;
-      display: block; border-radius: 0;
-    }
-    .menu-section .nb-item-image.is-unavailable { filter: grayscale(1); opacity: .55; }
-
-    .menu-section .nb-item-image-placeholder {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg,#EDF0F4,#E2E7EE);
-      color: #B7BFCB; font-size: 26px;
-    }
-
-    .menu-section .nb-item-overlay {
-      position: absolute; inset: 0; z-index: 2;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(16,24,40,.52);
-      color: #fff; font-size: 11px; font-weight: 800;
-      text-align: center; padding: 6px; line-height: 1.3;
-    }
-
-    /* CTA overlaps the image edge — connected to the food, clear of it. */
-    .menu-section .nb-item-cta {
-      position: relative; z-index: 3;
-      width: 100%; margin: -18px 0 0;
-      display: flex; justify-content: center;
-    }
-
-    .menu-section .nb-item-customisable {
-      font-size: 10px; font-weight: 700; color: var(--text-3);
-      text-align: center; margin-top: 7px; letter-spacing: .1px;
-    }
-    .menu-section .nb-item-customisable-spacer { min-height: 15px; }
-
-    /* ── ADD button / quantity stepper ── */
-    .nb-add-btn {
-      width: 104px; height: 38px;
-      display: block; margin: 0 auto;
-      background: #fff; border: 1px solid var(--action-line);
-      border-radius: 12px;
-      color: var(--action); font-family: inherit;
-      font-size: 14px; font-weight: 800; letter-spacing: .3px;
-      box-shadow: 0 4px 12px rgba(16,24,40,.10);
-      cursor: pointer;
-      transition: transform .14s var(--ease), box-shadow .14s var(--ease), filter .14s var(--ease);
-    }
-    .nb-add-btn:active { transform: scale(.95); box-shadow: 0 2px 6px rgba(16,24,40,.10); }
-    .nb-add-btn:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
-    .nb-add-btn.is-disabled {
-      background: #F2F4F7; border-color: var(--border); color: var(--text-3);
-      box-shadow: none; cursor: not-allowed; font-size: 12px;
-    }
-    .nb-add-btn.is-disabled:active { transform: none; }
-
-    .nb-qty {
-      display: flex; align-items: center; justify-content: space-between;
-      width: 104px; height: 38px; margin: 0 auto;
-      background: #fff; border: 1px solid var(--action);
-      border-radius: 12px; overflow: hidden;
-      box-shadow: 0 4px 12px rgba(252,128,25,.16);
-    }
-    .nb-qty.is-disabled { border-color: var(--border); box-shadow: none; }
-    .nb-qty-btn {
-      width: 34px; height: 100%; border: 0; background: transparent;
-      color: var(--action); font-family: inherit; font-weight: 900; font-size: 17px;
-      line-height: 1; cursor: pointer;
-      transition: background .14s var(--ease);
-    }
-    .nb-qty-btn:active { background: var(--action-soft); }
-    .nb-qty-btn.is-disabled { color: #CBD5E1; cursor: not-allowed; }
-    .nb-qty-btn.is-disabled:active { background: transparent; }
-    .nb-qty-val {
-      font-size: 14px; font-weight: 800; color: var(--action);
-      min-width: 22px; text-align: center;
-    }
-    .nb-qty.is-disabled .nb-qty-val { color: var(--text-3); }
-
-    /* ── Skeleton: same tokens as the real item, so no layout shift ── */
-    .skeleton {
-      background: linear-gradient(90deg,#EEF0F3 25%,#F7F8FA 50%,#EEF0F3 75%);
-      background-size: 300px 100%;
-      animation: nbShimmer 1.2s linear infinite;
-      border-radius: 8px;
-    }
-    @keyframes nbShimmer { to { background-position: 300px 0; } }
-
-    .skel-item {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 18px 0; border-bottom: 1px solid var(--line-soft); gap: var(--gutter);
-    }
-    .skel-left { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
-    .skel-media { flex: 0 0 var(--item-img); width: var(--item-img); }
-    .skel-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 16px; }
+    /* Menu item, food image, ADD/stepper and skeleton styling all live in
+       style.css under "RESTAURANT MENU — PRODUCTION". Nothing for those
+       components belongs in this file. */
 
     .empty-filter-msg { text-align: center; padding: 52px 24px; display: none; }
     .empty-filter-msg i { font-size: 34px; color: #D5DBE4; display: block; margin-bottom: 14px; }
@@ -533,47 +356,23 @@
     .menu-state-btn:active { transform: scale(.96); filter: brightness(.96); }
     .menu-state-btn:disabled { opacity: .6; cursor: default; transform: none; }
 
-    .nb-item-badge {
-      color: #B45309; font-size: 10px; font-weight: 800; letter-spacing: .3px;
-      background: #FFF5E3; border: 1px solid #FCE7C4;
-      padding: 3px 7px; border-radius: 6px; width: max-content;
-      margin: 0; display: inline-flex; align-items: center; line-height: 1.4;
-    }
 
-    .nb-veg-mark {
-      width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
-      display: inline-flex; align-items: center; justify-content: center;
-    }
-    .nb-veg-mark.veg { border: 1.5px solid #16a34a; }
-    .nb-veg-mark.veg span { width: 6px; height: 6px; background: #16a34a; border-radius: 50%; }
-    .nb-veg-mark.nonveg { border: 1.5px solid #dc2626; }
-    .nb-veg-mark.nonveg span {
-      width: 0; height: 0; border-left: 4px solid transparent;
-      border-right: 4px solid transparent; border-bottom: 7px solid #dc2626;
-    }
-
-    .nb-item-image-wrap.no-image { background: linear-gradient(135deg,#edf0f4,#e2e7ee); }
-
-    .nb-item-coupon{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;background:#EEF1FF;color:#4338CA;border:1px solid #DDE3FF;font-family:var(--font-micro);font-size:10px;font-weight:800;letter-spacing:.2px;line-height:1.4;}
-
+    
     /* ============================================================
        REDUCED MOTION
     ============================================================ */
     @media (prefers-reduced-motion: reduce) {
       .res-card, .delivery-strip, .filter-bar, .menu-section,
-      .closed-warning-card, .menu-section .nb-menu-item {
+      .closed-warning-card {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
       }
-      .skeleton { animation: none !important; background: #EEF0F3; }
-      .cat-nav, .cat-nav-pill, .veg-chip, .nb-add-btn, .nb-qty-btn,
-      .menu-state-btn, .icon-btn, .heart-btn, .menu-cat-chevron,
-      .menu-cat-items { transition: none !important; }
+      .cat-nav, .cat-nav-pill, .veg-chip, .menu-state-btn, .icon-btn,
+      .heart-btn, .menu-cat-chevron, .menu-cat-items { transition: none !important; }
       .cat-nav-inner { scroll-behavior: auto; }
-      .nb-add-btn:active, .nb-qty-btn:active, .veg-chip:active,
-      .cat-nav-pill:active, .icon-btn:active, .heart-btn:active,
-      .menu-state-btn:active { transform: none; }
+      .veg-chip:active, .cat-nav-pill:active, .icon-btn:active,
+      .heart-btn:active, .menu-state-btn:active { transform: none; }
     }
 </style>
 <link rel="stylesheet" href="style.css">

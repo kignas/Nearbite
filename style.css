@@ -612,7 +612,7 @@ main{
 }
 
 .section-label strong{
-  font-size:18px !important;
+  font-size:17px !important;
   font-weight:700 !important;
   letter-spacing:-.3px;
   color:var(--nb-ink) !important;
@@ -743,24 +743,49 @@ main{
 }
 
 .menu-cat-title{
-  font-size:18px !important;
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:17px !important;
   font-weight:700 !important;
   letter-spacing:-.3px;
   color:var(--nb-ink) !important;
 }
 
+/* ============================================================
+   RESTAURANT MENU — PRODUCTION
+   Single source of truth for the restaurant.html menu item.
+   Do NOT duplicate any of these rules in restaurant.html.
+   Responsive rules live together at the end of this section.
+   ============================================================ */
+
+:root{
+  /* One token drives the food image, the media column and the
+     skeleton, so skeleton and loaded item can never drift apart. */
+  --nb-item-img:122px;
+  --nb-item-gap:14px;
+  --nb-cta-w:96px;
+  --nb-cta-h:36px;
+  --nb-cta-overlap:20px;   /* how far the CTA sits over the image */
+}
+
 .nb-menu-item{
   display:flex;
   justify-content:space-between;
-  gap:16px;
-  padding:22px 0;
+  align-items:flex-start;
+  gap:var(--nb-item-gap);
+  padding:16px 0;
   border-bottom:1px solid #ECEFF1;
   animation:fadeSlideUp .4s ease forwards;
 }
 
 .nb-item-main{
   min-width:0;
-  flex:1;
+  flex:1 1 auto;
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
@@ -769,15 +794,45 @@ main{
 .nb-item-tag-row{
   display:flex;
   align-items:center;
-  gap:7px;
-  min-height:18px;
+  flex-wrap:wrap;
+  gap:6px;
+  min-height:16px;
   margin-bottom:5px;
+}
+
+.nb-veg-mark{
+  width:14px;height:14px;border-radius:3px;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.nb-veg-mark.veg{border:1.5px solid #16A34A;}
+.nb-veg-mark.veg span{width:6px;height:6px;background:#16A34A;border-radius:50%;}
+.nb-veg-mark.nonveg{border:1.5px solid #DC2626;}
+.nb-veg-mark.nonveg span{
+  width:0;height:0;border-left:4px solid transparent;
+  border-right:4px solid transparent;border-bottom:7px solid #DC2626;
+}
+
+.nb-item-badge{
+  display:inline-flex;align-items:center;width:max-content;margin:0;
+  padding:3px 7px;border-radius:6px;
+  background:var(--nb-offer-bg);color:var(--nb-offer);
+  border:1px solid #FCE7C4;
+  font-family:var(--font-micro);font-size:10px;font-weight:800;
+  letter-spacing:.3px;line-height:1.4;
+}
+
+.nb-item-coupon{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 7px;border-radius:6px;
+  background:#EEF1FF;color:#4338CA;border:1px solid #DDE3FF;
+  font-family:var(--font-micro);font-size:10px;font-weight:800;
+  letter-spacing:.2px;line-height:1.4;
 }
 
 .nb-item-title{
   margin:0 0 4px;
   max-width:100%;
-  font-size:14px;
+  font-size:14.5px;
   font-weight:650;
   line-height:1.3;
   letter-spacing:-.15px;
@@ -792,7 +847,7 @@ main{
   align-items:center;
   flex-wrap:wrap;
   gap:7px;
-  margin-bottom:7px;
+  margin-bottom:6px;
 }
 
 .nb-item-current-price{
@@ -840,19 +895,23 @@ main{
   overflow:hidden;
 }
 
+/* ---------- Food image + CTA ---------- */
+
 .nb-item-media{
   position:relative;
-  width:128px;
-  flex:0 0 128px;
+  width:var(--nb-item-img);
+  flex:0 0 var(--nb-item-img);
   display:flex;
   flex-direction:column;
   align-items:center;
 }
 
+.nb-item-image-wrap.no-image{background:linear-gradient(135deg,#EDF0F4,#E2E7EE);}
+
 .nb-item-image-wrap{
   position:relative;
   width:100%;
-  aspect-ratio:1;
+  aspect-ratio:1 / 1;
   border-radius:14px;
   overflow:hidden;
   background:#F5F6F7;
@@ -864,11 +923,18 @@ main{
   height:100%;
   display:block;
   object-fit:cover;
+  object-position:center center;
 }
 
 .nb-item-image.is-unavailable{
   filter:grayscale(90%);
   opacity:.8;
+}
+
+.nb-item-image-placeholder{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  color:#C7CDD2;background:#F5F6F7;
 }
 
 .nb-item-overlay{
@@ -892,28 +958,128 @@ main{
   text-transform:uppercase;
 }
 
+/* In normal flow with a negative margin, not absolutely positioned.
+   The old absolute + bottom:-16px was anchored to the media column,
+   not the image, so it landed on top of the Customisable label. */
 .nb-item-cta{
-  position:absolute;
-  bottom:-16px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:10;
+  position:relative;
+  z-index:3;
   width:100%;
+  margin-top:calc(var(--nb-cta-overlap) * -1);
+  display:flex;
+  justify-content:center;
 }
 
 .nb-item-customisable{
-  margin-top:23px;
+  margin-top:5px;
   color:#8A9299;
   font-family:var(--font-micro);
   font-size:10px;
   font-weight:600;
+  line-height:1.4;
+  text-align:center;
 }
+.nb-item-customisable-spacer{min-height:14px;}
+
+/* ---------- ADD button / quantity stepper ----------
+   Identical footprint so swapping one for the other cannot shift
+   the layout. Visual only; every onclick is defined in restaurant.html. */
+
+.nb-add-btn{
+  width:var(--nb-cta-w);
+  height:var(--nb-cta-h);
+  display:block;
+  background:#fff;
+  border:1px solid #F6DCC6;
+  border-radius:11px;
+  color:var(--nb-brand);
+  font-family:inherit;
+  font-size:13.5px;
+  font-weight:800;
+  letter-spacing:.4px;
+  box-shadow:0 4px 12px rgba(28,32,36,.10);
+  cursor:pointer;
+  transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
+}
+.nb-add-btn:active{transform:scale(.95);box-shadow:0 2px 6px rgba(28,32,36,.10);}
+.nb-add-btn:focus-visible{outline:2px solid var(--nb-brand);outline-offset:2px;}
+.nb-add-btn.is-disabled{
+  background:#F1F5F9;border-color:#E2E8F0;color:#94A3B8;
+  box-shadow:none;cursor:not-allowed;font-size:11.5px;letter-spacing:0;
+}
+.nb-add-btn.is-disabled:active{transform:none;}
+
+.nb-qty{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:var(--nb-cta-w);
+  height:var(--nb-cta-h);
+  background:#fff;
+  border:1px solid var(--nb-brand);
+  border-radius:11px;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(252,128,25,.16);
+}
+.nb-qty.is-disabled{border-color:#E2E8F0;box-shadow:none;}
+.nb-qty-btn{
+  width:31px;height:100%;
+  border:0;background:transparent;
+  color:var(--nb-brand);
+  font-family:inherit;font-weight:900;font-size:16px;line-height:1;
+  cursor:pointer;
+  transition:background .14s ease;
+}
+.nb-qty-btn:active{background:#FFF4EA;}
+.nb-qty-btn.is-disabled{color:#CBD5E1;cursor:not-allowed;}
+.nb-qty-btn.is-disabled:active{background:transparent;}
+.nb-qty-val{
+  font-family:var(--font-micro);
+  font-size:13.5px;font-weight:800;color:var(--nb-brand);
+  min-width:22px;text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.nb-qty.is-disabled .nb-qty-val{color:#94A3B8;}
+
+/* ---------- Skeleton: same tokens as the real item ---------- */
+
+.skel-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:var(--nb-item-gap);
+  padding:16px 0;
+  border-bottom:1px solid #ECEFF1;
+}
+.skel-left{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:9px;}
+.skel-media{flex:0 0 var(--nb-item-img);width:var(--nb-item-img);}
+.skel-img{width:100%;aspect-ratio:1 / 1;border-radius:14px;}
+
+/* ---------- Restaurant menu responsive ---------- */
+
+@media (max-width:380px){
+  :root{
+    --nb-item-img:118px;
+    --nb-item-gap:12px;
+    --nb-cta-w:92px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .nb-menu-item{animation:none;opacity:1;}
+  .nb-add-btn,.nb-qty-btn{transition:none;}
+  .nb-add-btn:active{transform:none;}
+  .skeleton{animation:none;background:#F0F0F2;}
+}
+
+/* ============================================================
+   END RESTAURANT MENU — PRODUCTION
+   ============================================================ */
 
 @media (max-width:380px){
   .mind-image-wrap{width:82px !important;height:82px !important}
   .mind-grid{column-gap:8px !important}
-  .nb-item-media{width:116px;flex-basis:116px}
-  .nb-menu-item{gap:12px}
+  /* menu item sizing moved into RESTAURANT MENU — PRODUCTION above */
 }
 
 @media (min-width:600px){
@@ -921,8 +1087,4 @@ main{
   .mind-image-wrap{width:104px !important;height:104px !important}
 }
 
-.nb-item-image-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#C7CDD2;background:#F5F6F7;}
-.nb-item-image-placeholder i{font-size:22px;}
-.nb-item-customisable-spacer{min-height:10px;}
 
-.nb-item-coupon{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;background:#EEF2FF;color:#4F46E5;font-family:var(--font-micro);font-size:10px;font-weight:800;line-height:1.2;}
