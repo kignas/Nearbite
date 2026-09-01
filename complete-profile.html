@@ -55,18 +55,18 @@
     /* ---------------- header band ---------------- */
     .topbar{
       background:var(--band);
-      padding:16px 30px 32px;
+      padding:12px 30px 24px;
     }
 
     .back{
       display:flex;
       align-items:center;
       justify-content:flex-start;
-      width:44px;height:44px;
+      width:42px;height:42px;
       margin-left:-11px;
       border:0;background:none;
       color:var(--ink);
-      font-size:21px;
+      font-size:20px;
       cursor:pointer;
       -webkit-tap-highlight-color:transparent;
     }
@@ -74,17 +74,17 @@
     .back:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
 
     .topbar h1{
-      margin-top:8px;
-      font-size:27px;
+      margin-top:4px;
+      font-size:25px;
       line-height:1.18;
       font-weight:800;
-      letter-spacing:-.7px;
+      letter-spacing:-.6px;
       color:var(--ink);
     }
 
     .topbar p{
-      margin-top:8px;
-      font-size:14.5px;
+      margin-top:6px;
+      font-size:14px;
       line-height:1.5;
       font-weight:500;
       color:var(--muted);
@@ -94,19 +94,19 @@
     /* ---------------- form ---------------- */
     .form{
       flex:1;
-      padding:38px 30px 0;
+      padding:28px 30px 0;
     }
 
-    .field{margin-bottom:34px}
+    .field{margin-bottom:26px}
     .field:last-of-type{margin-bottom:0}
 
     label{
       display:block;
       font-size:13px;
       line-height:1.3;
-      font-weight:500;
+      font-weight:600;
       color:var(--label);
-      margin-bottom:9px;
+      margin-bottom:7px;
     }
 
     .control{position:relative}
@@ -114,11 +114,12 @@
     .input{
       display:block;
       width:100%;
+      min-height:50px;
       border:0;
       border-bottom:1.5px solid var(--line);
       border-radius:0;
       background:transparent;
-      padding:5px 0 13px;
+      padding:8px 0 12px;
       font-size:17px;
       line-height:1.4;
       font-weight:600;
@@ -140,14 +141,14 @@
     .input.invalid:focus{border-bottom-color:var(--danger)}
 
     .tick{
-      position:absolute;right:2px;bottom:13px;
-      color:var(--green);font-size:17px;
+      position:absolute;right:2px;bottom:12px;
+      color:var(--green);font-size:16px;
       pointer-events:none;
     }
 
     .toggle{
-      position:absolute;right:-10px;bottom:-4px;
-      width:44px;height:44px;
+      position:absolute;right:-10px;bottom:-5px;
+      width:42px;height:42px;
       border:0;background:none;
       color:var(--label);font-size:16px;
       display:grid;place-items:center;
@@ -158,41 +159,44 @@
     .toggle:focus-visible{outline:2px solid var(--brand);outline-offset:-6px;border-radius:10px}
 
     .hint{
-      margin-top:10px;
-      font-size:12px;line-height:1.5;font-weight:500;
+      margin-top:8px;
+      font-size:11.5px;line-height:1.5;font-weight:500;
       color:var(--label);
     }
 
     .field-error{
       display:none;
-      margin-top:10px;
-      font-size:12px;line-height:1.45;font-weight:600;
+      margin-top:8px;
+      font-size:11.5px;line-height:1.45;font-weight:600;
       color:var(--danger);
     }
     .field-error.show{display:block}
 
     .form-error{
       display:none;
-      margin-bottom:26px;
-      font-size:13px;line-height:1.5;font-weight:600;
+      margin-bottom:22px;
+      font-size:12.5px;line-height:1.5;font-weight:600;
       color:var(--danger);
     }
     .form-error i{margin-right:7px}
 
     /* ---------------- CTA ---------------- */
     .cta-wrap{
-      padding:40px 30px calc(26px + env(safe-area-inset-bottom));
+      padding:30px 30px calc(22px + env(safe-area-inset-bottom));
     }
 
     .cta{
-      display:block;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
       width:100%;
-      min-height:56px;
+      min-height:52px;
       border:0;
       border-radius:9px;
       background:var(--brand-soft);
       color:#fff;
-      font-size:14.5px;
+      font-size:14px;
       font-weight:800;
       letter-spacing:.09em;
       text-transform:uppercase;
@@ -200,6 +204,7 @@
       transition:background .15s ease;
       -webkit-tap-highlight-color:transparent;
     }
+    .cta i{font-size:12px}
     .cta:not(:disabled){background:var(--brand);cursor:pointer}
     .cta:not(:disabled):active{background:var(--brand-dark)}
     .cta:focus-visible{outline:2px solid var(--brand-dark);outline-offset:3px}
@@ -213,15 +218,15 @@
       align-items:center;justify-content:center;flex-direction:column;
     }
     .spinner{
-      width:32px;height:32px;
+      width:30px;height:30px;
       border:3px solid #EDEFF2;
       border-top-color:var(--brand);
       border-radius:50%;
       animation:spin .8s linear infinite;
     }
     .loading span{
-      margin-top:14px;
-      font-size:13px;font-weight:600;color:var(--muted);
+      margin-top:13px;
+      font-size:12.5px;font-weight:600;color:var(--muted);
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -229,24 +234,24 @@
       *{animation-duration:.01ms !important;transition-duration:.01ms !important}
     }
 
-    /* 375px – 412px keep the full 30px gutter */
+    /* 360px */
     @media(max-width:365px){
-      .topbar{padding:14px 22px 28px}
-      .topbar h1{font-size:24px;letter-spacing:-.6px}
+      .topbar{padding:11px 22px 22px}
+      .topbar h1{font-size:23px;letter-spacing:-.5px}
       .topbar p{font-size:13.5px}
-      .form{padding:32px 22px 0}
-      .field{margin-bottom:30px}
-      .input{font-size:16px}
-      .cta-wrap{padding:34px 22px calc(24px + env(safe-area-inset-bottom))}
+      .form{padding:24px 22px 0}
+      .field{margin-bottom:23px}
+      .input{font-size:16px;min-height:48px}
+      .cta-wrap{padding:26px 22px calc(20px + env(safe-area-inset-bottom))}
     }
 
-    /* short viewport / keyboard open — tighten without cramping */
-    @media(max-height:660px){
-      .topbar{padding-bottom:26px}
-      .topbar h1{font-size:24px}
-      .form{padding-top:30px}
-      .field{margin-bottom:28px}
-      .cta-wrap{padding-top:32px}
+    /* short viewport / keyboard open */
+    @media(max-height:700px){
+      .topbar{padding-bottom:20px}
+      .topbar h1{font-size:23px}
+      .form{padding-top:24px}
+      .field{margin-bottom:22px}
+      .cta-wrap{padding-top:26px}
     }
   </style>
 </head>
@@ -273,14 +278,21 @@
       </div>
 
       <div class="field">
-        <label for="password">Password</label>
+        <label for="name">Full Name *</label>
+        <div class="control">
+          <input class="input" id="name" type="text" maxlength="60" placeholder="Enter your full name" autocomplete="name" autocapitalize="words">
+        </div>
+        <div class="field-error" id="err_name"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password *</label>
         <div class="control has-icon">
           <input class="input" id="password" type="password" minlength="6" maxlength="72" placeholder="Create password" autocomplete="new-password">
           <button type="button" class="toggle" id="pwToggle" onclick="togglePassword()" aria-label="Show password" aria-pressed="false">
             <i class="fa-solid fa-eye" id="pwIcon"></i>
           </button>
         </div>
-        <div class="hint">At least 6 characters</div>
         <div class="field-error" id="err_password"></div>
       </div>
 
@@ -295,7 +307,9 @@
     </main>
 
     <div class="cta-wrap">
-      <button class="cta" id="saveBtn" disabled onclick="completeProfile()">Continue</button>
+      <button class="cta" id="saveBtn" disabled onclick="completeProfile()">
+        Continue <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </button>
     </div>
 
   </div>
@@ -313,10 +327,14 @@
 
   const $ = id => document.getElementById(id);
 
-  /* Delivery details are collected by the address flow. Any name already on
-     the account is carried through untouched so the profile request keeps
-     its existing shape. */
-  let existingName = '';
+  /* Where the customer goes after the account is saved:
+     Complete Profile → Location map → Address → Checkout.
+     The address step is handed to the map as the destination so the
+     confirmed coordinates carry straight into the address form. */
+  const ADDRESS_STEP  = 'address.html?add=1';
+  const LOCATION_STEP = 'location-onboarding.html?from=complete-profile'
+                      + '&next=' + encodeURIComponent(ADDRESS_STEP)
+                      + '&return=' + encodeURIComponent(ADDRESS_STEP);
 
   function safeBack(){
     if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack();
@@ -360,6 +378,10 @@
     if (input) input.classList.toggle('invalid', !!message);
   }
 
+  function nameValid(){
+    return $('name').value.trim().length >= 2;
+  }
+
   function passwordValid(){
     return $('password').value.length >= 6;
   }
@@ -370,18 +392,19 @@
     return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
   }
 
-  /* The CTA is gated on the password only — an empty email never blocks it. */
+  /* CTA unlocks on name + password. An empty email never blocks it. */
   function syncCta(){
-    $('saveBtn').disabled = !passwordValid();
+    $('saveBtn').disabled = !(nameValid() && passwordValid());
   }
 
+  $('name').addEventListener('input', () => { setFieldError('name',''); showError(''); syncCta(); });
   $('password').addEventListener('input', () => { setFieldError('password',''); showError(''); syncCta(); });
   $('email').addEventListener('input', () => { setFieldError('email',''); showError(''); });
   $('email').addEventListener('blur', () => { if (!emailValid()) setFieldError('email','Enter a valid email address, or leave it empty.'); });
 
   /* With the Android keyboard open, bring the focused field into view. The
      CTA sits in normal flow, so it moves with the page instead of covering it. */
-  ['password','email'].forEach(id => {
+  ['name','password','email'].forEach(id => {
     $(id).addEventListener('focus', () => {
       setTimeout(() => $(id).scrollIntoView({ block:'center', behavior:'smooth' }), 240);
     });
@@ -403,7 +426,8 @@
       const user = result.data || {};
       $('phone').value = formatPhone(user.phone || cached.phone || '');
 
-      if (user.name && user.name !== 'Nearbite User' && user.name !== 'Eatswada User') existingName = user.name;
+      // Placeholder names created by signup are not shown as a real name.
+      if (user.name && user.name !== 'Nearbite User' && user.name !== 'Eatswada User') $('name').value = user.name;
       if (user.email) $('email').value = user.email;
     } catch (e){
       console.warn('Could not load existing profile', e);
@@ -417,6 +441,11 @@
   async function completeProfile(){
     showError('');
 
+    if (!nameValid()){
+      setFieldError('name', 'Enter your full name.');
+      $('name').focus();
+      return;
+    }
     if (!passwordValid()){
       setFieldError('password', 'Create a password with at least 6 characters.');
       $('password').focus();
@@ -433,10 +462,10 @@
 
     try {
       const payload = {
+        name: $('name').value.trim(),
         email: $('email').value.trim() || undefined,
         password: $('password').value
       };
-      if (existingName) payload.name = existingName;
 
       const res = await fetch(`${API}/users/profile`, {
         method:'PUT',
@@ -448,11 +477,16 @@
         throw new Error(result.message || 'Could not save your details. Please try again.');
       }
 
+      // Session state only. The auth token and nearbite_after_login are left
+      // exactly as they are for the later steps to use.
       let cached = {};
       try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
-      localStorage.setItem('nearbite_user', JSON.stringify(result.data || { ...cached, email: payload.email || cached.email }));
+      localStorage.setItem('nearbite_user', JSON.stringify(
+        result.data || { ...cached, name: payload.name, email: payload.email || cached.email }
+      ));
 
-      window.location.href = 'address.html?add=1';
+      // Next step is the map, not the address form.
+      window.location.href = LOCATION_STEP;
 
     } catch (error){
       console.error(error);

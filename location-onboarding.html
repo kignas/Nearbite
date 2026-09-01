@@ -7,7 +7,7 @@
 <title>Set delivery location · Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -25,9 +25,12 @@
   --shadow-sheet:0 -2px 8px rgba(17,24,39,.05),0 -14px 40px rgba(17,24,39,.14);
   --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
   --safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px);
+  /* Same stack as complete-profile.html and the homepage. Named --font
+     rather than --font-sans so style.css cannot redefine it. */
+  --font:'Manrope',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:var(--font-sans);color:var(--ink);overflow:hidden}
+html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--ink);overflow:hidden}
 #map{position:absolute;inset:0;background:#e9eef2}
 
 /* ── Floating header ── */
@@ -82,6 +85,12 @@ html,body{margin:0;width:100%;height:100%;font-family:var(--font-sans);color:var
 </style>
 <link rel="stylesheet" href="style.css">
 <style id="location-gate-styles">
+/* Typography. Re-declared here, after style.css, so a font-family rule in
+   the shared stylesheet cannot substitute another face. Matches
+   complete-profile.html. */
+html,body{font-family:var(--font)}
+button,input,textarea,select{font-family:inherit}
+
 /* Location gate. Loaded after style.css so its element-level rules
    (p{color}, h1-h6{color}) cannot repaint the modal. */
 .lg-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(17,24,39,.55);display:flex;align-items:flex-end;
@@ -333,6 +342,34 @@ async function locateMe(){
    }
  },{enableHighAccuracy:true,timeout:25000,maximumAge:10000});
 }
+/* ── Handoff target ────────────────────────────────────────────────
+   Complete Profile opens this page with ?next=<encoded relative path>
+   so the confirmed point flows straight into the address step. This
+   only chooses where to go AFTER the existing confirmation rules have
+   already passed — it never unlocks confirming. Anything missing,
+   malformed, or pointing off this origin falls back to the original
+   destination. */
+function safeDecode(v){
+ let out=String(v==null?'':v);
+ for(let i=0;i<2&&/%[0-9a-f]{2}/i.test(out);i++){
+  try{ const d=decodeURIComponent(out); if(d===out)break; out=d }catch(e){ break }
+ }
+ return out;
+}
+function nextDestination(){
+ let raw=null;
+ try{ raw=new URLSearchParams(window.location.search).get('next') }catch(e){ return null }
+ if(!raw)return null;
+ const d=safeDecode(raw).trim();
+ if(!d)return null;
+ if(/^[a-z][a-z0-9+.\-]*:/i.test(d))return null; // no scheme (http:, javascript:, data:)
+ if(/^\/\//.test(d))return null;                 // no protocol-relative host
+ if(/^[\/\\]/.test(d))return null;               // no absolute or UNC path
+ if(/[\\\s\x00-\x1f]/.test(d))return null;       // no backslashes, whitespace, control chars
+ // A plain page in this app, optionally with a query string / hash.
+ if(!/^[\w.\-]+\.html(\?[^#\s]*)?(#[^\s]*)?$/i.test(d))return null;
+ return d;
+}
 async function confirmLocation(){
  // A genuine GPS fix is the only thing that unlocks saving. Without it
  // `current` could only be the DEFAULT map centre, which is not a customer
@@ -348,6 +385,10 @@ async function confirmLocation(){
    }));
    if(d) localStorage.setItem('nearbite_onboarding_geocode',JSON.stringify(d));
    localStorage.setItem('nearbite_location_permission_seen','1');
+   // Coordinates are already stored above, so either destination receives
+   // the same confirmed point.
+   const handoff=nextDestination();
+   if(handoff){ window.location.href=handoff; return }
    const next=localStorage.getItem('nearbite_after_login');
    window.location.href='complete-profile.html?location=done'+(next?'':'&new=1');
  }catch(e){
