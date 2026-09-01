@@ -3,216 +3,863 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#fff">
-<title>Saved addresses · Nearbite</title>
+<meta name="theme-color" content="#ffffff">
+<title>Saved addresses · Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<style>
-:root{--brand:#fc8019;--soft:#f7f7f8;--ink:#111827;--muted:#6b7280;--line:#e8eaed;--green:#15803d;--red:#dc2626}
-*{box-sizing:border-box}body{margin:0;background:var(--soft);color:var(--ink);font-family:var(--font-sans),sans-serif;padding-bottom:30px}
-.app{max-width:720px;margin:auto;min-height:100dvh}.header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:13px 16px}
-.top{display:flex;align-items:center;gap:12px}.back,.add{width:40px;height:40px;border:0;border-radius:13px;background:#f5f5f6;display:grid;place-items:center;color:#374151}.add{background:#fff2e8;color:var(--brand)}
-.title{font-size:17px;font-weight:800;flex:1}.sub{font-size:11px;color:var(--muted);margin:4px 0 0 52px}
-.main{padding:16px}.hint{background:#fff2e8;border:1px solid #ffe1ce;color:#8a4517;border-radius:16px;padding:12px 13px;font-size:11px;line-height:1.5;margin-bottom:14px}
-.card{background:#fff;border:1px solid var(--line);border-radius:19px;box-shadow:0 6px 24px rgba(17,24,39,.05);margin-bottom:11px;overflow:hidden}
-.addr{padding:15px}.addr-top{display:flex;gap:12px}.addr-icon{width:42px;height:42px;border-radius:13px;background:#f7f7f8;display:grid;place-items:center;flex:none}.addr-icon.default{background:#fff2e8;color:var(--brand)}
-.addr-body{flex:1;min-width:0}.tag{font-size:13px;font-weight:800;display:flex;gap:7px;align-items:center}.default{color:var(--brand);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.line{font-size:11px;color:#4b5563;line-height:1.55;margin-top:5px}.meta{font-size:10px;color:#9ca3af;margin-top:5px}
-.actions{display:flex;gap:8px;margin-top:13px;padding-top:11px;border-top:1px solid #f0f1f2}.action{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;font-size:10px;font-weight:800;color:#374151}.action.primary{border-color:#ffd5bd;background:#fff8f3;color:#c85e0d}.action.danger{color:var(--red)}
-.empty{text-align:center;background:#fff;border:1px dashed #d9dce0;border-radius:19px;padding:34px 20px;color:var(--muted);font-size:12px}.empty i{font-size:30px;color:#c7cbd1;margin-bottom:10px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:100;display:none;align-items:flex-end;padding:10px}.modal.show{display:flex}.sheet{width:min(620px,100%);max-height:92dvh;overflow:auto;background:#fff;border-radius:25px;padding:19px;margin:auto}
-.sheet-head{display:flex;align-items:center;gap:10px}.sheet-head h2{font-size:17px;margin:0;flex:1}.close{border:0;background:#f4f4f5;width:36px;height:36px;border-radius:11px}.loc{margin:15px 0;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:15px}.loc button{width:100%;height:43px;border:1px solid var(--brand);background:#fff7f2;color:#c85e0d;border-radius:12px;font-weight:800;font-size:11px}.status{font-size:10px;margin-top:8px;color:var(--green);line-height:1.4}.status.err{color:var(--red)}
-.tags{display:flex;gap:8px;margin:12px 0}.tagbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800}.tagbtn.on{border-color:var(--brand);background:#fff2e8;color:var(--brand)}
-label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;font-weight:800;margin:13px 0 7px}input{width:100%;height:46px;border:1px solid var(--line);background:#fafafa;border-radius:12px;padding:0 12px;outline:none;font-size:12px}input:focus{border-color:#f5a36d;background:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.save{width:100%;height:48px;border:0;background:var(--brand);color:#fff;border-radius:13px;font-weight:800;margin-top:17px}.save:disabled{background:#ddd;color:#999}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,15px);opacity:0;background:#111827;color:#fff;padding:10px 14px;border-radius:11px;font-size:11px;z-index:130;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
-</style>
+
+<!-- Shared stylesheet loads first so the page-scoped .ea-* rules below win
+     without any global change to style.css. -->
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
+
+<style>
+:root{
+  --brand:#fc8019;
+  --brand-dark:#e96f0a;
+  --brand-light:#fff4ec;
+  --ea-bg:#f7f8fa;
+  --ink:#111827;
+  --muted:#6b7280;
+  --line:#eef0f2;
+  --green:#0b7a45;
+  --red:#dc2626;
+  --ea-font:"Plus Jakarta Sans","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.ea *,.ea *::before,.ea *::after{box-sizing:border-box}
+
+body.ea-body{
+  margin:0;
+  background:var(--ea-bg);
+  color:var(--ink);
+  font-family:var(--ea-font);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.ea button,.ea input{font:inherit}
+
+.ea-app{max-width:640px;margin:auto;min-height:100dvh}
+
+.ea-header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  padding:12px 16px;
+}
+.ea-top{display:flex;align-items:center;gap:12px}
+.ea-back,.ea-add{
+  width:40px;height:40px;flex:0 0 40px;border:0;border-radius:14px;
+  display:grid;place-items:center;color:#374151;background:#f3f5f7;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.ea-add{background:var(--brand-light);color:var(--brand)}
+.ea-back:active,.ea-add:active{transform:scale(.94)}
+.ea-title{font-size:18px;font-weight:800;letter-spacing:-.4px;flex:1;min-width:0}
+.ea-sub{font-size:11.5px;color:var(--muted);margin:5px 0 0 52px;font-weight:500}
+
+.ea-main{padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+
+.ea-note{
+  background:var(--brand-light);border:1px solid #ffe1ce;color:#8a4517;
+  border-radius:16px;padding:12px 13px;font-size:11.5px;line-height:1.55;
+  margin-bottom:14px;font-weight:500;display:flex;gap:9px;align-items:flex-start;
+}
+.ea-note i{margin-top:1px}
+
+.ea-card{
+  background:#fff;border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 4px 18px rgba(17,24,39,.045);
+  margin-bottom:12px;overflow:hidden;
+}
+.ea-card.is-selected{border-color:#ffd3b0;box-shadow:0 6px 22px rgba(252,128,25,.13)}
+
+.ea-addr{padding:15px 14px}
+.ea-addr-top{display:flex;gap:12px}
+.ea-addr-icon{
+  width:42px;height:42px;flex:0 0 42px;border-radius:14px;
+  background:#f4f5f7;color:#6b7280;display:grid;place-items:center;font-size:15px;
+}
+.ea-addr-icon.is-default{background:var(--brand-light);color:var(--brand)}
+.ea-addr-body{flex:1;min-width:0}
+
+.ea-tagline{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.ea-tag{font-size:14px;font-weight:800;letter-spacing:-.2px}
+.ea-chip{
+  font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  border-radius:999px;padding:4px 8px;
+}
+.ea-chip.default{background:var(--brand-light);color:#c85e0d}
+.ea-chip.selected{background:#e9f8ef;color:var(--green)}
+
+.ea-line{font-size:12px;color:#4b5563;line-height:1.6;margin-top:6px;overflow-wrap:anywhere}
+.ea-meta{font-size:11px;color:#9ca3af;margin-top:5px;font-weight:500;overflow-wrap:anywhere}
+
+.ea-actions{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:13px;padding-top:12px;
+  border-top:1px solid #f3f4f6;
+}
+.ea-action{
+  border:1.5px solid var(--line);background:#fff;border-radius:12px;
+  padding:10px 12px;font-size:11px;font-weight:800;color:#374151;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.ea-action:active{transform:scale(.97)}
+.ea-action.primary{border-color:#ffd5bd;background:#fff8f3;color:#c85e0d;flex:1 1 auto;min-width:140px}
+.ea-action.danger{color:var(--red);border-color:#f6dede}
+.ea-action.current{border-color:#cdead9;background:#f2fbf6;color:var(--green);flex:1 1 auto;min-width:140px}
+
+.ea-empty{
+  text-align:center;background:#fff;border:1px dashed #dde1e6;border-radius:20px;
+  padding:38px 22px;color:var(--muted);font-size:12.5px;line-height:1.6;
+}
+.ea-empty i{font-size:28px;color:#cbd0d6;display:block;margin-bottom:12px}
+.ea-empty b{display:block;font-size:15px;color:var(--ink);margin-bottom:5px}
+.ea-empty-cta{
+  margin-top:16px;border:0;background:var(--brand);color:#fff;
+  border-radius:14px;padding:13px 20px;font-size:13px;font-weight:800;cursor:pointer;
+}
+
+/* ---------- add / edit sheet ---------- */
+.ea-modal{
+  position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:120;
+  display:none;align-items:flex-end;justify-content:center;
+}
+.ea-modal.show{display:flex}
+.ea-sheet{
+  width:min(640px,100%);max-height:94dvh;display:flex;flex-direction:column;
+  background:#fff;border-radius:26px 26px 0 0;overflow:hidden;
+}
+.ea-sheet-head{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 16px 12px;border-bottom:1px solid var(--line);
+}
+.ea-sheet-head h2{font-size:17px;margin:0;flex:1;font-weight:800;letter-spacing:-.4px}
+.ea-close{border:0;background:#f3f5f7;width:36px;height:36px;border-radius:12px;cursor:pointer;color:#374151}
+
+.ea-sheet-body{padding:16px;overflow:auto;flex:1}
+
+.ea-group{margin-bottom:20px}
+.ea-group:last-child{margin-bottom:0}
+.ea-group-title{
+  font-size:12.5px;font-weight:800;color:#374151;margin-bottom:10px;letter-spacing:-.1px;
+}
+
+.ea-loc{
+  border:1px solid #ffe3cd;background:linear-gradient(180deg,#fffaf5 0%,#fff 62%);
+  border-radius:18px;padding:14px 13px;
+}
+.ea-loc-row{display:flex;gap:12px;align-items:flex-start}
+.ea-loc-pin{
+  width:42px;height:42px;flex:0 0 42px;border-radius:14px;
+  background:var(--brand-light);color:var(--brand);display:grid;place-items:center;font-size:16px;
+}
+.ea-loc-body{flex:1;min-width:0}
+.ea-loc-primary{font-size:14.5px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.ea-loc-secondary{margin-top:3px;font-size:12px;color:#5b6472;line-height:1.5;font-weight:500;overflow-wrap:anywhere}
+.ea-loc-badge{
+  display:inline-flex;align-items:center;gap:6px;margin-top:9px;
+  background:#e9f8ef;color:var(--green);border-radius:999px;
+  padding:5px 10px;font-size:10.5px;font-weight:800;
+}
+.ea-loc-badge.pending{background:#fff1f1;color:#b42318}
+.ea-loc-btn{
+  margin-top:12px;width:100%;min-height:46px;
+  border:1.5px solid #ffd9be;background:#fff;color:#c85e0d;
+  border-radius:14px;font-size:13px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  -webkit-tap-highlight-color:transparent;
+}
+.ea-loc-btn.solid{background:var(--brand);border-color:var(--brand);color:#fff}
+.ea-loc-btn:active{transform:scale(.99)}
+
+.ea-tags{display:flex;gap:8px;flex-wrap:wrap}
+.ea-tagbtn{
+  border:1.5px solid var(--line);background:#fff;border-radius:999px;
+  padding:10px 17px;font-size:12.5px;font-weight:800;color:#4b5563;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.ea-tagbtn.on{border-color:var(--brand);background:var(--brand-light);color:#c85e0d}
+
+.ea-field{margin-bottom:13px}
+.ea-field:last-child{margin-bottom:0}
+.ea-label{
+  display:block;font-size:12.5px;font-weight:700;color:#4b5563;
+  margin:0 0 7px;text-transform:none;letter-spacing:normal;
+}
+.ea-input{
+  width:100%;min-height:50px;border:1.5px solid #eceff3;background:#f8fafc;
+  border-radius:14px;padding:13px 14px;outline:none;
+  font:600 14px var(--ea-font);color:var(--ink);
+  transition:border-color .16s ease,background .16s ease,box-shadow .16s ease;
+  -webkit-appearance:none;
+}
+.ea-input::placeholder{color:#9ca3af;font-weight:500}
+.ea-input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(252,128,25,.10)}
+.ea-input.invalid{border-color:#f2a9a9;background:#fffafa}
+
+.ea-err{display:none;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--red);line-height:1.45}
+.ea-err.show{display:block}
+
+.ea-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+.ea-sheet-foot{
+  padding:11px 16px calc(13px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);background:rgba(255,255,255,.97);
+}
+.ea-save{
+  width:100%;min-height:54px;border:0;background:var(--brand);color:#fff;
+  border-radius:16px;font:800 14.5px var(--ea-font);cursor:pointer;
+  box-shadow:0 8px 18px rgba(252,128,25,.2);
+  -webkit-tap-highlight-color:transparent;
+}
+.ea-save:not(:disabled):active{transform:scale(.985)}
+.ea-save:disabled{background:#e5e7eb;color:#9ca3af;box-shadow:none;cursor:not-allowed}
+
+.ea-fab{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  padding:11px 16px calc(13px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.95);border-top:1px solid rgba(229,231,235,.9);
+  box-shadow:0 -8px 24px rgba(17,24,39,.06);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.ea-fab button{
+  display:block;width:100%;max-width:608px;margin:auto;min-height:52px;
+  border:1.5px dashed #ffd0ad;background:#fff8f3;color:#c85e0d;
+  border-radius:16px;font:800 14px var(--ea-font);cursor:pointer;
+}
+
+.ea-toast{
+  position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));
+  transform:translate(-50%,14px);opacity:0;pointer-events:none;
+  background:#111827;color:#fff;padding:11px 16px;border-radius:13px;
+  font-size:12px;font-weight:600;z-index:200;transition:.2s;
+  max-width:calc(100% - 32px);text-align:center;
+}
+.ea-toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  .ea *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+
+@media(max-width:412px){
+  .ea-main{padding-left:14px;padding-right:14px}
+  .ea-header{padding:11px 14px}
+  .ea-title{font-size:17px}
+  .ea-sheet-body{padding:14px}
+  .ea-fab{padding-left:14px;padding-right:14px}
+}
+
+@media(max-width:360px){
+  .ea-grid{grid-template-columns:1fr;gap:0}
+  .ea-grid .ea-field{margin-bottom:13px}
+  .ea-action{flex:1 1 100%}
+  .ea-action.primary,.ea-action.current{min-width:0}
+  .ea-loc-pin{width:38px;height:38px;flex:0 0 38px;border-radius:12px;font-size:14px}
+  .ea-sub{margin-left:0}
+}
+</style>
 </head>
-<body>
-<div class="app">
-<header class="header">
-  <div class="top">
-    <button class="back" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="title">Saved addresses</div>
-    <button class="add" onclick="openEditor()"><i class="fa-solid fa-plus"></i></button>
+<body class="ea ea-body">
+<div class="ea-app">
+<header class="ea-header">
+  <div class="ea-top">
+    <button class="ea-back" onclick="goBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="ea-title">Saved addresses</div>
+    <button class="ea-add" onclick="openEditor()" aria-label="Add address"><i class="fa-solid fa-plus"></i></button>
   </div>
-  <div class="sub">Choose where you want your food delivered</div>
+  <div class="ea-sub">Choose where you want your food delivered</div>
 </header>
-<main class="main">
-  <div class="hint"><i class="fa-solid fa-location-dot"></i> Your saved GPS location is used to calculate restaurant distance and delivery charges. You can switch addresses before placing each order.</div>
-  <div id="list"><div class="empty"><i class="fa-solid fa-location-dot"></i><br>Loading addresses…</div></div>
+
+<main class="ea-main">
+  <div class="ea-note">
+    <i class="fa-solid fa-location-dot"></i>
+    <span>Each address keeps the map location you confirmed for it. Eatswada uses that point for restaurant distance and delivery availability.</span>
+  </div>
+  <div id="list"><div class="ea-empty"><i class="fa-solid fa-location-dot"></i>Loading addresses…</div></div>
 </main>
 </div>
 
-<div class="modal" id="modal">
- <div class="sheet">
-  <div class="sheet-head"><h2 id="formTitle">Add new address</h2><button class="close" onclick="closeEditor()"><i class="fa-solid fa-xmark"></i></button></div>
-  <div class="loc">
-    <button id="gpsBtn" onclick="captureGps()"><i class="fa-solid fa-location-crosshairs"></i> Use my current location</button>
-    <div class="status" id="gpsStatus"></div>
+<div class="ea-fab">
+  <button onclick="openEditor()"><i class="fa-solid fa-plus"></i> Add a new address</button>
+</div>
+
+<div class="ea-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+ <div class="ea-sheet">
+  <div class="ea-sheet-head">
+    <h2 id="formTitle">Add new address</h2>
+    <button class="ea-close" onclick="closeEditor()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
-  <label>Save as</label>
-  <div class="tags">
-    <button class="tagbtn on" data-tag="Home" onclick="chooseTag('Home')">Home</button>
-    <button class="tagbtn" data-tag="Work" onclick="chooseTag('Work')">Work</button>
-    <button class="tagbtn" data-tag="Other" onclick="chooseTag('Other')">Other</button>
+
+  <div class="ea-sheet-body">
+
+    <div class="ea-group">
+      <div class="ea-group-title">Delivery location</div>
+      <div class="ea-loc">
+        <div class="ea-loc-row">
+          <div class="ea-loc-pin"><i class="fa-solid fa-location-dot" id="locIcon"></i></div>
+          <div class="ea-loc-body">
+            <div class="ea-loc-primary" id="locPrimary">No location yet</div>
+            <div class="ea-loc-secondary" id="locSecondary"></div>
+            <div class="ea-loc-badge pending" id="locBadge"><i class="fa-solid fa-circle-exclamation"></i> <span>Not confirmed</span></div>
+          </div>
+        </div>
+        <button type="button" class="ea-loc-btn solid" id="changeLocBtn" onclick="changeLocation()">
+          <i class="fa-solid fa-map-location-dot"></i> <span id="changeLocText">Set location on map</span>
+        </button>
+      </div>
+      <div class="ea-err" id="err_location"></div>
+    </div>
+
+    <div class="ea-group">
+      <div class="ea-group-title">Save as</div>
+      <div class="ea-tags">
+        <button type="button" class="ea-tagbtn on" data-tag="Home" onclick="chooseTag('Home')">Home</button>
+        <button type="button" class="ea-tagbtn" data-tag="Work" onclick="chooseTag('Work')">Work</button>
+        <button type="button" class="ea-tagbtn" data-tag="Other" onclick="chooseTag('Other')">Other</button>
+      </div>
+    </div>
+
+    <div class="ea-group">
+      <div class="ea-group-title">Address details</div>
+
+      <div class="ea-field">
+        <label class="ea-label" for="house">House / Flat / Building *</label>
+        <input class="ea-input" id="house" maxlength="120" placeholder="House no., flat, building">
+        <div class="ea-err" id="err_house"></div>
+      </div>
+
+      <div class="ea-field">
+        <label class="ea-label" for="area">Area / Locality *</label>
+        <input class="ea-input" id="area" maxlength="120" placeholder="Locality, village or street">
+        <div class="ea-err" id="err_area"></div>
+      </div>
+
+      <div class="ea-field">
+        <label class="ea-label" for="landmark">Landmark *</label>
+        <input class="ea-input" id="landmark" maxlength="160" placeholder="Near post office, opposite school">
+        <div class="ea-err" id="err_landmark"></div>
+      </div>
+
+      <div class="ea-grid">
+        <div class="ea-field">
+          <label class="ea-label" for="city">City / Town *</label>
+          <input class="ea-input" id="city" maxlength="80" value="Maynaguri">
+          <div class="ea-err" id="err_city"></div>
+        </div>
+        <div class="ea-field">
+          <label class="ea-label" for="pincode">PIN code *</label>
+          <input class="ea-input" id="pincode" inputmode="numeric" maxlength="6" placeholder="735224">
+          <div class="ea-err" id="err_pincode"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ea-group">
+      <div class="ea-group-title">Receiver details</div>
+      <div class="ea-field">
+        <label class="ea-label" for="receiverName">Receiver name</label>
+        <input class="ea-input" id="receiverName" maxlength="60" placeholder="Who should we hand the order to?">
+        <div class="ea-err" id="err_receiverName"></div>
+      </div>
+      <div class="ea-field">
+        <label class="ea-label" for="receiverPhone">Receiver phone</label>
+        <input class="ea-input" id="receiverPhone" inputmode="tel" maxlength="10" placeholder="10-digit mobile number">
+        <div class="ea-err" id="err_receiverPhone"></div>
+      </div>
+    </div>
+
   </div>
-  <div class="grid">
-    <div><label>House / flat</label><input id="house" placeholder="House No. / Name"></div>
-    <div><label>Pincode</label><input id="pincode" inputmode="numeric" maxlength="6" placeholder="735224"></div>
+
+  <div class="ea-sheet-foot">
+    <button class="ea-save" id="save" onclick="saveAddress()">Save address</button>
   </div>
-  <label>Area / street</label><input id="area" placeholder="Locality / village / street">
-  <label>Landmark</label><input id="landmark" placeholder="Nearby landmark">
-  <div class="grid">
-    <div><label>City</label><input id="city" value="Maynaguri"></div>
-    <div><label>Receiver name</label><input id="receiverName" placeholder="Full name"></div>
-  </div>
-  <label>Receiver phone</label><input id="receiverPhone" inputmode="tel" maxlength="10" placeholder="10-digit mobile number">
-  <button class="save" id="save" onclick="saveAddress()">Save address</button>
  </div>
 </div>
-<div class="toast" id="toast"></div>
+
+<div class="ea-toast" id="toast"></div>
 
 <script>
-const API=CONFIG.API_BASE_URL;
-let addresses=[], editingId=null, tag='Home', lat=null, lng=null;
-const $=id=>document.getElementById(id);
-const token=()=>localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';
-const headers=()=>({'Content-Type':'application/json',...(token()?{'Authorization':'Bearer '+token()}:{})});
-function toast(s){$('toast').textContent=s;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),2200)}
-function goBack(){if(new URLSearchParams(location.search).get('return')==='cart')location.replace('cart.html');else window.nearbiteSafeBack()}
-function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function coords(a){const c=a?.location?.coordinates;return Array.isArray(c)&&c.length>=2?[Number(c[1]),Number(c[0])]:[null,null]}
-function cache(a){localStorage.setItem('nearbite_address',JSON.stringify(a));localStorage.setItem('nearbite_address_updated_at',String(Date.now()))}
+const API = CONFIG.API_BASE_URL;
+
+let addresses = [], editingId = null, tag = 'Home', lat = null, lng = null, locGeo = null;
+
+const $ = id => document.getElementById(id);
+const token   = () => localStorage.getItem('nearbite_token') || localStorage.getItem('token') || '';
+const headers = () => ({ 'Content-Type':'application/json', ...(token() ? { Authorization:'Bearer ' + token() } : {}) });
+
+/* Session-only scratch space for the "Change location" round trip.
+   Not a nearbite_* compatibility key. */
+const DRAFT_KEY = 'eatswada_address_draft';
+const FORM_IDS = ['house','area','landmark','city','pincode','receiverName','receiverPhone'];
+
+function toast(s){
+  $('toast').textContent = s;
+  $('toast').classList.add('show');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => $('toast').classList.remove('show'), 2400);
+}
+
+function goBack(){
+  if (new URLSearchParams(location.search).get('return') === 'cart') location.replace('cart.html');
+  else if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack();
+  else history.length > 1 ? history.back() : location.replace('index.html');
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+/* ---------------- coordinates (Part 10 / Part 14) ---------------- */
+
+function validCoords(a, b){
+  a = Number(a); b = Number(b);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  if (a === 0 && b === 0) return false;                  // never [0,0]
+  if (Math.abs(a) > 90 || Math.abs(b) > 180) return false;
+  return true;
+}
+
+/* Server GeoJSON is [longitude, latitude] → returns [latitude, longitude]. */
+function coords(a){
+  const c = a?.location?.coordinates;
+  if (Array.isArray(c) && c.length >= 2){
+    const la = Number(c[1]), lo = Number(c[0]);
+    if (validCoords(la, lo)) return [la, lo];
+  }
+  const la = Number(a?.latitude), lo = Number(a?.longitude);
+  if (validCoords(la, lo)) return [la, lo];
+  return [null, null];
+}
+
+function readOnboardingLocation(){
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem('nearbite_onboarding_location') || 'null'); } catch { return null; }
+  if (!raw || typeof raw !== 'object') return null;
+  const la = Number(raw.latitude), lo = Number(raw.longitude);
+  return validCoords(la, lo) ? { latitude: la, longitude: lo } : null;
+}
+
+function readOnboardingGeocode(){
+  try { return JSON.parse(localStorage.getItem('nearbite_onboarding_geocode') || 'null'); } catch { return null; }
+}
+
+/* Never renders latitude/longitude to the customer. */
+function locationLines(geo, fallbackAddress){
+  const fb = fallbackAddress
+    ? { primary: fallbackAddress.area || fallbackAddress.city || 'Saved map location',
+        secondary: [fallbackAddress.city, fallbackAddress.pincode].filter(Boolean).join(' ') }
+    : { primary:'Map location selected', secondary:'Confirmed from the map you picked' };
+
+  if (!geo) return fb;
+
+  if (typeof geo === 'string'){
+    const p = geo.split(',').map(s => s.trim()).filter(Boolean);
+    return p.length ? { primary:p[0], secondary:p.slice(1,3).join(', ') } : fb;
+  }
+
+  const a = geo.address || geo.addressComponents || {};
+  const pick = (...v) => v.find(x => typeof x === 'string' && x.trim()) || '';
+
+  const area  = pick(geo.area, geo.locality, geo.neighbourhood, a.suburb, a.neighbourhood, a.village, a.hamlet, a.road);
+  const city  = pick(geo.city, geo.town, a.city, a.town, a.municipality, a.state_district, a.county);
+  const state = pick(geo.state, a.state);
+  const pin   = pick(geo.pincode, geo.postcode, a.postcode);
+
+  const primary = area || city;
+  if (primary){
+    const tail = [];
+    if (city && city !== primary) tail.push(city);
+    if (state) tail.push(state);
+    return { primary, secondary: [tail.join(', '), pin].filter(Boolean).join(' ') };
+  }
+
+  const full = pick(geo.shortAddress, geo.short_address, geo.formatted, geo.formattedAddress,
+                    geo.formatted_address, geo.display_name, geo.label, geo.name);
+  if (full){
+    const p = full.split(',').map(s => s.trim()).filter(Boolean);
+    return { primary:p[0] || fb.primary, secondary:p.slice(1,3).join(', ') };
+  }
+  return fb;
+}
+
+/* ---------------- list ---------------- */
+
+function selectedId(){ return localStorage.getItem('nearbite_selected_address_id'); }
+
+function cache(a){
+  localStorage.setItem('nearbite_address', JSON.stringify(a));
+  localStorage.setItem('nearbite_address_updated_at', String(Date.now()));
+}
+
 function useAddress(a){
-  if(!a)return;
+  if (!a) return;
   // The selected address is the single source of truth for Cart/Checkout.
   // Always update both the selected ID and the cached address together.
-  if(a._id) localStorage.setItem('nearbite_selected_address_id',String(a._id));
+  if (a._id) localStorage.setItem('nearbite_selected_address_id', String(a._id));
   cache(a);
-  window.dispatchEvent(new CustomEvent('nearbite:address-changed',{detail:a}));
+  window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail:a }));
   toast('Delivery address selected');
-  setTimeout(()=>goBack(),250);
+  setTimeout(() => goBack(), 300);
 }
+
+function byId(id){ return addresses.find(a => String(a._id) === String(id)); }
+function useAddressById(id){ const a = byId(id); if (a) useAddress(a); }
+
 function render(){
- const root=$('list');
- if(!addresses.length){root.innerHTML='<div class="empty"><i class="fa-solid fa-location-dot"></i><br><b>No saved addresses</b><br><span>Add your first delivery address.</span></div>';return}
- root.innerHTML=addresses.map(a=>{
-   const [la,lo]=coords(a), is=a.isDefault===true;
-   const label=a.tag||'Other';
-   const icon=label==='Home'?'fa-house':label==='Work'?'fa-briefcase':'fa-location-dot';
-   const text=[a.house,a.area,a.landmark].filter(Boolean).join(', ');
-   return `<div class="card"><div class="addr">
-    <div class="addr-top"><div class="addr-icon ${is?'default':''}"><i class="fa-solid ${icon}"></i></div>
-    <div class="addr-body"><div class="tag">${escapeHtml(label)} ${is?'<span class="default">Default</span>':''}</div>
-    <div class="line">${escapeHtml(text||'Address details')}</div>
-    <div class="meta">${escapeHtml(a.city||'Maynaguri')}${a.pincode?' · '+escapeHtml(a.pincode):''}${Number.isFinite(la)?' · GPS saved':''}</div></div></div>
-    <div class="actions">
-      <button class="action primary" onclick="useAddressById('${a._id}')"><i class="fa-solid fa-check"></i> Use this address</button>
-      ${!is?`<button class="action" onclick="setDefault('${a._id}')">Set default</button>`:''}
-      <button class="action" onclick="editAddress('${a._id}')">Edit</button>
-      <button class="action danger" onclick="deleteAddress('${a._id}')">Delete</button>
-    </div>
-   </div></div>`;
- }).join('');
+  const root = $('list');
+  if (!addresses.length){
+    root.innerHTML =
+      '<div class="ea-empty"><i class="fa-solid fa-location-dot"></i>' +
+      '<b>No saved addresses yet</b>' +
+      '<span>Add your delivery address so we can bring your food to the right door.</span>' +
+      '<button class="ea-empty-cta" onclick="openEditor()">Add an address</button></div>';
+    return;
+  }
+
+  const sel = selectedId();
+
+  root.innerHTML = addresses.map(a => {
+    const [la] = coords(a);
+    const isDefault  = a.isDefault === true;
+    const isSelected = sel && String(a._id) === String(sel);
+    const label = a.tag || 'Other';
+    const icon  = label === 'Home' ? 'fa-house' : label === 'Work' ? 'fa-briefcase' : 'fa-location-dot';
+    const text  = [a.house, a.area, a.landmark].filter(Boolean).join(', ');
+    const id    = escapeHtml(a._id);
+
+    return `<div class="ea-card ${isSelected ? 'is-selected' : ''}"><div class="ea-addr">
+      <div class="ea-addr-top">
+        <div class="ea-addr-icon ${isDefault ? 'is-default' : ''}"><i class="fa-solid ${icon}"></i></div>
+        <div class="ea-addr-body">
+          <div class="ea-tagline">
+            <span class="ea-tag">${escapeHtml(label)}</span>
+            ${isDefault ? '<span class="ea-chip default">Default</span>' : ''}
+            ${isSelected ? '<span class="ea-chip selected">Delivering here</span>' : ''}
+          </div>
+          <div class="ea-line">${escapeHtml(text || 'Address details')}</div>
+          <div class="ea-meta">${escapeHtml(a.city || 'Maynaguri')}${a.pincode ? ' · ' + escapeHtml(a.pincode) : ''}${Number.isFinite(la) ? ' · Map location saved' : ' · Map location missing'}</div>
+        </div>
+      </div>
+      <div class="ea-actions">
+        ${isSelected
+          ? '<button class="ea-action current" disabled><i class="fa-solid fa-circle-check"></i> Delivering here</button>'
+          : `<button class="ea-action primary" onclick="useAddressById('${id}')"><i class="fa-solid fa-check"></i> Use this address</button>`}
+        ${!isDefault ? `<button class="ea-action" onclick="setDefault('${id}')">Set default</button>` : ''}
+        <button class="ea-action" onclick="editAddress('${id}')">Edit</button>
+        <button class="ea-action danger" onclick="deleteAddress('${id}')">Delete</button>
+      </div>
+    </div></div>`;
+  }).join('');
 }
-function byId(id){return addresses.find(a=>String(a._id)===String(id))}
-function useAddressById(id){const a=byId(id);if(a)useAddress(a)}
+
 async function load(){
- if(!token()){location.replace('login.html');return}
- try{
-  const r=await fetch(API+'/users/addresses',{headers:headers(),cache:'no-store'});
-  if(r.status===401||r.status===403)throw new Error('AUTH');
-  const p=await r.json();addresses=Array.isArray(p?.data)?p.data:Array.isArray(p?.addresses)?p.addresses:Array.isArray(p)?p:[];
-  render();
-  const selectedId=localStorage.getItem('nearbite_selected_address_id');
-  const selected=selectedId ? addresses.find(a=>String(a._id)===String(selectedId)) : null;
-  const initial=selected || addresses.find(a=>a.isDefault) || addresses[0];
-  if(initial && !selectedId){
-    if(initial._id) localStorage.setItem('nearbite_selected_address_id',String(initial._id));
-    cache(initial);
+  if (!token()){ location.replace('login.html'); return; }
+  try {
+    const r = await fetch(API + '/users/addresses', { headers: headers(), cache:'no-store' });
+    if (r.status === 401 || r.status === 403) throw new Error('AUTH');
+    const p = await r.json();
+    addresses = Array.isArray(p?.data) ? p.data
+              : Array.isArray(p?.addresses) ? p.addresses
+              : Array.isArray(p) ? p : [];
+
+    const sid = selectedId();
+    const selected = sid ? addresses.find(a => String(a._id) === String(sid)) : null;
+    const initial = selected || addresses.find(a => a.isDefault) || addresses[0];
+    if (initial && !sid){
+      if (initial._id) localStorage.setItem('nearbite_selected_address_id', String(initial._id));
+      cache(initial);
+    }
+    render();
+  } catch (e){
+    if (e.message === 'AUTH'){
+      localStorage.removeItem('nearbite_token');
+      localStorage.removeItem('token');
+      location.replace('login.html');
+      return;
+    }
+    $('list').innerHTML = '<div class="ea-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Could not load your addresses</b><span>Check your connection and try again.</span><button class="ea-empty-cta" onclick="load()">Retry</button></div>';
   }
- }catch(e){
-  if(e.message==='AUTH'){localStorage.removeItem('nearbite_token');localStorage.removeItem('token');location.replace('login.html');return}
-  $('list').innerHTML='<div class="empty">Could not load addresses. Please try again.</div>';
- }
 }
-function chooseTag(t){tag=t;document.querySelectorAll('.tagbtn').forEach(b=>b.classList.toggle('on',b.dataset.tag===t))}
-function openEditor(id=null){
- editingId=id;tag='Home';lat=null;lng=null;
- const a=id?byId(id):null;
- $('formTitle').textContent=a?'Edit address':'Add new address';
- $('house').value=a?.house||'';$('area').value=a?.area||'';$('landmark').value=a?.landmark||'';
- $('city').value=a?.city||'Maynaguri';$('pincode').value=a?.pincode||'';
- $('receiverName').value=a?.receiverName||'';$('receiverPhone').value=(a?.receiverPhone||'').replace(/\D/g,'');
- const c=coords(a);if(Number.isFinite(c[0])){lat=c[0];lng=c[1];$('gpsStatus').textContent=`Saved GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`}
- else $('gpsStatus').textContent='';
- chooseTag(a?.tag||'Home');$('modal').classList.add('show');
+
+/* ---------------- editor ---------------- */
+
+function chooseTag(t){
+  tag = t;
+  document.querySelectorAll('.ea-tagbtn').forEach(b => b.classList.toggle('on', b.dataset.tag === t));
 }
-function editAddress(id){openEditor(id)}
-function closeEditor(){$('modal').classList.remove('show')}
-function captureGps(){
- if(!navigator.geolocation){$('gpsStatus').textContent='Location is not supported by this browser.';$('gpsStatus').className='status err';return}
- $('gpsBtn').disabled=true;$('gpsBtn').textContent='Getting location…';
- navigator.geolocation.getCurrentPosition(p=>{
-   lat=Number(p.coords.latitude.toFixed(7));lng=Number(p.coords.longitude.toFixed(7));
-   $('gpsStatus').className='status';$('gpsStatus').textContent=`GPS captured: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-   $('gpsBtn').disabled=false;$('gpsBtn').innerHTML='<i class="fa-solid fa-location-dot"></i> Location captured';
- },e=>{
-   $('gpsBtn').disabled=false;$('gpsBtn').innerHTML='<i class="fa-solid fa-location-crosshairs"></i> Use my current location';
-   $('gpsStatus').className='status err';$('gpsStatus').textContent=e.code===1?'Location permission denied.':e.code===3?'Location request timed out.':'Could not get your location.';
- },{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
+
+function paintLocation(){
+  const has = validCoords(lat, lng);
+  if (has){
+    const lines = locationLines(locGeo, { area:$('area').value.trim(), city:$('city').value.trim(), pincode:$('pincode').value.trim() });
+    $('locPrimary').textContent   = lines.primary;
+    $('locSecondary').textContent = lines.secondary || '';
+    $('locIcon').className        = 'fa-solid fa-location-dot';
+    $('locBadge').className       = 'ea-loc-badge';
+    $('locBadge').innerHTML       = '<i class="fa-solid fa-circle-check"></i> <span>Location confirmed</span>';
+    $('changeLocText').textContent = 'Change location';
+    $('changeLocBtn').classList.remove('solid');
+  } else {
+    $('locPrimary').textContent   = 'No location yet';
+    $('locSecondary').textContent = 'Pick this address on the map so we can deliver to it.';
+    $('locIcon').className        = 'fa-solid fa-location-crosshairs';
+    $('locBadge').className       = 'ea-loc-badge pending';
+    $('locBadge').innerHTML       = '<i class="fa-solid fa-circle-exclamation"></i> <span>Not confirmed</span>';
+    $('changeLocText').textContent = 'Set location on map';
+    $('changeLocBtn').classList.add('solid');
+  }
 }
+
+function clearErrors(){
+  ['location','house','area','landmark','city','pincode','receiverName','receiverPhone'].forEach(id => setErr(id, ''));
+}
+
+function setErr(id, msg){
+  const box = $('err_' + id), input = $(id);
+  if (box){ box.textContent = msg || ''; box.classList.toggle('show', !!msg); }
+  if (input && input.tagName === 'INPUT') input.classList.toggle('invalid', !!msg);
+}
+
+function openEditor(id = null){
+  editingId = id;
+  const a = id ? byId(id) : null;
+
+  clearErrors();
+  $('formTitle').textContent = a ? 'Edit address' : 'Add new address';
+
+  $('house').value  = a?.house || '';
+  $('area').value   = a?.area || '';
+  $('landmark').value = a?.landmark || '';
+  $('city').value   = a?.city || 'Maynaguri';
+  $('pincode').value = a?.pincode || '';
+  $('receiverName').value  = a?.receiverName || '';
+  $('receiverPhone').value = (a?.receiverPhone || '').replace(/\D/g,'');
+
+  chooseTag(a?.tag || 'Home');
+
+  const c = coords(a);
+  lat = c[0]; lng = c[1];
+  locGeo = null;
+
+  // A brand-new address can adopt the location the customer just confirmed
+  // during onboarding, if one is still waiting.
+  if (!a && !validCoords(lat, lng)){
+    const onboard = readOnboardingLocation();
+    if (onboard){ lat = onboard.latitude; lng = onboard.longitude; locGeo = readOnboardingGeocode(); }
+  }
+
+  paintLocation();
+  $('modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function editAddress(id){ openEditor(id); }
+
+function closeEditor(){
+  $('modal').classList.remove('show');
+  document.body.style.overflow = '';
+  try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+}
+
+/* ---------------- Part 8: change location round trip ---------------- */
+
+function changeLocation(){
+  const draft = { editingId, tag };
+  FORM_IDS.forEach(id => draft[id] = $(id).value);
+  try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
+
+  const search = new URLSearchParams(location.search);
+  let back = 'address.html?resume=1';
+  if (search.get('return')) back += '&return=' + encodeURIComponent(search.get('return'));
+  back = encodeURIComponent(back);
+
+  location.href = 'location-onboarding.html?from=address&return=' + back + '&next=' + back;
+}
+
+/* Restores the in-progress form after the map round trip and swaps in the
+   newly confirmed coordinates. The saved address on the server is untouched
+   until the customer taps Save address. */
+function resumeDraft(){
+  let draft = null;
+  try { draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null'); } catch {}
+  if (!draft) return false;
+  try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+
+  openEditor(draft.editingId || null);
+
+  FORM_IDS.forEach(id => { if (typeof draft[id] === 'string') $(id).value = draft[id]; });
+  chooseTag(draft.tag || 'Home');
+
+  const onboard = readOnboardingLocation();
+  if (onboard){
+    lat = onboard.latitude;
+    lng = onboard.longitude;
+    locGeo = readOnboardingGeocode();
+  }
+  paintLocation();
+  return true;
+}
+
+/* ---------------- save (Part 7 / Part 12) ---------------- */
+
+function validateForm(){
+  clearErrors();
+  let firstBad = null;
+  const fail = (id, msg) => { setErr(id, msg); if (!firstBad) firstBad = id; };
+
+  if (!validCoords(lat, lng)) fail('location', 'Please confirm your delivery location.');
+  if (!$('house').value.trim())    fail('house', 'Enter your house / building.');
+  if (!$('area').value.trim())     fail('area', 'Enter your area or locality.');
+  if (!$('landmark').value.trim()) fail('landmark', 'Enter a nearby landmark.');
+  if (!$('city').value.trim())     fail('city', 'Enter your city or town.');
+  if (!/^\d{6}$/.test($('pincode').value.trim())) fail('pincode', 'Enter a valid 6-digit PIN code.');
+
+  const phone = $('receiverPhone').value.replace(/\D/g,'');
+  if (phone && phone.length !== 10) fail('receiverPhone', 'Enter a 10-digit mobile number, or leave it empty.');
+
+  if (firstBad){
+    const el = $(firstBad) || $('err_' + firstBad);
+    if (el && el.scrollIntoView) el.scrollIntoView({ block:'center', behavior:'smooth' });
+    return false;
+  }
+  return true;
+}
+
 async function saveAddress(){
- const data={tag,house:$('house').value.trim()||'No House Number',area:$('area').value.trim(),landmark:$('landmark').value.trim(),
- city:$('city').value.trim()||'Maynaguri',pincode:$('pincode').value.trim(),
- receiverName:$('receiverName').value.trim(),receiverPhone:$('receiverPhone').value.replace(/\D/g,''),
- latitude:lat,longitude:lng,isDefault:!addresses.length};
- if(!data.area||!Number.isFinite(lat)||!Number.isFinite(lng)){toast('Add area and capture your GPS location');return}
- const b=$('save');b.disabled=true;b.textContent='Saving…';
- try{
-  const url=editingId?API+'/users/addresses/'+encodeURIComponent(editingId):API+'/users/addresses';
-  const r=await fetch(url,{method:editingId?'PUT':'POST',headers:headers(),body:JSON.stringify(data)});
-  const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not save address');
-  await load();const saved=p.data||p.address; if(saved)cache(saved);
-  if(saved?._id) localStorage.setItem('nearbite_selected_address_id',String(saved._id));
-  localStorage.removeItem('nearbite_onboarding_location');
-  closeEditor();toast(editingId?'Address updated':'Address added');
- }catch(e){toast(e.message)}finally{b.disabled=false;b.textContent='Save address'}
-}
-async function setDefault(id){
- try{const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id)+'/default',{method:'PATCH',headers:headers()});const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.message||'Could not set default');
-   // Changing the account default must NOT move the customer's current
-   // session selection — only "Use this address" (useAddress) does that.
-   await load();
-   toast('Default address changed')}catch(e){toast(e.message)}
-}
-async function deleteAddress(id){
- const a=byId(id);if(!a)return;
- if(!confirm(`Delete your ${a.tag||'saved'} address?`))return;
- try{
-  const r=await fetch(API+'/users/addresses/'+encodeURIComponent(id),{method:'DELETE',headers:headers()});
-  const p=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(p.message||'Could not delete address');
-  const wasSelected=String(localStorage.getItem('nearbite_selected_address_id'))===String(id);
-  await load();
-  if(wasSelected){
-    // The selected address no longer exists — nearbite_selected_address_id must
-    // not keep pointing at it. Prefer the current default, else the first
-    // remaining address, else clear the selection entirely. Deleting a
-    // non-selected address must not touch the selection at all.
-    const next=addresses.find(x=>x.isDefault)||addresses[0];
-    if(next){localStorage.setItem('nearbite_selected_address_id',String(next._id));cache(next)}
-    else{localStorage.removeItem('nearbite_selected_address_id');localStorage.removeItem('nearbite_address')}
-    window.dispatchEvent(new CustomEvent('nearbite:address-changed',{detail:next||null}));
+  if (!validateForm()) return;
+
+  const usedOnboarding = (() => {
+    const o = readOnboardingLocation();
+    return !!o && o.latitude === lat && o.longitude === lng;
+  })();
+
+  const data = {
+    tag,
+    house: $('house').value.trim(),
+    area: $('area').value.trim(),
+    landmark: $('landmark').value.trim(),
+    city: $('city').value.trim(),
+    pincode: $('pincode').value.trim(),
+    receiverName: $('receiverName').value.trim(),
+    receiverPhone: $('receiverPhone').value.replace(/\D/g,''),
+    latitude: lat,
+    longitude: lng,
+    // Editing must not silently change which address is the account default.
+    isDefault: editingId ? (byId(editingId)?.isDefault === true) : !addresses.length
+  };
+
+  const b = $('save');
+  b.disabled = true; b.textContent = 'Saving…';
+
+  try {
+    const url = editingId
+      ? API + '/users/addresses/' + encodeURIComponent(editingId)
+      : API + '/users/addresses';
+
+    const r = await fetch(url, { method: editingId ? 'PUT' : 'POST', headers: headers(), body: JSON.stringify(data) });
+    const p = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(p.message || 'Could not save this address. Please try again.');
+
+    const savedId = (p.data || p.address)?._id || editingId;
+    const wasEditingSelected = editingId && String(selectedId()) === String(editingId);
+
+    await load();
+
+    // Editing an unrelated address must never move the checkout selection.
+    if (!editingId){
+      const fresh = savedId ? byId(savedId) : null;
+      if (fresh && !selectedId()){
+        localStorage.setItem('nearbite_selected_address_id', String(fresh._id));
+        cache(fresh);
+        window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: fresh }));
+        render();
+      }
+    } else if (wasEditingSelected){
+      const fresh = byId(editingId);
+      if (fresh){
+        cache(fresh);
+        window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: fresh }));
+      }
+    }
+
+    // Only after a confirmed server save is the onboarding handoff consumed.
+    if (usedOnboarding){
+      localStorage.removeItem('nearbite_onboarding_location');
+      localStorage.removeItem('nearbite_onboarding_geocode');
+    }
+
+    closeEditor();
+    toast(editingId ? 'Address updated' : 'Address added');
+  } catch (e){
+    // A failed save leaves the onboarding coordinates exactly where they are.
+    setErr('location', '');
+    toast(e.message);
+  } finally {
+    b.disabled = false; b.textContent = 'Save address';
   }
-  toast('Address deleted')
- }catch(e){toast(e.message)}
 }
-document.addEventListener('DOMContentLoaded',load);
+
+async function setDefault(id){
+  try {
+    const r = await fetch(API + '/users/addresses/' + encodeURIComponent(id) + '/default', { method:'PATCH', headers: headers() });
+    const p = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(p.message || 'Could not set this as default');
+    // Changing the account default must NOT move the customer's current
+    // session selection — only "Use this address" (useAddress) does that.
+    await load();
+    toast('Default address changed');
+  } catch (e){ toast(e.message); }
+}
+
+async function deleteAddress(id){
+  const a = byId(id);
+  if (!a) return;
+  if (!confirm(`Delete your ${a.tag || 'saved'} address?`)) return;
+  try {
+    const r = await fetch(API + '/users/addresses/' + encodeURIComponent(id), { method:'DELETE', headers: headers() });
+    const p = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(p.message || 'Could not delete this address');
+
+    const wasSelected = String(selectedId()) === String(id);
+    await load();
+
+    if (wasSelected){
+      // The selected address no longer exists — nearbite_selected_address_id must
+      // not keep pointing at it. Prefer the current default, else the first
+      // remaining address, else clear the selection entirely. Deleting a
+      // non-selected address must not touch the selection at all.
+      const next = addresses.find(x => x.isDefault) || addresses[0];
+      if (next){
+        localStorage.setItem('nearbite_selected_address_id', String(next._id));
+        cache(next);
+      } else {
+        localStorage.removeItem('nearbite_selected_address_id');
+        localStorage.removeItem('nearbite_address');
+      }
+      window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: next || null }));
+      render();
+    }
+    toast('Address deleted');
+  } catch (e){ toast(e.message); }
+}
+
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeEditor(); });
+
+FORM_IDS.forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener('input', () => setErr(id, ''));
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await load();
+  const params = new URLSearchParams(location.search);
+  if (params.get('resume') === '1' || sessionStorage.getItem(DRAFT_KEY)) resumeDraft();
+  else if (params.get('add') === '1') openEditor();
+});
 </script>
 
 <script src="navigation.js"></script>
