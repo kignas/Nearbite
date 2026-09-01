@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#F1F5F9">
   <title>Complete your profile · Eatswada</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="config.js"></script>
@@ -15,222 +16,212 @@
     :root{
       --brand:#FC8019;
       --brand-dark:#e96f0a;
-      --brand-light:#fff4ec;
-      --text:#111827;
-      --muted:#6b7280;
-      --soft:#f7f8fa;
-      --border:#e5e7eb;
-      --input:#f8fafc;
-      --danger:#dc2626;
-      --success:#0f9d58;
-      --font-sans:"Plus Jakarta Sans","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      --brand-soft:#FFCBB7;
+      --band:#F1F5F9;
+      --ink:#1A1D21;
+      --label:#9AA1AB;
+      --muted:#6B7280;
+      --line:#E2E4E8;
+      --green:#16A34A;
+      --danger:#DC2626;
+      --font:'Manrope',system-ui,-apple-system,sans-serif;
     }
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-    html{min-height:100%;background:var(--soft);scroll-behavior:smooth}
+    html{background:var(--band)}
 
     body{
-      margin:0;
-      min-height:100dvh;
-      background:var(--soft);
-      color:var(--text);
-      font-family:var(--font-sans);
+      background:#fff;
+      color:var(--ink);
+      font-family:var(--font);
+      font-weight:500;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
       overflow-x:hidden;
     }
 
-    button,input,textarea,select{font:inherit}
+    button,input{font-family:inherit}
 
-    .header{
-      height:72px;
-      padding:12px 18px;
-      border-bottom:1px solid #edf0f2;
+    .page{
       display:flex;
-      align-items:center;
-      gap:13px;
-      position:sticky;
-      top:0;
-      background:rgba(255,255,255,.96);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      z-index:50;
+      flex-direction:column;
+      min-height:100dvh;
+      max-width:520px;
+      margin:0 auto;
+      background:#fff;
+    }
+
+    /* ---------------- header band ---------------- */
+    .topbar{
+      background:var(--band);
+      padding:16px 30px 32px;
     }
 
     .back{
-      width:40px;height:40px;flex:0 0 40px;
-      border:0;border-radius:14px;
-      background:#f3f5f7;color:#111827;
-      display:grid;place-items:center;font-size:15px;cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      width:44px;height:44px;
+      margin-left:-11px;
+      border:0;background:none;
+      color:var(--ink);
+      font-size:21px;
+      cursor:pointer;
       -webkit-tap-highlight-color:transparent;
     }
-    .back:active{transform:scale(.94)}
+    .back:active{opacity:.5}
+    .back:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
 
-    .title{font-size:18px;line-height:1.2;font-weight:800;letter-spacing:-.4px}
-
-    .content{
-      width:100%;
-      max-width:640px;
-      margin:0 auto;
-      padding:22px 16px calc(120px + env(safe-area-inset-bottom));
+    .topbar h1{
+      margin-top:8px;
+      font-size:27px;
+      line-height:1.18;
+      font-weight:800;
+      letter-spacing:-.7px;
+      color:var(--ink);
     }
 
-    /* Page-scoped hero rules — avoids the shared global .hero definition. */
-    .profile-hero{margin:0 2px 20px}
-    .profile-hero h1{
-      font-size:26px;line-height:1.12;font-weight:800;
-      letter-spacing:-.8px;color:var(--text);
-    }
-    .profile-hero p{
-      margin-top:8px;color:var(--muted);
-      font-size:13px;line-height:1.6;font-weight:500;
-      max-width:44ch;
+    .topbar p{
+      margin-top:8px;
+      font-size:14.5px;
+      line-height:1.5;
+      font-weight:500;
+      color:var(--muted);
+      max-width:32ch;
     }
 
-    .card{
-      background:#fff;
-      border:1px solid #eef0f2;
-      border-radius:20px;
-      box-shadow:0 4px 18px rgba(17,24,39,.045);
-      padding:16px 15px;
-      margin-bottom:14px;
+    /* ---------------- form ---------------- */
+    .form{
+      flex:1;
+      padding:38px 30px 0;
     }
 
-    .card-head{
-      display:flex;align-items:baseline;justify-content:space-between;
-      gap:10px;margin-bottom:14px;
-    }
-    .card-head h2{
-      font-size:13px;font-weight:800;letter-spacing:-.1px;color:#374151;
-    }
-
-    /* ---------- confirmed delivery location ---------- */
-    .loc-card{border-color:#ffe3cd;background:linear-gradient(180deg,#fffaf5 0%,#ffffff 62%)}
-
-    .loc-row{display:flex;gap:13px;align-items:flex-start}
-
-    .loc-pin{
-      width:44px;height:44px;flex:0 0 44px;
-      border-radius:15px;background:var(--brand-light);color:var(--brand);
-      display:grid;place-items:center;font-size:17px;
-    }
-
-    .loc-body{flex:1;min-width:0}
-
-    .loc-primary{
-      font-size:15px;font-weight:800;line-height:1.3;color:var(--text);
-      overflow-wrap:anywhere;
-    }
-    .loc-secondary{
-      margin-top:3px;font-size:12.5px;font-weight:500;color:#5b6472;line-height:1.5;
-      overflow-wrap:anywhere;
-    }
-
-    .loc-badge{
-      display:inline-flex;align-items:center;gap:6px;margin-top:9px;
-      background:#e9f8ef;color:#0b7a45;
-      border-radius:999px;padding:5px 10px;
-      font-size:11px;font-weight:800;letter-spacing:.01em;
-    }
-    .loc-badge.pending{background:#fff1f1;color:#b42318}
-
-    .loc-note{
-      margin-top:13px;padding-top:12px;border-top:1px dashed #f0e2d6;
-      font-size:11.5px;line-height:1.55;color:#8a8f98;font-weight:500;
-    }
-
-    .link-btn{
-      margin-top:12px;width:100%;
-      border:1.5px solid #ffd9be;background:#fff;
-      color:#c85e0d;border-radius:14px;
-      min-height:46px;padding:12px 14px;
-      font-size:13px;font-weight:800;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      -webkit-tap-highlight-color:transparent;
-    }
-    .link-btn:active{transform:scale(.99)}
-    .link-btn.solid{background:var(--brand);border-color:var(--brand);color:#fff}
-
-    /* ---------- form ---------- */
-    .field{margin-bottom:15px}
-    .field:last-child{margin-bottom:0}
+    .field{margin-bottom:34px}
+    .field:last-of-type{margin-bottom:0}
 
     label{
-      display:block;font-size:12.5px;line-height:1.3;font-weight:700;
-      color:#4b5563;margin:0 0 7px;
+      display:block;
+      font-size:13px;
+      line-height:1.3;
+      font-weight:500;
+      color:var(--label);
+      margin-bottom:9px;
     }
 
-    input{
-      display:block;width:100%;min-height:52px;
-      padding:14px 15px;
-      border:1.5px solid #eceff3;border-radius:15px;
-      background:var(--input);
-      font:600 14px var(--font-sans);
-      outline:0;color:var(--text);
-      transition:border-color .16s ease,background .16s ease,box-shadow .16s ease;
+    .control{position:relative}
+
+    .input{
+      display:block;
+      width:100%;
+      border:0;
+      border-bottom:1.5px solid var(--line);
+      border-radius:0;
+      background:transparent;
+      padding:5px 0 13px;
+      font-size:17px;
+      line-height:1.4;
+      font-weight:600;
+      color:var(--ink);
+      outline:0;
       -webkit-appearance:none;
+      transition:border-color .15s ease;
     }
-    input::placeholder{color:#9ca3af;font-weight:500}
-    input:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 3px rgba(252,128,25,.10)}
-    input[readonly]{background:#f1f3f6;color:#6b7280}
-    input.invalid{border-color:#f2a9a9;background:#fffafa}
-    input.invalid:focus{border-color:var(--danger);box-shadow:0 0 0 3px rgba(220,38,38,.09)}
+    .input::placeholder{color:#B4B9C0;font-weight:500}
+    .input:focus{border-bottom-color:var(--brand)}
 
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .control.has-icon .input{padding-right:40px}
 
-    .hint{font-size:11px;color:#9ca3af;margin-top:7px;line-height:1.5;font-weight:500}
+    /* the verified number never behaves like an editable field */
+    .input[readonly]{color:#1F2937;letter-spacing:.2px}
+    .input[readonly]:focus{border-bottom-color:var(--line)}
+
+    .input.invalid,
+    .input.invalid:focus{border-bottom-color:var(--danger)}
+
+    .tick{
+      position:absolute;right:2px;bottom:13px;
+      color:var(--green);font-size:17px;
+      pointer-events:none;
+    }
+
+    .toggle{
+      position:absolute;right:-10px;bottom:-4px;
+      width:44px;height:44px;
+      border:0;background:none;
+      color:var(--label);font-size:16px;
+      display:grid;place-items:center;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .toggle:active{opacity:.5}
+    .toggle:focus-visible{outline:2px solid var(--brand);outline-offset:-6px;border-radius:10px}
+
+    .hint{
+      margin-top:10px;
+      font-size:12px;line-height:1.5;font-weight:500;
+      color:var(--label);
+    }
 
     .field-error{
-      display:none;margin-top:7px;
-      font-size:11.5px;font-weight:700;color:var(--danger);line-height:1.45;
+      display:none;
+      margin-top:10px;
+      font-size:12px;line-height:1.45;font-weight:600;
+      color:var(--danger);
     }
     .field-error.show{display:block}
 
-    .error{
-      display:none;background:#fef2f2;color:var(--danger);
-      border:1px solid #fecaca;border-radius:14px;
-      padding:12px 13px;font-size:12px;font-weight:700;
-      margin-bottom:14px;line-height:1.5;
+    .form-error{
+      display:none;
+      margin-bottom:26px;
+      font-size:13px;line-height:1.5;font-weight:600;
+      color:var(--danger);
+    }
+    .form-error i{margin-right:7px}
+
+    /* ---------------- CTA ---------------- */
+    .cta-wrap{
+      padding:40px 30px calc(26px + env(safe-area-inset-bottom));
     }
 
-    /* ---------- sticky CTA ---------- */
-    .footer{
-      position:fixed;left:0;right:0;bottom:0;
-      padding:11px 16px calc(13px + env(safe-area-inset-bottom));
-      background:rgba(255,255,255,.95);
-      border-top:1px solid rgba(229,231,235,.9);
-      box-shadow:0 -8px 24px rgba(17,24,39,.06);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      z-index:100;
-    }
-
-    .primary{
-      display:block;width:100%;max-width:608px;min-height:54px;
-      margin:auto;border:0;border-radius:16px;padding:15px 18px;
-      background:var(--brand);color:#fff;
-      font:800 14.5px var(--font-sans);
-      box-shadow:0 8px 18px rgba(252,128,25,.2);
-      cursor:pointer;
-      transition:transform .15s ease,opacity .15s ease,background .15s ease;
+    .cta{
+      display:block;
+      width:100%;
+      min-height:56px;
+      border:0;
+      border-radius:9px;
+      background:var(--brand-soft);
+      color:#fff;
+      font-size:14.5px;
+      font-weight:800;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      cursor:not-allowed;
+      transition:background .15s ease;
       -webkit-tap-highlight-color:transparent;
     }
-    .primary:not(:disabled):active{transform:scale(.985)}
-    .primary:not(:disabled):hover{background:var(--brand-dark)}
-    .primary:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+    .cta:not(:disabled){background:var(--brand);cursor:pointer}
+    .cta:not(:disabled):active{background:var(--brand-dark)}
+    .cta:focus-visible{outline:2px solid var(--brand-dark);outline-offset:3px}
 
+    /* ---------------- loading ---------------- */
     .loading{
-      display:none;position:fixed;inset:0;
-      background:rgba(255,255,255,.85);z-index:200;
+      display:none;
+      position:fixed;inset:0;
+      background:rgba(255,255,255,.95);
+      z-index:200;
       align-items:center;justify-content:center;flex-direction:column;
-      backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
     }
-
     .spinner{
-      width:34px;height:34px;
-      border:4px solid #eee;border-top-color:var(--brand);
-      border-radius:50%;animation:spin .8s linear infinite;
+      width:32px;height:32px;
+      border:3px solid #EDEFF2;
+      border-top-color:var(--brand);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    .loading span{
+      margin-top:14px;
+      font-size:13px;font-weight:600;color:var(--muted);
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -238,130 +229,80 @@
       *{animation-duration:.01ms !important;transition-duration:.01ms !important}
     }
 
-    @media(max-width:412px){
-      .header{height:66px;padding:10px 14px}
-      .title{font-size:17px}
-      .content{padding:20px 14px calc(120px + env(safe-area-inset-bottom))}
-      .profile-hero h1{font-size:23px}
-      .card{padding:15px 14px;border-radius:18px}
-      .footer{padding-left:14px;padding-right:14px}
+    /* 375px – 412px keep the full 30px gutter */
+    @media(max-width:365px){
+      .topbar{padding:14px 22px 28px}
+      .topbar h1{font-size:24px;letter-spacing:-.6px}
+      .topbar p{font-size:13.5px}
+      .form{padding:32px 22px 0}
+      .field{margin-bottom:30px}
+      .input{font-size:16px}
+      .cta-wrap{padding:34px 22px calc(24px + env(safe-area-inset-bottom))}
     }
 
-    @media(max-width:360px){
-      .row{grid-template-columns:1fr;gap:0}
-      .row .field{margin-bottom:15px}
-      .loc-pin{width:40px;height:40px;flex:0 0 40px;border-radius:13px;font-size:15px}
-      .profile-hero h1{font-size:21px}
+    /* short viewport / keyboard open — tighten without cramping */
+    @media(max-height:660px){
+      .topbar{padding-bottom:26px}
+      .topbar h1{font-size:24px}
+      .form{padding-top:30px}
+      .field{margin-bottom:28px}
+      .cta-wrap{padding-top:32px}
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <button class="back" onclick="safeBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="title">Complete your profile</div>
-  </div>
+  <div class="page">
 
-  <main class="content">
-    <div class="profile-hero">
-      <h1>Almost there!</h1>
-      <p>Tell us your details once. We'll save them to your Eatswada account so future orders are faster.</p>
-    </div>
+    <header class="topbar">
+      <button class="back" onclick="safeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left"></i></button>
+      <h1>Complete your profile</h1>
+      <p>Create your Eatswada account for faster checkout.</p>
+    </header>
 
-    <div class="error" id="errorBox" role="alert"></div>
+    <main class="form">
 
-    <!-- Delivery location: read from the confirmed onboarding map point. No GPS request here. -->
-    <section class="card loc-card">
-      <div class="card-head"><h2>Delivery location</h2></div>
+      <div class="form-error" id="errorBox" role="alert"></div>
 
-      <div class="loc-row">
-        <div class="loc-pin"><i class="fa-solid fa-location-dot" id="locIcon"></i></div>
-        <div class="loc-body">
-          <div class="loc-primary" id="locPrimary">Checking your location…</div>
-          <div class="loc-secondary" id="locSecondary"></div>
-          <div class="loc-badge" id="locBadge"><i class="fa-solid fa-circle-check"></i> <span id="locBadgeText">Location confirmed</span></div>
+      <div class="field">
+        <label for="phone">Mobile Number</label>
+        <div class="control has-icon">
+          <input class="input" id="phone" type="tel" readonly aria-readonly="true" autocomplete="tel">
+          <i class="fa-solid fa-check tick" aria-hidden="true"></i>
         </div>
-      </div>
-
-      <button type="button" class="link-btn" id="changeLocBtn" onclick="changeLocation()">
-        <i class="fa-solid fa-map-location-dot"></i> <span id="changeLocText">Change location</span>
-      </button>
-
-      <div class="loc-note" id="locNote">Your selected map location will be used for restaurant distance and delivery availability.</div>
-      <div class="field-error" id="err_location" style="margin-top:10px"></div>
-    </section>
-
-    <section class="card">
-      <div class="card-head"><h2>Your details</h2></div>
-
-      <div class="field">
-        <label for="name">Full name *</label>
-        <input id="name" type="text" maxlength="60" placeholder="Enter your full name" autocomplete="name">
-        <div class="field-error" id="err_name"></div>
+        <div class="hint">Verified with OTP</div>
       </div>
 
       <div class="field">
-        <label for="phone">Mobile number</label>
-        <input id="phone" type="tel" readonly>
-        <div class="hint">Verified with OTP. Used for order updates and delivery contact.</div>
+        <label for="password">Password</label>
+        <div class="control has-icon">
+          <input class="input" id="password" type="password" minlength="6" maxlength="72" placeholder="Create password" autocomplete="new-password">
+          <button type="button" class="toggle" id="pwToggle" onclick="togglePassword()" aria-label="Show password" aria-pressed="false">
+            <i class="fa-solid fa-eye" id="pwIcon"></i>
+          </button>
+        </div>
+        <div class="hint">At least 6 characters</div>
+        <div class="field-error" id="err_password"></div>
       </div>
 
       <div class="field">
-        <label for="email">Email (optional)</label>
-        <input id="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email">
+        <label for="email">Email Address (Optional)</label>
+        <div class="control">
+          <input class="input" id="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email" inputmode="email">
+        </div>
         <div class="field-error" id="err_email"></div>
       </div>
 
-      <div class="field">
-        <label for="password">Create password *</label>
-        <input id="password" type="password" minlength="6" maxlength="72" placeholder="At least 6 characters" autocomplete="new-password">
-        <div class="hint">You'll log in with your mobile number and this password next time.</div>
-        <div class="field-error" id="err_password"></div>
-      </div>
-    </section>
+    </main>
 
-    <section class="card">
-      <div class="card-head"><h2>Delivery address</h2></div>
+    <div class="cta-wrap">
+      <button class="cta" id="saveBtn" disabled onclick="completeProfile()">Continue</button>
+    </div>
 
-      <div class="field">
-        <label for="house">House / Flat / Building *</label>
-        <input id="house" type="text" maxlength="120" placeholder="House no., flat, building" autocomplete="street-address">
-        <div class="field-error" id="err_house"></div>
-      </div>
-
-      <div class="field">
-        <label for="area">Area / Locality *</label>
-        <input id="area" type="text" maxlength="120" placeholder="Area, road or locality">
-        <div class="field-error" id="err_area"></div>
-      </div>
-
-      <div class="field">
-        <label for="landmark">Nearby landmark *</label>
-        <input id="landmark" type="text" maxlength="160" placeholder="Near post office, opposite school">
-        <div class="field-error" id="err_landmark"></div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="city">City / Town *</label>
-          <input id="city" type="text" value="Maynaguri" maxlength="80">
-          <div class="field-error" id="err_city"></div>
-        </div>
-        <div class="field">
-          <label for="pincode">PIN code *</label>
-          <input id="pincode" type="tel" inputmode="numeric" maxlength="6" placeholder="735224">
-          <div class="field-error" id="err_pincode"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="footer">
-    <button class="primary" id="saveBtn" onclick="completeProfile()">Save &amp; continue</button>
   </div>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <div style="margin-top:12px;font-weight:800;font-size:13px;">Saving your details…</div>
+    <span>Saving your details…</span>
   </div>
 
 <script>
@@ -372,189 +313,87 @@
 
   const $ = id => document.getElementById(id);
 
-  /* Draft key is session-only scratch space for the "Change location" round trip.
-     It is NOT one of the nearbite_* compatibility keys. */
-  const DRAFT_KEY = 'eatswada_profile_draft';
-  const TEXT_FIELDS = ['name','email','house','area','landmark','city','pincode'];
-
-  let confirmedLocation = null;   // {latitude, longitude}
+  /* Delivery details are collected by the address flow. Any name already on
+     the account is carried through untouched so the profile request keeps
+     its existing shape. */
+  let existingName = '';
 
   function safeBack(){
     if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack();
-    else history.length > 1 ? history.back() : window.location.replace('index.html');
+    else if (history.length > 1) history.back();
+    else window.location.replace('index.html');
   }
 
-  /* ---------------- coordinate helpers (Part 10 / Part 14) ---------------- */
+  /* ---------------- display helpers ---------------- */
 
-  function validCoords(lat, lng){
-    lat = Number(lat); lng = Number(lng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
-    if (lat === 0 && lng === 0) return false;             // never accept [0,0]
-    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return false;
-    return true;
+  function formatPhone(raw){
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    const ten = digits.length > 10 ? digits.slice(-10) : digits;
+    if (ten.length === 10) return '+91 ' + ten.slice(0, 5) + ' ' + ten.slice(5);
+    return String(raw).trim();
   }
 
-  function readOnboardingLocation(){
-    let raw = null;
-    try { raw = JSON.parse(localStorage.getItem('nearbite_onboarding_location') || 'null'); }
-    catch { return null; }
-    if (!raw || typeof raw !== 'object') return null;
-    const lat = Number(raw.latitude), lng = Number(raw.longitude);
-    if (!validCoords(lat, lng)) return null;
-    return { latitude: lat, longitude: lng };
+  function togglePassword(){
+    const input = $('password');
+    const shown = input.type === 'text';
+    input.type = shown ? 'password' : 'text';
+    $('pwIcon').className = shown ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+    $('pwToggle').setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
+    $('pwToggle').setAttribute('aria-pressed', shown ? 'false' : 'true');
+    const end = input.value.length;
+    input.focus({ preventScroll:true });
+    try { input.setSelectionRange(end, end); } catch {}
   }
 
-  function readOnboardingGeocode(){
-    try { return JSON.parse(localStorage.getItem('nearbite_onboarding_geocode') || 'null'); }
-    catch { return null; }
-  }
-
-  /* Turns whatever shape the onboarding geocode was saved in into two display
-     lines. Never renders latitude/longitude. */
-  function locationLines(geo){
-    const fallback = { primary:'Map location selected', secondary:'Confirmed from the map you picked' };
-    if (!geo) return fallback;
-
-    if (typeof geo === 'string'){
-      const parts = geo.split(',').map(s => s.trim()).filter(Boolean);
-      if (!parts.length) return fallback;
-      return { primary: parts[0], secondary: parts.slice(1, 3).join(', ') };
-    }
-
-    const a = geo.address || geo.addressComponents || {};
-    const pick = (...vals) => vals.find(v => typeof v === 'string' && v.trim()) || '';
-
-    const area  = pick(geo.area, geo.locality, geo.neighbourhood, a.suburb, a.neighbourhood, a.village, a.hamlet, a.road);
-    const city  = pick(geo.city, geo.town, a.city, a.town, a.municipality, a.state_district, a.county);
-    const state = pick(geo.state, a.state);
-    const pin   = pick(geo.pincode, geo.postcode, a.postcode);
-
-    const primary = area || city;
-    const tail = [];
-    if (city && city !== primary) tail.push(city);
-    if (state) tail.push(state);
-    const secondary = [tail.join(', '), pin].filter(Boolean).join(' ');
-
-    if (primary) return { primary, secondary };
-
-    const full = pick(geo.shortAddress, geo.short_address, geo.formatted, geo.formattedAddress,
-                      geo.formatted_address, geo.display_name, geo.label, geo.name);
-    if (full){
-      const parts = full.split(',').map(s => s.trim()).filter(Boolean);
-      return { primary: parts[0] || fallback.primary, secondary: parts.slice(1, 3).join(', ') };
-    }
-    return fallback;
-  }
-
-  /* ---------------- location card ---------------- */
-
-  function paintLocation(){
-    confirmedLocation = readOnboardingLocation();
-
-    if (confirmedLocation){
-      const lines = locationLines(readOnboardingGeocode());
-      $('locPrimary').textContent   = lines.primary;
-      $('locSecondary').textContent = lines.secondary || '';
-      $('locIcon').className        = 'fa-solid fa-location-dot';
-      $('locBadge').className       = 'loc-badge';
-      $('locBadge').innerHTML       = '<i class="fa-solid fa-circle-check"></i> <span>Location confirmed</span>';
-      $('changeLocText').textContent = 'Change location';
-      $('changeLocBtn').classList.remove('solid');
-      $('locNote').textContent = 'Your selected map location will be used for restaurant distance and delivery availability.';
-    } else {
-      $('locPrimary').textContent   = 'No delivery location yet';
-      $('locSecondary').textContent = 'Pick your delivery point on the map to continue.';
-      $('locIcon').className        = 'fa-solid fa-location-crosshairs';
-      $('locBadge').className       = 'loc-badge pending';
-      $('locBadge').innerHTML       = '<i class="fa-solid fa-circle-exclamation"></i> <span>Not confirmed</span>';
-      $('changeLocText').textContent = 'Set delivery location';
-      $('changeLocBtn').classList.add('solid');
-      $('locNote').textContent = 'We use your map location for restaurant distance and delivery availability.';
-    }
-  }
-
-  /* Part 3 / Part 8 — hand the user back to the map, keeping typed values. */
-  function changeLocation(){
-    const draft = {};
-    TEXT_FIELDS.forEach(id => draft[id] = $(id).value);
-    try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
-
-    const back = encodeURIComponent('complete-profile.html?location=done');
-    window.location.href = 'location-onboarding.html?from=complete-profile&return=' + back + '&next=' + back;
-  }
-
-  function restoreDraft(){
-    let draft = null;
-    try { draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null'); } catch {}
-    if (!draft) return false;
-    sessionStorage.removeItem(DRAFT_KEY);
-    TEXT_FIELDS.forEach(id => { if (typeof draft[id] === 'string' && draft[id]) $(id).value = draft[id]; });
-    return true;
-  }
-
-  /* ---------------- validation (Part 12) ---------------- */
+  /* ---------------- validation ---------------- */
 
   function showError(message){
-    $('errorBox').textContent = message || '';
-    $('errorBox').style.display = message ? 'block' : 'none';
+    const box = $('errorBox');
+    box.innerHTML = message ? '<i class="fa-solid fa-circle-exclamation"></i>' + message : '';
+    box.style.display = message ? 'block' : 'none';
   }
 
   function setFieldError(id, message){
-    const box = $('err_' + id);
-    const input = $(id);
-    if (box){
-      box.textContent = message || '';
-      box.classList.toggle('show', !!message);
-    }
-    if (input && input.tagName === 'INPUT') input.classList.toggle('invalid', !!message);
+    const box = $('err_' + id), input = $(id);
+    if (box){ box.textContent = message || ''; box.classList.toggle('show', !!message); }
+    if (input) input.classList.toggle('invalid', !!message);
   }
 
-  function clearAllErrors(){
-    ['name','email','password','house','area','landmark','city','pincode','location']
-      .forEach(id => setFieldError(id, ''));
-    showError('');
+  function passwordValid(){
+    return $('password').value.length >= 6;
   }
 
-  function validate(){
-    clearAllErrors();
-    let firstBad = null;
-    const fail = (id, msg) => { setFieldError(id, msg); if (!firstBad) firstBad = id; };
-
-    if ($('name').value.trim().length < 2) fail('name', 'Enter your full name.');
-
-    const email = $('email').value.trim();
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fail('email', 'Enter a valid email address, or leave it empty.');
-
-    if ($('password').value.length < 6) fail('password', 'Create a password with at least 6 characters.');
-
-    if (!$('house').value.trim())    fail('house', 'Enter your house / building.');
-    if (!$('area').value.trim())     fail('area', 'Enter your area or locality.');
-    if (!$('landmark').value.trim()) fail('landmark', 'Enter a nearby landmark.');
-    if (!$('city').value.trim())     fail('city', 'Enter your city or town.');
-    if (!/^\d{6}$/.test($('pincode').value.trim())) fail('pincode', 'Enter a valid 6-digit PIN code.');
-
-    /* Part 4 — no profile completion without confirmed coordinates. */
-    confirmedLocation = readOnboardingLocation();
-    if (!confirmedLocation) fail('location', 'Please confirm your delivery location.');
-
-    if (firstBad){
-      const el = $(firstBad) || $('err_location');
-      if (el && el.scrollIntoView) el.scrollIntoView({ block:'center', behavior:'smooth' });
-      if (el && el.tagName === 'INPUT') setTimeout(() => el.focus({ preventScroll:true }), 260);
-      return false;
-    }
-    return true;
+  /* Email is only checked when the customer actually types one. */
+  function emailValid(){
+    const v = $('email').value.trim();
+    return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
   }
 
-  TEXT_FIELDS.concat(['password']).forEach(id => {
-    $(id).addEventListener('input', () => setFieldError(id, ''));
+  /* The CTA is gated on the password only — an empty email never blocks it. */
+  function syncCta(){
+    $('saveBtn').disabled = !passwordValid();
+  }
+
+  $('password').addEventListener('input', () => { setFieldError('password',''); showError(''); syncCta(); });
+  $('email').addEventListener('input', () => { setFieldError('email',''); showError(''); });
+  $('email').addEventListener('blur', () => { if (!emailValid()) setFieldError('email','Enter a valid email address, or leave it empty.'); });
+
+  /* With the Android keyboard open, bring the focused field into view. The
+     CTA sits in normal flow, so it moves with the page instead of covering it. */
+  ['password','email'].forEach(id => {
+    $(id).addEventListener('focus', () => {
+      setTimeout(() => $(id).scrollIntoView({ block:'center', behavior:'smooth' }), 240);
+    });
   });
 
-  /* ---------------- profile load ---------------- */
+  /* ---------------- load ---------------- */
 
   async function loadExistingProfile(){
-    const hadDraft = restoreDraft();
-    paintLocation();
+    let cached = {};
+    try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
+
+    $('phone').value = formatPhone(cached.phone);
 
     try {
       const res = await fetch(`${API}/users/profile`, { headers:{ Authorization:`Bearer ${token}` } });
@@ -562,136 +401,69 @@
       if (!res.ok || !result.success) return;
 
       const user = result.data || {};
-      let cached = {};
-      try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
+      $('phone').value = formatPhone(user.phone || cached.phone || '');
 
-      if (!hadDraft && user.name && user.name !== 'Nearbite User' && user.name !== 'Eatswada User') $('name').value = user.name;
-      $('phone').value = user.phone || cached.phone || '';
-      if (!hadDraft && user.email) $('email').value = user.email;
-
-      const address = user.defaultAddress ||
-        (Array.isArray(user.addresses) ? user.addresses.find(a => a.isDefault) || user.addresses[0] : null);
-
-      if (address && !hadDraft){
-        $('house').value    = address.house || '';
-        $('area').value     = address.area || '';
-        $('landmark').value = address.landmark || '';
-        $('city').value     = address.city || 'Maynaguri';
-        $('pincode').value  = address.pincode || '';
-      }
+      if (user.name && user.name !== 'Nearbite User' && user.name !== 'Eatswada User') existingName = user.name;
+      if (user.email) $('email').value = user.email;
     } catch (e){
       console.warn('Could not load existing profile', e);
+    } finally {
+      syncCta();
     }
   }
 
-  /* ---------------- save (Part 4 / Part 5) ---------------- */
+  /* ---------------- save ---------------- */
 
   async function completeProfile(){
-    if (!validate()) return;
+    showError('');
 
-    const btn = $('saveBtn');
-    btn.disabled = true;
+    if (!passwordValid()){
+      setFieldError('password', 'Create a password with at least 6 characters.');
+      $('password').focus();
+      return;
+    }
+    if (!emailValid()){
+      setFieldError('email', 'Enter a valid email address, or leave it empty.');
+      $('email').focus();
+      return;
+    }
+
+    $('saveBtn').disabled = true;
     $('loading').style.display = 'flex';
 
-    const lat = confirmedLocation.latitude;
-    const lng = confirmedLocation.longitude;
-
     try {
-      const headers = { 'Content-Type':'application/json', Authorization:`Bearer ${token}` };
-
-      const profileRes = await fetch(`${API}/users/profile`, {
-        method:'PUT',
-        headers,
-        body: JSON.stringify({
-          name: $('name').value.trim(),
-          email: $('email').value.trim() || undefined,
-          password: $('password').value
-        })
-      });
-      const profileResult = await profileRes.json();
-      if (!profileRes.ok || !profileResult.success){
-        throw new Error(profileResult.message || 'Could not save your profile. Please try again.');
-      }
-
-      /* GeoJSON is [longitude, latitude] — never reversed. */
-      const addressPayload = {
-        tag:'Home',
-        house: $('house').value.trim(),
-        area: $('area').value.trim(),
-        landmark: $('landmark').value.trim(),
-        city: $('city').value.trim(),
-        pincode: $('pincode').value.trim(),
-        location: { type:'Point', coordinates:[lng, lat] },
-        latitude: lat,
-        longitude: lng,
-        isDefault: true
+      const payload = {
+        email: $('email').value.trim() || undefined,
+        password: $('password').value
       };
+      if (existingName) payload.name = existingName;
 
-      const addressRes = await fetch(`${API}/users/addresses`, {
-        method:'POST',
-        headers,
-        body: JSON.stringify(addressPayload)
+      const res = await fetch(`${API}/users/profile`, {
+        method:'PUT',
+        headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+        body: JSON.stringify(payload)
       });
-      const addressResult = await addressRes.json();
-      if (!addressRes.ok || !addressResult.success){
-        throw new Error(addressResult.message || 'Could not save your delivery address. Please try again.');
+      const result = await res.json();
+      if (!res.ok || !result.success){
+        throw new Error(result.message || 'Could not save your details. Please try again.');
       }
 
-      /* --- server save succeeded from here on --- */
+      let cached = {};
+      try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
+      localStorage.setItem('nearbite_user', JSON.stringify(result.data || { ...cached, email: payload.email || cached.email }));
 
-      let saved = addressResult.data || addressResult.address || null;
-
-      // Re-read from the server so the cached copy carries the real _id and
-      // whatever the backend normalised.
-      try {
-        const listRes = await fetch(`${API}/users/addresses`, { headers, cache:'no-store' });
-        const list = await listRes.json();
-        const arr = Array.isArray(list?.data) ? list.data
-                  : Array.isArray(list?.addresses) ? list.addresses
-                  : Array.isArray(list) ? list : [];
-        if (arr.length){
-          const match = saved?._id ? arr.find(a => String(a._id) === String(saved._id)) : null;
-          saved = match || arr.find(a => a.isDefault) || arr[arr.length - 1] || saved;
-        }
-      } catch (e){ console.warn('Address refresh failed, using POST response', e); }
-
-      if (!saved) saved = addressPayload;
-
-      const savedUser = profileResult.data || (() => {
-        try { return JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch { return {}; }
-      })();
-      localStorage.setItem('nearbite_user', JSON.stringify(savedUser));
-
-      localStorage.setItem('nearbite_address', JSON.stringify(saved));
-      localStorage.setItem('nearbite_address_updated_at', String(Date.now()));
-      if (saved._id) localStorage.setItem('nearbite_selected_address_id', String(saved._id));
-
-      // Only now — after a confirmed server save — is the onboarding handoff done.
-      localStorage.removeItem('nearbite_onboarding_location');
-      localStorage.removeItem('nearbite_onboarding_geocode');
-      localStorage.setItem('nearbite_location_permission_seen','1');
-      try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
-
-      window.dispatchEvent(new CustomEvent('nearbite:address-changed',{ detail: saved }));
-
-      const next = localStorage.getItem('nearbite_after_login') || 'index.html';
-      localStorage.removeItem('nearbite_after_login');
-      window.location.href = next;
+      window.location.href = 'address.html?add=1';
 
     } catch (error){
-      // Failed save must NOT touch the onboarding coordinates.
       console.error(error);
       showError(error.message || 'Something went wrong. Please try again.');
       $('errorBox').scrollIntoView({ block:'center', behavior:'smooth' });
-      btn.disabled = false;
       $('loading').style.display = 'none';
+      syncCta();
     }
   }
 
   document.addEventListener('DOMContentLoaded', loadExistingProfile);
-
-  // Coming back from the map via bfcache should repaint the confirmed location.
-  window.addEventListener('pageshow', e => { if (e.persisted) paintLocation(); });
 </script>
 
 <script src="navigation.js"></script>
