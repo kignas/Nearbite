@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<title>Choose delivery location · Nearbite</title>
+<title>Set delivery location · Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -13,42 +13,94 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-:root{--brand:#fc8019;--ink:#111827;--muted:#6b7280;--line:#e7e8eb;--soft:#f7f7f8}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:var(--font-sans);color:var(--ink);overflow:hidden}
+:root{
+  /* Brand orange unchanged. Neutrals warmed slightly so white surfaces
+     read as paper over the map rather than as grey panels. */
+  --brand:#fc8019;--brand-tint:#fff3e9;
+  --ink:#111827;--ink-2:#4b5563;--muted:#6b7280;
+  --line:#e7e8eb;--soft:#f7f7f8;--ok:#15803d;
+  /* Two-layer shadows: a tight contact edge plus a wide soft lift, so a
+     floating panel reads as raised over map tiles instead of outlined. */
+  --shadow-float:0 2px 6px rgba(17,24,39,.06),0 10px 26px rgba(17,24,39,.10);
+  --shadow-sheet:0 -2px 8px rgba(17,24,39,.05),0 -14px 40px rgba(17,24,39,.14);
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:var(--font-sans);color:var(--ink);overflow:hidden}
 #map{position:absolute;inset:0;background:#e9eef2}
-.top{position:absolute;top:14px;left:14px;right:14px;z-index:1000;display:flex;align-items:center;gap:10px}
-.back,.locate{width:44px;height:44px;border:0;border-radius:14px;background:#fff;box-shadow:0 5px 20px #0002;color:#111827;font-size:16px}
-.title{flex:1;background:rgba(255,255,255,.97);border-radius:15px;padding:11px 14px;box-shadow:0 5px 20px #0002}
-.title b{font-size:14px}.title span{display:block;font-size:10px;color:var(--muted);margin-top:3px}
-.pin{position:absolute;left:50%;top:50%;z-index:900;transform:translate(-50%,-100%);pointer-events:none;color:var(--brand);font-size:44px;filter:drop-shadow(0 4px 5px #0004)}
-.pin-dot{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid var(--brand);transform:translate(-50%,-50%);z-index:901;pointer-events:none}
+
+/* ── Floating header ── */
+.top{position:absolute;z-index:1000;display:flex;align-items:center;gap:10px;
+ top:calc(12px + var(--safe-t));left:calc(12px + var(--safe-l));right:calc(12px + var(--safe-r))}
+.back,.locate{flex:none;width:48px;height:48px;border:0;border-radius:16px;background:#fff;color:var(--ink);
+ font-size:16px;display:grid;place-items:center;box-shadow:var(--shadow-float);cursor:pointer}
+.back:active,.locate:active{background:var(--soft)}
+.locate:disabled{color:var(--muted)}
+.title{flex:1;min-width:0;background:#fff;border-radius:16px;padding:11px 14px;box-shadow:var(--shadow-float)}
+.title b{display:block;font-size:14.5px;font-weight:800;letter-spacing:-.3px;line-height:1.25;color:var(--ink)}
+.title span{display:block;font-size:11px;font-weight:500;color:var(--muted);line-height:1.4;margin-top:3px}
+
+/* ── Map furniture ── */
+.pin{position:absolute;left:50%;top:50%;z-index:900;transform:translate(-50%,-100%);pointer-events:none;
+ color:var(--brand);font-size:44px;filter:drop-shadow(0 5px 6px rgba(17,24,39,.28))}
+.pin-dot{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;background:#fff;
+ border:2px solid var(--brand);transform:translate(-50%,-50%);z-index:901;pointer-events:none}
 .gps-marker{width:18px;height:18px;border:3px solid #fff;border-radius:50%;background:#1677ff;box-shadow:0 2px 10px #0005}
-.gps-pulse{border:2px solid #1677ff;border-radius:50%;animation:pulse 1.8s infinite}@keyframes pulse{0%{transform:scale(.7);opacity:.75}100%{transform:scale(1.8);opacity:0}}
-.sheet{position:absolute;left:10px;right:10px;bottom:10px;z-index:1000;background:rgba(255,255,255,.98);border-radius:25px;padding:18px;box-shadow:0 -5px 30px #0002}
-.status{display:flex;gap:11px;align-items:flex-start;margin-bottom:13px}.status-icon{width:40px;height:40px;border-radius:13px;background:#fff2e8;color:var(--brand);display:grid;place-items:center;flex:none}
-.status b{font-size:14px}.status span{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:3px}
-.address{font-size:12px;color:#374151;background:#f8fafc;border:1px solid var(--line);padding:11px 12px;border-radius:13px;margin-bottom:11px;min-height:40px}
-.address strong{display:block;color:#111827;margin-bottom:2px}.accuracy{font-size:10px;color:#15803d;margin-top:5px}
-.warn{display:none;background:#fff7ed;border:1px solid #fed7aa;color:#9a4d13;padding:10px 12px;border-radius:12px;font-size:10px;line-height:1.45;margin-bottom:11px}
-.actions{display:grid;grid-template-columns:1fr 1.2fr;gap:9px}.btn{height:48px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12px}.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn:disabled{opacity:.45}
+.gps-pulse{border:2px solid #1677ff;border-radius:50%;animation:pulse 1.8s infinite}
+@keyframes pulse{0%{transform:scale(.7);opacity:.75}100%{transform:scale(1.8);opacity:0}}
 .leaflet-control-attribution{font-size:8px}
+
+/* ── Confirmation sheet ── */
+.sheet{position:absolute;z-index:1000;background:#fff;border-radius:26px;box-shadow:var(--shadow-sheet);
+ left:calc(10px + var(--safe-l));right:calc(10px + var(--safe-r));bottom:calc(10px + var(--safe-b));
+ padding:18px 16px 16px}
+.sheet-title{margin:0 0 12px;font-size:17px;font-weight:800;letter-spacing:-.35px;line-height:1.2;color:var(--ink)}
+.address{display:flex;gap:12px;align-items:flex-start;background:var(--soft);border:1px solid var(--line);
+ border-radius:16px;padding:13px 14px;margin-bottom:12px;min-height:66px}
+.addr-icon{flex:none;width:38px;height:38px;border-radius:12px;background:var(--brand-tint);color:var(--brand);
+ display:grid;place-items:center;font-size:15px}
+.addr-body{flex:1;min-width:0}
+.addr-primary{display:block;font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.35;color:var(--ink);
+ overflow-wrap:anywhere}
+.addr-secondary{font-size:12px;font-weight:500;line-height:1.45;color:var(--ink-2);margin-top:2px;overflow-wrap:anywhere}
+.addr-meta{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;line-height:1.4;
+ color:var(--muted);margin-top:7px}
+.addr-meta.is-gps{color:var(--ok)}
+.addr-meta i{font-size:11px;flex:none}
+.warn{display:none;background:#fff7ed;border:1px solid #fed7aa;color:#9a4d13;padding:11px 13px;border-radius:14px;
+ font-size:11.5px;font-weight:600;line-height:1.5;margin-bottom:12px}
+.actions{display:grid;gap:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:16px;
+ border:1px solid var(--line);background:#fff;font-family:inherit;font-size:13.5px;font-weight:800;
+ letter-spacing:-.2px;color:var(--ink);cursor:pointer}
+.btn:active{transform:scale(.99)}
+.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.back:focus-visible,.locate:focus-visible,.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
 </style>
 <link rel="stylesheet" href="style.css">
 <style id="location-gate-styles">
 /* Location gate. Loaded after style.css so its element-level rules
    (p{color}, h1-h6{color}) cannot repaint the modal. */
-.lg-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(17,24,39,.55);display:flex;align-items:flex-end;justify-content:center;padding:14px}
+.lg-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(17,24,39,.55);display:flex;align-items:flex-end;
+ justify-content:center;padding:14px calc(14px + var(--safe-r)) calc(14px + var(--safe-b)) calc(14px + var(--safe-l))}
 .lg-backdrop[hidden]{display:none}
-.lg-modal{width:100%;max-width:460px;background:#fff;border-radius:24px;padding:20px;box-shadow:0 -6px 40px #0004}
-.lg-icon{width:52px;height:52px;border-radius:16px;background:#fff2e8;color:var(--brand);display:grid;place-items:center;font-size:20px;margin-bottom:14px}
-.lg-modal h2{margin:0 0 8px;font-size:18px;font-weight:800;color:var(--ink);line-height:1.3;letter-spacing:-.3px}
-.lg-modal p{margin:0 0 16px;font-size:12.5px;line-height:1.55;color:var(--muted)}
-.lg-steps{display:none;margin:0 0 16px;padding:12px 14px;background:var(--soft);border:1px solid var(--line);border-radius:14px;font-size:11.5px;line-height:1.65;color:#374151}
+.lg-modal{width:100%;max-width:460px;background:#fff;border-radius:26px;padding:22px 18px;
+ box-shadow:0 -14px 44px rgba(17,24,39,.28)}
+.lg-icon{width:52px;height:52px;border-radius:17px;background:var(--brand-tint);color:var(--brand);
+ display:grid;place-items:center;font-size:20px;margin-bottom:15px}
+.lg-modal h2{margin:0 0 9px;font-size:18.5px;font-weight:800;color:var(--ink);line-height:1.28;letter-spacing:-.35px}
+.lg-modal p{margin:0 0 16px;font-size:12.5px;font-weight:500;line-height:1.6;color:var(--muted)}
+.lg-steps{display:none;margin:0 0 16px;padding:13px 14px;background:var(--soft);border:1px solid var(--line);
+ border-radius:15px;font-size:11.5px;font-weight:500;line-height:1.7;color:var(--ink-2)}
 .lg-steps.show{display:block}
-.lg-steps b{display:block;margin-bottom:4px;color:var(--ink);font-size:11px}
-.lg-btn{display:block;width:100%;height:50px;border-radius:14px;border:1px solid var(--line);background:#fff;font-family:inherit;font-weight:800;font-size:13px;color:var(--ink);margin-bottom:9px}
+.lg-steps b{display:block;margin-bottom:5px;color:var(--ink);font-size:11px;font-weight:800}
+.lg-btn{display:block;width:100%;height:52px;border-radius:16px;border:1px solid var(--line);background:#fff;
+ font-family:inherit;font-weight:800;font-size:13.5px;letter-spacing:-.2px;color:var(--ink);margin-bottom:10px;cursor:pointer}
 .lg-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
-.lg-btn:disabled{opacity:.55}
+.lg-btn:disabled{opacity:.55;cursor:default}
 .lg-btn:last-child{margin-bottom:0}
 .lg-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.gps-pulse{animation:none}}
@@ -58,19 +110,19 @@
 <div id="map"></div>
 <div class="pin"><i class="fa-solid fa-location-dot"></i></div><div class="pin-dot"></div>
 <div class="top">
-  <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-  <div class="title"><b>Set your delivery location</b><span>Allow location or move the map to your exact delivery point.</span></div>
-  <button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location"><i class="fa-solid fa-location-crosshairs"></i></button>
+  <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+  <div class="title">
+    <b>Set delivery location</b>
+    <span>Move the map to adjust your exact delivery point</span>
+  </div>
+  <button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i></button>
 </div>
 <div class="sheet">
-  <div class="status">
-    <div class="status-icon"><i class="fa-solid fa-location-dot"></i></div>
-    <div><b>Use your real location</b><span>We use this GPS point to calculate restaurant distance and delivery charges accurately.</span></div>
-  </div>
+  <h1 class="sheet-title">Deliver here?</h1>
   <div class="warn" id="warn"></div>
-  <div class="address" id="address">Waiting for your location…</div>
+  <div class="address" id="address" role="status" aria-live="polite">Waiting for your location…</div>
   <div class="actions">
-    <button class="btn" id="currentBtn" onclick="locateMe()"><i class="fa-solid fa-crosshairs"></i> Use current</button>
+    <button class="btn" id="currentBtn" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Use current location</button>
     <button class="btn primary" id="confirm" onclick="confirmLocation()" disabled>Confirm location</button>
   </div>
 </div>
@@ -98,7 +150,34 @@ const DEFAULT=[26.52,88.73]; // Map-only fallback. Never saved as customer GPS.
 let map,current=null,locating=false,gpsMarker=null,accuracyCircle=null,watchId=null,firstFix=false;
 const $=id=>document.getElementById(id);
 function warn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
-function setAddress(main,meta=''){ $('address').innerHTML=`<strong>${escapeHtml(main)}</strong>${meta?`<div class="accuracy">${escapeHtml(meta)}</div>`:''}` }
+/* kind: 'gps' for a genuine fix, 'map' for a point chosen by moving the map,
+   '' while waiting or on error. Presentation only. */
+function setAddress(main,meta='',secondary='',kind=''){
+ const metaIcon=kind==='gps'?'<i class="fa-solid fa-circle-check" aria-hidden="true"></i>'
+   :kind==='map'?'<i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i>':'';
+ $('address').innerHTML=
+  '<div class="addr-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>'+
+  '<div class="addr-body">'+
+   `<strong class="addr-primary">${escapeHtml(main)}</strong>`+
+   (secondary?`<div class="addr-secondary">${escapeHtml(secondary)}</div>`:'')+
+   (meta?`<div class="addr-meta${kind==='gps'?' is-gps':''}">${metaIcon}<span>${escapeHtml(meta)}</span></div>`:'')+
+  '</div>';
+}
+/* Splits the reverse-geocode payload we ALREADY fetch and store into a
+   place name and its wider locality. Display formatting only: it does not
+   change the request, the stored response, or any coordinate. */
+function splitAddress(d){
+ if(!d)return null;
+ const a=d.address||{};
+ const street=[a.house_number,a.road].filter(Boolean).join(' ');
+ const primary=street||a.neighbourhood||a.suburb||a.village||a.hamlet||a.town||a.city||a.county||'';
+ const locality=a.village||a.town||a.city||a.municipality||a.county||'';
+ const region=[locality&&locality!==primary?locality:'',a.state].filter(Boolean).join(', ');
+ if(primary)return{primary,secondary:[region,a.postcode].filter(Boolean).join(' ')};
+ const parts=String(d.display_name||'').split(',').map(s=>s.trim()).filter(Boolean);
+ if(!parts.length)return null;
+ return{primary:parts[0],secondary:parts.slice(1,4).join(', ')};
+}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]) )}
 let mapMoveTimer=null;
 function updateCenterFromMap(){
@@ -109,14 +188,19 @@ function updateCenterFromMap(){
  if(!Number.isFinite(c.lat)||!Number.isFinite(c.lng))return;
  // The center pin is the selected delivery point. After the first GPS fix,
  // moving the map intentionally changes the delivery coordinates.
- current={lat:c.lat,lng:c.lng,accuracy:firstFix && current?.accuracy ? current.accuracy : 0};
+ // accuracy is 0 because this point was chosen on the map, not measured:
+ // carrying the old GPS accuracy forward would claim a precision this
+ // point does not have.
+ current={lat:c.lat,lng:c.lng,accuracy:0};
  $('confirm').disabled=false;
  clearTimeout(mapMoveTimer);
  mapMoveTimer=setTimeout(async()=>{
    setAddress('Selected delivery location','Getting the address for this point…');
    const d=await reverseGeocode(current.lat,current.lng);
-   const meta=current.accuracy?`GPS accuracy ±${Math.round(current.accuracy)} m`:'Delivery point selected on map';
-   setAddress(d?.display_name||'Selected delivery location',meta);
+   const parts=splitAddress(d);
+   setAddress(parts?parts.primary:'Selected delivery location',
+              'Delivery point selected on map',
+              parts?parts.secondary:'','map');
  },250);
 }
 function showGps(lat,lng,accuracy){
@@ -139,9 +223,10 @@ function applyPosition(p,center=true){
  firstFix=true; showGps(current.lat,current.lng,current.accuracy);
  if(center)map.setView([current.lat,current.lng],17,{animate:true});
  const acc=current.accuracy?`GPS accuracy ±${Math.round(current.accuracy)} m`:'GPS location captured';
- setAddress('Current location',acc); $('confirm').disabled=false; warn('');
+ setAddress('Current location',acc,'','gps'); $('confirm').disabled=false; warn('');
  reverseGeocode(current.lat,current.lng).then(d=>{
-  if(d?.display_name)setAddress(d.display_name,acc);
+  const parts=splitAddress(d);
+  if(parts)setAddress(parts.primary,acc,parts.secondary,'gps');
  });
 }
 /* ── Location gate ─────────────────────────────────────────────────
