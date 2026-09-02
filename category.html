@@ -3,107 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Category – Nearbite</title>
+  <title>Category – Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    body { background: #fff; padding-bottom: 80px; font-family: var(--font-sans), sans-serif; }
-    
-    /* ── Header ── */
-    .cat-header {
-      position: sticky; top: 0; z-index: 50; background: #fff;
-      padding: 16px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #f3f4f6; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    }
-    .cat-header-left { display: flex; align-items: center; gap: 12px; }
-    .icon-btn-round {
-      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; background: #f3f4f6; border: none; cursor: pointer; color: #1f2937;
-    }
-    .icon-btn-round:active { background: #e5e7eb; }
-    .cat-title { font-size: 17px; font-weight: 900; color: #111827; line-height: 1.2; }
-    .cat-sub { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; }
+  :root{
+    --ew-green:#159447;
+    --ew-green-dark:#08783a;
+    --ew-text:#171717;
+    --ew-muted:#777;
+    --ew-border:#eeeeee;
+    --ew-soft:#f7f8f8;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:#fff;
+    color:var(--ew-text);
+    padding-bottom:84px;
+    font-family:"Manrope",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
 
-    /* ── Filter Bar ── */
-    .filter-bar {
-      display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px;
-      background: rgba(249,250,251,0.6); border-bottom: 1px solid #f9fafb;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-    .filter-pill {
-      display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px;
-      border: 1.5px solid #e5e7eb; border-radius: 999px; font-size: 11px; font-weight: 700;
-      color: #6b7280; background: #fff; white-space: nowrap; cursor: pointer;
-    }
-    .filter-pill.active { border-color: #111827; background: #111827; color: #fff; }
+  .cat-header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    padding:11px 16px;
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(0,0,0,.055);
+    box-shadow:0 5px 18px rgba(0,0,0,.035);
+  }
+  .cat-header-left{display:flex;align-items:center;gap:11px;min-width:0}
+  .icon-btn-round{
+    width:40px;height:40px;display:grid;place-items:center;
+    border-radius:13px;background:#f6f7f7;border:1px solid #f0f1f1;
+    cursor:pointer;color:#2c2c2c;flex:0 0 40px;
+    transition:transform .15s ease,background .15s ease;
+  }
+  .icon-btn-round:active{transform:scale(.94);background:#eef0ef}
+  .cat-title{
+    margin:0;font-size:17px;font-weight:800;color:#151515;line-height:1.2;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .cat-sub{
+    margin:3px 0 0;font-size:9.5px;font-weight:700;color:#999;
+    text-transform:uppercase;letter-spacing:.09em
+  }
 
-    /* ── Results ── */
-    .results-container { padding: 20px 16px; }
-    .res-count {
-      font-size: 11px; font-weight: 900; color: #9ca3af;
-      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;
-    }
-    .res-card {
-      display: flex; gap: 16px; margin-bottom: 28px; text-decoration: none;
-      transition: transform 0.1s; display: block; display: flex; /* Override block */
-    }
-    .res-card:active { transform: scale(0.97); }
-    
-    .res-img-wrap { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
-    .res-img-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-    .res-offer {
-      position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px); color: #fff; font-size: 8px; font-weight: 900;
-      text-align: center; padding: 4px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;
-    }
-    
-    .res-info { flex: 1; min-width: 0; padding-top: 4px; }
-    .res-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
-    .res-name { font-size: 16px; font-weight: 900; color: #111827; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .heart-btn { background: none; border: none; padding: 0; color: #d1d5db; font-size: 14px; }
-    
-    .res-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-    .res-rating { display: flex; align-items: center; gap: 2px; background: #16a34a; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 6px; }
-    .res-time { font-size: 12px; font-weight: 700; color: #374151; }
-    .res-cuisine { font-size: 12px; color: #9ca3af; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .res-loc { font-size: 11px; color: #9ca3af; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .filter-bar{
+    display:flex;overflow-x:auto;gap:8px;padding:10px 16px;
+    background:rgba(250,250,250,.92);
+    border-bottom:1px solid #f1f2f2;
+    scrollbar-width:none;
+    position:sticky;top:63px;z-index:40;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-pill{
+    display:inline-flex;align-items:center;gap:5px;padding:7px 13px;
+    border:1px solid #e4e6e5;border-radius:999px;
+    font-family:"Manrope",sans-serif;font-size:10.5px;font-weight:800;
+    color:#626665;background:#fff;white-space:nowrap;cursor:pointer;
+    transition:all .15s ease;box-shadow:0 2px 7px rgba(0,0,0,.025)
+  }
+  .filter-pill:active{transform:scale(.97)}
+  .filter-pill.active{
+    border-color:var(--ew-green);background:var(--ew-green);color:#fff;
+    box-shadow:0 5px 14px rgba(21,148,71,.16)
+  }
 
-    /* ── Skeleton ── */
-    .skel-card { display: flex; gap: 16px; margin-bottom: 24px; }
-    .skel-img { width: 112px; height: 112px; border-radius: 16px; flex-shrink: 0; }
-    .skel-info { flex: 1; padding-top: 4px; display: flex; flex-direction: column; gap: 8px; }
-    .skel-line { border-radius: 4px; }
+  .results-container{padding:18px 16px 24px}
+  .res-count{
+    margin:0 0 12px;font-size:10.5px;font-weight:800;color:#8b8f8d;
+    text-transform:uppercase;letter-spacing:.09em
+  }
 
-    /* ── Empty State ── */
-    .empty-state { text-align: center; padding: 80px 32px; }
-    .empty-icon-wrap {
-      width: 96px; height: 96px; background: #f9fafb; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
-    }
-    .empty-icon-wrap i { font-size: 36px; color: #e5e7eb; }
-    .empty-title { font-size: 18px; font-weight: 900; color: #111827; margin-bottom: 8px; }
-    .empty-sub { font-size: 13px; font-weight: 500; color: #6b7280; line-height: 1.5; margin-bottom: 32px; }
-    .btn-back-home {
-      background: #FC8019; color: #fff; font-size: 13px; font-weight: 900; padding: 12px 32px;
-      border-radius: 16px; border: none; box-shadow: 0 4px 12px rgba(252,128,25,0.2); cursor: pointer;
-    }
-  
-    .res-img-wrap.no-image, .res-img-fallback {
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg,#edf0f4,#e2e7ee); color: #b7bfcb; font-size: 22px;
-      width: 100%; height: 100%;
-    }
+  .res-card{
+    display:flex;gap:13px;margin-bottom:17px;text-decoration:none;
+    color:inherit;transition:transform .15s ease
+  }
+  .res-card:active{transform:scale(.985)}
+  .res-img-wrap{
+    position:relative;width:108px;height:108px;flex:0 0 108px;
+    border-radius:17px;overflow:hidden;background:#f3f5f4
+  }
+  .res-img-wrap img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    border-radius:17px;box-shadow:0 4px 14px rgba(0,0,0,.07)
+  }
+  .res-offer{
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(transparent,rgba(0,0,0,.72));
+    color:#fff;font-size:8px;font-weight:800;text-align:left;
+    padding:17px 8px 7px;border-radius:0 0 17px 17px
+  }
+  .res-info{flex:1;min-width:0;padding-top:2px}
+  .res-top{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    gap:8px;margin-bottom:6px
+  }
+  .res-name{
+    margin:0;font-size:15px;font-weight:800;color:#171717;line-height:1.3;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .res-meta-row{
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px
+  }
+  .res-rating{
+    display:inline-flex;align-items:center;gap:3px;background:#198f43;color:#fff;
+    font-size:10px;font-weight:800;padding:4px 6px;border-radius:7px
+  }
+  .res-time{font-size:11px;font-weight:700;color:#3f4442}
+  .res-cuisine{
+    margin:0;color:#777;font-size:11px;line-height:1.45;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .res-loc{
+    margin:5px 0 0;font-size:10.5px;color:#969a98;
+    display:flex;align-items:center;gap:4px;font-weight:600
+  }
+  .res-loc i{color:var(--ew-green)!important}
+
+  .skel-card{display:flex;gap:13px;margin-bottom:20px}
+  .skel-img{width:108px;height:108px;border-radius:17px;flex-shrink:0}
+  .skel-info{flex:1;padding-top:4px;display:flex;flex-direction:column;gap:8px}
+  .skel-line{border-radius:6px}
+
+  .empty-state{text-align:center;padding:76px 28px 90px}
+  .empty-icon-wrap{
+    width:82px;height:82px;background:#f5f7f6;border:1px solid #eef0ef;
+    border-radius:50%;display:grid;place-items:center;margin:0 auto 18px
+  }
+  .empty-icon-wrap i{font-size:28px;color:#c5cbc8}
+  .empty-title{font-size:17px;font-weight:800;color:#222;margin:0 0 7px}
+  .empty-sub{font-size:12px;font-weight:600;color:#7f8582;line-height:1.55;margin:0 0 24px}
+  .btn-back-home{
+    background:var(--ew-green);color:#fff;font-family:"Manrope",sans-serif;
+    font-size:12px;font-weight:800;padding:11px 26px;border-radius:13px;
+    border:0;box-shadow:0 5px 15px rgba(21,148,71,.18);cursor:pointer;
+    transition:transform .15s ease
+  }
+  .btn-back-home:active{transform:scale(.97)}
+  .res-img-wrap.no-image,.res-img-fallback{
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#f1f3f3,#e5e9e7);
+    color:#b7bfbb;font-size:21px;width:100%;height:100%
+  }
+
+  @media (min-width:600px){
+    .cat-header{padding-left:24px;padding-right:24px}
+    .filter-bar{padding-left:24px;padding-right:24px}
+    .results-container{max-width:760px;margin:0 auto}
+  }
 </style>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="cat-header">
   <div class="cat-header-left">
-    <button onclick="window.nearbiteSafeBack()" class="icon-btn-round">
+    <button onclick="window.nearbiteSafeBack()" class="icon-btn-round" aria-label="Go back">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
     <div>
@@ -111,7 +175,7 @@
       <p class="cat-sub">Restaurants near you</p>
     </div>
   </div>
-  <button onclick="window.location.href='search.html'" class="icon-btn-round">
+  <button onclick="window.location.href='search.html'" class="icon-btn-round" aria-label="Search">
     <i class="fa-solid fa-magnifying-glass"></i>
   </button>
 </div>
@@ -307,7 +371,7 @@
             (meta.length ? '<div class="res-meta-row">' + meta.join(' · ') + '</div>' : '') +
             (cuisine ? '<p class="res-cuisine">' + esc(cuisine) + '</p>' : '') +
             (distance
-              ? '<p class="res-loc"><i class="fa-solid fa-location-dot" style="color:#FC8019; font-size:9px;"></i> ' +
+              ? '<p class="res-loc"><i class="fa-solid fa-location-dot" style="color:#159447; font-size:9px;"></i> ' +
                 esc(distance) + '</p>'
               : '') +
           '</div>' +
