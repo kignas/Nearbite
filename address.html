@@ -56,177 +56,153 @@ body.ea-body{
 
 .ea-header{
   position:sticky;top:0;z-index:30;
-  background:#fff;
-  border-bottom:1px solid var(--line);
-  padding:13px 16px;
+  background:#fff;border-bottom:1px solid var(--line);
+  padding:11px 14px;
 }
-.ea-top{display:flex;align-items:center;gap:12px}
+.ea-top{display:flex;align-items:center;gap:11px}
 .ea-back,.ea-add{
-  width:38px;height:38px;flex:0 0 38px;border:0;border-radius:12px;
+  width:36px;height:36px;flex:0 0 36px;border:0;border-radius:11px;
   display:grid;place-items:center;color:#374151;background:#F3F5F7;
-  font-size:15px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;
 }
 .ea-add{background:var(--brand-tint);color:var(--brand)}
 .ea-back:active,.ea-add:active{opacity:.6}
-.ea-title{font-size:16px;font-weight:800;letter-spacing:-.35px;flex:1;min-width:0}
-.ea-sub{font-size:11.5px;color:var(--muted);margin:4px 0 0 50px;font-weight:500}
+.ea-title{font-size:15px;font-weight:800;letter-spacing:-.3px;flex:1;min-width:0}
+.ea-sub{font-size:11px;color:var(--muted);margin:3px 0 0 47px;font-weight:500}
 
-.ea-main{padding:14px 16px calc(88px + env(safe-area-inset-bottom))}
+.ea-main{padding:12px 14px calc(84px + env(safe-area-inset-bottom))}
 
 .ea-card{
-  background:#fff;border:1px solid var(--line);border-radius:22px;
+  background:#fff;border:1px solid var(--line);border-radius:20px;
   box-shadow:0 1px 2px rgba(17,24,39,.04);
-  margin-bottom:11px;overflow:hidden;
+  margin-bottom:10px;overflow:hidden;
 }
 .ea-card.is-selected{border-color:#FFD3B0}
 
-.ea-addr{padding:14px}
-.ea-addr-top{display:flex;gap:12px}
+.ea-addr{padding:13px}
+.ea-addr-top{display:flex;gap:11px}
 .ea-addr-icon{
-  width:40px;height:40px;flex:0 0 40px;border-radius:13px;
-  background:#F3F5F7;color:var(--muted);display:grid;place-items:center;font-size:14px;
+  width:36px;height:36px;flex:0 0 36px;border-radius:12px;
+  background:#F3F5F7;color:var(--muted);display:grid;place-items:center;font-size:13px;
 }
 .ea-addr-icon.is-default{background:var(--brand-tint);color:var(--brand)}
 .ea-addr-body{flex:1;min-width:0}
 
-.ea-tagline{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
-.ea-tag{font-size:14px;font-weight:800;letter-spacing:-.25px}
-.ea-chip{
-  font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
-  border-radius:999px;padding:4px 8px;
-}
+.ea-tagline{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ea-tag{font-size:13.5px;font-weight:800;letter-spacing:-.2px}
+.ea-chip{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:3px 7px}
 .ea-chip.default{background:var(--brand-tint);color:var(--brand-ink)}
 .ea-chip.selected{background:#E9F8EF;color:#0B7A45}
 
-.ea-line{font-size:12px;color:var(--ink-2);line-height:1.55;margin-top:5px;overflow-wrap:anywhere}
-.ea-meta{font-size:11px;color:var(--label);margin-top:4px;font-weight:500;overflow-wrap:anywhere}
+.ea-line{font-size:11.5px;color:var(--ink-2);line-height:1.55;margin-top:5px;overflow-wrap:anywhere}
+.ea-meta{font-size:10.5px;color:var(--label);margin-top:4px;font-weight:500;overflow-wrap:anywhere}
 
-.ea-actions{
-  display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;padding-top:11px;
-  border-top:1px solid #F2F4F6;
-}
+.ea-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;padding-top:10px;border-top:1px solid #F2F4F6}
 .ea-action{
-  border:1.5px solid var(--line);background:#fff;border-radius:11px;
-  padding:9px 12px;font-size:11px;font-weight:800;color:#374151;
+  border:1.5px solid var(--line);background:#fff;border-radius:10px;
+  padding:8px 11px;font-size:10.5px;font-weight:800;color:#374151;
   cursor:pointer;-webkit-tap-highlight-color:transparent;
 }
 .ea-action:active{opacity:.6}
-.ea-action.primary{border-color:#FFD5BD;background:#FFF8F3;color:var(--brand-ink);flex:1 1 auto;min-width:132px}
+.ea-action.primary{border-color:#FFD5BD;background:#FFF8F3;color:var(--brand-ink);flex:1 1 auto;min-width:126px}
 .ea-action.danger{color:var(--danger);border-color:#F6DEDE}
-.ea-action.current{border-color:#CDEAD9;background:#F2FBF6;color:#0B7A45;flex:1 1 auto;min-width:132px}
+.ea-action.current{border-color:#CDEAD9;background:#F2FBF6;color:#0B7A45;flex:1 1 auto;min-width:126px}
 
 .ea-empty{
-  text-align:center;background:#fff;border:1px dashed #DDE1E6;border-radius:22px;
-  padding:34px 20px;color:var(--muted);font-size:12.5px;line-height:1.6;
+  text-align:center;background:#fff;border:1px dashed #DDE1E6;border-radius:20px;
+  padding:30px 18px;color:var(--muted);font-size:12px;line-height:1.6;
 }
-.ea-empty i{font-size:26px;color:#CBD0D6;display:block;margin-bottom:11px}
-.ea-empty b{display:block;font-size:15px;color:var(--ink);margin-bottom:4px;font-weight:800}
-.ea-empty-cta{
-  margin-top:15px;border:0;background:var(--brand);color:#fff;
-  border-radius:13px;padding:12px 20px;font-size:13px;font-weight:800;cursor:pointer;
-}
+.ea-empty i{font-size:24px;color:#CBD0D6;display:block;margin-bottom:10px}
+.ea-empty b{display:block;font-size:14.5px;color:var(--ink);margin-bottom:4px;font-weight:800}
+.ea-empty-cta{margin-top:14px;border:0;background:var(--brand);color:#fff;border-radius:12px;padding:11px 18px;font-size:12.5px;font-weight:800;cursor:pointer}
 
 .ea-fab{
   position:fixed;left:0;right:0;bottom:0;z-index:40;
-  padding:10px 16px calc(12px + env(safe-area-inset-bottom));
+  padding:9px 14px calc(11px + env(safe-area-inset-bottom));
   background:#fff;border-top:1px solid var(--line);
 }
 .ea-fab button{
-  display:block;width:100%;max-width:528px;margin:auto;min-height:50px;
+  display:block;width:100%;max-width:532px;margin:auto;min-height:48px;
   border:1.5px dashed #FFD0AD;background:#FFF8F3;color:var(--brand-ink);
-  border-radius:15px;font-size:13.5px;font-weight:800;cursor:pointer;
+  border-radius:14px;font-size:13px;font-weight:800;cursor:pointer;
 }
 
-/* ================= address form screen ================= */
-.ea-form{
-  position:fixed;inset:0;z-index:120;
-  background:var(--bg);
-  display:none;
-  flex-direction:column;
-}
+/* ================= address form ================= */
+.ea-form{position:fixed;inset:0;z-index:120;background:var(--bg);display:none;flex-direction:column}
 .ea-form.show{display:flex}
 
 .ea-form-head{
   background:#fff;border-bottom:1px solid var(--line);
-  padding:12px 16px;
-  display:flex;align-items:flex-start;gap:12px;
-  padding-top:calc(12px + env(safe-area-inset-top));
+  padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));
+  display:flex;align-items:center;gap:11px;
 }
-.ea-form-head .ea-back{margin-top:1px}
 .ea-head-body{flex:1;min-width:0}
-.ea-eyebrow{
-  font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--label);
-}
+.ea-eyebrow{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--label)}
 .ea-head-primary{
-  margin-top:3px;font-size:15px;font-weight:800;letter-spacing:-.3px;
-  line-height:1.25;color:var(--ink);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin-top:2px;font-size:14.5px;font-weight:800;letter-spacing:-.3px;line-height:1.25;
+  color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .ea-head-secondary{
-  margin-top:2px;font-size:11.5px;font-weight:500;line-height:1.4;color:var(--muted);
+  margin-top:1px;font-size:11px;font-weight:500;line-height:1.4;color:var(--muted);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-
-.ea-form-body{
-  flex:1;overflow:auto;-webkit-overflow-scrolling:touch;
-  padding:14px 16px 18px;
+.ea-change{
+  flex:none;display:flex;align-items:center;gap:5px;
+  border:1.5px solid #FFD9BE;background:#FFF8F3;color:var(--brand-ink);
+  border-radius:11px;padding:8px 11px;
+  font-size:11px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;
 }
+.ea-change:active{opacity:.6}
 
-.ea-sec{margin-bottom:16px}
+.ea-form-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 16px}
+
+.ea-sec{margin-bottom:14px}
 .ea-sec:last-child{margin-bottom:0}
-.ea-sec-head{
-  display:flex;align-items:center;gap:8px;
-  margin:0 2px 9px;
-}
-.ea-sec-title{font-size:14px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
-.ea-sec-note{font-size:11.5px;font-weight:500;color:var(--label)}
-.ea-new{
-  font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
-  background:#E9F8EF;color:#0B7A45;border-radius:999px;padding:3px 7px;
-}
+.ea-sec-head{display:flex;align-items:center;gap:7px;margin:0 2px 8px}
+.ea-sec-title{font-size:13px;font-weight:800;letter-spacing:-.25px;color:var(--ink)}
+.ea-sec-note{font-size:11px;font-weight:500;color:var(--label)}
+.ea-new{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;background:#E9F8EF;color:#0B7A45;border-radius:999px;padding:3px 6px}
 
 .ea-panel{
-  background:#fff;border:1px solid var(--line);border-radius:22px;
-  box-shadow:0 1px 2px rgba(17,24,39,.04);
-  padding:15px 14px;
+  background:#fff;border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 1px 2px rgba(17,24,39,.04);padding:14px 13px;
 }
 
-/* use my account details */
-.ea-check{
+/* location still to confirm — only rendered when there are no coordinates,
+   so the confirmed address is never shown twice */
+.ea-pending{
   display:flex;align-items:center;gap:10px;
-  width:100%;border:0;background:none;padding:0 0 13px;
-  margin-bottom:13px;border-bottom:1px solid #F2F4F6;
-  cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;
+  background:#FFF8F3;border:1px solid #FFD9C4;border-radius:15px;
+  padding:11px 12px;margin-bottom:13px;
+}
+.ea-pending i{color:var(--brand);font-size:14px;flex:none}
+.ea-pending span{flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#8A4517;line-height:1.45}
+
+.ea-check{
+  display:flex;align-items:center;gap:10px;width:100%;
+  border:0;background:none;padding:0 0 12px;margin-bottom:12px;
+  border-bottom:1px solid #F2F4F6;cursor:pointer;text-align:left;
+  -webkit-tap-highlight-color:transparent;
 }
 .ea-box{
-  width:20px;height:20px;flex:0 0 20px;border-radius:6px;
-  border:1.5px solid #CFD4DA;background:#fff;
-  display:grid;place-items:center;color:#fff;font-size:10px;
+  width:19px;height:19px;flex:0 0 19px;border-radius:6px;
+  border:1.5px solid #CFD4DA;background:#fff;display:grid;place-items:center;color:#fff;font-size:9px;
 }
 .ea-check.on .ea-box{background:var(--brand);border-color:var(--brand)}
-.ea-check-text{font-size:13px;font-weight:700;color:var(--ink)}
+.ea-check-text{font-size:12.5px;font-weight:700;color:var(--ink)}
 .ea-check:disabled{opacity:.5;cursor:default}
 
-/* fields */
-.ea-field{margin-bottom:12px}
+.ea-field{margin-bottom:11px}
 .ea-field:last-child{margin-bottom:0}
 
-.ea-label{
-  display:block;font-size:12.5px;font-weight:600;color:var(--label);
-  margin:0 0 7px;text-transform:none;letter-spacing:normal;
-}
+.ea-label{display:block;font-size:12px;font-weight:600;color:var(--label);margin:0 0 6px;text-transform:none;letter-spacing:normal}
 .ea-label .req{color:var(--brand)}
 
 .ea-input,.ea-area{
-  width:100%;min-height:52px;
-  border:1.5px solid var(--line);
-  background:var(--field);
-  border-radius:15px;
-  padding:14px 14px;
-  outline:none;
-  font-size:14.5px;font-weight:600;line-height:1.35;
-  color:var(--ink);
+  width:100%;min-height:48px;
+  border:1.5px solid var(--line);background:var(--field);border-radius:14px;
+  padding:13px 13px;outline:none;
+  font-size:14px;font-weight:600;line-height:1.35;color:var(--ink);
   -webkit-appearance:none;
   transition:border-color .15s ease,background .15s ease;
 }
@@ -234,132 +210,85 @@ body.ea-body{
 .ea-input:focus,.ea-area:focus{border-color:var(--brand);background:#fff}
 .ea-input[readonly]{background:#F3F5F7;color:var(--ink-2)}
 .ea-input.invalid,.ea-area.invalid{border-color:#F0A5A5;background:#FFFAFA}
-.ea-area{min-height:84px;resize:none;padding-top:13px}
+.ea-area{min-height:78px;resize:none;padding-top:12px}
 
-.ea-err{display:none;margin-top:6px;font-size:11.5px;font-weight:600;color:var(--danger);line-height:1.45}
+.ea-err{display:none;margin-top:6px;font-size:11px;font-weight:600;color:var(--danger);line-height:1.45}
 .ea-err.show{display:block}
 
-.ea-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ea-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 
-/* segmented House / Office / Other */
-.ea-seg{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:4px;
-  background:#F1F3F6;border-radius:15px;padding:4px;margin-bottom:14px;
-}
+.ea-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#F1F3F6;border-radius:14px;padding:4px;margin-bottom:13px}
 .ea-seg button{
   display:flex;align-items:center;justify-content:center;gap:6px;
-  min-height:42px;border:0;border-radius:12px;background:transparent;
-  font-size:12.5px;font-weight:700;color:var(--ink);
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  min-height:38px;border:0;border-radius:11px;background:transparent;
+  font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
   transition:background .15s ease,color .15s ease;
 }
-.ea-seg button i{font-size:12px}
+.ea-seg button i{font-size:11px}
 .ea-seg button.on{background:var(--pill);color:#fff}
 
-/* confirmed map location */
-.ea-loc{
-  display:flex;align-items:flex-start;gap:11px;
-  border:1px solid var(--line);background:var(--field);
-  border-radius:16px;padding:12px;margin-top:10px;
-}
-.ea-loc.pending{border-color:#FFD9C4;background:#FFF8F3}
-.ea-loc-pin{
-  width:34px;height:34px;flex:0 0 34px;border-radius:11px;
-  background:var(--brand-tint);color:var(--brand);
-  display:grid;place-items:center;font-size:13px;
-}
-.ea-loc-body{flex:1;min-width:0}
-.ea-loc-primary{font-size:13px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
-.ea-loc-secondary{margin-top:2px;font-size:11.5px;font-weight:500;color:var(--muted);line-height:1.45;overflow-wrap:anywhere}
-.ea-change{
-  flex:none;align-self:center;
-  display:flex;align-items:center;gap:5px;
-  border:1.5px solid #FFD9BE;background:#fff;color:var(--brand-ink);
-  border-radius:11px;padding:9px 11px;
-  font-size:11.5px;font-weight:800;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-.ea-change:active{opacity:.6}
-
-/* save address as */
-.ea-tags{display:flex;gap:8px;flex-wrap:wrap}
+.ea-tags{display:flex;gap:7px;flex-wrap:wrap}
 .ea-tagbtn{
-  display:flex;align-items:center;gap:7px;
+  display:flex;align-items:center;gap:6px;
   border:1.5px solid var(--line);background:#fff;border-radius:999px;
-  padding:10px 16px;font-size:12.5px;font-weight:700;color:var(--ink);
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  padding:9px 15px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
   transition:border-color .15s ease,background .15s ease,color .15s ease;
 }
-.ea-tagbtn i{font-size:11px}
+.ea-tagbtn i{font-size:10.5px}
 .ea-tagbtn.on{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-ink)}
 
-/* optional rows */
 .ea-row{
-  display:flex;align-items:center;gap:12px;
-  width:100%;text-align:left;
-  background:#fff;border:1px solid var(--line);border-radius:22px;
-  box-shadow:0 1px 2px rgba(17,24,39,.04);
-  padding:15px 14px;cursor:pointer;
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  background:#fff;border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 1px 2px rgba(17,24,39,.04);padding:13px;cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
-.ea-row-text{flex:1;min-width:0;font-size:12.5px;font-weight:600;color:var(--ink-2);line-height:1.45}
-.ea-row-text small{display:block;margin-top:3px;font-size:11px;font-weight:500;color:var(--label)}
-.ea-row-cta{
-  flex:none;border:1.5px solid var(--line);background:#fff;
-  border-radius:11px;padding:9px 13px;font-size:11.5px;font-weight:800;color:#374151;
-}
-.ea-row-icon{flex:none;width:38px;height:38px;border-radius:12px;background:#F3F5F7;
-  display:grid;place-items:center;color:var(--muted);font-size:14px}
+.ea-row-text{flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--ink-2);line-height:1.45}
+.ea-row-text small{display:block;margin-top:2px;font-size:10.5px;font-weight:500;color:var(--label)}
+.ea-row-cta{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:800;color:#374151}
+.ea-row-icon{flex:none;width:36px;height:36px;border-radius:11px;background:#F3F5F7;display:grid;place-items:center;color:var(--muted);font-size:13px}
 .ea-row.is-off{cursor:default}
 .ea-row.is-off .ea-row-text,.ea-row.is-off .ea-row-icon{opacity:.55}
 
-/* sticky save */
-.ea-form-foot{
-  padding:10px 16px calc(12px + env(safe-area-inset-bottom));
-  background:#fff;border-top:1px solid var(--line);
-}
+.ea-form-foot{padding:9px 14px calc(11px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
 .ea-save{
-  display:block;width:100%;max-width:528px;margin:auto;min-height:54px;
-  border:0;border-radius:16px;
-  background:var(--brand);color:#fff;
-  font-size:15px;font-weight:800;letter-spacing:-.2px;
-  box-shadow:0 4px 12px rgba(252,128,25,.18);
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
-  transition:background .15s ease;
+  display:block;width:100%;max-width:532px;margin:auto;min-height:50px;
+  border:0;border-radius:14px;background:var(--brand);color:#fff;
+  font-size:14.5px;font-weight:800;letter-spacing:-.2px;
+  box-shadow:0 3px 10px rgba(252,128,25,.18);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s ease;
 }
 .ea-save:not(:disabled):active{background:var(--brand-dark)}
 .ea-save:disabled{background:#E8EAED;color:#A3A8B0;box-shadow:none;cursor:not-allowed}
 
 .ea-toast{
-  position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));
+  position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));
   transform:translate(-50%,14px);opacity:0;pointer-events:none;
-  background:#111827;color:#fff;padding:11px 16px;border-radius:13px;
-  font-size:12px;font-weight:600;z-index:200;transition:.2s;
-  max-width:calc(100% - 32px);text-align:center;
+  background:#111827;color:#fff;padding:10px 15px;border-radius:12px;
+  font-size:11.5px;font-weight:600;z-index:200;transition:.2s;
+  max-width:calc(100% - 28px);text-align:center;
 }
 .ea-toast.show{opacity:1;transform:translate(-50%,0)}
 
-@media (prefers-reduced-motion:reduce){
-  .ea *{transition-duration:.01ms !important}
-}
+@media (prefers-reduced-motion:reduce){.ea *{transition-duration:.01ms !important}}
 
 @media(max-width:365px){
-  .ea-main,.ea-form-body{padding-left:14px;padding-right:14px}
-  .ea-header,.ea-form-head{padding-left:14px;padding-right:14px}
-  .ea-fab,.ea-form-foot{padding-left:14px;padding-right:14px}
   .ea-grid{grid-template-columns:1fr;gap:0}
-  .ea-grid .ea-field{margin-bottom:12px}
-  .ea-seg button{font-size:11.5px;gap:5px}
+  .ea-grid .ea-field{margin-bottom:11px}
+  .ea-seg button{font-size:11px;gap:4px}
   .ea-action{flex:1 1 100%}
   .ea-action.primary,.ea-action.current{min-width:0}
   .ea-sub{margin-left:0}
+  .ea-change{padding:8px 9px}
 }
 </style>
 </head>
 <body class="ea ea-body">
 
 <!-- ===================== saved addresses ===================== -->
-<div class="ea-app" id="listScreen">
+<div class="ea-app">
   <header class="ea-header">
     <div class="ea-top">
       <button class="ea-back" onclick="goBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
@@ -374,26 +303,30 @@ body.ea-body{
   </main>
 </div>
 
-<div class="ea-fab" id="listFab">
+<div class="ea-fab">
   <button onclick="openEditor()"><i class="fa-solid fa-plus"></i> Add a new address</button>
 </div>
 
 <!-- ===================== address form ===================== -->
 <div class="ea-form" id="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
 
+  <!-- The confirmed map location lives here and nowhere else. -->
   <div class="ea-form-head">
     <button class="ea-back" onclick="closeEditor()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="ea-head-body">
-      <div class="ea-eyebrow" id="formTitle">Add new address</div>
-      <div class="ea-head-primary" id="headPrimary">Delivery location</div>
-      <div class="ea-head-secondary" id="headSecondary">Confirm your point on the map</div>
+      <div class="ea-eyebrow" id="formTitle">Add delivery address</div>
+      <div class="ea-head-primary" id="headPrimary">No location set</div>
+      <div class="ea-head-secondary" id="headSecondary">Confirm your delivery point on the map</div>
     </div>
+    <button type="button" class="ea-change" onclick="changeLocation()">
+      <i class="fa-solid fa-location-crosshairs"></i> <span id="changeLocText">Change</span>
+    </button>
   </div>
 
-  <div class="ea-form-body">
+  <div class="ea-form-body" id="formBody">
 
-    <!-- Receiver Details -->
-    <section class="ea-sec">
+    <!-- Receiver Details — MODE 2 only -->
+    <section class="ea-sec" id="receiverSec">
       <div class="ea-sec-head"><span class="ea-sec-title">Receiver Details</span></div>
       <div class="ea-panel">
 
@@ -422,6 +355,13 @@ body.ea-body{
       <div class="ea-sec-head"><span class="ea-sec-title">Location Details</span></div>
       <div class="ea-panel">
 
+        <div class="ea-pending" id="pendingLoc" style="display:none">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>Confirm your delivery point on the map before saving.</span>
+          <button type="button" class="ea-change" onclick="changeLocation()">Set location</button>
+        </div>
+        <div class="ea-err" id="err_location" style="margin-bottom:10px"></div>
+
         <div class="ea-seg" id="locSeg" role="group" aria-label="Location type">
           <button type="button" class="on" data-type="House" onclick="chooseType('House')"><i class="fa-solid fa-house"></i> House</button>
           <button type="button" data-type="Office" onclick="chooseType('Office')"><i class="fa-solid fa-briefcase"></i> Office</button>
@@ -437,32 +377,18 @@ body.ea-body{
         <div class="ea-field">
           <label class="ea-label" for="landmark"><span id="lbl_landmark">Building / Street</span> <span class="ea-sec-note">(Recommended)</span></label>
           <input class="ea-input" id="landmark" maxlength="160" placeholder="Building name, street or nearby landmark">
-          <div class="ea-err" id="err_landmark"></div>
         </div>
 
         <div class="ea-field">
           <label class="ea-label" for="area">Area / Locality <span class="req">*</span></label>
           <input class="ea-input" id="area" maxlength="120" placeholder="Locality, village or area">
           <div class="ea-err" id="err_area"></div>
-
-          <!-- Confirmed map point. Never shows raw coordinates. -->
-          <div class="ea-loc" id="locBox">
-            <div class="ea-loc-pin"><i class="fa-solid fa-location-dot" id="locIcon"></i></div>
-            <div class="ea-loc-body">
-              <div class="ea-loc-primary" id="locPrimary">No location yet</div>
-              <div class="ea-loc-secondary" id="locSecondary">Pick this address on the map.</div>
-            </div>
-            <button type="button" class="ea-change" onclick="changeLocation()">
-              <i class="fa-solid fa-location-crosshairs"></i> <span id="changeLocText">Change</span>
-            </button>
-          </div>
-          <div class="ea-err" id="err_location"></div>
         </div>
 
-        <div class="ea-grid" style="margin-top:12px">
+        <div class="ea-grid">
           <div class="ea-field">
             <label class="ea-label" for="city">City / Town <span class="req">*</span></label>
-            <input class="ea-input" id="city" maxlength="80" value="Maynaguri">
+            <input class="ea-input" id="city" maxlength="80" placeholder="City or town">
             <div class="ea-err" id="err_city"></div>
           </div>
           <div class="ea-field">
@@ -477,7 +403,7 @@ body.ea-body{
 
     <!-- Save address as -->
     <section class="ea-sec">
-      <div class="ea-sec-head"><span class="ea-sec-title">Save address as</span><span class="req" style="color:var(--brand);font-weight:800">*</span></div>
+      <div class="ea-sec-head"><span class="ea-sec-title">Save address as</span><span style="color:var(--brand);font-weight:800">*</span></div>
       <div class="ea-panel">
         <div class="ea-tags">
           <button type="button" class="ea-tagbtn on" data-tag="Home" onclick="chooseTag('Home')"><i class="fa-solid fa-house"></i> Home</button>
@@ -487,23 +413,7 @@ body.ea-body{
       </div>
     </section>
 
-    <!-- Location Photos -->
-    <section class="ea-sec">
-      <div class="ea-sec-head">
-        <span class="ea-sec-title">Location Photos</span>
-        <span class="ea-sec-note">(Recommended)</span>
-        <span class="ea-new">New</span>
-      </div>
-      <div class="ea-row is-off" id="photoRow" onclick="photosUnavailable()">
-        <div class="ea-row-text">
-          Add photos to help delivery partners reach faster
-          <small>Photo upload isn't available yet.</small>
-        </div>
-        <div class="ea-row-icon"><i class="fa-solid fa-camera"></i></div>
-      </div>
-    </section>
-
-    <!-- Delivery Instructions -->
+    <!-- Delivery instructions -->
     <section class="ea-sec">
       <div class="ea-sec-head">
         <span class="ea-sec-title">Delivery Instructions</span>
@@ -515,7 +425,7 @@ body.ea-body{
         <span class="ea-row-cta" id="instrCta">Add</span>
       </div>
 
-      <div class="ea-panel" id="instrPanel" style="display:none;margin-top:10px">
+      <div class="ea-panel" id="instrPanel" style="display:none;margin-top:9px">
         <div class="ea-field">
           <label class="ea-label" for="instructions">Instructions to reach location</label>
           <textarea class="ea-area" id="instructions" maxlength="240" placeholder="Ring the second bell, gate is behind the blue shop…"></textarea>
@@ -523,6 +433,22 @@ body.ea-body{
         <button type="button" class="ea-change" style="width:100%;justify-content:center;margin-top:2px" onclick="closeInstructions()">
           <i class="fa-solid fa-check"></i> Done
         </button>
+      </div>
+    </section>
+
+    <!-- Location photos — MODE 2 only -->
+    <section class="ea-sec" id="photoSec">
+      <div class="ea-sec-head">
+        <span class="ea-sec-title">Location Photos</span>
+        <span class="ea-sec-note">(Recommended)</span>
+        <span class="ea-new">New</span>
+      </div>
+      <div class="ea-row is-off" onclick="photosUnavailable()">
+        <div class="ea-row-text">
+          Add photos to help delivery partners reach faster
+          <small>Photo upload isn't available yet.</small>
+        </div>
+        <div class="ea-row-icon"><i class="fa-solid fa-camera"></i></div>
       </div>
     </section>
 
@@ -542,6 +468,14 @@ let addresses = [], editingId = null, tag = 'Home', locType = 'House';
 let lat = null, lng = null, locGeo = null;
 let account = null, useAccountOn = false;
 
+/* 'setup'  — MODE 1. First address, reached from Complete Profile via the
+              map. Receiver details come from the account, the receiver card
+              is hidden, and a successful save continues to nearbite_after_login.
+   'manage' — MODE 2. Existing customer adding or editing an address from the
+              saved list. Receiver card is shown, and a save returns to
+              wherever they came from. */
+let mode = 'manage';
+
 const $ = id => document.getElementById(id);
 const token   = () => localStorage.getItem('nearbite_token') || localStorage.getItem('token') || '';
 const headers = () => ({ 'Content-Type':'application/json', ...(token() ? { Authorization:'Bearer ' + token() } : {}) });
@@ -551,16 +485,13 @@ const headers = () => ({ 'Content-Type':'application/json', ...(token() ? { Auth
 const DRAFT_KEY = 'eatswada_address_draft';
 const FORM_IDS = ['house','area','landmark','city','pincode','receiverName','receiverPhone','instructions'];
 
-/* How the customer arrived. `add=1` / `resume=1` mean this is the new-user
-   setup leg (Complete Profile → Location → Address), so a first successful
-   save continues to the destination they were originally heading for
-   instead of parking them on the saved-address list. */
+/* How the customer arrived at this page. */
 const ENTRY = new URLSearchParams(location.search);
-const isSetupFlow = ENTRY.get('add') === '1' || ENTRY.get('resume') === '1';
+const cameFromSetupUrl = ENTRY.get('add') === '1' || ENTRY.get('resume') === '1';
 
 /* The segmented control only changes what the two building fields are
-   called. It is presentation: the value saved to the backend is still
-   `house` and `landmark`. */
+   called. It is presentation: the values saved are still `house` and
+   `landmark`. */
 const TYPE_FIELDS = {
   House:  { f1:'House / Flat / Floor', f2:'Building / Street' },
   Office: { f1:'Office name / Floor',  f2:'Building / Street' },
@@ -575,7 +506,7 @@ function toast(s){
 }
 
 function goBack(){
-  if (new URLSearchParams(location.search).get('return') === 'cart') location.replace('cart.html');
+  if (ENTRY.get('return') === 'cart') location.replace('cart.html');
   else if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack();
   else history.length > 1 ? history.back() : location.replace('index.html');
 }
@@ -632,16 +563,16 @@ function geoParts(geo){
 
 /* Never renders latitude/longitude to the customer. */
 function locationLines(geo, fallbackAddress){
-  const fb = fallbackAddress
-    ? { primary: fallbackAddress.area || fallbackAddress.city || 'Saved map location',
+  const fb = fallbackAddress && (fallbackAddress.area || fallbackAddress.city)
+    ? { primary: fallbackAddress.area || fallbackAddress.city,
         secondary: [fallbackAddress.city, fallbackAddress.pincode].filter(Boolean).join(' ') }
-    : { primary:'Map location selected', secondary:'Confirmed from the map you picked' };
+    : { primary:'Delivery point confirmed', secondary:'Selected on the map' };
 
   if (!geo) return fb;
 
   if (typeof geo === 'string'){
     const p = geo.split(',').map(s => s.trim()).filter(Boolean);
-    return p.length ? { primary:p[0], secondary:p.slice(1,3).join(', ') } : fb;
+    return p.length ? { primary:p[0], secondary:p.slice(1,4).join(', ') } : fb;
   }
 
   const g = geoParts(geo);
@@ -658,7 +589,7 @@ function locationLines(geo, fallbackAddress){
                     geo.formatted_address, geo.display_name, geo.label, geo.name);
   if (full){
     const p = full.split(',').map(s => s.trim()).filter(Boolean);
-    return { primary:p[0] || fb.primary, secondary:p.slice(1,3).join(', ') };
+    return { primary:p[0] || fb.primary, secondary:p.slice(1,4).join(', ') };
   }
   return fb;
 }
@@ -764,24 +695,26 @@ async function load(){
 
 /* ---------------- account details ---------------- */
 
+const tenDigits = v => String(v || '').replace(/\D/g,'').slice(-10);
+
 async function loadAccount(){
-  const norm = v => String(v || '').replace(/\D/g,'').slice(-10);
   try {
     const c = JSON.parse(localStorage.getItem('nearbite_user') || '{}');
-    if (c && (c.name || c.phone)) account = { name: c.name || '', phone: norm(c.phone) };
+    if (c && (c.name || c.phone)) account = { name: c.name || '', phone: tenDigits(c.phone) };
   } catch {}
   try {
     const r = await fetch(API + '/users/profile', { headers: headers() });
     const p = await r.json();
     if (r.ok && p && p.success && p.data){
-      account = { name: p.data.name || account?.name || '', phone: norm(p.data.phone || account?.phone) };
+      account = { name: p.data.name || account?.name || '', phone: tenDigits(p.data.phone || account?.phone) };
     }
   } catch {}
-  if (account && account.name && account.name.startsWith('Nearbite User')) account.name = '';
-  const btn = $('useAccount');
-  const usable = !!(account && (account.name || account.phone));
-  btn.disabled = !usable;
-  if (!usable) btn.querySelector('.ea-check-text').textContent = 'Account details not available';
+  // Signup placeholders are not a real receiver name.
+  if (account && /^(Nearbite|Eatswada) User$/.test(account.name)) account.name = '';
+}
+
+function accountUsable(){
+  return !!(account && account.name && /^\d{10}$/.test(account.phone || ''));
 }
 
 function setUseAccount(on){
@@ -817,26 +750,22 @@ function chooseType(t){
   $('landmark').placeholder     = f.f2 === 'Street' ? 'Street or nearby landmark' : 'Building name, street or nearby landmark';
 }
 
+/* The confirmed location is shown ONCE, in the form header. The panel only
+   gains a prompt strip while there is nothing to show. */
 function paintLocation(){
   const has = validCoords(lat, lng);
-  const lines = locationLines(locGeo, { area:$('area').value.trim(), city:$('city').value.trim(), pincode:$('pincode').value.trim() });
 
   if (has){
-    $('locBox').className = 'ea-loc';
-    $('locIcon').className = 'fa-solid fa-location-dot';
-    $('locPrimary').textContent   = lines.primary;
-    $('locSecondary').textContent = lines.secondary || 'Confirmed on the map';
-    $('changeLocText').textContent = 'Change';
+    const lines = locationLines(locGeo, { area:$('area').value.trim(), city:$('city').value.trim(), pincode:$('pincode').value.trim() });
     $('headPrimary').textContent   = lines.primary;
     $('headSecondary').textContent = lines.secondary || 'Confirmed delivery point';
+    $('changeLocText').textContent = 'Change';
+    $('pendingLoc').style.display  = 'none';
   } else {
-    $('locBox').className = 'ea-loc pending';
-    $('locIcon').className = 'fa-solid fa-location-crosshairs';
-    $('locPrimary').textContent   = 'No location yet';
-    $('locSecondary').textContent = 'Pick this address on the map so we can deliver to it.';
+    $('headPrimary').textContent   = 'No location set';
+    $('headSecondary').textContent = 'Confirm your delivery point on the map';
     $('changeLocText').textContent = 'Set';
-    $('headPrimary').textContent   = 'Delivery location';
-    $('headSecondary').textContent = 'Confirm your point on the map';
+    $('pendingLoc').style.display  = 'flex';
   }
 }
 
@@ -844,14 +773,13 @@ function paintLocation(){
    overwrites something the customer typed. */
 function prefillFromGeocode(){
   const g = geoParts(locGeo);
-  if (!g) return;
   if (g.area && !$('area').value.trim()) $('area').value = g.area;
   if (g.city && !$('city').value.trim()) $('city').value = g.city;
   if (g.pin && /^\d{6}$/.test(g.pin) && !$('pincode').value.trim()) $('pincode').value = g.pin;
 }
 
 function clearErrors(){
-  ['location','house','area','landmark','city','pincode','receiverName','receiverPhone'].forEach(id => setErr(id, ''));
+  ['location','house','area','city','pincode','receiverName','receiverPhone'].forEach(id => setErr(id, ''));
 }
 
 function setErr(id, msg){
@@ -874,16 +802,40 @@ function closeInstructions(){
   $('instrCta').textContent  = v ? 'Edit' : 'Add';
 }
 
-function photosUnavailable(){
-  toast('Photo upload isn\u2019t available yet.');
+function photosUnavailable(){ toast('Photo upload isn\u2019t available yet.'); }
+
+/* MODE 1 only holds while this really is the customer's first address and
+   the account can supply the receiver. Otherwise the receiver card is shown
+   so nothing is saved blank. */
+function applyMode(){
+  const setup = mode === 'setup';
+  const hideReceiver = setup && accountUsable();
+
+  $('receiverSec').style.display = hideReceiver ? 'none' : 'block';
+  $('photoSec').style.display    = setup ? 'none' : 'block';
+  $('formTitle').textContent = editingId ? 'Edit address'
+                             : setup     ? 'Set your delivery address'
+                             : 'Add delivery address';
+
+  const btn = $('useAccount');
+  btn.disabled = !accountUsable();
+  btn.querySelector('.ea-check-text').textContent =
+    accountUsable() ? 'Use my account details' : 'Account details not available';
+
+  if (hideReceiver){
+    $('receiverName').value  = account.name;
+    $('receiverPhone').value = account.phone;
+  }
 }
 
 function openEditor(id = null){
   editingId = id;
   const a = id ? byId(id) : null;
 
+  // Editing an existing address is always MODE 2.
+  if (a) mode = 'manage';
+
   clearErrors();
-  $('formTitle').textContent = a ? 'Edit address' : 'Add new address';
 
   $('house').value  = a?.house || '';
   $('area').value   = a?.area || '';
@@ -891,7 +843,7 @@ function openEditor(id = null){
   $('city').value   = a?.city || '';
   $('pincode').value = a?.pincode || '';
   $('receiverName').value  = a?.receiverName || '';
-  $('receiverPhone').value = (a?.receiverPhone || '').replace(/\D/g,'');
+  $('receiverPhone').value = tenDigits(a?.receiverPhone);
   $('instructions').value  = a?.deliveryInstructions || '';
 
   chooseTag(a?.tag || 'Home');
@@ -902,24 +854,26 @@ function openEditor(id = null){
   lat = c[0]; lng = c[1];
   locGeo = null;
 
-  // A brand-new address can adopt the location the customer just confirmed
-  // during onboarding, if one is still waiting.
+  // A brand-new address adopts the point the customer just confirmed on the
+  // map, if one is still waiting.
   if (!a && !validCoords(lat, lng)){
     const onboard = readOnboardingLocation();
     if (onboard){ lat = onboard.latitude; lng = onboard.longitude; locGeo = readOnboardingGeocode(); }
   }
 
   prefillFromGeocode();
-  if (!$('city').value.trim()) $('city').value = 'Maynaguri';
+  applyMode();
 
-  setUseAccount(!a && !$('receiverName').value.trim() && !!(account && (account.name || account.phone)));
+  // MODE 2: default to the account details for a new address, off when
+  // editing so the saved receiver is preserved.
+  setUseAccount(mode === 'manage' && !a && accountUsable());
 
   paintLocation();
   syncSave();
 
   $('modal').classList.add('show');
   document.body.style.overflow = 'hidden';
-  $('modal').querySelector('.ea-form-body').scrollTop = 0;
+  $('formBody').scrollTop = 0;
 }
 
 function editAddress(id){ openEditor(id); }
@@ -927,19 +881,19 @@ function editAddress(id){ openEditor(id); }
 function closeEditor(){
   $('modal').classList.remove('show');
   document.body.style.overflow = '';
+  mode = 'manage';
   try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
 }
 
 /* ---------------- change location round trip ---------------- */
 
 function changeLocation(){
-  const draft = { editingId, tag, locType, useAccount: useAccountOn };
+  const draft = { editingId, tag, locType, mode, useAccount: useAccountOn };
   FORM_IDS.forEach(id => draft[id] = $(id).value);
   try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
 
-  const search = new URLSearchParams(location.search);
   let back = 'address.html?resume=1';
-  if (search.get('return')) back += '&return=' + encodeURIComponent(search.get('return'));
+  if (ENTRY.get('return')) back += '&return=' + encodeURIComponent(ENTRY.get('return'));
   back = encodeURIComponent(back);
 
   location.href = 'location-onboarding.html?from=address&return=' + back + '&next=' + back;
@@ -954,12 +908,12 @@ function resumeDraft(){
   if (!draft) return false;
   try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
 
+  mode = draft.mode === 'setup' ? 'setup' : 'manage';
   openEditor(draft.editingId || null);
 
   FORM_IDS.forEach(id => { if (typeof draft[id] === 'string') $(id).value = draft[id]; });
   chooseTag(draft.tag || 'Home');
   chooseType(draft.locType || 'House');
-  setUseAccount(!!draft.useAccount);
 
   const onboard = readOnboardingLocation();
   if (onboard){
@@ -967,7 +921,10 @@ function resumeDraft(){
     lng = onboard.longitude;
     locGeo = readOnboardingGeocode();
   }
+
   prefillFromGeocode();
+  applyMode();
+  if (mode === 'manage') setUseAccount(!!draft.useAccount);
   closeInstructions();
   paintLocation();
   syncSave();
@@ -977,20 +934,20 @@ function resumeDraft(){
 /* ---------------- validation & save ---------------- */
 
 function formState(){
+  const needsReceiverInput = !(mode === 'setup' && accountUsable());
   return {
     location: validCoords(lat, lng),
-    receiverName: $('receiverName').value.trim().length >= 2,
-    receiverPhone: /^\d{10}$/.test($('receiverPhone').value.replace(/\D/g,'')),
     house: !!$('house').value.trim(),
     area: !!$('area').value.trim(),
     city: !!$('city').value.trim(),
-    pincode: /^\d{6}$/.test($('pincode').value.trim())
+    pincode: /^\d{6}$/.test($('pincode').value.trim()),
+    receiverName: !needsReceiverInput || $('receiverName').value.trim().length >= 2,
+    receiverPhone: !needsReceiverInput || /^\d{10}$/.test($('receiverPhone').value.replace(/\D/g,''))
   };
 }
 
 function syncSave(){
-  const s = formState();
-  $('save').disabled = !Object.values(s).every(Boolean);
+  $('save').disabled = !Object.values(formState()).every(Boolean);
 }
 
 function validateForm(){
@@ -1013,6 +970,28 @@ function validateForm(){
     return false;
   }
   return true;
+}
+
+/* Where the customer goes after a successful save. `wasSetup` is captured
+   before closeEditor() runs, because closeEditor() resets `mode` back to
+   'manage' and this must not read it afterwards. Returns true if the page
+   is navigating away. */
+function routeAfterSave(wasEditing, wasSetup){
+  if (wasSetup && !wasEditing){
+    const dest = localStorage.getItem('nearbite_after_login');
+    if (dest){
+      localStorage.removeItem('nearbite_after_login');
+      setTimeout(() => { location.href = dest; }, 350);
+      return true;
+    }
+    setTimeout(() => location.replace('index.html'), 350);
+    return true;
+  }
+  if (ENTRY.get('return') === 'cart'){
+    setTimeout(() => location.replace('cart.html'), 350);
+    return true;
+  }
+  return false; // stay on the saved-address list
 }
 
 async function saveAddress(){
@@ -1039,11 +1018,14 @@ async function saveAddress(){
   };
 
   // Only sent when the customer actually wrote something, so the default
-  // payload stays byte-identical to what the backend already accepts.
+  // payload stays identical to what the backend already accepts.
   const instr = $('instructions').value.trim();
   if (instr) data.deliveryInstructions = instr;
 
   const b = $('save');
+  const wasEditing = !!editingId;
+  // Captured before closeEditor() resets `mode` to 'manage'.
+  const wasSetup = mode === 'setup';
   b.disabled = true; b.textContent = 'Saving…';
 
   try {
@@ -1060,16 +1042,19 @@ async function saveAddress(){
 
     await load();
 
-    // Editing an unrelated address must never move the checkout selection.
     if (!editingId){
+      // A newly added address becomes the delivery selection when nothing is
+      // selected yet, or always on the first-address setup leg so Checkout
+      // has something to use.
       const fresh = savedId ? byId(savedId) : null;
-      if (fresh && !selectedId()){
+      if (fresh && (wasSetup || !selectedId())){
         localStorage.setItem('nearbite_selected_address_id', String(fresh._id));
         cache(fresh);
         window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: fresh }));
         render();
       }
     } else if (wasEditingSelected){
+      // Editing an unrelated address must never move the checkout selection.
       const fresh = byId(editingId);
       if (fresh){
         cache(fresh);
@@ -1084,21 +1069,10 @@ async function saveAddress(){
     }
 
     closeEditor();
-    toast(editingId ? 'Address updated' : 'Address added');
-
-    // New-user leg: hand the customer on to where they were going.
-    if (!editingId && isSetupFlow){
-      const dest = localStorage.getItem('nearbite_after_login');
-      if (dest){
-        localStorage.removeItem('nearbite_after_login');
-        setTimeout(() => { location.href = dest; }, 350);
-      } else if (ENTRY.get('return') === 'cart'){
-        setTimeout(() => location.replace('cart.html'), 350);
-      }
-    }
+    toast(wasEditing ? 'Address updated' : 'Address added');
+    routeAfterSave(wasEditing, wasSetup);
   } catch (e){
     // A failed save leaves the onboarding coordinates exactly where they are.
-    setErr('location', '');
     toast(e.message);
   } finally {
     b.textContent = 'Save Address';
@@ -1159,13 +1133,20 @@ $('receiverPhone').addEventListener('input', e => {
   if (v !== e.target.value) e.target.value = v;
   syncSave();
 });
-$('area').addEventListener('input', paintLocation);
+['area','city','pincode'].forEach(id => $(id).addEventListener('input', () => { if (!locGeo) paintLocation(); }));
 
 document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([ load(), loadAccount() ]);
-  const params = new URLSearchParams(location.search);
-  if (params.get('resume') === '1' || sessionStorage.getItem(DRAFT_KEY)) resumeDraft();
-  else if (params.get('add') === '1') openEditor();
+
+  const resuming = ENTRY.get('resume') === '1' || !!sessionStorage.getItem(DRAFT_KEY);
+  if (resuming){ resumeDraft(); return; }
+
+  // MODE 1 is the first address, reached from Complete Profile via the map.
+  // An existing customer with saved addresses is always MODE 2.
+  if (cameFromSetupUrl){
+    mode = addresses.length === 0 ? 'setup' : 'manage';
+    openEditor();
+  }
 });
 </script>
 
