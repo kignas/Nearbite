@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Global sheet FIRST so cart-scoped rules below can win without !important. -->
@@ -29,6 +29,8 @@
      ========================================================================== */
 
   :root{
+    --font: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-micro: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --ct-green:      #159A62;   /* Eatswada primary action */
     --ct-green-deep: #0E7A4C;
     --ct-green-soft: #E9F7F0;
@@ -58,6 +60,7 @@
   /* body{background:#fff} in style.css beats a bare `body` selector here,
      so the page is scoped with a class to raise specificity legitimately. */
   body.ct-page{
+    font-family: var(--font);
     background: var(--ct-bg);
     color: var(--ct-ink);
     -webkit-tap-highlight-color: transparent;
