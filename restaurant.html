@@ -517,6 +517,78 @@ button,input,select,textarea{font-family:inherit}
 }
 /* The two chips read as filters on their own; the word is redundant. */
 .filter-label{display:none}
+.advanced-filter-btn{
+  position:relative;display:inline-flex;align-items:center;gap:7px;min-height:36px;
+  padding:8px 13px!important;border-radius:999px!important;background:#fff!important;
+  border:1.5px solid var(--ew-line-2)!important;color:var(--ew-ink)!important;
+  font-size:11.5px!important;font-weight:800!important;cursor:pointer;
+  box-shadow:0 1px 2px rgba(16,24,40,.03);white-space:nowrap;
+  transition:background .18s var(--ease),border-color .18s var(--ease),transform .12s var(--ease);
+}
+.advanced-filter-btn i{font-size:11px;color:var(--ew-ink-2)}
+.advanced-filter-btn:active{transform:scale(.97);background:#F7F8FA!important}
+.filter-count-badge{
+  min-width:17px;height:17px;padding:0 4px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--ew-green);color:#fff;font-size:9px;font-weight:800;
+}
+
+.filter-sheet-backdrop{
+  position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,.54);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s ease;
+}
+.filter-sheet-backdrop.open{opacity:1;visibility:visible;pointer-events:auto}
+.filter-sheet{
+  position:absolute;left:0;right:0;bottom:0;max-height:min(82vh,760px);
+  background:#F7F8FA;border-radius:22px 22px 0 0;overflow:hidden;
+  transform:translateY(100%);transition:transform .28s var(--ease);
+  box-shadow:0 -10px 35px rgba(16,24,40,.16);display:flex;flex-direction:column;
+}
+.filter-sheet-backdrop.open .filter-sheet{transform:translateY(0)}
+.filter-sheet-handle{width:38px;height:4px;border-radius:99px;background:#D4D9E1;margin:9px auto 2px;flex:none}
+.filter-sheet-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 18px 14px;background:#fff;border-bottom:1px solid var(--ew-line);flex:none;
+}
+.filter-sheet-head h2{font-size:21px;font-weight:800;letter-spacing:-.45px;color:var(--ew-ink)}
+.filter-sheet-close{
+  width:36px;height:36px;border:0;border-radius:50%;background:#EEF1F5;color:#344050;
+  display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;
+}
+.filter-sheet-body{padding:14px 18px 20px;overflow:auto;-webkit-overflow-scrolling:touch}
+.filter-group{background:#fff;border:1px solid var(--ew-line);border-radius:18px;padding:17px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(16,24,40,.03)}
+.filter-group:last-child{margin-bottom:0}
+.filter-group h3{font-size:15px;font-weight:800;color:var(--ew-ink);margin-bottom:13px}
+.filter-options{display:flex;gap:10px;flex-wrap:wrap}
+.sheet-option{
+  min-height:42px;padding:9px 13px;border:1px solid #E5E8ED;border-radius:12px;background:#fff;
+  color:#344050;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;box-shadow:0 1px 2px rgba(16,24,40,.03);
+  transition:background .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease),transform .12s var(--ease);
+}
+.sheet-option:active{transform:scale(.97)}
+.sheet-option.selected{background:var(--ew-green-soft);border-color:var(--ew-green-line);color:var(--ew-green-dark)}
+.sheet-option.diet-egg.selected{background:#FFF7E8;border-color:#F2D79C;color:#9A6812}
+.sheet-option.diet-nonveg.selected{background:#FFF1F2;border-color:#F1C8CD;color:#C8202D}
+.sheet-diet-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.veg-icon{border:1.5px solid #16845A;border-radius:4px}.veg-icon:after{content:'';width:7px;height:7px;border-radius:50%;background:#16845A}
+.egg-icon{color:#C98B2A;font-size:13px}.nonveg-icon{border:1.5px solid #C8202D;border-radius:4px}.nonveg-icon:after{content:'';width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #C8202D}
+.reorder-icon{color:#36A85B;font-size:15px}
+.filter-sheet-footer{
+  display:flex;align-items:center;gap:12px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));
+  background:#fff;border-top:1px solid var(--ew-line);flex:none;
+}
+.clear-filter-btn,.apply-filter-btn{height:52px;border:0;border-radius:12px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}
+.clear-filter-btn{width:40%;background:#fff;color:#D65A69}
+.apply-filter-btn{flex:1;background:var(--ew-green);color:#fff;box-shadow:0 5px 14px rgba(21,154,98,.20)}
+.apply-filter-btn:disabled{background:#E5E7EB;color:#AAB2BF;box-shadow:none;cursor:default}
+body.filter-sheet-open{overflow:hidden}
+@media(max-width:380px){
+  .filter-sheet-head h2{font-size:19px}.filter-sheet-body{padding-left:12px;padding-right:12px}
+  .filter-sheet-head,.filter-sheet-footer{padding-left:14px;padding-right:14px}
+  .filter-group{padding:15px 13px}.sheet-option{font-size:12px;padding-left:11px;padding-right:11px}
+}
+
 .veg-toggle-row{display:flex;gap:8px!important;flex-wrap:wrap!important}
 .veg-chip{
   display:inline-flex!important;align-items:center!important;gap:7px!important;
@@ -785,12 +857,55 @@ button,input,select,textarea{font-family:inherit}
   <div class="cat-nav-sentinel" id="cat-nav-sentinel"></div>
   <div class="cat-nav" id="cat-nav"><div class="cat-nav-inner" id="cat-nav-inner"></div></div>
 
-  <div class="filter-bar">
-    <span class="filter-label">Filter</span>
-    <div class="veg-toggle-row">
+  <div class="filter-bar" id="restaurant-filter-bar">
+    <button type="button" class="advanced-filter-btn" id="advanced-filter-btn" onclick="openFilterSheet()" aria-label="Open filters and sorting">
+      <i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Filters</span><span class="filter-count-badge" id="filter-count-badge" hidden>0</span>
+    </button>
+    <div class="veg-toggle-row" id="quick-filter-row">
       <div class="veg-chip veg-type" id="filter-veg" onclick="toggleFilter('veg')"><span class="veg-dot-icon"></span>Veg</div>
       <div class="veg-chip nonveg-type" id="filter-nonveg" onclick="toggleFilter('nonveg')"><span class="veg-dot-icon"></span>Non-veg</div>
     </div>
+  </div>
+
+  <div class="filter-sheet-backdrop" id="filter-sheet-backdrop" onclick="closeFilterSheet(event)" aria-hidden="true">
+    <section class="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="filter-sheet-title" onclick="event.stopPropagation()">
+      <div class="filter-sheet-handle" aria-hidden="true"></div>
+      <div class="filter-sheet-head">
+        <h2 id="filter-sheet-title">Filters and Sorting</h2>
+        <button type="button" class="filter-sheet-close" onclick="closeFilterSheet()" aria-label="Close filters"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="filter-sheet-body">
+        <div class="filter-group">
+          <h3>Sort by</h3>
+          <div class="filter-options">
+            <button type="button" class="sheet-option" data-sort="price-asc" onclick="setDraftSort('price-asc')">Price - low to high</button>
+            <button type="button" class="sheet-option" data-sort="price-desc" onclick="setDraftSort('price-desc')">Price - high to low</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>Veg/Non-veg preference</h3>
+          <div class="filter-options">
+            <button type="button" class="sheet-option diet-veg" data-diet="veg" onclick="setDraftDiet('veg')"><span class="sheet-diet-icon veg-icon"><span></span></span>Veg</button>
+            <button type="button" class="sheet-option diet-egg" data-diet="egg" onclick="setDraftDiet('egg')"><span class="sheet-diet-icon egg-icon"><i class="fa-solid fa-egg"></i></span>Egg</button>
+            <button type="button" class="sheet-option diet-nonveg" data-diet="nonveg" onclick="setDraftDiet('nonveg')"><span class="sheet-diet-icon nonveg-icon"><span></span></span>Non-veg</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>Top picks</h3>
+          <div class="filter-options">
+            <button type="button" class="sheet-option" data-top-pick="reordered" onclick="toggleDraftReordered()"><i class="fa-solid fa-rotate-right reorder-icon"></i>Highly reordered</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-sheet-footer">
+        <button type="button" class="clear-filter-btn" onclick="clearAllFilters()">Clear All</button>
+        <button type="button" class="apply-filter-btn" id="apply-filter-btn" onclick="applyAdvancedFilters()">Apply</button>
+      </div>
+    </section>
   </div>
 
   <div class="menu-section">
@@ -835,6 +950,9 @@ button,input,select,textarea{font-family:inherit}
   let isRestaurantOpen = true; // tracks restaurant availability for item states
   let currentResId = null;
 
+  const advancedFilters = { sort: null, diet: null, reordered: false };
+  const draftFilters = { sort: null, diet: null, reordered: false };
+
   function formatTime(timeStr) {
     if (!timeStr) return '';
     let [hours, minutes] = timeStr.split(':');
@@ -852,25 +970,147 @@ button,input,select,textarea{font-family:inherit}
     applyFilter();
   }
 
+  function itemIsEgg(item) {
+    const raw = String(item.dataset.egg || '').toLowerCase();
+    return raw === 'true' || raw === '1' || raw === 'yes' || raw === 'egg';
+  }
+
+  function itemIsHighlyReordered(item) {
+    const raw = String(item.dataset.reordered || '').toLowerCase();
+    return raw === 'true' || raw === '1' || raw === 'yes';
+  }
+
+  function getFilterStateCount(state) {
+    return (state.sort ? 1 : 0) + (state.diet ? 1 : 0) + (state.reordered ? 1 : 0);
+  }
+
+  function matchesFilterState(item, state) {
+    const vegKnown = item.dataset.vegKnown === 'true';
+    const isVeg = item.dataset.veg === 'true';
+
+    if (state.diet === 'veg' && !(vegKnown && isVeg)) return false;
+    if (state.diet === 'nonveg' && !(vegKnown && !isVeg)) return false;
+    if (state.diet === 'egg' && !itemIsEgg(item)) return false;
+    if (state.reordered && !itemIsHighlyReordered(item)) return false;
+    return true;
+  }
+
   function applyFilter() {
-    const items = document.querySelectorAll('.menu-item');
+    const items = Array.from(document.querySelectorAll('.menu-item'));
     let visible = 0;
 
     items.forEach(item => {
-      const vegKnown = item.dataset.vegKnown === 'true';
-      const isVeg = item.dataset.veg === 'true';
-      let show = true;
-
-      // Items with no veg information are hidden by either veg filter
-      // rather than being silently classified as non-veg.
-      if (activeFilter === 'veg') show = vegKnown && isVeg;
-      if (activeFilter === 'nonveg') show = vegKnown && !isVeg;
-
+      const quickDiet = activeFilter === 'veg' ? 'veg' : activeFilter === 'nonveg' ? 'nonveg' : null;
+      const state = { ...advancedFilters, diet: advancedFilters.diet || quickDiet };
+      const show = matchesFilterState(item, state);
       item.classList.toggle('hidden-by-filter', !show);
       if (show) visible++;
     });
 
-    document.getElementById('empty-filter-msg').style.display = visible === 0 ? 'block' : 'none';
+    const empty = document.getElementById('empty-filter-msg');
+    if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+    updateFilterBadge();
+  }
+
+  function previewFilterCount() {
+    const items = Array.from(document.querySelectorAll('.menu-item'));
+    let count = 0;
+    items.forEach(item => { if (matchesFilterState(item, draftFilters)) count++; });
+    return count;
+  }
+
+  function updateFilterBadge() {
+    const badge = document.getElementById('filter-count-badge');
+    const button = document.getElementById('advanced-filter-btn');
+    const count = getFilterStateCount(advancedFilters) + (activeFilter ? 1 : 0);
+    if (badge) { badge.textContent = String(count); badge.hidden = count === 0; }
+    if (button) button.classList.toggle('is-active', count > 0);
+  }
+
+  function syncFilterSheetUI() {
+    document.querySelectorAll('.sheet-option[data-sort]').forEach(btn => btn.classList.toggle('selected', btn.dataset.sort === draftFilters.sort));
+    document.querySelectorAll('.sheet-option[data-diet]').forEach(btn => btn.classList.toggle('selected', btn.dataset.diet === draftFilters.diet));
+    const reordered = document.querySelector('[data-top-pick="reordered"]');
+    if (reordered) reordered.classList.toggle('selected', !!draftFilters.reordered);
+    const applyBtn = document.getElementById('apply-filter-btn');
+    const count = previewFilterCount();
+    if (applyBtn) applyBtn.textContent = `Apply${count ? ` (${count})` : ''}`;
+  }
+
+  function openFilterSheet() {
+    draftFilters.sort = advancedFilters.sort;
+    draftFilters.diet = advancedFilters.diet || (activeFilter === 'veg' ? 'veg' : activeFilter === 'nonveg' ? 'nonveg' : null);
+    draftFilters.reordered = advancedFilters.reordered;
+    syncFilterSheetUI();
+    const backdrop = document.getElementById('filter-sheet-backdrop');
+    if (backdrop) {
+      backdrop.classList.add('open');
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('filter-sheet-open');
+    }
+  }
+
+  function closeFilterSheet(event) {
+    if (event && event.target && event.target !== event.currentTarget) return;
+    const backdrop = document.getElementById('filter-sheet-backdrop');
+    if (backdrop) {
+      backdrop.classList.remove('open');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('filter-sheet-open');
+  }
+
+  function setDraftSort(value) {
+    draftFilters.sort = draftFilters.sort === value ? null : value;
+    syncFilterSheetUI();
+  }
+
+  function setDraftDiet(value) {
+    draftFilters.diet = draftFilters.diet === value ? null : value;
+    syncFilterSheetUI();
+  }
+
+  function toggleDraftReordered() {
+    draftFilters.reordered = !draftFilters.reordered;
+    syncFilterSheetUI();
+  }
+
+  function clearAllFilters() {
+    activeFilter = null;
+    advancedFilters.sort = null;
+    advancedFilters.diet = null;
+    advancedFilters.reordered = false;
+    draftFilters.sort = null;
+    draftFilters.diet = null;
+    draftFilters.reordered = false;
+    document.getElementById('filter-veg')?.classList.remove('active');
+    document.getElementById('filter-nonveg')?.classList.remove('active');
+    applyAdvancedFilters(true);
+  }
+
+  function applyAdvancedFilters(closeAfter = true) {
+    advancedFilters.sort = draftFilters.sort;
+    advancedFilters.diet = draftFilters.diet;
+    advancedFilters.reordered = draftFilters.reordered;
+
+    // The advanced diet choice owns the quick Veg/Non-veg chips.
+    activeFilter = advancedFilters.diet === 'veg' || advancedFilters.diet === 'nonveg' ? advancedFilters.diet : null;
+    document.getElementById('filter-veg')?.classList.toggle('active', activeFilter === 'veg');
+    document.getElementById('filter-nonveg')?.classList.toggle('active', activeFilter === 'nonveg');
+
+    applyFilter();
+    applySort();
+    if (closeAfter) closeFilterSheet();
+  }
+
+  function applySort() {
+    if (!advancedFilters.sort) return;
+    const direction = advancedFilters.sort === 'price-desc' ? -1 : 1;
+    document.querySelectorAll('.menu-cat-items').forEach(group => {
+      const items = Array.from(group.querySelectorAll(':scope > .menu-item'));
+      items.sort((a, b) => (Number(a.dataset.price || 0) - Number(b.dataset.price || 0)) * direction);
+      items.forEach(item => group.appendChild(item));
+    });
   }
 
   const catNav = document.getElementById('cat-nav');
@@ -1228,7 +1468,13 @@ button,input,select,textarea{font-family:inherit}
         const isCustomisable = item.isCustomisable === true || item.customisable === true;
 
         return `
-          <div class="menu-item nb-menu-item" data-veg="${item.isVeg ? 'true' : 'false'}" data-veg-known="${vegKnown ? 'true' : 'false'}" style="animation-delay:${delay}s;">
+          <div class="menu-item nb-menu-item"
+               data-veg="${item.isVeg ? 'true' : 'false'}"
+               data-veg-known="${vegKnown ? 'true' : 'false'}"
+               data-price="${cleanPrice}"
+               data-egg="${Boolean(item.isEgg ?? item.egg ?? item.containsEgg ?? item.dietaryType === 'egg' || item.foodType === 'egg')}"
+               data-reordered="${Boolean(item.isHighlyReordered ?? item.highlyReordered ?? item.isReordered ?? item.reordered ?? (Number(item.reorderCount) > 0))}"
+               style="animation-delay:${delay}s;">
 
             <div class="nb-item-main">
               <div class="nb-item-tag-row">
@@ -1309,9 +1555,13 @@ button,input,select,textarea{font-family:inherit}
      so it can never be a chip that filters nothing. */
   function syncVegFilterAvailability() {
     const bar = document.querySelector('.filter-bar');
+    const quickRow = document.getElementById('quick-filter-row');
     if (!bar) return;
     const known = document.querySelectorAll('.menu-item[data-veg-known="true"]').length;
-    bar.style.display = known ? '' : 'none';
+    if (quickRow) quickRow.style.display = known ? 'flex' : 'none';
+    // The advanced Filters button remains available even when the API has no veg metadata.
+    bar.style.display = '';
+    updateFilterBadge();
   }
 
   async function loadRestaurantPage() {
@@ -1372,8 +1622,8 @@ button,input,select,textarea{font-family:inherit}
         <p class="menu-state-title">Menu not available</p>
         <p class="menu-state-sub">This restaurant hasn't published its menu yet.</p>
       </div>`;
-    const bar = document.querySelector('.filter-bar');
-    if (bar) bar.style.display = 'none';
+    const quickRow = document.getElementById('quick-filter-row');
+    if (quickRow) quickRow.style.display = 'none';
   }
 
   function showErrorState(message, canRetry) {
@@ -1397,9 +1647,13 @@ button,input,select,textarea{font-family:inherit}
       });
     }
 
-    const bar = document.querySelector('.filter-bar');
-    if (bar) bar.style.display = 'none';
+    const quickRow = document.getElementById('quick-filter-row');
+    if (quickRow) quickRow.style.display = 'none';
   }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFilterSheet();
+  });
 
   document.addEventListener('DOMContentLoaded', loadRestaurantPage);
 
