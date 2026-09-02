@@ -827,6 +827,136 @@ body.filter-sheet-open{overflow:hidden}
 }
 </style>
 
+<style id="eatswada-restaurant-final">
+/* ============================================================
+   EATSWADA — RESTAURANT MENU, FINAL PASS
+   Loads last so it settles the cascade against style.css and the
+   two blocks above without editing either.
+
+   `display` carries !important on exactly one selector here,
+   .cat-group-empty, whose visibility is owned by CSS alone — no
+   JavaScript ever writes style.display to .menu-cat-group. Every
+   element the JS shows/hides inline (.filter-bar, #quick-filter-row,
+   .offer-strip, .meta-chip, .rating-count, .rating-divider,
+   #empty-filter-msg, #menu-container, #menu-skeleton) is left with
+   plain display so inline styles keep winning.
+   Elements toggled through the `hidden` property get an explicit
+   [hidden] rule, because a plain display would otherwise beat it.
+============================================================ */
+
+/* ── Type scale ──────────────────────────────────────────── */
+.res-name{font-size:26px!important;line-height:1.14!important;letter-spacing:-.85px!important}
+.res-cuisine{font-size:13px!important;font-weight:600!important}
+.meta-chip{font-size:12.5px!important;font-weight:600!important}
+.rating-num{font-size:13px!important}
+.rating-count{font-size:10.5px!important}
+.del-chip{font-size:12px!important;font-weight:600!important}
+.offer-text{font-size:12.5px!important;font-weight:600!important}
+
+.menu-cat-title{font-size:20px!important;letter-spacing:-.55px!important}
+.menu-cat-count{font-size:13px!important;font-weight:600!important}
+
+.nb-item-title{font-size:17px!important;font-weight:800!important;line-height:1.3!important}
+.nb-item-current-price{font-size:16px!important;font-weight:800!important}
+.nb-item-original-price{font-size:13px!important;font-weight:600!important}
+.nb-item-desc{font-size:13px!important;font-weight:500!important;line-height:1.5!important}
+.nb-item-badge,.nb-item-coupon,.nb-item-discount{font-size:10px!important}
+.nb-add-btn{font-size:13px!important}
+.nb-qty-val{font-size:14px!important}
+.nb-item-customisable{font-size:11px!important}
+.cat-nav-pill{font-size:12.5px!important}
+.veg-chip{font-size:12.5px!important}
+
+@media(max-width:380px){
+  .res-name{font-size:23px!important;letter-spacing:-.7px!important}
+  .menu-cat-title{font-size:18.5px!important}
+  .nb-item-title{font-size:16px!important}
+  .nb-item-current-price{font-size:15px!important}
+}
+@media(max-width:340px){
+  .res-name{font-size:22px!important}
+  .menu-cat-title{font-size:17.5px!important}
+  .nb-item-title{font-size:15.5px!important}
+  .nb-item-desc{font-size:12.5px!important}
+}
+
+/* ── Quick chips as real buttons ─────────────────────────── */
+.veg-chip{appearance:none;-webkit-appearance:none;cursor:pointer;font-family:inherit}
+.veg-chip:focus-visible,.advanced-filter-btn:focus-visible,.icon-btn:focus-visible,
+.cat-nav-pill:focus-visible,.nb-add-btn:focus-visible,.nb-qty-btn:focus-visible,
+.sheet-option:focus-visible,.menu-search-cancel:focus-visible,.menu-search-clear:focus-visible{
+  outline:2px solid var(--ew-green);outline-offset:2px;
+}
+
+/* ── In-menu search ──────────────────────────────────────── */
+.menu-search-row{
+  position:sticky;top:58px;z-index:29;
+  display:flex;align-items:center;gap:9px;
+  padding:9px var(--gutter);
+  background:#fff;border-bottom:1px solid var(--ew-line);
+}
+.menu-search-row[hidden]{display:none}
+
+.menu-search-field{
+  flex:1;min-width:0;display:flex;align-items:center;gap:9px;
+  height:42px;padding:0 12px;
+  background:#F2F4F7;border:1.5px solid transparent;border-radius:12px;
+  transition:border-color .16s var(--ease),background .16s var(--ease);
+}
+.menu-search-field:focus-within{background:#fff;border-color:var(--ew-green)}
+.menu-search-field > i{color:var(--ew-ink-3);font-size:13px;flex:none}
+
+.menu-search-input{
+  flex:1;min-width:0;border:0;background:transparent;outline:0;
+  font-family:inherit;font-size:14.5px;font-weight:600;color:var(--ew-ink);
+  -webkit-appearance:none;
+}
+.menu-search-input::placeholder{color:var(--ew-ink-3);font-weight:500}
+.menu-search-input::-webkit-search-cancel-button{display:none}
+
+.menu-search-clear{
+  flex:none;width:26px;height:26px;border:0;border-radius:50%;
+  background:#DDE2E9;color:#5B6573;font-size:11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.menu-search-clear[hidden]{display:none}
+
+.menu-search-cancel{
+  flex:none;border:0;background:none;padding:0 2px;cursor:pointer;
+  font-family:inherit;font-size:13px;font-weight:800;color:var(--ew-green);
+}
+
+/* Category rail sits below the search bar while it is open. */
+body.menu-search-open .cat-nav{top:118px!important}
+
+/* Categories with nothing left to show collapse away. Owned by CSS
+   only — no JS writes style.display to .menu-cat-group. */
+.cat-group-empty{display:none!important}
+
+/* ── Minimum order / free delivery hint ──────────────────── */
+.order-hint{
+  display:flex;align-items:center;gap:8px;
+  margin-top:9px;padding:9px 10px;
+  background:var(--ew-green-soft);border:1px solid var(--ew-green-line);
+  border-radius:11px;
+  font-size:12px;font-weight:600;line-height:1.4;color:#0E6B47;
+}
+.order-hint[hidden]{display:none}
+.order-hint i{flex:none;font-size:12px}
+.order-hint b{font-weight:800}
+.order-hint.is-short{background:#FFF6E8;border-color:#F7E2C0;color:#8A5312}
+
+/* ── Empty states ────────────────────────────────────────── */
+.empty-filter-msg{padding:44px 24px!important}
+.empty-filter-msg i{font-size:30px!important;color:#CBD2DA!important;display:block;margin-bottom:13px}
+#empty-filter-title{font-size:16px!important;font-weight:800!important;color:var(--ew-ink)!important;margin-bottom:5px}
+#empty-filter-sub{font-size:13px!important;font-weight:500!important;color:var(--ew-ink-3)!important}
+
+@media(prefers-reduced-motion:reduce){
+  .menu-search-field,.veg-chip,.order-hint{transition:none!important}
+}
+</style>
+
 </head>
 <body>
 
@@ -834,8 +964,22 @@ body.filter-sheet-open{overflow:hidden}
     <button class="icon-btn" onclick="window.nearbiteSafeBack()"><i class="fa-solid fa-chevron-left"></i></button>
     <div class="top-actions">
       <button class="icon-btn" type="button" onclick="openRestaurantDetails()" aria-label="Restaurant information"><i class="fa-solid fa-circle-info"></i></button>
-      <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <button class="icon-btn" type="button" id="menu-search-btn" onclick="toggleMenuSearch()" aria-label="Search this menu" aria-expanded="false"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
+  </div>
+
+  <div class="menu-search-row" id="menu-search-row" hidden>
+    <div class="menu-search-field">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" id="menu-search-input" class="menu-search-input"
+             placeholder="Search dishes in this menu" autocomplete="off"
+             aria-label="Search dishes in this menu" oninput="onMenuSearchInput()">
+      <button type="button" class="menu-search-clear" id="menu-search-clear"
+              onclick="clearMenuSearch()" aria-label="Clear search" hidden>
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <button type="button" class="menu-search-cancel" onclick="closeMenuSearch()">Cancel</button>
   </div>
 
   <div class="res-card">
@@ -865,6 +1009,7 @@ body.filter-sheet-open{overflow:hidden}
     </div>
     <div class="delivery-strip">
       <div class="del-chip" id="res-free-delivery"><i class="fa-solid fa-motorcycle orange"></i> FREE delivery above ₹199</div>
+      <div class="order-hint" id="order-hint" hidden></div>
     </div>
   </div>
 
@@ -879,8 +1024,8 @@ body.filter-sheet-open{overflow:hidden}
       <span class="filter-count-badge" id="filter-count-badge" hidden>0</span>
     </button>
     <div class="veg-toggle-row" id="quick-filter-row">
-      <div class="veg-chip veg-type" id="filter-veg" onclick="toggleFilter('veg')"><span class="veg-dot-icon"></span>Veg</div>
-      <div class="veg-chip nonveg-type" id="filter-nonveg" onclick="toggleFilter('nonveg')"><span class="veg-dot-icon"></span>Non-veg</div>
+      <button type="button" class="veg-chip veg-type" id="filter-veg" onclick="toggleFilter('veg')" aria-pressed="false" aria-label="Show only vegetarian dishes"><span class="veg-dot-icon" aria-hidden="true"></span>Veg</button>
+      <button type="button" class="veg-chip nonveg-type" id="filter-nonveg" onclick="toggleFilter('nonveg')" aria-pressed="false" aria-label="Show only non-vegetarian dishes"><span class="veg-dot-icon" aria-hidden="true"></span>Non-veg</button>
     </div>
   </div>
 
@@ -974,8 +1119,9 @@ body.filter-sheet-open{overflow:hidden}
     <div id="menu-container" style="display:none"></div>
 
     <div class="empty-filter-msg" id="empty-filter-msg">
-      <i class="fa-solid fa-leaf"></i>
-      <p>No items match the current filter.</p>
+      <i class="fa-solid fa-sliders" id="empty-filter-icon" aria-hidden="true"></i>
+      <p id="empty-filter-title">No dishes match these filters</p>
+      <p id="empty-filter-sub">Try changing your filters.</p>
     </div>
   </div>
 
@@ -1000,32 +1146,38 @@ body.filter-sheet-open{overflow:hidden}
     return `${h}:${minutes} ${ampm}`;
   }
 
+  /* The quick chips and the filter sheet describe the same thing — a diet
+     preference — so they share one piece of state (sheetApplied.diet) and one
+     visibility pass. They used to keep separate state and each recompute
+     .hidden-by-filter alone, which meant using one silently discarded the
+     other. `activeFilter` is still maintained for any outside reader. */
   function toggleFilter(type) {
-    activeFilter = (activeFilter === type) ? null : type;
-    document.getElementById('filter-veg').classList.toggle('active', activeFilter === 'veg');
-    document.getElementById('filter-nonveg').classList.toggle('active', activeFilter === 'nonveg');
-    applyFilter();
+    sheetApplied.diet = (sheetApplied.diet === type) ? null : type;
+    activeFilter = (sheetApplied.diet === 'veg' || sheetApplied.diet === 'nonveg')
+      ? sheetApplied.diet : null;
+    syncQuickChips();
+    updateFilterBadge();
+    applyAllMenuFilters();
   }
 
+  function syncQuickChips() {
+    const veg = document.getElementById('filter-veg');
+    const nonveg = document.getElementById('filter-nonveg');
+    if (veg) {
+      const on = sheetApplied.diet === 'veg';
+      veg.classList.toggle('active', on);
+      veg.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if (nonveg) {
+      const on = sheetApplied.diet === 'nonveg';
+      nonveg.classList.toggle('active', on);
+      nonveg.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  /* Kept so any existing caller still works — it now runs the shared pass. */
   function applyFilter() {
-    const items = document.querySelectorAll('.menu-item');
-    let visible = 0;
-
-    items.forEach(item => {
-      const vegKnown = item.dataset.vegKnown === 'true';
-      const isVeg = item.dataset.veg === 'true';
-      let show = true;
-
-      // Items with no veg information are hidden by either veg filter
-      // rather than being silently classified as non-veg.
-      if (activeFilter === 'veg') show = vegKnown && isVeg;
-      if (activeFilter === 'nonveg') show = vegKnown && !isVeg;
-
-      item.classList.toggle('hidden-by-filter', !show);
-      if (show) visible++;
-    });
-
-    document.getElementById('empty-filter-msg').style.display = visible === 0 ? 'block' : 'none';
+    applyAllMenuFilters();
   }
 
   const catNav = document.getElementById('cat-nav');
@@ -1216,6 +1368,7 @@ body.filter-sheet-open{overflow:hidden}
   }
 
   function renderRestaurantHeader(restaurant) {
+    currentRestaurant = restaurant;   // used by the minimum-order hint
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
     document.getElementById('res-name').innerText = restaurant.name || 'Restaurant';
@@ -1509,6 +1662,7 @@ body.filter-sheet-open{overflow:hidden}
       renderMenu(groups, resId);
 
       if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+      renderOrderHint();
     } catch (error) {
       console.error('[restaurant] load failed:', error);
       showErrorState(error && error.message ? error.message : 'Please try again.', true);
@@ -1588,6 +1742,8 @@ body.filter-sheet-open{overflow:hidden}
 
   function previewFilterCount() {
     let items = filterMenuItems();
+    const query = menuSearchQuery.trim().toLowerCase();
+    if (query) items = items.filter(item => itemSearchText(item).indexOf(query) !== -1);
     if (sheetDraft.diet) items = items.filter(item => itemDiet(item) === sheetDraft.diet);
     if (sheetDraft.reordered) items = items.filter(isHighlyReordered);
     return items.length;
@@ -1621,7 +1777,9 @@ body.filter-sheet-open{overflow:hidden}
     const apply = document.getElementById('apply-filter-btn');
     const label = document.getElementById('apply-filter-count');
     if (label) label.textContent = '(' + count + ')';
-    if (apply) apply.disabled = count === 0 && !!(sheetDraft.diet || sheetDraft.reordered);
+    // Never disabled: a filter that legitimately matches nothing must be
+    // applicable so the customer sees why, rather than a dead button.
+    if (apply) apply.disabled = false;
   }
 
   function openFilterSheet() {
@@ -1665,15 +1823,8 @@ body.filter-sheet-open{overflow:hidden}
 
   function applySheetFilters() {
     sheetApplied = { ...sheetDraft };
-
-    // Apply food/top-pick filters.
-    const items = filterMenuItems();
-    items.forEach(item => {
-      let show = true;
-      if (sheetApplied.diet) show = itemDiet(item) === sheetApplied.diet;
-      if (sheetApplied.reordered) show = show && isHighlyReordered(item);
-      item.classList.toggle('hidden-by-filter', !show);
-    });
+    activeFilter = (sheetApplied.diet === 'veg' || sheetApplied.diet === 'nonveg')
+      ? sheetApplied.diet : null;
 
     // Sort within each category, preserving category grouping.
     if (sheetApplied.sort) {
@@ -1690,23 +1841,249 @@ body.filter-sheet-open{overflow:hidden}
       });
     }
 
-    const empty = document.getElementById('empty-filter-msg');
-    const visible = items.some(item => !item.classList.contains('hidden-by-filter'));
-    if (empty) empty.style.display = visible ? 'none' : 'block';
-
-    // Keep the original quick controls synchronized.
-    if (typeof activeFilter !== 'undefined') activeFilter = null;
-    const veg = document.getElementById('filter-veg');
-    const nonveg = document.getElementById('filter-nonveg');
-    if (veg) veg.classList.toggle('active', sheetApplied.diet === 'veg');
-    if (nonveg) nonveg.classList.toggle('active', sheetApplied.diet === 'nonveg');
-
+    syncQuickChips();
     updateFilterBadge();
+    applyAllMenuFilters();
     closeFilterSheet();
   }
 
+
+  /* ══════════════════════════════════════════════════════════
+     SHARED MENU VISIBILITY, IN-MENU SEARCH, ORDER HINTS
+     Additive. No API route, storage key, cart function or
+     restaurant-availability rule is touched below.
+     ══════════════════════════════════════════════════════════ */
+
+  let menuSearchQuery = '';
+
+  function itemSearchText(item) {
+    const title = item.querySelector('.nb-item-title');
+    const desc  = item.querySelector('.nb-item-desc');
+    return ((title ? title.textContent : '') + ' ' + (desc ? desc.textContent : '')).toLowerCase();
+  }
+
+  /* The one place .hidden-by-filter is written. Search, the quick chips and
+     the sheet each narrow the same list, so they are combined here rather
+     than each running their own pass. */
+  function applyAllMenuFilters() {
+    const items = Array.from(document.querySelectorAll('.menu-item'));
+    const query = menuSearchQuery.trim().toLowerCase();
+    let visible = 0;
+
+    items.forEach(item => {
+      let show = true;
+
+      if (query) show = itemSearchText(item).indexOf(query) !== -1;
+
+      // Items carrying no veg information are hidden by a diet filter rather
+      // than being silently classified as non-veg.
+      if (show && sheetApplied.diet) show = itemDiet(item) === sheetApplied.diet;
+      if (show && sheetApplied.reordered) show = isHighlyReordered(item);
+
+      item.classList.toggle('hidden-by-filter', !show);
+      if (show) visible++;
+    });
+
+    // Collapse categories that have nothing left to show.
+    document.querySelectorAll('.menu-cat-group').forEach(group => {
+      const any = group.querySelector('.menu-item:not(.hidden-by-filter)');
+      group.classList.toggle('cat-group-empty', !any);
+    });
+
+    updateMenuEmptyState(visible, query);
+    return visible;
+  }
+
+  function updateMenuEmptyState(visible, query) {
+    const box = document.getElementById('empty-filter-msg');
+    if (!box) return;
+
+    if (visible > 0) { box.style.display = 'none'; return; }
+
+    const icon  = document.getElementById('empty-filter-icon');
+    const title = document.getElementById('empty-filter-title');
+    const sub   = document.getElementById('empty-filter-sub');
+
+    let iconClass = 'fa-solid fa-sliders';
+    let titleText = 'No dishes match these filters';
+    let subText   = 'Try changing your filters.';
+
+    if (query) {
+      iconClass = 'fa-solid fa-magnifying-glass';
+      titleText = 'No dishes found';
+      subText   = 'Try searching for something else.';
+    } else if (sheetApplied.reordered && !sheetApplied.diet) {
+      // The backend may simply not mark any dish as highly reordered.
+      iconClass = 'fa-solid fa-rotate-right';
+      titleText = 'No highly reordered items found';
+      subText   = 'This restaurant hasn\u2019t marked any dishes as highly reordered.';
+    }
+
+    if (icon)  icon.className = iconClass;
+    if (title) title.textContent = titleText;
+    if (sub)   sub.textContent = subText;
+    box.style.display = 'block';
+  }
+
+  /* ── In-menu search ─────────────────────────────────────── */
+
+  function toggleMenuSearch() {
+    const row = document.getElementById('menu-search-row');
+    if (!row) return;
+    if (row.hidden) openMenuSearch(); else closeMenuSearch();
+  }
+
+  function openMenuSearch() {
+    const row = document.getElementById('menu-search-row');
+    const input = document.getElementById('menu-search-input');
+    const btn = document.getElementById('menu-search-btn');
+    if (!row) return;
+    row.hidden = false;
+    document.body.classList.add('menu-search-open');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    if (input) setTimeout(() => input.focus(), 60);
+  }
+
+  function closeMenuSearch() {
+    const row = document.getElementById('menu-search-row');
+    const input = document.getElementById('menu-search-input');
+    const btn = document.getElementById('menu-search-btn');
+    if (input) input.value = '';
+    menuSearchQuery = '';
+    syncSearchClearButton();
+    if (row) row.hidden = true;
+    document.body.classList.remove('menu-search-open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    applyAllMenuFilters();
+  }
+
+  function syncSearchClearButton() {
+    const clear = document.getElementById('menu-search-clear');
+    if (clear) clear.hidden = menuSearchQuery.length === 0;
+  }
+
+  function onMenuSearchInput() {
+    const input = document.getElementById('menu-search-input');
+    menuSearchQuery = input ? input.value : '';
+    syncSearchClearButton();
+    applyAllMenuFilters();
+  }
+
+  function clearMenuSearch() {
+    const input = document.getElementById('menu-search-input');
+    if (input) { input.value = ''; input.focus(); }
+    menuSearchQuery = '';
+    syncSearchClearButton();
+    applyAllMenuFilters();
+  }
+
+  /* ── Minimum order / free delivery hint ─────────────────── */
+
+  let currentRestaurant = null;
+
+  function firstPositiveNumber() {
+    for (let i = 0; i < arguments.length; i++) {
+      const n = Number(arguments[i]);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+    return null;
+  }
+
+  const money = n => '\u20B9' + Math.ceil(n).toLocaleString('en-IN');
+
+  /* Reads the existing nearbite_cart only — never writes to it. Returns null
+     when a subtotal cannot be established from the stored entries, so a wrong
+     figure is never shown. */
+  function cartSubtotalForRestaurant() {
+    let cart = null;
+    try { cart = JSON.parse(localStorage.getItem('nearbite_cart')); } catch (e) { return null; }
+    if (!cart || typeof cart !== 'object') return null;
+
+    let subtotal = 0;
+    let priced = false;
+
+    Object.keys(cart).forEach(key => {
+      const entry = cart[key];
+      if (!entry || typeof entry !== 'object') return;
+
+      const rid = entry.restaurantId || entry.resId || entry.restaurant || entry.rId;
+      if (currentResId && rid && String(rid) !== String(currentResId)) return;
+
+      const qty = Number(entry.quantity);
+      const price = Number(entry.price != null ? entry.price : entry.itemPrice);
+      if (!Number.isFinite(qty) || qty <= 0) return;
+      if (!Number.isFinite(price) || price <= 0) return;
+
+      subtotal += price * qty;
+      priced = true;
+    });
+
+    return priced ? subtotal : null;
+  }
+
+  function renderOrderHint() {
+    const box = document.getElementById('order-hint');
+    if (!box) return;
+
+    const restaurant = currentRestaurant;
+    const subtotal = cartSubtotalForRestaurant();
+
+    if (!restaurant || subtotal === null || subtotal <= 0) { box.hidden = true; return; }
+
+    // Minimum order is measured on the food subtotal only — no delivery fee,
+    // no tip. The backend stays the final authority at checkout.
+    const minimum = firstPositiveNumber(
+      restaurant.minimumOrder, restaurant.minOrder,
+      restaurant.minimumOrderAmount, restaurant.minOrderValue
+    );
+
+    const freeAbove = restaurant.freeDeliveryEnabled === false
+      ? null
+      : firstPositiveNumber(restaurant.freeDeliveryAbove);
+
+    let html = '';
+    let short = false;
+
+    if (minimum && subtotal < minimum) {
+      short = true;
+      html = '<i class="fa-solid fa-circle-info" aria-hidden="true"></i>' +
+             '<span>Minimum order ' + money(minimum) +
+             ' \u00B7 <b>Add ' + money(minimum - subtotal) + ' more</b></span>';
+    } else if (freeAbove && subtotal < freeAbove) {
+      html = '<i class="fa-solid fa-motorcycle" aria-hidden="true"></i>' +
+             '<span>Add <b>' + money(freeAbove - subtotal) + ' more</b> for FREE delivery</span>';
+    } else if (freeAbove && subtotal >= freeAbove) {
+      html = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i>' +
+             '<span>FREE delivery unlocked on this order</span>';
+    }
+
+    if (!html) { box.hidden = true; return; }
+    box.innerHTML = html;
+    box.classList.toggle('is-short', short);
+    box.hidden = false;
+  }
+
+  /* updateCart() lives in cart-bar.js and is left exactly as it is — this
+     wraps it so the hint can refresh after a quantity change, always calling
+     through and never letting a hint error reach the cart. */
+  (function hookCartUpdates() {
+    if (typeof window.updateCart !== 'function' || window.updateCart.__ewHinted) return;
+    const original = window.updateCart;
+    const wrapped = function () {
+      const result = original.apply(this, arguments);
+      try { renderOrderHint(); } catch (e) { console.warn('[restaurant] order hint failed:', e); }
+      return result;
+    };
+    wrapped.__ewHinted = true;
+    window.updateCart = wrapped;
+  })();
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') closeFilterSheet();
+    if (event.key !== 'Escape') return;
+    const sheet = document.getElementById('filter-sheet-backdrop');
+    if (sheet && sheet.classList.contains('open')) { closeFilterSheet(); return; }
+    const row = document.getElementById('menu-search-row');
+    if (row && !row.hidden) closeMenuSearch();
   });
 
   document.addEventListener('DOMContentLoaded', loadRestaurantPage);
