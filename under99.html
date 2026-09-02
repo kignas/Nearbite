@@ -7,12 +7,12 @@
 <title>₹99 Store – Nearbite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{--orange:#fc8019;--ink:#171a21;--muted:#7c8490;--line:#eceef1;--bg:#f2f4f7;--green:#159a62; --red:#e53935;}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans),sans-serif;padding-bottom:110px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);padding-bottom:110px}
 
 .store-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
 .header-top{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -25,7 +25,7 @@
 
 .hero{margin:16px 16px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffeedb,#fff);display:flex;align-items:center;justify-content:space-between;gap:12px; position:relative; overflow:hidden;}
 .hero::before{content:""; position:absolute; right:-20px; bottom:-20px; width:100px; height:100px; background:var(--orange); opacity:0.1; border-radius:50%;}
-.hero-copy strong{display:block;font-size:18px;font-weight:900; line-height:1.2; color:#d64a00;}
+.hero-copy strong{display:block;font-size:18px;font-weight:800; line-height:1.2; color:#d64a00;}
 .hero-copy span{display:block;margin-top:6px;color:#555;font-size:12px; font-weight:500;}
 .hero-badge{width:56px;height:56px;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(252,128,25,.15);display:flex;align-items:center;justify-content:center;color:var(--orange);font-size:24px; z-index:1;}
 
@@ -238,9 +238,9 @@ main{padding:16px 14px 20px}
     var payload = cartPayload(item);
     if (qty > 0) {
       return '<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);">' +
-        '<button onclick="updateCart(\'' + payload + '\', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:16px;cursor:pointer;">−</button>' +
+        '<button onclick="updateCart(\'' + payload + '\', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:800;font-size:16px;cursor:pointer;">−</button>' +
         '<span style="font-size:13px;font-weight:800;color:#FC8019;">' + qty + '</span>' +
-        '<button onclick="updateCart(\'' + payload + '\', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:900;font-size:14px;cursor:pointer;">+</button>' +
+        '<button onclick="updateCart(\'' + payload + '\', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:800;font-size:14px;cursor:pointer;">+</button>' +
         '</div>';
     }
     return '<button class="add-btn" onclick="updateCart(\'' + payload + '\', 1)">ADD</button>';

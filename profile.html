@@ -7,7 +7,7 @@
 <title>Profile · Nearbite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
@@ -39,7 +39,7 @@
 html{background:var(--soft);scroll-behavior:smooth}
 body{
   margin:0;background:var(--soft);color:var(--ink);
-  font-family:"Manrope",sans-serif;-webkit-font-smoothing:antialiased;
+  font-family:var(--font);-webkit-font-smoothing:antialiased;
   padding-bottom:calc(70px + 26px + env(safe-area-inset-bottom));
 }
 button,a,input{font:inherit}
@@ -77,11 +77,11 @@ a{text-decoration:none;color:inherit}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .user{min-width:0;flex:1}
 .user h1{
-  margin:0;font-size:21px;font-weight:800;letter-spacing:-.45px;line-height:1.2;
+  margin:0;font-size:20px;font-weight:800;letter-spacing:-.45px;line-height:1.2;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .user p{
-  margin:4px 0 0;color:var(--muted);font-size:12.5px;font-weight:500;
+  margin:4px 0 0;color:var(--muted);font-size:13px;font-weight:500;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 /* Verified reads as a status pill, not loose green text. */
@@ -89,7 +89,7 @@ a{text-decoration:none;color:inherit}
   display:inline-flex;align-items:center;gap:5px;margin-top:9px;
   padding:4px 9px;border-radius:999px;
   background:var(--ok-soft);color:var(--ok);
-  font-size:10.5px;font-weight:800;letter-spacing:.2px;
+  font-size:11px;font-weight:800;letter-spacing:.2px;
   max-width:100%;overflow:hidden;
 }
 .verified i{font-size:10px;flex:none}
@@ -116,7 +116,7 @@ a{text-decoration:none;color:inherit}
   background:var(--brand-soft);color:var(--brand-ink);font-size:14px;
 }
 .quick-tile span{
-  font-size:11.5px;font-weight:700;color:var(--ink-2);
+  font-size:12px;font-weight:700;color:var(--ink-2);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;
 }
 
@@ -151,19 +151,19 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
    so it carries the weight. Markup and IDs are unchanged. */
 .row-title{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:.02em}
 .row-sub{
-  font-size:13.5px;font-weight:700;color:var(--ink);margin-top:3px;line-height:1.4;
+  font-size:14px;font-weight:700;color:var(--ink);margin-top:3px;line-height:1.4;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 /* Navigation rows read the other way round: title leads, sub describes. */
-.row.is-nav .row-title{font-size:13.5px;font-weight:700;color:var(--ink);letter-spacing:-.1px}
-.row.is-nav .row-sub{font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+.row.is-nav .row-title{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.1px}
+.row.is-nav .row-sub{font-size:12px;font-weight:500;color:var(--muted);margin-top:3px}
 
 .row-sub .skeleton{display:inline-block;height:13px;width:150px;vertical-align:middle}
 
 .chev{color:#C8CDD4;font-size:11px;flex:none}
 .edit-btn{
   border:1px solid #F6DCC6;background:var(--brand-soft);color:var(--brand-ink);
-  border-radius:10px;padding:7px 12px;font-size:11.5px;font-weight:800;flex:none;
+  border-radius:10px;padding:7px 12px;font-size:12px;font-weight:800;flex:none;
   transition:transform .12s ease,filter .12s ease;
 }
 .edit-btn:active{transform:scale(.94);filter:brightness(.97)}
@@ -171,15 +171,15 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 /* The phone is verified and deliberately not editable — say so, quietly. */
 .locked{
   display:inline-flex;align-items:center;gap:5px;flex:none;
-  color:var(--faint);font-size:10.5px;font-weight:700;
+  color:var(--faint);font-size:11px;font-weight:700;
 }
 .locked i{font-size:10px}
 
 /* ---------- Logout --------------------------------------------- */
 .logout{width:100%;background:#fff;border:0;text-align:left}
 .logout .row-icon{background:var(--danger-soft);color:var(--danger)}
-.logout .row-title{color:var(--danger);font-size:13.5px;font-weight:700;letter-spacing:-.1px}
-.logout .row-sub{font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+.logout .row-title{color:var(--danger);font-size:14px;font-weight:700;letter-spacing:-.1px}
+.logout .row-sub{font-size:12px;font-weight:500;color:var(--muted);margin-top:3px}
 .logout:active{background:var(--danger-soft)}
 
 /* ---------- Favourites ----------------------------------------- */
@@ -192,11 +192,11 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   display:grid;place-items:center;width:52px;height:52px;margin:0 auto;
   border-radius:50%;background:var(--brand-soft);color:#E8863A;font-size:20px;
 }
-.fav-empty h3{margin:14px 0 0;font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
+.fav-empty h3{margin:14px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
 .fav-empty p{margin:6px auto 16px;font-size:12px;font-weight:500;color:var(--muted);line-height:1.5;max-width:34ch}
 .fav-cta{
   display:inline-block;border:0;background:var(--brand);color:#fff;
-  border-radius:12px;padding:11px 20px;font-size:12.5px;font-weight:800;
+  border-radius:12px;padding:11px 20px;font-size:13px;font-weight:800;
   box-shadow:0 4px 12px rgba(252,128,25,.26);
   transition:transform .13s ease,filter .13s ease;
 }
@@ -229,11 +229,11 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 .field input{width:100%;height:48px;border:1px solid var(--line);border-radius:13px;padding:0 13px;outline:none;background:#FAFAFB}
 .field input:focus{border-color:#F5A36D;background:#fff;box-shadow:0 0 0 3px rgba(252,128,25,.12)}
 .sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
-.btn{height:46px;border-radius:13px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:12.5px}
+.btn{height:46px;border-radius:13px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:13px}
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .btn:active{transform:scale(.98)}
 .btn:disabled{opacity:.5;transform:none}
-.error{color:var(--danger);font-size:11.5px;font-weight:600;margin-top:9px;min-height:15px}
+.error{color:var(--danger);font-size:12px;font-weight:600;margin-top:9px;min-height:15px}
 
 /* ---------- Bottom nav ----------------------------------------- */
 .bottom{
@@ -258,7 +258,7 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));
   transform:translate(-50%,15px);opacity:0;pointer-events:none;
   background:#111827;color:#fff;padding:11px 15px;border-radius:12px;
-  font-size:11.5px;font-weight:600;z-index:120;transition:.2s;white-space:nowrap;
+  font-size:12px;font-weight:600;z-index:120;transition:.2s;white-space:nowrap;
 }
 .toast.show{opacity:1;transform:translate(-50%,0)}
 

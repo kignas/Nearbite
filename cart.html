@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Global sheet FIRST so cart-scoped rules below can win without !important. -->
@@ -29,8 +29,8 @@
      ========================================================================== */
 
   :root{
-    --font: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-micro: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font: var(--font-sans);
+    --font-micro: var(--font-sans);
     --ct-green:      #159A62;   /* Eatswada primary action */
     --ct-green-deep: #0E7A4C;
     --ct-green-soft: #E9F7F0;
@@ -91,11 +91,11 @@
   }
   .ct-head-copy{ min-width:0; }
   .ct-head-title{
-    font-size:17px; font-weight:800; letter-spacing:-.3px;
+    font-size:18px; font-weight:800; letter-spacing:-.3px;
     line-height:1.15; color:var(--ct-ink);
   }
   .ct-head-sub{
-    font-size:11.5px; font-weight:600; color:var(--ct-muted);
+    font-size:12px; font-weight:600; color:var(--ct-muted);
     line-height:1.3; margin-top:1px;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
@@ -124,23 +124,23 @@
     display:flex; align-items:center; justify-content:center; font-size:12px;
   }
   .ct-addr-eyebrow{
-    font-size:10.5px; font-weight:700; letter-spacing:.4px;
+    font-size:11px; font-weight:700; letter-spacing:.4px;
     color:var(--ct-muted); text-transform:uppercase; line-height:1;
   }
   .ct-addr-tag{
     display:block; margin-top:5px;
-    font-size:14.5px; font-weight:800; color:var(--ct-ink);
+    font-size:15px; font-weight:800; color:var(--ct-ink);
     line-height:1.2; overflow-wrap:anywhere;
   }
   .ct-addr-text{
     grid-column:2 / -1; margin-top:4px;
-    font-size:12.5px; font-weight:500; line-height:1.5; color:var(--ct-muted);
+    font-size:13px; font-weight:500; line-height:1.5; color:var(--ct-muted);
     overflow-wrap:anywhere;
   }
   .ct-addr-text.ct-prompt{ color:var(--ct-green); font-weight:700; }
   .ct-change{
     display:inline-flex; align-items:center; gap:3px;
-    font-size:11.5px; font-weight:800; letter-spacing:.3px;
+    font-size:12px; font-weight:800; letter-spacing:.3px;
     color:var(--ct-green); background:var(--ct-green-soft);
     border:1px solid rgba(21,154,98,.18);
     padding:6px 10px; border-radius:999px; white-space:nowrap;
@@ -202,19 +202,19 @@
     display:flex; align-items:center; gap:6px; flex-wrap:wrap;
     margin-top:6px;
   }
-  .ct-unit-price{ font-size:12.5px; font-weight:800; color:var(--ct-ink-2); }
+  .ct-unit-price{ font-size:13px; font-weight:800; color:var(--ct-ink-2); }
   .ct-was-price{ font-size:11px; font-weight:600; color:#9CA3AF; text-decoration:line-through; }
   /* Named ct-off-badge, not *discount*, to escape the global amber rule. */
   .ct-off-badge{
     display:inline-flex; align-items:center; height:17px; padding:0 6px;
     border-radius:5px; background:var(--ct-save-bg); color:var(--ct-save);
-    font-size:9.5px; font-weight:800; letter-spacing:.2px;
+    font-size:10px; font-weight:800; letter-spacing:.2px;
     font-family:var(--font-micro);
   }
 
   .ct-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
-  .ct-item-total{ font-size:14.5px; font-weight:800; color:var(--ct-ink); line-height:1.1; }
-  .ct-item-save{ font-size:9.5px; font-weight:800; color:var(--ct-save); margin-top:3px; text-align:right; }
+  .ct-item-total{ font-size:15px; font-weight:800; color:var(--ct-ink); line-height:1.1; }
+  .ct-item-save{ font-size:10px; font-weight:800; color:var(--ct-save); margin-top:3px; text-align:right; }
 
   .ct-stepper{
     display:inline-flex; align-items:center;
@@ -274,7 +274,7 @@
     margin-top:13px; padding-top:13px;
     border-top:1px dashed var(--ct-line);
   }
-  .ct-total-label{ font-size:14.5px; font-weight:800; color:var(--ct-ink); }
+  .ct-total-label{ font-size:15px; font-weight:800; color:var(--ct-ink); }
   .ct-total-val{ font-size:18px; font-weight:800; color:var(--ct-ink); letter-spacing:-.4px; }
 
   /* .skeleton (shimmer + reduced-motion) comes from style.css; this is the
@@ -288,7 +288,7 @@
   /* ── Empty state ──────────────────────────────────────────────────── */
   .ct-empty{ display:none; padding:64px 32px 40px; text-align:center; }
   .ct-empty-art{ width:104px; height:104px; margin:0 auto 20px; display:block; }
-  .ct-empty-title{ font-size:19px; font-weight:800; letter-spacing:-.3px; color:var(--ct-ink); }
+  .ct-empty-title{ font-size:20px; font-weight:800; letter-spacing:-.3px; color:var(--ct-ink); }
   .ct-empty-sub{
     font-size:13px; font-weight:500; color:var(--ct-muted);
     line-height:1.55; margin:8px auto 24px; max-width:36ch;
@@ -296,7 +296,7 @@
   .ct-empty-btn{
     background:var(--ct-green); color:#fff; border:none;
     padding:14px 26px; border-radius:13px;
-    font-size:14.5px; font-weight:800; letter-spacing:.2px;
+    font-size:15px; font-weight:800; letter-spacing:.2px;
     box-shadow:0 6px 16px rgba(21,154,98,.24);
   }
 
@@ -343,7 +343,7 @@
   .cod-icon{ background:#ECFDF5; color:#059669; }
   .payment-check{ font-size:16px; color:var(--ct-muted); flex:0 0 auto; }
   .payment-method-option.selected .payment-check{ color:var(--ct-green); }
-  .payment-title{ font-size:12.5px; font-weight:800; color:var(--ct-ink); line-height:1.25; }
+  .payment-title{ font-size:13px; font-weight:800; color:var(--ct-ink); line-height:1.25; }
   .payment-sub{ font-size:10px; font-weight:600; color:var(--ct-muted); line-height:1.3; margin-top:2px; }
 
   .ct-cta{
@@ -365,7 +365,7 @@
     display:block; font-size:10px; font-weight:600;
     letter-spacing:.2px; opacity:.85; margin-top:2px;
   }
-  .ct-cta-val{ font-size:17px; font-weight:800; letter-spacing:-.2px; }
+  .ct-cta-val{ font-size:18px; font-weight:800; letter-spacing:-.2px; }
 
   .ct-cta.locked{
     background:#E3E6E9; color:#98A0A8; box-shadow:none; cursor:not-allowed;
@@ -390,7 +390,7 @@
     display:flex; align-items:center; gap:9px;
     max-width:calc(100vw - 40px);
     background:#1C2024; color:#fff;
-    font-size:12.5px; font-weight:700; line-height:1.35;
+    font-size:13px; font-weight:700; line-height:1.35;
     padding:11px 18px; border-radius:14px;
     box-shadow:0 10px 30px rgba(28,32,36,.3);
     opacity:0; pointer-events:none;
@@ -428,17 +428,17 @@
   .ct-line-card.is-set .ct-line-ic{ background:var(--ct-green-soft); color:var(--ct-green); }
   .ct-line-copy{ flex:1; min-width:0; }
   .ct-line-title{
-    display:block; font-size:13.5px; font-weight:800;
+    display:block; font-size:14px; font-weight:800;
     color:var(--ct-ink); line-height:1.25; letter-spacing:-.1px;
   }
   .ct-line-sub{
-    margin-top:3px; font-size:11.5px; font-weight:500; line-height:1.45;
+    margin-top:3px; font-size:12px; font-weight:500; line-height:1.45;
     color:var(--ct-muted); overflow-wrap:anywhere;
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   }
   .ct-line-act{
     flex:0 0 auto; white-space:nowrap;
-    font-size:11.5px; font-weight:800; letter-spacing:.3px; color:var(--ct-green);
+    font-size:12px; font-weight:800; letter-spacing:.3px; color:var(--ct-green);
   }
   .ct-line-act[hidden]{ display:none; }
   .ct-line-chev{ flex:0 0 auto; font-size:11px; color:#B6BDC4; }
@@ -446,12 +446,12 @@
 
   /* ── Tip ──────────────────────────────────────────────────────────── */
   .ct-tip-note{
-    margin:11px 0 0; font-size:11.5px; font-weight:500;
+    margin:11px 0 0; font-size:12px; font-weight:500;
     line-height:1.5; color:var(--ct-muted);
   }
   .ct-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
   .ct-chip{
-    font:inherit; font-size:12.5px; font-weight:800;
+    font:inherit; font-size:13px; font-weight:800;
     color:var(--ct-ink-2); background:var(--ct-surface);
     border:1.5px solid var(--ct-line); border-radius:999px;
     padding:9px 15px; min-height:40px;
@@ -533,7 +533,7 @@
     display:flex; align-items:flex-start; justify-content:space-between;
     gap:12px; margin-top:7px;
   }
-  .ct-field-help{ font-size:11.5px; font-weight:500; line-height:1.45; color:var(--ct-muted); }
+  .ct-field-help{ font-size:12px; font-weight:500; line-height:1.45; color:var(--ct-muted); }
   .ct-count{
     flex:0 0 auto; font-family:var(--font-micro); font-variant-numeric:tabular-nums;
     font-size:11px; font-weight:700; color:var(--ct-muted);
@@ -586,7 +586,7 @@
     background:var(--ct-green-soft);
     color:var(--ct-green);
     display:flex; align-items:center; justify-content:center;
-    font-size:17px;
+    font-size:18px;
   }
   .ct-delivery-eta-copy{ min-width:0; }
   .ct-delivery-eta-title{
@@ -595,7 +595,7 @@
   }
   .ct-delivery-eta-title strong{ font-weight:800; }
   .ct-delivery-eta-sub{
-    margin-top:3px; font-size:11.5px; color:var(--ct-muted); font-weight:500;
+    margin-top:3px; font-size:12px; color:var(--ct-muted); font-weight:500;
   }
   .ct-customer-card{
     display:flex; align-items:center; gap:12px;
@@ -617,7 +617,7 @@
   /* ── Compact bill row ───────────────────────────────────────────────── */
   .ct-bill-peek{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
   .ct-bill-peek-val{
-    font-size:14.5px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink);
+    font-size:15px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink);
     font-family:var(--font-micro); font-variant-numeric:tabular-nums;
   }
   .ct-bill-peek-val.is-pending{ color:var(--ct-muted); }
@@ -632,7 +632,7 @@
   .ct-empty-mini-title{ font-size:15px; font-weight:800; color:var(--ct-ink); }
   .ct-empty-mini-sub{
     margin:7px auto 0; max-width:34ch;
-    font-size:12.5px; font-weight:500; line-height:1.55; color:var(--ct-muted);
+    font-size:13px; font-weight:500; line-height:1.55; color:var(--ct-muted);
   }
 
   /* ── Narrow phones (360 / 375) ────────────────────────────────────── */

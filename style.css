@@ -1,4 +1,40 @@
-:root{--font-sans:"Plus Jakarta Sans","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--font-micro:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;--nb-ink:#1C2024;--nb-muted:#697077;--nb-line:#E7EAED;--nb-offer-bg:#FEF3C7;--nb-offer:#D97706;}
+:root{
+  /* ---------- Type system (single source of truth) ---------- */
+  --font:'Manrope', system-ui, -apple-system, sans-serif;
+  --font-sans:var(--font);
+  --font-micro:var(--font);
+
+  --fs-display:28px;   /* order total, hero number */
+  --fs-h1:22px;        /* page title */
+  --fs-h2:18px;        /* section heading */
+  --fs-h3:16px;        /* restaurant name, card title */
+  --fs-ui:15px;        /* buttons, inputs */
+  --fs-body:14px;      /* body copy */
+  --fs-label:13px;     /* meta, secondary */
+  --fs-caption:12px;   /* helper text */
+  --fs-micro:11px;     /* badges, nav labels */
+
+  --lh-tight:1.2;
+  --lh-ui:1.35;
+  --lh-body:1.5;
+
+  --ls-display:-0.6px;
+  --ls-heading:-0.3px;
+  --ls-body:0;
+  --ls-micro:0.3px;
+
+  --fw-body:500;
+  --fw-label:600;
+  --fw-title:700;
+  --fw-strong:800;
+
+  /* ---------- Color ---------- */
+  --nb-ink:#1C2024;
+  --nb-muted:#697077;
+  --nb-line:#E7EAED;
+  --nb-offer-bg:#FEF3C7;
+  --nb-offer:#D97706;
+}
 /* ============================================================
    NEARBITE — Global Stylesheet  (Premium Redesign)
    ============================================================ */
@@ -7,10 +43,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   background-color: #fff;
   color: var(--nb-ink);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
 }
@@ -79,11 +116,11 @@ body { animation: fadeIn 0.3s ease-out; }
 .cart-text-wrap {}
 .cart-summary-text {
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
   color: #fff;
   line-height: 1;
   letter-spacing: 0.1px;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
 }
 .cart-sub-text {
   font-size: 9px;
@@ -94,7 +131,7 @@ body { animation: fadeIn 0.3s ease-out; }
   display: flex;
   align-items: center;
   gap: 4px;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
 }
 .cart-sub-text i {
   color: #FFD700;
@@ -108,7 +145,7 @@ body { animation: fadeIn 0.3s ease-out; }
   gap: 6px;
   background: #FC8019;
   color: #fff;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.4px;
@@ -153,11 +190,11 @@ body { animation: fadeIn 0.3s ease-out; }
   height: 100%;
   border: none;
   background: transparent;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #FC8019;          /* orange — premium feel vs plain green */
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   display: flex; align-items: center; justify-content: center;
   transition: background 0.12s;
 }
@@ -167,9 +204,9 @@ body { animation: fadeIn 0.3s ease-out; }
   flex: 1;
   text-align: center;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--nb-ink);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   pointer-events: none;
 }
 
@@ -185,7 +222,7 @@ body { animation: fadeIn 0.3s ease-out; }
   letter-spacing: 0.8px;
   text-transform: uppercase;
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   transition: background 0.12s;
 }
 .add-btn-single:active { background: #fff8f2; }
@@ -206,7 +243,7 @@ body { animation: fadeIn 0.3s ease-out; }
   background: #fff;
   white-space: nowrap;
   cursor: pointer;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans);
   transition: all 0.18s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
@@ -247,7 +284,7 @@ body { animation: fadeIn 0.3s ease-out; }
 }
 .nav-item.active { color: #FC8019; }
 .nav-item svg { width: 22px; height: 22px; }
-.nav-item span { font-size: 10px; font-weight: 700; font-family: var(--font-sans), sans-serif; }
+.nav-item span { font-size: 10px; font-weight: 700; font-family: var(--font-sans); }
 
 /* ============================================================
    VEG / NON-VEG INDICATOR
@@ -328,6 +365,7 @@ html, body, button, input, textarea, select {
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale;
 }
 body { letter-spacing: -0.01em; }
 button, input, textarea, select { letter-spacing: inherit; }
@@ -375,7 +413,9 @@ button,input,textarea,select{
 
 h1,h2,h3,h4,h5,h6{
   color:var(--nb-ink);
-  letter-spacing:-.25px;
+  font-weight:var(--fw-strong);
+  line-height:var(--lh-tight);
+  letter-spacing:var(--ls-heading);
 }
 
 p,small,.muted,.secondary,.description{
@@ -554,7 +594,7 @@ p,small,.muted,.secondary,.description{
 }
 
 .header-title{
-  font-size:19px !important;
+  font-size:20px !important;
   font-weight:800 !important;
   letter-spacing:-.45px;
   color:var(--nb-ink) !important;
@@ -595,7 +635,7 @@ p,small,.muted,.secondary,.description{
   color:#596168 !important;
   font-family:var(--font-micro) !important;
   font-size:12px !important;
-  font-weight:650 !important;
+  font-weight:600 !important;
 }
 
 .filter-pill.active{
@@ -612,7 +652,7 @@ main{
 }
 
 .section-label strong{
-  font-size:17px !important;
+  font-size:18px !important;
   font-weight:700 !important;
   letter-spacing:-.3px;
   color:var(--nb-ink) !important;
@@ -649,7 +689,7 @@ main{
 .item-name{
   min-height:0 !important;
   font-size:14px !important;
-  font-weight:650 !important;
+  font-weight:600 !important;
   line-height:1.3 !important;
   letter-spacing:-.15px;
   color:var(--nb-ink) !important;
@@ -666,7 +706,7 @@ main{
   margin-top:5px !important;
   font-family:var(--font-micro) !important;
   font-size:12px !important;
-  font-weight:650 !important;
+  font-weight:600 !important;
 }
 
 .meta{
@@ -690,7 +730,7 @@ main{
   border-radius:9px !important;
   font-family:var(--font-micro) !important;
   font-size:12px !important;
-  font-weight:750 !important;
+  font-weight:700 !important;
 }
 
 .restaurant-link{
@@ -726,7 +766,7 @@ main{
 }
 
 .res-name{
-  font-size:21px !important;
+  font-size:20px !important;
   font-weight:800 !important;
   color:var(--nb-ink) !important;
   letter-spacing:-.55px;
@@ -750,7 +790,7 @@ main{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:17px !important;
+  font-size:18px !important;
   font-weight:700 !important;
   letter-spacing:-.3px;
   color:var(--nb-ink) !important;
@@ -832,8 +872,8 @@ main{
 .nb-item-title{
   margin:0 0 4px;
   max-width:100%;
-  font-size:14.5px;
-  font-weight:650;
+  font-size:15px;
+  font-weight:600;
   line-height:1.3;
   letter-spacing:-.15px;
   color:var(--nb-ink);
@@ -887,7 +927,7 @@ main{
   color:var(--nb-muted);
   font-family:var(--font-micro);
   font-size:12px;
-  font-weight:450;
+  font-weight:500;
   line-height:1.45;
   display:-webkit-box;
   -webkit-line-clamp:2;
@@ -1010,7 +1050,7 @@ main{
   border-radius:11px;
   color:var(--nb-brand);
   font-family:inherit;
-  font-size:13.5px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.4px;
   box-shadow:0 4px 12px rgba(28,32,36,.10);
@@ -1021,7 +1061,7 @@ main{
 .nb-add-btn:focus-visible{outline:2px solid var(--nb-brand);outline-offset:2px;}
 .nb-add-btn.is-disabled{
   background:#F1F5F9;border-color:#E2E8F0;color:#94A3B8;
-  box-shadow:none;cursor:not-allowed;font-size:11.5px;letter-spacing:0;
+  box-shadow:none;cursor:not-allowed;font-size:12px;letter-spacing:0;
 }
 .nb-add-btn.is-disabled:active{transform:none;}
 
@@ -1042,7 +1082,7 @@ main{
   width:31px;height:100%;
   border:0;background:transparent;
   color:var(--nb-brand);
-  font-family:inherit;font-weight:900;font-size:16px;line-height:1;
+  font-family:inherit;font-weight:800;font-size:16px;line-height:1;
   cursor:pointer;
   transition:background .14s ease;
 }
@@ -1051,7 +1091,7 @@ main{
 .nb-qty-btn.is-disabled:active{background:transparent;}
 .nb-qty-val{
   font-family:var(--font-micro);
-  font-size:13.5px;font-weight:800;color:var(--nb-brand);
+  font-size:14px;font-weight:800;color:var(--nb-brand);
   min-width:22px;text-align:center;
   font-variant-numeric:tabular-nums;
 }
