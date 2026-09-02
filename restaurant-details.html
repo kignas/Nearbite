@@ -1,57 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
   <title>Restaurant Information – Eatswada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    *{box-sizing:border-box} body{margin:0;background:#f4f5f7;color:#20232b;font-family:Poppins,sans-serif;padding-bottom:30px}
-    .top{height:74px;background:#fff;border-bottom:1px solid #eceef1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}
-    .icon{width:44px;height:44px;border:0;border-radius:50%;background:#f4f5f7;color:#20232b;font-size:17px;display:grid;place-items:center}
-    .title{font-weight:800;font-size:17px}.wrap{max-width:720px;margin:18px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e9ebef;border-radius:22px;padding:20px;margin-bottom:14px;box-shadow:0 4px 18px rgba(15,23,42,.04)}
-    h1{font-size:26px;margin:0 0 4px}.sub{color:#7b8490;font-size:13px;margin:0 0 16px}.address{font-size:14px;line-height:1.5}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.pill{padding:9px 12px;border:1px solid #eceef1;border-radius:12px;font-size:12px;font-weight:700}
-    .pill i{margin-right:6px}.green{color:#168a55}.orange{color:#e67e22}.section-title{font-size:19px;font-weight:800;margin:0 0 14px}.line{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid #eef0f2;font-size:13px}.line:last-child{border-bottom:0}.label{color:#7c8490}.value{text-align:right;font-weight:600}
-    .review{border-top:1px solid #eef0f2;padding:14px 0}.review:first-child{border-top:0;padding-top:0}.review-head{display:flex;justify-content:space-between;gap:10px}.review-name{font-weight:700;font-size:13px}.rating{color:#168a55;font-weight:800;font-size:12px}.review-text{color:#5f6874;font-size:13px;line-height:1.5;margin:7px 0 0}.review-photo{display:block;width:96px;height:96px;object-fit:cover;border-radius:12px;margin-top:10px}
-    .back{width:100%;height:52px;border:0;border-radius:15px;background:#111827;color:#fff;font:800 15px Poppins,sans-serif}
-    .muted{color:#9299a3;font-size:13px}.error{color:#c53d4b}
+    :root{--green:#168a55;--green-dark:#0f6f45;--ink:#18212b;--muted:#77818d;--line:#e9edf0;--bg:#f6f7f8;--card:#fff;--danger:#c83f4d;--shadow:0 10px 30px rgba(18,32,45,.06)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;padding-bottom:30px}
+    button{font:inherit}
+    .top{height:64px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:20}
+    .icon{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+    .title{font-weight:800;font-size:15px}
+    .wrap{max-width:760px;margin:0 auto;padding:16px}
+    .hero{position:relative;overflow:hidden;border-radius:24px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:14px}
+    .gallery{height:230px;background:#eef1f3;position:relative}
+    .gallery img{width:100%;height:100%;object-fit:cover;display:block}
+    .gallery.empty{display:grid;place-items:center;color:#a1a9b1;font-size:42px}
+    .gallery-overlay{position:absolute;inset:auto 0 0;padding:50px 18px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
+    .hero-body{padding:18px}
+    h1{font-size:27px;line-height:1.15;margin:0 0 6px;letter-spacing:-.5px}
+    .sub{color:var(--muted);font-size:13px;margin:0;line-height:1.55}
+    .address{margin-top:11px;font-size:13px;line-height:1.55;color:#4f5a65}
+    .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+    .stat{border:1px solid var(--line);border-radius:14px;padding:11px 8px;text-align:center;background:#fff}
+    .stat i{display:block;color:var(--green);font-size:14px;margin-bottom:5px}
+    .stat b{display:block;font-size:12px}
+    .stat span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;background:#eaf8f1;color:var(--green);margin-top:12px}
+    .status.closed{background:#fff0f1;color:var(--danger)}
+    .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+    .section-title{font-size:17px;font-weight:800;margin:0 0 13px}
+    .description{font-size:13px;line-height:1.7;color:#56616c;margin:0}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .info{border:1px solid var(--line);border-radius:14px;padding:12px}
+    .info-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+    .info-value{font-size:12px;font-weight:700;line-height:1.4;word-break:break-word}
+    .hours{border:1px solid var(--line);border-radius:15px;overflow:hidden}
+    .hours-row{display:flex;justify-content:space-between;gap:15px;padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}
+    .hours-row:last-child{border-bottom:0}
+    .day{font-weight:700}.time{color:#59636d;text-align:right}.today{background:#f0faf5}.today .day{color:var(--green)}
+    .closed-day{color:#9aa1a9}
+    .review{padding:14px 0;border-top:1px solid var(--line)}
+    .review:first-child{border-top:0;padding-top:0}
+    .review-head{display:flex;justify-content:space-between;gap:12px}
+    .review-name{font-size:12px;font-weight:800}
+    .rating{color:var(--green);font-size:11px;font-weight:800}
+    .review-text{font-size:12px;color:#5b6670;line-height:1.6;margin:6px 0 0}
+    .review-photo{width:86px;height:86px;object-fit:cover;border-radius:12px;margin-top:9px;display:block}
+    .muted{font-size:12px;color:#9aa1a9}
+    .error{color:var(--danger)}
+    .bottom-actions{position:sticky;bottom:12px;z-index:10;margin-top:5px}
+    .menu-btn{width:100%;height:52px;border:0;border-radius:16px;background:var(--ink);color:#fff;font-size:14px;font-weight:800;box-shadow:0 12px 25px rgba(24,33,43,.18);cursor:pointer}
+    .menu-btn:active{transform:translateY(1px)}
+    .skeleton{background:linear-gradient(90deg,#eef1f3 25%,#f8f9fa 50%,#eef1f3 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px}
+    .sk-img{height:230px}.sk-line{height:14px;margin:12px 0}.sk-line.w70{width:70%}.sk-line.w45{width:45%}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    @media(max-width:520px){.quick{grid-template-columns:repeat(3,1fr)}.gallery{height:205px}.info-grid{grid-template-columns:1fr 1fr}}
+    @media(min-width:700px){.gallery{height:290px}}
   </style>
 </head>
 <body>
-  <header class="top"><button class="icon" onclick="history.back()" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><div class="title">Restaurant information</div><div style="width:44px"></div></header>
-  <main class="wrap">
-    <section class="card" id="main-card"><h1 id="name">Loading…</h1><p class="sub" id="cuisine"></p><div class="address" id="address"></div><div class="row" id="quick"></div></section>
-    <section class="card"><h2 class="section-title">Restaurant details</h2><div id="details"><div class="muted">Loading details…</div></div></section>
-    <section class="card" id="reviews-card" hidden><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><h2 class="section-title" style="margin:0">Customer reviews</h2><span class="muted" id="review-count"></span></div><div id="reviews" style="margin-top:14px"></div></section>
-    <button class="back" onclick="goMenu()">Go back to menu</button>
-  </main>
-  <script src="config.js"></script><script src="api.js"></script>
-  <script>
-    function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-    function goMenu(){const id=new URLSearchParams(location.search).get('id');location.href=id?'restaurant.html?id='+encodeURIComponent(id):'index.html'}
-    function cuisine(r){return r.cuisineDisplay||r.cuisine||(Array.isArray(r.cuisines)?r.cuisines.join(' · '):'')}
-    function render(r){
-      document.title=(r.name||'Restaurant')+' – Information';
-      document.getElementById('name').textContent=r.name||'Restaurant';
-      document.getElementById('cuisine').textContent=cuisine(r);
-      document.getElementById('address').textContent=r.address||(r.location&&r.location.address)||'Address not available';
-      const q=[]; if(Number.isFinite(Number(r.rating))) q.push('<span class="pill green"><i class="fa-solid fa-star"></i>'+Number(r.rating).toFixed(1)+' · '+(Number(r.ratingCount)||0)+' ratings</span>');
-      if(Number.isFinite(Number(r.estimatedDeliveryMin))) q.push('<span class="pill orange"><i class="fa-regular fa-clock"></i>'+Number(r.estimatedDeliveryMin)+'-'+Number(r.estimatedDeliveryMax||r.estimatedDeliveryMin)+' mins</span>');
-      q.push('<span class="pill"><i class="fa-solid fa-motorcycle"></i>'+((r.freeDeliveryEnabled===false)?'Delivery available':'Free delivery')+'</span>'); document.getElementById('quick').innerHTML=q.join('');
-      const rows=[]; const radius=Number(r.deliveryRadiusKm); if(cuisine(r)) rows.push(['Cuisine',cuisine(r)]); if(r.phone) rows.push(['Phone',r.phone]); if(Number.isFinite(radius)&&radius>0) rows.push(['Delivery radius',radius+' km']);
-      if(r.availability){if(r.availability.opensAt) rows.push(['Opens at',r.availability.opensAt]);if(r.availability.closesAt) rows.push(['Closes at',r.availability.closesAt]);}
-      if(r.isActive!==undefined) rows.push(['Status',r.isActive?'Active':'Unavailable']);
-      document.getElementById('details').innerHTML=rows.length?rows.map(x=>'<div class="line"><span class="label">'+esc(x[0])+'</span><span class="value">'+esc(x[1])+'</span></div>').join(''):'<div class="muted">No additional details available.</div>';
+<header class="top">
+  <button class="icon" id="back-btn" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+  <div class="title">Restaurant information</div>
+  <div style="width:42px"></div>
+</header>
+
+<main class="wrap">
+  <div id="loading">
+    <section class="hero">
+      <div class="skeleton sk-img"></div>
+      <div class="hero-body"><div class="skeleton sk-line w70"></div><div class="skeleton sk-line w45"></div></div>
+    </section>
+    <section class="card"><div class="skeleton sk-line w45"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line w70"></div></section>
+  </div>
+
+  <div id="content" hidden>
+    <section class="hero">
+      <div class="gallery" id="gallery"></div>
+      <div class="hero-body">
+        <h1 id="name">Restaurant</h1>
+        <p class="sub" id="cuisine"></p>
+        <div class="address" id="address"></div>
+        <div id="status"></div>
+        <div class="quick" id="quick"></div>
+      </div>
+    </section>
+
+    <section class="card" id="about-card" hidden>
+      <h2 class="section-title">About this restaurant</h2>
+      <p class="description" id="description"></p>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Restaurant details</h2>
+      <div class="info-grid" id="details"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Opening hours</h2>
+      <div class="hours" id="hours"></div>
+    </section>
+
+    <section class="card" id="reviews-card" hidden>
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <h2 class="section-title" style="margin:0">Customer reviews</h2>
+        <span class="muted" id="review-count"></span>
+      </div>
+      <div id="reviews" style="margin-top:14px"></div>
+    </section>
+
+    <div class="bottom-actions">
+      <button class="menu-btn" id="menu-btn"><i class="fa-solid fa-utensils"></i>&nbsp; View full menu</button>
+    </div>
+  </div>
+
+  <section class="card" id="error-card" hidden>
+    <div class="error" style="font-weight:800;margin-bottom:6px">Unable to load restaurant</div>
+    <div class="muted" id="error-text">Please try again.</div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+(function(){
+  const id = new URLSearchParams(location.search).get('id');
+  const $ = s => document.querySelector(s);
+  const esc = v => String(v ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+  $('#back-btn').addEventListener('click',()=>history.back());
+  $('#menu-btn').addEventListener('click',()=>{
+    location.href=id ? 'restaurant.html?id='+encodeURIComponent(id) : 'index.html';
+  });
+
+  function cuisine(r){
+    if(Array.isArray(r.cuisine) && r.cuisine.length) return r.cuisine.join(' · ');
+    return r.cuisineDisplay || (Array.isArray(r.cuisines) ? r.cuisines.join(' · ') : (r.cuisine || ''));
+  }
+
+  function renderGallery(r){
+    const gallery = Array.isArray(r.images)&&r.images.length ? r.images : (r.image ? [r.image] : []);
+    const el = $('#gallery');
+    if(!gallery.length){el.classList.add('empty');el.innerHTML='<i class="fa-solid fa-store"></i>';return;}
+    const safe = esc(gallery[0]);
+    el.innerHTML='<img src="'+safe+'" alt="'+esc(r.name||'Restaurant')+'" loading="eager">';
+  }
+
+  function renderHours(r){
+    const source = r.openingHours || {};
+    const days=[['monday','Monday'],['tuesday','Tuesday'],['wednesday','Wednesday'],['thursday','Thursday'],['friday','Friday'],['saturday','Saturday'],['sunday','Sunday']];
+    const today=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+    $('#hours').innerHTML=days.map(([key,label])=>{
+      const h=source[key];
+      const closed=h && h.closed===true;
+      const time=closed?'Closed':((h&&h.opensAt&&h.closesAt)?esc(h.opensAt)+' – '+esc(h.closesAt):'Hours not available');
+      return '<div class="hours-row '+(key===today?'today':'')+'"><span class="day">'+label+(key===today?' · Today':'')+'</span><span class="time '+(closed?'closed-day':'')+'">'+time+'</span></div>';
+    }).join('');
+  }
+
+  function render(r){
+    document.title=(r.name||'Restaurant')+' – Eatswada';
+    $('#name').textContent=r.name||'Restaurant';
+    $('#cuisine').textContent=cuisine(r);
+    $('#address').textContent=r.address || (r.location&&r.location.address) || 'Address not available';
+    renderGallery(r);
+
+    const open = r.availability && typeof r.availability.isOpen==='boolean' ? r.availability.isOpen : (typeof r.isOpen==='boolean'?r.isOpen:true);
+    $('#status').innerHTML='<span class="status '+(open?'':'closed')+'"><span class="dot"></span>'+ (open?'Open now':'Currently closed')+'</span>';
+
+    const rating=Number(r.rating), ratingCount=Number(r.ratingCount||r.reviewCount||0);
+    const min=Number(r.estimatedDeliveryMin), max=Number(r.estimatedDeliveryMax||r.estimatedDeliveryMin);
+    const quick=[];
+    if(Number.isFinite(rating)) quick.push('<div class="stat"><i class="fa-solid fa-star"></i><b>'+rating.toFixed(1)+'</b><span>'+ratingCount+' ratings</span></div>');
+    if(Number.isFinite(min)) quick.push('<div class="stat"><i class="fa-regular fa-clock"></i><b>'+min+'–'+max+' min</b><span>delivery</span></div>');
+    const fee=Number(r.deliveryFee);
+    quick.push('<div class="stat"><i class="fa-solid fa-motorcycle"></i><b>'+ (r.freeDeliveryEnabled!==false?'Free':'₹'+(Number.isFinite(fee)?fee:0)) +'</b><span>delivery</span></div>');
+    $('#quick').innerHTML=quick.join('');
+
+    if(r.description){
+      $('#description').textContent=r.description;
+      $('#about-card').hidden=false;
     }
-    async function loadReviews(id){
-      try{const payload=await window.API.request('/restaurants/'+encodeURIComponent(id)+'/reviews');const d=window.API.unwrap(payload);const list=Array.isArray(d)?d:(d&&Array.isArray(d.reviews)?d.reviews:[]);if(!list.length)return;document.getElementById('reviews-card').hidden=false;document.getElementById('review-count').textContent=list.length+(list.length===1?' review':' reviews');document.getElementById('reviews').innerHTML=list.slice(0,10).map(r=>{const n=(r.user&&(r.user.name||r.user.fullName))||r.userName||r.name||'Customer';const score=Number(r.score||r.rating||r.foodRating);const text=r.comment||r.text||r.review||'';const photo=r.image||r.photo||r.foodImage||r.imageUrl||'';return '<article class="review"><div class="review-head"><span class="review-name">'+esc(n)+'</span><span class="rating">'+(Number.isFinite(score)?'★ '+score.toFixed(1):'')+'</span></div>'+(text?'<p class="review-text">'+esc(text)+'</p>':'')+(photo?'<img class="review-photo" src="'+esc(photo)+'" alt="Customer food photo" loading="lazy">':'')+'</article>'}).join('')}catch(e){}}
-    async function init(){const id=new URLSearchParams(location.search).get('id');if(!id){document.getElementById('name').textContent='Restaurant not found';return}try{const r=await window.API.getObject(window.API.routes.restaurant(id));render(r);loadReviews(id)}catch(e){document.getElementById('name').textContent='Unable to load restaurant';document.getElementById('address').innerHTML='<span class="error">'+esc(e.message||'Please try again.')+'</span>'}}
-    document.addEventListener('DOMContentLoaded',init);
-  </script>
+
+    const rows=[];
+    if(r.phone) rows.push(['Phone',r.phone]);
+    if(cuisine(r)) rows.push(['Cuisine',cuisine(r)]);
+    if(Number.isFinite(Number(r.minOrder)) && Number(r.minOrder)>0) rows.push(['Minimum order','₹'+Number(r.minOrder).toFixed(0)]);
+    if(r.freeDeliveryEnabled!==false && Number.isFinite(Number(r.freeDeliveryAbove)) && Number(r.freeDeliveryAbove)>0) rows.push(['Free delivery above','₹'+Number(r.freeDeliveryAbove).toFixed(0)]);
+    if(Number.isFinite(Number(r.deliveryFee)) && r.freeDeliveryEnabled===false) rows.push(['Delivery fee','₹'+Number(r.deliveryFee).toFixed(0)]);
+    if(Number.isFinite(Number(r.deliveryRadiusKm)) && Number(r.deliveryRadiusKm)>0) rows.push(['Delivery radius',Number(r.deliveryRadiusKm)+' km']);
+    if(r.codEnabled!==undefined) rows.push(['Cash on delivery',r.codEnabled?'Available':'Not available']);
+    if(r.totalOrders!==undefined) rows.push(['Total orders',String(r.totalOrders)]);
+    $('#details').innerHTML=rows.length?rows.map(x=>'<div class="info"><div class="info-label">'+esc(x[0])+'</div><div class="info-value">'+esc(x[1])+'</div></div>').join(''):'<div class="muted">No additional details available.</div>';
+    renderHours(r);
+  }
+
+  async function loadReviews(){
+    try{
+      const payload=await window.API.request('/restaurants/'+encodeURIComponent(id)+'/reviews');
+      const d=window.API.unwrap(payload);
+      const list=Array.isArray(d)?d:(d&&Array.isArray(d.reviews)?d.reviews:[]);
+      if(!list.length)return;
+      $('#reviews-card').hidden=false;
+      $('#review-count').textContent=list.length+(list.length===1?' review':' reviews');
+      $('#reviews').innerHTML=list.slice(0,10).map(r=>{
+        const n=(r.user&&(r.user.name||r.user.fullName))||r.userName||r.name||'Customer';
+        const score=Number(r.score??r.rating??r.foodRating);
+        const text=r.comment||r.text||r.review||'';
+        const photo=r.image||r.photo||r.foodImage||r.imageUrl||'';
+        return '<article class="review"><div class="review-head"><span class="review-name">'+esc(n)+'</span><span class="rating">'+(Number.isFinite(score)?'★ '+score.toFixed(1):'')+'</span></div>'+(text?'<p class="review-text">'+esc(text)+'</p>':'')+(photo?'<img class="review-photo" src="'+esc(photo)+'" alt="Customer food photo" loading="lazy">':'')+'</article>';
+      }).join('');
+    }catch(e){}
+  }
+
+  async function init(){
+    if(!id){
+      $('#loading').hidden=true; $('#error-card').hidden=false; $('#error-text').textContent='Restaurant ID is missing.';
+      return;
+    }
+    try{
+      const r=await window.API.getObject(window.API.routes.restaurant(id));
+      render(r);
+      $('#loading').hidden=true;
+      $('#content').hidden=false;
+      loadReviews();
+    }catch(e){
+      $('#loading').hidden=true;
+      $('#error-card').hidden=false;
+      $('#error-text').textContent=e.message||'Please try again.';
+    }
+  }
+  document.addEventListener('DOMContentLoaded',init);
+})();
+</script>
 </body>
 </html>
