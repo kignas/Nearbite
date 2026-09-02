@@ -492,6 +492,56 @@
                         + '&next=' + encodeURIComponent(ADDRESS_STEP)
                         + '&return=' + encodeURIComponent(ADDRESS_STEP);
 
+    /* Single routing decision, shared by OTP verification and password login
+       so the two methods cannot drift apart. Reads the ACCOUNT, never whether
+       a map location happens to be cached. */
+    function routeAfterAuthentication(profile, requestedPage) {
+      const addresses = Array.isArray(profile && profile.addresses) ? profile.addresses : [];
+      const placeholderName = /^(Nearbite|Eatswada) User$/;
+      const hasRealName = !!(profile && profile.name) && !placeholderName.test(profile.name.trim());
+      const hasAddress = addresses.length > 0 || !!(profile && profile.defaultAddress);
+
+      // Use the backend's own flag when it exposes one; fall back to the
+      // profile data we already have.
+      const profileComplete = (profile && typeof profile.isProfileComplete === 'boolean')
+        ? profile.isProfileComplete
+        : (profile && typeof profile.profileComplete === 'boolean')
+          ? profile.profileComplete
+          : hasRealName;
+
+      if (!profileComplete) {
+        // Keep the original destination so a guest cart returns to cart.html
+        // once onboarding finishes. address.html consumes it.
+        localStorage.setItem('nearbite_after_login', requestedPage);
+        window.location.href = 'complete-profile.html';
+        return;
+      }
+      if (!hasAddress) {
+        // Profile is done but there is nowhere to deliver. Go straight to the
+        // map, then the address form — not back through profile.
+        localStorage.setItem('nearbite_after_login', requestedPage);
+        window.location.href = LOCATION_STEP;
+        return;
+      }
+      localStorage.removeItem('nearbite_after_login');
+      window.location.href = requestedPage;
+    }
+
+    /* Fetches the profile for the routing decision. Returns the cached user
+       if the lookup fails, so a network blip cannot strand the customer. */
+    async function fetchProfileForRouting(authToken, fallbackUser) {
+      try {
+        const res = await fetch(`${API_URL}/profile`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const result = await res.json();
+        return (result && result.success) ? result.data : fallbackUser;
+      } catch (e) {
+        console.error('Profile lookup failed:', e);
+        return fallbackUser;
+      }
+    }
+
     /* ============================================================
        Hero Slider
     ============================================================ */
@@ -786,48 +836,9 @@
 
             const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
 
-            // Decide from the ACCOUNT, never from whether a map location
-            // happens to be cached. A new/incomplete customer always starts
-            // at Complete Profile, which then chains to the map and address.
-            try {
-              const profileResponse = await fetch(`${API_URL}/profile`, {
-                headers: { 'Authorization': `Bearer ${safeToken}` }
-              });
-              const profileResult = await profileResponse.json();
-              const profile = profileResult && profileResult.success ? profileResult.data : safeUser;
-
-              const addresses = Array.isArray(profile && profile.addresses) ? profile.addresses : [];
-              const placeholderName = /^(Nearbite|Eatswada) User$/;
-              const hasRealName = !!(profile && profile.name) && !placeholderName.test(profile.name.trim());
-              const hasAddress = addresses.length > 0 || !!(profile && profile.defaultAddress);
-
-              // Use the backend's own flag when it exposes one; fall back to
-              // the profile data we already have.
-              const profileComplete = (profile && typeof profile.isProfileComplete === 'boolean')
-                ? profile.isProfileComplete
-                : (profile && typeof profile.profileComplete === 'boolean')
-                  ? profile.profileComplete
-                  : hasRealName;
-
-              if (!profileComplete) {
-                // Keep the original destination so a guest cart returns to
-                // cart.html once onboarding finishes. address.html consumes it.
-                localStorage.setItem('nearbite_after_login', requestedPage);
-                window.location.href = 'complete-profile.html';
-              } else if (!hasAddress) {
-                // Profile is done but there is nowhere to deliver. Go straight
-                // to the map, then the address form — not back through profile.
-                localStorage.setItem('nearbite_after_login', requestedPage);
-                window.location.href = LOCATION_STEP;
-              } else {
-                localStorage.removeItem('nearbite_after_login');
-                window.location.href = requestedPage;
-              }
-            } catch (profileError) {
-              console.error('Profile lookup failed:', profileError);
-              localStorage.setItem('nearbite_after_login', requestedPage);
-              window.location.href = 'complete-profile.html';
-            }
+            // Same decision as password login — see routeAfterAuthentication.
+            const profile = await fetchProfileForRouting(safeToken, safeUser);
+            routeAfterAuthentication(profile, requestedPage);
           } else {
             showBanner(step2Banner, step2BannerText, "Something went wrong on our end. Please try again.");
             otpBoxes.forEach(box => box.removeAttribute('readonly'));
@@ -927,7 +938,9 @@
         if (!res.ok || !data.success) { text.textContent = data.message || 'Unable to log in. Please try again.'; banner.classList.add('show'); return; }
         localStorage.setItem('nearbite_token', data.data.token); localStorage.setItem('token', data.data.token); localStorage.setItem('nearbite_user', JSON.stringify(data.data.user || {}));
         const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
-        localStorage.removeItem('nearbite_after_login'); window.location.href = requestedPage;
+        // Same onboarding decision as OTP verification.
+        const profile = await fetchProfileForRouting(data.data.token, data.data.user);
+        routeAfterAuthentication(profile, requestedPage);
       } catch(e) { text.textContent = "Can't reach Eatswada right now. Check your connection and try again."; banner.classList.add('show'); }
       finally { setAuthBtnLoading('passwordLoginBtn', false, 'Log in'); }
     }

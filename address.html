@@ -424,13 +424,10 @@ let account = null, useAccountOn = false;
 
 /* City / PIN are no longer typed by the customer. They are derived from the
    confirmed reverse-geocode and held here purely to keep the existing
-   backend payload intact. */
+   backend payload intact. When the geocoder yields nothing and the address
+   has no saved value they stay empty — coordinates are the delivery truth,
+   so an invented city or PIN would be worse than none. */
 let addrCity = '', addrPin = '';
-
-/* Service-area fallback, used only when the geocoder returns nothing usable
-   and the address has no previously saved value. */
-const FALLBACK_CITY = 'Maynaguri';
-const FALLBACK_PIN  = '735224';
 
 /* 'setup'  — MODE 1. First address, reached from Complete Profile via the
               map. Receiver details come from the account, the receiver card
@@ -635,7 +632,7 @@ function render(){
             ${isSelected ? '<span class="ea-chip selected">Delivering here</span>' : ''}
           </div>
           <div class="ea-line">${escapeHtml(text || 'Address details')}</div>
-          <div class="ea-meta">${escapeHtml(a.city || FALLBACK_CITY)}${a.pincode ? ' · ' + escapeHtml(a.pincode) : ''}${Number.isFinite(la) ? ' · Map location saved' : ' · Map location missing'}</div>
+          <div class="ea-meta">${[a.city, a.pincode].filter(Boolean).map(escapeHtml).join(' · ') || 'Location details'}${Number.isFinite(la) ? ' · Map location saved' : ' · Map location missing'}</div>
         </div>
       </div>
       <div class="ea-actions">
@@ -750,12 +747,12 @@ function paintLocation(){
 }
 
 /* City and PIN are derived, never typed. Priority: confirmed geocode, then
-   whatever the address already had, then the service-area fallback. */
+   whatever the address already had, then empty. Nothing is invented. */
 function deriveCityPin(existing){
   const g = geoParts(locGeo);
-  addrCity = g.city || existing?.city || addrCity || FALLBACK_CITY;
+  addrCity = g.city || existing?.city || addrCity || '';
   const geoPin = /^\d{6}$/.test(g.pin || '') ? g.pin : '';
-  addrPin  = geoPin || existing?.pincode || addrPin || FALLBACK_PIN;
+  addrPin  = geoPin || existing?.pincode || addrPin || '';
 
   // Area is the only locality field the customer edits; seed it once.
   if (g.area && !$('area').value.trim()) $('area').value = g.area;
@@ -991,8 +988,8 @@ async function saveAddress(){
     house: $('house').value.trim(),
     area: $('area').value.trim(),
     landmark: $('landmark').value.trim(),
-    city: addrCity || FALLBACK_CITY,        // derived, not typed
-    pincode: addrPin || FALLBACK_PIN,       // derived, not typed
+    city: addrCity,        // derived from the map point, '' when unknown
+    pincode: addrPin,      // derived from the map point, '' when unknown
     receiverName: $('receiverName').value.trim(),
     receiverPhone: $('receiverPhone').value.replace(/\D/g,''),
     latitude: lat,
