@@ -131,7 +131,7 @@
 
   /* ── 2. THE CSS ── */
   const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+    /* Font is inherited from the global Eatswada typography system (Manrope). */
 
     @keyframes slideUpWhiteCart {
       0% { transform: translate(-50%, 150%); opacity: 0; }
