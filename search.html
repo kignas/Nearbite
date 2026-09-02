@@ -12,313 +12,124 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
 <style>
-  :root{
-    --ew-green:#159447;
-    --ew-green-dark:#08783a;
-    --ew-text:#171717;
-    --ew-muted:#777;
-    --ew-border:#eeeeee;
-    --ew-soft:#f7f8f8;
-  }
-
+  :root{--ew-green:#159447;--ew-text:#171717}
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{
-    background:#fff;
-    color:var(--ew-text);
+    background:#fff;color:var(--ew-text);
     font-family:"Manrope",sans-serif;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:88px;
+    padding-bottom:84px;
   }
 
-  /* Premium search header */
   .search-header{
-    position:sticky;
-    top:0;
-    z-index:50;
+    position:sticky;top:0;z-index:50;
     background:rgba(255,255,255,.96);
-    backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
     padding:12px 16px 10px;
-    border-bottom:1px solid rgba(0,0,0,.055);
+    border-bottom:1px solid rgba(0,0,0,.055)
   }
   .search-input-wrapper{
-    min-height:54px;
-    display:flex;
-    align-items:center;
-    gap:11px;
-    background:#fff;
-    border:1px solid #e5e7e8;
-    border-radius:17px;
-    padding:7px 12px 7px 9px;
+    min-height:54px;display:flex;align-items:center;gap:10px;
+    background:#fff;border:1px solid #e5e7e8;border-radius:17px;
+    padding:7px 10px 7px 9px;
     box-shadow:0 6px 22px rgba(0,0,0,.055);
-    transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+    transition:border-color .2s,box-shadow .2s
   }
   .search-input-wrapper:focus-within{
     border-color:rgba(21,148,71,.48);
-    box-shadow:0 8px 26px rgba(21,148,71,.11);
+    box-shadow:0 8px 26px rgba(21,148,71,.11)
   }
   .search-back{
-    width:38px;height:38px;
-    border-radius:12px;
-    display:grid;place-items:center;
-    color:#454545;
-    flex:0 0 38px;
-    background:#f7f7f7;
+    width:38px;height:38px;flex:0 0 38px;border:0;border-radius:12px;
+    display:grid;place-items:center;background:#f7f7f7;color:#454545
   }
-  .search-icon{
-    color:#777;
-    font-size:16px;
-    flex:0 0 auto;
-  }
+  .search-icon{color:#777;font-size:16px;flex:0 0 auto}
   #search-input{
-    min-width:0;
-    color:#202020;
-    font-family:"Manrope",sans-serif;
+    min-width:0;color:#202020;font-family:"Manrope",sans-serif
   }
   #search-input::placeholder{color:#a0a0a0}
   .search-clear{
-    width:32px;height:32px;
-    display:grid;place-items:center;
-    border-radius:10px;
-    flex:0 0 32px;
+    width:32px;height:32px;display:grid;place-items:center;
+    border:0;border-radius:10px;flex:0 0 32px;background:transparent
   }
   .search-clear:hover{background:#f5f5f5}
   .search-mic{
-    width:35px;height:35px;
-    display:grid;place-items:center;
-    color:var(--ew-green);
-    flex:0 0 35px;
-    border-left:1px solid #ededed;
-    padding-left:10px;
-    box-sizing:content-box;
+    width:35px;height:35px;display:grid;place-items:center;
+    color:var(--ew-green);flex:0 0 35px;
+    border:0;border-left:1px solid #ededed;padding-left:10px;
+    box-sizing:content-box;background:transparent
   }
 
-  /* Search suggestions */
   .suggestion-chips{
-    display:flex;
-    gap:9px;
-    overflow-x:auto;
-    padding:12px 16px 9px;
-    scrollbar-width:none;
-    overscroll-behavior-x:contain;
+    display:flex;gap:9px;overflow-x:auto;
+    padding:12px 16px 18px;scrollbar-width:none;
+    overscroll-behavior-x:contain
   }
   .suggestion-chips::-webkit-scrollbar{display:none}
   .chip{
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-    padding:9px 13px;
-    border:1px solid #e8e9e9;
-    border-radius:999px;
-    font-family:"Manrope",sans-serif;
-    font-size:11.5px;
-    font-weight:700;
-    color:#505050;
-    white-space:nowrap;
-    background:#fff;
+    display:inline-flex;align-items:center;gap:7px;
+    padding:9px 13px;border:1px solid #e8e9e9;border-radius:999px;
+    font-family:"Manrope",sans-serif;font-size:11.5px;font-weight:700;
+    color:#505050;white-space:nowrap;background:#fff;
     box-shadow:0 2px 7px rgba(0,0,0,.025);
-    transition:transform .15s ease,border-color .15s ease,background .15s ease;
+    transition:transform .15s,border-color .15s
   }
   .chip:active{transform:scale(.97)}
   .chip i{color:var(--ew-green);font-size:9px}
 
-  /* Discovery */
-  .mind-section{padding:14px 16px 28px;background:#fff}
-  .section-heading{
-    display:flex;
-    align-items:center;
-    gap:11px;
-    margin-bottom:18px;
-  }
-  .section-heading h2{
-    margin:0;
-    font-size:12px;
-    line-height:1.2;
-    font-weight:800;
-    letter-spacing:.75px;
-    text-transform:uppercase;
-    color:#737373;
-  }
-  .section-heading span{height:1px;background:#eeeeee;flex:1}
-
-  .mind-grid{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    column-gap:13px;
-    row-gap:24px;
-  }
-  .mind-item{
-    border:0;
-    background:none;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:9px;
-    min-width:0;
-    cursor:pointer;
-    -webkit-tap-highlight-color:transparent;
-    transition:transform .15s ease;
-  }
-  .mind-item:active{transform:scale(.95)}
-  .mind-image-wrap{
-    width:88px;height:88px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    background:#f5f7f6;
-    box-shadow:0 5px 16px rgba(0,0,0,.07);
-    border:1px solid #f0f1f1;
-  }
-  .mind-image-wrap img{
-    width:100%;height:100%;
-    object-fit:cover;
-    display:block;
-  }
-  .mind-item span{
-    font-size:12px;
-    line-height:1.25;
-    font-weight:700;
-    color:#333;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    max-width:100%;
-  }
-
-  /* Loading skeleton */
-  .mind-skeleton{
-    height:116px;
-    border-radius:14px;
-    background:linear-gradient(90deg,#f3f4f4 25%,#e9ebea 37%,#f3f4f4 63%);
-    background-size:400% 100%;
-    animation:mindShimmer 1.25s infinite;
-  }
-  @keyframes mindShimmer{
-    0%{background-position:100% 0}
-    100%{background-position:-100% 0}
-  }
-
-  /* Results */
   #results-section{padding-bottom:12px}
   .result-card{
-    display:flex;
-    align-items:center;
-    gap:13px;
-    padding:14px 0;
-    text-decoration:none;
-    color:inherit;
-    border-bottom:1px solid #f0f0f0;
-    transition:background .15s ease,transform .15s ease;
+    display:flex;align-items:center;gap:13px;padding:14px 0;
+    text-decoration:none;color:inherit;border-bottom:1px solid #f0f0f0;
+    transition:background .15s,transform .15s
   }
-  .result-card:active{
-    transform:scale(.99);
-    background:#fafafa;
-  }
+  .result-card:active{transform:scale(.99);background:#fafafa}
   .result-card img{
-    width:76px;height:76px;
-    object-fit:cover;
-    border-radius:15px;
-    background:#f3f4f6;
-    flex:0 0 76px;
-    box-shadow:0 5px 15px rgba(0,0,0,.07);
+    width:76px;height:76px;object-fit:cover;border-radius:15px;
+    background:#f3f4f6;flex:0 0 76px;box-shadow:0 5px 15px rgba(0,0,0,.07)
   }
   .result-main{min-width:0;flex:1}
   .result-title-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
+    display:flex;align-items:center;justify-content:space-between;gap:8px
   }
   .result-title-row strong{
-    font-size:14px;
-    line-height:1.35;
-    font-weight:800;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    color:#1c1c1c;
+    font-size:14px;line-height:1.35;font-weight:800;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#1c1c1c
   }
   .result-main p{
-    margin:4px 0 0;
-    color:#666;
-    font-size:11.5px;
-    line-height:1.45;
-    font-weight:600;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    margin:4px 0 0;color:#666;font-size:11.5px;line-height:1.45;
+    font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
   }
   .result-main small{
-    display:block;
-    color:#888;
-    font-size:10.5px;
-    line-height:1.4;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    margin-top:5px;
-    font-weight:600;
+    display:block;color:#888;font-size:10.5px;line-height:1.4;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    margin-top:5px;font-weight:600
   }
   .result-rating{
-    font-size:10px;
-    line-height:1;
-    font-weight:800;
-    color:#fff;
-    background:#198f43;
-    padding:5px 6px;
-    border-radius:7px;
-    white-space:nowrap;
-    display:inline-flex;
-    align-items:center;
-    gap:3px;
-    flex:0 0 auto;
+    font-size:10px;line-height:1;font-weight:800;color:#fff;
+    background:#198f43;padding:5px 6px;border-radius:7px;
+    white-space:nowrap;display:inline-flex;align-items:center;gap:3px;flex:0 0 auto
   }
-
-  .search-empty{
-    text-align:center;
-    padding:72px 20px 90px;
-    color:#9ca3af;
-  }
+  .search-empty{text-align:center;padding:72px 20px 90px;color:#9ca3af}
   .search-empty i{
-    width:68px;height:68px;
-    display:grid;place-items:center;
-    margin:0 auto 18px;
-    border-radius:50%;
-    background:#f5f7f6;
-    color:#c5cbc8;
-    font-size:25px;
+    width:68px;height:68px;display:grid;place-items:center;margin:0 auto 18px;
+    border-radius:50%;background:#f5f7f6;color:#c5cbc8;font-size:25px
   }
-  .search-empty p{
-    margin:0 0 5px;
-    font-size:15px;
-    font-weight:800;
-    color:#2e2e2e;
-  }
-  .search-empty span{
-    font-size:12px;
-    color:#888;
-    font-weight:600;
-  }
+  .search-empty p{margin:0 0 5px;font-size:15px;font-weight:800;color:#2e2e2e}
+  .search-empty span{font-size:12px;color:#888;font-weight:600}
 
-  /* Bottom navigation compatibility */
   .bottom-nav{
-    height:72px;
-    padding:9px 12px calc(9px + env(safe-area-inset-bottom));
-    box-shadow:0 -5px 22px rgba(0,0,0,.07);
+    height:72px;padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+    box-shadow:0 -5px 22px rgba(0,0,0,.07)
   }
   .bottom-nav a{transition:transform .15s ease,color .15s ease}
   .bottom-nav a:active{transform:scale(.94)}
   .bottom-nav .active{color:var(--ew-green)!important}
 
   @media (min-width:600px){
-    .mind-grid{grid-template-columns:repeat(6,1fr);gap:26px 18px}
-    .mind-image-wrap{width:96px;height:96px}
     .search-header{padding-left:24px;padding-right:24px}
-    .suggestion-chips,.mind-section{padding-left:24px;padding-right:24px}
+    .suggestion-chips{padding-left:24px;padding-right:24px}
     #results-section{max-width:760px;margin:0 auto}
   }
 </style>
@@ -355,19 +166,6 @@
   <button class="chip" onclick="quickSearch('Game night munchies')"><i class="fa-solid fa-star-of-life"></i> Game night munchies</button>
   <button class="chip" onclick="quickSearch('Quick bites')"><i class="fa-solid fa-star-of-life"></i> Quick bites</button>
 </div>
-
-<!-- ── What's on your mind ── -->
-<section id="mind-section" class="mind-section" aria-label="What's on your mind">
-  <div class="section-heading">
-    <h2>WHAT'S ON YOUR MIND?</h2>
-    <span></span>
-  </div>
-  <div id="mind-grid" class="mind-grid" aria-live="polite">
-    <div class="mind-skeleton"></div><div class="mind-skeleton"></div><div class="mind-skeleton"></div>
-    <div class="mind-skeleton"></div><div class="mind-skeleton"></div><div class="mind-skeleton"></div>
-  </div>
-</section>
-
 <!-- ── Search Results ── -->
 <div id="results-section" class="px-4 pt-2 hidden">
   <div id="results-list" class="flex flex-col"></div>
@@ -391,8 +189,6 @@
 
 <script>
   const searchInput = document.getElementById('search-input');
-  const mindSection = document.getElementById('mind-section');
-  const mindGrid = document.getElementById('mind-grid');
   const resultsSection = document.getElementById('results-section');
   const resultsList = document.getElementById('results-list');
   const clearBtn = document.getElementById('clear-btn');
@@ -401,38 +197,6 @@
 
 
   function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-  function renderMind(categories){
-    // Real categories only. With none, the section hides rather than
-    // showing a hardcoded stand-in list that doesn't match the menu.
-    const data = (categories || []).filter(c=>c && c.image && c.name).slice(0,12);
-
-    if(!data.length){
-      if(mindSection) mindSection.classList.add('hidden');
-      mindGrid.innerHTML='';
-      return;
-    }
-
-    if(mindSection) mindSection.classList.remove('hidden');
-    mindGrid.innerHTML = data.map(cat=>`
-      <button class="mind-item" type="button" onclick="quickSearch('${esc(cat.type).replace(/'/g,"\\'")}')" aria-label="Search ${esc(cat.name)}">
-        <div class="mind-image-wrap">
-          <img src="${esc(cat.image)}" alt="${esc(cat.name)}" loading="lazy"
-               onerror="this.closest('.mind-item').remove()">
-        </div>
-        <span>${esc(cat.name)}</span>
-      </button>`).join('');
-  }
-
-  async function loadCategories(){
-    try{
-      const data = await window.API.getList(window.API.routes.categories);
-      const cats = data.filter(c=>c && c.isActive!==false && c.name && c.image)
-        .sort((a,b)=>(a.order??0)-(b.order??0))
-        .map(c=>({name:c.name,type:c.name,image:c.image}));
-      renderMind(cats);
-    }catch(e){renderMind([]);}
-  }
 
   async function loadRestaurants(){
     // Shares the one restaurant cache used by the home and category pages.
@@ -458,7 +222,6 @@
     const q=e.target.value.trim().toLowerCase();
     clearBtn.classList.toggle('hidden',!q);
     if(q){
-      mindSection.classList.add('hidden');
       chipsSection.classList.add('hidden');
       resultsSection.classList.remove('hidden');
       doSearch(q);
@@ -505,13 +268,12 @@
     searchInput.value='';
     clearBtn.classList.add('hidden');
     resultsSection.classList.add('hidden');
-    mindSection.classList.remove('hidden');
     chipsSection.classList.remove('hidden');
     searchInput.focus();
   }
   window.clearSearch=clearSearch;
 
-  document.addEventListener('DOMContentLoaded',()=>{renderMind([]);loadCategories();loadRestaurants();});
+  document.addEventListener('DOMContentLoaded',()=>{loadRestaurants();});
 </script>
 </body>
 </html>
