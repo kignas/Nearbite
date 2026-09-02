@@ -662,6 +662,19 @@
     .ct-sheet{ transition:none; transform:translateY(0); }
   }
   </style>
+
+<style id="ct-min-order-style">
+.ct-min-order{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:10px 16px;padding:11px 13px;border:1px solid rgba(21,154,98,.16);
+  border-radius:12px;background:#f2fbf6;color:#17352a;font-size:12px;
+}
+.ct-min-order strong{font-weight:800;color:#b35f00}
+.ct-min-order span{font-weight:700;color:#66736d;text-align:right}
+.ct-min-order.is-reached{background:#f0faf5;border-color:rgba(21,154,98,.24)}
+.ct-min-order.is-reached strong{color:#159a62}
+</style>
+
 </head>
 
 <body class="ct-page">
@@ -1871,7 +1884,72 @@ function syncFooterOffset() {
 }
 
 /* ── Checkout ───────────────────────────────────────────────────────────── */
+
+/* ── Restaurant minimum-order guard ──────────────────────────────── */
+function ctGetMinimumOrder() {
+  const r = window.ctRestaurant || window.currentRestaurant || window.restaurantData || {};
+  const raw = r.minimumOrder ?? r.minimumOrderAmount ?? r.minOrder ?? r.minOrderAmount;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function ctGetCartSubtotalForMinimum() {
+  if (typeof subtotal === 'number' && Number.isFinite(subtotal)) return subtotal;
+  if (typeof ctState !== 'undefined' && Number.isFinite(Number(ctState.subtotal))) {
+    return Number(ctState.subtotal);
+  }
+  return 0;
+}
+
+function ctUpdateMinimumOrderUI() {
+  const minimum = ctGetMinimumOrder();
+  const current = ctGetCartSubtotalForMinimum();
+  const footerBtn =
+    document.getElementById('place-order-btn') ||
+    document.getElementById('checkout-btn') ||
+    document.querySelector('[data-place-order]');
+
+  let box = document.getElementById('ct-min-order');
+
+  if (!minimum) {
+    if (box) box.remove();
+    if (footerBtn) footerBtn.disabled = false;
+    return true;
+  }
+
+  const remaining = Math.max(0, minimum - current);
+  const reached = remaining <= 0;
+
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'ct-min-order';
+    box.className = 'ct-min-order';
+    const target = document.querySelector('.ct-items, #cart-items, .ct-card');
+    if (target && target.parentNode) target.parentNode.insertBefore(box, target);
+    else document.body.appendChild(box);
+  }
+
+  box.innerHTML = reached
+    ? '<strong>✓ Minimum order reached</strong><span>₹' + minimum.toFixed(0) + ' minimum</span>'
+    : '<strong>Add ₹' + Math.ceil(remaining).toFixed(0) + ' more</strong><span>Minimum order ₹' + minimum.toFixed(0) + '</span>';
+
+  box.classList.toggle('is-reached', reached);
+
+  if (footerBtn) footerBtn.disabled = !reached;
+  return reached;
+}
+
+
 async function placeOrder() {
+  if (!ctUpdateMinimumOrderUI()) {
+    const minimum = ctGetMinimumOrder();
+    const current = ctGetCartSubtotalForMinimum();
+    const remaining = Math.max(0, minimum - current);
+    showToast(`Add ₹${Math.ceil(remaining)} more to reach the ₹${minimum} minimum order.`, 'error');
+    return;
+  }
+
+
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
 
   // UI guard only. Backend validation below is untouched.
