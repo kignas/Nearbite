@@ -1972,7 +1972,9 @@ async function placeOrder() {
   }
 
   if (!hasAddress()) {
-    window.location.href = 'address.html';
+    // Send the customer directly into address setup and preserve checkout
+    // intent so a successful save returns to the cart.
+    window.location.href = 'address.html?add=1&return=cart';
     return;
   }
 
@@ -2442,10 +2444,6 @@ async function ctEnsureProfile() {
   // A cached login profile is enough to paint immediately, but when a token is
   // present always refresh from the authenticated backend so edited profile
   // data is reflected on Cart.
-  if (!token) {
-    paintCheckoutDeliverySummary();
-    return;
-  }
   if (!token) {
     paintCheckoutDeliverySummary();
     return;
