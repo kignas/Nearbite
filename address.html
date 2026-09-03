@@ -15,6 +15,7 @@
      without any global change to style.css. -->
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 
 <style>
 /* ===== Eatswada onboarding design system — identical in login.html,
@@ -693,7 +694,7 @@ async function loadAccount(){
     }
   } catch {}
   // Signup placeholders are not a real receiver name.
-  if (account && /^(Nearbite|Eatswada) User$/.test(account.name)) account.name = '';
+  if (account && /^(Eatswada|Eatswada) User$/.test(account.name)) account.name = '';
 }
 
 function accountUsable(){

@@ -1122,6 +1122,7 @@ body.menu-search-open .cat-nav{top:118px!important}
   </div>
 
   <script src="config.js"></script>
+<script src="safe-html.js"></script>
   <script src="api.js"></script>
   <script src="cart-bar.js"></script>
   <script>
@@ -1213,12 +1214,27 @@ body.menu-search-open .cat-nav{top:118px!important}
     window.scrollTo({ top, behavior: 'smooth' });
   }
 
+  /* Builds a JS string literal that is safe to sit inside an HTML attribute.
+     JSON.stringify handles every JS-string hazard (quotes, backslashes,
+     newlines, line separators); escapeMenuHtml then handles the HTML layer,
+     and the parser decodes it back before the JS is parsed.
+
+     This replaces a hand-rolled .replace(/'/g, "\\'") that escaped quotes but
+     NOT backslashes — a dish named  Chef\  produced  'Chef\\'  , which ends the
+     string early and lets the rest of the name run as JavaScript in the
+     browser of every customer who opens the menu. */
+  function jsArg(value) {
+    return escapeMenuHtml(JSON.stringify(String(value == null ? '' : value)));
+  }
+
   window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
-    const safeName = itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    const safeId = String(rId).replace(/['"]/g, ''); 
-    const safeMenuItemId = String(menuItemId || '').replace(/['"]/g, '');
-    const safeImage = String(image || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const safeName = jsArg(itemName);
+    const safeId = jsArg(rId);
+    const safeMenuItemId = jsArg(menuItemId || '');
+    const safeImage = jsArg(resolveMenuImage(image) || '');
     const vegArg = isVeg ? 'true' : 'false';
+    const numPrice = Number(price) || 0;
+    const numOriginal = Number(originalPrice) || 0;
     const isItemAvailable = inStock !== false && isRestaurantOpen;
 
     if (qty > 0) {
@@ -1226,16 +1242,16 @@ body.menu-search-open .cat-nav{top:118px!important}
       // If the restaurant is CLOSED, all changes (add and remove) are disabled.
       const plusBtn = !isItemAvailable
         ? `<button class="nb-qty-btn is-disabled" onclick="notifyItemUnavailable()" aria-label="Item unavailable">+</button>`
-        : `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" class="nb-qty-btn" aria-label="Increase quantity">+</button>`;
+        : `<button onclick="updateCart(${safeName}, 1, ${numPrice}, ${safeId}, true, ${safeMenuItemId}, ${safeImage}, ${vegArg}, ${numOriginal})" class="nb-qty-btn" aria-label="Increase quantity">+</button>`;
       
       const minusBtn = !isRestaurantOpen
         ? `<button class="nb-qty-btn is-disabled" onclick="notifyItemUnavailable()" aria-label="Item unavailable">−</button>`
-        : `<button onclick="updateCart('${safeName}', -1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" class="nb-qty-btn" aria-label="Decrease quantity">−</button>`;
+        : `<button onclick="updateCart(${safeName}, -1, ${numPrice}, ${safeId}, true, ${safeMenuItemId}, ${safeImage}, ${vegArg}, ${numOriginal})" class="nb-qty-btn" aria-label="Decrease quantity">−</button>`;
 
       return `
         <div class="nb-qty${!isItemAvailable ? ' is-disabled' : ''}" role="group" aria-label="Quantity">
            ${minusBtn}
-           <span class="nb-qty-val">${qty}</span>
+           <span class="nb-qty-val">${escapeMenuHtml(qty)}</span>
            ${plusBtn}
          </div>`;
     }
@@ -1243,7 +1259,7 @@ body.menu-search-open .cat-nav{top:118px!important}
     if (!isItemAvailable) {
       return `<button class="nb-add-btn is-disabled" disabled>Unavailable</button>`;
     }
-    return `<button onclick="updateCart('${safeName}', 1, ${price}, '${safeId}', true, '${safeMenuItemId}', '${safeImage}', ${vegArg}, ${Number(originalPrice) || 0})" class="nb-add-btn" aria-label="Add ${safeName} to cart">ADD</button>`;
+    return `<button onclick="updateCart(${safeName}, 1, ${numPrice}, ${safeId}, true, ${safeMenuItemId}, ${safeImage}, ${vegArg}, ${numOriginal})" class="nb-add-btn" aria-label="Add ${escapeMenuHtml(itemName)} to cart">ADD</button>`;
   };
 
   function notifyItemUnavailable() {
@@ -1315,7 +1331,8 @@ body.menu-search-open .cat-nav{top:118px!important}
     }
 
     node.style.display = '';
-    node.innerHTML = iconHtml + ' ' + value;
+    // iconHtml is a literal in every call site; value can come from the API.
+    node.innerHTML = iconHtml + ' ' + escapeMenuHtml(value);
   }
 
   function selectedCustomerCoords() {
@@ -1471,7 +1488,7 @@ body.menu-search-open .cat-nav{top:118px!important}
     const categories = groups.map(group => group.name);
 
     navInner.innerHTML = categories.map((cat, i) => {
-      const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+      const catId = categoryDomId(cat);
       return `<div class="cat-nav-pill ${i === 0 ? 'active' : ''}" data-target="${catId}" onclick="scrollToCategory('${catId}')">${escapeMenuHtml(cat)}</div>`;
     }).join('');
 
@@ -1481,7 +1498,7 @@ body.menu-search-open .cat-nav{top:118px!important}
     let globalIdx = 0;
 
     menuContainer.innerHTML = groups.map(group => {
-      const catId = 'cat-' + group.name.replace(/\s+/g, '-').toLowerCase();
+      const catId = categoryDomId(group.name);
 
       const itemsHTML = group.items.map(item => {
         const key = String(item.name).replace(/\s+/g, '');
@@ -1606,6 +1623,18 @@ body.menu-search-open .cat-nav{top:118px!important}
     if (/^data:image\/[a-z0-9.+-]+;base64,/i.test(url)) return url;   // inline image
     if (/^[a-z][a-z0-9.+-]*:/i.test(url)) return '';                  // any other scheme
     return url;                                                       // relative path
+  }
+
+  /* Category names come from the vendor and used to be pasted straight into
+     an inline onclick="scrollToCategory('...')" handler, where a name like
+     a'); alert(1);// would break out of the string and run. Strip everything
+     that isn't a letter, digit or dash so the id can only ever be an id. */
+  function categoryDomId(name) {
+    return 'cat-' + String(name == null ? '' : name)
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9\-]/g, '')
+      .slice(0, 60) || 'cat';
   }
 
   function escapeMenuHtml(value) {

@@ -822,7 +822,14 @@
     <div id="payment-options" class="ct-pay">
       <div class="ct-pay-label">Payment method</div>
 
-      <div class="payment-method-option selected" data-method="upi" onclick="selectPaymentMethod('upi')">
+      <!-- ONLINE PAYMENT IS NOT LIVE.
+           There is no payment gateway in the order path — the backend now
+           rejects every method except 'cod'. Showing an "Online" tile that
+           silently creates an unpaid order is exactly the fake control this
+           app is not allowed to have, so it stays hidden until Razorpay is
+           actually wired up and verified server-side. Delete this block (and
+           re-enable the method in orderController) together, never separately. -->
+      <div class="payment-method-option" data-method="upi" onclick="selectPaymentMethod('upi')" style="display:none;" hidden>
         <div class="ct-pay-head">
           <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
           <i class="fa-solid fa-circle-check payment-check"></i>
@@ -833,7 +840,7 @@
         </div>
       </div>
 
-      <div id="cod-payment-option" class="payment-method-option" data-method="cod" onclick="selectPaymentMethod('cod')" style="display:none;">
+      <div id="cod-payment-option" class="payment-method-option selected" data-method="cod" onclick="selectPaymentMethod('cod')">
         <div class="ct-pay-head">
           <div class="cod-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
           <i class="fa-regular fa-circle payment-check"></i>
@@ -988,6 +995,7 @@
   </div>
 
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 <script>
 /* ============================================================================
    EATSWADA CART — Phase 3.1
@@ -1138,7 +1146,7 @@ function ctCaptureProfile(user) {
   const phone = typeof user.phone === 'string' ? user.phone.trim() : '';
 
   // Never replace a real profile name with the OTP onboarding placeholder.
-  if (name && name !== 'Nearbite User') ctProfile.name = name;
+  if (name && name !== 'Eatswada User') ctProfile.name = name;
   if (phone) ctProfile.phone = phone;
   ctProfile.fetched = true;
 }
@@ -1150,7 +1158,7 @@ function ctCaptureProfile(user) {
   try {
     const cached = JSON.parse(localStorage.getItem('nearbite_user') || 'null');
     if (cached && typeof cached === 'object') {
-      if (typeof cached.name === 'string' && cached.name.trim() && cached.name.trim() !== 'Nearbite User') {
+      if (typeof cached.name === 'string' && cached.name.trim() && cached.name.trim() !== 'Eatswada User') {
         ctProfile.name = cached.name.trim();
       }
       if (typeof cached.phone === 'string' && cached.phone.trim()) {
@@ -1210,7 +1218,7 @@ async function calculateCurrentDelivery(options) {
   const needsHydration = force || ctAddrHydratedFor !== selectedAddressId;
   if (token && selectedAddressId && needsHydration) {
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+      const response = await fetch(`${CONFIG.API_BASE_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
       const result = await response.json();
       if (response.ok && result.success) {
         ctCaptureProfile(result.data);
@@ -1241,31 +1249,52 @@ async function calculateCurrentDelivery(options) {
   return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0, codEnabled: restaurantInfo?.codEnabled === true };
 }
 
-/* ── Payment (behaviour unchanged) ──────────────────────────────────────── */
-let selectedPaymentMethod = localStorage.getItem('nearbite_payment_method') || 'upi';
+/* ── Payment ─────────────────────────────────────────────────────────────
+   Cash on delivery is the only method the backend accepts today (there is no
+   gateway in the order path). This is kept as a one-value function rather
+   than deleted so re-enabling online payment later is a small, obvious diff. */
+const AVAILABLE_PAYMENT_METHODS = ['cod'];
+let selectedPaymentMethod = 'cod';
 
 function selectPaymentMethod(method) {
-  selectedPaymentMethod = method === 'cod' ? 'cod' : 'upi';
+  selectedPaymentMethod = AVAILABLE_PAYMENT_METHODS.includes(method) ? method : 'cod';
   localStorage.setItem('nearbite_payment_method', selectedPaymentMethod);
   document.querySelectorAll('.payment-method-option').forEach(el => {
-    const active = el.dataset.method === selectedPaymentMethod && el.style.display !== 'none';
+    const active = el.dataset.method === selectedPaymentMethod && !el.hidden;
     el.classList.toggle('selected', active);
     const icon = el.querySelector('.payment-check');
     if (icon) icon.className = active ? 'fa-solid fa-circle-check payment-check' : 'fa-regular fa-circle payment-check';
   });
 }
 
+/* A restaurant with codEnabled false cannot take any order at all right now,
+   because COD is the only method. Say so plainly instead of leaving a Place
+   order button that the server will reject. */
 function syncPaymentOptions(codEnabled) {
   const codOption = document.getElementById('cod-payment-option');
-  if (!codOption) return;
-  codOption.style.display = codEnabled ? 'flex' : 'none';
   const grid = document.getElementById('payment-options');
-  if (grid) grid.classList.toggle('is-single', !codEnabled);
-  if (!codEnabled && selectedPaymentMethod === 'cod') {
-    selectedPaymentMethod = 'upi';
-    localStorage.setItem('nearbite_payment_method', 'upi');
+  if (!codOption || !grid) return;
+
+  let notice = document.getElementById('ct-pay-unavailable');
+  if (!notice) {
+    notice = document.createElement('div');
+    notice.id = 'ct-pay-unavailable';
+    notice.className = 'ct-pay-label';
+    notice.style.cssText = 'color:#b42318;font-weight:700;';
+    grid.appendChild(notice);
   }
-  selectPaymentMethod(selectedPaymentMethod);
+
+  codOption.style.display = codEnabled ? 'flex' : 'none';
+  notice.textContent = codEnabled
+    ? ''
+    : 'This restaurant is not accepting orders right now.';
+  notice.style.display = codEnabled ? 'none' : 'block';
+  grid.classList.toggle('is-single', true);
+
+  const checkoutBtn = document.getElementById('btn-checkout');
+  if (checkoutBtn && !codEnabled) checkoutBtn.disabled = true;
+
+  selectPaymentMethod('cod');
 }
 
 /* ── Shared UI state ────────────────────────────────────────────────────── */
@@ -1378,7 +1407,9 @@ function readCart() {
    image. Nothing is invented when the field is absent. */
 function itemImage(info) {
   const url = info && (info.image || info.imageUrl);
-  return (typeof url === 'string' && url.trim()) ? url.trim() : '';
+  // safeUrl() drops javascript:/data: URLs so a stored value can never
+  // become an executable src="". Comes from safe-html.js.
+  return (typeof url === 'string' && url.trim()) ? safeUrl(url.trim()) : '';
 }
 
 /* Veg mark: strictly boolean. Unknown/null/undefined renders nothing. */
@@ -1758,7 +1789,7 @@ function clearCart() {
   localStorage.removeItem('nearbite_cart');
   localStorage.removeItem('nearbite_payment_method');
   clearCartExtras();
-  selectedPaymentMethod = 'upi';
+  selectedPaymentMethod = 'cod';
   renderCart();
 }
 
@@ -1790,7 +1821,7 @@ async function loadAddress() {
   // browser's localStorage. Hydrate the local cart UI from their saved profile.
   if (token && !hasAddress()) {
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/users/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await response.json();
@@ -2449,7 +2480,7 @@ async function ctEnsureProfile() {
     return;
   }
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/users/profile`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store'
     });

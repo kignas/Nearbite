@@ -12,6 +12,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="config.js"></script>
+<script src="safe-html.js"></script>
   <style>
     /* ===== Eatswada onboarding design system — identical in login.html,
        complete-profile.html, location-onboarding.html and address.html ===== */
@@ -377,7 +378,7 @@
       $('phone').value = formatPhone(user.phone || cached.phone || '');
 
       // Placeholder names created by signup are not shown as a real name.
-      if (user.name && user.name !== 'Nearbite User' && user.name !== 'Eatswada User') $('name').value = user.name;
+      if (user.name && user.name !== 'Eatswada User' && user.name !== 'Eatswada User') $('name').value = user.name;
       if (user.email) $('email').value = user.email;
     } catch (e){
       console.warn('Could not load existing profile', e);

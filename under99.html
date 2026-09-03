@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#ffffff">
-<title>₹99 Store – Nearbite</title>
+<title>₹99 Store – Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
@@ -142,6 +142,7 @@ main{padding:16px 14px 20px}
 </main>
 
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 <script src="api.js"></script>
 <script>
 /* ================================================================
@@ -275,8 +276,8 @@ main{padding:16px 14px 20px}
 
       return '<article class="card">' +
         '<div class="image-wrap">' +
-          (item.image
-            ? '<img src="' + esc(item.image) + '" alt="' + esc(item.name) +
+          (safeUrl(item.image)
+            ? '<img src="' + esc(safeUrl(item.image)) + '" alt="' + esc(item.name) +
               '" loading="lazy" class="food-img' + (item.image.indexOf('png') !== -1 ? ' food-img-contain' : '') +
               '" onerror="this.closest(\'.image-wrap\').classList.add(\'no-image\'); this.remove();">'
             : '<div class="img-fallback"><i class="fa-solid fa-utensils"></i></div>') +

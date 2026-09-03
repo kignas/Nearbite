@@ -130,6 +130,7 @@
 </main>
 
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 <script src="api.js"></script>
 <script>
 (function(){
@@ -150,9 +151,9 @@
   function renderGallery(r){
     const gallery = Array.isArray(r.images)&&r.images.length ? r.images : (r.image ? [r.image] : []);
     const el = $('#gallery');
-    if(!gallery.length){el.classList.add('empty');el.innerHTML='<i class="fa-solid fa-store"></i>';return;}
-    const safe = esc(gallery[0]);
-    el.innerHTML='<img src="'+safe+'" alt="'+esc(r.name||'Restaurant')+'" loading="eager">';
+    const src = safeUrl(gallery[0]);
+    if(!gallery.length || !src){el.classList.add('empty');el.innerHTML='<i class="fa-solid fa-store"></i>';return;}
+    el.innerHTML='<img src="'+esc(src)+'" alt="'+esc(r.name||'Restaurant')+'" loading="eager">';
   }
 
   function renderHours(r){
@@ -217,7 +218,7 @@
         const score=Number(r.score??r.rating??r.foodRating);
         const text=r.comment||r.text||r.review||'';
         const photo=r.image||r.photo||r.foodImage||r.imageUrl||'';
-        return '<article class="review"><div class="review-head"><span class="review-name">'+esc(n)+'</span><span class="rating">'+(Number.isFinite(score)?'★ '+score.toFixed(1):'')+'</span></div>'+(text?'<p class="review-text">'+esc(text)+'</p>':'')+(photo?'<img class="review-photo" src="'+esc(photo)+'" alt="Customer food photo" loading="lazy">':'')+'</article>';
+        return '<article class="review"><div class="review-head"><span class="review-name">'+esc(n)+'</span><span class="rating">'+(Number.isFinite(score)?'★ '+score.toFixed(1):'')+'</span></div>'+(text?'<p class="review-text">'+esc(text)+'</p>':'')+(safeUrl(photo)?'<img class="review-photo" src="'+esc(safeUrl(photo))+'" alt="Customer food photo" loading="lazy">':'')+'</article>';
       }).join('');
     }catch(e){}
   }

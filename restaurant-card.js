@@ -120,6 +120,10 @@
 
       return list
         .filter(function (src) { return typeof src === 'string' && src.trim(); })
+        // Escaping alone still lets a stored javascript:/data: URL reach src="".
+        // safeUrl (safe-html.js) returns '' for anything that isn't http(s).
+        .map(function (src) { return typeof safeUrl === 'function' ? safeUrl(src) : src; })
+        .filter(Boolean)
         .slice(0, 4);
     },
 

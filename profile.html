@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<title>Profile · Nearbite</title>
+<title>Profile · Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
@@ -274,6 +274,7 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="restaurant-card.css">
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 </head>
 <body>
 <div class="app">
@@ -287,7 +288,7 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   <div class="profile-hero">
     <div class="avatar" id="avatar">N</div>
     <div class="user">
-      <h1 id="userName">Nearbite User</h1>
+      <h1 id="userName">Eatswada User</h1>
       <p id="userPhone">Loading account…</p>
       <div class="verified"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span id="verifiedText">Verified phone account</span></div>
     </div>
@@ -356,7 +357,7 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
       </a>
       <a class="row is-nav" href="legal.html">
         <div class="row-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
-        <div class="row-main"><div class="row-title">Terms, privacy & refunds</div><div class="row-sub">Read Nearbite policies</div></div>
+        <div class="row-main"><div class="row-title">Terms, privacy & refunds</div><div class="row-sub">Read Eatswada policies</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
     </div>
@@ -423,7 +424,7 @@ function normalizeUser(payload){
 }
 function saveUser(u){localStorage.setItem('nearbite_user',JSON.stringify(u))}
 function renderUser(u){
-  const name=u.name||'Nearbite User';
+  const name=u.name||'Eatswada User';
   $('userName').textContent=name;
   $('userPhone').textContent=u.phone||'Phone not available';
   $('nameValue').textContent=name;
@@ -452,7 +453,7 @@ async function loadProfile(){
       localStorage.removeItem('nearbite_token');localStorage.removeItem('token');localStorage.removeItem('nearbite_user');
       location.replace('login.html');return null;
     }
-    if(!cached)renderUser({name:'Nearbite User',phone:'Account unavailable'});
+    if(!cached)renderUser({name:'Eatswada User',phone:'Account unavailable'});
     return cached||null;
   }
 }
@@ -509,7 +510,7 @@ $('cancelEdit').onclick=closeEdit;
 $('saveEdit').onclick=saveEdit;
 $('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEdit()});
 $('logoutBtn').onclick=()=>{
-  if(!confirm('Log out of Nearbite on this device?'))return;
+  if(!confirm('Log out of Eatswada on this device?'))return;
   localStorage.removeItem('token');
   localStorage.removeItem('nearbite_token');
   localStorage.removeItem('nearbite_user');

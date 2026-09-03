@@ -213,7 +213,7 @@
     .otp-title{font-size:22px;font-weight:800;letter-spacing:-.55px;line-height:1.2;color:var(--ink)}
     .otp-sub{margin-top:7px;margin-bottom:22px;font-size:14px;font-weight:500;line-height:1.5;color:var(--muted)}
 
-    .otp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:280px}
+    .otp-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;max-width:320px}
     .otp-grid.shake{animation:shake .3s}
     @keyframes shake{
       0%,100%{transform:translateX(0)}
@@ -291,8 +291,8 @@
       .bottom-sheet{padding-left:15px;padding-right:15px}
       .sheet-title,.otp-title{font-size:20px}
       .hero-title{font-size:22px}
-      .otp-box{height:54px;font-size:20px}
-      .otp-grid{gap:8px}
+      .otp-box{height:50px;font-size:18px}
+      .otp-grid{gap:5px}
     }
 
     @media(max-height:700px){
@@ -304,6 +304,7 @@
 
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 </head>
 <body>
 
@@ -387,18 +388,20 @@
     <div id="step2" class="step-container">
       <button class="btn-back-otp tap" onclick="goBack()" aria-label="Change phone number"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
       <h2 class="otp-title">Verify your number</h2>
-      <div class="otp-sub">Enter the 4-digit code sent to <span id="displayPhone" style="color:#111827; font-weight:800;"></span></div>
+      <div class="otp-sub">Enter the 6-digit code sent to <span id="displayPhone" style="color:#111827; font-weight:800;"></span></div>
 
       <div id="step2Banner" class="banner-error" role="alert" aria-live="assertive">
         <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
         <span id="step2BannerText"></span>
       </div>
 
-      <div class="otp-grid" id="otpGrid" role="group" aria-label="4-digit verification code">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="one-time-code" class="otp-box" maxlength="1" aria-label="Digit 1 of 4" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)" onpaste="handleOtpPaste(event)">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 2 of 4" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 3 of 4" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 4 of 4" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
+      <div class="otp-grid" id="otpGrid" role="group" aria-label="6-digit verification code">
+        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="one-time-code" class="otp-box" maxlength="1" aria-label="Digit 1 of 6" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)" onpaste="handleOtpPaste(event)">
+        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 2 of 6" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
+        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 3 of 6" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
+        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 4 of 6" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
+        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 5 of 6" oninput="moveNext(this, 4)" onkeydown="moveBack(event, 4)">
+        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 6 of 6" oninput="moveNext(this, 5)" onkeydown="moveBack(event, 5)">
       </div>
       <button type="button" id="verifyOtpBtn" class="verify-otp-btn tap" onclick="verifyOTP()" disabled aria-label="Verify OTP">
         <span id="verifyOtpBtnText">Verify OTP</span>
@@ -450,10 +453,10 @@
       <div class="sheet-header">
         <div class="brand-mark">Eatswada</div>
         <h2 class="sheet-title">Create a new password</h2>
-        <p class="sheet-sub">Enter the 4-digit OTP and your new password</p>
+        <p class="sheet-sub">Enter the 6-digit OTP and your new password</p>
       </div>
       <label class="auth-label" for="forgotOtpInput">Verification code</label>
-      <input class="auth-field" id="forgotOtpInput" type="tel" inputmode="numeric" maxlength="4" placeholder="4-digit OTP" autocomplete="one-time-code">
+      <input class="auth-field" id="forgotOtpInput" type="tel" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" autocomplete="one-time-code">
       <label class="auth-label" for="forgotNewPasswordInput">New password</label>
       <input class="auth-field" id="forgotNewPasswordInput" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
       <div id="resetBanner" class="banner-error" role="alert"><i class="fa-solid fa-triangle-exclamation"></i><span id="resetBannerText"></span></div>
@@ -497,7 +500,7 @@
        a map location happens to be cached. */
     function routeAfterAuthentication(profile, requestedPage) {
       const addresses = Array.isArray(profile && profile.addresses) ? profile.addresses : [];
-      const placeholderName = /^(Nearbite|Eatswada) User$/;
+      const placeholderName = /^(Eatswada|Eatswada) User$/;
       const hasRealName = !!(profile && profile.name) && !placeholderName.test(profile.name.trim());
       const hasAddress = addresses.length > 0 || !!(profile && profile.defaultAddress);
 
@@ -953,7 +956,9 @@
       if (phone.length !== 10) { text.textContent = 'Enter a valid 10-digit mobile number.'; banner.classList.add('show'); return; }
       setAuthBtnLoading('forgotSendBtn', true, 'Send OTP');
       try {
-        const res = await fetch(`${API_URL}/forgot-password/send-otp`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:'+91'+phone}) });
+        // Route is /forgot-password. /forgot-password/send-otp never existed,
+        // so this sheet could never send a code at all.
+        const res = await fetch(`${API_URL}/forgot-password`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:'+91'+phone}) });
         const data = await res.json().catch(()=>({}));
         if (!res.ok || !data.success) { text.textContent = data.message || 'Unable to send the code. Please try again.'; banner.classList.add('show'); return; }
         window._forgotPhone = '+91'+phone;
@@ -964,15 +969,26 @@
     }
 
     async function resetPassword() {
-      const otp = document.getElementById('forgotOtpInput').value.replace(/\D/g,'').slice(0,4);
+      const otp = document.getElementById('forgotOtpInput').value.replace(/\D/g,'').slice(0,6);
       const password = document.getElementById('forgotNewPasswordInput').value;
       const banner = document.getElementById('resetBanner'); const text = document.getElementById('resetBannerText');
       banner.classList.remove('show');
-      if (!/^\d{4}$/.test(otp)) { text.textContent='Enter the 4-digit verification code.'; banner.classList.add('show'); return; }
+      if (!/^\d{6}$/.test(otp)) { text.textContent='Enter the 6-digit verification code.'; banner.classList.add('show'); return; }
       if (password.length < 6) { text.textContent='Password must be at least 6 characters.'; banner.classList.add('show'); return; }
       setAuthBtnLoading('resetPasswordBtn', true, 'Reset password');
       try {
-        const res = await fetch(`${API_URL}/forgot-password/reset`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:window._forgotPhone,otp,password}) });
+        // Two steps, not one. The old code posted { phone, otp, password }
+        // straight to /reset, which expects { phone, resetToken, password } —
+        // the OTP was never verified and the reset always failed.
+        const verifyRes = await fetch(`${API_URL}/forgot-password/verify`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:window._forgotPhone,otp}) });
+        const verifyData = await verifyRes.json().catch(()=>({}));
+        if (!verifyRes.ok || !verifyData.success || !(verifyData.data && verifyData.data.resetToken)) {
+          text.textContent = (verifyData && verifyData.message) || 'Invalid or expired code.';
+          banner.classList.add('show');
+          return;
+        }
+
+        const res = await fetch(`${API_URL}/forgot-password/reset`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:window._forgotPhone,resetToken:verifyData.data.resetToken,password}) });
         const data = await res.json().catch(()=>({}));
         if (!res.ok || !data.success) { text.textContent=data.message || 'Invalid or expired code.'; banner.classList.add('show'); return; }
         alert('Password reset successfully. Please log in with your new password.');
@@ -1002,7 +1018,7 @@
         const updateRes = await fetch(`${API_URL}/profile`, { method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({name,email:email||undefined}) });
         const updateData = await updateRes.json().catch(()=>({}));
         if (!updateRes.ok || !updateData.success) throw new Error(updateData.message || 'Unable to save your profile.');
-        const passRes = await fetch(`${API_URL}/password`, { method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({password}) });
+        const passRes = await fetch(`${API_URL}/profile`, { method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({password}) });
         const passData = await passRes.json().catch(()=>({}));
         if (!passRes.ok || !passData.success) throw new Error(passData.message || 'Unable to create your password.');
         localStorage.setItem('nearbite_user', JSON.stringify(updateData.data || passData.data?.user || {}));

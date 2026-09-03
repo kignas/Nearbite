@@ -135,6 +135,7 @@
 </style>
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
+<script src="safe-html.js"></script>
 <script src="api.js"></script>
 </head>
 <body class="bg-white pb-24">
@@ -251,7 +252,7 @@
       const id=esc(res._id||res.id||'');
       const dishes=(Array.isArray(res.menu)?res.menu:[]).filter(i=>String(i.name||'').toLowerCase().includes(q)).slice(0,3).map(i=>i.name).join(', ');
       return `<a href="restaurant.html?id=${encodeURIComponent(id)}" class="result-card">
-        <img src="${esc(res.image||res.img||'')}" alt="${esc(res.name)}" onerror="this.style.display='none'">
+        <img src="${esc(safeUrl(res.image||res.img||''))}" alt="${esc(res.name)}" onerror="this.style.display='none'">
         <div class="result-main">
           <div class="result-title-row">
             <strong>${esc(res.name)}</strong>

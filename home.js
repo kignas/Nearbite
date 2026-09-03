@@ -618,7 +618,7 @@
       return '<a class="cat-item" href="category.html?type=' + encodeURIComponent(cat.type) +
         '" style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
         '<span class="cat-ring">' +
-          '<img src="' + card.escape(cat.image) + '" alt="' + card.escape(cat.name) +
+          '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
           '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
           ' onerror="this.closest(\'.cat-item\').remove()">' +
         '</span>' +
