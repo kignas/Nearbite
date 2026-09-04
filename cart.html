@@ -448,6 +448,15 @@
   .ct-line-act[hidden]{ display:none; }
   .ct-line-chev{ flex:0 0 auto; font-size:11px; color:#B6BDC4; }
   .ct-line-chev[hidden]{ display:none; }
+  /* Per-restaurant note card, rendered inside a restaurant group. Sits tight
+     under that restaurant's items and shows the saved note in the title when
+     set (the full note is always kept in state, the display is clamped). */
+  .ct-restaurant-group .ct-note-card{ margin:2px 14px 14px; }
+  .ct-note-card.is-set .ct-line-title{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; font-weight:700; letter-spacing:0;
+  }
+  .ct-line-sub[hidden]{ display:none; }
 
   /* ── Tip ──────────────────────────────────────────────────────────── */
   .ct-tip-note{
@@ -753,16 +762,11 @@
       <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
     </button>
 
-    <!-- ── Note for the restaurant ───────────────────────────────────── -->
-    <button type="button" class="ct-line-card tap" data-note-field="restaurantNote" aria-haspopup="dialog">
-      <span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>
-      <span class="ct-line-copy">
-        <span class="ct-line-title" data-role="title">Add a note for the restaurant</span>
-        <span class="ct-line-sub" data-role="sub">Spice level, allergies, packaging &mdash; anything the kitchen should know</span>
-      </span>
-      <span class="ct-line-act" data-role="act" hidden>Edit</span>
-      <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
-    </button>
+    <!-- ── Note for the restaurant ───────────────────────────────────────
+         Phase 3.5B: per-restaurant notes now render inside each restaurant
+         group in the cart list (see paintItems). A multi-restaurant cart must
+         never show one shared note field, so the old single card was removed.
+         Delivery instructions stay global (one field, one sheet) below. -->
 
     <!-- ── Delivery instructions (separate field, separate sheet) ─────── -->
     <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
@@ -1346,8 +1350,10 @@ const ctState = {
   unavailable: false,
   deliveryReady: false,
   deliveryFee: 0,
-  // Phase 3.1 — sent to the existing POST /orders endpoint.
-  restaurantNote: '',
+  // Sent to the existing POST /orders endpoint.
+  // Phase 3.5B: notes are per-restaurant, keyed by the real restaurant id
+  // (resId) already present on every cart item. { [restaurantId]: note }.
+  restaurantNotes: {},
   deliveryInstructions: '',
   tipAmount: 0
 };
@@ -1368,20 +1374,13 @@ const CT_TIP_MIN     = 1;
 const CT_TIP_MAX     = 1000;     // frontend sanity bound; the backend validates too
 const CT_TIP_PRESETS = [10, 20, 30, 50];
 
+// Copy for the per-restaurant note sheet is built dynamically (the title and
+// label include the restaurant's name), so only the global delivery-
+// instructions field is configured statically here.
+const CT_RESTAURANT_NOTE_SUGGESTIONS =
+  ['Please make it less spicy', 'Extra napkins, please', 'No onion', 'Pack the sauces separately'];
+
 const CT_NOTE_CFG = {
-  restaurantNote: {
-    idleTitle:    'Add a note for the restaurant',
-    idleSub:      'Spice level, allergies, packaging — anything the kitchen should know',
-    setTitle:     'Note added',
-    sheetTitle:   'Add a note for the restaurant',
-    fieldLabel:   'Your note for the restaurant',
-    help:         'Example: Please make it less spicy',
-    saveLabel:    'Save note',
-    removeLabel:  'Remove note',
-    savedToast:   'Note saved for the restaurant',
-    removedToast: 'Restaurant note removed',
-    suggestions:  ['Please make it less spicy', 'Extra napkins, please', 'No onion', 'Pack the sauces separately']
-  },
   deliveryInstructions: {
     idleTitle:    'Add delivery instructions',
     idleSub:      'Tell your delivery partner how to reach you',
@@ -1410,19 +1409,50 @@ function ctCleanTip(value) {
   return Math.min(n, CT_TIP_MAX);
 }
 
+/* Notes keyed by restaurant id. Accepts the stored object form and the array
+   form; drops empty notes and bad keys so nothing invalid reaches checkout. */
+function ctCleanNotesMap(value) {
+  const out = {};
+  if (Array.isArray(value)) {
+    value.forEach(entry => {
+      if (!entry || typeof entry !== 'object') return;
+      const key = entry.restaurantId != null ? entry.restaurantId : entry.id;
+      const note = ctCleanNote(entry.note);
+      if (key && key !== 'undefined' && key !== 'null' && note) out[String(key)] = note;
+    });
+  } else if (value && typeof value === 'object') {
+    Object.entries(value).forEach(([key, raw]) => {
+      const note = ctCleanNote(raw);
+      if (key && key !== 'undefined' && key !== 'null' && note) out[String(key)] = note;
+    });
+  }
+  return out;
+}
+
 function loadCartExtras() {
   let raw = null;
   try { raw = JSON.parse(localStorage.getItem(CT_EXTRAS_KEY)); } catch (e) {}
   const data = (raw && typeof raw === 'object') ? raw : {};
-  ctState.restaurantNote       = ctCleanNote(data.restaurantNote);
+  ctState.restaurantNotes      = ctCleanNotesMap(data.restaurantNotes);
   ctState.deliveryInstructions = ctCleanNote(data.deliveryInstructions);
   ctState.tipAmount            = ctCleanTip(data.tipAmount);
+
+  // One-time migration: an older build stored a single global `restaurantNote`.
+  // If the cart currently holds exactly one restaurant, attach that note to it;
+  // otherwise it is dropped rather than copied onto every restaurant.
+  const legacy = ctCleanNote(data.restaurantNote);
+  if (legacy) {
+    const ids = getCartRestaurantIds(readCart() || {});
+    if (ids.length === 1 && !ctState.restaurantNotes[ids[0]]) {
+      ctState.restaurantNotes[ids[0]] = legacy;
+    }
+  }
 }
 
 function saveCartExtras() {
   try {
     localStorage.setItem(CT_EXTRAS_KEY, JSON.stringify({
-      restaurantNote: ctState.restaurantNote,
+      restaurantNotes: ctState.restaurantNotes || {},
       deliveryInstructions: ctState.deliveryInstructions,
       tipAmount: ctState.tipAmount
     }));
@@ -1430,10 +1460,41 @@ function saveCartExtras() {
 }
 
 function clearCartExtras() {
-  ctState.restaurantNote = '';
+  ctState.restaurantNotes = {};
   ctState.deliveryInstructions = '';
   ctState.tipAmount = 0;
   try { localStorage.removeItem(CT_EXTRAS_KEY); } catch (e) {}
+}
+
+/* Drop notes for restaurants that are no longer in the cart, so a removed
+   restaurant can never contribute a stale note to checkout. Returns true if
+   anything was pruned. */
+function pruneRestaurantNotes(savedCart) {
+  if (!ctState.restaurantNotes || typeof ctState.restaurantNotes !== 'object') {
+    ctState.restaurantNotes = {};
+    return false;
+  }
+  const ids = new Set(getCartRestaurantIds(savedCart || {}).map(String));
+  let changed = false;
+  Object.keys(ctState.restaurantNotes).forEach(key => {
+    if (!ids.has(String(key))) { delete ctState.restaurantNotes[key]; changed = true; }
+  });
+  if (changed) saveCartExtras();
+  return changed;
+}
+
+/* Build the { [restaurantId]: note } object sent at checkout — only for the
+   given restaurant ids (those currently in the cart), only non-empty notes,
+   each cleaned and length-capped. A note is never attached to a restaurant
+   that is not in this list, and never copied from one restaurant to another. */
+function buildCheckoutRestaurantNotes(restaurantIds) {
+  const out = {};
+  (restaurantIds || []).forEach(id => {
+    const note = ctState.restaurantNotes && ctState.restaurantNotes[id];
+    const clean = ctCleanNote(note);
+    if (clean) out[String(id)] = clean;
+  });
+  return out;
 }
 
 loadCartExtras();
@@ -1481,11 +1542,70 @@ function customLine(value) {
   return '';
 }
 
+/* ── Per-restaurant note card ────────────────────────────────────────────
+   Rendered inside each restaurant group. The real restaurant id (resId) is
+   the key; the name is display only. When a note exists the title shows it
+   (prefixed with a note glyph) and an Edit affordance replaces the chevron. */
+const CT_NOTE_IDLE_SUB = 'Spice level, allergies, packaging — anything the kitchen should know';
+
+function restaurantNoteCardMarkup(group) {
+  const rid = String(group.id || '');
+  // 'unknown' means the item carried no restaurant id; such carts are flushed
+  // elsewhere, and a note keyed on it could never be submitted — so skip it.
+  if (!rid || rid === 'unknown') return '';
+  const name = group.name || 'the restaurant';
+  const value = (ctState.restaurantNotes && ctState.restaurantNotes[rid]) || '';
+  const isSet = !!value;
+  const titleText = isSet ? ('📝 ' + value) : ('Add a note for ' + name);
+  const aria = isSet
+    ? ('Note for ' + name + ': ' + value + '. Tap to edit or remove.')
+    : ('Add a note for ' + name);
+  return `
+      <button type="button" class="ct-line-card ct-note-card tap${isSet ? ' is-set' : ''}"
+              data-restaurant-note-id="${esc(rid)}" data-restaurant-note-name="${esc(name)}"
+              aria-haspopup="dialog" aria-label="${esc(aria)}">
+        <span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>
+        <span class="ct-line-copy">
+          <span class="ct-line-title" data-role="title">${esc(titleText)}</span>
+          <span class="ct-line-sub" data-role="sub"${isSet ? ' hidden' : ''}>${esc(CT_NOTE_IDLE_SUB)}</span>
+        </span>
+        <span class="ct-line-act" data-role="act"${isSet ? '' : ' hidden'}>Edit</span>
+        <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev"${isSet ? ' hidden' : ''} aria-hidden="true"></i>
+      </button>`;
+}
+
+/* Update the in-group note cards in place after a note change, without
+   rebuilding the item rows (so quantity, scroll and focus are untouched). */
+function paintRestaurantNoteCards() {
+  document.querySelectorAll('.ct-note-card[data-restaurant-note-id]').forEach(card => {
+    const rid = card.dataset.restaurantNoteId;
+    const name = card.dataset.restaurantNoteName || 'the restaurant';
+    const value = (ctState.restaurantNotes && ctState.restaurantNotes[rid]) || '';
+    const isSet = !!value;
+    const title = card.querySelector('[data-role="title"]');
+    const sub   = card.querySelector('[data-role="sub"]');
+    const act   = card.querySelector('[data-role="act"]');
+    const chev  = card.querySelector('[data-role="chev"]');
+    card.classList.toggle('is-set', isSet);
+    if (title) title.textContent = isSet ? ('📝 ' + value) : ('Add a note for ' + name);
+    if (sub)  { sub.textContent = isSet ? '' : CT_NOTE_IDLE_SUB; sub.hidden = isSet; }
+    if (act)   act.hidden  = !isSet;
+    if (chev)  chev.hidden  = isSet;
+    card.setAttribute('aria-label', isSet
+      ? ('Note for ' + name + ': ' + value + '. Tap to edit or remove.')
+      : ('Add a note for ' + name));
+  });
+}
+
 /* ── Item painting: synchronous, never waits on the network ─────────────── */
 function paintItems(savedCart) {
   const listEl = document.getElementById('cart-items-list');
   const items = Object.entries(savedCart || {});
   const anyMedia = items.some(([, info]) => itemImage(info));
+
+  // Keep notes in step with the cart: a restaurant no longer present loses its
+  // note here, before it can ever be rendered or submitted.
+  pruneRestaurantNotes(savedCart);
 
   // Phase 3.5A: keep different restaurants visually separated in one cart.
   const groups = [];
@@ -1545,6 +1665,7 @@ function paintItems(savedCart) {
             </div>
           </div>`;
       }).join('')}
+      ${restaurantNoteCardMarkup(group)}
     </section>`).join('');
 
   const names = groups.map(g => g.name).filter(Boolean);
@@ -2076,6 +2197,7 @@ async function placeOrder() {
     try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) { savedAddress = null; }
 
     const total = subtotal + deliveryFee;
+    const restaurantNotes = buildCheckoutRestaurantNotes(restaurantIds);
     const payload = {
       items: itemsArray,
       deliveryAddress: savedAddress,
@@ -2087,8 +2209,14 @@ async function placeOrder() {
       deliveryFee,
       total,
       paymentMethod: selectedPaymentMethod,
-      restaurantNote: ctState.restaurantNote || '',
-      globalRestaurantNote: restaurantIds.length > 1,
+      // Per-restaurant notes, keyed by the real restaurant id, built ONLY for
+      // restaurants actually in the cart right now (stale notes never leak in).
+      // The same note is never copied across restaurants.
+      restaurantNotes: restaurantNotes,
+      // Legacy flat field: kept for a single-restaurant order (the existing
+      // backend contract). For multi-restaurant it is intentionally empty and
+      // the broadcast flag is omitted, so no note is applied to every order.
+      restaurantNote: restaurantIds.length === 1 ? (restaurantNotes[restaurantIds[0]] || '') : '',
       deliveryInstructions: ctState.deliveryInstructions || '',
       tipAmount: ctCleanTip(ctState.tipAmount)
     };
@@ -2252,12 +2380,50 @@ document.addEventListener('keydown', (event) => {
 });
 
 /* ══════════════════════════════════════════════════════════════════════════
-   RESTAURANT NOTE + DELIVERY INSTRUCTIONS
-   Two independent fields sharing one sheet. Which field is being edited is
-   held in ctNoteField, and the value is written back to ctState[field] —
-   never read out of the DOM at checkout time.
+   RESTAURANT NOTES + DELIVERY INSTRUCTIONS
+   One sheet serves two kinds of edit, described by ctNoteTarget:
+     { type:'instructions' }                       — global delivery note
+     { type:'restaurant', resId, resName }         — that restaurant's note
+   The value is written back to ctState — never read out of the DOM at
+   checkout time. Restaurant notes stay keyed by the real restaurant id.
    ═══════════════════════════════════════════════════════════════════════ */
-let ctNoteField = null;
+let ctNoteTarget = null;
+
+function ctNoteGet(target) {
+  if (!target) return '';
+  if (target.type === 'instructions') return ctState.deliveryInstructions || '';
+  return (ctState.restaurantNotes && ctState.restaurantNotes[target.resId]) || '';
+}
+
+function ctNoteSet(target, value) {
+  if (!target) return;
+  if (target.type === 'instructions') { ctState.deliveryInstructions = value; return; }
+  if (!ctState.restaurantNotes || typeof ctState.restaurantNotes !== 'object') ctState.restaurantNotes = {};
+  if (value) ctState.restaurantNotes[target.resId] = value;
+  else delete ctState.restaurantNotes[target.resId];   // empty note = removal
+}
+
+function ctNoteSheetCopy(target) {
+  if (target && target.type === 'restaurant') {
+    const name = target.resName || 'the restaurant';
+    return {
+      sheetTitle:   'Add a note for ' + name,
+      fieldLabel:   'Your note for ' + name,
+      help:         'Example: Please make it less spicy',
+      saveLabel:    'Save note',
+      removeLabel:  'Remove note',
+      suggestions:  CT_RESTAURANT_NOTE_SUGGESTIONS,
+      savedToast:   'Note saved for ' + name,
+      removedToast: 'Note removed for ' + name
+    };
+  }
+  return CT_NOTE_CFG.deliveryInstructions;   // global instructions
+}
+
+function ctRepaintNoteTarget(target) {
+  if (target && target.type === 'restaurant') paintRestaurantNoteCards();
+  else paintNoteCards();
+}
 
 function paintNoteCards() {
   Object.keys(CT_NOTE_CFG).forEach(field => {
@@ -2292,10 +2458,10 @@ function updateNoteCount() {
   count.classList.toggle('is-max', length >= CT_NOTE_MAX);
 }
 
-function openNoteSheet(field) {
-  const cfg = CT_NOTE_CFG[field];
+function openNoteSheetForTarget(target) {
+  const cfg = ctNoteSheetCopy(target);
   if (!cfg) return;
-  ctNoteField = field;
+  ctNoteTarget = target;
 
   openSheet('ct-note-sheet', () => {
     document.getElementById('note-sheet-title').textContent = cfg.sheetTitle;
@@ -2303,14 +2469,15 @@ function openNoteSheet(field) {
     document.getElementById('note-help').textContent = cfg.help;
     document.getElementById('note-save').textContent = cfg.saveLabel;
 
+    const current = ctNoteGet(target);
     const input = document.getElementById('note-input');
-    input.value = ctState[field] || '';
+    input.value = current || '';
     input.setAttribute('maxlength', String(CT_NOTE_MAX));
     updateNoteCount();
 
     const removeBtn = document.getElementById('note-remove');
     removeBtn.textContent = cfg.removeLabel;
-    removeBtn.hidden = !ctState[field];
+    removeBtn.hidden = !current;
 
     const suggestions = document.getElementById('note-suggestions');
     suggestions.innerHTML = cfg.suggestions
@@ -2319,18 +2486,29 @@ function openNoteSheet(field) {
   });
 }
 
+/* Global delivery-instructions card still routes through here by field name. */
+function openNoteSheet(field) {
+  if (field === 'deliveryInstructions') openNoteSheetForTarget({ type: 'instructions' });
+}
+
+/* Per-restaurant note card opens the same sheet, scoped to one restaurant. */
+function openRestaurantNoteSheet(resId, resName) {
+  if (!resId) return;
+  openNoteSheetForTarget({ type: 'restaurant', resId: String(resId), resName: resName || '' });
+}
+
 function saveNoteSheet() {
-  const field = ctNoteField;
-  const cfg = CT_NOTE_CFG[field];
+  const target = ctNoteTarget;
+  const cfg = ctNoteSheetCopy(target);
   if (!cfg) { closeSheet(); return; }
 
   const input = document.getElementById('note-input');
   const value = ctCleanNote(input ? input.value : '');
-  const had = !!ctState[field];
+  const had = !!ctNoteGet(target);
 
-  ctState[field] = value;         // saving an empty field is a removal
+  ctNoteSet(target, value);       // saving an empty field is a removal
   saveCartExtras();
-  paintNoteCards();
+  ctRepaintNoteTarget(target);
   closeSheet();
 
   if (value) showToast(cfg.savedToast);
@@ -2338,12 +2516,12 @@ function saveNoteSheet() {
 }
 
 function removeNoteSheet() {
-  const field = ctNoteField;
-  const cfg = CT_NOTE_CFG[field];
+  const target = ctNoteTarget;
+  const cfg = ctNoteSheetCopy(target);
   if (!cfg) { closeSheet(); return; }
-  ctState[field] = '';
+  ctNoteSet(target, '');
   saveCartExtras();
-  paintNoteCards();
+  ctRepaintNoteTarget(target);
   closeSheet();
   showToast(cfg.removedToast);
 }
@@ -2540,6 +2718,12 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  const resNoteCard = target.closest('.ct-note-card[data-restaurant-note-id]');
+  if (resNoteCard) {
+    openRestaurantNoteSheet(resNoteCard.dataset.restaurantNoteId, resNoteCard.dataset.restaurantNoteName);
+    return;
+  }
+
   const noteCard = target.closest('.ct-line-card[data-note-field]');
   if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
 
@@ -2577,7 +2761,7 @@ window.addEventListener('storage',(e)=>{
   }
   if(e.key === CT_EXTRAS_KEY){
     loadCartExtras();
-    paintNoteCards(); paintTipChips(); applyTotals();
+    paintNoteCards(); paintRestaurantNoteCards(); paintTipChips(); applyTotals();
   }
 });
 // address.html dispatches this when the selected address changes; refresh
