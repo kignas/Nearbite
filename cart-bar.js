@@ -78,15 +78,20 @@
         return;
     }
 
-    // Cross-Restaurant Protection
+    // Phase 3.5A — multi-restaurant carts are supported.
+    // The backend resolves each Menu.restaurantId authoritatively at checkout,
+    // so the frontend must never block a second restaurant from being added.
     let cartMemory = safeGetCart();
-    const existingItems = Object.keys(cartMemory);
-    
-    if (existingItems.length > 0) {
-        const firstItemResId = cartMemory[existingItems[0]].resId;
-        if (firstItemResId && firstItemResId !== rId && change > 0) {
-            alert("You can only order from one restaurant at a time. Please clear your cart to start a new order.");
-            return;
+    let restaurantName = '';
+    try {
+        if (typeof currentRestaurant !== 'undefined' && currentRestaurant && currentRestaurant.name) {
+            restaurantName = String(currentRestaurant.name);
+        }
+    } catch (_) {}
+    if (!restaurantName) {
+        const headerName = document.getElementById('res-name');
+        if (headerName && headerName.textContent && headerName.textContent.trim() && headerName.textContent.trim() !== 'Loading…') {
+            restaurantName = headerName.textContent.trim();
         }
     }
 
@@ -94,12 +99,13 @@
     if (!cartMemory[itemName]) {
         cartMemory[itemName] = {
             quantity: 0, price: parseFloat(price), originalPrice: (Number(originalPrice) > Number(price) ? Number(originalPrice) : null), resId: rId,
-            menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg
+            menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg, restaurantName: restaurantName
         };
     } else {
         if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
         if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
         if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
+        if (!cartMemory[itemName].restaurantName && restaurantName) cartMemory[itemName].restaurantName = restaurantName;
         if (!cartMemory[itemName].originalPrice && Number(originalPrice) > Number(price)) cartMemory[itemName].originalPrice = Number(originalPrice);
     }
     
