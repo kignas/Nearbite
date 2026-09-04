@@ -1174,6 +1174,15 @@ function ctCaptureProfile(user) {
    immediately so the card can paint without waiting for the network; the
    authenticated /profile request below remains the authoritative refresh. */
 (function hydrateCachedCustomer() {
+  // Cached profile data is display-only and must never survive a logged-out
+  // state. A previous user's name/phone must not appear on a guest checkout.
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  if (!token) {
+    ctProfile.name = '';
+    ctProfile.phone = '';
+    ctProfile.fetched = false;
+    return;
+  }
   try {
     const cached = JSON.parse(localStorage.getItem('nearbite_user') || 'null');
     if (cached && typeof cached === 'object') {
@@ -2676,6 +2685,10 @@ async function ctEnsureProfile() {
   // present always refresh from the authenticated backend so edited profile
   // data is reflected on Cart.
   if (!token) {
+    // Never fall back to a previous user's cached profile when logged out.
+    ctProfile.name = '';
+    ctProfile.phone = '';
+    ctProfile.fetched = false;
     paintCheckoutDeliverySummary();
     return;
   }
@@ -2685,8 +2698,21 @@ async function ctEnsureProfile() {
       cache: 'no-store'
     });
     const result = await response.json();
-    if (response.ok && result.success) ctCaptureProfile(result.data);
+    if (response.ok && result.success) {
+      ctCaptureProfile(result.data);
+    } else if (response.status === 401 || response.status === 403) {
+      // Token is no longer authenticated: remove stale display data so a
+      // previous user's identity cannot remain visible on checkout.
+      ctProfile.name = '';
+      ctProfile.phone = '';
+      ctProfile.fetched = false;
+      localStorage.removeItem('nearbite_user');
+      localStorage.removeItem('nearbite_token');
+      localStorage.removeItem('token');
+    }
   } catch (e) {
+    // On a transient network failure, keep an authenticated cached profile;
+    // this is safer than logging the user out because of a temporary outage.
     console.warn('Could not load customer details:', e);
   }
   paintCheckoutDeliverySummary();
