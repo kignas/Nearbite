@@ -585,7 +585,6 @@
   </div>
 
   <script src="config.js"></script>
-<script src="safe-html.js"></script>
   <script>
     let pollInterval;
     let currentOrder = null;
@@ -655,15 +654,14 @@
 
     function renderLogo(order) {
       const el = document.getElementById('hero-logo');
-      const logoSrc = safeUrl(order.restaurantImage);
-      if (logoSrc) {
-        el.innerHTML = `<img src="${esc(logoSrc)}" alt="">`;
+      if (order.restaurantImage) {
+        el.innerHTML = `<img src="${order.restaurantImage}" alt="">`;
       } else {
         el.textContent = initials(order.restaurantName);
       }
       const banner = document.getElementById('hero-banner-img');
-      if (logoSrc) {
-        banner.src = logoSrc;
+      if (order.restaurantImage) {
+        banner.src = order.restaurantImage;
         banner.style.display = 'block';
       } else {
         banner.style.display = 'none';
@@ -678,7 +676,7 @@
 
       itemsList.innerHTML = (order.items || []).map(i => {
         const hasPrice = typeof i.price === 'number';
-        return `<div class="item-row"><span class="item-qty">${esc(i.quantity)}×</span><span class="item-name">${esc(i.name)}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
+        return `<div class="item-row"><span class="item-qty">${i.quantity}×</span><span class="item-name">${i.name}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
       }).join('');
 
       // Only ever render charge rows for fields the backend actually provided —
@@ -690,13 +688,18 @@
       if (subtotal !== null) rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
 
       const discount = order.discount ?? order.couponDiscount;
-      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + esc(order.couponCode) + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
+      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + order.couponCode + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
 
       const taxes = order.taxes ?? order.tax;
       if (typeof taxes === 'number' && taxes > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxes)}</span></div>`);
 
       const deliveryFee = order.deliveryFee ?? order.deliveryCharge;
       if (typeof deliveryFee === 'number') rows.push(`<div class="charge-row"><span class="charge-label">Delivery Fee</span><span class="charge-val">${deliveryFee > 0 ? fmtMoney(deliveryFee) : 'FREE'}</span></div>`);
+
+      // Rider tip is part of the server-authoritative order total. Show it as
+      // its own line so the Grand Total is fully explainable to the customer.
+      const tipAmount = order.tipAmount ?? order.riderTip ?? order.tip;
+      if (typeof tipAmount === 'number' && tipAmount > 0) rows.push(`<div class="charge-row"><span class="charge-label">Rider Tip</span><span class="charge-val">${fmtMoney(tipAmount)}</span></div>`);
 
       // If we know a subtotal but none of the individual charge fields exist,
       // show the honest gap between subtotal and total as one transparent line
@@ -782,15 +785,15 @@
         riderNameEl.innerText = 'Delivery Partner';
       }
       if (order.rider && order.rider.phone) {
-        riderCallBtn.href = `tel:${encodeURIComponent(order.rider.phone)}`;
+        riderCallBtn.href = `tel:${order.rider.phone}`;
         riderCallBtn.style.display = 'flex';
       } else {
         riderCallBtn.style.display = 'none';
       }
 
       if (order.rider && (order.rider.photo || order.rider.avatar || order.rider.image)) {
-        const src = safeUrl(order.rider.photo || order.rider.avatar || order.rider.image);
-        riderPhotoEl.innerHTML = src ? `<img src="${esc(src)}" alt="">` : '<i class="fa-solid fa-user"></i>';
+        const src = order.rider.photo || order.rider.avatar || order.rider.image;
+        riderPhotoEl.innerHTML = `<img src="${src}" alt="">`;
       } else {
         riderPhotoEl.innerHTML = '<i class="fa-solid fa-user"></i>';
       }
@@ -1062,15 +1065,15 @@
           const idLabel = order.orderNumber || String(order._id).slice(-5).toUpperCase();
           const itemsHtml = order.items.map(i => {
             const priceHtml = (typeof i.price === 'number') ? `<span>₹${i.price * i.quantity}</span>` : '';
-            return `<div class="invoice-row"><span>${esc(i.quantity)}x ${esc(i.name)}</span>${priceHtml}</div>`;
+            return `<div class="invoice-row"><span>${i.quantity}x ${i.name}</span>${priceHtml}</div>`;
           }).join('');
           const body = `
             <div class="invoice-meta">
-              <div><span>Order</span><strong>#${esc(idLabel)}</strong></div>
+              <div><span>Order</span><strong>#${idLabel}</strong></div>
               <div><span>Payment</span><strong>${order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery'}</strong></div>
             </div>
             <div class="invoice-items">${itemsHtml}</div>
-            <div class="invoice-total"><span>Total</span><strong>₹${esc(order.total)}</strong></div>
+            <div class="invoice-total"><span>Total</span><strong>₹${order.total}</strong></div>
             <button class="sheet-cta tap" onclick="window.print()"><i class="fa-solid fa-print"></i> Save as PDF</button>
           `;
           openSheet('Invoice', body);
@@ -1084,7 +1087,7 @@
           const id = currentOrder ? currentOrder._id : '';
           const body = `
             <p class="sheet-note">Cancellations are handled by our support team to make sure your refund (if applicable) is processed correctly. Chat with us and we'll take care of it right away.</p>
-            <a class="sheet-cta tap" href="support.html?order=${encodeURIComponent(id)}&type=cancel"><i class="fa-solid fa-headset"></i> Chat with Support</a>
+            <a class="sheet-cta tap" href="support.html?order=${id}&type=cancel"><i class="fa-solid fa-headset"></i> Chat with Support</a>
           `;
           openSheet('Cancel this order?', body);
         });
