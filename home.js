@@ -758,15 +758,28 @@
 
     var phrases = ['Search "Biryani"', 'Search "Pizza"', 'Search "Momos"', 'Search "Rolls"'];
     var index = 0;
+    var timer = null;
 
-    setInterval(function () {
+    function tick() {
       placeholder.style.opacity = '0';
       setTimeout(function () {
         index = (index + 1) % phrases.length;
         placeholder.textContent = phrases[index];
         placeholder.style.opacity = '1';
       }, 260);
-    }, 3000);
+    }
+
+    function startTimer() { if (!timer) timer = setInterval(tick, 3000); }
+    function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+    /* The rotation is purely decorative, so don't keep firing timers and writing
+       to the DOM while the tab is backgrounded. Pause when hidden and resume the
+       exact same animation when the page is visible again. */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopTimer(); else startTimer();
+    });
+
+    if (!document.hidden) startTimer();
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -851,8 +864,13 @@
     renderLocationBanner();
 
     /* Before the first payload arrives the skeleton owns the list, so
-       repainting here would replace it with an empty state. */
-    if (state.status !== 'loading') {
+       repainting here would replace it with an empty state.
+       'locating' is transient and brings no new coordinates, so every card
+       verdict is identical to what's already on screen — skip the full list
+       rebuild for it (the banner above already shows the "checking…" state) and
+       let the settled 'ready'/'denied'/'unavailable' status repaint the list
+       once, when the outcome actually changes. */
+    if (state.status !== 'loading' && status !== 'locating') {
       renderFilterBar();   // the Distance sort appears once a location exists
       renderRestaurants(); // re-reads the coordinates and re-decides every card
     }

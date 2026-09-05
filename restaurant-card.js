@@ -654,6 +654,20 @@
      hold the detached DOM in memory. Handles for galleries still on the
      page are left untouched. */
   var galleryHandles = [];
+  var pageVisible = !document.hidden;
+
+  /* Gallery autoplay is decorative. Stop every carousel while the tab is
+     backgrounded so low/mid-range phones do not keep interval callbacks and
+     transform work alive unnecessarily. */
+  document.addEventListener('visibilitychange', function () {
+    pageVisible = !document.hidden;
+    for (var i = 0; i < galleryHandles.length; i++) {
+      var handle = galleryHandles[i];
+      if (!document.contains(handle.gallery)) continue;
+      if (pageVisible) handle.resume();
+      else handle.pause();
+    }
+  });
 
   function pruneGalleries() {
     var kept = [];
@@ -701,6 +715,7 @@
 
       function restart() {
         stop();
+        if (!pageVisible) return;
         timer = setInterval(function () { go(index + 1); }, AUTO_DELAY);
       }
 
@@ -759,6 +774,12 @@
 
       galleryHandles.push({
         gallery: gallery,
+        pause: function () {
+          stop();
+        },
+        resume: function () {
+          if (document.contains(gallery)) restart();
+        },
         dispose: function () {
           stop();
           if (observer) observer.disconnect();
