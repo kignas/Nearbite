@@ -12,7 +12,7 @@
 
   <style>
     :root {
-      --brand: #FC8019;
+      --brand: #16a34a;
       --text-1: #111827;
       --text-2: #374151;
       --text-3: #9ca3af;
@@ -23,7 +23,7 @@
       --ease: cubic-bezier(0.25,1,0.5,1);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--bg); color: var(--text-1); padding-bottom: 48px; -webkit-tap-highlight-color: transparent; }
+    body { font-family: "Manrope", sans-serif; background: var(--bg); color: var(--text-1); padding-bottom: 48px; -webkit-tap-highlight-color: transparent; }
 
     .tap { cursor: pointer; transition: transform 0.15s var(--ease), opacity 0.15s; }
     .tap:active { transform: scale(0.97); opacity: 0.85; }
@@ -142,6 +142,18 @@
       <button class="issue-btn tap issue-wide" onclick="reportIssue('Payment problem')"><i class="fa-solid fa-credit-card" aria-hidden="true"></i>Payment problem</button>
     </div>
 
+
+    <!-- Grievance & complaint submission -->
+    <h2 class="section-title" id="grievance"><i class="fa-solid fa-scale-balanced" style="color:var(--brand);" aria-hidden="true"></i> Grievance &amp; complaints</h2>
+    <div class="order-help-card" style="text-align:left;">
+      <p><strong>Eatswada</strong> is operated by <strong>Kingas Yor</strong>. For order complaints, refunds, privacy/data requests, account issues, restaurant concerns, or other grievances, contact us using the details below.</p>
+      <p style="margin-top:10px;"><strong>Email:</strong> <a href="mailto:kingasyou2007@gmail.com">kingasyou2007@gmail.com</a><br><strong>Phone:</strong> DEMO — REPLACE BEFORE LAUNCH</p>
+      <p style="margin-top:10px;">Please include your order ID (if applicable), registered phone number/email, and a clear description of the issue. Do not send passwords, OTPs, card numbers, CVVs, or other sensitive authentication/payment credentials.</p>
+      <a class="btn-secondary tap" style="display:inline-flex;text-decoration:none;margin-top:12px;" href="mailto:kingasyou2007@gmail.com?subject=Eatswada%20Grievance%20or%20Complaint">
+        <i class="fa-solid fa-envelope" aria-hidden="true"></i> Email a grievance
+      </a>
+    </div>
+
     <!-- FAQs -->
     <h2 class="section-title" style="margin-top:36px;"><i class="fa-solid fa-circle-question" style="color:var(--brand);" aria-hidden="true"></i> Frequently asked questions</h2>
     <nav class="faq-chips" aria-label="FAQ categories">
@@ -221,7 +233,7 @@
     </div>
 
     <div class="footer-links">
-      <a href="legal.html#terms">Terms</a><span>·</span><a href="legal.html#privacy">Privacy</a><span>·</span><a href="legal.html#refunds">Refund Policy</a>
+      <a href="legal.html#terms">Terms</a><span>·</span><a href="legal.html#privacy">Privacy</a><span>·</span><a href="refund-policy.html">Refund Policy</a><span>·</span><a href="support.html#grievance">Grievance</a>
     </div>
   </div>
 
@@ -234,9 +246,9 @@
        Do not invent contact details: if a value is left blank,
        the related UI stays hidden instead of showing a fake number.
     ============================================================ */
-    const SUPPORT_PHONE    = '';   // e.g. '+911234567890' — used for the tel: link
+    const SUPPORT_PHONE    = ''; // DEMO — REPLACE BEFORE LAUNCH   // e.g. '+911234567890' — used for the tel: link
     const SUPPORT_WHATSAPP = '';   // e.g. '911234567890' (digits only, no +) — used for the wa.me link
-    const SUPPORT_EMAIL    = '';   // e.g. 'support@nearbite.in'
+    const SUPPORT_EMAIL    = 'kingasyou2007@gmail.com';
     const SUPPORT_HOURS    = '10:00 AM – 10:00 PM, every day'; // confirm this is accurate
     const ORDERS_PAGE_URL  = 'orders.html'; // TODO: confirm the real "My Orders" page filename
     const APP_NAME         = 'Eatswada';
