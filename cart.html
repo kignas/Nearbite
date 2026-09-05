@@ -7,8 +7,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <!-- Global sheet FIRST so cart-scoped rules below can win without !important. -->
 <link rel="stylesheet" href="style.css">
@@ -1117,6 +1117,10 @@ function ctEtaText(restaurant) {
    makes. No extra request is added to the render path; the bill sheet tops
    this up lazily only if it is still empty. */
 const ctProfile = { name: '', phone: '', fetched: false };
+// True only within a single renderCart() pass once the delivery calculation has
+// already refreshed /profile (address hydration), so ctEnsureProfile() can skip
+// a second identical GET /profile in that same pass. renderCart() resets it.
+let ctProfileRefreshedThisPass = false;
 
 /* Backend /profile returns the authenticated User document directly in
    result.data. The User model uses the exact fields: name and phone. */
@@ -1204,6 +1208,7 @@ async function calculateCurrentDelivery(options) {
       const result = await response.json();
       if (response.ok && result.success) {
         ctCaptureProfile(result.data);
+        ctProfileRefreshedThisPass = true;   // profile is now current for this pass
         const list = Array.isArray(result.data?.addresses) ? result.data.addresses : [];
         const selected = list.find(a => String(a._id) === String(selectedAddressId));
         if (selected) {
@@ -1768,6 +1773,7 @@ async function renderCart() {
   paintItems(savedCart);   // instant
   paintBill(savedCart);    // instant
   syncFooterOffset();
+  ctProfileRefreshedThisPass = false;   // new pass: the delivery calc below may refresh /profile
   await refreshDelivery(); // network, guarded
   paintCheckoutDeliverySummary();
   await ctEnsureProfile();
@@ -2433,6 +2439,14 @@ async function ctEnsureProfile() {
     paintCheckoutDeliverySummary();
     return;
   }
+  // The delivery calculation earlier in this same renderCart() pass may already
+  // have refreshed /profile (address hydration). If so, the display data is
+  // current — skip the duplicate GET /profile and just repaint.
+  if (ctProfileRefreshedThisPass) {
+    ctProfileRefreshedThisPass = false;
+    paintCheckoutDeliverySummary();
+    return;
+  }
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -2501,11 +2515,26 @@ document.getElementById('tip-input').addEventListener('keydown', (event) => {
 });
 
 /* ── Lifecycle (listeners preserved) ────────────────────────────────────── */
-window.addEventListener('pageshow',()=>{ loadCartExtras(); loadAddress().then(()=>paintCheckoutDeliverySummary()); renderCart(); });
+window.addEventListener('pageshow',(e)=>{
+  // On a fresh load or a full navigation the DOMContentLoaded handler below
+  // already runs the complete init (a strict superset of the work here), so
+  // re-running it on the initial pageshow just duplicates the address fetch,
+  // the delivery calc and the cart render. Only a back/forward bfcache restore
+  // skips DOMContentLoaded — that is the one case that must re-hydrate here.
+  if(!e.persisted) return;
+  // Rehydrate what a bfcache freeze could have missed: extras (storage events
+  // don't fire while frozen) and the selected address, then render exactly once.
+  // renderCart() runs the delivery pipeline and paints the summary itself, so no
+  // separate paintCheckoutDeliverySummary() is needed here.
+  loadCartExtras();
+  loadAddress().then(renderCart);
+});
 window.addEventListener('storage',(e)=>{
   if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
     ctAddrHydratedFor = null;
-    loadAddress().then(()=>paintCheckoutDeliverySummary()); renderCart();
+    // Load the changed address, then render once — renderCart() recalculates
+    // delivery and repaints the summary through its own pipeline.
+    loadAddress().then(renderCart);
   }
   if(e.key === CT_EXTRAS_KEY){
     loadCartExtras();
@@ -2516,20 +2545,24 @@ window.addEventListener('storage',(e)=>{
 // address text + recalculate distance/fee/total using the existing pipeline.
 window.addEventListener('nearbite:address-changed',()=>{
   ctAddrHydratedFor = null;
-  loadAddress().then(()=>paintCheckoutDeliverySummary()); renderCart();
-  paintCheckoutDeliverySummary();
+  // renderCart() recalculates distance/fee/total and repaints the summary via
+  // its own pipeline, so load the new address first and then render exactly once.
+  loadAddress().then(renderCart);
 });
 window.addEventListener('resize', syncFooterOffset);
 
 document.addEventListener('DOMContentLoaded', async () => {
-  loadCartExtras();
+  // Cart extras were already primed once at script-parse time (the loadCartExtras()
+  // call beside their definition), and nothing mutates that localStorage before
+  // this point — so re-reading here would just duplicate the same work.
   syncFooterOffset();
   if (window.ResizeObserver) {
     const footer = document.getElementById('checkout-footer');
     if (footer) new ResizeObserver(syncFooterOffset).observe(footer);
   }
   await loadAddress();
-  paintCheckoutDeliverySummary();
+  // renderCart() paints the checkout summary as part of its pipeline, so a
+  // separate paintCheckoutDeliverySummary() here would just repaint the same state.
   await renderCart();
 });
 </script>

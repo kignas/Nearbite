@@ -582,7 +582,11 @@ async function loadFavorites(){
    card from the list immediately. Same event keeps Home in sync. */
 window.addEventListener('eatswada:favorites-changed',renderFavorites);
 
-document.addEventListener('DOMContentLoaded',async()=>{loadFavorites();await loadProfile();await loadAddresses()});
+// loadProfile (GET /users/profile) and loadAddresses (GET /users/addresses)
+// are independent: loadAddresses reads only localStorage + its own response and
+// never consumes loadProfile's result, so they can run in parallel instead of
+// one after the other. loadFavorites stays fire-and-forget as before.
+document.addEventListener('DOMContentLoaded',()=>{loadFavorites();Promise.all([loadProfile(),loadAddresses()])});
 // Keep the account summary in sync if the selected delivery address changes
 // elsewhere (Address/Cart) without a full page reload.
 window.addEventListener('nearbite:address-changed',loadAddresses);
