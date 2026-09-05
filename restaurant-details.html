@@ -194,6 +194,9 @@
 
     const rows=[];
     if(r.phone) rows.push(['Phone',r.phone]);
+    // Show the restaurant's FSSAI reference when Admin has supplied one.
+    // If it has not been added yet, clearly indicate that it is coming soon.
+    rows.push(['FSSAI', r.fssaiLicenseNumber ? r.fssaiLicenseNumber : 'Coming soon']);
     if(cuisine(r)) rows.push(['Cuisine',cuisine(r)]);
     if(Number.isFinite(Number(r.minOrder)) && Number(r.minOrder)>0) rows.push(['Minimum order','₹'+Number(r.minOrder).toFixed(0)]);
     if(r.freeDeliveryEnabled!==false && Number.isFinite(Number(r.freeDeliveryAbove)) && Number(r.freeDeliveryAbove)>0) rows.push(['Free delivery above','₹'+Number(r.freeDeliveryAbove).toFixed(0)]);
