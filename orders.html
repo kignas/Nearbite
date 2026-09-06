@@ -388,6 +388,41 @@ img{max-width:100%;display:block;}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   let token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+
+  /* XSS-safe output helpers. Restaurant names, dish names and image URLs on an
+     order are ultimately vendor-controlled, so every one is escaped before it
+     is placed into innerHTML. Falls back to a local implementation if
+     safe-html.js is not present. */
+  const esc = window.esc || function (v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  const safeUrl = window.safeUrl || function (v) {
+    if (!v) return '';
+    try { var u = new URL(String(v), location.href); return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : ''; }
+    catch (e) { return ''; }
+  };
+
+  /* Cancel is allowed only while an order is still "placed" (not yet accepted
+     by the restaurant). The backend enforces the same rule. */
+  window.cancelOrder = async function (id) {
+    if (!id) return;
+    if (!window.confirm('Cancel this order? This can only be done before the restaurant accepts it.')) return;
+    try {
+      const res = await fetch(CONFIG.API_BASE_URL + '/orders/' + encodeURIComponent(id) + '/cancel', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ reason: 'Cancelled by customer' })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { window.location.href = 'login.html'; return; }
+      if (!res.ok || !data.success) { alert(data.message || 'Could not cancel this order.'); return; }
+      fetchOrders();
+    } catch (e) {
+      alert("Can't reach the server. Check your connection and try again.");
+    }
+  };
   if (token === 'undefined' || token === 'null') token = null;
 
   const loader = document.getElementById('loading-state');
@@ -457,9 +492,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!items || items.length === 0) return '';
     const first = items[0];
     const thumb = first.image
-      ? `<span class="item-thumb"><img src="${first.image}" loading="lazy" alt=""></span>`
-      : `<span class="item-thumb">${initials(first.name)}</span>`;
-    let html = `${thumb}${first.name} ×${first.quantity}`;
+      ? `<span class="item-thumb"><img src="${safeUrl(first.image)}" loading="lazy" alt=""></span>`
+      : `<span class="item-thumb">${esc(initials(first.name))}</span>`;
+    let html = `${thumb}${esc(first.name)} ×${esc(first.quantity)}`;
     if (items.length > 1) {
       html += `<br><span class="extra-items">+${items.length - 1} more item${items.length > 2 ? 's' : ''}</span>`;
     }
@@ -469,8 +504,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const initials = (name) => (name ? name.charAt(0).toUpperCase() : 'E');
 
   const logoHtml = (order, cls) => order.restaurantImage
-    ? `<img src="${order.restaurantImage}" class="${cls}" loading="lazy" alt="${order.restaurantName || 'Restaurant'}">`
-    : `<div class="${cls}">${initials(order.restaurantName)}</div>`;
+    ? `<img src="${safeUrl(order.restaurantImage)}" class="${cls}" loading="lazy" alt="${esc(order.restaurantName || 'Restaurant')}">`
+    : `<div class="${cls}">${esc(initials(order.restaurantName))}</div>`;
 
   // Reuses the exact same defensive address-parsing rules as track-order.html
   const getDeliveryAddressText = (order) => {
@@ -515,10 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="order-card track-card">
           <a href="track-order.html?id=${order._id}" style="text-decoration:none;color:inherit;display:block;">
             <div class="track-cover">
-              ${order.restaurantImage ? `<img src="${order.restaurantImage}" loading="lazy" alt="">` : ''}
+              ${order.restaurantImage ? `<img src="${safeUrl(order.restaurantImage)}" loading="lazy" alt="">` : ''}
               <div class="live-flag"><span class="dot"></span>Live</div>
               <div class="eta-flag"><span>ETA</span><strong>${etaText}${mins !== null ? 'm' : ''}</strong></div>
-              <div class="cover-caption"><h3>${order.restaurantName || "EatSwada Partner"}</h3><p>Order #${order._id.substring(0,6).toUpperCase()}</p></div>
+              <div class="cover-caption"><h3>${esc(order.restaurantName || "EatSwada Partner")}</h3><p>Order #${order._id.substring(0,6).toUpperCase()}</p></div>
             </div>
             ${logoHtml(order, 'track-logo')}
             <div class="track-body">
@@ -531,13 +566,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               ${itemsHtml ? `<div class="order-line-row"><i class="fa-solid fa-bag-shopping"></i><span>${itemsHtml.replace('<br>',' ')}</span></div>` : ''}
-              ${addr ? `<div class="addr-row"><i class="fa-solid fa-location-dot"></i><span>${addr}</span></div>` : ''}
+              ${addr ? `<div class="addr-row"><i class="fa-solid fa-location-dot"></i><span>${esc(addr)}</span></div>` : ''}
             </div>
           </a>
           <div style="padding:0 16px 16px;display:flex;gap:8px;">
             <button class="track-btn tap" onclick="window.location.href='track-order.html?id=${order._id}'">Track Order <i class="fa-solid fa-location-arrow"></i></button>
             ${canCall ? `<a href="tel:${order.rider.phone}" class="icon-btn call tap" aria-label="Call rider"><i class="fa-solid fa-phone"></i></a>` : ''}
             <button class="icon-btn tap" aria-label="Support" onclick="window.location.href='support.html?order=${order._id}'"><i class="fa-solid fa-headset"></i></button>
+            ${order.status === 'placed' ? `<button class="icon-btn tap" aria-label="Cancel order" onclick="cancelOrder('${order._id}')" style="color:#dc2626;"><i class="fa-solid fa-xmark"></i></button>` : ''}
           </div>
         </div>
       `;
@@ -576,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${logoHtml(order, 'past-thumb')}
               <div class="past-title-wrap">
                 <div class="past-title-row">
-                  <h4>${order.restaurantName || "EatSwada Partner"}</h4>
+                  <h4>${esc(order.restaurantName || "EatSwada Partner")}</h4>
                   <span class="badge ${badgeClass}">${order.status}</span>
                 </div>
                 ${cuisine ? `<div class="past-cuisine">${cuisine}</div>` : ''}
