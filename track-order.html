@@ -599,21 +599,6 @@
       }
 
       const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-
-      /* XSS-safe output helpers — order restaurant/dish names, coupon codes and
-         rider/restaurant image URLs are vendor/rider-controlled and are escaped
-         before being placed into innerHTML. Falls back locally if safe-html.js
-         is absent. */
-      const esc = window.esc || function (v) {
-        return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-      };
-      const safeUrl = window.safeUrl || function (v) {
-        if (!v) return '';
-        try { var u = new URL(String(v), location.href); return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : ''; }
-        catch (e) { return ''; }
-      };
       if (!token) {
         window.location.href = 'login.html';
         return;
@@ -670,13 +655,13 @@
     function renderLogo(order) {
       const el = document.getElementById('hero-logo');
       if (order.restaurantImage) {
-        el.innerHTML = `<img src="${safeUrl(order.restaurantImage)}" alt="">`;
+        el.innerHTML = `<img src="${order.restaurantImage}" alt="">`;
       } else {
         el.textContent = initials(order.restaurantName);
       }
       const banner = document.getElementById('hero-banner-img');
       if (order.restaurantImage) {
-        banner.src = safeUrl(order.restaurantImage);
+        banner.src = order.restaurantImage;
         banner.style.display = 'block';
       } else {
         banner.style.display = 'none';
@@ -691,7 +676,7 @@
 
       itemsList.innerHTML = (order.items || []).map(i => {
         const hasPrice = typeof i.price === 'number';
-        return `<div class="item-row"><span class="item-qty">${esc(i.quantity)}×</span><span class="item-name">${esc(i.name)}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
+        return `<div class="item-row"><span class="item-qty">${i.quantity}×</span><span class="item-name">${i.name}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
       }).join('');
 
       // Only ever render charge rows for fields the backend actually provided —
@@ -703,7 +688,7 @@
       if (subtotal !== null) rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
 
       const discount = order.discount ?? order.couponDiscount;
-      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + esc(order.couponCode) + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
+      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + order.couponCode + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
 
       const taxes = order.taxes ?? order.tax;
       if (typeof taxes === 'number' && taxes > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxes)}</span></div>`);
@@ -808,7 +793,7 @@
 
       if (order.rider && (order.rider.photo || order.rider.avatar || order.rider.image)) {
         const src = order.rider.photo || order.rider.avatar || order.rider.image;
-        riderPhotoEl.innerHTML = `<img src="${safeUrl(src)}" alt="">`;
+        riderPhotoEl.innerHTML = `<img src="${src}" alt="">`;
       } else {
         riderPhotoEl.innerHTML = '<i class="fa-solid fa-user"></i>';
       }
@@ -1080,7 +1065,7 @@
           const idLabel = order.orderNumber || String(order._id).slice(-5).toUpperCase();
           const itemsHtml = order.items.map(i => {
             const priceHtml = (typeof i.price === 'number') ? `<span>₹${i.price * i.quantity}</span>` : '';
-            return `<div class="invoice-row"><span>${esc(i.quantity)}x ${esc(i.name)}</span>${priceHtml}</div>`;
+            return `<div class="invoice-row"><span>${i.quantity}x ${i.name}</span>${priceHtml}</div>`;
           }).join('');
           const body = `
             <div class="invoice-meta">
