@@ -1617,6 +1617,13 @@ function applyTotals() {
 
   // One number, written everywhere it appears: the sheet's "To pay", the
   // compact row and the checkout CTA can never disagree.
+  const deliveryVal = document.getElementById('bill-delivery-val');
+  if (deliveryVal && ctState.deliveryReady && !ctState.unavailable) {
+    const isFree = Number(ctState.deliveryFee) === 0 && ctState.freeDeliveryEnabled === true;
+    deliveryVal.classList.toggle('is-free', isFree);
+    deliveryVal.textContent = isFree ? 'FREE' : '₹' + Number(ctState.deliveryFee || 0);
+  }
+
   document.getElementById('bill-total').innerText = '₹' + total;
   document.getElementById('checkout-total').innerText = '₹' + total;
   updateBillCompact(total);
@@ -1725,11 +1732,14 @@ function applyDelivery(delivery) {
 
   if (delivery.outsideRadius) {
     deliveryFee = 0;
+  } else if (delivery.freeDelivery === true) {
+    // Backend says free delivery is unlocked: never keep a stale fee.
+    deliveryFee = 0;
   } else if (deliveryFee == null) {
     deliveryFee = 30;
   }
 
-  ctState.deliveryFee = deliveryFee;
+  ctState.deliveryFee = Number(deliveryFee) || 0;
   ctState.minOrder = Number(delivery.minOrder || ctState.minOrder || 0);
   ctState.freeDeliveryAbove = Number(delivery.freeDeliveryAbove || ctState.freeDeliveryAbove || 0);
   ctState.freeDeliveryEnabled = delivery.freeDeliveryEnabled !== false;
