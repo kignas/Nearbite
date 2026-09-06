@@ -1997,41 +1997,6 @@ async function placeOrder() {
       throw new Error("Your cart data looks corrupted. Please add the items again.");
     }
 
-    // ── Multi-restaurant carts: each restaurant must independently meet its
-    // own minimum order. The backend enforces this authoritatively too, but
-    // checking here means the customer gets a precise, per-restaurant message
-    // BEFORE the order is attempted, instead of a rejection afterwards.
-    // (Single-restaurant carts keep using the existing ctState minimum check
-    // above, so nothing changes for the common case.)
-    const groupsByRes = {};
-    for (const [name, info] of Object.entries(savedCart)) {
-      const rid = info.resId;
-      if (!rid) continue;
-      if (!groupsByRes[rid]) groupsByRes[rid] = { subtotal: 0, name: info.restaurantName || info.resName || '' };
-      groupsByRes[rid].subtotal += Number(info.price || 0) * Number(info.quantity || 0);
-    }
-    const distinctResIds = Object.keys(groupsByRes);
-    if (distinctResIds.length > 1) {
-      const shortfalls = [];
-      for (const rid of distinctResIds) {
-        let info = null;
-        try {
-          const r = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}`, { cache: 'no-store' });
-          const j = await r.json();
-          if (r.ok && j.success) info = j.data || {};
-        } catch (_) {}
-        const minOrder = Number(info?.minOrder || 0);
-        const rName = (info && info.name) || groupsByRes[rid].name || 'a restaurant';
-        if (minOrder > 0 && groupsByRes[rid].subtotal < minOrder) {
-          const add = Math.ceil(minOrder - groupsByRes[rid].subtotal);
-          shortfalls.push(`${rName}: add ₹${add.toLocaleString('en-IN')} (min ₹${minOrder.toLocaleString('en-IN')})`);
-        }
-      }
-      if (shortfalls.length) {
-        throw new Error('Minimum order not met — ' + shortfalls.join('; ') + '.');
-      }
-    }
-
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     // The backend is the final authority, but the checkout preview must use
     // the SAME restaurant GPS + customer GPS pricing so the customer sees
@@ -2071,23 +2036,11 @@ async function placeOrder() {
       tipAmount: ctCleanTip(ctState.tipAmount)
     };
 
-    // Idempotency: reuse one key for this cart so a double-tap, a dropped
-    // response, or a network retry returns the SAME order(s) instead of
-    // creating a second set. Cleared once the order succeeds.
-    let idempotencyKey = localStorage.getItem('nearbite_checkout_key');
-    if (!idempotencyKey) {
-      idempotencyKey = (self.crypto && self.crypto.randomUUID)
-        ? self.crypto.randomUUID()
-        : 'ck_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-      localStorage.setItem('nearbite_checkout_key', idempotencyKey);
-    }
-
     const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'Idempotency-Key': idempotencyKey
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(payload)
     });
@@ -2096,25 +2049,15 @@ async function placeOrder() {
 
     if (response.ok && result.success) {
       localStorage.removeItem('nearbite_cart');
-      localStorage.removeItem('nearbite_checkout_key');
       clearCartExtras();
 
-      if (result.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
-        // Multi-restaurant checkout created one order per restaurant. Keep each
-        // one-time delivery PIN, then send the customer to their orders list
-        // where every order in this checkout is shown and independently tracked.
-        Object.keys(result.deliveryOtps).forEach(oid => {
-          const otp = result.deliveryOtps[oid];
-          if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
-        });
-        window.location.href = 'orders.html';
-      } else {
-        // Single-restaurant checkout — unchanged behaviour.
-        if (result.deliveryOtp) {
-          localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
-        }
-        window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
+      // Keep the one-time delivery PIN returned by the backend so the
+      // tracking page can display it even though the backend stores only a hash.
+      if (result.deliveryOtp) {
+        localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
       }
+
+      window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
     } else {
       throw new Error(result.message || "Failed to place order.");
     }
