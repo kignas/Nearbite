@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Rate Us · Eatswada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--brand:#FC8019;--brand-soft:#FFF3E9;--brand-ink:#C2570B;--ink:#111827;--muted:#6B7280;--faint:#9CA3AF;--soft:#F6F7F9;--line:#ECEEF1;--white:#fff;--danger:#DC2626;--ok:#15803D}
+*{box-sizing:border-box}html{background:var(--soft)}body{margin:0;background:var(--soft);color:var(--ink);font-family:Manrope,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:30px}button,input,textarea{font:inherit}.app{max-width:720px;margin:auto;min-height:100dvh}.top{display:flex;align-items:center;gap:10px;padding:14px}.back{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#374151;display:grid;place-items:center}.title{font-size:17px;font-weight:800}.content{padding:10px 14px 28px}.hero{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px 18px 20px;text-align:center;box-shadow:0 6px 18px rgba(17,24,39,.05)}.hero-icon{width:56px;height:56px;margin:0 auto 12px;border-radius:18px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:24px}.hero h1{margin:0;font-size:22px;letter-spacing:-.5px}.hero p{margin:7px auto 0;max-width:420px;color:var(--muted);font-size:12px;line-height:1.55}.remaining{display:inline-flex;margin-top:12px;padding:6px 10px;border-radius:999px;background:#F3F4F6;color:#4B5563;font-size:10px;font-weight:800}.form-card{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 6px 18px rgba(17,24,39,.04)}.label{display:block;text-align:center;font-size:12px;font-weight:800;color:#374151}.stars{display:flex;justify-content:center;gap:8px;margin:14px 0 18px}.star{width:48px;height:48px;border:1px solid var(--line);border-radius:14px;background:#fff;color:#D1D5DB;font-size:23px;display:grid;place-items:center;transition:.12s}.star.active{color:var(--brand);background:var(--brand-soft);border-color:#F7C49E;transform:translateY(-1px)}.star:focus-visible{outline:2px solid var(--brand);outline-offset:2px}.field-label{display:block;font-size:11px;font-weight:800;color:#4B5563;margin-bottom:7px}.comment{width:100%;min-height:110px;resize:vertical;border:1px solid var(--line);border-radius:13px;background:#FAFAFB;padding:12px;outline:none;font-size:13px;line-height:1.5}.comment:focus{border-color:#F5A36D;background:#fff;box-shadow:0 0 0 3px rgba(252,128,25,.12)}.count{text-align:right;margin-top:5px;color:var(--faint);font-size:10px}.submit{width:100%;height:48px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-size:13px;font-weight:800;margin-top:15px}.submit:disabled{opacity:.45}.message{min-height:18px;margin-top:10px;text-align:center;font-size:12px;font-weight:700}.message.error{color:var(--danger)}.message.ok{color:var(--ok)}.done{text-align:center;padding:18px 4px}.done .check{width:54px;height:54px;border-radius:50%;background:#E9F7EF;color:var(--ok);display:grid;place-items:center;margin:0 auto 10px;font-size:22px}.done h2{font-size:18px;margin:0}.done p{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 16px}.home-btn{display:inline-flex;height:44px;padding:0 18px;border-radius:13px;align-items:center;justify-content:center;background:var(--brand);color:#fff;font-size:12px;font-weight:800}.history{margin-top:12px}.history-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:800;margin:0 4px 8px}.history-card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}.history-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #F3F4F6}.history-item:last-child{border-bottom:0}.mini-stars{color:var(--brand);font-size:13px;letter-spacing:1px;white-space:nowrap}.history-comment{flex:1;min-width:0;font-size:11px;color:#4B5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history-date{font-size:9px;color:var(--faint);white-space:nowrap}@media(max-width:374px){.content{padding-left:12px;padding-right:12px}.star{width:44px;height:44px}}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="top"><button class="back" type="button" aria-label="Go back" onclick="history.length>1?history.back():location.href='profile.html'"><i class="fa-solid fa-arrow-left"></i></button><div class="title">Rate Us</div></header>
+  <main class="content">
+    <section class="hero">
+      <div class="hero-icon"><i class="fa-solid fa-star"></i></div>
+      <h1>How is Eatswada doing?</h1>
+      <p>Your feedback helps us improve the ordering experience for everyone. This is feedback about Eatswada itself, not a restaurant review.</p>
+      <div class="remaining" id="remaining">Loading your submissions…</div>
+    </section>
+
+    <section class="form-card" id="formCard">
+      <span class="label">Choose your rating</span>
+      <div class="stars" role="radiogroup" aria-label="Eatswada rating">
+        <button class="star" type="button" data-score="1" role="radio" aria-label="1 star">★</button>
+        <button class="star" type="button" data-score="2" role="radio" aria-label="2 stars">★</button>
+        <button class="star" type="button" data-score="3" role="radio" aria-label="3 stars">★</button>
+        <button class="star" type="button" data-score="4" role="radio" aria-label="4 stars">★</button>
+        <button class="star" type="button" data-score="5" role="radio" aria-label="5 stars">★</button>
+      </div>
+      <label class="field-label" for="comment">Anything you'd like us to know? <span style="font-weight:500;color:#9CA3AF">(optional)</span></label>
+      <textarea class="comment" id="comment" maxlength="500" placeholder="Tell us what you like or what we should improve…"></textarea>
+      <div class="count" id="count">0 / 500</div>
+      <div class="message" id="message" aria-live="polite"></div>
+      <button class="submit" id="submit" type="button" disabled>Submit rating</button>
+    </section>
+
+    <section class="history" id="historySection" hidden>
+      <div class="history-title">Your previous ratings</div>
+      <div class="history-card" id="history"></div>
+    </section>
+  </main>
+</div>
+<script>
+'use strict';
+const API=CONFIG.API_BASE_URL;
+const $=id=>document.getElementById(id);
+const stars=[...document.querySelectorAll('.star')];
+let score=0, used=0, max=3;
+function token(){return localStorage.getItem('nearbite_token')||localStorage.getItem('token')||''}
+function authHeaders(){const t=token();return {'Content-Type':'application/json',...(t?{'Authorization':'Bearer '+t}:{})}}
+function setMessage(text,type=''){const el=$('message');el.textContent=text;el.className='message'+(type?' '+type:'')}
+function renderStars(){stars.forEach(b=>{const on=Number(b.dataset.score)<=score;b.classList.toggle('active',on);b.setAttribute('aria-checked',String(Number(b.dataset.score)===score))})}
+function renderLimit(remaining){$('remaining').textContent=remaining>0?`${remaining} Rate Us submission${remaining===1?'':'s'} remaining`:'You have used all 3 Rate Us submissions';$('submit').disabled=score===0||remaining<=0}
+function renderHistory(rows){if(!rows.length)return;$('historySection').hidden=false;$('history').innerHTML=rows.map(r=>{const starsText='★★★★★'.slice(0,Number(r.score));const date=r.createdAt?new Date(r.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';const safe=String(r.comment||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));return `<div class="history-item"><span class="mini-stars">${starsText}</span><span class="history-comment">${safe||'No comment'}</span><span class="history-date">${date}</span></div>`}).join('')}
+async function load(){
+  if(!token()){localStorage.setItem('nearbite_after_login','rate-us.html');location.replace('login.html');return}
+  try{
+    const res=await fetch(API+'/ratings/me',{headers:authHeaders(),cache:'no-store'});const j=await res.json().catch(()=>({}));
+    if(res.status===401||res.status===403){location.replace('login.html');return}
+    if(!res.ok||j.success===false)throw new Error(j.message||'Could not load your rating status.');
+    used=Number(j.data?.used||0);max=Number(j.data?.max||3);renderLimit(Math.max(0,max-used));renderHistory(j.data?.ratings||[]);
+    if(used>=max){$('formCard').innerHTML='<div class="done"><div class="check"><i class="fa-solid fa-check"></i></div><h2>Thanks for your feedback</h2><p>You have used all 3 Rate Us submissions available for your account.</p><a class="home-btn" href="profile.html">Back to profile</a></div>';}
+  }catch(e){$('remaining').textContent='Unable to load rating status';setMessage(e.message||'Could not load.','error')}
+}
+stars.forEach(b=>b.addEventListener('click',()=>{score=Number(b.dataset.score);renderStars();$('submit').disabled=false;setMessage('')}));
+$('comment').addEventListener('input',e=>$('count').textContent=`${e.target.value.length} / 500`);
+$('submit').addEventListener('click',async()=>{
+  if(!score)return;const btn=$('submit');btn.disabled=true;btn.textContent='Submitting…';setMessage('');
+  try{
+    const res=await fetch(API+'/ratings',{method:'POST',headers:authHeaders(),body:JSON.stringify({score,comment:$('comment').value.trim()})});
+    const j=await res.json().catch(()=>({}));
+    if(res.status===401||res.status===403){location.replace('login.html');return}
+    if(!res.ok||j.success===false)throw new Error(j.message||'Could not submit your rating.');
+    used=Number(j.data?.used||used+1);const remaining=Number(j.data?.remaining??Math.max(0,max-used));renderLimit(remaining);setMessage('Thanks for rating Eatswada!','ok');$('comment').value='';$('count').textContent='0 / 500';score=0;renderStars();btn.textContent='Submit rating';
+    const fresh=await fetch(API+'/ratings/me',{headers:authHeaders(),cache:'no-store'});const fj=await fresh.json().catch(()=>({}));if(fresh.ok&&fj.success){renderHistory(fj.data?.ratings||[])}
+    if(remaining<=0){setTimeout(()=>load(),350)}
+  }catch(e){setMessage(e.message||'Could not submit your rating.','error');btn.disabled=score===0;btn.textContent='Submit rating'}
+});
+document.addEventListener('DOMContentLoaded',load);
+</script>
+</body>
+</html>
