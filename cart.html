@@ -1686,6 +1686,20 @@ function applyDelivery(delivery) {
   // skeleton or stale total.
   const feeEl = document.getElementById('bill-delivery-val');
   let deliveryFee = delivery.fee;
+
+  // The delivery calculation can arrive with a stale `fee/freeDelivery`
+  // pair (for example, the banner may already know the threshold is reached
+  // while `fee` is still the distance fee). Re-derive the free-delivery state
+  // from the authoritative threshold + current subtotal before rendering the
+  // bill, so the banner and Bill Details can never disagree.
+  const deliveryThreshold = Number(delivery.freeDeliveryAbove || 0);
+  const thresholdUnlocked = delivery.freeDeliveryEnabled !== false &&
+    deliveryThreshold > 0 && Number(ctState.subtotal || 0) >= deliveryThreshold;
+  if (!delivery.multi && !delivery.outsideRadius && (delivery.freeDelivery === true || thresholdUnlocked)) {
+    deliveryFee = 0;
+    delivery.freeDelivery = true;
+  }
+
   if (delivery.multi) {
     ctState.deliveryFee = deliveryFee == null ? 0 : Number(deliveryFee);
     ctState.unavailable = !!delivery.outsideRadius;
