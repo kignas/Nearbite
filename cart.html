@@ -1602,11 +1602,14 @@ function applyTotals() {
     if (ctState.deliveryReady && ctState.freeDeliveryEnabled && threshold > 0) {
       if (ctState.deliveryFee === 0) {
         freeRow.style.display = 'flex';
-        freeVal.textContent = 'Unlocked';
+        freeVal.textContent = 'FREE';
       } else {
         freeRow.style.display = 'flex';
         freeVal.textContent = 'Above ₹' + threshold.toLocaleString('en-IN');
       }
+    } else if (ctState.deliveryReady && ctState.deliveryFee === 0 && ctState.freeDeliveryEnabled) {
+      freeRow.style.display = 'flex';
+      freeVal.textContent = 'FREE';
     } else {
       freeRow.style.display = 'none';
     }
@@ -1671,20 +1674,51 @@ function setDeliveryPending() {
 }
 
 function applyDelivery(delivery) {
-  // Multi-restaurant checkout sums each restaurant's independently verified fee.
+  // Multi-restaurant delivery is authoritative per restaurant. Keep the
+  // shared state in sync so the bill, CTA and bill sheet never stay on a
+  // skeleton or stale total.
+  const feeEl = document.getElementById('bill-delivery-val');
   let deliveryFee = delivery.fee;
   if (delivery.multi) {
+    ctState.deliveryFee = deliveryFee == null ? 0 : Number(deliveryFee);
+    ctState.unavailable = !!delivery.outsideRadius;
+    ctState.multiDelivery = delivery;
+    ctState.multiMinOrderFailures = delivery.minOrderFailures || [];
+    ctState.deliveryReady = !delivery.unresolved && !delivery.outsideRadius;
+
+    const freeRestaurants = (delivery.restaurants || []).filter(r => r.freeDelivery);
+    const freeAll = (delivery.restaurants || []).length > 0 &&
+      freeRestaurants.length === (delivery.restaurants || []).length;
+
+    // A single restaurant can still expose its backend threshold in the
+    // bill. For multiple restaurants, the bill shows FREE only when every
+    // restaurant's delivery fee is free.
+    if ((delivery.restaurants || []).length === 1) {
+      const r = delivery.restaurants[0];
+      ctState.freeDeliveryEnabled = r.info?.freeDeliveryEnabled !== false;
+      ctState.freeDeliveryAbove = Number(r.info?.freeDeliveryAbove || 0);
+      ctState.minOrder = Number(r.info?.minOrder || 0);
+    } else {
+      ctState.freeDeliveryEnabled = freeAll;
+      ctState.freeDeliveryAbove = 0;
+      ctState.minOrder = 0;
+    }
+
     if (delivery.unresolved) {
       feeEl.className = 'ct-bill-val'; feeEl.textContent = 'Checking…';
       setStrip('is-neutral', 'fa-solid fa-motorcycle', 'Checking delivery for all restaurants…', 'Each restaurant is priced separately.');
     } else if (delivery.outsideRadius) {
       feeEl.className = 'ct-bill-val is-off'; feeEl.textContent = 'Unavailable';
       setStrip('is-error', 'fa-solid fa-circle-exclamation', 'Delivery unavailable', `${delivery.name || 'One restaurant'} is outside its delivery radius.`);
+    } else if (freeAll) {
+      feeEl.className = 'ct-bill-val is-free'; feeEl.textContent = 'FREE';
+      const detail = (delivery.restaurants || []).map(r => `${r.name}: FREE`).join(' · ');
+      setStrip('', 'fa-solid fa-motorcycle', 'Free delivery on this order', detail);
     } else {
-      feeEl.className = 'ct-bill-val'; feeEl.textContent = '₹' + deliveryFee;
-      const freeCount = (delivery.restaurants || []).filter(r => r.freeDelivery).length;
-      const detail = (delivery.restaurants || []).map(r => `${r.name}: ₹${r.fee}`).join(' · ');
-      setStrip('', 'fa-solid fa-motorcycle', `${delivery.restaurants.length} restaurants · ₹${deliveryFee} delivery`, detail + (freeCount ? ` · ${freeCount} free` : ''));
+      feeEl.className = 'ct-bill-val'; feeEl.textContent = '₹' + ctState.deliveryFee;
+      const detail = (delivery.restaurants || []).map(r => `${r.name}: ${r.fee === 0 ? 'FREE' : '₹' + r.fee}`).join(' · ');
+      const freeCount = freeRestaurants.length;
+      setStrip('', 'fa-solid fa-motorcycle', `${delivery.restaurants.length} restaurants · ₹${ctState.deliveryFee} delivery`, detail + (freeCount ? ` · ${freeCount} free` : ''));
     }
     applyTotals(); updateCheckoutCta(); return;
   }
@@ -1704,7 +1738,6 @@ function applyDelivery(delivery) {
   ctState.multiMinOrderFailures = delivery.multi ? (delivery.minOrderFailures || []) : [];
   ctState.deliveryReady = !delivery.unresolved;
 
-  const feeEl = document.getElementById('bill-delivery-val');
   const strip = document.getElementById('free-delivery-nudge');
   const stripText = document.getElementById('nudge-text');
   const stripSub = document.getElementById('nudge-sub');
@@ -1813,8 +1846,8 @@ function updateCheckoutCta() {
   if (ctState.multiMinOrderFailures && ctState.multiMinOrderFailures.length) {
     btn.classList.add('locked'); btn.setAttribute('aria-disabled', 'true');
     const first = ctState.multiMinOrderFailures[0];
-    const add = Math.ceil(Number(first.info.minOrder) - first.subtotal);
-    label.innerHTML = `Add ₹${add.toLocaleString('en-IN')} more<span class="ct-cta-sub">${esc(first.info.name || first.name)} minimum ₹${Number(first.info.minOrder).toLocaleString('en-IN')}</span>`;
+    const add = Math.max(0, Math.ceil(Number(first.info?.minOrder || 0) - Number(first.subtotal || 0)));
+    label.innerHTML = `Add ₹${add.toLocaleString('en-IN')} more<span class="ct-cta-sub">${esc(first.info?.name || first.name || 'Restaurant')} minimum ₹${Number(first.info?.minOrder || 0).toLocaleString('en-IN')}</span>`;
     return;
   }
   if (ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
@@ -2532,6 +2565,11 @@ function openBillSheet() {
   /* IMPORTANT: Bill details opens ONLY the bill breakdown. */
   openSheet('ct-bill-sheet');
   applyTotals();
+
+  // If pricing is still resolving, refresh it immediately. The backend
+  // restaurant settings remain the source of truth for minimum order,
+  // free-delivery threshold and delivery fee.
+  if (!ctState.deliveryReady) refreshDelivery({ force: true });
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
