@@ -1317,8 +1317,10 @@ function renderMultiBreakdown(rows) {
       note = 'Outside ' + r.radius.toFixed(1).replace(/\.0$/, '') + ' km delivery range';
     } else if (Number(r.fee) === 0 && r.freeAbove > 0) {
       note = 'Free delivery unlocked';
-    } else if (r.freeAbove > 0) {
-      note = 'Add ₹' + Math.max(0, Math.ceil(r.freeAbove - r.subtotal)).toLocaleString('en-IN') + ' for free delivery';
+    } else if (r.freeAbove > 0 && r.freeEnabled === false) {
+      note = 'Free delivery disabled by restaurant';
+    } else if (r.freeAbove > 0 && r.subtotal < r.freeAbove) {
+      note = 'Add ₹' + Math.ceil(r.freeAbove - r.subtotal).toLocaleString('en-IN') + ' for free delivery';
     }
     html.push(
       '<div class="ct-bill-row" style="flex-direction:column;align-items:stretch;gap:2px;">' +
