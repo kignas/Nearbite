@@ -2270,21 +2270,6 @@ async function placeOrder() {
         name: 'Eatswada',
         description: result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`,
         order_id: result.payment.orderId,
-        // Platform policy: Razorpay Checkout is restricted to UPI only.
-        // The backend also accepts only paymentMethod='upi', so this is a
-        // second, customer-facing enforcement layer.
-        config: {
-          display: {
-            blocks: {
-              upi_only: {
-                name: 'Pay via UPI',
-                instruments: [{ method: 'upi' }]
-              }
-            },
-            sequence: ['block.upi_only'],
-            preferences: { show_default_blocks: false }
-          }
-        },
         prefill: {
           name: document.getElementById('checkout-customer-name')?.textContent || '',
           contact: document.getElementById('checkout-customer-phone')?.textContent || ''
