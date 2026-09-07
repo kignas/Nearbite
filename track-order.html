@@ -905,13 +905,18 @@
       document.body.classList.add('data-loaded');
 
       function minutesRemaining() {
+        // Prefer the rider's live ETA when the rider app is streaming GPS.
+        if (typeof order.riderEtaMinutes === 'number' && order.riderEtaMinutes > 0) return order.riderEtaMinutes;
         if (!order.estimatedDelivery) return null;
         const diffMs = new Date(order.estimatedDelivery) - Date.now();
-        return Math.max(1, Math.round(diffMs / 60000));
+        return Math.round(diffMs / 60000); // may be <= 0 once the estimate has passed
       }
       function etaHTML() {
         const mins = minutesRemaining();
-        return mins === null ? '— <span>mins</span>' : `${mins} <span>mins</span>`;
+        // No estimate, or the estimate has already passed: show an honest
+        // "Soon" instead of a fake "1 min" that used to appear on every order.
+        if (mins === null || mins <= 0) return 'Soon';
+        return `${mins} <span>mins</span>`;
       }
 
       s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step'; s5.className = 'step'; s6.className = 'step';
