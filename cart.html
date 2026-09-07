@@ -813,7 +813,7 @@
         </div>
         <div>
           <div class="payment-title">Online</div>
-          <div class="payment-sub">UPI · GPay · PhonePe</div>
+          <div class="payment-sub">UPI · GPay · PhonePe · Cards</div>
         </div>
       </div>
 
@@ -979,6 +979,7 @@
     </div>
   </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="config.js"></script>
 <script>
 /* ============================================================================
@@ -1962,6 +1963,8 @@ function cartAdjust(name, change) {
     savedCart[name].quantity += change;
     if (savedCart[name].quantity <= 0) delete savedCart[name];
     localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
+    // A cart mutation invalidates any pending checkout idempotency key.
+    localStorage.removeItem('nearbite_checkout_key');
     repaintCart();       // instant feedback
     scheduleDelivery();  // debounced; free-delivery threshold depends on subtotal
   }
@@ -1970,6 +1973,7 @@ function cartAdjust(name, change) {
 function clearCart() {
   localStorage.removeItem('nearbite_cart');
   localStorage.removeItem('nearbite_payment_method');
+  localStorage.removeItem('nearbite_checkout_key');
   clearCartExtras();
   selectedPaymentMethod = 'upi';
   renderCart();
@@ -2260,29 +2264,103 @@ async function placeOrder() {
 
     const result = await response.json();
 
-    if (response.ok && result.success) {
-      localStorage.removeItem('nearbite_cart');
-      localStorage.removeItem('nearbite_checkout_key');
-      clearCartExtras();
+    if (!(response.ok && result.success)) {
+      throw new Error(result.message || 'Failed to place order.');
+    }
 
-      if (result.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
-        // Multi-restaurant checkout created one order per restaurant. Keep each
-        // one-time delivery PIN, then send the customer to their orders list
-        // where every order in this checkout is shown and independently tracked.
-        Object.keys(result.deliveryOtps).forEach(oid => {
-          const otp = result.deliveryOtps[oid];
-          if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
-        });
-        window.location.href = 'orders.html';
-      } else {
-        // Single-restaurant checkout — unchanged behaviour.
-        if (result.deliveryOtp) {
-          localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
-        }
-        window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
+    // COD completes immediately. Online orders are finalized only after the
+    // Razorpay handler returns and the backend verifies signature + capture.
+    if (selectedPaymentMethod !== 'cod') {
+      if (!result.payment?.orderId || !result.payment?.keyId || !window.Razorpay) {
+        throw new Error('Online payment is temporarily unavailable. Please try again.');
       }
+
+      const primaryOrderId = result.data?._id;
+      const rzp = new Razorpay({
+        key: result.payment.keyId,
+        amount: result.payment.amount,
+        currency: result.payment.currency || 'INR',
+        name: 'Eatswada',
+        description: result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`,
+        order_id: result.payment.orderId,
+        prefill: {
+          name: document.getElementById('checkout-customer-name')?.textContent || '',
+          contact: document.getElementById('checkout-customer-phone')?.textContent || ''
+        },
+        theme: { color: '#0aa66f' },
+        modal: {
+          ondismiss: () => {
+            btn.innerHTML = originalHTML;
+            btn.style.pointerEvents = 'auto';
+            showToast('Payment cancelled. Your cart is still saved.');
+          }
+        },
+        handler: async function (paymentResponse) {
+          try {
+            const verifyResponse = await fetch(`${CONFIG.API_BASE_URL}/payments/verify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                orderId: primaryOrderId,
+                razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                razorpayOrderId: paymentResponse.razorpay_order_id,
+                razorpaySignature: paymentResponse.razorpay_signature
+              })
+            });
+            const verifyResult = await verifyResponse.json();
+            if (!verifyResponse.ok || !verifyResult.success || verifyResult.paymentStatus !== 'paid') {
+              throw new Error(verifyResult.message || 'Payment could not be verified.');
+            }
+
+            localStorage.removeItem('nearbite_cart');
+            localStorage.removeItem('nearbite_checkout_key');
+            clearCartExtras();
+
+            if (result.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
+              Object.keys(result.deliveryOtps).forEach(oid => {
+                const otp = result.deliveryOtps[oid];
+                if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
+              });
+              window.location.href = 'orders.html';
+            } else {
+              if (result.deliveryOtp) localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
+              window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
+            }
+          } catch (verifyError) {
+            console.error(verifyError);
+            btn.innerHTML = originalHTML;
+            btn.style.pointerEvents = 'auto';
+            showToast(verifyError.message || 'Payment verification failed. Please contact support.', 'error');
+          }
+        }
+      });
+
+      rzp.on('payment.failed', function (failure) {
+        console.error('Razorpay payment failed:', failure);
+        btn.innerHTML = originalHTML;
+        btn.style.pointerEvents = 'auto';
+        showToast(failure?.error?.description || 'Payment failed. Your cart is still saved.', 'error');
+      });
+      rzp.open();
+      return;
+    }
+
+    localStorage.removeItem('nearbite_cart');
+    localStorage.removeItem('nearbite_checkout_key');
+    clearCartExtras();
+
+    if (result.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
+      Object.keys(result.deliveryOtps).forEach(oid => {
+        const otp = result.deliveryOtps[oid];
+        if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
+      });
+      window.location.href = 'orders.html';
     } else {
-      throw new Error(result.message || "Failed to place order.");
+      if (result.deliveryOtp) localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
+      window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
     }
   } catch (error) {
     console.error(error);
@@ -2754,6 +2832,7 @@ window.addEventListener('pageshow',(e)=>{
 });
 window.addEventListener('storage',(e)=>{
   if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
+    localStorage.removeItem('nearbite_checkout_key');
     ctAddrHydratedFor = null;
     // Load the changed address, then render once — renderCart() recalculates
     // delivery and repaints the summary through its own pipeline.
@@ -2767,6 +2846,7 @@ window.addEventListener('storage',(e)=>{
 // address.html dispatches this when the selected address changes; refresh
 // address text + recalculate distance/fee/total using the existing pipeline.
 window.addEventListener('nearbite:address-changed',()=>{
+  localStorage.removeItem('nearbite_checkout_key');
   ctAddrHydratedFor = null;
   // renderCart() recalculates distance/fee/total and repaints the summary via
   // its own pipeline, so load the new address first and then render exactly once.
