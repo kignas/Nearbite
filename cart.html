@@ -439,8 +439,7 @@
   }
   .ct-line-act[hidden]{ display:none; }
   .ct-line-chev{ flex:0 0 auto; font-size:11px; color:#B6BDC4; }
-  .ct-restaurant-notes{display:block;}
-  .ct-restaurant-note-label{margin:12px 14px 0;font-size:12px;font-weight:800;color:var(--ct-muted);text-transform:uppercase;letter-spacing:.4px;}
+  .ct-line-chev[hidden]{ display:none; }
 
   /* ── Tip ──────────────────────────────────────────────────────────── */
   .ct-tip-note{
@@ -733,8 +732,16 @@
       <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
     </button>
 
-    <!-- ── Note for the restaurant(s) ───────────────────────────────── -->
-    <div id="restaurant-notes-list" class="ct-restaurant-notes" aria-label="Restaurant notes"></div>
+    <!-- ── Note for the restaurant ───────────────────────────────────── -->
+    <button type="button" class="ct-line-card tap" data-note-field="restaurantNote" aria-haspopup="dialog">
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>
+      <span class="ct-line-copy">
+        <span class="ct-line-title" data-role="title">Add a note for the restaurant</span>
+        <span class="ct-line-sub" data-role="sub">Spice level, allergies, packaging &mdash; anything the kitchen should know</span>
+      </span>
+      <span class="ct-line-act" data-role="act" hidden>Edit</span>
+      <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
+    </button>
 
     <!-- ── Delivery instructions (separate field, separate sheet) ─────── -->
     <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
@@ -1219,7 +1226,7 @@ async function calculateCurrentDelivery(options) {
   }
 
   if (!customerCoords || !restaurantCoords) {
-    const freeDelivery = Number(restaurantInfo?.freeDeliveryAbove || 0) > 0 && subtotal >= Number(restaurantInfo.freeDeliveryAbove);
+    const freeDelivery = !!(restaurantInfo?.freeDeliveryEnabled && restaurantInfo?.freeDeliveryAbove > 0 && subtotal >= restaurantInfo.freeDeliveryAbove);
     return {
       fee: freeDelivery ? 0 : 30,
       distance: null,
@@ -1243,7 +1250,7 @@ async function calculateCurrentDelivery(options) {
   }
 
   const baseFee = deliveryFeeForDistance(distance);
-  const freeDelivery = Number(restaurantInfo?.freeDeliveryAbove || 0) > 0 && subtotal >= Number(restaurantInfo.freeDeliveryAbove);
+  const freeDelivery = restaurantInfo?.freeDeliveryEnabled && restaurantInfo?.freeDeliveryAbove > 0 && subtotal >= restaurantInfo.freeDeliveryAbove;
   return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryEnabled: restaurantInfo?.freeDeliveryEnabled !== false, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0, minOrder: restaurantInfo?.minOrder || 0, codEnabled: restaurantInfo?.codEnabled === true };
 }
 
@@ -1284,11 +1291,11 @@ async function ctComputeBreakdown(groups, force) {
       radius = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 10) : 10;
       if (distance > radius) { outsideRadius = true; }
       else {
-        freeDelivery = freeAbove > 0 && g.subtotal >= freeAbove;
+        freeDelivery = freeEnabled && freeAbove > 0 && g.subtotal >= freeAbove;
         fee = freeDelivery ? 0 : deliveryFeeForDistance(distance);
       }
     } else {
-      freeDelivery = freeAbove > 0 && g.subtotal >= freeAbove;
+      freeDelivery = freeEnabled && freeAbove > 0 && g.subtotal >= freeAbove;
       fee = freeDelivery ? 0 : 30;
     }
     rows.push({ ...g, distance, outsideRadius, radius, fee, freeDelivery, freeAbove, freeEnabled, minOrder, codEnabled: info?.codEnabled === true });
@@ -1311,8 +1318,7 @@ function renderMultiBreakdown(rows) {
     } else if (Number(r.fee) === 0 && r.freeAbove > 0) {
       note = 'Free delivery unlocked';
     } else if (r.freeAbove > 0) {
-      const remaining = Math.max(0, Math.ceil(r.freeAbove - r.subtotal));
-      note = remaining > 0 ? 'Add ₹' + remaining.toLocaleString('en-IN') + ' for free delivery' : 'Free delivery unlocked';
+      note = 'Add ₹' + Math.max(0, Math.ceil(r.freeAbove - r.subtotal)).toLocaleString('en-IN') + ' for free delivery';
     }
     html.push(
       '<div class="ct-bill-row" style="flex-direction:column;align-items:stretch;gap:2px;">' +
@@ -1345,11 +1351,8 @@ function applyMultiDelivery(rows) {
   ctState.freeDeliveryAbove = 0;
   ctState.freeDeliveryEnabled = false;
 
-  // Multi-restaurant checkout is online-payment-only. COD is available
-  // only when the cart contains exactly one restaurant and that restaurant
-  // has explicitly enabled COD. This keeps payment method consistent across
-  // every order created from the checkout.
-  syncPaymentOptions(false);
+  // COD only if EVERY restaurant allows it.
+  syncPaymentOptions(rows.every(r => r.codEnabled));
 
   const feeEl = document.getElementById('bill-delivery-val');
   const feeLabel = document.getElementById('bill-delivery-label');
@@ -1496,12 +1499,6 @@ function loadCartExtras() {
   try { raw = JSON.parse(localStorage.getItem(CT_EXTRAS_KEY)); } catch (e) {}
   const data = (raw && typeof raw === 'object') ? raw : {};
   ctState.restaurantNote       = ctCleanNote(data.restaurantNote);
-  ctState.restaurantNotes      = {};
-  if (data.restaurantNotes && typeof data.restaurantNotes === 'object' && !Array.isArray(data.restaurantNotes)) {
-    Object.entries(data.restaurantNotes).forEach(([rid, note]) => {
-      if (/^[a-fA-F0-9]{24}$/.test(String(rid))) ctState.restaurantNotes[String(rid)] = ctCleanNote(note);
-    });
-  }
   ctState.deliveryInstructions = ctCleanNote(data.deliveryInstructions);
   ctState.tipAmount            = ctCleanTip(data.tipAmount);
 }
@@ -1510,7 +1507,6 @@ function saveCartExtras() {
   try {
     localStorage.setItem(CT_EXTRAS_KEY, JSON.stringify({
       restaurantNote: ctState.restaurantNote,
-      restaurantNotes: ctState.restaurantNotes,
       deliveryInstructions: ctState.deliveryInstructions,
       tipAmount: ctState.tipAmount
     }));
@@ -1519,7 +1515,6 @@ function saveCartExtras() {
 
 function clearCartExtras() {
   ctState.restaurantNote = '';
-  ctState.restaurantNotes = {};
   ctState.deliveryInstructions = '';
   ctState.tipAmount = 0;
   try { localStorage.removeItem(CT_EXTRAS_KEY); } catch (e) {}
@@ -1682,7 +1677,7 @@ function applyTotals() {
   const freeVal = document.getElementById('bill-free-delivery-val');
   if (freeRow && freeVal) {
     const threshold = Number(ctState.freeDeliveryAbove || 0);
-    if (ctState.deliveryReady && threshold > 0) {
+    if (ctState.deliveryReady && ctState.freeDeliveryEnabled && threshold > 0) {
       if (ctState.deliveryFee === 0) {
         freeRow.style.display = 'flex';
         freeVal.textContent = 'Unlocked';
@@ -1768,7 +1763,7 @@ function applyDelivery(delivery) {
   const _dl = document.getElementById('bill-delivery-label'); if (_dl) _dl.textContent = 'Delivery fee';
   ctState.minOrder = Number(delivery.minOrder || ctState.minOrder || 0);
   ctState.freeDeliveryAbove = Number(delivery.freeDeliveryAbove || ctState.freeDeliveryAbove || 0);
-  ctState.freeDeliveryEnabled = Number(delivery.freeDeliveryAbove || 0) > 0;
+  ctState.freeDeliveryEnabled = delivery.freeDeliveryEnabled !== false;
   ctState.unavailable = !!delivery.outsideRadius;
   ctState.deliveryReady = true;
 
@@ -2242,7 +2237,6 @@ async function placeOrder() {
       // existing pre-tip meaning; the tip is a separate field and the backend
       // folds it into the authoritative total.
       restaurantNote: ctState.restaurantNote || '',
-      restaurantNotes: Object.keys(ctState.restaurantNotes || {}).length ? ctState.restaurantNotes : undefined,
       deliveryInstructions: ctState.deliveryInstructions || '',
       tipAmount: ctCleanTip(ctState.tipAmount)
     };
@@ -2500,72 +2494,28 @@ document.addEventListener('keydown', (event) => {
    ═══════════════════════════════════════════════════════════════════════ */
 let ctNoteField = null;
 
-function restaurantNoteField(rid) {
-  return 'restaurantNote:' + String(rid);
-}
-
-function getRestaurantNote(rid) {
-  return ctCleanNote(ctState.restaurantNotes && ctState.restaurantNotes[String(rid)]);
-}
-
-function setRestaurantNote(rid, value) {
-  const key = String(rid);
-  if (!ctState.restaurantNotes || typeof ctState.restaurantNotes !== 'object') ctState.restaurantNotes = {};
-  const clean = ctCleanNote(value);
-  if (clean) ctState.restaurantNotes[key] = clean;
-  else delete ctState.restaurantNotes[key];
-}
-
-function getNoteRestaurantGroups() {
-  const groups = ctCartGroups();
-  return groups.length ? groups : [{ resId: 'legacy', name: 'Eatswada Restaurant' }];
-}
-
 function paintNoteCards() {
-  const list = document.getElementById('restaurant-notes-list');
-  if (list) {
-    const groups = getNoteRestaurantGroups();
-    const multi = groups.length > 1;
-    const heading = multi
-      ? '<div class="ct-restaurant-note-label">Add notes for each restaurant</div>'
-      : '<div class="ct-restaurant-note-label">Restaurant note</div>';
+  Object.keys(CT_NOTE_CFG).forEach(field => {
+    const card = document.querySelector('.ct-line-card[data-note-field="' + field + '"]');
+    if (!card) return;
+    const cfg = CT_NOTE_CFG[field];
+    const value = ctState[field];
 
-    // IMPORTANT: one independent note card is rendered for EVERY restaurant
-    // represented in the current cart. The restaurant id is part of the
-    // data-note-field key, so opening/saving one card can never overwrite
-    // another restaurant's note.
-    list.innerHTML = heading + groups.map(g => {
-      const rid = String(g.resId);
-      const restaurantName = String(g.name || 'Restaurant');
-      const value = rid === 'legacy' ? ctState.restaurantNote : getRestaurantNote(rid);
-      const title = value ? restaurantName + ' — Note added' : 'Add a note for ' + restaurantName;
-      const sub = value || 'Spice level, allergies, packaging — anything this kitchen should know';
-      const field = restaurantNoteField(rid);
-      return '<button type="button" class="ct-line-card tap' + (value ? ' is-set' : '') + '" data-note-field="' + esc(field) + '" data-restaurant-id="' + esc(rid) + '" aria-haspopup="dialog" aria-label="' + esc(value ? ('Note for ' + restaurantName + ': ' + value + '. Tap to edit or remove.') : title) + '">' +
-        '<span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>' +
-        '<span class="ct-line-copy"><span class="ct-line-title">' + esc(title) + '</span><span class="ct-line-sub">' + esc(sub) + '</span></span>' +
-        '<span class="ct-line-act"' + (value ? '' : ' hidden') + '>Edit</span>' +
-        '<i class="fa-solid fa-chevron-right ct-line-chev"' + (value ? ' hidden' : '') + ' aria-hidden="true"></i>' +
-        '</button>';
-    }).join('');
-  }
+    const title = card.querySelector('[data-role="title"]');
+    const sub   = card.querySelector('[data-role="sub"]');
+    const act   = card.querySelector('[data-role="act"]');
+    const chev  = card.querySelector('[data-role="chev"]');
 
-  // Delivery instructions remains a single checkout-wide field.
-  const field = 'deliveryInstructions';
-  const card = document.querySelector('.ct-line-card[data-note-field="' + field + '"]');
-  if (!card) return;
-  const cfg = CT_NOTE_CFG[field];
-  const value = ctState[field];
-  const title = card.querySelector('[data-role="title"]');
-  const sub   = card.querySelector('[data-role="sub"]');
-  const act   = card.querySelector('[data-role="act"]');
-  const chev  = card.querySelector('[data-role="chev"]');
-  card.classList.toggle('is-set', !!value);
-  if (title) title.textContent = value ? cfg.setTitle : cfg.idleTitle;
-  if (sub) sub.textContent = value || cfg.idleSub;
-  if (act) act.hidden = !value;
-  if (chev) chev.hidden = !!value;
-  card.setAttribute('aria-label', value ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.' : cfg.idleTitle);
+    card.classList.toggle('is-set', !!value);
+    if (title) title.textContent = value ? cfg.setTitle : cfg.idleTitle;
+    if (sub)   sub.textContent   = value || cfg.idleSub;   // textContent: no injection path
+    if (act)   act.hidden  = !value;
+    if (chev)  chev.hidden = !!value;
+
+    card.setAttribute('aria-label', value
+      ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.'
+      : cfg.idleTitle);
+  });
 }
 
 function updateNoteCount() {
@@ -2578,9 +2528,7 @@ function updateNoteCount() {
 }
 
 function openNoteSheet(field) {
-  const isRestaurantNote = String(field).indexOf('restaurantNote:') === 0;
-  const restaurantId = isRestaurantNote ? String(field).slice('restaurantNote:'.length) : null;
-  const cfg = isRestaurantNote ? CT_NOTE_CFG.restaurantNote : CT_NOTE_CFG[field];
+  const cfg = CT_NOTE_CFG[field];
   if (!cfg) return;
   ctNoteField = field;
 
@@ -2591,13 +2539,13 @@ function openNoteSheet(field) {
     document.getElementById('note-save').textContent = cfg.saveLabel;
 
     const input = document.getElementById('note-input');
-    input.value = isRestaurantNote ? (restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId)) : (ctState[field] || '');
+    input.value = ctState[field] || '';
     input.setAttribute('maxlength', String(CT_NOTE_MAX));
     updateNoteCount();
 
     const removeBtn = document.getElementById('note-remove');
     removeBtn.textContent = cfg.removeLabel;
-    removeBtn.hidden = !(isRestaurantNote ? (restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId)) : ctState[field]);
+    removeBtn.hidden = !ctState[field];
 
     const suggestions = document.getElementById('note-suggestions');
     suggestions.innerHTML = cfg.suggestions
@@ -2608,24 +2556,14 @@ function openNoteSheet(field) {
 
 function saveNoteSheet() {
   const field = ctNoteField;
-  const isRestaurantNote = String(field).indexOf('restaurantNote:') === 0;
-  const restaurantId = isRestaurantNote ? String(field).slice('restaurantNote:'.length) : null;
-  const cfg = isRestaurantNote ? CT_NOTE_CFG.restaurantNote : CT_NOTE_CFG[field];
+  const cfg = CT_NOTE_CFG[field];
   if (!cfg) { closeSheet(); return; }
 
   const input = document.getElementById('note-input');
   const value = ctCleanNote(input ? input.value : '');
-  const had = isRestaurantNote
-    ? !!(restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId))
-    : !!ctState[field];
+  const had = !!ctState[field];
 
-  if (String(field).indexOf('restaurantNote:') === 0) {
-    const restaurantId = String(field).slice('restaurantNote:'.length);
-    if (restaurantId === 'legacy') ctState.restaurantNote = value;
-    else setRestaurantNote(restaurantId, value);
-  } else {
-    ctState[field] = value;
-  }
+  ctState[field] = value;         // saving an empty field is a removal
   saveCartExtras();
   paintNoteCards();
   closeSheet();
@@ -2636,17 +2574,9 @@ function saveNoteSheet() {
 
 function removeNoteSheet() {
   const field = ctNoteField;
-  const isRestaurantNote = String(field).indexOf('restaurantNote:') === 0;
-  const restaurantId = isRestaurantNote ? String(field).slice('restaurantNote:'.length) : null;
-  const cfg = isRestaurantNote ? CT_NOTE_CFG.restaurantNote : CT_NOTE_CFG[field];
+  const cfg = CT_NOTE_CFG[field];
   if (!cfg) { closeSheet(); return; }
-  if (String(field).indexOf('restaurantNote:') === 0) {
-    const restaurantId = String(field).slice('restaurantNote:'.length);
-    if (restaurantId === 'legacy') ctState.restaurantNote = '';
-    else setRestaurantNote(restaurantId, '');
-  } else {
-    ctState[field] = '';
-  }
+  ctState[field] = '';
   saveCartExtras();
   paintNoteCards();
   closeSheet();
@@ -2802,6 +2732,10 @@ async function ctEnsureProfile() {
   // A cached login profile is enough to paint immediately, but when a token is
   // present always refresh from the authenticated backend so edited profile
   // data is reflected on Cart.
+  if (!token) {
+    paintCheckoutDeliverySummary();
+    return;
+  }
   if (!token) {
     paintCheckoutDeliverySummary();
     return;
