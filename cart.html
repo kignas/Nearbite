@@ -154,10 +154,6 @@
 
   /* ── Item rows ────────────────────────────────────────────────────── */
   #cart-items-list{ padding-top:2px; padding-bottom:2px; }
-  .ct-restaurant-group{ margin:12px 0 16px; }
-  .ct-restaurant-group > .ct-card-head{ margin:0 14px; padding:12px 2px 9px; }
-  .ct-restaurant-group > .ct-line-card{ margin-top:10px; }
-
 
   .ct-row{
     display:grid;
@@ -736,6 +732,17 @@
       <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
     </button>
 
+    <!-- ── Note for the restaurant ───────────────────────────────────── -->
+    <button type="button" class="ct-line-card tap" data-note-field="restaurantNote" aria-haspopup="dialog">
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>
+      <span class="ct-line-copy">
+        <span class="ct-line-title" data-role="title">Add a note for the restaurant</span>
+        <span class="ct-line-sub" data-role="sub">Spice level, allergies, packaging &mdash; anything the kitchen should know</span>
+      </span>
+      <span class="ct-line-act" data-role="act" hidden>Edit</span>
+      <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
+    </button>
+
     <!-- ── Delivery instructions (separate field, separate sheet) ─────── -->
     <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
       <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-motorcycle"></i></span>
@@ -885,8 +892,11 @@
           <span class="ct-bill-val" id="bill-savings-val">₹0</span>
         </div>
 
+        <!-- #8 — per-restaurant breakdown (multi-restaurant carts only) -->
+        <div id="bill-per-restaurant" style="display:none;"></div>
+
         <div class="ct-bill-row">
-          <span class="ct-bill-label">Delivery fee</span>
+          <span class="ct-bill-label" id="bill-delivery-label">Delivery fee</span>
           <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
         </div>
 
@@ -1160,7 +1170,7 @@ async function getRestaurantLocation(restaurantId, force) {
       minOrder: Number(restaurant.minOrder || 0),
       freeDeliveryEnabled: restaurant.freeDeliveryEnabled !== false,
       freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
-      deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 15),
+      deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 10),
       codEnabled: restaurant.codEnabled === true,
       etaText: '35–40 mins',
     };
@@ -1175,7 +1185,7 @@ async function getRestaurantLocation(restaurantId, force) {
 /* Address hydration is likewise cached per selected address id. */
 let ctAddrHydratedFor = null;
 
-async function calculateSingleRestaurantDelivery(options) {
+async function calculateCurrentDelivery(options) {
   const force = !!(options && options.force);
   let savedCart = {};
   let savedAddress = null;
@@ -1229,8 +1239,12 @@ async function calculateSingleRestaurantDelivery(options) {
   }
 
   const distance = distanceKm(restaurantCoords, customerCoords);
-  const radius = Number(restaurantInfo?.deliveryRadiusKm);
-  if (Number.isFinite(radius) && radius > 0 && distance > radius) {
+  // Platform maximum delivery distance is 10 km. A restaurant may narrow its
+  // own radius below 10, never widen it past 10 — mirrors the backend cap so
+  // the cart and the order endpoint agree on who can be delivered to.
+  const rawRadius = Number(restaurantInfo?.deliveryRadiusKm);
+  const radius = Number.isFinite(rawRadius) && rawRadius > 0 ? Math.min(rawRadius, 10) : 10;
+  if (distance > radius) {
     return { fee: null, distance, source: 'gps', outsideRadius: true, radius, codEnabled: restaurantInfo?.codEnabled === true };
   }
 
@@ -1239,62 +1253,141 @@ async function calculateSingleRestaurantDelivery(options) {
   return { fee: freeDelivery ? 0 : baseFee, distance, source: 'gps', freeDelivery, freeDeliveryEnabled: restaurantInfo?.freeDeliveryEnabled !== false, freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0, minOrder: restaurantInfo?.minOrder || 0, codEnabled: restaurantInfo?.codEnabled === true };
 }
 
-async function calculateCurrentDelivery(options) {
-  const savedCart = readCart() || {};
-  const groups = cartGroups(savedCart);
-  if (groups.length <= 1) return calculateSingleRestaurantDelivery(options);
+/* ── #8 Per-restaurant bill breakdown ────────────────────────────────────
+   For carts spanning 2+ restaurants, each restaurant is priced on its own:
+   its own subtotal, its own minimum order, its own delivery fee and its own
+   free-delivery threshold — exactly how the backend charges since Phase 1.
+   Single-restaurant carts are untouched (they use the existing path). */
+function ctCartGroups() {
+  let savedCart = {};
+  try { savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
+  const map = {};
+  for (const [, info] of Object.entries(savedCart)) {
+    const rid = info && info.resId;
+    if (!rid || rid === 'undefined' || rid === 'null') continue;
+    if (!map[rid]) map[rid] = { resId: String(rid), name: info.restaurantName || info.resName || 'Restaurant', subtotal: 0, units: 0 };
+    map[rid].subtotal += Number(info.price || 0) * Number(info.quantity || 0);
+    map[rid].units += Number(info.quantity || 0);
+  }
+  return Object.values(map);
+}
 
-  const savedAddress = ctSelectedAddress();
-  const selectedAddressId = localStorage.getItem('nearbite_selected_address_id');
-  let customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-  const force = !!(options && options.force);
-  if (token && selectedAddressId && (force || ctAddrHydratedFor !== selectedAddressId)) {
-    try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
-      const result = await response.json();
-      if (response.ok && result.success) {
-        ctCaptureProfile(result.data);
-        ctProfileRefreshedThisPass = true;
-        const list = Array.isArray(result.data?.addresses) ? result.data.addresses : [];
-        const selected = list.find(a => String(a._id) === String(selectedAddressId));
-        if (selected) { customerCoords = normalizeCoords(selected.location || selected); localStorage.setItem('nearbite_address', JSON.stringify(selected)); ctAddrHydratedFor = selectedAddressId; }
+async function ctComputeBreakdown(groups, force) {
+  let savedAddress = null;
+  try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
+  const customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
+  const rows = [];
+  for (const g of groups) {
+    const info = await getRestaurantLocation(g.resId, force);
+    const coords = info && info.coords;
+    const freeAbove = Number(info?.freeDeliveryAbove || 0);
+    const freeEnabled = info?.freeDeliveryEnabled !== false;
+    const minOrder = Number(info?.minOrder || 0);
+    let distance = null, outsideRadius = false, radius = 10, fee = null, freeDelivery = false;
+    if (customerCoords && coords) {
+      distance = distanceKm(coords, customerCoords);
+      const raw = Number(info?.deliveryRadiusKm);
+      radius = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 10) : 10;
+      if (distance > radius) { outsideRadius = true; }
+      else {
+        freeDelivery = freeEnabled && freeAbove > 0 && g.subtotal >= freeAbove;
+        fee = freeDelivery ? 0 : deliveryFeeForDistance(distance);
       }
-    } catch (e) { console.warn('Could not refresh selected delivery address:', e); }
+    } else {
+      freeDelivery = freeEnabled && freeAbove > 0 && g.subtotal >= freeAbove;
+      fee = freeDelivery ? 0 : 30;
+    }
+    rows.push({ ...g, distance, outsideRadius, radius, fee, freeDelivery, freeAbove, freeEnabled, minOrder, codEnabled: info?.codEnabled === true });
+  }
+  return rows;
+}
+
+function renderMultiBreakdown(rows) {
+  const box = document.getElementById('bill-per-restaurant');
+  if (!box) return;
+  const muted = 'font-size:11px;color:#6b7280;';
+  const html = ['<div style="' + muted + 'font-weight:800;letter-spacing:.3px;text-transform:uppercase;margin:2px 0 6px;">Bill by restaurant</div>'];
+  rows.forEach(r => {
+    const feeText = r.outsideRadius ? 'Unavailable' : (Number(r.fee) === 0 ? 'FREE' : '₹' + r.fee);
+    let note = '';
+    if (r.minOrder > 0 && r.subtotal < r.minOrder) {
+      note = 'Add ₹' + Math.ceil(r.minOrder - r.subtotal).toLocaleString('en-IN') + ' (min ₹' + r.minOrder.toLocaleString('en-IN') + ')';
+    } else if (r.outsideRadius) {
+      note = 'Outside ' + r.radius.toFixed(1).replace(/\.0$/, '') + ' km delivery range';
+    } else if (Number(r.fee) === 0 && r.freeAbove > 0) {
+      note = 'Free delivery unlocked';
+    } else if (r.freeAbove > 0) {
+      note = 'Add ₹' + Math.max(0, Math.ceil(r.freeAbove - r.subtotal)).toLocaleString('en-IN') + ' for free delivery';
+    }
+    html.push(
+      '<div class="ct-bill-row" style="flex-direction:column;align-items:stretch;gap:2px;">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;">' +
+          '<span class="ct-bill-label">' + esc(r.name) + '</span>' +
+          '<span class="ct-bill-val' + (r.outsideRadius ? ' is-off' : (Number(r.fee) === 0 ? ' is-free' : '')) + '">' + feeText + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;' + muted + '">' +
+          '<span>Item total ₹' + r.subtotal.toLocaleString('en-IN') + '</span>' +
+          '<span>' + esc(note) + '</span>' +
+        '</div>' +
+      '</div>'
+    );
+  });
+  box.innerHTML = html.join('');
+  box.style.display = 'block';
+}
+
+function applyMultiDelivery(rows) {
+  const anyOutside = rows.some(r => r.outsideRadius);
+  const deliveryTotal = rows.reduce((sum, r) => sum + (r.outsideRadius ? 0 : Number(r.fee || 0)), 0);
+  const belowMin = rows.filter(r => r.minOrder > 0 && r.subtotal < r.minOrder);
+
+  ctState.deliveryFee = deliveryTotal;
+  ctState.unavailable = anyOutside;
+  ctState.deliveryReady = true;
+  ctState.multiBelowMin = belowMin;
+  // Free-delivery is per-restaurant now; the single aggregate free-delivery row
+  // is hidden (each restaurant shows its own progress in the breakdown).
+  ctState.freeDeliveryAbove = 0;
+  ctState.freeDeliveryEnabled = false;
+
+  // COD only if EVERY restaurant allows it.
+  syncPaymentOptions(rows.every(r => r.codEnabled));
+
+  const feeEl = document.getElementById('bill-delivery-val');
+  const feeLabel = document.getElementById('bill-delivery-label');
+  if (feeLabel) feeLabel.textContent = 'Delivery fee (' + rows.length + ' restaurants)';
+  if (anyOutside) { feeEl.className = 'ct-bill-val is-off'; feeEl.textContent = 'Unavailable'; }
+  else if (deliveryTotal === 0) { feeEl.className = 'ct-bill-val is-free'; feeEl.textContent = 'FREE'; }
+  else { feeEl.className = 'ct-bill-val'; feeEl.textContent = '₹' + deliveryTotal; }
+
+  renderMultiBreakdown(rows);
+
+  const strip = document.getElementById('free-delivery-nudge');
+  const stripText = document.getElementById('nudge-text');
+  const stripSub = document.getElementById('nudge-sub');
+  const stripIcon = document.getElementById('nudge-icon');
+  if (strip) {
+    strip.style.display = 'flex';
+    if (anyOutside) {
+      strip.className = 'ct-strip is-error';
+      if (stripIcon) stripIcon.className = 'fa-solid fa-circle-exclamation';
+      if (stripText) stripText.textContent = 'One or more restaurants can’t deliver to this address';
+      if (stripSub) { stripSub.textContent = 'See the bill breakdown for details'; stripSub.hidden = false; }
+    } else if (belowMin.length) {
+      strip.className = 'ct-strip is-neutral';
+      if (stripIcon) stripIcon.className = 'fa-solid fa-basket-shopping';
+      if (stripText) stripText.textContent = belowMin.length + ' restaurant' + (belowMin.length > 1 ? 's' : '') + ' below minimum order';
+      if (stripSub) { stripSub.textContent = 'Add items to continue'; stripSub.hidden = false; }
+    } else {
+      strip.className = 'ct-strip';
+      if (stripIcon) stripIcon.className = 'fa-solid fa-motorcycle';
+      if (stripText) stripText.textContent = 'Each restaurant is delivered separately';
+      if (stripSub) { stripSub.textContent = '₹' + deliveryTotal + ' total delivery'; stripSub.hidden = false; }
+    }
   }
 
-  const results = await Promise.all(groups.map(async group => {
-    const info = await getRestaurantLocation(group.id, force);
-    const subtotal = group.items.reduce((sum, [, item]) => sum + Number(item.quantity || 0) * Number(item.price || 0), 0);
-    if (!customerCoords || !info?.coords) return { id: group.id, name: group.name, fee: 30, subtotal, info, distance: null, outsideRadius: false, unresolved: true };
-    const distance = distanceKm(info.coords, customerCoords);
-    const radius = Number(info.deliveryRadiusKm || 15);
-    if (Number.isFinite(radius) && radius > 0 && distance > radius) return { id: group.id, name: info.name || group.name, fee: 0, subtotal, info, distance, outsideRadius: true, radius };
-    const base = deliveryFeeForDistance(distance);
-    const free = info.freeDeliveryEnabled && info.freeDeliveryAbove > 0 && subtotal >= info.freeDeliveryAbove;
-    return { id: group.id, name: info.name || group.name, fee: free ? 0 : base, subtotal, info, distance, outsideRadius: false, freeDelivery: free };
-  }));
-
-  const unavailable = results.find(r => r.outsideRadius);
-  const fee = results.reduce((sum, r) => sum + Number(r.fee || 0), 0);
-  const minOrderFailures = results.filter(r => Number(r.info?.minOrder || 0) > r.subtotal);
-  return {
-    fee: unavailable ? null : fee,
-    distance: unavailable ? unavailable.distance : null,
-    radius: unavailable ? unavailable.radius : null,
-    outsideRadius: !!unavailable,
-    multi: true,
-    restaurants: results,
-    unresolved: results.some(r => r.unresolved),
-    minOrderFailures,
-    codEnabled: results.every(r => r.info?.codEnabled === true),
-    freeDelivery: false,
-    freeDeliveryEnabled: false,
-    freeDeliveryAbove: 0,
-  multiMinOrderFailures: [],
-  multiDelivery: null,
-    minOrder: 0
-  };
+  applyTotals();
+  updateCheckoutCta();
 }
 
 /* ── Payment (behaviour unchanged) ──────────────────────────────────────── */
@@ -1336,10 +1429,7 @@ const ctState = {
   minOrder: 0,
   freeDeliveryEnabled: false,
   freeDeliveryAbove: 0,
-  multiMinOrderFailures: [],
-  multiDelivery: null,
   // Phase 3.1 — sent to the existing POST /orders endpoint.
-  restaurantNotes: {},
   restaurantNote: '',
   deliveryInstructions: '',
   tipAmount: 0
@@ -1407,25 +1497,15 @@ function loadCartExtras() {
   let raw = null;
   try { raw = JSON.parse(localStorage.getItem(CT_EXTRAS_KEY)); } catch (e) {}
   const data = (raw && typeof raw === 'object') ? raw : {};
-  const notes = (data.restaurantNotes && typeof data.restaurantNotes === 'object' && !Array.isArray(data.restaurantNotes)) ? data.restaurantNotes : {};
-  ctState.restaurantNotes = Object.fromEntries(Object.entries(notes).map(([id, note]) => [String(id), ctCleanNote(note)]).filter(([, note]) => note));
-  // Migrate the old single-note format without breaking existing carts.
-  ctState.restaurantNote = ctCleanNote(data.restaurantNote);
-  if (ctState.restaurantNote && Object.keys(ctState.restaurantNotes).length === 0) {
-    const cart = readCart();
-    const first = cart && Object.values(cart).find(item => item && item.resId);
-    if (first && first.resId) ctState.restaurantNotes[String(first.resId)] = ctState.restaurantNote;
-  }
+  ctState.restaurantNote       = ctCleanNote(data.restaurantNote);
   ctState.deliveryInstructions = ctCleanNote(data.deliveryInstructions);
-  ctState.tipAmount = ctCleanTip(data.tipAmount);
+  ctState.tipAmount            = ctCleanTip(data.tipAmount);
 }
 
 function saveCartExtras() {
   try {
     localStorage.setItem(CT_EXTRAS_KEY, JSON.stringify({
-      restaurantNotes: ctState.restaurantNotes,
-      // Keep legacy field for older builds; only mirror the note when exactly one restaurant exists.
-      restaurantNote: Object.keys(ctState.restaurantNotes).length === 1 ? Object.values(ctState.restaurantNotes)[0] : '',
+      restaurantNote: ctState.restaurantNote,
       deliveryInstructions: ctState.deliveryInstructions,
       tipAmount: ctState.tipAmount
     }));
@@ -1433,7 +1513,6 @@ function saveCartExtras() {
 }
 
 function clearCartExtras() {
-  ctState.restaurantNotes = {};
   ctState.restaurantNote = '';
   ctState.deliveryInstructions = '';
   ctState.tipAmount = 0;
@@ -1484,62 +1563,60 @@ function customLine(value) {
 }
 
 /* ── Item painting: synchronous, never waits on the network ─────────────── */
-function cartGroups(savedCart) {
-  const groups = new Map();
-  Object.entries(savedCart).forEach(([name, info]) => {
-    const rid = info && info.resId ? String(info.resId) : '';
-    if (!rid) return;
-    if (!groups.has(rid)) groups.set(rid, { id: rid, name: info.restaurantName || info.resName || 'Restaurant', items: [] });
-    groups.get(rid).items.push([name, info]);
-  });
-  return Array.from(groups.values());
-}
-
-function restaurantNoteCard(group) {
-  const rid = esc(group.id);
-  const value = ctState.restaurantNotes[group.id] || '';
-  return `<button type="button" class="ct-line-card tap" data-note-field="restaurantNote" data-note-restaurant-id="${rid}" aria-haspopup="dialog" aria-label="${value ? 'Edit note for ' + esc(group.name) : 'Add a note for ' + esc(group.name)}">
-    <span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>
-    <span class="ct-line-copy">
-      <span class="ct-line-title" data-role="title">${value ? 'Note added' : 'Add a note for ' + esc(group.name)}</span>
-      <span class="ct-line-sub" data-role="sub">${value ? esc(value) : 'Spice level, allergies, packaging — anything the kitchen should know'}</span>
-    </span>
-    <span class="ct-line-act" data-role="act" ${value ? '' : 'hidden'}>Edit</span>
-    <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" ${value ? 'hidden' : ''} aria-hidden="true"></i>
-  </button>`;
-}
-
 function paintItems(savedCart) {
   const listEl = document.getElementById('cart-items-list');
-  const groups = cartGroups(savedCart);
-  const allItems = Object.entries(savedCart);
-  const anyMedia = allItems.some(([, info]) => itemImage(info));
+  const items = Object.entries(savedCart);
+  const anyMedia = items.some(([, info]) => itemImage(info));
 
-  listEl.innerHTML = groups.map(group => `
-    <div class="ct-restaurant-group" data-restaurant-id="${esc(group.id)}">
-      <div class="ct-card-head"><i class="fa-solid fa-store"></i> ${esc(group.name)} <span style="margin-left:auto;font-size:10px;text-transform:none;letter-spacing:0;">${group.items.length} ${group.items.length === 1 ? 'item' : 'items'}</span></div>
-      ${group.items.map(([name, info]) => {
-        const price = Number(info.price || 0);
-        const original = Number(info.originalPrice || 0);
-        const hasDiscount = original > price;
-        const discountPct = hasDiscount ? Math.round(((original - price) / original) * 100) : 0;
-        const quantity = Number(info.quantity || 0);
-        const itemTotal = quantity * price;
-        const itemSavings = hasDiscount ? quantity * (original - price) : 0;
-        const img = itemImage(info);
-        const media = anyMedia ? `<div class="ct-media"><div class="ct-media-fallback"><i class="fa-solid fa-utensils"></i></div>${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>` : '';
-        const custom = customLine(info.customizations);
-        return `<div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
-          ${media}<div class="ct-info"><div class="ct-name-row">${vegMark(info)}<span class="ct-name">${esc(name)}</span></div>
-          ${custom ? `<div class="ct-custom">${esc(custom)}</div>` : ''}<div class="ct-price-line"><span class="ct-unit-price ct-num">₹${price}</span>${hasDiscount ? `<span class="ct-was-price ct-num">₹${original}</span><span class="ct-off-badge">${discountPct}% OFF</span>` : ''}</div></div>
-          <div class="ct-right"><div><div class="ct-item-total ct-num">₹${itemTotal}</div>${hasDiscount ? `<div class="ct-item-save ct-num">Save ₹${itemSavings.toFixed(0)}</div>` : ''}</div>
-          <div class="ct-stepper" role="group" aria-label="Quantity for ${esc(name)}"><button type="button" data-step="-1" aria-label="Decrease quantity">−</button><span class="ct-qty">${quantity}</span><button type="button" data-step="1" aria-label="Increase quantity">+</button></div></div>
-        </div>`;
-      }).join('')}
-      ${restaurantNoteCard(group)}
-    </div>`).join('');
+  listEl.innerHTML = items.map(([name, info]) => {
+    const price = Number(info.price || 0);
+    const original = Number(info.originalPrice || 0);
+    const hasDiscount = original > price;
+    const discountPct = hasDiscount ? Math.round(((original - price) / original) * 100) : 0;
+    const quantity = Number(info.quantity || 0);
+    const itemTotal = quantity * price;
+    const itemSavings = hasDiscount ? quantity * (original - price) : 0;
 
-  document.getElementById('cart-restaurant-name').innerText = groups.length === 1 ? groups[0].name : `${groups.length} restaurants`;
+    const img = itemImage(info);
+    const media = anyMedia ? `
+        <div class="ct-media">
+          <div class="ct-media-fallback"><i class="fa-solid fa-utensils"></i></div>
+          ${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+        </div>` : '';
+
+    const custom = customLine(info.customizations);
+
+    return `
+      <div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
+        ${media}
+        <div class="ct-info">
+          <div class="ct-name-row">
+            ${vegMark(info)}
+            <span class="ct-name">${esc(name)}</span>
+          </div>
+          ${custom ? `<div class="ct-custom">${esc(custom)}</div>` : ''}
+          <div class="ct-price-line">
+            <span class="ct-unit-price ct-num">₹${price}</span>
+            ${hasDiscount ? `<span class="ct-was-price ct-num">₹${original}</span><span class="ct-off-badge">${discountPct}% OFF</span>` : ''}
+          </div>
+        </div>
+        <div class="ct-right">
+          <div>
+            <div class="ct-item-total ct-num">₹${itemTotal}</div>
+            ${hasDiscount ? `<div class="ct-item-save ct-num">Save ₹${itemSavings.toFixed(0)}</div>` : ''}
+          </div>
+          <div class="ct-stepper" role="group" aria-label="Quantity for ${esc(name)}">
+            <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
+            <span class="ct-qty">${quantity}</span>
+            <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  let resName = 'Eatswada Restaurant';
+  if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
+  document.getElementById('cart-restaurant-name').innerText = resName;
 }
 
 /* ── Bill painting: money math identical to the previous build ───────────── */
@@ -1602,14 +1679,11 @@ function applyTotals() {
     if (ctState.deliveryReady && ctState.freeDeliveryEnabled && threshold > 0) {
       if (ctState.deliveryFee === 0) {
         freeRow.style.display = 'flex';
-        freeVal.textContent = 'FREE';
+        freeVal.textContent = 'Unlocked';
       } else {
         freeRow.style.display = 'flex';
         freeVal.textContent = 'Above ₹' + threshold.toLocaleString('en-IN');
       }
-    } else if (ctState.deliveryReady && ctState.deliveryFee === 0 && ctState.freeDeliveryEnabled) {
-      freeRow.style.display = 'flex';
-      freeVal.textContent = 'FREE';
     } else {
       freeRow.style.display = 'none';
     }
@@ -1617,13 +1691,6 @@ function applyTotals() {
 
   // One number, written everywhere it appears: the sheet's "To pay", the
   // compact row and the checkout CTA can never disagree.
-  const deliveryVal = document.getElementById('bill-delivery-val');
-  if (deliveryVal && ctState.deliveryReady && !ctState.unavailable) {
-    const isFree = Number(ctState.deliveryFee) === 0 && ctState.freeDeliveryEnabled === true;
-    deliveryVal.classList.toggle('is-free', isFree);
-    deliveryVal.textContent = isFree ? 'FREE' : '₹' + Number(ctState.deliveryFee || 0);
-  }
-
   document.getElementById('bill-total').innerText = '₹' + total;
   document.getElementById('checkout-total').innerText = '₹' + total;
   updateBillCompact(total);
@@ -1681,87 +1748,25 @@ function setDeliveryPending() {
 }
 
 function applyDelivery(delivery) {
-  // Multi-restaurant delivery is authoritative per restaurant. Keep the
-  // shared state in sync so the bill, CTA and bill sheet never stay on a
-  // skeleton or stale total.
-  const feeEl = document.getElementById('bill-delivery-val');
+  // Fee resolution is byte-for-byte the previous rule set.
   let deliveryFee = delivery.fee;
-
-  // The delivery calculation can arrive with a stale `fee/freeDelivery`
-  // pair (for example, the banner may already know the threshold is reached
-  // while `fee` is still the distance fee). Re-derive the free-delivery state
-  // from the authoritative threshold + current subtotal before rendering the
-  // bill, so the banner and Bill Details can never disagree.
-  const deliveryThreshold = Number(delivery.freeDeliveryAbove || 0);
-  const thresholdUnlocked = delivery.freeDeliveryEnabled !== false &&
-    deliveryThreshold > 0 && Number(ctState.subtotal || 0) >= deliveryThreshold;
-  if (!delivery.multi && !delivery.outsideRadius && (delivery.freeDelivery === true || thresholdUnlocked)) {
-    deliveryFee = 0;
-    delivery.freeDelivery = true;
-  }
-
-  if (delivery.multi) {
-    ctState.deliveryFee = deliveryFee == null ? 0 : Number(deliveryFee);
-    ctState.unavailable = !!delivery.outsideRadius;
-    ctState.multiDelivery = delivery;
-    ctState.multiMinOrderFailures = delivery.minOrderFailures || [];
-    ctState.deliveryReady = !delivery.unresolved && !delivery.outsideRadius;
-
-    const freeRestaurants = (delivery.restaurants || []).filter(r => r.freeDelivery);
-    const freeAll = (delivery.restaurants || []).length > 0 &&
-      freeRestaurants.length === (delivery.restaurants || []).length;
-
-    // A single restaurant can still expose its backend threshold in the
-    // bill. For multiple restaurants, the bill shows FREE only when every
-    // restaurant's delivery fee is free.
-    if ((delivery.restaurants || []).length === 1) {
-      const r = delivery.restaurants[0];
-      ctState.freeDeliveryEnabled = r.info?.freeDeliveryEnabled !== false;
-      ctState.freeDeliveryAbove = Number(r.info?.freeDeliveryAbove || 0);
-      ctState.minOrder = Number(r.info?.minOrder || 0);
-    } else {
-      ctState.freeDeliveryEnabled = freeAll;
-      ctState.freeDeliveryAbove = 0;
-      ctState.minOrder = 0;
-    }
-
-    if (delivery.unresolved) {
-      feeEl.className = 'ct-bill-val'; feeEl.textContent = 'Checking…';
-      setStrip('is-neutral', 'fa-solid fa-motorcycle', 'Checking delivery for all restaurants…', 'Each restaurant is priced separately.');
-    } else if (delivery.outsideRadius) {
-      feeEl.className = 'ct-bill-val is-off'; feeEl.textContent = 'Unavailable';
-      setStrip('is-error', 'fa-solid fa-circle-exclamation', 'Delivery unavailable', `${delivery.name || 'One restaurant'} is outside its delivery radius.`);
-    } else if (freeAll) {
-      feeEl.className = 'ct-bill-val is-free'; feeEl.textContent = 'FREE';
-      const detail = (delivery.restaurants || []).map(r => `${r.name}: FREE`).join(' · ');
-      setStrip('', 'fa-solid fa-motorcycle', 'Free delivery on this order', detail);
-    } else {
-      feeEl.className = 'ct-bill-val'; feeEl.textContent = '₹' + ctState.deliveryFee;
-      const detail = (delivery.restaurants || []).map(r => `${r.name}: ${r.fee === 0 ? 'FREE' : '₹' + r.fee}`).join(' · ');
-      const freeCount = freeRestaurants.length;
-      setStrip('', 'fa-solid fa-motorcycle', `${delivery.restaurants.length} restaurants · ₹${ctState.deliveryFee} delivery`, detail + (freeCount ? ` · ${freeCount} free` : ''));
-    }
-    applyTotals(); updateCheckoutCta(); return;
-  }
-
   if (delivery.outsideRadius) {
-    deliveryFee = 0;
-  } else if (delivery.freeDelivery === true) {
-    // Backend says free delivery is unlocked: never keep a stale fee.
     deliveryFee = 0;
   } else if (deliveryFee == null) {
     deliveryFee = 30;
   }
 
-  ctState.deliveryFee = Number(deliveryFee) || 0;
+  ctState.deliveryFee = deliveryFee;
+  ctState.multiBelowMin = [];
+  const _bpr = document.getElementById('bill-per-restaurant'); if (_bpr) { _bpr.style.display = 'none'; _bpr.innerHTML = ''; }
+  const _dl = document.getElementById('bill-delivery-label'); if (_dl) _dl.textContent = 'Delivery fee';
   ctState.minOrder = Number(delivery.minOrder || ctState.minOrder || 0);
   ctState.freeDeliveryAbove = Number(delivery.freeDeliveryAbove || ctState.freeDeliveryAbove || 0);
   ctState.freeDeliveryEnabled = delivery.freeDeliveryEnabled !== false;
   ctState.unavailable = !!delivery.outsideRadius;
-  ctState.multiDelivery = delivery.multi ? delivery : null;
-  ctState.multiMinOrderFailures = delivery.multi ? (delivery.minOrderFailures || []) : [];
-  ctState.deliveryReady = !delivery.unresolved;
+  ctState.deliveryReady = true;
 
+  const feeEl = document.getElementById('bill-delivery-val');
   const strip = document.getElementById('free-delivery-nudge');
   const stripText = document.getElementById('nudge-text');
   const stripSub = document.getElementById('nudge-sub');
@@ -1831,6 +1836,17 @@ async function refreshDelivery(options) {
   setDeliveryPending();
   updateCheckoutCta();
   try {
+    const groups = ctCartGroups();
+    if (groups.length > 1) {
+      // Hydrate the selected address coords once via the normal calc, then
+      // price every restaurant in the cart independently (#8).
+      await calculateCurrentDelivery(options);
+      if (myReq !== ctDeliveryReq) return;
+      const rows = await ctComputeBreakdown(groups, !!(options && options.force));
+      if (myReq !== ctDeliveryReq) return;
+      applyMultiDelivery(rows);
+      return;
+    }
     const delivery = await calculateCurrentDelivery(options);
     if (myReq !== ctDeliveryReq) return;          // superseded, drop it
     syncPaymentOptions(delivery.codEnabled === true);
@@ -1867,11 +1883,12 @@ function updateCheckoutCta() {
     label.innerHTML = `Log in to order<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
     return;
   }
-  if (ctState.multiMinOrderFailures && ctState.multiMinOrderFailures.length) {
-    btn.classList.add('locked'); btn.setAttribute('aria-disabled', 'true');
-    const first = ctState.multiMinOrderFailures[0];
-    const add = Math.max(0, Math.ceil(Number(first.info?.minOrder || 0) - Number(first.subtotal || 0)));
-    label.innerHTML = `Add ₹${add.toLocaleString('en-IN')} more<span class="ct-cta-sub">${esc(first.info?.name || first.name || 'Restaurant')} minimum ₹${Number(first.info?.minOrder || 0).toLocaleString('en-IN')}</span>`;
+  if (ctState.multiBelowMin && ctState.multiBelowMin.length) {
+    const r = ctState.multiBelowMin[0];
+    const remaining = Math.ceil(r.minOrder - r.subtotal);
+    btn.classList.add('locked');
+    btn.setAttribute('aria-disabled', 'true');
+    label.innerHTML = `Add ₹${remaining.toLocaleString('en-IN')} more<span class="ct-cta-sub">${esc(r.name)} · min ₹${r.minOrder.toLocaleString('en-IN')}</span>`;
     return;
   }
   if (ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
@@ -2122,43 +2139,104 @@ async function placeOrder() {
 
   try {
     const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-    const groups = cartGroups(savedCart);
-    const itemsArray = Object.entries(savedCart).map(([name, info]) => ({
-      menuItem: (info.menuItem && info.menuItem !== 'undefined') ? info.menuItem : null,
-      name, price: info.price, quantity: info.quantity, customizations: info.customizations || {}
-    }));
-    if (!groups.length) throw new Error('Your cart is empty.');
-    if (itemsArray.some(i => !i.menuItem)) throw new Error('Your cart contains an outdated item. Please refresh and add it again.');
 
-    // The backend is authoritative. This preview check is only for a fast, precise UI message.
-    const delivery = await calculateCurrentDelivery({ force: true });
-    if (delivery.outsideRadius) throw new Error('One or more restaurants do not deliver to your selected address.');
-    if (delivery.minOrderFailures && delivery.minOrderFailures.length) {
-      const msg = delivery.minOrderFailures.map(r => `${r.info.name || r.name}: add ₹${Math.ceil(Number(r.info.minOrder) - r.subtotal).toLocaleString('en-IN')}`).join('; ');
-      throw new Error('Minimum order not met — ' + msg + '.');
+    const itemsArray = [];
+    let restaurantId = null;
+    let restaurantName = '';
+
+    for (const [name, info] of Object.entries(savedCart)) {
+      if (info.resId && info.resId !== "undefined" && info.resId !== "null") {
+        restaurantId = info.resId;
+      }
+      if (!restaurantName && info.resName) restaurantName = info.resName;
+
+      itemsArray.push({
+        menuItem: (info.menuItem && info.menuItem !== "undefined") ? info.menuItem : null,
+        name: name,
+        price: info.price,
+        quantity: info.quantity,
+        customizations: info.customizations || {}
+      });
     }
 
+    if (!restaurantId || restaurantId.length < 20) {
+      throw new Error("Your cart data looks corrupted. Please add the items again.");
+    }
+
+    // ── Multi-restaurant carts: each restaurant must independently meet its
+    // own minimum order. The backend enforces this authoritatively too, but
+    // checking here means the customer gets a precise, per-restaurant message
+    // BEFORE the order is attempted, instead of a rejection afterwards.
+    // (Single-restaurant carts keep using the existing ctState minimum check
+    // above, so nothing changes for the common case.)
+    const groupsByRes = {};
+    for (const [name, info] of Object.entries(savedCart)) {
+      const rid = info.resId;
+      if (!rid) continue;
+      if (!groupsByRes[rid]) groupsByRes[rid] = { subtotal: 0, name: info.restaurantName || info.resName || '' };
+      groupsByRes[rid].subtotal += Number(info.price || 0) * Number(info.quantity || 0);
+    }
+    const distinctResIds = Object.keys(groupsByRes);
+    if (distinctResIds.length > 1) {
+      const shortfalls = [];
+      for (const rid of distinctResIds) {
+        let info = null;
+        try {
+          const r = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}`, { cache: 'no-store' });
+          const j = await r.json();
+          if (r.ok && j.success) info = j.data || {};
+        } catch (_) {}
+        const minOrder = Number(info?.minOrder || 0);
+        const rName = (info && info.name) || groupsByRes[rid].name || 'a restaurant';
+        if (minOrder > 0 && groupsByRes[rid].subtotal < minOrder) {
+          const add = Math.ceil(minOrder - groupsByRes[rid].subtotal);
+          shortfalls.push(`${rName}: add ₹${add.toLocaleString('en-IN')} (min ₹${minOrder.toLocaleString('en-IN')})`);
+        }
+      }
+      if (shortfalls.length) {
+        throw new Error('Minimum order not met — ' + shortfalls.join('; ') + '.');
+      }
+    }
+
+    const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    // The backend is the final authority, but the checkout preview must use
+    // the SAME restaurant GPS + customer GPS pricing so the customer sees
+    // the amount that will actually be charged. force:true keeps this path
+    // on live data, exactly as before.
+    const delivery = await calculateCurrentDelivery({ force: true });
+    if (delivery.outsideRadius) {
+      throw new Error(`This restaurant does not deliver to your selected address (${delivery.distance.toFixed(1)} km away; limit ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km).`);
+    }
+    const deliveryFee = delivery.fee == null ? 30 : delivery.fee;
+
+    // Read the selected address AFTER calculateCurrentDelivery() — it
+    // re-hydrates nearbite_address from the server-authoritative selection.
+    // Reading it earlier could send an address that doesn't match the
+    // distance/fee that were just calculated.
     let savedAddress;
     try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) { savedAddress = null; }
-    const subtotal = itemsArray.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0);
-    const deliveryFee = Number(delivery.fee || 0);
-    const total = subtotal + deliveryFee + ctCleanTip(ctState.tipAmount);
-    const restaurantId = groups[0].id;
-    const restaurantName = groups.length === 1 ? groups[0].name : `${groups.length} restaurants`;
-    const restaurantNotes = Object.fromEntries(Object.entries(ctState.restaurantNotes || {}).filter(([id, note]) => groups.some(g => g.id === id) && note));
+
+    const total = subtotal + deliveryFee;
 
     const payload = {
       items: itemsArray,
       deliveryAddress: savedAddress,
       addressId: localStorage.getItem('nearbite_selected_address_id') || (savedAddress && savedAddress._id) || null,
-      // Legacy fields remain for older backend builds; the new backend ignores the client restaurantId for ownership.
-      restaurantId, restaurantName, subtotal, deliveryFee, total,
+      restaurantId: restaurantId,
+      restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
+      subtotal,
+      deliveryFee,
+      total,
       paymentMethod: selectedPaymentMethod,
-      restaurantNotes,
-      restaurantNote: groups.length === 1 ? (restaurantNotes[restaurantId] || '') : '',
+      // Phase 3.1 — read from ctState, not from the DOM, so they are exactly
+      // what the customer saved. subtotal/deliveryFee/total above keep their
+      // existing pre-tip meaning; the tip is a separate field and the backend
+      // folds it into the authoritative total.
+      restaurantNote: ctState.restaurantNote || '',
       deliveryInstructions: ctState.deliveryInstructions || '',
       tipAmount: ctCleanTip(ctState.tipAmount)
     };
+
     // Idempotency: reuse one key for this cart so a double-tap, a dropped
     // response, or a network retry returns the SAME order(s) instead of
     // creating a second set. Cleared once the order succeeds.
@@ -2337,74 +2415,94 @@ document.addEventListener('keydown', (event) => {
    never read out of the DOM at checkout time.
    ═══════════════════════════════════════════════════════════════════════ */
 let ctNoteField = null;
-let ctNoteRestaurantId = null;
 
 function paintNoteCards() {
-  document.querySelectorAll('.ct-line-card[data-note-field="restaurantNote"]').forEach(card => {
-    const rid = String(card.dataset.noteRestaurantId || '');
-    const value = ctState.restaurantNotes[rid] || '';
-    const group = card.closest('.ct-restaurant-group');
-    const name = group ? (group.querySelector('.ct-card-head')?.textContent || 'restaurant').replace(/\d+\s+items?$/, '').trim() : 'restaurant';
+  Object.keys(CT_NOTE_CFG).forEach(field => {
+    const card = document.querySelector('.ct-line-card[data-note-field="' + field + '"]');
+    if (!card) return;
+    const cfg = CT_NOTE_CFG[field];
+    const value = ctState[field];
+
     const title = card.querySelector('[data-role="title"]');
-    const sub = card.querySelector('[data-role="sub"]');
-    const act = card.querySelector('[data-role="act"]');
-    const chev = card.querySelector('[data-role="chev"]');
+    const sub   = card.querySelector('[data-role="sub"]');
+    const act   = card.querySelector('[data-role="act"]');
+    const chev  = card.querySelector('[data-role="chev"]');
+
     card.classList.toggle('is-set', !!value);
-    if (title) title.textContent = value ? 'Note added' : 'Add a note for ' + name;
-    if (sub) sub.textContent = value || 'Spice level, allergies, packaging — anything the kitchen should know';
-    if (act) act.hidden = !value;
-    if (chev) chev.hidden = !!value;
-    card.setAttribute('aria-label', value ? 'Edit note for ' + name : 'Add a note for ' + name);
+    if (title) title.textContent = value ? cfg.setTitle : cfg.idleTitle;
+    if (sub)   sub.textContent   = value || cfg.idleSub;   // textContent: no injection path
+    if (act)   act.hidden  = !value;
+    if (chev)  chev.hidden = !!value;
+
+    card.setAttribute('aria-label', value
+      ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.'
+      : cfg.idleTitle);
   });
-  const deliveryCard = document.querySelector('.ct-line-card[data-note-field="deliveryInstructions"]');
-  if (deliveryCard) {
-    const value = ctState.deliveryInstructions;
-    const cfg = CT_NOTE_CFG.deliveryInstructions;
-    deliveryCard.classList.toggle('is-set', !!value);
-    deliveryCard.querySelector('[data-role="title"]').textContent = value ? cfg.setTitle : cfg.idleTitle;
-    deliveryCard.querySelector('[data-role="sub"]').textContent = value || cfg.idleSub;
-    deliveryCard.querySelector('[data-role="act"]').hidden = !value;
-    deliveryCard.querySelector('[data-role="chev"]').hidden = !!value;
-  }
 }
 
 function updateNoteCount() {
-  const input = document.getElementById('note-input'); const count = document.getElementById('note-count');
-  if (!input || !count) return; count.textContent = input.value.length + '/' + CT_NOTE_MAX; count.classList.toggle('is-max', input.value.length >= CT_NOTE_MAX);
+  const input = document.getElementById('note-input');
+  const count = document.getElementById('note-count');
+  if (!input || !count) return;
+  const length = input.value.length;
+  count.textContent = length + '/' + CT_NOTE_MAX;
+  count.classList.toggle('is-max', length >= CT_NOTE_MAX);
 }
 
-function openNoteSheet(field, restaurantId) {
-  const cfg = CT_NOTE_CFG[field]; if (!cfg) return;
-  ctNoteField = field; ctNoteRestaurantId = field === 'restaurantNote' ? String(restaurantId || '') : null;
-  if (field === 'restaurantNote' && !ctNoteRestaurantId) return;
+function openNoteSheet(field) {
+  const cfg = CT_NOTE_CFG[field];
+  if (!cfg) return;
+  ctNoteField = field;
+
   openSheet('ct-note-sheet', () => {
-    const restaurantName = ctNoteRestaurantId ? (cartGroups(readCart() || {}).find(g => g.id === ctNoteRestaurantId)?.name || 'restaurant') : '';
-    document.getElementById('note-sheet-title').textContent = field === 'restaurantNote' ? 'Note for ' + restaurantName : cfg.sheetTitle;
+    document.getElementById('note-sheet-title').textContent = cfg.sheetTitle;
     document.getElementById('note-field-label').textContent = cfg.fieldLabel;
     document.getElementById('note-help').textContent = cfg.help;
     document.getElementById('note-save').textContent = cfg.saveLabel;
-    const value = field === 'restaurantNote' ? (ctState.restaurantNotes[ctNoteRestaurantId] || '') : ctState[field];
-    const input = document.getElementById('note-input'); input.value = value || ''; input.setAttribute('maxlength', String(CT_NOTE_MAX)); updateNoteCount();
-    const removeBtn = document.getElementById('note-remove'); removeBtn.textContent = cfg.removeLabel; removeBtn.hidden = !value;
-    document.getElementById('note-suggestions').innerHTML = cfg.suggestions.map(text => '<button type="button" class="ct-sug" data-suggest="' + esc(text) + '">' + esc(text) + '</button>').join('');
+
+    const input = document.getElementById('note-input');
+    input.value = ctState[field] || '';
+    input.setAttribute('maxlength', String(CT_NOTE_MAX));
+    updateNoteCount();
+
+    const removeBtn = document.getElementById('note-remove');
+    removeBtn.textContent = cfg.removeLabel;
+    removeBtn.hidden = !ctState[field];
+
+    const suggestions = document.getElementById('note-suggestions');
+    suggestions.innerHTML = cfg.suggestions
+      .map(text => '<button type="button" class="ct-sug" data-suggest="' + esc(text) + '">' + esc(text) + '</button>')
+      .join('');
   });
 }
 
 function saveNoteSheet() {
-  const field = ctNoteField; const cfg = CT_NOTE_CFG[field]; if (!cfg) { closeSheet(); return; }
-  const value = ctCleanNote(document.getElementById('note-input')?.value || '');
-  const old = field === 'restaurantNote' ? (ctState.restaurantNotes[ctNoteRestaurantId] || '') : ctState[field];
-  if (field === 'restaurantNote') { if (value) ctState.restaurantNotes[ctNoteRestaurantId] = value; else delete ctState.restaurantNotes[ctNoteRestaurantId]; ctState.restaurantNote = Object.keys(ctState.restaurantNotes).length === 1 ? Object.values(ctState.restaurantNotes)[0] : ''; }
-  else ctState[field] = value;
-  saveCartExtras(); paintNoteCards(); closeSheet();
-  if (value) showToast(field === 'restaurantNote' ? 'Note saved for the restaurant' : cfg.savedToast); else if (old) showToast(cfg.removedToast);
+  const field = ctNoteField;
+  const cfg = CT_NOTE_CFG[field];
+  if (!cfg) { closeSheet(); return; }
+
+  const input = document.getElementById('note-input');
+  const value = ctCleanNote(input ? input.value : '');
+  const had = !!ctState[field];
+
+  ctState[field] = value;         // saving an empty field is a removal
+  saveCartExtras();
+  paintNoteCards();
+  closeSheet();
+
+  if (value) showToast(cfg.savedToast);
+  else if (had) showToast(cfg.removedToast);
 }
 
 function removeNoteSheet() {
-  const field = ctNoteField; const cfg = CT_NOTE_CFG[field]; if (!cfg) { closeSheet(); return; }
-  if (field === 'restaurantNote') { delete ctState.restaurantNotes[ctNoteRestaurantId]; ctState.restaurantNote = Object.keys(ctState.restaurantNotes).length === 1 ? Object.values(ctState.restaurantNotes)[0] : ''; }
-  else ctState[field] = '';
-  saveCartExtras(); paintNoteCards(); closeSheet(); showToast(field === 'restaurantNote' ? 'Restaurant note removed' : cfg.removedToast);
+  const field = ctNoteField;
+  const cfg = CT_NOTE_CFG[field];
+  if (!cfg) { closeSheet(); return; }
+  ctState[field] = '';
+  saveCartExtras();
+  paintNoteCards();
+  closeSheet();
+  showToast(cfg.removedToast);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2589,11 +2687,6 @@ function openBillSheet() {
   /* IMPORTANT: Bill details opens ONLY the bill breakdown. */
   openSheet('ct-bill-sheet');
   applyTotals();
-
-  // If pricing is still resolving, refresh it immediately. The backend
-  // restaurant settings remain the source of truth for minimum order,
-  // free-delivery threshold and delivery fee.
-  if (!ctState.deliveryReady) refreshDelivery({ force: true });
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2617,7 +2710,7 @@ document.addEventListener('click', (event) => {
   }
 
   const noteCard = target.closest('.ct-line-card[data-note-field]');
-  if (noteCard) { openNoteSheet(noteCard.dataset.noteField, noteCard.dataset.noteRestaurantId); return; }
+  if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
 
   if (target.closest('#bill-card')) { openBillSheet(); return; }
 
