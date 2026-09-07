@@ -332,12 +332,11 @@
     box-shadow:0 3px 12px rgba(21,154,98,.12);
   }
   .ct-pay-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .upi-icon, .cod-icon{
+  .upi-icon{
     width:30px; height:30px; flex:0 0 30px; border-radius:9px;
     display:flex; align-items:center; justify-content:center; font-size:13px;
   }
   .upi-icon{ background:#F3E8FF; color:#9333EA; }
-  .cod-icon{ background:#ECFDF5; color:#059669; }
   .payment-check{ font-size:16px; color:var(--ct-muted); flex:0 0 auto; }
   .payment-method-option.selected .payment-check{ color:var(--ct-green); }
   .payment-title{ font-size:12.5px; font-weight:800; color:var(--ct-ink); line-height:1.25; }
@@ -806,18 +805,7 @@
         </div>
         <div>
           <div class="payment-title">Online</div>
-          <div class="payment-sub">UPI · GPay · PhonePe · Cards</div>
-        </div>
-      </div>
-
-      <div id="cod-payment-option" class="payment-method-option" data-method="cod" onclick="selectPaymentMethod('cod')" style="display:none;">
-        <div class="ct-pay-head">
-          <div class="cod-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-          <i class="fa-regular fa-circle payment-check"></i>
-        </div>
-        <div>
-          <div class="payment-title">Cash on delivery</div>
-          <div class="payment-sub">Pay at your doorstep</div>
+          <div class="payment-sub">UPI only · GPay · PhonePe</div>
         </div>
       </div>
     </div>
@@ -1389,30 +1377,24 @@ function applyMultiDelivery(rows) {
 }
 
 /* ── Payment (behaviour unchanged) ──────────────────────────────────────── */
-let selectedPaymentMethod = localStorage.getItem('nearbite_payment_method') || 'upi';
+let selectedPaymentMethod = 'upi';
+localStorage.setItem('nearbite_payment_method', 'upi');
 
-function selectPaymentMethod(method) {
-  selectedPaymentMethod = method === 'cod' ? 'cod' : 'upi';
-  localStorage.setItem('nearbite_payment_method', selectedPaymentMethod);
+function selectPaymentMethod(_method) {
+  // UPI is the only supported payment method on Eatswada.
+  selectedPaymentMethod = 'upi';
+  localStorage.setItem('nearbite_payment_method', 'upi');
   document.querySelectorAll('.payment-method-option').forEach(el => {
-    const active = el.dataset.method === selectedPaymentMethod && el.style.display !== 'none';
+    const active = el.dataset.method === 'upi';
     el.classList.toggle('selected', active);
     const icon = el.querySelector('.payment-check');
     if (icon) icon.className = active ? 'fa-solid fa-circle-check payment-check' : 'fa-regular fa-circle payment-check';
   });
 }
 
-function syncPaymentOptions(codEnabled) {
-  const codOption = document.getElementById('cod-payment-option');
-  if (!codOption) return;
-  codOption.style.display = codEnabled ? 'flex' : 'none';
-  const grid = document.getElementById('payment-options');
-  if (grid) grid.classList.toggle('is-single', !codEnabled);
-  if (!codEnabled && selectedPaymentMethod === 'cod') {
-    selectedPaymentMethod = 'upi';
-    localStorage.setItem('nearbite_payment_method', 'upi');
-  }
-  selectPaymentMethod(selectedPaymentMethod);
+function syncPaymentOptions(_ignored) {
+  // Compatibility shim for existing delivery-state callers. COD no longer exists.
+  selectPaymentMethod('upi');
 }
 
 /* ── Shared UI state ────────────────────────────────────────────────────── */
@@ -2236,7 +2218,7 @@ async function placeOrder() {
       subtotal,
       deliveryFee,
       total,
-      paymentMethod: selectedPaymentMethod,
+      paymentMethod: 'upi',
       // Phase 3.1 — read from ctState, not from the DOM, so they are exactly
       // what the customer saved. subtotal/deliveryFee/total above keep their
       // existing pre-tip meaning; the tip is a separate field and the backend
@@ -2274,9 +2256,8 @@ async function placeOrder() {
       throw new Error(result.message || 'Failed to place order.');
     }
 
-    // COD completes immediately. Online orders are finalized only after the
-    // Razorpay handler returns and the backend verifies signature + capture.
-    if (selectedPaymentMethod !== 'cod') {
+    // UPI orders are finalized only after Razorpay returns and the backend verifies
+    // the signature + captured payment.
       if (!result.payment?.orderId || !result.payment?.keyId || !window.Razorpay) {
         throw new Error('Online payment is temporarily unavailable. Please try again.');
       }
@@ -2289,6 +2270,21 @@ async function placeOrder() {
         name: 'Eatswada',
         description: result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`,
         order_id: result.payment.orderId,
+        // Platform policy: Razorpay Checkout is restricted to UPI only.
+        // The backend also accepts only paymentMethod='upi', so this is a
+        // second, customer-facing enforcement layer.
+        config: {
+          display: {
+            blocks: {
+              upi_only: {
+                name: 'Pay via UPI',
+                instruments: [{ method: 'upi' }]
+              }
+            },
+            sequence: ['block.upi_only'],
+            preferences: { show_default_blocks: false }
+          }
+        },
         prefill: {
           name: document.getElementById('checkout-customer-name')?.textContent || '',
           contact: document.getElementById('checkout-customer-phone')?.textContent || ''
@@ -2352,22 +2348,7 @@ async function placeOrder() {
       });
       rzp.open();
       return;
-    }
 
-    localStorage.removeItem('nearbite_cart');
-    localStorage.removeItem('nearbite_checkout_key');
-    clearCartExtras();
-
-    if (result.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
-      Object.keys(result.deliveryOtps).forEach(oid => {
-        const otp = result.deliveryOtps[oid];
-        if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
-      });
-      window.location.href = 'orders.html';
-    } else {
-      if (result.deliveryOtp) localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
-      window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
-    }
   } catch (error) {
     console.error(error);
     showToast(error.message, 'error');
