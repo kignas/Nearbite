@@ -13,6 +13,7 @@
 
   <style>
     :root {
+      --font: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --brand:#FC8019; --brand-dark:#E06B12; --brand-darker:#C85F0E;
       --brand-50:#FFF4E9; --brand-100:#FFE8D1;
       --ink-900:#14171F; --ink-800:#1F232C; --ink-700:#3A3F4B; --ink-500:#6B7280;
@@ -139,6 +140,9 @@
     body.data-loaded .d4 { animation-delay: 0.2s; }
     body.data-loaded .d5 { animation-delay: 0.25s; }
     body.data-loaded .d6 { animation-delay: 0.3s; }
+
+    /* Reliability fallback: keep tracking cards visible after data loads. */
+    body.data-loaded .card-fade { opacity: 1 !important; transform: none !important; }
 
     /* ── OTP Card ── */
     .customer-otp-box {
@@ -907,7 +911,7 @@
       }
       function etaHTML() {
         const mins = minutesRemaining();
-        return mins === null ? '-- <span>mins</span>' : `${mins} <span>mins</span>`;
+        return mins === null ? '— <span>mins</span>' : `${mins} <span>mins</span>`;
       }
 
       s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step'; s5.className = 'step'; s6.className = 'step';
@@ -1014,6 +1018,20 @@
          riderCard.style.display = 'flex';
          progress = 0.46;
          etaTitle.innerText = "Heading to Restaurant";
+         heroBg.classList.add('stage-dispatch');
+      }
+      else if (status === 'picked_up') {
+         etaTime.innerHTML = etaHTML();
+         s1.classList.add('passed');
+         s2.classList.add('passed');
+         s3.classList.add('passed');
+         s4.classList.add('active');
+         document.getElementById('dispatch-title').innerText = 'Picked Up';
+         document.getElementById('dispatch-desc').innerText = 'Rider has collected your order';
+         otpBox.style.display = 'flex';
+         riderCard.style.display = 'flex';
+         progress = 0.66;
+         etaTitle.innerText = 'On the Way';
          heroBg.classList.add('stage-dispatch');
       }
       else if (status === 'out_for_delivery') {
