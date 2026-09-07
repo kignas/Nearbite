@@ -2522,13 +2522,23 @@ function paintNoteCards() {
   const list = document.getElementById('restaurant-notes-list');
   if (list) {
     const groups = getNoteRestaurantGroups();
-    list.innerHTML = groups.map(g => {
+    const multi = groups.length > 1;
+    const heading = multi
+      ? '<div class="ct-restaurant-note-label">Add notes for each restaurant</div>'
+      : '<div class="ct-restaurant-note-label">Restaurant note</div>';
+
+    // IMPORTANT: one independent note card is rendered for EVERY restaurant
+    // represented in the current cart. The restaurant id is part of the
+    // data-note-field key, so opening/saving one card can never overwrite
+    // another restaurant's note.
+    list.innerHTML = heading + groups.map(g => {
       const rid = String(g.resId);
+      const restaurantName = String(g.name || 'Restaurant');
       const value = rid === 'legacy' ? ctState.restaurantNote : getRestaurantNote(rid);
-      const title = value ? 'Note added' : 'Add a note for ' + (g.name || 'restaurant');
+      const title = value ? restaurantName + ' — Note added' : 'Add a note for ' + restaurantName;
       const sub = value || 'Spice level, allergies, packaging — anything this kitchen should know';
       const field = restaurantNoteField(rid);
-      return '<button type="button" class="ct-line-card tap' + (value ? ' is-set' : '') + '" data-note-field="' + esc(field) + '" data-restaurant-id="' + esc(rid) + '" aria-haspopup="dialog" aria-label="' + esc(value ? ('Note added: ' + value + '. Tap to edit or remove.') : title) + '">' +
+      return '<button type="button" class="ct-line-card tap' + (value ? ' is-set' : '') + '" data-note-field="' + esc(field) + '" data-restaurant-id="' + esc(rid) + '" aria-haspopup="dialog" aria-label="' + esc(value ? ('Note for ' + restaurantName + ': ' + value + '. Tap to edit or remove.') : title) + '">' +
         '<span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>' +
         '<span class="ct-line-copy"><span class="ct-line-title">' + esc(title) + '</span><span class="ct-line-sub">' + esc(sub) + '</span></span>' +
         '<span class="ct-line-act"' + (value ? '' : ' hidden') + '>Edit</span>' +
