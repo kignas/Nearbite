@@ -1345,8 +1345,11 @@ function applyMultiDelivery(rows) {
   ctState.freeDeliveryAbove = 0;
   ctState.freeDeliveryEnabled = false;
 
-  // COD only if EVERY restaurant allows it.
-  syncPaymentOptions(rows.every(r => r.codEnabled));
+  // Multi-restaurant checkout is online-payment-only. COD is available
+  // only when the cart contains exactly one restaurant and that restaurant
+  // has explicitly enabled COD. This keeps payment method consistent across
+  // every order created from the checkout.
+  syncPaymentOptions(false);
 
   const feeEl = document.getElementById('bill-delivery-val');
   const feeLabel = document.getElementById('bill-delivery-label');
