@@ -905,20 +905,35 @@
       document.body.classList.add('data-loaded');
 
       function minutesRemaining() {
-        // Prefer the rider's live ETA when the rider app is streaming GPS.
-        if (typeof order.riderEtaMinutes === 'number' && Number.isFinite(order.riderEtaMinutes) && order.riderEtaMinutes > 0) {
-          return Math.ceil(order.riderEtaMinutes);
+        // 1) Prefer server-calculated live rider ETA.
+        const liveEta = Number(order?.riderEtaMinutes);
+        if (Number.isFinite(liveEta) && liveEta > 0) {
+          return Math.max(1, Math.ceil(liveEta));
         }
-        if (!order.estimatedDelivery) return null;
-        const diffMs = new Date(order.estimatedDelivery) - Date.now();
-        return Math.round(diffMs / 60000); // may be <= 0 once the estimate has passed
+
+        // 2) Fall back to the stored order estimate.
+        if (order?.estimatedDelivery) {
+          const diffMs = new Date(order.estimatedDelivery) - Date.now();
+          if (Number.isFinite(diffMs)) {
+            return Math.max(1, Math.ceil(diffMs / 60000));
+          }
+        }
+
+        // 3) Active orders must still show a useful ETA if an older backend
+        // response has neither field. This is explicitly a UI estimate.
+        const status = String(order?.status || '').toLowerCase();
+        const fallbackByStatus = {
+          placed: 40, pending: 40, confirmed: 35, preparing: 30,
+          waiting_for_rider: 25, assigned: 20, picked_up: 15,
+          out_for_delivery: 10, otp_verified: 5
+        };
+        return fallbackByStatus[status] || null;
       }
+
       function etaHTML() {
         const mins = minutesRemaining();
-        // No estimate, or the estimate has already passed: show an honest
-        // "Soon" instead of a fake "1 min" that used to appear on every order.
-        if (mins === null || mins <= 0) return 'Soon';
-        return `${mins} <span>mins</span>`;
+        if (mins === null) return '-- <span>mins</span>';
+        return `~${mins} <span>mins</span>`;
       }
 
       s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step'; s5.className = 'step'; s6.className = 'step';
@@ -1047,8 +1062,8 @@
          s2.classList.add('passed');
          s3.classList.add('passed');
          s4.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Out for Delivery";
-         document.getElementById('dispatch-desc').innerText = "Rider is on the way to you";
+         document.getElementById('dispatch-title').innerText = "Rider Assigned";
+         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
          otpBox.style.display = 'flex';
          riderCard.style.display = 'flex';
          progress = 0.66;
@@ -1087,10 +1102,11 @@
 
       // Live rider ETA (#7) — shown only while the backend reports the rider on
       // the move with a recent GPS fix. Overrides the generic ETA text.
-      if (order.riderLocation && typeof order.riderEtaMinutes === 'number' &&
+      const liveEtaMinutes = Number(order?.riderEtaMinutes);
+      if (order.riderLocation && Number.isFinite(liveEtaMinutes) && liveEtaMinutes > 0 &&
           (status === 'out_for_delivery' || status === 'otp_verified' || status === 'picked_up')) {
         etaTitle.innerText = 'Arriving in';
-        etaTime.innerHTML = '~' + order.riderEtaMinutes + ' min';
+        etaTime.innerHTML = '~' + Math.max(1, Math.ceil(liveEtaMinutes)) + ' min';
         const dd = document.getElementById('dispatch-desc');
         if (dd && order.riderDistanceKm != null) dd.innerText = 'Rider ~' + order.riderDistanceKm + ' km away';
       }
