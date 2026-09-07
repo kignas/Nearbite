@@ -608,6 +608,20 @@
     };
     let currentOrder = null;
 
+    /* XSS-safe output helpers, shared by ALL render functions below. Must live
+       at this (script) scope — not inside fetchOrderData — or sibling functions
+       like renderInvoiceStyleSummary()/renderLogo() throw "esc is not defined". */
+    const esc = window.esc || function (v) {
+      return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    };
+    const safeUrl = window.safeUrl || function (v) {
+      if (!v) return '';
+      try { var u = new URL(String(v), location.href); return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : ''; }
+      catch (e) { return ''; }
+    };
+
     async function fetchOrderData() {
       const urlParams = new URLSearchParams(window.location.search);
       const orderId = urlParams.get('id');
@@ -619,20 +633,6 @@
 
       const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
 
-      /* XSS-safe output helpers — order restaurant/dish names, coupon codes and
-         rider/restaurant image URLs are vendor/rider-controlled and are escaped
-         before being placed into innerHTML. Falls back locally if safe-html.js
-         is absent. */
-      const esc = window.esc || function (v) {
-        return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-      };
-      const safeUrl = window.safeUrl || function (v) {
-        if (!v) return '';
-        try { var u = new URL(String(v), location.href); return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : ''; }
-        catch (e) { return ''; }
-      };
       if (!token) {
         window.location.href = 'login.html';
         return;
