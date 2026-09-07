@@ -906,7 +906,9 @@
 
       function minutesRemaining() {
         // Prefer the rider's live ETA when the rider app is streaming GPS.
-        if (typeof order.riderEtaMinutes === 'number' && order.riderEtaMinutes > 0) return order.riderEtaMinutes;
+        if (typeof order.riderEtaMinutes === 'number' && Number.isFinite(order.riderEtaMinutes) && order.riderEtaMinutes > 0) {
+          return Math.ceil(order.riderEtaMinutes);
+        }
         if (!order.estimatedDelivery) return null;
         const diffMs = new Date(order.estimatedDelivery) - Date.now();
         return Math.round(diffMs / 60000); // may be <= 0 once the estimate has passed
@@ -1045,8 +1047,8 @@
          s2.classList.add('passed');
          s3.classList.add('passed');
          s4.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
+         document.getElementById('dispatch-title').innerText = "Out for Delivery";
+         document.getElementById('dispatch-desc').innerText = "Rider is on the way to you";
          otpBox.style.display = 'flex';
          riderCard.style.display = 'flex';
          progress = 0.66;

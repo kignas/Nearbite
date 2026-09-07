@@ -484,9 +484,14 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const minutesRemaining = (order) => {
+    // Prefer the server-calculated rider ETA when live GPS is available.
+    if (typeof order.riderEtaMinutes === 'number' && Number.isFinite(order.riderEtaMinutes) && order.riderEtaMinutes > 0) {
+      return Math.ceil(order.riderEtaMinutes);
+    }
     if (!order.estimatedDelivery) return null;
     const diffMs = new Date(order.estimatedDelivery) - Date.now();
-    return Math.max(1, Math.round(diffMs / 60000));
+    const mins = Math.round(diffMs / 60000);
+    return mins > 0 ? mins : null;
   };
 
   function renderLiveSection(liveOrders) {
@@ -503,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (status === 'preparing') { width = 0.35; active2 = 'on'; statusTitle = 'Preparing your food'; alertClass = 'preparing'; statusIcon = 'fa-fire-burner'; }
       if (['waiting_for_rider', 'assigned'].includes(status)) { width = 0.6; active2 = 'on'; active3 = 'on'; statusTitle = status === 'assigned' ? 'Rider assigned' : 'Finding a rider'; alertClass = 'dispatch'; statusIcon = 'fa-motorcycle'; }
-      if (['out_for_delivery', 'otp_verified'].includes(status)) { width = 0.88; active2 = 'on'; active3 = 'on'; active4 = 'on'; statusTitle = 'Arriving soon!'; alertClass = 'arriving'; statusIcon = 'fa-location-arrow'; }
+      if (['picked_up', 'out_for_delivery', 'otp_verified'].includes(status)) { width = 0.88; active2 = 'on'; active3 = 'on'; active4 = 'on'; statusTitle = 'Arriving soon!'; alertClass = 'arriving'; statusIcon = 'fa-location-arrow'; }
 
       const mins = minutesRemaining(order);
       const etaText = mins !== null ? mins : '—';
