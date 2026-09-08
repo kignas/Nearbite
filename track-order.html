@@ -233,6 +233,22 @@
     .pay-status-pill { font-size: 10px; font-weight: 800; padding: 4px 9px; border-radius: 8px; text-transform: uppercase; letter-spacing:.3px; background: var(--success-light); color: var(--success-deep); flex-shrink:0; }
     .pay-status-pill.cod { background: var(--amber-light); color: var(--amber); }
 
+    /* Cancellation + refund card (shown only for cancelled orders) */
+    .cancel-card { background: var(--card, #fff); border:1px solid rgba(229,72,77,0.18); border-radius:16px; padding:16px 16px 14px; margin:0 16px 14px; box-shadow:0 6px 18px rgba(0,0,0,0.04); }
+    .cancel-card-head { display:flex; align-items:center; gap:9px; font-weight:800; font-size:15px; color: var(--danger); margin-bottom:10px; }
+    .cancel-reason { display:flex; flex-direction:column; gap:3px; padding:10px 12px; background: rgba(229,72,77,0.06); border-radius:10px; margin-bottom:10px; }
+    .cancel-reason-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color: var(--danger); }
+    .cancel-reason-text { font-size:14px; font-weight:600; color: var(--text, #1a1a1a); }
+    .refund-status-line { display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color: var(--text,#1a1a1a); }
+    .refund-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:#bbb; }
+    .refund-dot.processing { background: var(--amber, #F5A623); box-shadow:0 0 0 3px rgba(245,166,35,0.16); }
+    .refund-dot.done { background: var(--success-deep, #16A673); box-shadow:0 0 0 3px rgba(22,166,115,0.16); }
+    .refund-dot.failed { background: var(--danger, #E5484D); box-shadow:0 0 0 3px rgba(229,72,77,0.16); }
+    .refund-note { margin:6px 0 0; font-size:12.5px; line-height:1.5; color: var(--muted, #6b7280); }
+    .cancel-reason-input { width:100%; box-sizing:border-box; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font-family:inherit; font-size:14px; resize:none; margin:6px 0 10px; }
+    .sheet-cta.danger { background: var(--danger, #E5484D); }
+    .sheet-cta-ghost { display:block; width:100%; text-align:center; background:transparent; border:none; color: var(--muted,#6b7280); font-family:inherit; font-weight:700; font-size:14px; padding:10px; margin-top:4px; cursor:pointer; }
+
     /* ════════════════════════════════════════════
        ORDER SUMMARY — INVOICE STYLE
     ════════════════════════════════════════════ */
@@ -513,6 +529,19 @@
         <div class="info-card-sub" id="payment-txn-row" style="display:none;">Transaction ID: <span id="payment-txn-id"></span></div>
       </div>
       <span class="pay-status-pill" id="pay-status-pill">Paid</span>
+    </div>
+
+    <!-- Cancellation + refund details (populated + shown only for cancelled orders) -->
+    <div class="cancel-card" id="cancellation-card" style="display:none;">
+      <div class="cancel-card-head"><i class="fa-solid fa-circle-info"></i><span>Order Cancelled</span></div>
+      <div class="cancel-reason" id="cancel-reason-row" style="display:none;">
+        <span class="cancel-reason-label" id="cancel-reason-label">Reason</span>
+        <span class="cancel-reason-text" id="cancel-reason-text"></span>
+      </div>
+      <div class="refund-row" id="refund-row" style="display:none;">
+        <div class="refund-status-line"><span class="refund-dot" id="refund-dot"></span><span id="refund-status-text"></span></div>
+        <p class="refund-note" id="refund-note"></p>
+      </div>
     </div>
 
     <!-- Order Summary — Invoice Style -->
@@ -965,6 +994,7 @@
          etaTime.className = "eta-time cancelled-text";
          timeline.style.display = "none";
          document.getElementById('timeline').closest('.timeline-card').style.display = "none";
+         renderCancellation(order);
          return;
       }
 
@@ -1093,10 +1123,10 @@
          heroIcon.className = 'fa-solid fa-location-arrow';
       }
 
-      // Cancel is only offered before the kitchen has started preparing — mirrors
-      // common food-delivery policy. This opens a help sheet; it never calls a
-      // cancellation endpoint since none exists in this app's current backend.
-      if (['pending', 'placed', 'confirmed'].includes(status)) {
+      // Cancel is offered only before the kitchen starts preparing. isCancellable
+      // is the backend's source of truth (flipped false at 'preparing' and beyond),
+      // so gating on it keeps the button in lockstep with what the server allows.
+      if (order.isCancellable && ['pending', 'placed', 'confirmed'].includes(status)) {
         helpCancelBtn.style.display = 'flex';
       }
 
@@ -1113,6 +1143,65 @@
 
       timelineFill.style.height = `${progress * 100}%`;
       renderStageMapAndRoute(progress);
+    }
+
+    function renderCancellation(order) {
+      const card = document.getElementById('cancellation-card');
+      if (!card) return;
+
+      // Reason — set by both customer cancel and vendor rejection. Vendor
+      // rejections are prefixed "Rejected by restaurant: <reason>"; relabel those
+      // so the customer sees who cancelled. innerText keeps it XSS-safe.
+      const reasonText = String(order.cancelReason || '').trim();
+      const reasonRow = document.getElementById('cancel-reason-row');
+      if (reasonText) {
+        const byRestaurant = /^rejected by restaurant/i.test(reasonText);
+        document.getElementById('cancel-reason-label').innerText = byRestaurant ? 'Cancelled by restaurant' : 'Reason';
+        document.getElementById('cancel-reason-text').innerText = byRestaurant
+          ? (reasonText.replace(/^rejected by restaurant:\s*/i, '') || 'No reason given')
+          : reasonText;
+        reasonRow.style.display = 'flex';
+      } else {
+        reasonRow.style.display = 'none';
+      }
+
+      // Refund status — only for online payments. COD orders have nothing to refund.
+      const refund = order.refund || {};
+      const refundRow = document.getElementById('refund-row');
+      const dot = document.getElementById('refund-dot');
+      const statusText = document.getElementById('refund-status-text');
+      const note = document.getElementById('refund-note');
+      const amt = Number(refund.amount || order.total || 0);
+
+      if (order.paymentMethod === 'cod') {
+        refundRow.style.display = 'none';
+      } else if (refund.status === 'completed' || order.paymentStatus === 'refunded') {
+        dot.className = 'refund-dot done';
+        statusText.innerText = 'Refund completed';
+        note.innerText = `₹${amt} was refunded to your original payment method.`;
+        refundRow.style.display = 'block';
+      } else if (refund.status === 'processing') {
+        dot.className = 'refund-dot processing';
+        statusText.innerText = 'Refund processing';
+        note.innerText = `₹${amt} will be credited to your original payment method, usually within 5–7 business days.`;
+        refundRow.style.display = 'block';
+      } else if (refund.status === 'failed') {
+        dot.className = 'refund-dot failed';
+        statusText.innerText = 'Refund needs attention';
+        note.innerText = `We couldn't process your ₹${amt} refund automatically. Please contact support and we'll sort it out.`;
+        refundRow.style.display = 'block';
+      } else if (order.paymentStatus === 'paid') {
+        // Paid online but no refund recorded yet (e.g. an order cancelled before
+        // this feature existed) — point them to support rather than imply nothing.
+        dot.className = 'refund-dot processing';
+        statusText.innerText = 'Refund pending';
+        note.innerText = 'If you were charged, your refund will be processed. Contact support if you have any questions.';
+        refundRow.style.display = 'block';
+      } else {
+        refundRow.style.display = 'none';
+      }
+
+      card.style.display = 'block';
     }
 
     function launchConfetti() {
@@ -1168,16 +1257,57 @@
         });
       }
 
-      // Cancel order — informational sheet only, no cancellation endpoint is called
+      // Cancel order — calls the real cancellation endpoint (PUT /orders/:id/cancel).
       const helpCancelBtn = document.getElementById('help-cancel');
       if (helpCancelBtn) {
         helpCancelBtn.addEventListener('click', () => {
-          const id = currentOrder ? currentOrder._id : '';
+          if (!currentOrder) return;
+          const id = currentOrder._id;
+          const paidOnline = currentOrder.paymentMethod !== 'cod' && currentOrder.paymentStatus === 'paid';
+          const refundLine = paidOnline
+            ? `<p class="sheet-note">Your online payment of ₹${esc(currentOrder.total)} will be refunded to your original payment method.</p>`
+            : '';
           const body = `
-            <p class="sheet-note">Cancellations are handled by our support team to make sure your refund (if applicable) is processed correctly. Chat with us and we'll take care of it right away.</p>
-            <a class="sheet-cta tap" href="support.html?order=${id}&type=cancel"><i class="fa-solid fa-headset"></i> Chat with Support</a>
+            ${refundLine}
+            <p class="sheet-note">This can't be undone, and you can only cancel before the restaurant starts preparing your food.</p>
+            <textarea id="cancel-reason-input" class="cancel-reason-input" rows="2" maxlength="200" placeholder="Reason (optional)"></textarea>
+            <button class="sheet-cta tap danger" id="confirm-cancel-btn"><i class="fa-solid fa-ban"></i> Yes, cancel order</button>
+            <button class="sheet-cta-ghost tap" id="keep-order-btn">Keep my order</button>
           `;
           openSheet('Cancel this order?', body);
+
+          document.getElementById('keep-order-btn').addEventListener('click', () => {
+            document.getElementById('sheet-modal').classList.remove('open');
+          });
+
+          document.getElementById('confirm-cancel-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('confirm-cancel-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cancelling...';
+            const reason = (document.getElementById('cancel-reason-input')?.value || '').trim();
+            try {
+              const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token') || sessionStorage.getItem('nearbite_token') || '';
+              const resp = await fetch(`${CONFIG.API_BASE_URL}/orders/${id}/cancel`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                body: JSON.stringify({ reason })
+              });
+              const data = await resp.json().catch(() => ({}));
+              if (!resp.ok || !data.success) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-ban"></i> Yes, cancel order';
+                alert((data && data.message) || 'Could not cancel this order. Please try again or contact support.');
+                return;
+              }
+              document.getElementById('sheet-modal').classList.remove('open');
+              // Re-pull the authoritative order (now cancelled, with refund state) and re-render.
+              fetchOrderData();
+            } catch (e) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-ban"></i> Yes, cancel order';
+              alert('Network error. Please check your connection and try again.');
+            }
+          });
         });
       }
 

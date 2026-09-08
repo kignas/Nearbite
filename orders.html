@@ -563,6 +563,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('');
   }
 
+  // 'refunded' is a payment outcome (a cancelled order whose money came back),
+  // not an order status — detect it from the real refund data so the Refunded
+  // badge / filter / count actually work instead of keying off a status value
+  // that never exists.
+  function isOrderRefunded(o) {
+    return !!(o && (o.paymentStatus === 'refunded' || (o.refund && o.refund.status === 'completed')));
+  }
+
   function renderPastSection(pastOrders) {
     if (pastOrders.length === 0) { pastContainer.innerHTML = ''; loadMoreWrap.style.display = 'none'; return; }
 
@@ -577,9 +585,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const itemsHtml = formatItemsDisplay(order.items);
       const statusLower = order.status.toLowerCase();
       const isDelivered = statusLower === 'delivered';
-      const isRefunded = statusLower === 'refunded';
-      const badgeClass = isDelivered ? 'delivered' : (isRefunded ? 'refunded' : 'cancelled');
       const isCancelled = statusLower === 'cancelled';
+      const isRefunded = isOrderRefunded(order);
+      const badgeClass = isDelivered ? 'delivered' : (isRefunded ? 'refunded' : 'cancelled');
+      const badgeLabel = isRefunded ? 'Refunded' : order.status;
       const payLabel = order.paymentStatus === 'paid' ? 'Paid Online' : 'COD';
       const cuisine = order.cuisine || order.restaurantCuisine || '';
 
@@ -596,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="past-title-wrap">
                 <div class="past-title-row">
                   <h4>${order.restaurantName || "EatSwada Partner"}</h4>
-                  <span class="badge ${badgeClass}">${order.status}</span>
+                  <span class="badge ${badgeClass}">${badgeLabel}</span>
                 </div>
                 ${cuisine ? `<div class="past-cuisine">${cuisine}</div>` : ''}
                 <div class="past-date">${dateStr}</div>
@@ -641,8 +650,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const counts = { all: visible.length, active: 0, delivered: 0, cancelled: 0, refunded: 0 };
     visible.forEach(o => {
       const s = o.status.toLowerCase();
-      if (liveStatuses.includes(s)) counts.active++;
-      else if (counts[s] !== undefined) counts[s]++;
+      if (liveStatuses.includes(s)) { counts.active++; return; }
+      if (isOrderRefunded(o)) { counts.refunded++; return; }   // refunded counted separately from cancelled
+      if (counts[s] !== undefined) counts[s]++;
     });
     document.querySelectorAll('.chip').forEach(chip => {
       const key = chip.getAttribute('data-filter');
@@ -684,6 +694,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chip Filtering
     if (currentFilter !== 'all') {
       if (currentFilter === 'active') filteredOrders = filteredOrders.filter(o => liveStatuses.includes(o.status.toLowerCase()));
+      else if (currentFilter === 'refunded') filteredOrders = filteredOrders.filter(o => isOrderRefunded(o));
+      else if (currentFilter === 'cancelled') filteredOrders = filteredOrders.filter(o => o.status.toLowerCase() === 'cancelled' && !isOrderRefunded(o));
       else filteredOrders = filteredOrders.filter(o => o.status.toLowerCase() === currentFilter);
     }
 
