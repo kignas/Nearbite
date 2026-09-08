@@ -79,6 +79,8 @@ html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--in
 .primary{background:var(--brand);border-color:var(--brand);color:#fff}
 .primary:not(:disabled):active{background:var(--brand-dark);border-color:var(--brand-dark)}
 .btn:disabled{opacity:.45;cursor:default;transform:none}
+.loc-progress{display:none;align-items:center;gap:10px;background:#F8FAFC;border:1px solid var(--line);padding:10px 12px;border-radius:14px;margin-bottom:10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.loc-progress.show{display:flex}.loc-spinner{width:18px;height:18px;border:2px solid #DDE3E8;border-top-color:var(--brand);border-radius:50%;animation:locSpin .75s linear infinite;flex:none}@keyframes locSpin{to{transform:rotate(360deg)}}
 .back:focus-visible,.locate:focus-visible,.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
 </style>
@@ -130,6 +132,7 @@ button,input,textarea,select{font-family:inherit}
 <div class="sheet">
   <h1 class="sheet-title">Deliver here?</h1>
   <div class="warn" id="warn"></div>
+  <div class="loc-progress" id="locProgress" role="status" aria-live="polite"><span class="loc-spinner"></span><span id="locProgressText">Finding your location…</span></div>
   <div class="address" id="address" role="status" aria-live="polite">Waiting for your location…</div>
   <div class="actions">
     <button class="btn" id="currentBtn" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Use current location</button>
@@ -319,18 +322,46 @@ function gateRetry(){
  locateMe();
 }
 async function locateMe(){
- if(locating)return;
- if(!navigator.geolocation){ openGate('unsupported'); return }
+  if(locating)return;
+  if(!navigator.geolocation){ openGate('unsupported'); return }
 
- const state=await permissionState();
- if(state==='denied'){ openGate('blocked'); return }
+  const state=await permissionState();
+  if(state==='denied'){ openGate('blocked'); return }
 
- locating=true;$('locateBtn').disabled=true;$('currentBtn').disabled=true;warn('Requesting your live location…');
- navigator.geolocation.getCurrentPosition(p=>{
-   locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
-   closeGate();
-   applyPosition(p,true);
- },async e=>{
+  locating=true;
+  $('locateBtn').disabled=true;$('currentBtn').disabled=true;
+  $('confirm').disabled=true;
+  setLocProgress(true,'Finding your current location…');
+  warn('');
+
+  let finished=false;
+  const success=p=>{
+    if(finished)return;
+    finished=true;
+    locating=false;
+    $('locateBtn').disabled=false;$('currentBtn').disabled=false;
+    setLocProgress(false);
+    closeGate();
+    applyPosition(p,true);
+  };
+  const fail=e=>{
+    if(finished)return;
+    finished=true;
+    locating=false;
+    $('locateBtn').disabled=false;$('currentBtn').disabled=false;
+    setLocProgress(false);
+    if(e.code===1){ openGate('denied'); }
+    else if(e.code===3){ openGate('timeout'); }
+    else { openGate('unavailable'); }
+  };
+
+  // Fast first fix: cached/network location is normally available in 1–3s.
+  navigator.geolocation.getCurrentPosition(success,fail,{
+    enableHighAccuracy:false,
+    timeout:8000,
+    maximumAge:120000
+  });
+},async e=>{
    locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
    warn('');
    setAddress('Location not available','Allow location access to continue.');

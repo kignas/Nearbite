@@ -28,8 +28,9 @@
     'support.html': 'orders.html',
     'track-order.html': 'orders.html',
     'legal.html': 'profile.html',
-    'location-onboarding.html': 'login.html',
-    'complete-profile.html': 'login.html'
+    'location-onboarding.html': 'index.html',
+    'complete-profile.html': 'login.html',
+    'address-new.html': 'index.html'
   };
 
   window.nearbiteSafeBack = function () {
@@ -68,3 +69,35 @@
     }, 250);
   };
 })();
+
+
+/* ── Fast navigation layer ─────────────────────────────────────
+   Warm likely same-origin pages while the user is reading the current page.
+   This makes the next full-page navigation much less likely to start cold. */
+(function(){
+  if (window.__esFastNavigation) return;
+  window.__esFastNavigation = true;
+
+  function prefetch(url){
+    try{
+      const u = new URL(url, location.href);
+      if(u.origin !== location.origin || !/\.html$/i.test(u.pathname)) return;
+      if(u.pathname === location.pathname) return;
+      if(document.querySelector('link[rel="prefetch"][href="'+u.href+'"]')) return;
+      const l=document.createElement('link');
+      l.rel='prefetch'; l.href=u.href; l.as='document';
+      document.head.appendChild(l);
+    }catch(e){}
+  }
+
+  // Only warm high-value navigation targets; don't flood mobile connections.
+  const preferred=['index.html','profile.html','orders.html','cart.html','address.html','search.html'];
+  preferred.forEach(function(page){ if(page !== currentPage()) setTimeout(function(){prefetch(page)}, 900); });
+
+  document.addEventListener('pointerdown',function(e){
+    const a=e.target.closest && e.target.closest('a[href]');
+    if(a) prefetch(a.href);
+  },{passive:true});
+})();
+
+if ('serviceWorker' in navigator) window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F1F5F9">
-<title>Delivery address · Eatswada</title>
+<title>Set delivery address · Delivery address · Eatswada</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -264,6 +264,7 @@ body.ea-body{
   .ea-sub{margin-left:0}
   .ea-change{padding:9px 10px}
 }
+.ea-app{display:none}.ea-form{display:flex!important}.ea-form .ea-form-head .ea-back{display:none}#receiverSec,#photoSec{display:none!important}
 </style>
 </head>
 <body class="ea ea-body">
@@ -273,10 +274,10 @@ body.ea-body{
   <header class="ea-header">
     <div class="ea-top">
       <button class="ea-back" onclick="goBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-      <div class="ea-title">Saved addresses</div>
-      <button class="ea-add" onclick="openEditor()" aria-label="Add address"><i class="fa-solid fa-plus"></i></button>
+      <div class="ea-title">Set delivery address</div>
+      
     </div>
-    <div class="ea-sub">Choose where you want your food delivered</div>
+    <div class="ea-sub">Add your first delivery address</div>
   </header>
 
   <main class="ea-main">
@@ -284,9 +285,7 @@ body.ea-body{
   </main>
 </div>
 
-<div class="ea-fab">
-  <button onclick="openEditor()"><i class="fa-solid fa-plus"></i> Add a new address</button>
-</div>
+
 
 <!-- ===================== address form ===================== -->
 <div class="ea-form" id="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
@@ -434,7 +433,7 @@ let addrCity = '', addrPin = '';
               map. Receiver details come from the account, the receiver card
               is hidden, and a successful save continues to nearbite_after_login.
    'manage' — MODE 2. Existing customer adding or editing from the saved list. */
-let mode = 'manage';
+let mode = 'setup';
 
 const $ = id => document.getElementById(id);
 const token   = () => localStorage.getItem('nearbite_token') || localStorage.getItem('token') || '';
@@ -446,7 +445,7 @@ const DRAFT_KEY = 'eatswada_address_draft';
 const FORM_IDS = ['house','area','landmark','receiverName','receiverPhone','instructions'];
 
 const ENTRY = new URLSearchParams(location.search);
-const cameFromSetupUrl = false;
+const cameFromSetupUrl = true;
 
 /* The single selector drives both the field wording and the stored `tag`.
    House → Home, Office → Work, Other → Other. */
@@ -1118,17 +1117,11 @@ $('receiverPhone').addEventListener('input', e => {
 $('area').addEventListener('input', () => { if (!locGeo) paintLocation(); });
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await Promise.all([ load(), loadAccount() ]);
-
-  const resuming = ENTRY.get('resume') === '1' || !!sessionStorage.getItem(DRAFT_KEY);
-  if (resuming){ resumeDraft(); return; }
-
-  // MODE 1 is the first address, reached from Complete Profile via the map.
-  // An existing customer with saved addresses is always MODE 2.
-  if (cameFromSetupUrl){
-    mode = addresses.length === 0 ? 'setup' : 'manage';
-    openEditor();
-  }
+  // Dedicated first-address page: don't fetch the saved-address list first.
+  // The onboarding coordinate is already stored by the location step.
+  mode = 'setup';
+  await loadAccount();
+  openEditor();
 });
 </script>
 
