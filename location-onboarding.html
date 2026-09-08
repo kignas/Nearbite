@@ -164,6 +164,10 @@ const DEFAULT=[26.52,88.73]; // Map-only fallback. Never saved as customer GPS.
 let map,current=null,locating=false,gpsMarker=null,accuracyCircle=null,watchId=null,firstFix=false;
 const $=id=>document.getElementById(id);
 function warn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
+function setLocProgress(show,text){
+ $('locProgress').classList.toggle('show',!!show);
+ if(text) $('locProgressText').textContent=text;
+}
 /* kind: 'gps' for a genuine fix, 'map' for a point chosen by moving the map,
    '' while waiting or on error. Presentation only. */
 function setAddress(main,meta='',secondary='',kind=''){
@@ -323,57 +327,66 @@ function gateRetry(){
 }
 async function locateMe(){
   if(locating)return;
-  if(!navigator.geolocation){ openGate('unsupported'); return }
+  if(!navigator.geolocation){ openGate('unsupported'); return; }
 
-  const state=await permissionState();
-  if(state==='denied'){ openGate('blocked'); return }
+  // The Permissions API is only a quick pre-check. If it is unavailable or
+  // slow on a browser, continue directly to getCurrentPosition so it can
+  // show the native Android/Chrome permission prompt.
+  const state=await Promise.race([
+    permissionState(),
+    new Promise(resolve=>setTimeout(()=>resolve('unknown'),500))
+  ]);
+  if(state==='denied'){
+    openGate('blocked');
+    return;
+  }
 
   locating=true;
-  $('locateBtn').disabled=true;$('currentBtn').disabled=true;
+  $('locateBtn').disabled=true;
+  $('currentBtn').disabled=true;
   $('confirm').disabled=true;
   setLocProgress(true,'Finding your current location…');
   warn('');
+  setAddress('Finding your location…','Please allow location access when Chrome asks.');
 
   let finished=false;
   const success=p=>{
     if(finished)return;
     finished=true;
     locating=false;
-    $('locateBtn').disabled=false;$('currentBtn').disabled=false;
+    $('locateBtn').disabled=false;
+    $('currentBtn').disabled=false;
     setLocProgress(false);
     closeGate();
     applyPosition(p,true);
   };
-  const fail=e=>{
+  const fail=async e=>{
     if(finished)return;
     finished=true;
     locating=false;
-    $('locateBtn').disabled=false;$('currentBtn').disabled=false;
+    $('locateBtn').disabled=false;
+    $('currentBtn').disabled=false;
     setLocProgress(false);
-    if(e.code===1){ openGate('denied'); }
-    else if(e.code===3){ openGate('timeout'); }
-    else { openGate('unavailable'); }
+    setAddress('Location not available','Allow location access to continue.');
+
+    if(e && e.code===1){
+      const s=await permissionState();
+      openGate(s==='denied'?'blocked':'denied');
+    }else if(e && e.code===3){
+      openGate('timeout');
+    }else{
+      openGate('unavailable');
+    }
   };
 
-  // Fast first fix: cached/network location is normally available in 1–3s.
+  // Fast first fix. Network-assisted location is much faster on phones.
+  // If the device cannot provide it within 8 seconds, the user gets a clear
+  // retry state instead of waiting 25 seconds with no feedback.
   navigator.geolocation.getCurrentPosition(success,fail,{
     enableHighAccuracy:false,
     timeout:8000,
     maximumAge:120000
   });
-},async e=>{
-   locating=false;$('locateBtn').disabled=false;$('currentBtn').disabled=false;
-   warn('');
-   setAddress('Location not available','Allow location access to continue.');
-   if(e.code===1){
-     const s=await permissionState();
-     openGate(s==='denied'?'blocked':'denied');
-   }else if(e.code===3){
-     openGate('timeout');
-   }else{
-     openGate('unavailable');
-   }
- },{enableHighAccuracy:true,timeout:25000,maximumAge:10000});
 }
 /* ── Handoff target ────────────────────────────────────────────────
    Complete Profile opens this page with ?next=<encoded relative path>
