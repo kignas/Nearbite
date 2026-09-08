@@ -287,7 +287,7 @@
      Complete Profile → Location map → Address → Checkout.
      The address step is handed to the map as the destination so the
      confirmed coordinates carry straight into the address form. */
-  const ADDRESS_STEP  = 'address.html?add=1';
+  const ADDRESS_STEP  = 'address-new.html';
   const LOCATION_STEP = 'location-onboarding.html?from=complete-profile'
                       + '&next=' + encodeURIComponent(ADDRESS_STEP)
                       + '&return=' + encodeURIComponent(ADDRESS_STEP);
@@ -428,13 +428,21 @@
         throw new Error(result.message || 'Could not save your details. Please try again.');
       }
 
-      // Session state only. The auth token and nearbite_after_login are left
-      // exactly as they are for the later steps to use.
+      // updateProfile revokes the old JWT when a password is created/changed.
+      // Replace it immediately with the fresh JWT returned by the backend.
+      // Without this, the next protected onboarding request receives 401 and
+      // older frontend code can incorrectly redirect the customer to login.
+      if (result.data?.token) {
+        localStorage.setItem('nearbite_token', result.data.token);
+        localStorage.setItem('token', result.data.token);
+      }
+
       let cached = {};
       try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
-      localStorage.setItem('nearbite_user', JSON.stringify(
-        result.data || { ...cached, name: payload.name, email: payload.email || cached.email }
-      ));
+      const updatedUser = result.data?.user || result.data || {
+        ...cached, name: payload.name, email: payload.email || cached.email
+      };
+      localStorage.setItem('nearbite_user', JSON.stringify(updatedUser));
 
       // Next step is the map, not the address form.
       window.location.href = LOCATION_STEP;
