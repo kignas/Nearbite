@@ -125,7 +125,7 @@ button,input,textarea,select{font-family:inherit}
   <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
   <div class="title">
     <b>Set delivery location</b>
-    <span>Move the map to adjust your exact delivery point</span>
+    <span>Approximate location is enough — adjust the pin if needed</span>
   </div>
   <button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i></button>
 </div>
@@ -147,7 +147,7 @@ button,input,textarea,select{font-family:inherit}
   <div class="lg-modal">
     <div class="lg-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>
     <h2 id="lg-title">Location permission required</h2>
-    <p id="lg-text">Eatswada needs your location to find nearby restaurants, calculate delivery distance and check whether we deliver to you.</p>
+    <p id="lg-text">Eatswada needs your approximate location to find nearby restaurants and check whether we deliver to you. You can adjust the delivery pin on the map.</p>
     <div class="lg-steps" id="lg-steps">
       <b>Android · Chrome</b>
       Open Chrome → ⋮ → Settings → Site settings → Location → allow Eatswada → return here and tap Try again.
@@ -160,7 +160,9 @@ button,input,textarea,select{font-family:inherit}
 <script src="safe-html.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const DEFAULT=[26.52,88.73]; // Map-only fallback. Never saved as customer GPS.
+// Maynaguri, West Bengal — visual fallback only.
+ // The real device location still replaces this as soon as the browser returns it.
+ const DEFAULT=[26.545,88.820];
 let map,current=null,locating=false,gpsMarker=null,accuracyCircle=null,watchId=null,firstFix=false;
 const $=id=>document.getElementById(id);
 function warn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
@@ -240,7 +242,7 @@ function applyPosition(p,center=true){
  current={lat:Number(p.coords.latitude),lng:Number(p.coords.longitude),accuracy:Number(p.coords.accuracy||0)};
  firstFix=true; showGps(current.lat,current.lng,current.accuracy);
  if(center)map.setView([current.lat,current.lng],17,{animate:true});
- const acc=current.accuracy?`GPS accuracy ±${Math.round(current.accuracy)} m`:'GPS location captured';
+ const acc=current.accuracy?`Location accuracy ±${Math.round(current.accuracy)} m`:'Location captured';
  setAddress('Current location',acc,'','gps'); $('confirm').disabled=false; warn('');
  reverseGeocode(current.lat,current.lng).then(d=>{
   const parts=splitAddress(d);
@@ -254,7 +256,7 @@ function applyPosition(p,center=true){
 const GATE={
  denied:{
    title:'Location permission required',
-   text:'Eatswada needs your location to find nearby restaurants, calculate delivery distance and check whether we deliver to you.',
+   text:'Eatswada needs your approximate location to find nearby restaurants and check whether we deliver to you. You can adjust the delivery pin on the map.',
    primary:'Allow location', steps:false
  },
  blocked:{
@@ -379,9 +381,10 @@ async function locateMe(){
     }
   };
 
-  // Fast first fix. Network-assisted location is much faster on phones.
-  // If the device cannot provide it within 8 seconds, the user gets a clear
-  // retry state instead of waiting 25 seconds with no feedback.
+  // Request a low-power/approximate-style browser location. Android/Chrome
+  // controls whether the permission dialog offers Precise vs Approximate; a
+  // website cannot hide or force that choice. We deliberately do NOT request
+  // high-accuracy GPS because approximate location is sufficient.
   navigator.geolocation.getCurrentPosition(success,fail,{
     enableHighAccuracy:false,
     timeout:8000,

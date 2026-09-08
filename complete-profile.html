@@ -378,7 +378,11 @@
       $('phone').value = formatPhone(user.phone || cached.phone || '');
 
       // Placeholder names created by signup are not shown as a real name.
-      if (user.name && user.name !== 'Eatswada User' && user.name !== 'Eatswada User') $('name').value = user.name;
+      // Never prefill placeholder account names such as "Nearbite User".
+       // Only a real customer-provided name may appear in this field.
+       if (user.name && !/^(?:nearbite|nearbile|eatswada)\s+user$/i.test(String(user.name).trim())) {
+         $('name').value = user.name;
+       }
       if (user.email) $('email').value = user.email;
     } catch (e){
       console.warn('Could not load existing profile', e);
