@@ -14,7 +14,19 @@ const CONFIG = {
 
   // Visible brand name. Used for page titles and UI copy so the
   // storefront can be renamed from one line instead of 16 files.
-  BRAND_NAME: "EatSwada"
+  BRAND_NAME: "EatSwada",
+
+  // Firebase Web config is public by design. It identifies your Firebase
+  // project; the Firebase Admin service-account key NEVER belongs here.
+  FIREBASE: {
+    enabled: false,
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  }
 };
 
 window.CONFIG = CONFIG;
