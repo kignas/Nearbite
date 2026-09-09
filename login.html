@@ -12,8 +12,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
   <style>
-    /* Firebase phone OTP modal must stay hidden until an OTP is actually sent. */
-    #firebasePhoneModal[hidden]{display:none !important;}
     /* ===== Eatswada onboarding design system — identical in login.html,
        complete-profile.html, location-onboarding.html and address.html ===== */
     :root{
@@ -306,6 +304,9 @@
 
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
+  <!-- Firebase Web SDK (compat build; required by the existing login logic) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -1099,8 +1100,31 @@
         await finishFirebaseLogin(result.user);
       } catch(e) {
         console.error(e);
+        // Some mobile browsers block auth popups. Fall back to the Firebase redirect flow.
+        if (['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e.code)) {
+          try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            await firebase.auth().signInWithRedirect(provider);
+            return;
+          } catch (redirectError) {
+            console.error(redirectError);
+            e = redirectError;
+          }
+        }
         showBanner(step1Banner, step1BannerText, e.code === 'auth/popup-closed-by-user' ? 'Google sign-in was cancelled.' : (e.message || 'Google sign-in failed.'));
       } finally { if(btn) btn.disabled=false; }
+    }
+
+    async function handleGoogleRedirectResult() {
+      if (!initFirebaseAuth()) return;
+      try {
+        const result = await firebase.auth().getRedirectResult();
+        if (result && result.user) await finishFirebaseLogin(result.user);
+      } catch (e) {
+        console.error(e);
+        showBanner(step1Banner, step1BannerText, e.message || 'Google sign-in failed.');
+      }
     }
 
     async function startFirebasePhoneOTP() {
@@ -1150,9 +1174,11 @@
     });
 
     function verifyOTP() { checkOTPCompletion(); }
+
+    // Complete a Google redirect login when Firebase returns to this page.
+    handleGoogleRedirectResult();
   </script>
 
-<script src="config.js"></script>
 <script src="navigation.js"></script>
 </body>
 </html>
