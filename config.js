@@ -12,20 +12,19 @@ const CONFIG = {
   // Production Render URL
   API_BASE_URL: "https://eatswada.onrender.com/api",
 
-  // Visible brand name. Used for page titles and UI copy so the
-  // storefront can be renamed from one line instead of 16 files.
+  // Visible brand name
   BRAND_NAME: "EatSwada",
 
-  // Firebase Web config is public by design. It identifies your Firebase
-  // project; the Firebase Admin service-account key NEVER belongs here.
+  // Firebase Web config is public by design.
+  // The Firebase Admin service-account key NEVER belongs here.
   FIREBASE: {
-    enabled: false,
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+    enabled: true,
+    apiKey: "AIzaSyA0bqVE3RCmiJORcufx-v6Gew16GMCfFp0",
+    authDomain: "eatswada.firebaseapp.com",
+    projectId: "eatswada",
+    storageBucket: "eatswada.firebasestorage.app",
+    messagingSenderId: "644274579271",
+    appId: "1:644274579271:web:ba72c4cd4f81c568fa0e62"
   }
 };
 
