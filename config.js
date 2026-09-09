@@ -14,5 +14,4 @@ const CONFIG = {
     appId: "1:644274579271:web:ba72c4cd4f81c568fa0e62"
   }
 };
-
 window.CONFIG = CONFIG;
