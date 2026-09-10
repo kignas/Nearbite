@@ -303,10 +303,9 @@
   </style>
 
 <link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="config.js"></script>
-  <!-- Firebase Web SDK (compat build; required by the existing login logic) -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -333,57 +332,26 @@
     </div>
   </div>
 
-  <div id="firebasePhoneModal" hidden style="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;padding:18px;">
-    <div style="width:min(520px,100%);background:#fff;border-radius:24px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
-      <div style="font-weight:800;font-size:20px;color:#111827">Verify your phone</div>
-      <div id="firebasePhoneText" style="margin-top:6px;color:#6b7280;font-size:14px">Enter the 6-digit code sent to your phone.</div>
-      <input id="firebasePhoneCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="width:100%;margin-top:18px;height:56px;border:1px solid #d1d5db;border-radius:14px;padding:0 16px;font-size:24px;letter-spacing:8px;text-align:center;font-weight:800" aria-label="6-digit phone verification code">
-      <div id="firebasePhoneError" style="display:none;color:#dc2626;font-size:13px;margin-top:8px"></div>
-      <button id="firebasePhoneVerifyBtn" type="button" style="width:100%;margin-top:16px;height:52px;border:0;border-radius:14px;background:#16a34a;color:#fff;font-weight:800;font-size:16px">Verify & Continue</button>
-      <button id="firebasePhoneCancelBtn" type="button" style="width:100%;margin-top:8px;height:44px;border:0;background:transparent;color:#6b7280;font-weight:700">Cancel</button>
-    </div>
-  </div>
-
-  <div id="firebaseRecaptcha" aria-hidden="true"></div>
   <div class="bottom-sheet">
 
     <div id="step1" class="step-container active">
       <div class="brand-mark">Eatswada</div>
       <div class="sheet-header">
-        <h1 class="sheet-title">Log in or sign up</h1>
-        <div class="sheet-sub">Enter your phone number to proceed</div>
+        <h1 class="sheet-title">Welcome to Eatswada</h1>
+        <div class="sheet-sub">Log in or create your account to continue</div>
       </div>
 
       <div id="step1Banner" class="banner-error" role="alert" aria-live="assertive">
         <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
         <span id="step1BannerText"></span>
-        <button class="banner-retry tap" onclick="sendOTP()">Retry</button>
       </div>
 
-      <label for="phoneInput" class="sr-only">Mobile number</label>
-      <div class="input-row">
-        <div class="country-drop" aria-hidden="true">🇮🇳</div>
-        <div class="phone-box" id="phoneBox">
-          <span class="phone-prefix">+91</span>
-          <div class="phone-divider"></div>
-          <input
-            type="tel" id="phoneInput" inputmode="numeric" class="phone-input"
-            placeholder="Mobile number" maxlength="10" autocomplete="tel-national"
-            aria-describedby="phoneError"
-            oninput="checkPhone()"
-            onkeydown="if(event.key==='Enter' &amp;&amp; !actionBtn.disabled) sendOTP();">
-        </div>
-      </div>
-      <div id="phoneError" class="field-error" role="alert" aria-live="polite">
-        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-        <span>Enter a valid 10-digit mobile number.</span>
-      </div>
-
-      <button id="actionBtn" class="btn-primary tap" disabled onclick="sendOTP()">
-        <span id="actionBtnText">Continue</span>
-      </button>
-
-      <button type="button" class="auth-secondary tap" onclick="showPasswordLogin()">Already have a password? Log in</button>
+      <label class="auth-label" for="loginIdentifierInput">Email or mobile number</label>
+      <input class="auth-field" id="loginIdentifierInput" type="text" inputmode="email" maxlength="120" placeholder="Email or 10-digit mobile number" autocomplete="username">
+      <label class="auth-label" for="loginPasswordInput">Password</label>
+      <input class="auth-field" id="loginPasswordInput" type="password" minlength="8" maxlength="128" placeholder="Your password" autocomplete="current-password">
+      <button id="passwordLoginBtn" class="btn-primary tap" onclick="passwordLogin()">Log in</button>
+      <button type="button" class="auth-link tap" onclick="showForgotPassword()">Forgot password?</button>
 
       <div class="divider"><span class="divider-text">or</span></div>
 
@@ -399,786 +367,157 @@
     </div>
 
     <div id="step2" class="step-container">
-      <button class="btn-back-otp tap" onclick="goBack()" aria-label="Change phone number"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
-      <h2 class="otp-title">Verify your number</h2>
-      <div class="otp-sub">Enter the 4-digit code sent to <span id="displayPhone" style="color:#111827; font-weight:800;"></span></div>
-
-      <div id="step2Banner" class="banner-error" role="alert" aria-live="assertive">
-        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-        <span id="step2BannerText"></span>
-      </div>
-
-      <div class="otp-grid" id="otpGrid" role="group" aria-label="4-digit verification code">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="one-time-code" class="otp-box" maxlength="1" aria-label="Digit 1 of 4" oninput="moveNext(this, 0)" onkeydown="moveBack(event, 0)" onpaste="handleOtpPaste(event)">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 2 of 4" oninput="moveNext(this, 1)" onkeydown="moveBack(event, 1)">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 3 of 4" oninput="moveNext(this, 2)" onkeydown="moveBack(event, 2)">
-        <input type="text" inputmode="numeric" pattern="\d*" autocomplete="off" class="otp-box" maxlength="1" aria-label="Digit 4 of 4" oninput="moveNext(this, 3)" onkeydown="moveBack(event, 3)">
-      </div>
-      <button type="button" id="verifyOtpBtn" class="verify-otp-btn tap" onclick="verifyOTP()" disabled aria-label="Verify OTP">
-        <span id="verifyOtpBtnText">Verify OTP</span>
-      </button>
-
-      <div id="otpError" class="field-error" role="alert" aria-live="polite">
-        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-        <span id="otpErrorText">Incorrect code. Please try again.</span>
-      </div>
-
-      <div class="resend-row">
-        Didn't receive code? <button id="resendBtn" class="resend-btn tap" onclick="resendOTP()" disabled>Resend in 60s</button>
-      </div>
-    </div>
-
-    <div id="step3" class="step-container">
-      <button class="btn-back-otp tap" onclick="backToPhoneStart()" aria-label="Back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
-      <div class="sheet-header">
-        <div class="brand-mark">Eatswada</div>
-        <h2 class="sheet-title">Welcome back 👋</h2>
-        <p class="sheet-sub">Log in with your mobile number and password</p>
-      </div>
-      <label class="auth-label" for="loginPhoneInput">Mobile number</label>
-      <input class="auth-field" id="loginPhoneInput" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
-      <label class="auth-label" for="loginPasswordInput">Password</label>
-      <input class="auth-field" id="loginPasswordInput" type="password" minlength="6" placeholder="Your password" autocomplete="current-password">
-      <div id="passwordLoginError" class="banner-error" role="alert"><i class="fa-solid fa-triangle-exclamation"></i><span id="passwordLoginErrorText"></span></div>
-      <button id="passwordLoginBtn" class="btn-primary tap" onclick="passwordLogin()">Log in</button>
-      <button type="button" class="auth-link tap" onclick="showForgotPassword()">Forgot password?</button>
-      <button type="button" class="auth-secondary tap" onclick="showOtpStart()">Login with OTP</button>
-    </div>
-
-    <div id="step4" class="step-container">
-      <button class="btn-back-otp tap" onclick="showPasswordLogin()" aria-label="Back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+      <button class="btn-back-otp tap" onclick="showLogin()" aria-label="Back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
       <div class="sheet-header">
         <div class="brand-mark">Eatswada</div>
         <h2 class="sheet-title">Reset your password</h2>
-        <p class="sheet-sub">We'll send a verification code to your mobile</p>
+        <p class="sheet-sub">Enter the email connected to your Eatswada account. We'll send a secure reset link.</p>
       </div>
-      <label class="auth-label" for="forgotPhoneInput">Mobile number</label>
-      <input class="auth-field" id="forgotPhoneInput" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
+      <label class="auth-label" for="forgotEmailInput">Email address</label>
+      <input class="auth-field" id="forgotEmailInput" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email" inputmode="email">
       <div id="forgotBanner" class="banner-error" role="alert"><i class="fa-solid fa-triangle-exclamation"></i><span id="forgotBannerText"></span></div>
-      <button id="forgotSendBtn" class="btn-primary tap" onclick="sendForgotOTP()">Send OTP</button>
-      <p class="auth-note">For your security, we'll show the same message whether or not an account exists.</p>
-    </div>
-
-    <div id="step5" class="step-container">
-      <button class="btn-back-otp tap" onclick="showForgotPassword()" aria-label="Back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
-      <div class="sheet-header">
-        <div class="brand-mark">Eatswada</div>
-        <h2 class="sheet-title">Create a new password</h2>
-        <p class="sheet-sub">Enter the 4-digit OTP and your new password</p>
-      </div>
-      <label class="auth-label" for="forgotOtpInput">Verification code</label>
-      <input class="auth-field" id="forgotOtpInput" type="tel" inputmode="numeric" maxlength="4" placeholder="4-digit OTP" autocomplete="one-time-code">
-      <label class="auth-label" for="forgotNewPasswordInput">New password</label>
-      <input class="auth-field" id="forgotNewPasswordInput" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
-      <div id="resetBanner" class="banner-error" role="alert"><i class="fa-solid fa-triangle-exclamation"></i><span id="resetBannerText"></span></div>
-      <button id="resetPasswordBtn" class="btn-primary tap" onclick="resetPassword()">Reset password</button>
-    </div>
-
-    <div id="step6" class="step-container">
-      <div class="sheet-header">
-        <div class="brand-mark">Eatswada</div>
-        <h2 class="sheet-title">Finish your account</h2>
-        <p class="sheet-sub">Your mobile is verified. Create a password to continue.</p>
-      </div>
-      <label class="auth-label" for="setupNameInput">Your name</label>
-      <input class="auth-field" id="setupNameInput" type="text" maxlength="60" placeholder="Enter your name" autocomplete="name">
-      <label class="auth-label" for="setupEmailInput">Email <span style="font-weight:500;color:#9ca3af">(optional)</span></label>
-      <input class="auth-field" id="setupEmailInput" type="email" placeholder="you@example.com" autocomplete="email">
-      <label class="auth-label" for="setupPasswordInput">Create password</label>
-      <input class="auth-field" id="setupPasswordInput" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
-      <div id="setupBanner" class="banner-error" role="alert"><i class="fa-solid fa-triangle-exclamation"></i><span id="setupBannerText"></span></div>
-      <button id="setupAccountBtn" class="btn-primary tap" onclick="finishAccountSetup()">Create account</button>
+      <button id="forgotSendBtn" class="btn-primary tap" onclick="sendPasswordResetEmail()">Send reset link</button>
+      <p class="auth-note">For your security, we use the same confirmation message whether or not an account exists.</p>
     </div>
 
   </div>
 
   <script>
-    /* ============================================================
-       CONFIG — do not change: matches the live backend contract
-    ============================================================ */
     const API_URL = CONFIG.API_BASE_URL + '/users';
-
-    /* Onboarding chain, mirroring complete-profile.html so every entry point
-       lands on the same sequence:
-       Login → OTP → Complete Profile → Location map → Address → destination. */
-    const ADDRESS_STEP  = 'address-new.html';
+    const AUTH_API = CONFIG.API_BASE_URL + '/auth';
     const LOCATION_STEP = 'location-onboarding.html?from=login'
-                        + '&next=' + encodeURIComponent(ADDRESS_STEP)
-                        + '&return=' + encodeURIComponent(ADDRESS_STEP);
+      + '&next=' + encodeURIComponent('address.html?add=1')
+      + '&return=' + encodeURIComponent('address.html?add=1');
 
-    /* Single routing decision, shared by OTP verification and password login
-       so the two methods cannot drift apart. Reads the ACCOUNT, never whether
-       a map location happens to be cached. */
-    function routeAfterAuthentication(profile, requestedPage) {
-      const addresses = Array.isArray(profile && profile.addresses) ? profile.addresses : [];
-      const placeholderName = /^(Nearbite|Eatswada) User$/;
-      const hasRealName = !!(profile && profile.name) && !placeholderName.test(profile.name.trim());
-      const hasAddress = addresses.length > 0 || !!(profile && profile.defaultAddress);
-
-      // Use the backend's own flag when it exposes one; fall back to the
-      // profile data we already have.
-      const profileComplete = (profile && typeof profile.isProfileComplete === 'boolean')
-        ? profile.isProfileComplete
-        : (profile && typeof profile.profileComplete === 'boolean')
-          ? profile.profileComplete
-          : hasRealName;
-
-      if (!profileComplete) {
-        // Keep the original destination so a guest cart returns to cart.html
-        // once onboarding finishes. address.html consumes it.
-        localStorage.setItem('nearbite_after_login', requestedPage);
-        window.location.href = 'complete-profile.html';
+    function showOnlyStep(id){
+      document.querySelectorAll('.step-container').forEach(el=>el.classList.remove('active'));
+      const el=document.getElementById(id); if(el) el.classList.add('active');
+      window.scrollTo({top:320,behavior:'smooth'});
+    }
+    function showLogin(){ showOnlyStep('step1'); hideBanner(document.getElementById('step1Banner')); }
+    function showForgotPassword(){
+      const id=document.getElementById('loginIdentifierInput').value.trim();
+      const email=id.includes('@')?id:'';
+      document.getElementById('forgotEmailInput').value=email;
+      showOnlyStep('step2');
+      setTimeout(()=>document.getElementById('forgotEmailInput')?.focus(),120);
+    }
+    function hideBanner(el){ if(el) el.classList.remove('show'); }
+    function showBanner(el,textEl,msg){ if(textEl) textEl.textContent=msg||''; if(el) el.classList.toggle('show',!!msg); }
+    function setAuthBtnLoading(id,loading,label){
+      const btn=document.getElementById(id); if(!btn)return;
+      btn.disabled=loading;
+      btn.innerHTML=loading?'<span class="spinner"></span> Please wait…':label;
+    }
+    function firebaseEnabled(){
+      return !!(window.CONFIG?.FIREBASE?.enabled && window.CONFIG.FIREBASE.apiKey && window.CONFIG.FIREBASE.projectId && window.CONFIG.FIREBASE.appId && window.firebase);
+    }
+    function initFirebase(){
+      if(!firebaseEnabled()) return false;
+      try{ if(!firebase.apps.length) firebase.initializeApp(CONFIG.FIREBASE); return true; }catch(e){ console.error(e); return false; }
+    }
+    function persistSession(data){
+      const token=data?.token || data?.data?.token;
+      const user=data?.user || data?.data?.user || {};
+      if(!token) throw new Error('Authentication succeeded but no Eatswada session was returned.');
+      localStorage.setItem('nearbite_token',token);
+      localStorage.setItem('token',token);
+      localStorage.setItem('nearbite_user',JSON.stringify(user));
+      return {token,user};
+    }
+    function routeAfterAuthentication(profile,requestedPage){
+      const addresses=Array.isArray(profile?.addresses)?profile.addresses:[];
+      const placeholder=/^(Nearbite|Eatswada) User$/i;
+      const hasRealName=!!profile?.name && !placeholder.test(String(profile.name).trim());
+      const hasAddress=addresses.length>0 || !!profile?.defaultAddress;
+      const complete=typeof profile?.isProfileComplete==='boolean'?profile.isProfileComplete:
+        typeof profile?.profileComplete==='boolean'?profile.profileComplete:hasRealName;
+      if(!complete){ localStorage.setItem('nearbite_after_login',requestedPage); window.location.href='complete-profile.html'; return; }
+      if(!hasAddress){ localStorage.setItem('nearbite_after_login',requestedPage); window.location.href=LOCATION_STEP; return; }
+      localStorage.removeItem('nearbite_after_login'); window.location.href=requestedPage;
+    }
+    async function fetchProfileForRouting(token,user){
+      try{ const r=await fetch(`${API_URL}/profile`,{headers:{Authorization:`Bearer ${token}`}}); const d=await r.json().catch(()=>({})); return d?.success?d.data:user; }catch(e){ return user; }
+    }
+    async function finishGoogleLogin(firebaseUser){
+      const idToken=await firebaseUser.getIdToken(true);
+      const res=await fetch(`${AUTH_API}/firebase`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+      const data=await res.json().catch(()=>({}));
+      if(data.code==='PROFILE_REQUIRED'){
+        sessionStorage.setItem('nearbite_google_pending_token',idToken);
+        sessionStorage.setItem('nearbite_google_pending_profile',JSON.stringify(data.data?.profile||{name:firebaseUser.displayName||'',email:firebaseUser.email||'',avatar:firebaseUser.photoURL||''}));
+        localStorage.setItem('nearbite_after_login',localStorage.getItem('nearbite_after_login')||'index.html');
+        window.location.href='complete-profile.html?google=1';
         return;
       }
-      if (!hasAddress) {
-        // Profile is done but there is nowhere to deliver. Go straight to the
-        // map, then the address form — not back through profile.
-        localStorage.setItem('nearbite_after_login', requestedPage);
-        window.location.href = LOCATION_STEP;
-        return;
-      }
-      localStorage.removeItem('nearbite_after_login');
-      window.location.href = requestedPage;
+      if(!res.ok || !data.success) throw new Error(data.message||'Google authentication failed.');
+      const session=persistSession(data);
+      const requested=localStorage.getItem('nearbite_after_login')||'index.html';
+      routeAfterAuthentication(await fetchProfileForRouting(session.token,session.user),requested);
     }
-
-    /* Fetches the profile for the routing decision. Returns the cached user
-       if the lookup fails, so a network blip cannot strand the customer. */
-    async function fetchProfileForRouting(authToken, fallbackUser) {
-      try {
-        const res = await fetch(`${API_URL}/profile`, {
-          headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const result = await res.json();
-        return (result && result.success) ? result.data : fallbackUser;
-      } catch (e) {
-        console.error('Profile lookup failed:', e);
-        return fallbackUser;
-      }
-    }
-
-    /* ============================================================
-       Hero Slider
-    ============================================================ */
-    let currentSlide = 0;
-    const totalSlides = 3;
-    setInterval(() => {
-      document.getElementById(`slide${currentSlide}`).classList.remove('active');
-      document.getElementById(`dot${currentSlide}`).classList.remove('active');
-      currentSlide = (currentSlide + 1) % totalSlides;
-      document.getElementById(`slide${currentSlide}`).classList.add('active');
-      document.getElementById(`dot${currentSlide}`).classList.add('active');
-    }, 3500);
-
-    /* ============================================================
-       Element refs
-    ============================================================ */
-    const phoneInput      = document.getElementById('phoneInput');
-    const phoneBox        = document.getElementById('phoneBox');
-    const phoneError      = document.getElementById('phoneError');
-    const actionBtn       = document.getElementById('actionBtn');
-    const actionBtnText   = document.getElementById('actionBtnText');
-    const displayPhone    = document.getElementById('displayPhone');
-    const otpGrid         = document.getElementById('otpGrid');
-    const otpBoxes        = document.querySelectorAll('.otp-box');
-    const otpError        = document.getElementById('otpError');
-    const otpErrorText    = document.getElementById('otpErrorText');
-    const resendBtn       = document.getElementById('resendBtn');
-    const step1Banner     = document.getElementById('step1Banner');
-    const step1BannerText = document.getElementById('step1BannerText');
-    const step2Banner     = document.getElementById('step2Banner');
-    const step2BannerText = document.getElementById('step2BannerText');
-
-    let timerInterval;
-    let isSendingOtp = false;
-    let isResending = false;
-    let isVerifying = false;
-    let otpAbortController = null;
-
-    /* ============================================================
-       Small helpers
-    ============================================================ */
-    function showBanner(bannerEl, textEl, message) {
-      textEl.textContent = message;
-      bannerEl.classList.add('show');
-    }
-    function hideBanner(bannerEl) {
-      bannerEl.classList.remove('show');
-    }
-    function showFieldError(el, textEl, message) {
-      if (textEl && message) textEl.textContent = message;
-      el.classList.add('show');
-    }
-    function hideFieldError(el) {
-      el.classList.remove('show');
-    }
-    function setButtonLoading(loading, loadingLabel, idleLabel) {
-      if (loading) {
-        actionBtn.disabled = true;
-        actionBtnText.innerHTML = `<span class="spinner"></span>${loadingLabel}`;
-      } else {
-        actionBtnText.textContent = idleLabel;
-      }
-    }
-
-    /* ============================================================
-       Phone validation
-    ============================================================ */
-    function checkPhone() {
-      phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
-      hideBanner(step1Banner);
-
-      const val = phoneInput.value;
-      const isComplete = val.length === 10;
-      const isValidPrefix = /^[6-9]/.test(val);
-
-      if (isComplete && !isValidPrefix) {
-        phoneBox.classList.add('error');
-        showFieldError(phoneError);
-      } else {
-        phoneBox.classList.remove('error');
-        hideFieldError(phoneError);
-      }
-
-      actionBtn.disabled = !(isComplete && isValidPrefix);
-    }
-
-    /* ============================================================
-       Resend countdown
-    ============================================================ */
-    function startOTPTimer() {
-      let timeLeft = 60;
-      resendBtn.disabled = true;
-      resendBtn.innerText = `Resend in ${timeLeft}s`;
-
-      clearInterval(timerInterval);
-
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        resendBtn.innerText = `Resend in ${timeLeft}s`;
-
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          resendBtn.innerText = 'Resend';
-          resendBtn.disabled = false;
+    async function signInWithGoogle(){
+      const banner=document.getElementById('step1Banner'),text=document.getElementById('step1BannerText'); hideBanner(banner);
+      if(!initFirebase()){ showBanner(banner,text,'Google Sign-In is not configured yet.'); return; }
+      const btn=document.getElementById('googleSignInBtn'); if(btn)btn.disabled=true;
+      try{
+        const provider=new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({prompt:'select_account'});
+        let result;
+        try{ result=await firebase.auth().signInWithPopup(provider); }
+        catch(e){
+          if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') { await firebase.auth().signInWithRedirect(provider); return; }
+          throw e;
         }
-      }, 1000);
+        await finishGoogleLogin(result.user);
+      }catch(e){ console.error(e); showBanner(banner,text,e.code==='auth/popup-closed-by-user'?'Google sign-in was cancelled.':(e.message||'Google sign-in failed.')); }
+      finally{ if(btn)btn.disabled=false; }
     }
-
-    /* ============================================================
-       WebOTP — Android SMS autofill (no-op everywhere else)
-    ============================================================ */
-    function listenForWebOTP() {
-      if (!('OTPCredential' in window)) return;
-      try {
-        otpAbortController = new AbortController();
-        navigator.credentials.get({
-          otp: { transport: ['sms'] },
-          signal: otpAbortController.signal
-        }).then((otp) => {
-          if (!otp || !otp.code) return;
-          const digits = otp.code.replace(/\D/g, '').slice(0, otpBoxes.length).split('');
-          digits.forEach((d, i) => { if (otpBoxes[i]) otpBoxes[i].value = d; });
-          checkOTPCompletion();
-        }).catch(() => { /* unsupported, cancelled, or timed out — ignore */ });
-      } catch (e) { /* WebOTP not available in this context */ }
+    async function handleRedirectResult(){
+      if(!initFirebase())return;
+      try{ const result=await firebase.auth().getRedirectResult(); if(result?.user) await finishGoogleLogin(result.user); }catch(e){ console.error(e); showBanner(document.getElementById('step1Banner'),document.getElementById('step1BannerText'),e.message||'Google sign-in failed.'); }
     }
-    function stopListeningForWebOTP() {
-      if (otpAbortController) { otpAbortController.abort(); otpAbortController = null; }
+    async function passwordLogin(){
+      const identifier=document.getElementById('loginIdentifierInput').value.trim();
+      const password=document.getElementById('loginPasswordInput').value;
+      const banner=document.getElementById('step1Banner'),text=document.getElementById('step1BannerText'); hideBanner(banner);
+      if(!identifier){ showBanner(banner,text,'Enter your email or mobile number.'); return; }
+      if(password.length<8){ showBanner(banner,text,'Enter your password.'); return; }
+      setAuthBtnLoading('passwordLoginBtn',true,'Log in');
+      try{
+        const body=identifier.includes('@')?{email:identifier.toLowerCase(),password}:{phone:identifier.replace(/\D/g,'').length===10?'+91'+identifier.replace(/\D/g,''):identifier,password};
+        const res=await fetch(`${API_URL}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.success) throw new Error(data.message||'Invalid email/mobile number or password.');
+        const session=persistSession(data);
+        const requested=localStorage.getItem('nearbite_after_login')||'index.html';
+        routeAfterAuthentication(await fetchProfileForRouting(session.token,session.user),requested);
+      }catch(e){ showBanner(banner,text,e.message||'Unable to log in. Please try again.'); }
+      finally{ setAuthBtnLoading('passwordLoginBtn',false,'Log in'); }
     }
+    let currentSlide=0;
+    const totalSlides=3;
+    setInterval(()=>{
+      const oldSlide=document.getElementById(`slide${currentSlide}`),oldDot=document.getElementById(`dot${currentSlide}`);
+      if(oldSlide)oldSlide.classList.remove('active'); if(oldDot)oldDot.classList.remove('active');
+      currentSlide=(currentSlide+1)%totalSlides;
+      const next=document.getElementById(`slide${currentSlide}`),dot=document.getElementById(`dot${currentSlide}`);
+      if(next)next.classList.add('active'); if(dot)dot.classList.add('active');
+    },3500);
 
-    /* ============================================================
-       Send OTP
-    ============================================================ */
-    async function sendOTP() {
-      if (isSendingOtp || actionBtn.disabled) return;
-      if (firebaseEnabled()) { await startFirebasePhoneOTP(); return; }
-      isSendingOtp = true;
-      hideBanner(step1Banner);
-      setButtonLoading(true, 'Sending code…');
-
-      const phoneVal = '+91' + phoneInput.value;
-
-      try {
-        const response = await fetch(`${API_URL}/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: phoneVal })
-        });
-
-        let result = {};
-        try { result = await response.json(); } catch (e) { result = {}; }
-
-        if (response.ok && result && result.success) {
-          displayPhone.innerText = phoneVal;
-          window.scrollTo({ top: 320, behavior: 'smooth' });
-          document.getElementById('step1').classList.remove('active');
-          document.getElementById('step2').classList.add('active');
-          hideBanner(step2Banner);
-          hideFieldError(otpError);
-          otpBoxes.forEach(box => { box.value = ''; box.classList.remove('error'); });
-
-          startOTPTimer();
-          listenForWebOTP();
-          setTimeout(() => { otpBoxes[0].focus(); }, 100);
-          updateVerifyButton();
-        } else {
-          showBanner(step1Banner, step1BannerText, (result && result.message) || "We couldn't send the code. Please try again.");
-        }
-      } catch (error) {
-        showBanner(step1Banner, step1BannerText, "Can't reach Eatswada right now. Check your connection and try again.");
-      } finally {
-        isSendingOtp = false;
-        setButtonLoading(false, '', 'Continue');
-        checkPhone();
-      }
+    async function sendPasswordResetEmail(){
+      const email=document.getElementById('forgotEmailInput').value.trim().toLowerCase();
+      const banner=document.getElementById('forgotBanner'),text=document.getElementById('forgotBannerText'); hideBanner(banner);
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ showBanner(banner,text,'Enter a valid email address.'); return; }
+      setAuthBtnLoading('forgotSendBtn',true,'Send reset link');
+      try{
+        const res=await fetch(`${API_URL}/forgot-password/email`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.success) throw new Error(data.message||'Unable to process the request. Please try again.');
+        showBanner(banner,text,'If an Eatswada account exists for this email, a password reset link has been sent. Check your inbox and spam folder.');
+      }catch(e){ showBanner(banner,text,e.message||'Unable to process the request. Please try again.'); }
+      finally{ setAuthBtnLoading('forgotSendBtn',false,'Send reset link'); }
     }
-
-    /* ============================================================
-       Resend OTP
-    ============================================================ */
-    async function resendOTP() {
-      if (isResending || resendBtn.disabled) return;
-      isResending = true;
-      hideBanner(step2Banner);
-      resendBtn.innerText = 'Sending…';
-      resendBtn.disabled = true;
-
-      const phoneVal = '+91' + phoneInput.value;
-
-      try {
-        const response = await fetch(`${API_URL}/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: phoneVal })
-        });
-
-        let result = {};
-        try { result = await response.json(); } catch (e) { result = {}; }
-
-        if (response.ok && result && result.success) {
-          otpBoxes.forEach(box => { box.value = ''; box.classList.remove('error'); });
-          hideFieldError(otpError);
-          startOTPTimer();
-          listenForWebOTP();
-          otpBoxes[0].focus();
-          updateVerifyButton();
-        } else {
-          showBanner(step2Banner, step2BannerText, (result && result.message) || "Couldn't resend the code. Please try again.");
-          resendBtn.innerText = 'Resend';
-          resendBtn.disabled = false;
-        }
-      } catch (error) {
-        showBanner(step2Banner, step2BannerText, "Can't reach Eatswada right now. Check your connection and try again.");
-        resendBtn.innerText = 'Resend';
-        resendBtn.disabled = false;
-      } finally {
-        isResending = false;
-      }
-    }
-
-    /* ============================================================
-       Back to phone step
-    ============================================================ */
-    function goBack() {
-      clearInterval(timerInterval);
-      stopListeningForWebOTP();
-      document.getElementById('step2').classList.remove('active');
-      document.getElementById('step1').classList.add('active');
-      otpBoxes.forEach(box => { box.value = ''; box.classList.remove('error'); box.removeAttribute('readonly'); });
-      hideBanner(step2Banner);
-      hideFieldError(otpError);
-      updateVerifyButton();
-    }
-
-    /* ============================================================
-       Verify OTP
-    ============================================================ */
-    function updateVerifyButton() {
-      const complete = Array.from(otpBoxes).every(box => box.value.length === 1);
-      const btn = document.getElementById('verifyOtpBtn');
-      if (btn && !isVerifying) btn.disabled = !complete;
-    }
-
-    function setVerifyButtonLoading(loading) {
-      const btn = document.getElementById('verifyOtpBtn');
-      const text = document.getElementById('verifyOtpBtnText');
-      if (!btn || !text) return;
-      btn.disabled = loading || !Array.from(otpBoxes).every(box => box.value.length === 1);
-      text.innerHTML = loading ? '<span class="spinner"></span>Verifying…' : 'Verify OTP';
-    }
-
-    async function checkOTPCompletion() {
-      const otpString = Array.from(otpBoxes).map(box => box.value).join('');
-      if (otpString.length !== otpBoxes.length || isVerifying) return;
-
-      isVerifying = true;
-      setVerifyButtonLoading(true);
-      hideBanner(step2Banner);
-      hideFieldError(otpError);
-      otpBoxes.forEach(box => box.setAttribute('readonly', 'true'));
-      otpBoxes[otpBoxes.length - 1].blur();
-
-      const phoneVal = '+91' + phoneInput.value;
-
-      try {
-        const response = await fetch(`${API_URL}/verify-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: phoneVal, otp: otpString })
-        });
-
-        let result = {};
-        try { result = await response.json(); } catch (e) { result = {}; }
-
-        if (response.ok && result && result.success) {
-          stopListeningForWebOTP();
-          const safeToken = result.data && result.data.token;
-          const safeUser  = result.data && result.data.user;
-
-          if (safeToken) {
-            if (result.data && result.data.needsPasswordSetup) {
-              localStorage.setItem('nearbite_token', safeToken);
-              localStorage.setItem('token', safeToken);
-              localStorage.setItem('nearbite_user', JSON.stringify(safeUser || {}));
-              showOnlyStep('step6');
-              return;
-            }
-            // Keep the cart intact across login. Authentication is required
-            // only when the customer tries to place the order.
-            localStorage.setItem('nearbite_token', safeToken);
-            localStorage.setItem('token', safeToken);
-            localStorage.setItem('nearbite_user', JSON.stringify(safeUser || {}));
-
-            const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
-
-            // Same decision as password login — see routeAfterAuthentication.
-            const profile = await fetchProfileForRouting(safeToken, safeUser);
-            routeAfterAuthentication(profile, requestedPage);
-          } else {
-            showBanner(step2Banner, step2BannerText, "Something went wrong on our end. Please try again.");
-            otpBoxes.forEach(box => box.removeAttribute('readonly'));
-          }
-        } else {
-          otpBoxes.forEach(box => { box.classList.add('error'); box.removeAttribute('readonly'); });
-          otpGrid.classList.add('shake');
-          setTimeout(() => otpGrid.classList.remove('shake'), 300);
-          showFieldError(otpError, otpErrorText, (result && result.message) || "Incorrect code. Please try again.");
-          otpBoxes.forEach(box => box.value = '');
-          otpBoxes[0].focus();
-        }
-      } catch (error) {
-        otpBoxes.forEach(box => box.removeAttribute('readonly'));
-        showBanner(step2Banner, step2BannerText, "Verification failed. Check your connection and try again.");
-      } finally {
-        isVerifying = false;
-        setVerifyButtonLoading(false);
-        updateVerifyButton();
-      }
-    }
-
-    /* ============================================================
-       OTP box navigation, paste, and backspace
-    ============================================================ */
-    function moveNext(input, index) {
-      input.value = input.value.replace(/\D/g, '').slice(0, 1);
-      input.classList.remove('error');
-      hideFieldError(otpError);
-      if (input.value.length === 1 && index < otpBoxes.length - 1) {
-        otpBoxes[index + 1].focus();
-      }
-      updateVerifyButton();
-      checkOTPCompletion();
-    }
-
-    function moveBack(event, index) {
-      if (event.key === 'Backspace' && event.target.value === '' && index > 0) {
-        otpBoxes[index - 1].focus();
-      }
-    }
-
-    function handleOtpPaste(event) {
-      event.preventDefault();
-      const pasted = (event.clipboardData || window.clipboardData).getData('text');
-      const digits = pasted.replace(/\D/g, '').slice(0, otpBoxes.length).split('');
-      digits.forEach((d, i) => { if (otpBoxes[i]) otpBoxes[i].value = d; });
-      const nextIndex = Math.min(digits.length, otpBoxes.length - 1);
-      otpBoxes[nextIndex].focus();
-      updateVerifyButton();
-      checkOTPCompletion();
-    }
-
-    function showOnlyStep(id) {
-      document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
-      const el = document.getElementById(id); if (el) el.classList.add('active');
-      window.scrollTo({ top: 320, behavior: 'smooth' });
-    }
-
-    function showPasswordLogin() {
-      const current = phoneInput.value.trim();
-      if (current) document.getElementById('loginPhoneInput').value = current;
-      showOnlyStep('step3');
-    }
-
-    function showOtpStart() {
-      showOnlyStep('step1');
-      checkPhone();
-    }
-
-    function backToPhoneStart() { showOtpStart(); }
-
-    function showForgotPassword() {
-      const phone = document.getElementById('loginPhoneInput').value.trim() || phoneInput.value.trim();
-      if (phone) document.getElementById('forgotPhoneInput').value = phone;
-      showOnlyStep('step4');
-    }
-
-    function setAuthBtnLoading(id, loading, label) {
-      const btn = document.getElementById(id); if (!btn) return;
-      btn.disabled = loading;
-      btn.innerHTML = loading ? '<span class="spinner"></span> Please wait…' : label;
-    }
-
-    async function passwordLogin() {
-      const phone = document.getElementById('loginPhoneInput').value.replace(/\D/g,'').slice(0,10);
-      const password = document.getElementById('loginPasswordInput').value;
-      const banner = document.getElementById('passwordLoginError');
-      const text = document.getElementById('passwordLoginErrorText');
-      banner.classList.remove('show');
-      if (phone.length !== 10) { text.textContent = 'Enter a valid 10-digit mobile number.'; banner.classList.add('show'); return; }
-      if (password.length < 6) { text.textContent = 'Enter your password.'; banner.classList.add('show'); return; }
-      setAuthBtnLoading('passwordLoginBtn', true, 'Log in');
-      try {
-        const res = await fetch(`${API_URL}/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:'+91'+phone,password}) });
-        const data = await res.json().catch(()=>({}));
-        if (!res.ok || !data.success) { text.textContent = data.message || 'Unable to log in. Please try again.'; banner.classList.add('show'); return; }
-        localStorage.setItem('nearbite_token', data.data.token); localStorage.setItem('token', data.data.token); localStorage.setItem('nearbite_user', JSON.stringify(data.data.user || {}));
-        const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
-        // Same onboarding decision as OTP verification.
-        const profile = await fetchProfileForRouting(data.data.token, data.data.user);
-        routeAfterAuthentication(profile, requestedPage);
-      } catch(e) { text.textContent = "Can't reach Eatswada right now. Check your connection and try again."; banner.classList.add('show'); }
-      finally { setAuthBtnLoading('passwordLoginBtn', false, 'Log in'); }
-    }
-
-    async function sendForgotOTP() {
-      const input = document.getElementById('forgotPhoneInput');
-      const phone = input.value.replace(/\D/g,'').slice(0,10);
-      const banner = document.getElementById('forgotBanner'); const text = document.getElementById('forgotBannerText');
-      banner.classList.remove('show');
-      if (phone.length !== 10) { text.textContent = 'Enter a valid 10-digit mobile number.'; banner.classList.add('show'); return; }
-      setAuthBtnLoading('forgotSendBtn', true, 'Send OTP');
-      try {
-        const res = await fetch(`${API_URL}/forgot-password/send-otp`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:'+91'+phone}) });
-        const data = await res.json().catch(()=>({}));
-        if (!res.ok || !data.success) { text.textContent = data.message || 'Unable to send the code. Please try again.'; banner.classList.add('show'); return; }
-        window._forgotPhone = '+91'+phone;
-        showOnlyStep('step5');
-        document.getElementById('forgotOtpInput').focus();
-      } catch(e) { text.textContent = "Can't reach Eatswada right now. Check your connection and try again."; banner.classList.add('show'); }
-      finally { setAuthBtnLoading('forgotSendBtn', false, 'Send OTP'); }
-    }
-
-    async function resetPassword() {
-      const otp = document.getElementById('forgotOtpInput').value.replace(/\D/g,'').slice(0,4);
-      const password = document.getElementById('forgotNewPasswordInput').value;
-      const banner = document.getElementById('resetBanner'); const text = document.getElementById('resetBannerText');
-      banner.classList.remove('show');
-      if (!/^\d{4}$/.test(otp)) { text.textContent='Enter the 4-digit verification code.'; banner.classList.add('show'); return; }
-      if (password.length < 6) { text.textContent='Password must be at least 6 characters.'; banner.classList.add('show'); return; }
-      setAuthBtnLoading('resetPasswordBtn', true, 'Reset password');
-      try {
-        const res = await fetch(`${API_URL}/forgot-password/reset`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:window._forgotPhone,otp,password}) });
-        const data = await res.json().catch(()=>({}));
-        if (!res.ok || !data.success) { text.textContent=data.message || 'Invalid or expired code.'; banner.classList.add('show'); return; }
-        alert('Password reset successfully. Please log in with your new password.');
-        document.getElementById('loginPhoneInput').value = (window._forgotPhone || '').replace(/^\+91/,'');
-        document.getElementById('loginPasswordInput').value = '';
-        showPasswordLogin();
-      } catch(e) { text.textContent="Can't reach Eatswada right now. Check your connection and try again."; banner.classList.add('show'); }
-      finally { setAuthBtnLoading('resetPasswordBtn', false, 'Reset password'); }
-    }
-
-    async function finishAccountSetup() {
-      const password = document.getElementById('setupPasswordInput').value;
-      const name = document.getElementById('setupNameInput').value.trim();
-      const email = document.getElementById('setupEmailInput').value.trim();
-      const banner = document.getElementById('setupBanner'); const text = document.getElementById('setupBannerText');
-      banner.classList.remove('show');
-      if (!name) { text.textContent='Please enter your name.'; banner.classList.add('show'); return; }
-      if (password.length < 6) { text.textContent='Password must be at least 6 characters.'; banner.classList.add('show'); return; }
-      if (email && !/^\S+@\S+\.\S+$/.test(email)) { text.textContent='Enter a valid email address or leave it blank.'; banner.classList.add('show'); return; }
-      const token = localStorage.getItem('nearbite_token');
-      if (!token) { text.textContent='Your verification session expired. Please start again.'; banner.classList.add('show'); return; }
-      setAuthBtnLoading('setupAccountBtn', true, 'Create account');
-      try {
-        const profileRes = await fetch(`${API_URL}/profile`, { headers:{Authorization:`Bearer ${token}`} });
-        const profileData = await profileRes.json().catch(()=>({}));
-        if (!profileRes.ok || !profileData.success) throw new Error('Your verification session expired. Please start again.');
-        const updateRes = await fetch(`${API_URL}/profile`, { method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({name,email:email||undefined}) });
-        const updateData = await updateRes.json().catch(()=>({}));
-        if (!updateRes.ok || !updateData.success) throw new Error(updateData.message || 'Unable to save your profile.');
-        const passRes = await fetch(`${API_URL}/password`, { method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify({password}) });
-        const passData = await passRes.json().catch(()=>({}));
-        if (!passRes.ok || !passData.success) throw new Error(passData.message || 'Unable to create your password.');
-        localStorage.setItem('nearbite_user', JSON.stringify(updateData.data || passData.data?.user || {}));
-        // The profile is now complete, so continue at the map step. The
-        // original destination stays in nearbite_after_login for address.html.
-        const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
-        localStorage.setItem('nearbite_after_login', requestedPage);
-        window.location.href = LOCATION_STEP;
-      } catch(e) { text.textContent=e.message || 'Unable to complete your account.'; banner.classList.add('show'); }
-      finally { setAuthBtnLoading('setupAccountBtn', false, 'Create account'); }
-    }
-
-    /* ============================================================
-       Firebase Authentication — Google + Phone OTP
-       The Firebase Web config is public. All trusted account creation and
-       Eatswada JWT issuance happens on the backend after Admin SDK verification.
-    ============================================================ */
-    let firebaseReady = false;
-    let firebaseConfirmation = null;
-    let firebaseRecaptcha = null;
-
-    function firebaseEnabled() {
-      return !!(window.CONFIG && window.CONFIG.FIREBASE && window.CONFIG.FIREBASE.enabled && window.CONFIG.FIREBASE.apiKey && window.CONFIG.FIREBASE.projectId && window.CONFIG.FIREBASE.appId);
-    }
-
-    function initFirebaseAuth() {
-      if (!firebaseEnabled() || !window.firebase) return false;
-      try {
-        if (!firebase.apps.length) firebase.initializeApp(window.CONFIG.FIREBASE);
-        firebaseReady = true;
-        return true;
-      } catch (e) {
-        console.error('Firebase init failed', e);
-        return false;
-      }
-    }
-
-    async function finishFirebaseLogin(firebaseUser) {
-      const idToken = await firebaseUser.getIdToken(true);
-      const res = await fetch(`${API_URL.replace(/\/users\/?$/, '')}/auth/firebase`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ idToken })
-      });
-      const data = await res.json().catch(()=>({}));
-      if (res.ok && data.success && data.data && data.data.token) {
-        localStorage.setItem('nearbite_token', data.data.token);
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('nearbite_user', JSON.stringify(data.data.user || {}));
-        const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
-        const profile = await fetchProfileForRouting(data.data.token, data.data.user);
-        routeAfterAuthentication(profile, requestedPage);
-        return;
-      }
-      if (data.code === 'PHONE_REQUIRED') {
-        const phone = prompt('Enter your 10-digit mobile number to finish your Eatswada account:');
-        if (!phone || !/^[6-9]\d{9}$/.test(phone)) throw new Error('Please enter a valid 10-digit mobile number.');
-        const retry = await fetch(`${API_URL.replace(/\/users\/?$/, '')}/auth/firebase`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ idToken, phone:'+91'+phone })
-        });
-        const retryData = await retry.json().catch(()=>({}));
-        if (!retry.ok || !retryData.success) throw new Error(retryData.message || 'Unable to finish your account.');
-        localStorage.setItem('nearbite_token', retryData.data.token); localStorage.setItem('token', retryData.data.token);
-        localStorage.setItem('nearbite_user', JSON.stringify(retryData.data.user || {}));
-        const requestedPage = localStorage.getItem('nearbite_after_login') || 'index.html';
-        const profile = await fetchProfileForRouting(retryData.data.token, retryData.data.user);
-        routeAfterAuthentication(profile, requestedPage);
-        return;
-      }
-      throw new Error(data.message || 'Firebase authentication failed.');
-    }
-
-    async function signInWithGoogle() {
-      if (!initFirebaseAuth()) { showBanner(step1Banner, step1BannerText, 'Google Sign-In is not configured yet.'); return; }
-      const btn=document.getElementById('googleSignInBtn'); if(btn) btn.disabled=true;
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        const result = await firebase.auth().signInWithPopup(provider);
-        await finishFirebaseLogin(result.user);
-      } catch(e) {
-        console.error(e);
-        // Some mobile browsers block auth popups. Fall back to the Firebase redirect flow.
-        if (['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e.code)) {
-          try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            await firebase.auth().signInWithRedirect(provider);
-            return;
-          } catch (redirectError) {
-            console.error(redirectError);
-            e = redirectError;
-          }
-        }
-        showBanner(step1Banner, step1BannerText, e.code === 'auth/popup-closed-by-user' ? 'Google sign-in was cancelled.' : (e.message || 'Google sign-in failed.'));
-      } finally { if(btn) btn.disabled=false; }
-    }
-
-    async function handleGoogleRedirectResult() {
-      if (!initFirebaseAuth()) return;
-      try {
-        const result = await firebase.auth().getRedirectResult();
-        if (result && result.user) await finishFirebaseLogin(result.user);
-      } catch (e) {
-        console.error(e);
-        showBanner(step1Banner, step1BannerText, e.message || 'Google sign-in failed.');
-      }
-    }
-
-    async function startFirebasePhoneOTP() {
-      if (!initFirebaseAuth()) return false;
-      const raw = phoneInput.value.replace(/\D/g,'');
-      if (!/^[6-9]\d{9}$/.test(raw)) return false;
-      try {
-        if (!firebaseRecaptcha) {
-          firebaseRecaptcha = new firebase.auth.RecaptchaVerifier('firebaseRecaptcha', { size:'invisible' });
-          await firebaseRecaptcha.render();
-        }
-        const confirmation = await firebase.auth().signInWithPhoneNumber('+91'+raw, firebaseRecaptcha);
-        firebaseConfirmation = confirmation;
-        displayPhone.textContent = '+91'+raw;
-        document.getElementById('firebasePhoneText').textContent = `Enter the 6-digit code sent to +91${raw}.`;
-        document.getElementById('firebasePhoneCode').value='';
-        document.getElementById('firebasePhoneError').style.display='none';
-        document.getElementById('firebasePhoneModal').hidden=false;
-        document.getElementById('firebasePhoneModal').style.display='flex';
-        document.getElementById('firebasePhoneCode').focus();
-        return true;
-      } catch(e) {
-        console.error(e);
-        try { if(firebaseRecaptcha) firebaseRecaptcha.clear(); } catch(_) {}
-        firebaseRecaptcha=null;
-        showBanner(step1Banner, step1BannerText, e.message || 'Could not send the verification code.');
-        return true;
-      }
-    }
-
-    async function verifyFirebasePhoneOTP() {
-      const code=document.getElementById('firebasePhoneCode').value.replace(/\D/g,'').slice(0,6);
-      const errEl=document.getElementById('firebasePhoneError');
-      if(!/^\d{6}$/.test(code)){ errEl.textContent='Enter the 6-digit verification code.'; errEl.style.display='block'; return; }
-      const btn=document.getElementById('firebasePhoneVerifyBtn'); btn.disabled=true; btn.textContent='Verifying…';
-      try {
-        const result=await firebaseConfirmation.confirm(code);
-        await finishFirebaseLogin(result.user);
-        document.getElementById('firebasePhoneModal').hidden=true;
-        document.getElementById('firebasePhoneModal').style.display='none';
-      } catch(e) {
-        errEl.textContent='Invalid or expired code. Please try again.'; errEl.style.display='block';
-      } finally { btn.disabled=false; btn.textContent='Verify & Continue'; }
-    }
-
-    document.getElementById('firebasePhoneVerifyBtn')?.addEventListener('click', verifyFirebasePhoneOTP);
-    document.getElementById('firebasePhoneCancelBtn')?.addEventListener('click', () => {
-      document.getElementById('firebasePhoneModal').hidden=true; document.getElementById('firebasePhoneModal').style.display='none'; firebaseConfirmation=null;
-    });
-
-    function verifyOTP() { checkOTPCompletion(); }
-
-    // Complete a Google redirect login when Firebase returns to this page.
-    handleGoogleRedirectResult();
+    handleRedirectResult();
   </script>
 
 <script src="navigation.js"></script>

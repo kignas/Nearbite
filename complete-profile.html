@@ -8,11 +8,10 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="config.js"></script>
-<script src="safe-html.js"></script>
   <style>
     /* ===== Eatswada onboarding design system — identical in login.html,
        complete-profile.html, location-onboarding.html and address.html ===== */
@@ -218,14 +217,21 @@
 
       <div class="sec-head"><span class="sec-title">Account details</span></div>
 
+      <div id="googleIdentity" style="display:none;align-items:center;gap:12px;margin-bottom:14px;padding:12px 13px;border:1px solid #E5E7EB;border-radius:16px;background:#FAFAFA">
+        <img id="googleAvatar" src="" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;background:#E5E7EB">
+        <div style="min-width:0">
+          <div id="googleName" style="font-size:14px;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+          <div id="googleEmail" style="font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="field">
           <label for="phone">Mobile Number</label>
-          <div class="control verified">
-            <input id="phone" type="tel" readonly aria-readonly="true" autocomplete="tel">
-            <i class="fa-solid fa-check tick" aria-hidden="true"></i>
+          <div class="control">
+            <input id="phone" type="tel" maxlength="10" inputmode="numeric" placeholder="10-digit mobile number" autocomplete="tel-national">
           </div>
-          <div class="hint">Verified with OTP</div>
+          <div class="hint">Used for delivery contact. No SMS verification required.</div>
         </div>
 
         <div class="field">
@@ -248,7 +254,7 @@
         </div>
 
         <div class="field">
-          <label for="email">Email Address (Optional)</label>
+          <label for="email">Google Email</label>
           <div class="control">
             <input id="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email" inputmode="email">
           </div>
@@ -256,9 +262,9 @@
         </div>
       </div>
 
-      <div class="reassure">
+      <div class="reassure" id="reassureText">
         <i class="fa-solid fa-circle-check"></i>
-        <span>Your mobile number is already verified.</span>
+        <span>Your Google account will be linked to this Eatswada profile.</span>
       </div>
     </main>
 
@@ -277,190 +283,74 @@
 
 <script>
   const API = CONFIG.API_BASE_URL;
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
-
-  if (!token) window.location.replace('login.html');
-
   const $ = id => document.getElementById(id);
+  const googleMode = new URLSearchParams(location.search).get('google') === '1';
+  const pendingGoogleToken = sessionStorage.getItem('nearbite_google_pending_token') || '';
+  const ADDRESS_STEP='address.html?add=1';
+  const LOCATION_STEP='location-onboarding.html?from=complete-profile'
+    + '&next=' + encodeURIComponent(ADDRESS_STEP)
+    + '&return=' + encodeURIComponent(ADDRESS_STEP);
 
-  /* Where the customer goes after the account is saved:
-     Complete Profile → Location map → Address → Checkout.
-     The address step is handed to the map as the destination so the
-     confirmed coordinates carry straight into the address form. */
-  const ADDRESS_STEP  = 'address-new.html';
-  const LOCATION_STEP = 'location-onboarding.html?from=complete-profile'
-                      + '&next=' + encodeURIComponent(ADDRESS_STEP)
-                      + '&return=' + encodeURIComponent(ADDRESS_STEP);
-
-  function safeBack(){
-    if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack();
-    else if (history.length > 1) history.back();
-    else window.location.replace('index.html');
-  }
-
-  /* ---------------- display helpers ---------------- */
+  if(!googleMode && !(localStorage.getItem('nearbite_token')||localStorage.getItem('token'))) window.location.replace('login.html');
+  if(googleMode && !pendingGoogleToken) window.location.replace('login.html');
 
   function formatPhone(raw){
-    const digits = String(raw || '').replace(/\D/g, '');
-    if (!digits) return '';
-    const ten = digits.length > 10 ? digits.slice(-10) : digits;
-    if (ten.length === 10) return '+91 ' + ten.slice(0, 5) + ' ' + ten.slice(5);
-    return String(raw).trim();
+    const d=String(raw||'').replace(/\D/g,'').slice(-10);
+    return d;
   }
-
-  function togglePassword(){
-    const input = $('password');
-    const shown = input.type === 'text';
-    input.type = shown ? 'password' : 'text';
-    $('pwIcon').className = shown ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
-    $('pwToggle').setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
-    $('pwToggle').setAttribute('aria-pressed', shown ? 'false' : 'true');
-    const end = input.value.length;
-    input.focus({ preventScroll:true });
-    try { input.setSelectionRange(end, end); } catch {}
-  }
-
-  /* ---------------- validation ---------------- */
-
   function showError(message){
-    const box = $('errorBox');
-    box.innerHTML = message ? '<i class="fa-solid fa-circle-exclamation"></i>' + message : '';
-    box.style.display = message ? 'block' : 'none';
+    const box=$('errorBox'); box.innerHTML=message?'<i class="fa-solid fa-circle-exclamation"></i>'+message:''; box.style.display=message?'block':'none';
   }
+  function setFieldError(id,message){ const box=$('err_'+id),input=$(id); if(box){box.textContent=message||'';box.classList.toggle('show',!!message)} if(input)input.classList.toggle('invalid',!!message); }
+  function nameValid(){return $('name').value.trim().length>=2}
+  function phoneValid(){return /^[6-9]\d{9}$/.test($('phone').value.replace(/\D/g,''))}
+  function passwordValid(){return $('password').value.length>=8}
+  function emailValid(){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('email').value.trim())}
+  function syncCta(){$('saveBtn').disabled=!(nameValid()&&phoneValid()&&passwordValid()&&emailValid())}
+  ['name','phone','password','email'].forEach(id=>$(id)?.addEventListener('input',()=>{setFieldError(id,'');showError('');syncCta()}));
 
-  function setFieldError(id, message){
-    const box = $('err_' + id), input = $(id);
-    if (box){ box.textContent = message || ''; box.classList.toggle('show', !!message); }
-    if (input) input.classList.toggle('invalid', !!message);
+  function paintGoogleProfile(){
+    let profile={}; try{profile=JSON.parse(sessionStorage.getItem('nearbite_google_pending_profile')||'{}')}catch{}
+    if(profile.name && !/^(Nearbite|Eatswada) User$/i.test(profile.name)) $('name').value=profile.name;
+    if(profile.email) $('email').value=profile.email;
+    if(profile.phone) $('phone').value=formatPhone(profile.phone);
+    $('email').readOnly=true;
+    $('email').setAttribute('aria-readonly','true');
+    const identity=$('googleIdentity');
+    if(identity){ identity.style.display='flex'; $('googleName').textContent=profile.name||'Google account'; $('googleEmail').textContent=profile.email||''; if(profile.avatar){$('googleAvatar').src=profile.avatar;} else {$('googleAvatar').style.display='none';} }
+    syncCta();
   }
-
-  function nameValid(){ return $('name').value.trim().length >= 2; }
-  function passwordValid(){ return $('password').value.length >= 6; }
-
-  /* Email is only checked when the customer actually types one. */
-  function emailValid(){
-    const v = $('email').value.trim();
-    return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
-  }
-
-  /* CTA unlocks on name + password. An empty email never blocks it. */
-  function syncCta(){
-    $('saveBtn').disabled = !(nameValid() && passwordValid());
-  }
-
-  $('name').addEventListener('input', () => { setFieldError('name',''); showError(''); syncCta(); });
-  $('password').addEventListener('input', () => { setFieldError('password',''); showError(''); syncCta(); });
-  $('email').addEventListener('input', () => { setFieldError('email',''); showError(''); });
-  $('email').addEventListener('blur', () => { if (!emailValid()) setFieldError('email','Enter a valid email address, or leave it empty.'); });
-
-  /* With the Android keyboard open, bring the focused field into view. The
-     CTA sits in normal flow, so it moves with the page instead of covering it. */
-  ['name','password','email'].forEach(id => {
-    $(id).addEventListener('focus', () => {
-      setTimeout(() => $(id).scrollIntoView({ block:'center', behavior:'smooth' }), 240);
-    });
-  });
-
-  /* ---------------- load ---------------- */
-
   async function loadExistingProfile(){
-    let cached = {};
-    try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
-
-    $('phone').value = formatPhone(cached.phone);
-
-    try {
-      const res = await fetch(`${API}/users/profile`, { headers:{ Authorization:`Bearer ${token}` } });
-      const result = await res.json();
-      if (!res.ok || !result.success) return;
-
-      const user = result.data || {};
-      $('phone').value = formatPhone(user.phone || cached.phone || '');
-
-      // Placeholder names created by signup are not shown as a real name.
-      // Never prefill placeholder account names such as "Nearbite User".
-       // Only a real customer-provided name may appear in this field.
-       if (user.name && !/^(?:nearbite|nearbile|eatswada)\s+user$/i.test(String(user.name).trim())) {
-         $('name').value = user.name;
-       }
-      if (user.email) $('email').value = user.email;
-    } catch (e){
-      console.warn('Could not load existing profile', e);
-    } finally {
-      syncCta();
-    }
+    if(googleMode){ paintGoogleProfile(); return; }
+    const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');
+    try{const r=await fetch(`${API}/users/profile`,{headers:{Authorization:`Bearer ${token}`}});const d=await r.json();if(!r.ok||!d.success)return;const u=d.data||{};$('phone').value=formatPhone(u.phone);if(u.name&&!/^(Nearbite|Eatswada) User$/i.test(u.name))$('name').value=u.name;if(u.email)$('email').value=u.email;}catch(e){console.warn(e)}finally{syncCta()}
   }
-
-  /* ---------------- save ---------------- */
-
+  function togglePassword(){const i=$('password'),shown=i.type==='text';i.type=shown?'password':'text';if($('pwIcon'))$('pwIcon').className=shown?'fa-solid fa-eye':'fa-solid fa-eye-slash';}
   async function completeProfile(){
     showError('');
-
-    if (!nameValid()){
-      setFieldError('name', 'Enter your full name.');
-      $('name').focus();
-      return;
-    }
-    if (!passwordValid()){
-      setFieldError('password', 'Create a password with at least 6 characters.');
-      $('password').focus();
-      return;
-    }
-    if (!emailValid()){
-      setFieldError('email', 'Enter a valid email address, or leave it empty.');
-      $('email').focus();
-      return;
-    }
-
-    $('saveBtn').disabled = true;
-    $('loading').style.display = 'flex';
-
-    try {
-      const payload = {
-        name: $('name').value.trim(),
-        email: $('email').value.trim() || undefined,
-        password: $('password').value
-      };
-
-      const res = await fetch(`${API}/users/profile`, {
-        method:'PUT',
-        headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
-        body: JSON.stringify(payload)
-      });
-      const result = await res.json();
-      if (!res.ok || !result.success){
-        throw new Error(result.message || 'Could not save your details. Please try again.');
+    if(!nameValid()){setFieldError('name','Enter your full name.');$('name').focus();return}
+    if(!phoneValid()){setFieldError('phone','Enter a valid 10-digit mobile number.');$('phone').focus();return}
+    if(!emailValid()){setFieldError('email','A valid email address is required.');$('email').focus();return}
+    if(!passwordValid()){setFieldError('password','Create a password with at least 8 characters.');$('password').focus();return}
+    $('saveBtn').disabled=true;$('loading').style.display='flex';
+    try{
+      let result;
+      if(googleMode){
+        const res=await fetch(`${CONFIG.API_BASE_URL}/auth/firebase/complete-profile`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:pendingGoogleToken,name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),password:$('password').value})});
+        result=await res.json().catch(()=>({}));
+        if(!res.ok||!result.success)throw new Error(result.message||'Unable to create your Eatswada account.');
+        localStorage.setItem('nearbite_token',result.data.token);localStorage.setItem('token',result.data.token);localStorage.setItem('nearbite_user',JSON.stringify(result.data.user||{}));
+        sessionStorage.removeItem('nearbite_google_pending_token');sessionStorage.removeItem('nearbite_google_pending_profile');
+      }else{
+        const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');
+        const res=await fetch(`${API}/users/profile`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),email:$('email').value.trim(),password:$('password').value})});
+        result=await res.json().catch(()=>({}));if(!res.ok||!result.success)throw new Error(result.message||'Could not save your details. Please try again.');
+        localStorage.setItem('nearbite_user',JSON.stringify(result.data||{}));
       }
-
-      // updateProfile revokes the old JWT when a password is created/changed.
-      // Replace it immediately with the fresh JWT returned by the backend.
-      // Without this, the next protected onboarding request receives 401 and
-      // older frontend code can incorrectly redirect the customer to login.
-      if (result.data?.token) {
-        localStorage.setItem('nearbite_token', result.data.token);
-        localStorage.setItem('token', result.data.token);
-      }
-
-      let cached = {};
-      try { cached = JSON.parse(localStorage.getItem('nearbite_user') || '{}'); } catch {}
-      const updatedUser = result.data?.user || result.data || {
-        ...cached, name: payload.name, email: payload.email || cached.email
-      };
-      localStorage.setItem('nearbite_user', JSON.stringify(updatedUser));
-
-      // Next step is the map, not the address form.
-      window.location.href = LOCATION_STEP;
-
-    } catch (error){
-      console.error(error);
-      showError(error.message || 'Something went wrong. Please try again.');
-      $('errorBox').scrollIntoView({ block:'center', behavior:'smooth' });
-      $('loading').style.display = 'none';
-      syncCta();
-    }
+      const requested=localStorage.getItem('nearbite_after_login')||'index.html';localStorage.setItem('nearbite_after_login',requested);window.location.href=LOCATION_STEP;
+    }catch(e){console.error(e);showError(e.message||'Something went wrong. Please try again.');$('loading').style.display='none';syncCta()}
   }
-
-  document.addEventListener('DOMContentLoaded', loadExistingProfile);
+  document.addEventListener('DOMContentLoaded',loadExistingProfile);
 </script>
 
 <script src="navigation.js"></script>
