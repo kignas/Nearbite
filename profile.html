@@ -99,7 +99,7 @@ a{text-decoration:none;color:inherit}
 /* A light shortcut strip, not a dashboard. Every tile points at a
    destination that already exists. */
 .quick{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:9px;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:9px;
   padding:0 var(--pf-gutter);margin-top:-16px;position:relative;z-index:1;
 }
 .quick-tile{
@@ -183,34 +183,40 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 .logout:active{background:var(--danger-soft)}
 
 /* ---------- Favourites ----------------------------------------- */
-.fav-list{padding:4px}
+.fav-toggle{
+  overflow:hidden;
+}
+.fav-summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;
+  min-height:66px;padding:12px 14px;background:#fff;
+}
+.fav-summary::-webkit-details-marker{display:none}
+.fav-summary::after{
+  content:'\f078';font-family:'Font Awesome 6 Free';font-weight:900;
+  margin-left:auto;color:var(--faint);font-size:12px;transition:transform .18s ease;
+}
+.fav-toggle[open] .fav-summary::after{transform:rotate(180deg)}
+.fav-summary:active{background:#fafafa}
+.fav-summary .row-icon{background:var(--brand-soft);color:var(--brand)}
+.fav-summary .row-title{font-size:14px;font-weight:800;color:var(--ink)}
+.fav-summary .row-sub{font-size:12px;font-weight:500;color:var(--muted);margin-top:3px}
+.fav-body{border-top:1px solid var(--line);padding:4px}
 .fav-list .es-card-wrap{margin:0 0 10px}
 .fav-list .es-card-wrap:last-child{margin-bottom:0}
-
-.fav-empty{padding:34px 22px 30px;text-align:center}
+.fav-empty{padding:24px 18px;text-align:center}
 .fav-empty i{
-  display:grid;place-items:center;width:52px;height:52px;margin:0 auto;
-  border-radius:50%;background:var(--brand-soft);color:#E8863A;font-size:20px;
+  display:grid;place-items:center;width:46px;height:46px;margin:0 auto;
+  border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:18px;
 }
-.fav-empty h3{margin:14px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
-.fav-empty p{margin:6px auto 16px;font-size:12px;font-weight:500;color:var(--muted);line-height:1.5;max-width:34ch}
+.fav-empty h3{margin:12px 0 0;font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
+.fav-empty p{margin:5px auto 14px;font-size:12px;font-weight:500;color:var(--muted);line-height:1.5;max-width:34ch}
 .fav-cta{
   display:inline-block;border:0;background:var(--brand);color:#fff;
-  border-radius:12px;padding:11px 20px;font-size:13px;font-weight:800;
-  box-shadow:0 4px 12px rgba(252,128,25,.26);
-  transition:transform .13s ease,filter .13s ease;
+  border-radius:11px;padding:10px 17px;font-size:12px;font-weight:800;
 }
-.fav-cta:active{transform:scale(.96);filter:brightness(.96)}
-.fav-cta:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-
-/* Loading state: a calm shimmer bar rather than bare text. */
-.fav-note{
-  padding:26px 18px;text-align:center;
-  font-size:12px;font-weight:600;color:var(--muted);
-}
+.fav-note{padding:22px 14px;text-align:center;font-size:12px;font-weight:600;color:var(--muted)}
 .fav-note::before{
-  content:'';display:block;width:110px;height:9px;margin:0 auto 12px;
-  border-radius:6px;
+  content:'';display:block;width:100px;height:8px;margin:0 auto 10px;border-radius:6px;
   background:linear-gradient(90deg,#F0F0F2 25%,#E6E6EA 50%,#F0F0F2 75%);
   background-size:1200px 100%;animation:shimmer 1.5s infinite linear;
 }
@@ -298,10 +304,26 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 <div class="quick">
   <a class="quick-tile" href="orders.html"><span class="quick-ico"><i class="fa-solid fa-receipt" aria-hidden="true"></i></span><span>Orders</span></a>
   <a class="quick-tile" href="address.html"><span class="quick-ico"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span><span>Addresses</span></a>
-  <a class="quick-tile" href="#favSection"><span class="quick-ico"><i class="fa-solid fa-heart" aria-hidden="true"></i></span><span>Favourites</span></a>
 </div>
 
 <main class="content">
+  <section class="section">
+    <div class="section-title">Favourites</div>
+    <details class="pf-card fav-toggle" id="favoritesSection">
+      <summary class="fav-summary">
+        <div class="row-icon"><i class="fa-solid fa-heart" aria-hidden="true"></i></div>
+        <div class="row-main">
+          <div class="row-title">Saved restaurants</div>
+          <div class="row-sub">Tap to view your favourite restaurants</div>
+        </div>
+      </summary>
+      <div class="fav-body">
+        <div class="fav-note" id="favoritesStatus">Loading your saved restaurants…</div>
+        <div class="fav-list" id="favoritesList" hidden></div>
+      </div>
+    </details>
+  </section>
+
   <section class="section">
     <div class="section-title">Your account</div>
     <div class="pf-card">
@@ -339,25 +361,51 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
     </div>
   </section>
 
-  <section class="section" id="favSection">
-    <div class="section-title">Favourites</div>
-    <div class="pf-card" id="favoritesCard">
-      <div class="fav-note" id="favoritesStatus">Loading your saved restaurants…</div>
-      <div class="fav-list" id="favoritesList" hidden></div>
+
+
+  <section class="section">
+    <div class="section-title">About & help</div>
+    <div class="pf-card">
+      <a class="row is-nav" href="about.html">
+        <div class="row-icon"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></div>
+        <div class="row-main"><div class="row-title">About us</div><div class="row-sub">What Eatswada is and how it works</div></div>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </a>
+      <a class="row is-nav" href="support.html">
+        <div class="row-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></div>
+        <div class="row-main"><div class="row-title">Contact us</div><div class="row-sub">Reach our Maynaguri support team</div></div>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </a>
     </div>
   </section>
 
   <section class="section">
-    <div class="section-title">Help & policies</div>
+    <div class="section-title">Legal & policies</div>
     <div class="pf-card">
-      <a class="row is-nav" href="support.html">
-        <div class="row-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></div>
-        <div class="row-main"><div class="row-title">Help & customer care</div><div class="row-sub">Get help with an order or account</div></div>
+      <a class="row is-nav" href="legal.html#terms">
+        <div class="row-icon"><i class="fa-solid fa-file-contract" aria-hidden="true"></i></div>
+        <div class="row-main"><div class="row-title">Terms &amp; conditions</div><div class="row-sub">Rules for using Eatswada</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
-      <a class="row is-nav" href="legal.html">
+      <a class="row is-nav" href="legal.html#privacy">
         <div class="row-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
-        <div class="row-main"><div class="row-title">Terms, privacy & refunds</div><div class="row-sub">Read Eatswada policies</div></div>
+        <div class="row-main"><div class="row-title">Privacy policy</div><div class="row-sub">How your data is handled</div></div>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </a>
+      <a class="row is-nav" href="refund-policy.html">
+        <div class="row-icon"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i></div>
+        <div class="row-main"><div class="row-title">Cancellation &amp; refund</div><div class="row-sub">Cancellations, refunds &amp; delivery issues</div></div>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">Feedback</div>
+    <div class="pf-card">
+      <a class="row is-nav" href="rate-us.html">
+        <div class="row-icon"><i class="fa-solid fa-star" aria-hidden="true"></i></div>
+        <div class="row-main"><div class="row-title">Rate your experience</div><div class="row-sub">Tell us how we're doing</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
     </div>
@@ -424,6 +472,14 @@ function normalizeUser(payload){
   };
 }
 function saveUser(u){localStorage.setItem('nearbite_user',JSON.stringify(u))}
+function safeAvatarUrl(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '';
+  try{
+    const url=new URL(raw,window.location.origin);
+    return (url.protocol==='https:'||url.protocol==='http:')?url.href:'';
+  }catch{return ''}
+}
 function renderUser(u){
   const name=u.name||'Eatswada User';
   $('userName').textContent=name;
@@ -431,19 +487,20 @@ function renderUser(u){
   $('nameValue').textContent=name;
   $('phoneValue').textContent=u.phone||'Not available';
   $('emailValue').textContent=u.email||'Not added';
-  const avatarEl=$('avatar');
-  const avatarUrl=String(u.avatar||'').trim();
-  avatarEl.textContent='';
-  if(avatarUrl){
+
+  const avatar=$('avatar');
+  const photo=safeAvatarUrl(u.avatar);
+  const initial=(name.trim()[0]||'N').toUpperCase();
+  avatar.textContent=initial;
+  avatar.innerHTML='';
+  if(photo){
     const img=document.createElement('img');
-    img.src=avatarUrl;
+    img.src=photo;
     img.alt='';
     img.referrerPolicy='no-referrer';
     img.loading='eager';
-    img.onerror=()=>{avatarEl.textContent=(name.trim()[0]||'N').toUpperCase();};
-    avatarEl.appendChild(img);
-  }else{
-    avatarEl.textContent=(name.trim()[0]||'N').toUpperCase();
+    img.onerror=function(){ avatar.innerHTML=''; avatar.textContent=initial; };
+    avatar.appendChild(img);
   }
 }
 function toast(msg){
@@ -531,75 +588,30 @@ $('logoutBtn').onclick=()=>{
   localStorage.removeItem('nearbite_address');
   location.replace('login.html');
 };
-/* ── Favourites ─────────────────────────────────────────────────────
-   IDs come from window.Favorites (localStorage). They are resolved against
-   the SAME restaurant list Home uses — window.API.getList(routes.restaurants)
-   — reading API's cache first so the section paints without a round trip.
-   Cards are rendered by the real RestaurantCard component, not a copy. */
+// loadProfile and loadAddresses are independent and can run in parallel.
+/* Favourites stay in one compact collapsible section so the Profile page does not become a long restaurant list. */
 const FAV_CACHE_MAX_AGE_MS=5*60*1000;
 let favRestaurants=null;
-
-function favDeps(){
-  return !!(window.Favorites&&window.RestaurantCard&&window.API&&
-            window.API.getList&&window.API.routes&&window.API.routes.restaurants);
-}
-function showFavStatus(html){
-  $('favoritesList').hidden=true;
-  $('favoritesList').innerHTML='';
-  $('favoritesStatus').hidden=false;
-  $('favoritesStatus').innerHTML=html;
-}
+function favDeps(){return !!(window.Favorites&&window.RestaurantCard&&window.API&&window.API.getList&&window.API.routes&&window.API.routes.restaurants)}
+function showFavStatus(html){$('favoritesList').hidden=true;$('favoritesList').innerHTML='';$('favoritesStatus').hidden=false;$('favoritesStatus').innerHTML=html}
 function renderFavorites(){
-  if(!favDeps()){
-    showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>Favourites unavailable</h3><p>Saved restaurants can\'t be loaded right now.</p></div>');
-    return;
-  }
+  if(!favDeps()){showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>Favourites unavailable</h3><p>Saved restaurants can\'t be loaded right now.</p></div>');return}
   const ids=window.Favorites.getFavorites();
-  if(!ids.length){
-    showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>No saved restaurants yet</h3><p>Tap the heart on any restaurant to save it here.</p><a class="fav-cta" href="index.html">Explore restaurants</a></div>');
-    return;
-  }
-  if(!Array.isArray(favRestaurants)){
-    showFavStatus('Loading your saved restaurants…');
-    return;
-  }
-  const read=window.RestaurantCard.read;
-  const idSet=new Set(ids.map(String));
+  if(!ids.length){showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>No saved restaurants yet</h3><p>Tap the heart on any restaurant to save it here.</p><a class="fav-cta" href="index.html">Explore restaurants</a></div>');return}
+  if(!Array.isArray(favRestaurants)){showFavStatus('Loading your saved restaurants…');return}
+  const read=window.RestaurantCard.read;const idSet=new Set(ids.map(String));
   const matched=favRestaurants.filter(r=>idSet.has(String(read.id(r))));
-  if(!matched.length){
-    showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>Saved restaurants unavailable</h3><p>These restaurants aren\'t in the current listing.</p><a class="fav-cta" href="index.html">Explore restaurants</a></div>');
-    return;
-  }
-  $('favoritesStatus').hidden=true;
-  $('favoritesList').hidden=false;
-  window.RestaurantCard.renderList($('favoritesList'),matched);
+  if(!matched.length){showFavStatus('<div class="fav-empty"><i class="fa-regular fa-heart"></i><h3>Saved restaurants unavailable</h3><p>These restaurants aren\'t in the current listing.</p><a class="fav-cta" href="index.html">Explore restaurants</a></div>');return}
+  $('favoritesStatus').hidden=true;$('favoritesList').hidden=false;window.RestaurantCard.renderList($('favoritesList'),matched);
 }
 async function loadFavorites(){
   if(!favDeps()){renderFavorites();return}
   if(!window.Favorites.getFavorites().length){renderFavorites();return}
-  try{
-    const cached=window.API.cache&&window.API.cache.readList
-      ?window.API.cache.readList(window.API.CACHE_KEYS.restaurants,FAV_CACHE_MAX_AGE_MS):null;
-    if(Array.isArray(cached)&&cached.length){favRestaurants=cached;renderFavorites()}
-  }catch{}
-  try{
-    const list=await window.API.getList(window.API.routes.restaurants);
-    favRestaurants=Array.isArray(list)?list:[];
-    renderFavorites();
-  }catch(e){
-    if(!Array.isArray(favRestaurants)){
-      showFavStatus('<div class="fav-empty"><i class="fa-solid fa-plug-circle-xmark"></i><h3>Couldn\'t load favourites</h3><p>Check your connection and try again.</p><a class="fav-cta" href="profile.html">Retry</a></div>');
-    }
-  }
+  try{const cached=window.API.cache&&window.API.cache.readList?window.API.cache.readList(window.API.CACHE_KEYS.restaurants,FAV_CACHE_MAX_AGE_MS):null;if(Array.isArray(cached)&&cached.length){favRestaurants=cached;renderFavorites()}}catch{}
+  try{const list=await window.API.getList(window.API.routes.restaurants);favRestaurants=Array.isArray(list)?list:[];renderFavorites()}catch(e){if(!Array.isArray(favRestaurants)){showFavStatus('<div class="fav-empty"><i class="fa-solid fa-plug-circle-xmark"></i><h3>Couldn\'t load favourites</h3><p>Check your connection and try again.</p><a class="fav-cta" href="profile.html">Retry</a></div>')}}
 }
-/* Un-hearting a card here removes the ID, which fires this and drops the
-   card from the list immediately. Same event keeps Home in sync. */
 window.addEventListener('eatswada:favorites-changed',renderFavorites);
 
-// loadProfile (GET /users/profile) and loadAddresses (GET /users/addresses)
-// are independent: loadAddresses reads only localStorage + its own response and
-// never consumes loadProfile's result, so they can run in parallel instead of
-// one after the other. loadFavorites stays fire-and-forget as before.
 document.addEventListener('DOMContentLoaded',()=>{loadFavorites();Promise.all([loadProfile(),loadAddresses()])});
 // Keep the account summary in sync if the selected delivery address changes
 // elsewhere (Address/Cart) without a full page reload.

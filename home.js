@@ -1181,27 +1181,33 @@
 
       var user = JSON.parse(userStr);
       var button = document.querySelector('.btn-profile');
-      ensureProfileAvatarStyle();
-      if (button && user) {
-        var name = String(user.name || 'Eatswada User');
-        var avatar = String(user.avatar || user.photoURL || user.picture || '').trim();
-        if (avatar) {
-          button.innerHTML = '<img class="profile-avatar-img" src="' +
-            card.escape(avatar) + '" alt="" referrerpolicy="no-referrer">';
-        } else {
-          button.innerHTML = '<span class="profile-initial">' +
-            card.escape(name.charAt(0).toUpperCase()) + '</span>';
+      if (!button || !user) return;
+
+      var name = String(user.name || 'Eatswada User').trim();
+      var initial = card.escape((name.charAt(0) || 'N').toUpperCase());
+      var rawAvatar = String(user.avatar || user.photoURL || user.picture || '').trim();
+      var avatar = '';
+
+      if (rawAvatar) {
+        try {
+          var url = new URL(rawAvatar, window.location.origin);
+          if (url.protocol === 'https:' || url.protocol === 'http:') avatar = url.href;
+        } catch (e) {}
+      }
+
+      if (avatar) {
+        button.innerHTML = '<img class="profile-avatar-image" src="' + card.escape(avatar) +
+          '" alt="" referrerpolicy="no-referrer" loading="eager" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;">';
+        var img = button.querySelector('.profile-avatar-image');
+        if (img) {
+          img.addEventListener('error', function () {
+            button.innerHTML = '<span class="profile-initial">' + initial + '</span>';
+          }, { once: true });
         }
+      } else if (user.name) {
+        button.innerHTML = '<span class="profile-initial">' + initial + '</span>';
       }
     } catch (e) {}
-  }
-
-  function ensureProfileAvatarStyle() {
-    if (document.getElementById('eatswada-profile-avatar-style')) return;
-    var style = document.createElement('style');
-    style.id = 'eatswada-profile-avatar-style';
-    style.textContent = '.btn-profile .profile-avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}';
-    document.head.appendChild(style);
   }
 
   /* ── Wiring ─────────────────────────────────────────────────── */
