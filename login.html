@@ -371,13 +371,61 @@
       <div class="sheet-header">
         <div class="brand-mark">Eatswada</div>
         <h2 class="sheet-title">Reset your password</h2>
-        <p class="sheet-sub">Enter the email connected to your Eatswada account. We'll send a secure reset link.</p>
+        <p class="sheet-sub">Enter the email connected to your Eatswada account. We'll send a 6-digit verification code.</p>
       </div>
       <label class="auth-label" for="forgotEmailInput">Email address</label>
       <input class="auth-field" id="forgotEmailInput" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email" inputmode="email">
       <div id="forgotBanner" class="banner-error" role="alert"><i class="fa-solid fa-triangle-exclamation"></i><span id="forgotBannerText"></span></div>
-      <button id="forgotSendBtn" class="btn-primary tap" onclick="sendPasswordResetEmail()">Send reset link</button>
+      <button id="forgotSendBtn" class="btn-primary tap" onclick="sendPasswordResetOTP()">Send OTP</button>
       <p class="auth-note">For your security, we use the same confirmation message whether or not an account exists.</p>
+    </div>
+
+
+    <div id="step3" class="step-container">
+      <button class="btn-back-otp tap" onclick="showForgotPassword()" aria-label="Back">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      </button>
+      <div class="sheet-header">
+        <div class="brand-mark">Eatswada</div>
+        <h2 class="otp-title">Enter verification code</h2>
+        <p class="otp-sub">Enter the 6-digit code sent to <strong id="resetEmailDisplay"></strong>.</p>
+      </div>
+      <div id="resetOtpGrid" class="otp-grid" aria-label="6 digit verification code">
+        <input class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+        <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+        <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+        <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+        <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+        <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+      </div>
+      <div id="resetOtpBanner" class="banner-error" role="alert">
+        <i class="fa-solid fa-triangle-exclamation"></i><span id="resetOtpBannerText"></span>
+      </div>
+      <button id="verifyResetOtpBtn" class="verify-otp-btn tap" onclick="verifyPasswordResetOTP()">Verify OTP</button>
+      <div class="resend-row">
+        <span>Didn't receive it?</span>
+        <button id="resendResetOtpBtn" class="resend-btn tap" type="button" onclick="resendPasswordResetOTP()">Resend OTP</button>
+      </div>
+      <p class="auth-note">The code expires in 10 minutes. Never share your OTP with anyone.</p>
+    </div>
+
+    <div id="step4" class="step-container">
+      <button class="btn-back-otp tap" onclick="showOnlyStep('step3')" aria-label="Back">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      </button>
+      <div class="sheet-header">
+        <div class="brand-mark">Eatswada</div>
+        <h2 class="sheet-title">Create a new password</h2>
+        <p class="sheet-sub">Choose a strong password for your Eatswada account.</p>
+      </div>
+      <label class="auth-label" for="resetNewPasswordInput">New password</label>
+      <input class="auth-field" id="resetNewPasswordInput" type="password" minlength="8" maxlength="128" placeholder="At least 8 characters" autocomplete="new-password">
+      <label class="auth-label" for="resetConfirmPasswordInput">Confirm password</label>
+      <input class="auth-field" id="resetConfirmPasswordInput" type="password" minlength="8" maxlength="128" placeholder="Enter it again" autocomplete="new-password">
+      <div id="resetPasswordBanner" class="banner-error" role="alert">
+        <i class="fa-solid fa-triangle-exclamation"></i><span id="resetPasswordBannerText"></span>
+      </div>
+      <button id="resetPasswordBtn" class="btn-primary tap" onclick="finishPasswordReset()">Change password</button>
     </div>
 
   </div>
@@ -504,19 +552,204 @@
       if(next)next.classList.add('active'); if(dot)dot.classList.add('active');
     },3500);
 
-    async function sendPasswordResetEmail(){
-      const email=document.getElementById('forgotEmailInput').value.trim().toLowerCase();
-      const banner=document.getElementById('forgotBanner'),text=document.getElementById('forgotBannerText'); hideBanner(banner);
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ showBanner(banner,text,'Enter a valid email address.'); return; }
-      setAuthBtnLoading('forgotSendBtn',true,'Send reset link');
-      try{
-        const res=await fetch(`${API_URL}/forgot-password/email`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
-        const data=await res.json().catch(()=>({}));
-        if(!res.ok||!data.success) throw new Error(data.message||'Unable to process the request. Please try again.');
-        showBanner(banner,text,'If an Eatswada account exists for this email, a password reset link has been sent. Check your inbox and spam folder.');
-      }catch(e){ showBanner(banner,text,e.message||'Unable to process the request. Please try again.'); }
-      finally{ setAuthBtnLoading('forgotSendBtn',false,'Send reset link'); }
+    let passwordResetEmail = '';
+    let passwordResetSessionToken = '';
+    let resetOtpResendTimer = null;
+
+    function getResetOtpValue(){
+      return Array.from(document.querySelectorAll('#resetOtpGrid .otp-box'))
+        .map(el => el.value.replace(/\D/g,'').slice(0,1))
+        .join('');
     }
+
+    function clearResetOtpInputs(){
+      document.querySelectorAll('#resetOtpGrid .otp-box').forEach(el => {
+        el.value = '';
+        el.classList.remove('error');
+      });
+    }
+
+    function focusFirstResetOtp(){
+      document.querySelector('#resetOtpGrid .otp-box')?.focus();
+    }
+
+    function setupResetOtpInputs(){
+      const boxes = Array.from(document.querySelectorAll('#resetOtpGrid .otp-box'));
+      boxes.forEach((box,index)=>{
+        box.addEventListener('input',()=>{
+          box.value=box.value.replace(/\D/g,'').slice(0,1);
+          box.classList.remove('error');
+          if(box.value && boxes[index+1]) boxes[index+1].focus();
+        });
+        box.addEventListener('keydown',(e)=>{
+          if(e.key==='Backspace' && !box.value && boxes[index-1]) boxes[index-1].focus();
+          if(e.key==='ArrowLeft' && boxes[index-1]) boxes[index-1].focus();
+          if(e.key==='ArrowRight' && boxes[index+1]) boxes[index+1].focus();
+        });
+        box.addEventListener('paste',(e)=>{
+          const pasted=(e.clipboardData?.getData('text')||'').replace(/\D/g,'').slice(0,6);
+          if(!pasted)return;
+          e.preventDefault();
+          boxes.forEach((b,i)=>b.value=pasted[i]||'');
+          boxes[Math.min(pasted.length,6)-1]?.focus();
+        });
+      });
+    }
+
+    function startResetOtpResendTimer(seconds=60){
+      const btn=document.getElementById('resendResetOtpBtn');
+      if(!btn)return;
+      clearInterval(resetOtpResendTimer);
+      let left=seconds;
+      btn.disabled=true;
+      btn.textContent=`Resend in ${left}s`;
+      resetOtpResendTimer=setInterval(()=>{
+        left--;
+        if(left<=0){
+          clearInterval(resetOtpResendTimer);
+          btn.disabled=false;
+          btn.textContent='Resend OTP';
+        }else btn.textContent=`Resend in ${left}s`;
+      },1000);
+    }
+
+    async function sendPasswordResetOTP(){
+      const email=document.getElementById('forgotEmailInput').value.trim().toLowerCase();
+      const banner=document.getElementById('forgotBanner'),text=document.getElementById('forgotBannerText');
+      hideBanner(banner);
+
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+        showBanner(banner,text,'Enter a valid email address.');
+        return;
+      }
+
+      setAuthBtnLoading('forgotSendBtn',true,'Send OTP');
+      try{
+        const res=await fetch(`${API_URL}/forgot-password/email`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({email})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.success) throw new Error(data.message||'Unable to send the verification code. Please try again.');
+
+        passwordResetEmail=email;
+        document.getElementById('resetEmailDisplay').textContent=email;
+        clearResetOtpInputs();
+        showOnlyStep('step3');
+        startResetOtpResendTimer(60);
+        setTimeout(focusFirstResetOtp,250);
+      }catch(e){
+        showBanner(banner,text,e.message||'Unable to send the verification code. Please try again.');
+      }finally{
+        setAuthBtnLoading('forgotSendBtn',false,'Send OTP');
+      }
+    }
+
+    async function verifyPasswordResetOTP(){
+      const otp=getResetOtpValue();
+      const banner=document.getElementById('resetOtpBanner'),text=document.getElementById('resetOtpBannerText');
+      hideBanner(banner);
+
+      if(!passwordResetEmail){
+        showBanner(banner,text,'Please start the password reset again.');
+        return;
+      }
+      if(!/^\d{6}$/.test(otp)){
+        document.querySelectorAll('#resetOtpGrid .otp-box').forEach(el=>el.classList.add('error'));
+        showBanner(banner,text,'Enter the 6-digit verification code.');
+        return;
+      }
+
+      setAuthBtnLoading('verifyResetOtpBtn',true,'Verify OTP');
+      try{
+        const res=await fetch(`${API_URL}/forgot-password/email/verify`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({email:passwordResetEmail,otp})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.success) throw new Error(data.message||'Invalid or expired OTP.');
+        passwordResetSessionToken=data.data?.resetToken||'';
+        if(!passwordResetSessionToken) throw new Error('Verification succeeded but no reset session was returned.');
+        showOnlyStep('step4');
+        setTimeout(()=>document.getElementById('resetNewPasswordInput')?.focus(),200);
+      }catch(e){
+        document.querySelectorAll('#resetOtpGrid .otp-box').forEach(el=>el.classList.add('error'));
+        showBanner(banner,text,e.message||'Invalid or expired OTP.');
+      }finally{
+        setAuthBtnLoading('verifyResetOtpBtn',false,'Verify OTP');
+      }
+    }
+
+    async function resendPasswordResetOTP(){
+      if(!passwordResetEmail)return;
+      const btn=document.getElementById('resendResetOtpBtn');
+      btn.disabled=true;
+      try{
+        const res=await fetch(`${API_URL}/forgot-password/email`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({email:passwordResetEmail})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.success) throw new Error(data.message||'Unable to resend the OTP.');
+        clearResetOtpInputs();
+        startResetOtpResendTimer(60);
+        focusFirstResetOtp();
+      }catch(e){
+        const banner=document.getElementById('resetOtpBanner');
+        showBanner(banner,document.getElementById('resetOtpBannerText'),e.message||'Unable to resend the OTP.');
+        btn.disabled=false;
+        btn.textContent='Resend OTP';
+      }
+    }
+
+    async function finishPasswordReset(){
+      const password=document.getElementById('resetNewPasswordInput').value;
+      const confirm=document.getElementById('resetConfirmPasswordInput').value;
+      const banner=document.getElementById('resetPasswordBanner'),text=document.getElementById('resetPasswordBannerText');
+      hideBanner(banner);
+
+      if(!passwordResetSessionToken){
+        showBanner(banner,text,'Your password reset session has expired. Please start again.');
+        return;
+      }
+      if(password.length<8){
+        showBanner(banner,text,'Password must be at least 8 characters.');
+        return;
+      }
+      if(password!==confirm){
+        showBanner(banner,text,'Passwords do not match.');
+        return;
+      }
+
+      setAuthBtnLoading('resetPasswordBtn',true,'Change password');
+      try{
+        const res=await fetch(`${API_URL}/forgot-password/email/reset`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({resetToken:passwordResetSessionToken,password})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok||!data.success) throw new Error(data.message||'Unable to change your password.');
+        passwordResetSessionToken='';
+        passwordResetEmail='';
+        document.getElementById('resetNewPasswordInput').value='';
+        document.getElementById('resetConfirmPasswordInput').value='';
+        showBanner(
+          banner,text,
+          'Password changed successfully. You can now log in.'
+        );
+        setTimeout(()=>showLogin(),1400);
+      }catch(e){
+        showBanner(banner,text,e.message||'Unable to change your password.');
+      }finally{
+        setAuthBtnLoading('resetPasswordBtn',false,'Change password');
+      }
+    }
+
+    setupResetOtpInputs();
     handleRedirectResult();
   </script>
 
