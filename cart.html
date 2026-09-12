@@ -948,6 +948,10 @@
            this container is the only markup that changes: the trigger, the
            sheet shell, the a11y wiring and the bill row slot already exist. -->
       <div class="ct-sheet-body" id="coupon-sheet-body">
+        <label class="ct-field-label" for="coupon-input">Coupon code</label>
+        <input id="coupon-input" class="ct-input" type="text" autocomplete="off" placeholder="Enter coupon code">
+        <p class="ct-sheet-err" id="coupon-error" role="alert" hidden></p>
+        <button type="button" class="ct-btn ct-btn-primary" id="coupon-apply">Apply coupon</button>
         <div class="ct-empty-mini">
           <div class="ct-empty-mini-ic" aria-hidden="true"><i class="fa-solid fa-ticket"></i></div>
           <div class="ct-empty-mini-title">No coupons available</div>
@@ -1412,7 +1416,9 @@ const ctState = {
   // Phase 3.1 — sent to the existing POST /orders endpoint.
   restaurantNote: '',
   deliveryInstructions: '',
-  tipAmount: 0
+  tipAmount: 0,
+  couponCode: '',
+  couponDiscount: 0
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2226,7 +2232,8 @@ async function placeOrder() {
       restaurantNote: ctState.restaurantNote || '',
       restaurantNotes: Object.keys(ctState.restaurantNotes || {}).length ? ctState.restaurantNotes : undefined,
       deliveryInstructions: ctState.deliveryInstructions || '',
-      tipAmount: ctCleanTip(ctState.tipAmount)
+      tipAmount: ctCleanTip(ctState.tipAmount),
+      couponCode: String(ctState.couponCode || '')
     };
 
     // Idempotency: reuse one key for this cart so a double-tap, a dropped
@@ -2823,6 +2830,20 @@ document.addEventListener('click', (event) => {
   if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
 
   if (target.closest('#bill-card')) { openBillSheet(); return; }
+
+  document.getElementById('coupon-apply')?.addEventListener('click', async () => {
+    const input=document.getElementById('coupon-input'); const err=document.getElementById('coupon-error'); const code=String(input?.value||'').trim().toUpperCase();
+    if(err){err.hidden=true;err.textContent='';} if(!code){if(err){err.hidden=false;err.textContent='Enter a coupon code.';}return;}
+    try {
+      const subtotal = Array.isArray(ctState.items) ? ctState.items.reduce((sum,it)=>sum + Number(it.price||0)*Number(it.quantity||1),0) : 0;
+      const token=localStorage.getItem('nearbite_token') || localStorage.getItem('eatswada_token') || '';
+      const r=await fetch(`${CONFIG.API_BASE_URL}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({code,subtotal,restaurantId:ctState.restaurantId||undefined})});
+      const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
+      ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
+      const card=document.getElementById('coupon-card'); if(card){const sub=card.querySelector('.ct-line-sub');if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;}
+      closeSheet?.('ct-coupon-sheet'); if(typeof renderCart==='function') renderCart();
+    } catch(e){if(err){err.hidden=false;err.textContent=e.message||'Coupon could not be applied.';}}
+  });
 
   if (target.closest('#coupon-card')) { openSheet('ct-coupon-sheet'); return; }
 
