@@ -210,6 +210,24 @@
     }
   ];
 
+  /* Availability is the first ranking dimension, just like a food-delivery
+     marketplace: restaurants that can accept orders come before restaurants
+     that are currently closed. The selected customer sort is applied only
+     inside those two groups. Keep the fallback to legacy `isOpen` because
+     cached/older payloads may not have the nested availability object yet. */
+  function availabilityRank(res) {
+    if (res && res.availability && typeof res.availability.isOpen === 'boolean') {
+      return res.availability.isOpen ? 0 : 1;
+    }
+    return res && res.isOpen === false ? 1 : 0;
+  }
+
+  function compareAvailabilityFirst(a, b, secondaryCompare) {
+    var availabilityDiff = availabilityRank(a) - availabilityRank(b);
+    if (availabilityDiff !== 0) return availabilityDiff;
+    return secondaryCompare ? secondaryCompare(a, b) : 0;
+  }
+
   var SORTS = [
     { id: 'recommended', label: 'Relevance', supported: function () { return true; } },
     {
@@ -219,7 +237,9 @@
         return list.some(function (r) { return card.read.rating(r) != null; });
       },
       compare: function (a, b) {
-        return (card.read.rating(b) || 0) - (card.read.rating(a) || 0);
+        return compareAvailabilityFirst(a, b, function (x, y) {
+          return (card.read.rating(y) || 0) - (card.read.rating(x) || 0);
+        });
       }
     },
     {
@@ -229,11 +249,13 @@
         return list.some(function (r) { return card.read.deliveryTime(r) != null; });
       },
       compare: function (a, b) {
-        var ta = card.read.deliveryTime(a);
-        var tb = card.read.deliveryTime(b);
-        var va = ta && ta.max != null ? ta.max : Infinity;
-        var vb = tb && tb.max != null ? tb.max : Infinity;
-        return va - vb;
+        return compareAvailabilityFirst(a, b, function (x, y) {
+          var ta = card.read.deliveryTime(x);
+          var tb = card.read.deliveryTime(y);
+          var va = ta && ta.max != null ? ta.max : Infinity;
+          var vb = tb && tb.max != null ? tb.max : Infinity;
+          return va - vb;
+        });
       }
     },
     {
@@ -247,9 +269,11 @@
         return list.some(function (r) { return card.getDistanceKm(r, coords) != null; });
       },
       compare: function (a, b) {
-        var da = card.getDistanceKm(a, sortCoords);
-        var db = card.getDistanceKm(b, sortCoords);
-        return (da == null ? Infinity : da) - (db == null ? Infinity : db);
+        return compareAvailabilityFirst(a, b, function (x, y) {
+          var da = card.getDistanceKm(x, sortCoords);
+          var db = card.getDistanceKm(y, sortCoords);
+          return (da == null ? Infinity : da) - (db == null ? Infinity : db);
+        });
       }
     }
   ];
@@ -1181,31 +1205,9 @@
 
       var user = JSON.parse(userStr);
       var button = document.querySelector('.btn-profile');
-      if (!button || !user) return;
-
-      var name = String(user.name || 'Eatswada User').trim();
-      var initial = card.escape((name.charAt(0) || 'N').toUpperCase());
-      var rawAvatar = String(user.avatar || user.photoURL || user.picture || '').trim();
-      var avatar = '';
-
-      if (rawAvatar) {
-        try {
-          var url = new URL(rawAvatar, window.location.origin);
-          if (url.protocol === 'https:' || url.protocol === 'http:') avatar = url.href;
-        } catch (e) {}
-      }
-
-      if (avatar) {
-        button.innerHTML = '<img class="profile-avatar-image" src="' + card.escape(avatar) +
-          '" alt="" referrerpolicy="no-referrer" loading="eager" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;">';
-        var img = button.querySelector('.profile-avatar-image');
-        if (img) {
-          img.addEventListener('error', function () {
-            button.innerHTML = '<span class="profile-initial">' + initial + '</span>';
-          }, { once: true });
-        }
-      } else if (user.name) {
-        button.innerHTML = '<span class="profile-initial">' + initial + '</span>';
+      if (button && user && user.name) {
+        button.innerHTML = '<span class="profile-initial">' +
+          card.escape(String(user.name).charAt(0).toUpperCase()) + '</span>';
       }
     } catch (e) {}
   }
