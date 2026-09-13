@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
 <link rel="preconnect" href="https://unpkg.com">
+<script src="config.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
@@ -447,7 +448,15 @@ async function confirmLocation(){
 }
 function init(){
  map=L.map('map',{zoomControl:false,attributionControl:true}).setView(DEFAULT,15);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'© OpenStreetMap contributors'}).addTo(map);
+ const mapCfg=window.CONFIG?.MAPTILER;
+ if(mapCfg?.enabled && mapCfg.apiKey){
+   L.tileLayer(`https://api.maptiler.com/maps/${encodeURIComponent(mapCfg.mapId || 'streets-v4')}/{z}/{x}/{y}.png?key=${encodeURIComponent(mapCfg.apiKey)}`,{
+     tileSize:512,zoomOffset:-1,minZoom:1,maxZoom:20,
+     attribution:'© MapTiler © OpenStreetMap contributors',crossOrigin:true
+   }).addTo(map);
+ } else {
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'© OpenStreetMap contributors'}).addTo(map);
+ }
  map.on('moveend',updateCenterFromMap);
  map.on('movestart',()=>{ if(!locating) $('address').style.opacity='.75'; });
  map.on('moveend',()=>{ $('address').style.opacity='1'; });

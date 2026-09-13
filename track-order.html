@@ -782,7 +782,7 @@
       chargesWrap.innerHTML = rows.join('');
     }
 
-    // ── Real live map (Leaflet + OpenStreetMap, no API key) ─────────
+    // ── Real live map (Leaflet + MapTiler) ─────────────────────────
     let liveMap = null, riderMarker = null, homeMarker = null, routeLine = null;
 
     function riderIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker rider"><i class="fa-solid fa-motorcycle"></i></div>', iconSize:[38,38], iconAnchor:[19,19] }); }
@@ -791,7 +791,19 @@
     function ensureMap(){
       if (liveMap || typeof L === 'undefined') return liveMap;
       liveMap = L.map('live-map', { zoomControl:true, attributionControl:true });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(liveMap);
+      const mapCfg = window.CONFIG?.MAPTILER;
+      if (!mapCfg?.enabled || !mapCfg.apiKey) {
+        console.warn('[Map] MapTiler is not configured; map tiles unavailable.');
+        return liveMap;
+      }
+      L.tileLayer(`https://api.maptiler.com/maps/${encodeURIComponent(mapCfg.mapId || 'streets-v4')}/{z}/{x}/{y}.png?key=${encodeURIComponent(mapCfg.apiKey)}`, {
+        tileSize:512,
+        zoomOffset:-1,
+        minZoom:1,
+        maxZoom:20,
+        attribution:'© MapTiler © OpenStreetMap contributors',
+        crossOrigin:true
+      }).addTo(liveMap);
       liveMap.setView([26.8700, 88.8200], 13); // Maynaguri default until the first GPS fix
       return liveMap;
     }

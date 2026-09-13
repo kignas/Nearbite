@@ -4,6 +4,11 @@
 const CONFIG = {
   API_BASE_URL: "https://eatswada.onrender.com/api",
   BRAND_NAME: "EatSwada",
+  MAPTILER: {
+    enabled: true,
+    apiKey: "JBRewxAAxaNAJiXuf1F9",
+    mapId: "streets-v4"
+  },
   FIREBASE: {
     enabled: true,
     apiKey: "AIzaSyA0bqVE3RCmiJORcufx-v6Gew16GMCfFp0",
