@@ -7,7 +7,7 @@
 <title>My Orders – Nearbite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -37,7 +37,7 @@
 *,*::before,*::after{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;}
 body{
-  font-family:var(--font-sans),sans-serif;
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
   background:var(--paper); color:var(--ink-900); margin:0;
   padding-bottom:calc(84px + env(safe-area-inset-bottom));
   -webkit-tap-highlight-color:transparent;
@@ -311,6 +311,41 @@ img{max-width:100%;display:block;}
 .nav-item svg{width:23px;height:23px;transition:transform .2s var(--ease-out);}
 .nav-item:active svg{transform:scale(.88);}
 .nav-new-badge{position:absolute;top:6px;right:calc(50% - 24px);background:var(--danger);color:#fff;font-size:8px;font-weight:900;padding:2px 6px;border-radius:999px;box-shadow:0 2px 5px rgba(229,72,77,.35);}
+/* ---------- Invoice modal ---------- */
+.invoice-overlay{ position:fixed; inset:0; z-index:1000; display:none; align-items:flex-end; justify-content:center; background:rgba(20,23,31,.55); backdrop-filter:blur(3px); }
+.invoice-overlay.open{ display:flex; }
+.invoice-sheet{ background:#fff; width:100%; max-width:480px; max-height:92vh; overflow:auto; border-radius:20px 20px 0 0; padding:22px 20px calc(20px + env(safe-area-inset-bottom,0)); position:relative; }
+.inv-close{ position:absolute; top:12px; right:14px; border:0; background:var(--paper); width:34px; height:34px; border-radius:50%; font-size:20px; line-height:1; color:var(--ink-500); cursor:pointer; }
+.inv-head{ display:flex; align-items:center; justify-content:space-between; }
+.inv-brand{ font-size:22px; font-weight:800; color:var(--brand-darker); letter-spacing:-.5px; }
+.inv-status{ font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; }
+.inv-status.paid{ background:var(--success-bg); color:var(--success); }
+.inv-status.cod{ background:var(--amber-bg); color:var(--amber); }
+.inv-sub{ font-size:15px; font-weight:700; color:var(--ink-900); margin-top:2px; }
+.inv-meta{ display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--ink-500); margin:8px 0 12px; }
+.inv-addr{ font-size:12px; color:var(--ink-500); background:var(--paper); padding:9px 11px; border-radius:10px; margin-bottom:14px; }
+.inv-table{ width:100%; border-collapse:collapse; margin-bottom:12px; }
+.inv-table td{ padding:7px 0; font-size:13.5px; color:var(--ink-800); border-bottom:1px solid var(--line); }
+.inv-table td.r{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.inv-line{ display:flex; justify-content:space-between; font-size:13.5px; color:var(--ink-700); padding:4px 0; }
+.inv-line.disc{ color:var(--success); }
+.inv-total{ display:flex; justify-content:space-between; font-size:16.5px; font-weight:800; color:var(--ink-900); border-top:2px solid var(--ink-200); margin-top:8px; padding-top:10px; font-variant-numeric:tabular-nums; }
+.inv-foot{ text-align:center; font-size:12px; color:var(--ink-400); margin-top:16px; }
+.inv-actions{ display:flex; gap:10px; margin-top:18px; }
+.inv-btn{ flex:1; padding:13px; border-radius:12px; font-family:inherit; font-weight:800; font-size:14px; border:0; cursor:pointer; }
+.inv-btn.ghost{ background:var(--paper); color:var(--ink-700); }
+.inv-btn.solid{ background:var(--brand); color:#fff; }
+/* ---------- Toast ---------- */
+.od-toast{ position:fixed; left:50%; bottom:84px; transform:translateX(-50%) translateY(12px); background:var(--ink-900); color:#fff; font-size:13.5px; font-weight:700; padding:12px 16px; border-radius:12px; z-index:1100; opacity:0; pointer-events:none; transition:.25s; max-width:88%; text-align:center; }
+.od-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+/* ---------- Print only the invoice ---------- */
+@media print{
+  body{ visibility:hidden; }
+  .invoice-overlay, .invoice-overlay *{ visibility:visible; }
+  .invoice-overlay{ position:absolute; inset:0; display:block!important; background:#fff; }
+  .invoice-sheet{ max-width:none; max-height:none; border-radius:0; }
+  .no-print{ display:none!important; }
+}
 </style>
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
@@ -595,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return `
         <div class="swipe-container">
           <div class="swipe-actions">
-            <button class="swipe-btn btn-invoice tap" onclick="window.location.href='track-order.html?id=${order._id}'"><i class="fa-solid fa-receipt"></i><span>Invoice</span></button>
+            <button class="swipe-btn btn-invoice tap" onclick="showInvoice('${order._id}')"><i class="fa-solid fa-receipt"></i><span>Invoice</span></button>
             <button class="swipe-btn btn-support tap" onclick="window.location.href='support.html?order=${order._id}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
             ${isCancelled ? `<button class="swipe-btn btn-delete tap" onclick="deleteCancelledOrder('${order._id}')"><i class="fa-solid fa-trash"></i><span>Remove</span></button>` : ''}
           </div>
@@ -618,11 +653,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="past-total">₹${order.total}</span>
               </div>
               <div class="action-buttons">
-                <button class="btn-reorder tap" onclick="window.location.href='index.html'">Order Again</button>
+                <button class="btn-reorder tap" onclick="reorder('${order._id}')">Order Again</button>
                 <button class="btn-details tap" onclick="window.location.href='track-order.html?id=${order._id}'">View Details</button>
               </div>
               <div class="ghost-row">
-                <button class="ghost-btn tap" onclick="window.location.href='track-order.html?id=${order._id}'"><i class="fa-solid fa-file-lines"></i>Invoice</button>
+                <button class="ghost-btn tap" onclick="showInvoice('${order._id}')"><i class="fa-solid fa-file-lines"></i>Invoice</button>
                 ${isDelivered ? `<button class="ghost-btn rate tap" onclick="window.location.href='track-order.html?id=${order._id}#rate'"><i class="fa-solid fa-star"></i>Rate</button>` : ''}
                 <button class="ghost-btn tap" onclick="window.location.href='support.html?order=${order._id}'"><i class="fa-solid fa-circle-question"></i>Need Help</button>
               </div>
@@ -643,6 +678,73 @@ document.addEventListener('DOMContentLoaded', () => {
     hideOrderLocally(id);
     renderOrders();
   };
+
+  // ── Toast ─────────────────────────────────────────────────────────
+  function toastMsg(text){
+    let t = document.getElementById('od-toast');
+    if(!t){ t = document.createElement('div'); t.id='od-toast'; t.className='od-toast'; document.body.appendChild(t); }
+    t.textContent = text; t.classList.add('show');
+    clearTimeout(t._timer); t._timer = setTimeout(()=>t.classList.remove('show'), 2600);
+  }
+  window.toastMsg = toastMsg;
+
+  function escapeHtmlInv(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // ── Reorder: re-add the past order's items to the cart, then open cart ──
+  window.reorder = async function(orderId){
+    if(!token){ location.href='login.html'; return; }
+    const order = (allOrdersData||[]).find(o => o._id === orderId);
+    if(!order || !Array.isArray(order.items) || !order.items.length){ toastMsg('Could not find this order.'); return; }
+    toastMsg('Adding items to your cart…');
+    let ok=0, fail=0;
+    for(const it of order.items){
+      const mid = it.menuItem && (it.menuItem._id || it.menuItem);
+      if(!mid){ fail++; continue; }
+      try{
+        const r = await fetch(CONFIG.API_BASE_URL + '/cart/add', {
+          method:'POST',
+          headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
+          body: JSON.stringify({ menuItemId: mid, quantity: it.quantity || 1, customizations: it.customizations || {} })
+        });
+        if(r.ok) ok++; else fail++;
+      }catch(e){ fail++; }
+    }
+    if(ok===0){ toastMsg('Sorry, none of these items are available right now.'); return; }
+    toastMsg(fail>0 ? (ok+' item'+(ok>1?'s':'')+' added · '+fail+' unavailable') : 'Added to cart!');
+    setTimeout(()=>{ location.href='cart.html'; }, 850);
+  };
+
+  // ── Invoice: a real receipt built from the order, printable / save-as-PDF ──
+  function invMoney(n){ return '₹' + Number(n||0).toLocaleString('en-IN'); }
+  function invAddress(o){
+    const a = o.deliveryAddress || {};
+    return [a.flat||a.house||a.line1, a.area||a.landmark, a.city, a.pincode||a.zip].filter(Boolean).join(', ');
+  }
+  window.showInvoice = function(orderId){
+    const o = (allOrdersData||[]).find(x => x._id === orderId);
+    if(!o){ toastMsg('Could not load this invoice.'); return; }
+    const idLabel = o.orderNumber || String(o._id).slice(-6).toUpperCase();
+    const dt = o.createdAt ? new Date(o.createdAt) : new Date();
+    const rows = (o.items||[]).map(it =>
+      `<tr><td>${(it.quantity||1)} × ${escapeHtmlInv(it.name||'Item')}</td><td class="r">${invMoney((it.price||0)*(it.quantity||1))}</td></tr>`
+    ).join('');
+    const disc = Number(o.discount||0), tip = Number(o.tipAmount||0), paid = o.paymentStatus === 'paid';
+    document.getElementById('invoice-content').innerHTML =
+      `<div class="inv-head"><div class="inv-brand">EatSwada</div><div class="inv-status ${paid?'paid':'cod'}">${paid?'PAID':'COD'}</div></div>
+       <div class="inv-sub">${escapeHtmlInv(o.restaurantName||'Restaurant')}</div>
+       <div class="inv-meta"><span>Invoice #${escapeHtmlInv(idLabel)}</span><span>${dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})} · ${dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span></div>
+       ${invAddress(o) ? `<div class="inv-addr">Deliver to: ${escapeHtmlInv(invAddress(o))}</div>` : ''}
+       <table class="inv-table"><tbody>${rows}</tbody></table>
+       <div class="inv-line"><span>Item total</span><span>${invMoney(o.subtotal)}</span></div>
+       ${disc>0?`<div class="inv-line disc"><span>Discount${o.coupon&&o.coupon.code?(' ('+escapeHtmlInv(o.coupon.code)+')'):''}</span><span>− ${invMoney(disc)}</span></div>`:''}
+       <div class="inv-line"><span>Delivery fee</span><span>${invMoney(o.deliveryFee)}</span></div>
+       ${tip>0?`<div class="inv-line"><span>Tip</span><span>${invMoney(tip)}</span></div>`:''}
+       <div class="inv-total"><span>Total ${paid?'paid':'payable'}</span><span>${invMoney(o.total)}</span></div>
+       <div class="inv-foot">Thank you for ordering with EatSwada.</div>`;
+    document.getElementById('invoice-overlay').classList.add('open');
+  };
+  window.closeInvoice = function(){ document.getElementById('invoice-overlay').classList.remove('open'); };
+  window.printInvoice = function(){ window.print(); };
 
   const updateChipCounts = () => {
     const hidden = new Set(getHidden());
@@ -852,5 +954,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script src="navigation.js"></script>
   <script src="bottom-tab-bar.js"></script>
+<div class="invoice-overlay" id="invoice-overlay">
+  <div class="invoice-sheet">
+    <button class="inv-close no-print" onclick="closeInvoice()" aria-label="Close">&times;</button>
+    <div id="invoice-content"></div>
+    <div class="inv-actions no-print">
+      <button class="inv-btn ghost" onclick="closeInvoice()">Close</button>
+      <button class="inv-btn solid" onclick="printInvoice()"><i class="fa-solid fa-download"></i> Save / Print</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

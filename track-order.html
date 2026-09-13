@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
@@ -191,7 +193,12 @@
     .map-card { display:none; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 18px 14px; margin-bottom: 16px; box-shadow: var(--shadow); }
     .map-card-header { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:var(--ink-900); margin-bottom:16px; text-transform:uppercase; letter-spacing:.4px; }
     .map-card-header i { color: var(--brand); }
-    .map-visual { position: relative; height: 96px; margin-bottom: 12px; background: linear-gradient(180deg,#FAFAFB, #F3F4F6); border-radius: var(--r-sm); overflow:hidden; }
+    .map-visual { position: relative; height: 220px; margin-bottom: 12px; background: #EAEDF0; border-radius: var(--r-sm); overflow: hidden; }
+    #live-map { position:absolute; inset:0; width:100%; height:100%; z-index:1; }
+    .leaflet-container { font-family: var(--font); background:#EAEDF0; }
+    .map-marker { display:flex; align-items:center; justify-content:center; border-radius:50%; border:2px solid #fff; box-shadow: var(--shadow); }
+    .map-marker.rider { width:38px; height:38px; background: var(--brand); color:#fff; font-size:16px; }
+    .map-marker.home  { width:32px; height:32px; background:#fff; color: var(--brand-darker); font-size:13px; }
     .map-route-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
     .map-pin { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: var(--card); border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-700); box-shadow: var(--shadow-sm); top: 60%; transform: translate(-50%,-50%); z-index:2; }
     .map-pin-store { left: 12%; }
@@ -467,15 +474,8 @@
     <!-- Live Route Placeholder Card -->
     <div class="map-card card-fade d3" id="map-card">
       <div class="map-card-header"><i class="fa-solid fa-location-dot"></i> Live Route</div>
-      <div class="map-visual">
-        <svg class="map-route-svg" viewBox="0 0 300 90" preserveAspectRatio="none">
-          <path d="M36,54 C110,10 190,10 264,54" stroke="#E4E6EA" stroke-width="3" fill="none" stroke-dasharray="1 9" stroke-linecap="round"/>
-        </svg>
-        <div class="map-pin map-pin-store"><i class="fa-solid fa-store"></i></div>
-        <div class="map-pin map-pin-home"><i class="fa-solid fa-house"></i></div>
-        <div class="map-rider" id="map-rider"><i class="fa-solid fa-motorcycle"></i></div>
-      </div>
-      <div class="map-card-footer">Live GPS isn't available yet — this shows your order's overall progress.</div>
+      <div class="map-visual"><div id="live-map"></div></div>
+      <div class="map-card-footer" id="map-card-footer">Live location updates every few seconds.</div>
     </div>
 
     <!-- Premium Rider Card -->
@@ -782,13 +782,70 @@
       chargesWrap.innerHTML = rows.join('');
     }
 
-    function renderStageMapAndRoute(progress) {
-      const rider = document.getElementById('map-rider');
-      const leftPct = 12 + progress * 76; // travels from the store pin (12%) to the home pin (88%)
-      const bob = -18 * Math.sin(progress * Math.PI);
-      rider.style.left = leftPct + '%';
-      rider.style.top = `calc(60% + ${bob}px)`;
+    // ── Real live map (Leaflet + OpenStreetMap, no API key) ─────────
+    let liveMap = null, riderMarker = null, homeMarker = null, routeLine = null;
+
+    function riderIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker rider"><i class="fa-solid fa-motorcycle"></i></div>', iconSize:[38,38], iconAnchor:[19,19] }); }
+    function homeIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker home"><i class="fa-solid fa-house"></i></div>', iconSize:[32,32], iconAnchor:[16,16] }); }
+
+    function ensureMap(){
+      if (liveMap || typeof L === 'undefined') return liveMap;
+      liveMap = L.map('live-map', { zoomControl:true, attributionControl:true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(liveMap);
+      liveMap.setView([26.8700, 88.8200], 13); // Maynaguri default until the first GPS fix
+      return liveMap;
     }
+
+    // Draws the rider's REAL position (order.riderLocation) heading to the
+    // delivery address. Only shows while the backend is sending live GPS
+    // (picked_up / out_for_delivery); hidden otherwise — never a fake pin.
+    function updateLiveMap(order){
+      const card = document.getElementById('map-card');
+      const footer = document.getElementById('map-card-footer');
+      const rl = order && order.riderLocation;
+      const hasRider = rl && Number.isFinite(Number(rl.lat)) && Number.isFinite(Number(rl.lng));
+      if (!hasRider){ if (card) card.style.display = 'none'; return; }
+
+      if (card) card.style.display = 'block';
+      const map = ensureMap();
+      if (!map) return;
+
+      const riderLL = [Number(rl.lat), Number(rl.lng)];
+      const destC = order.deliveryAddress && order.deliveryAddress.coordinates;
+      const homeLL = (Array.isArray(destC) && destC.length === 2 &&
+                      Number.isFinite(Number(destC[1])) && Number.isFinite(Number(destC[0])))
+        ? [Number(destC[1]), Number(destC[0])] : null;
+
+      if (!riderMarker) riderMarker = L.marker(riderLL, { icon: riderIcon(), zIndexOffset:1000 }).addTo(map);
+      else riderMarker.setLatLng(riderLL);
+
+      if (homeLL){
+        if (!homeMarker) homeMarker = L.marker(homeLL, { icon: homeIcon() }).addTo(map);
+        else homeMarker.setLatLng(homeLL);
+        const pts = [riderLL, homeLL];
+        if (!routeLine) routeLine = L.polyline(pts, { color:'#159A62', weight:4, opacity:.75, dashArray:'2 8' }).addTo(map);
+        else routeLine.setLatLngs(pts);
+        map.fitBounds(L.latLngBounds(pts).pad(0.35));
+      } else {
+        map.setView(riderLL, 15);
+      }
+
+      if (footer){
+        const eta = Number(order.riderEtaMinutes);
+        footer.textContent = (Number.isFinite(eta) && eta > 0)
+          ? ('Rider ' + (order.riderDistanceKm != null ? '~' + order.riderDistanceKm + ' km away · ' : '') + 'arriving in ~' + Math.max(1, Math.ceil(eta)) + ' min')
+          : 'Live location updates every few seconds.';
+      }
+
+      // The card starts hidden, so Leaflet first measured it as 0×0 — recompute
+      // now that it's visible, then re-fit.
+      setTimeout(function(){
+        try { map.invalidateSize(); if (homeLL) map.fitBounds(L.latLngBounds([riderLL, homeLL]).pad(0.35)); } catch(e){}
+      }, 60);
+    }
+
+    // Kept as a no-op so nothing that referenced the old animator can throw.
+    function renderStageMapAndRoute(){ /* replaced by updateLiveMap */ }
 
     function renderLiveUI(order, deliveredCount) {
       document.getElementById('loading-overlay').style.display = 'none';
@@ -1142,7 +1199,7 @@
       }
 
       timelineFill.style.height = `${progress * 100}%`;
-      renderStageMapAndRoute(progress);
+      updateLiveMap(order);
     }
 
     function renderCancellation(order) {
