@@ -39,7 +39,7 @@ html{-webkit-text-size-adjust:100%;}
 body{
   font-family:'Manrope',system-ui,-apple-system,sans-serif;
   background:var(--paper); color:var(--ink-900); margin:0;
-  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  padding-bottom:calc(104px + env(safe-area-inset-bottom));
   -webkit-tap-highlight-color:transparent;
   overscroll-behavior-y:contain;
   line-height:1.45;
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${order.restaurantImage ? `<img src="${order.restaurantImage}" loading="lazy" alt="">` : ''}
               <div class="live-flag"><span class="dot"></span>Live</div>
               <div class="eta-flag"><span>ETA</span><strong>${etaText}${mins !== null ? 'm' : ''}</strong></div>
-              <div class="cover-caption"><h3>${order.restaurantName || "EatSwada Partner"}</h3><p>Order #${order._id.substring(0,6).toUpperCase()}</p></div>
+              <div class="cover-caption"><h3>${order.restaurantName || "EatSwada Partner"}</h3><p>Order #${order.orderNumber || order._id.substring(0,6).toUpperCase()}</p></div>
             </div>
             ${logoHtml(order, 'track-logo')}
             <div class="track-body">
