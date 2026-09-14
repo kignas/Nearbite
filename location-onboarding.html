@@ -43,6 +43,47 @@ html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--in
 .title b{display:block;font-size:15px;font-weight:800;letter-spacing:-.35px;line-height:1.25;color:var(--ink)}
 .title span{display:block;font-size:12px;font-weight:500;color:var(--muted);line-height:1.4;margin-top:2px}
 
+
+/* ── Search location ── */
+.location-search{
+ position:absolute;z-index:1100;top:calc(66px + var(--safe-t));left:calc(12px + var(--safe-l));
+ right:calc(12px + var(--safe-r));display:flex;flex-direction:column;gap:7px;
+}
+.location-search-row{
+ display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+ border-radius:15px;padding:0 11px;min-height:48px;box-shadow:var(--shadow-float);
+}
+.location-search-row i{color:var(--muted);font-size:14px;flex:none}
+#locationSearch{
+ flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);
+ font:600 14px/1.3 inherit;padding:13px 0;
+}
+#locationSearch::placeholder{color:#AEB4BC;font-weight:500}
+.location-search-clear{
+ display:none;width:30px;height:30px;border:0;border-radius:9px;background:#F1F3F6;
+ color:var(--muted);place-items:center;cursor:pointer;flex:none;
+}
+.location-search-clear.show{display:grid}
+.location-results{
+ display:none;background:#fff;border:1px solid var(--line);border-radius:15px;
+ box-shadow:var(--shadow-float);overflow:hidden;max-height:220px;overflow-y:auto;
+}
+.location-results.show{display:block}
+.location-result{
+ width:100%;display:flex;gap:10px;align-items:flex-start;text-align:left;
+ border:0;border-bottom:1px solid #F1F3F6;background:#fff;padding:12px;cursor:pointer;
+ color:var(--ink);font:600 13px/1.4 inherit;
+}
+.location-result:last-child{border-bottom:0}
+.location-result i{color:var(--brand);margin-top:2px;flex:none}
+.location-result small{display:block;color:var(--muted);font-size:11px;font-weight:500;margin-top:2px}
+.location-result:active{background:#F8FAFC}
+.location-search-status{
+ display:none;background:#fff;border:1px solid var(--line);border-radius:13px;
+ padding:10px 12px;box-shadow:var(--shadow-float);font-size:12px;font-weight:600;color:var(--muted);
+}
+.location-search-status.show{display:block}
+
 /* ── Map furniture ── */
 .pin{position:absolute;left:50%;top:50%;z-index:900;transform:translate(-50%,-100%);pointer-events:none;
  color:var(--brand);font-size:40px;filter:drop-shadow(0 5px 6px rgba(17,24,39,.28))}
@@ -122,6 +163,19 @@ button,input,textarea,select{font-family:inherit}
 <body>
 <div id="map"></div>
 <div class="pin"><i class="fa-solid fa-location-dot"></i></div><div class="pin-dot"></div>
+<div class="location-search" aria-label="Search delivery location">
+  <div class="location-search-row">
+    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    <input id="locationSearch" type="search" inputmode="search" autocomplete="off"
+      placeholder="Search area, landmark or address" aria-label="Search area, landmark or address">
+    <button type="button" id="locationSearchClear" class="location-search-clear" aria-label="Clear search">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div id="locationResults" class="location-results" role="listbox" aria-label="Location search results"></div>
+  <div id="locationSearchStatus" class="location-search-status" role="status" aria-live="polite"></div>
+</div>
+
 <div class="top">
   <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
   <div class="title">
@@ -140,21 +194,21 @@ button,input,textarea,select{font-family:inherit}
     <button class="btn primary" id="confirm" onclick="confirmLocation()" disabled>Confirm location</button>
   </div>
 </div>
-<!-- Location gate. Blocking by design: no close control, and neither
-     Escape nor a backdrop click dismisses it. It closes only after a
-     genuine GPS fix. -->
+<!-- Location gate. GPS is preferred, but search is a safe manual fallback.
+     It does not grant or fake browser location permission. -->
 <div class="lg-backdrop" id="lg-gate" role="dialog" aria-modal="true"
      aria-labelledby="lg-title" aria-describedby="lg-text" hidden>
   <div class="lg-modal">
     <div class="lg-icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>
-    <h2 id="lg-title">Location permission required</h2>
-    <p id="lg-text">Eatswada needs your approximate location to find nearby restaurants and check whether we deliver to you. You can adjust the delivery pin on the map.</p>
+    <h2 id="lg-title">Choose your location</h2>
+    <p id="lg-text">Use your current location for the fastest setup, or search for your area, landmark, or address and choose the delivery point on the map.</p>
     <div class="lg-steps" id="lg-steps">
       <b>Android · Chrome</b>
       Open Chrome → ⋮ → Settings → Site settings → Location → allow Eatswada → return here and tap Try again.
     </div>
-    <button type="button" class="lg-btn primary" id="lg-primary" onclick="gateRetry()">Allow location</button>
-    <button type="button" class="lg-btn" id="lg-help" aria-expanded="false" aria-controls="lg-steps" onclick="toggleGateSteps()">How to allow</button>
+    <button type="button" class="lg-btn primary" id="lg-primary" onclick="gateRetry()">Use current location</button>
+    <button type="button" class="lg-btn" id="lg-search" onclick="useSearchInstead()">Search location instead</button>
+    <button type="button" class="lg-btn" id="lg-help" aria-expanded="false" aria-controls="lg-steps" onclick="toggleGateSteps()">How to allow GPS</button>
   </div>
 </div>
 
@@ -164,7 +218,7 @@ button,input,textarea,select{font-family:inherit}
 // Maynaguri, West Bengal — visual fallback only.
  // The real device location still replaces this as soon as the browser returns it.
  const DEFAULT=[26.545,88.820];
-let map,current=null,locating=false,gpsMarker=null,accuracyCircle=null,watchId=null,firstFix=false;
+let map,current=null,locating=false,gpsMarker=null,accuracyCircle=null,watchId=null,firstFix=false,locationReady=false;
 const $=id=>document.getElementById(id);
 function warn(t){$('warn').textContent=t;$('warn').style.display=t?'block':'none'}
 function setLocProgress(show,text){
@@ -204,7 +258,7 @@ let mapMoveTimer=null;
 function updateCenterFromMap(){
  // The fallback map center is never a valid customer location.
  // Only a real GPS fix can unlock map selection.
- if(!firstFix)return;
+ if(!locationReady)return;
  const c=map.getCenter();
  if(!Number.isFinite(c.lat)||!Number.isFinite(c.lng))return;
  // The center pin is the selected delivery point. After the first GPS fix,
@@ -224,6 +278,83 @@ function updateCenterFromMap(){
               parts?parts.secondary:'','map');
  },250);
 }
+
+let searchTimer=null, searchController=null;
+function showSearchStatus(text,show=true){
+ const el=$('locationSearchStatus'); if(!el)return;
+ el.textContent=text||''; el.classList.toggle('show',!!show);
+}
+function renderSearchResults(features){
+ const box=$('locationResults'); if(!box)return;
+ box.innerHTML='';
+ (features||[]).slice(0,5).forEach((f,idx)=>{
+   const coords=f?.geometry?.coordinates;
+   if(!Array.isArray(coords)||coords.length<2)return;
+   const lng=Number(coords[0]),lat=Number(coords[1]);
+   if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+   const btn=document.createElement('button');
+   btn.type='button';btn.className='location-result';btn.setAttribute('role','option');
+   const title=String(f.text||f.place_name||'Selected location');
+   const full=String(f.place_name||'');
+   const detail=full.replace(title,'').replace(/^,\s*/,'');
+   btn.innerHTML='<i class="fa-solid fa-location-dot" aria-hidden="true"></i><span></span>';
+   const span=btn.querySelector('span');
+   const b=document.createElement('b'); b.textContent=title;
+   const small=document.createElement('small'); small.textContent=detail;
+   span.appendChild(b); if(detail)span.appendChild(small);
+   btn.addEventListener('click',()=>selectSearchResult(lat,lng,title,detail));
+   box.appendChild(btn);
+ });
+ box.classList.toggle('show',box.children.length>0);
+}
+function selectSearchResult(lat,lng,title,detail){
+ if(!map)return;
+ locationReady=true; firstFix=false;
+ current={lat,lng,accuracy:0,source:'search'};
+ if(gpsMarker){map.removeLayer(gpsMarker);gpsMarker=null}
+ if(accuracyCircle){map.removeLayer(accuracyCircle);accuracyCircle=null}
+ map.setView([lat,lng],17,{animate:true});
+ setAddress(title||'Selected delivery location','Location selected from search',detail||'','map');
+ $('confirm').disabled=false;
+ $('locationResults').classList.remove('show');
+ $('locationSearchStatus').classList.remove('show');
+ const input=$('locationSearch'); if(input)input.value=title||'';
+ warn('');
+ closeGate();
+}
+async function searchLocation(){
+ const input=$('locationSearch'); if(!input)return;
+ const q=input.value.trim();
+ $('locationSearchClear').classList.toggle('show',!!q);
+ if(q.length<2){$('locationResults').classList.remove('show');showSearchStatus('',false);return}
+ if(searchController)searchController.abort();
+ searchController=new AbortController();
+ showSearchStatus('Searching…',true); $('locationResults').classList.remove('show');
+ try{
+   const key=window.CONFIG?.MAPTILER?.apiKey;
+   if(!key) throw new Error('Location search is temporarily unavailable.');
+   const proximity='88.820,26.545';
+   const url=`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json?key=${encodeURIComponent(key)}&country=in&autocomplete=true&limit=5&proximity=${proximity}`;
+   const r=await fetch(url,{signal:searchController.signal,headers:{Accept:'application/json'}});
+   if(!r.ok)throw new Error('Search failed.');
+   const d=await r.json();
+   const features=Array.isArray(d.features)?d.features:[];
+   if(!features.length){showSearchStatus('No matching location found. Try a nearby landmark or area.',true);return}
+   showSearchStatus('',false); renderSearchResults(features);
+ }catch(e){
+   if(e.name==='AbortError')return;
+   console.error(e);showSearchStatus('Location search is unavailable right now. Please try again or use GPS.',true);
+ }
+}
+function scheduleSearch(){
+ clearTimeout(searchTimer);searchTimer=setTimeout(searchLocation,350);
+}
+function useSearchInstead(){
+ closeGate();
+ const input=$('locationSearch'); if(input){input.focus();input.scrollIntoView({block:'nearest'});}
+ setAddress('Search for your location','Choose a result, then adjust the map pin if needed.');
+}
+
 function showGps(lat,lng,accuracy){
  if(gpsMarker)map.removeLayer(gpsMarker);
  if(accuracyCircle)map.removeLayer(accuracyCircle);
@@ -241,7 +372,7 @@ async function reverseGeocode(lat,lng){
 }
 function applyPosition(p,center=true){
  current={lat:Number(p.coords.latitude),lng:Number(p.coords.longitude),accuracy:Number(p.coords.accuracy||0)};
- firstFix=true; showGps(current.lat,current.lng,current.accuracy);
+ firstFix=true; locationReady=true; showGps(current.lat,current.lng,current.accuracy);
  if(center)map.setView([current.lat,current.lng],17,{animate:true});
  const acc=current.accuracy?`Location accuracy ±${Math.round(current.accuracy)} m`:'Location captured';
  setAddress('Current location',acc,'','gps'); $('confirm').disabled=false; warn('');
@@ -256,27 +387,27 @@ function applyPosition(p,center=true){
    Only a real GPS fix closes it. */
 const GATE={
  denied:{
-   title:'Location permission required',
-   text:'Eatswada needs your approximate location to find nearby restaurants and check whether we deliver to you. You can adjust the delivery pin on the map.',
+   title:'Choose your location',
+   text:'Use current location for the fastest setup, or search for your area, landmark, or address and choose the delivery point on the map.',
    primary:'Allow location', steps:false
  },
  blocked:{
-   title:'Location permission required',
-   text:'Location is blocked for Eatswada in this browser, so it cannot ask you again. Turn it on in your browser settings, then tap Try again.',
+   title:'Choose your location',
+   text:'GPS is blocked for Eatswada in this browser. You can enable it in browser settings, or use location search instead.',
    primary:'Try again', steps:true
  },
  unsupported:{
-   title:'Location permission required',
+   title:'Choose your location',
    text:'Location services aren\u2019t available on this device. Turn on location services and try again.',
    primary:'Try again', steps:false
  },
  timeout:{
-   title:'Location permission required',
+   title:'Choose your location',
    text:'We couldn\u2019t get your location yet. Make sure device location is turned on and try again.',
    primary:'Try again', steps:false
  },
  unavailable:{
-   title:'Location permission required',
+   title:'Choose your location',
    text:'We couldn\u2019t get your location. Make sure device location is turned on and try again.',
    primary:'Try again', steps:false
  }
@@ -306,7 +437,7 @@ document.addEventListener('keydown',e=>{
  if(!gateOpen)return;
  if(e.key==='Escape'){ e.preventDefault(); $('lg-primary').focus(); return }
  if(e.key!=='Tab')return;
- const f=[$('lg-primary'),$('lg-help')].filter(b=>b&&!b.disabled);
+ const f=[$('lg-primary'),$('lg-search'),$('lg-help')].filter(b=>b&&!b.disabled);
  if(!f.length)return;
  const first=f[0],last=f[f.length-1];
  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
@@ -421,17 +552,17 @@ function nextDestination(){
  return d;
 }
 async function confirmLocation(){
- // A genuine GPS fix is the only thing that unlocks saving. Without it
- // `current` could only be the DEFAULT map centre, which is not a customer
- // location.
- if(!current||!firstFix)return;
+ // Saving is allowed only after a genuine GPS fix or an explicit search/map
+ // selection. The DEFAULT map centre is never treated as a customer location.
+ if(!current||!locationReady)return;
  const btn=$('confirm');
  btn.disabled=true; btn.textContent='Saving location…';
  try{
    const d=await reverseGeocode(current.lat,current.lng);
    localStorage.setItem('nearbite_onboarding_location',JSON.stringify({
      latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),
-     accuracy:Number((current.accuracy||0).toFixed(1)),capturedAt:Date.now()
+     accuracy:Number((current.accuracy||0).toFixed(1)),
+     source:current.source|| (firstFix?'gps':'map'),capturedAt:Date.now()
    }));
    if(d) localStorage.setItem('nearbite_onboarding_geocode',JSON.stringify(d));
    localStorage.setItem('nearbite_location_permission_seen','1');
@@ -447,6 +578,15 @@ async function confirmLocation(){
  }
 }
 function init(){
+ const searchInput=$('locationSearch'), clear=$('locationSearchClear');
+ if(searchInput){
+   searchInput.addEventListener('input',scheduleSearch);
+   searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(searchTimer);searchLocation()}});
+ }
+ if(clear)clear.addEventListener('click',()=>{searchInput.value='';clear.classList.remove('show');$('locationResults').classList.remove('show');showSearchStatus('',false);searchInput.focus()});
+ document.addEventListener('click',e=>{
+   if(!e.target.closest('.location-search')) $('locationResults').classList.remove('show');
+ });
  map=L.map('map',{zoomControl:false,attributionControl:true}).setView(DEFAULT,15);
  const mapCfg=window.CONFIG?.MAPTILER;
  if(mapCfg?.enabled && mapCfg.apiKey){
@@ -460,7 +600,8 @@ function init(){
  map.on('moveend',updateCenterFromMap);
  map.on('movestart',()=>{ if(!locating) $('address').style.opacity='.75'; });
  map.on('moveend',()=>{ $('address').style.opacity='1'; });
- // The default map is visual context only and cannot be confirmed.
+ // The default map is visual context only and cannot be confirmed until
+ // the customer supplies GPS or selects a search result.
  $('confirm').disabled=true;
  setAddress('Finding your current location…','Please allow location access when your browser asks.');
  locateMe();

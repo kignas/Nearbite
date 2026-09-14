@@ -446,7 +446,7 @@ const DRAFT_KEY = 'eatswada_address_draft';
 const FORM_IDS = ['house','area','landmark','receiverName','receiverPhone','instructions'];
 
 const ENTRY = new URLSearchParams(location.search);
-const cameFromSetupUrl = false;
+const cameFromSetupUrl = ENTRY.get('add') === '1';
 
 /* The single selector drives both the field wording and the stored `tag`.
    House → Home, Office → Work, Other → Other. */
@@ -1126,7 +1126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // MODE 1 is the first address, reached from Complete Profile via the map.
   // An existing customer with saved addresses is always MODE 2.
   if (cameFromSetupUrl){
-    mode = addresses.length === 0 ? 'setup' : 'manage';
+    // ?add=1 is an explicit onboarding handoff. Do not show an empty
+    // saved-address list first; open the first-address form immediately.
+    mode = 'setup';
     openEditor();
   }
 });
