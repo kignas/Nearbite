@@ -618,13 +618,15 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+  <script src="push.js"></script>
   <script>
     let pollInterval;
-    // ── Order-status notifications (#2) ─────────────────────────────────
-    let lastTrackedStatus = null;
-    function tNotify(title, body){ try{ if('Notification' in window && Notification.permission === 'granted') new Notification(title, { body: body || '', tag: 'order-status', renotify: true }); }catch(e){} }
-    // Ask for permission on the customer's first interaction (browsers require a gesture).
-    document.addEventListener('pointerdown', function(){ try{ if('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }catch(e){} }, { once: true });
+    // ── Customer push notifications are owned by push.js. ────────────────
+    // Do not create a second local Notification here: FCM foreground messages
+    // are surfaced once by push.js, while background messages are handled by
+    // firebase-messaging-sw.js.
     const STATUS_MESSAGES = {
       confirmed: 'The restaurant accepted your order.',
       preparing: 'Your food is being prepared.',
@@ -692,12 +694,9 @@
           const deliveredCount = result.data.filter(o => o.status && o.status.toLowerCase() === 'delivered').length;
           renderLiveUI(liveOrder, deliveredCount);
 
-          // Notify the customer when the status advances (skips the first load).
-          const st = String(liveOrder.status || '').toLowerCase();
-          if (lastTrackedStatus && st !== lastTrackedStatus && STATUS_MESSAGES[st]) {
-            tNotify('Order update', STATUS_MESSAGES[st]);
-          }
-          lastTrackedStatus = st;
+          // FCM push is handled centrally by push.js/backend. Keep polling
+          // purely for refreshing the tracking UI so foreground alerts are not
+          // duplicated.
         }
       } catch (err) {
         console.error("Failed to fetch live order data");
@@ -834,10 +833,16 @@
       if (homeLL){
         if (!homeMarker) homeMarker = L.marker(homeLL, { icon: homeIcon() }).addTo(map);
         else homeMarker.setLatLng(homeLL);
-        const pts = [riderLL, homeLL];
-        if (!routeLine) routeLine = L.polyline(pts, { color:'#159A62', weight:4, opacity:.75, dashArray:'2 8' }).addTo(map);
-        else routeLine.setLatLngs(pts);
-        map.fitBounds(L.latLngBounds(pts).pad(0.35));
+        // Mapbox Directions geometry is returned as [lng,lat] pairs. Use the
+        // real road route when available; otherwise keep the safe straight-line
+        // fallback between rider and customer.
+        const road = Array.isArray(order.riderRoute) ? order.riderRoute
+          .filter(p => Array.isArray(p) && p.length >= 2 && Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])))
+          .map(p => [Number(p[1]), Number(p[0])]) : [];
+        const routePts = road.length >= 2 ? road : [riderLL, homeLL];
+        if (!routeLine) routeLine = L.polyline(routePts, { color:'#159A62', weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' }).addTo(map);
+        else routeLine.setLatLngs(routePts);
+        map.fitBounds(L.latLngBounds([riderLL, homeLL]).pad(0.35));
       } else {
         map.setView(riderLL, 15);
       }
