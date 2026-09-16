@@ -45,10 +45,19 @@
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
 
+  // Admin-controlled hero/header background. Only allow simple CSS colors/gradients.
+  const safeCssBackground = v => {
+    v = String(v || '').trim();
+    if (!v || v.length > 180) return '';
+    const ok = /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([\d\s.,%+\-]+\)|hsla?\([\d\s.,%+\-]+\)|(?:linear|radial)-gradient\([\w\s.,%+\-#()]+\)|transparent)$/i;
+    return ok.test(v) ? v : '';
+  };
+
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
     const t = theme(b.headerTheme);
     const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
+    const bannerBg = safeCssBackground(b.background);
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
@@ -125,6 +134,9 @@
   function applyHeaderTheme() {
     const b = banners[active];
     header.dataset.theme = theme(b?.headerTheme);
+    const bg = safeCssBackground(b?.background);
+    if (bg) header.style.setProperty('--hd-bg', bg);
+    else header.style.removeProperty('--hd-bg');
   }
   // Marking the active slide (re)triggers its text wobble each time it
   // becomes active — on load, on swipe, and on every autoplay step.
