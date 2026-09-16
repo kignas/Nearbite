@@ -25,8 +25,8 @@
 
   const AUTOPLAY_MS = 5000;   // time each slide is shown
   const RESUME_MS   = 4000;   // wait after a gesture before autoplay resumes
-  const SWIPE_MIN   = 36;     // px of horizontal travel needed to change slide
-  const LOCK_MIN    = 8;      // px before we decide the gesture is horiz/vert
+  const SWIPE_MIN   = 28;     // px of horizontal travel needed to change slide
+  const LOCK_MIN    = 5;      // px before we decide the gesture is horiz/vert
 
   let banners = [];
   let active  = 0;
@@ -179,6 +179,9 @@
     startY = p.y;
     basePx = offsetFor(active);
     capturedId = (e.pointerId != null) ? e.pointerId : null;
+    if (capturedId != null && viewport.setPointerCapture) {
+      try { viewport.setPointerCapture(capturedId); } catch (_) {}
+    }
     pauseAuto();
   }
 

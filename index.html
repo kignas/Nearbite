@@ -611,6 +611,70 @@
   .banner-subtitle{font-size:10px;}
 }
 
+
+/* ================================================================
+   EATSWADA APPROVED HEADER BENCHMARK V1
+   Visual target: clean mobile food-delivery header.
+   Only header styling is changed; page content below stays untouched.
+   ================================================================ */
+.hero-header{
+  min-height:0 !important;
+  padding:12px 16px 10px !important;
+  background:var(--header-bg,#fff) !important;
+  border-radius:0 0 26px 26px !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.07) !important;
+  overflow:hidden;
+}
+.hero-header[data-theme="anime"]{--header-bg:#fff;--header-ink:#202431;--header-muted:#697386;--header-accent:#d20a61;}
+.hero-header[data-theme="pink"]{--header-bg:#ffd8e5;--header-ink:#202431;--header-muted:#697386;--header-accent:#d20a61;}
+.hero-header[data-theme="lavender"]{--header-bg:#d8c9ff;--header-ink:#fff;--header-muted:rgba(255,255,255,.82);--header-accent:#ffde69;}
+.hero-header[data-theme="magenta"]{--header-bg:#b80057;--header-ink:#fff;--header-muted:rgba(255,255,255,.82);--header-accent:#ffde69;}
+.loc-row{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:10px !important;margin:0 0 10px !important;min-height:48px !important;position:relative;z-index:20;}
+.loc-left{display:flex !important;align-items:center !important;gap:10px !important;min-width:0 !important;text-decoration:none !important;color:var(--header-ink) !important;}
+.loc-pin-wrap{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.86);box-shadow:0 4px 12px rgba(15,23,42,.06);flex:0 0 44px;}
+.loc-pin-wrap i{font-size:19px;color:#d20a61;}
+.loc-copy{display:flex;flex-direction:column;min-width:0;line-height:1.1;}
+.loc-name-row{display:flex;align-items:center;gap:6px;min-width:0;}
+.loc-name{font-size:17px !important;font-weight:800 !important;color:var(--header-ink) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.loc-chevron{font-size:10px;color:var(--header-muted);flex:0 0 auto;}
+.loc-sub{display:block !important;margin:4px 0 0 !important;font-size:11px !important;font-weight:600 !important;color:var(--header-muted) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;}
+.loc-right{display:flex !important;align-items:center !important;gap:8px !important;flex:0 0 auto;}
+.btn-store{width:88px !important;height:48px !important;border-radius:17px !important;background:rgba(255,255,255,.72) !important;border:1px solid rgba(210,10,97,.12) !important;box-shadow:0 5px 14px rgba(15,23,42,.05) !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;text-decoration:none !important;}
+.store-top{font-size:9px !important;font-weight:800 !important;color:var(--header-accent) !important;line-height:1;letter-spacing:.4px;text-transform:uppercase;}
+.store-bot{font-size:17px !important;font-weight:900 !important;color:var(--header-accent) !important;line-height:1.05;margin-top:2px;}
+.btn-profile{width:44px !important;height:44px !important;border-radius:50% !important;background:#fff !important;display:grid !important;place-items:center !important;text-decoration:none !important;box-shadow:0 5px 14px rgba(15,23,42,.07) !important;}
+.profile-initial{font-size:16px !important;font-weight:900 !important;color:#b80057 !important;}
+.search-row{display:flex !important;align-items:center !important;gap:9px !important;height:54px !important;margin:0 0 12px !important;position:relative;z-index:25;}
+.search-box{height:54px !important;border-radius:18px !important;background:#fff !important;border:1px solid rgba(15,23,42,.045) !important;box-shadow:0 7px 18px rgba(15,23,42,.07) !important;}
+.search-icon{font-size:18px !important;color:#536173 !important;}
+.search-text{font-size:13px !important;font-weight:600 !important;color:#697386 !important;}
+.veg-box{height:54px !important;width:68px !important;border-radius:18px !important;background:#fff !important;border:1px solid rgba(15,23,42,.045) !important;box-shadow:0 7px 18px rgba(15,23,42,.06) !important;}
+.banner-wrap{height:auto !important;min-height:0 !important;margin:0 -16px !important;padding:0 0 0 !important;position:relative;z-index:5;}
+.header-carousel{width:100% !important;overflow:hidden !important;border-radius:0 !important;touch-action:pan-y !important;}
+.header-carousel-track{display:flex !important;gap:0 !important;will-change:transform;}
+.header-slide{flex:0 0 100% !important;width:100% !important;height:205px !important;border-radius:0 0 26px 26px !important;overflow:hidden !important;box-shadow:none !important;}
+.header-slide__panel{height:100% !important;border-radius:0 0 26px 26px !important;box-shadow:none !important;}
+.header-slide__copy{left:50px !important;top:auto !important;bottom:42px !important;max-width:48% !important;}
+.banner-title{font-size:28px !important;line-height:1.03 !important;letter-spacing:-.8px !important;}
+.banner-subtitle{font-size:12px !important;line-height:1.35 !important;margin-top:8px !important;}
+.banner-cta{margin-top:12px !important;box-shadow:none !important;}
+.banner-controls{height:14px !important;margin:8px 0 0 !important;gap:6px !important;}
+.banner-dot{width:7px !important;height:7px !important;box-shadow:none !important;}
+.banner-dot.is-active{width:18px !important;height:6px !important;}
+@media(max-width:380px){
+ .hero-header{padding:10px 14px 8px !important;}
+ .loc-pin-wrap{width:42px;height:42px;flex-basis:42px;}
+ .loc-name{font-size:16px !important;}
+ .loc-sub{font-size:10px !important;max-width:205px;}
+ .btn-store{width:82px !important;height:46px !important;}
+ .btn-profile{width:42px !important;height:42px !important;}
+ .search-row{height:52px !important;margin-bottom:10px !important;}
+ .search-box,.veg-box{height:52px !important;}
+ .header-slide{height:195px !important;}
+ .header-slide__copy{left:36px !important;bottom:36px !important;max-width:50% !important;}
+ .banner-title{font-size:25px !important;}
+}
+
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
 </head>
@@ -619,21 +683,23 @@
 
 <header class="hero-header" id="home-header" data-theme="anime">
   <div class="loc-row es-header-item">
-    <a class="loc-left tap" href="address.html">
-      <p class="loc-sub" id="loc-sub">Delivery in <span id="delivery-time-value">—</span> minutes</p>
-      <span class="loc-name-row">
-        <i class="fa-solid fa-location-arrow loc-arrow"></i>
-        <span class="loc-name" id="loc-name">Set delivery location</span>
-        <i class="fa-solid fa-chevron-down loc-chevron"></i>
+    <a class="loc-left tap" href="address.html" aria-label="Change delivery location">
+      <span class="loc-pin-wrap" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+      <span class="loc-copy">
+        <span class="loc-name-row">
+          <span class="loc-name" id="loc-name">Home</span>
+          <i class="fa-solid fa-chevron-down loc-chevron" aria-hidden="true"></i>
+        </span>
+        <span class="loc-sub" id="loc-sub">Huu, Maynaguri, HR7R+WFX</span>
       </span>
     </a>
     <div class="loc-right">
-      <a class="btn-store tap" href="under99.html">
-        <span class="store-top">Under</span>
+      <a class="btn-store tap" href="under99.html" aria-label="Under 99 store">
+        <span class="store-top">UNDER</span>
         <span class="store-bot">₹99</span>
       </a>
       <a class="btn-profile tap" href="profile.html" aria-label="Profile">
-        <i class="fa-solid fa-user"></i>
+        <span class="profile-initial">S</span>
       </a>
     </div>
   </div>
