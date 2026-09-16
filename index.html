@@ -462,6 +462,155 @@
 .banner-dot{width:6px;height:6px;border:0;padding:0;border-radius:999px;background:rgba(100,116,139,.28);transition:width .25s ease,background .25s ease;cursor:pointer;}
 .banner-dot.is-active{width:18px;height:6px;background:#D20A61;}
 
+
+/* ================================================================
+   EATSWADA HEADER FINAL FIX
+   - full-bleed promotional area
+   - slightly taller hero
+   - active banner controls the header theme
+   - mobile-friendly swipe surface
+   - everything below the header remains untouched
+   ================================================================ */
+.hero-header{
+  min-height:327px;
+  overflow:hidden;
+  transition:background .28s ease,color .28s ease;
+}
+.hero-header[data-theme="anime"]{background:#fff;color:#1F2430;}
+.hero-header[data-theme="pink"]{background:linear-gradient(145deg,#F7B7CB,#E887A9);color:#172033;}
+.hero-header[data-theme="lavender"]{background:linear-gradient(145deg,#BDA9EA,#8F70D2);color:#17132A;}
+.hero-header[data-theme="magenta"]{background:linear-gradient(145deg,#B80057,#730035);color:#fff;}
+
+.loc-row{height:50px;margin-bottom:10px;z-index:8;}
+.loc-left{display:grid;grid-template-columns:40px minmax(0,1fr);grid-template-rows:21px 18px;column-gap:9px;align-items:center;padding-right:0;}
+.loc-left::before{
+  content:'\f3c5';font-family:'Font Awesome 6 Free';font-weight:900;
+  grid-row:1 / span 2;width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff0f6;color:#d20a61;font-size:18px;
+  box-shadow:0 7px 18px -12px rgba(210,10,97,.4);
+}
+.loc-name-row{display:contents;}
+.loc-arrow{display:none;}
+.loc-name{grid-column:2;grid-row:1;font-size:15px;line-height:20px;font-weight:850;}
+.loc-chevron{font-size:8px;}
+.loc-sub{grid-column:2;grid-row:2;font-size:10px;line-height:15px;font-weight:600;color:#697386;}
+.loc-right{gap:8px;}
+.btn-store{min-width:78px;height:40px;border-radius:16px;background:#fff!important;border-color:rgba(210,10,97,.12)!important;}
+.store-top{font-size:8px;color:#697386;}
+.store-bot{font-size:15px;color:#d20a61;}
+.btn-profile{width:40px;height:40px;background:#fff;color:#1F2937;}
+
+.hero-header[data-theme="pink"] .loc-sub,
+.hero-header[data-theme="lavender"] .loc-sub{color:#4f5664;}
+.hero-header[data-theme="magenta"] .loc-name{color:#fff;}
+.hero-header[data-theme="magenta"] .loc-sub,
+.hero-header[data-theme="magenta"] .loc-chevron{color:rgba(255,255,255,.82);}
+.hero-header[data-theme="magenta"] .loc-left::before{background:#fff;color:#b80057;}
+.hero-header[data-theme="magenta"] .btn-store{background:rgba(255,255,255,.16)!important;border-color:rgba(255,255,255,.28)!important;}
+.hero-header[data-theme="magenta"] .store-top{color:rgba(255,255,255,.78);}
+.hero-header[data-theme="magenta"] .store-bot{color:#ffde69;}
+
+.search-row{height:54px;z-index:9;}
+.search-box{height:54px;border-radius:18px;background:#fff;}
+.veg-box{height:54px;width:68px;border-radius:18px;background:#fff;}
+
+.banner-wrap{
+  position:relative;
+  height:205px;
+  min-height:0;
+  margin:0 -16px;
+  padding:0;
+  z-index:3;
+}
+.header-carousel{
+  position:relative;
+  width:100%;
+  height:205px;
+  overflow:hidden;
+  border-radius:0;
+  touch-action:pan-y;
+  overscroll-behavior-x:contain;
+}
+.header-carousel-track{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  height:205px;
+  will-change:transform;
+  transition:transform .38s cubic-bezier(.22,1,.36,1);
+}
+.header-carousel-track.is-dragging{transition:none;cursor:grabbing;}
+
+.header-slide{
+  position:relative;
+  flex:0 0 100%;
+  width:100%;
+  height:205px;
+  border-radius:0;
+  overflow:hidden;
+}
+.header-slide__panel{position:absolute;inset:0;}
+.header-slide__copy{
+  position:absolute;
+  left:48px;
+  top:0;
+  bottom:0;
+  max-width:48%;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  z-index:3;
+}
+.header-slide__art{
+  position:absolute;
+  right:0;
+  top:0;
+  bottom:0;
+  width:56%;
+  height:100%;
+  object-fit:contain;
+  object-position:right bottom;
+  z-index:1;
+  pointer-events:none;
+}
+.header-slide[data-theme="anime"]{background:#fff;--slide-ink:#1F2430;--slide-muted:#697386;--slide-accent:#D20A61;}
+.header-slide[data-theme="anime"] .header-slide__art{mix-blend-mode:multiply;}
+.header-slide[data-theme="pink"]{background:linear-gradient(145deg,#F7B7CB,#E887A9);--slide-ink:#172033;--slide-muted:#5F6675;--slide-accent:#C50057;}
+.header-slide[data-theme="lavender"]{background:linear-gradient(145deg,#BDA9EA,#8F70D2);--slide-ink:#17132A;--slide-muted:#4A4160;--slide-accent:#6A35C7;}
+.header-slide[data-theme="magenta"]{background:linear-gradient(145deg,#B80057,#730035);--slide-ink:#fff;--slide-muted:rgba(255,255,255,.82);--slide-accent:#FFDE69;}
+
+.banner-title{font-size:27px;line-height:1.03;letter-spacing:-.9px;font-weight:900;}
+.banner-subtitle{font-size:11px;line-height:1.35;margin:7px 0 0;max-width:25ch;font-weight:600;}
+.banner-cta{min-height:34px;margin-top:11px;padding:0 15px;font-size:11px;}
+.header-slide[data-theme="magenta"] .banner-cta{background:#FFDE69;color:#5A0027;}
+
+.banner-controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:14px;
+  margin-top:9px;
+  padding:0;
+  position:static;
+  transform:none;
+}
+.banner-controls[hidden]{display:none;}
+.banner-dot{width:6px;height:6px;}
+.banner-dot.is-active{width:18px;height:6px;background:#D20A61;}
+
+@media(max-width:380px){
+  .hero-header{min-height:307px;}
+  .banner-wrap,.header-carousel,.header-carousel-track{height:191px;}
+  .header-slide{height:191px;}
+  .header-slide__copy{left:38px;max-width:50%;}
+  .header-slide__art{width:57%;}
+  .banner-title{font-size:24px;}
+  .banner-subtitle{font-size:10px;}
+}
+
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
 </head>

@@ -25,7 +25,7 @@
 
   const AUTOPLAY_MS = 5000;   // time each slide is shown
   const RESUME_MS   = 4000;   // wait after a gesture before autoplay resumes
-  const SWIPE_MIN   = 50;     // px of horizontal travel needed to change slide
+  const SWIPE_MIN   = 36;     // px of horizontal travel needed to change slide
   const LOCK_MIN    = 8;      // px before we decide the gesture is horiz/vert
 
   let banners = [];
@@ -33,6 +33,7 @@
   let autoTimer = null;
   let resumeTimer = null;
   let gesturesBound = false;
+  let suppressClickUntil = 0;
 
   // One AbortController lets us detach every listener cleanly if we ever
   // rebuild, so we never stack duplicate listeners/timers.
@@ -112,13 +113,20 @@
     track.classList.toggle('is-dragging', !animate);
     track.style.transform = `translate3d(${-px}px,0,0)`;
   }
+  function applyHeaderTheme() {
+    const b = banners[active];
+    header.dataset.theme = theme(b?.headerTheme);
+  }
+
   function jumpTo(i) {              // no animation (initial layout / resize)
     setTransform(offsetFor(i), false);
+    applyHeaderTheme();
     updateDots();
   }
   function moveTo(i, animate) {     // wraps around
     active = (i + n()) % n();
     setTransform(offsetFor(active), animate);
+    applyHeaderTheme();
     updateDots();
   }
   function updateDots() {
@@ -150,7 +158,8 @@
   }
 
   // ── Gestures (finger-follow drag) ───────────────────────────────
-  let dragging = false, axis = null, startX = 0, startY = 0, basePx = 0, lastDx = 0, capturedId = null;
+  let dragging = false, axis = null, startX = 0, startY = 0,
+      basePx = 0, lastDx = 0, capturedId = null;
 
   const point = e => (e.touches && e.touches[0])
     ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
@@ -161,58 +170,72 @@
   function onStart(e) {
     if (n() < 2) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+
     const p = point(e);
-    dragging = true; axis = null; lastDx = 0;
-    startX = p.x; startY = p.y;
+    dragging = true;
+    axis = null;
+    lastDx = 0;
+    startX = p.x;
+    startY = p.y;
     basePx = offsetFor(active);
     capturedId = (e.pointerId != null) ? e.pointerId : null;
-    pauseAuto();               // hold autoplay while the finger is down
+    pauseAuto();
   }
 
   function onMove(e) {
     if (!dragging) return;
+
     const p = point(e);
     const dx = p.x - startX;
     const dy = p.y - startY;
 
     if (axis === null) {
       if (Math.abs(dx) < LOCK_MIN && Math.abs(dy) < LOCK_MIN) return;
-      // Only treat as a carousel swipe when horizontal clearly dominates.
+
       axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      if (axis === 'y') {      // vertical → let the page scroll, abort drag
+
+      if (axis === 'y') {
         dragging = false;
+        axis = null;
         setTransform(basePx, true);
+        scheduleResume();
         return;
       }
-      // Lock horizontal: capture the pointer so the release can't fire a
-      // stray click on a CTA, and so moves keep coming to us.
+
       if (capturedId != null && viewport.setPointerCapture) {
         try { viewport.setPointerCapture(capturedId); } catch (_) {}
       }
     }
+
     if (axis !== 'x') return;
 
-    if (e.cancelable) e.preventDefault();   // stop native horizontal panning
+    if (e.cancelable) e.preventDefault();
     lastDx = dx;
+
     let move = dx;
-    // Rubber-band resistance past the first/last slide.
-    if ((active === 0 && move > 0) || (active === n() - 1 && move < 0)) move *= 0.35;
-    setTransform(basePx - move, false);      // follow the finger, no transition
+    if ((active === 0 && move > 0) || (active === n() - 1 && move < 0)) {
+      move *= 0.28;
+    }
+    setTransform(basePx - move, false);
   }
 
   function onEnd() {
     if (!dragging) return;
+
     dragging = false;
+
     if (capturedId != null && viewport.releasePointerCapture) {
       try { viewport.releasePointerCapture(capturedId); } catch (_) {}
     }
     capturedId = null;
 
     if (axis === 'x' && Math.abs(lastDx) >= SWIPE_MIN) {
-      moveTo(active + (lastDx < 0 ? 1 : -1), true);   // commit to next/prev
+      suppressClickUntil = Date.now() + 450;
+      moveTo(active + (lastDx < 0 ? 1 : -1), true);
     } else {
-      moveTo(active, true);                            // snap back
+      moveTo(active, true);
     }
+
     axis = null;
     scheduleResume();
   }
@@ -227,12 +250,20 @@
       viewport.addEventListener('pointermove', onMove, sig);
       viewport.addEventListener('pointerup', onEnd, sig);
       viewport.addEventListener('pointercancel', onEnd, sig);
+      viewport.addEventListener('lostpointercapture', onEnd, sig);
     } else {
       viewport.addEventListener('touchstart', onStart, { passive: true, signal: bag.signal });
       viewport.addEventListener('touchmove', onMove, { passive: false, signal: bag.signal });
       viewport.addEventListener('touchend', onEnd, { passive: true, signal: bag.signal });
       viewport.addEventListener('touchcancel', onEnd, { passive: true, signal: bag.signal });
     }
+
+    viewport.addEventListener('click', e => {
+      if (Date.now() < suppressClickUntil) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, { capture: true, signal: bag.signal });
   }
 
   // Keep the active slide aligned when the viewport width changes.
