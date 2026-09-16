@@ -49,9 +49,18 @@
   function slideHtml(b, i) {
     const t = theme(b.headerTheme);
     const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
-    const titleHtml = b.title
-      ? esc(b.title).replace(/\n/g, '<br>')
-      : (t === 'anime' ? 'Good Food.<br><span style="color:#d20a61">Closer to Home.</span>' : 'Good Food. Closer to Home.');
+    // Title: first line in the theme ink, any following lines in the accent
+    // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
+    // fall back to the default two-liner when no title is set.
+    let titleHtml;
+    if (b.title) {
+      const parts = esc(b.title).split('\n');
+      titleHtml = parts[0] + (parts.length > 1
+        ? '<br><span class="banner-title-accent">' + parts.slice(1).join('<br>') + '</span>'
+        : '');
+    } else {
+      titleHtml = 'Good Food.<br><span class="banner-title-accent">Closer to Home.</span>';
+    }
     const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || (url ? 'Order Now' : '');
@@ -117,16 +126,26 @@
     const b = banners[active];
     header.dataset.theme = theme(b?.headerTheme);
   }
+  // Marking the active slide (re)triggers its text wobble each time it
+  // becomes active — on load, on swipe, and on every autoplay step.
+  function updateActiveSlide() {
+    const kids = track.children;
+    for (let i = 0; i < kids.length; i++) {
+      kids[i].classList.toggle('is-active', i === active);
+    }
+  }
 
   function jumpTo(i) {              // no animation (initial layout / resize)
     setTransform(offsetFor(i), false);
     applyHeaderTheme();
+    updateActiveSlide();
     updateDots();
   }
   function moveTo(i, animate) {     // wraps around
     active = (i + n()) % n();
     setTransform(offsetFor(active), animate);
     applyHeaderTheme();
+    updateActiveSlide();
     updateDots();
   }
   function updateDots() {
