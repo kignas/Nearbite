@@ -405,6 +405,63 @@
 .banner-dot{width:7px;height:7px;}.banner-dot.is-active{width:7px;height:7px;background:#d20a61;}
 @media(max-width:380px){.hero-header{min-height:238px}.anime-art{top:88px;width:57%;height:149px}.banner-wrap,.banner-carousel,.banner-slide{min-height:121px;height:121px}.banner-title{font-size:25px}.banner-copy{max-width:52%;}}
 
+/* ══════════════════════════════════════════════════════════════
+   HEADER CAROUSEL v4 — real horizontal swipe track
+   Header chrome (location + search) stays fixed; only the
+   promotional hero area is a carousel. Each slide is a complete,
+   independent themed panel that physically slides in/out via
+   translate3d. Rules live last so they win cleanly. Nothing below
+   "What's on your mind?" is affected.
+   ══════════════════════════════════════════════════════════════ */
+.hero-header{min-height:302px;}
+@media(max-width:380px){.hero-header{min-height:280px;}}
+
+/* Hero region: a little more breathing room below the search bar */
+.banner-wrap{position:relative;min-height:0;height:auto;margin-top:12px;padding:0;z-index:3;}
+
+/* Viewport clips the track; touch-action keeps vertical scroll native */
+.header-carousel{position:relative;width:100%;overflow:hidden;border-radius:20px;touch-action:pan-y;}
+.header-carousel-track{display:flex;align-items:stretch;gap:10px;will-change:transform;transform:translate3d(0,0,0);transition:transform .42s cubic-bezier(.22,1,.36,1);}
+.header-carousel-track.is-dragging{transition:none;}
+@media(prefers-reduced-motion:reduce){.header-carousel-track{transition:none!important;}}
+
+/* One full-width slide per banner */
+.header-slide{position:relative;flex:0 0 100%;width:100%;height:168px;border-radius:20px;overflow:hidden;}
+@media(max-width:380px){.header-slide{height:150px;border-radius:18px;}.header-carousel{border-radius:18px;}}
+
+.header-slide__panel{position:absolute;inset:0;}
+.header-slide__copy{position:absolute;left:16px;top:0;bottom:0;max-width:56%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;z-index:3;color:var(--slide-ink,#1F2430);}
+.header-slide__art{position:absolute;right:0;top:0;bottom:0;width:52%;height:100%;object-fit:contain;object-position:right bottom;z-index:1;pointer-events:none;}
+@media(max-width:380px){.header-slide__copy{max-width:58%;left:14px;}}
+
+/* Per-slide themes (independent of the header's own theme) */
+.header-slide[data-theme="anime"]{background:#fff;--slide-ink:#1F2430;--slide-muted:#697386;--slide-accent:#D20A61;box-shadow:inset 0 0 0 1px #F2E5EC;}
+.header-slide[data-theme="anime"] .header-slide__art{mix-blend-mode:multiply;}
+.header-slide[data-theme="pink"]{background:linear-gradient(145deg,#F7B7CB,#E887A9);--slide-ink:#172033;--slide-muted:#5F6675;--slide-accent:#C50057;}
+.header-slide[data-theme="lavender"]{background:linear-gradient(145deg,#BDA9EA,#8F70D2);--slide-ink:#17132A;--slide-muted:#4A4160;--slide-accent:#6A35C7;}
+.header-slide[data-theme="magenta"]{background:linear-gradient(145deg,#B80057,#730035);--slide-ink:#fff;--slide-muted:rgba(255,255,255,.82);--slide-accent:#FFDE69;}
+
+/* Copy typography — reuse existing class names, re-based for the panel layout */
+.banner-badge{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:999px;background:rgba(255,255,255,.5);font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--slide-ink);margin-bottom:6px;}
+.banner-title{margin:0;font-size:26px;line-height:1.05;letter-spacing:-.8px;font-weight:900;color:var(--slide-ink);}
+.banner-subtitle{margin:7px 0 0;font-size:11px;line-height:1.35;font-weight:600;color:var(--slide-muted);max-width:26ch;opacity:1;}
+.banner-offer{margin:7px 0 0;font-size:12px;line-height:1.2;font-weight:900;color:var(--slide-ink);}
+.banner-cta{margin-top:11px;display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 15px;border-radius:999px;background:var(--slide-accent);color:#fff;font-size:11px;font-weight:900;text-decoration:none;box-shadow:0 8px 18px -12px rgba(0,0,0,.5);}
+.header-slide[data-theme="magenta"] .banner-cta{color:#5A0027;}
+@media(max-width:380px){.banner-title{font-size:23px;}.banner-subtitle{font-size:10px;}}
+
+/* Neutralize the old header-scoped anime overrides so per-slide themes win */
+.hero-header[data-theme="anime"] .banner-cta{background:var(--slide-accent);color:#fff;}
+.hero-header[data-theme="anime"] .banner-badge{background:rgba(255,255,255,.5);color:var(--slide-ink);}
+.header-slide[data-theme="anime"] .banner-badge{background:#FCE7F3;color:#C50057;}
+.header-slide[data-theme="magenta"] .banner-cta{background:var(--slide-accent);color:#5A0027;}
+
+/* Indicators sit below the hero, above "What's on your mind?" */
+.banner-controls{display:flex;align-items:center;justify-content:center;gap:6px;height:14px;margin-top:9px;padding:0;position:static;transform:none;left:auto;bottom:auto;}
+.banner-controls[hidden]{display:none;}
+.banner-dot{width:6px;height:6px;border:0;padding:0;border-radius:999px;background:rgba(100,116,139,.28);transition:width .25s ease,background .25s ease;cursor:pointer;}
+.banner-dot.is-active{width:18px;height:6px;background:#D20A61;}
+
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
 </head>
@@ -412,7 +469,6 @@
 <body>
 
 <header class="hero-header" id="home-header" data-theme="anime">
-  <div class="anime-art" id="header-art" aria-hidden="true"></div>
   <div class="loc-row es-header-item">
     <a class="loc-left tap" href="address.html">
       <p class="loc-sub" id="loc-sub">Delivery in <span id="delivery-time-value">—</span> minutes</p>
@@ -445,7 +501,10 @@
   </div>
 
   <div class="banner-wrap es-header-item" id="hero-banner-region" aria-live="polite">
-    <div class="banner-carousel" id="banner-carousel" aria-hidden="true"></div>
+    <div class="header-carousel" id="banner-carousel" aria-roledescription="carousel" aria-label="Promotions">
+      <div class="header-carousel-track" id="header-carousel-track"></div>
+    </div>
+    <div class="banner-controls" id="banner-controls" role="tablist" aria-label="Choose promotion" hidden></div>
   </div>
 </header>
 

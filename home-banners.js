@@ -1,92 +1,268 @@
 (function () {
   'use strict';
-  const API_BASE = String(window.CONFIG?.API_BASE_URL || window.API_BASE_URL || 'https://eatswada.onrender.com/api').replace(/\/$/, '');
-  const header = document.getElementById('home-header');
-  const carousel = document.getElementById('banner-carousel');
-  const art = document.getElementById('header-art');
-  if (!header || !carousel || !art) return;
 
-  let headers = [];
-  let active = 0;
-  let touchStartX = 0;
+  // ────────────────────────────────────────────────────────────────
+  // Eatswada home header carousel
+  // Real horizontal swipe track. The location row and search bar are
+  // fixed header chrome; only the promotional hero area is a carousel.
+  // Each banner is rendered ONCE as a complete .header-slide, and the
+  // track is moved with translate3d. No colour-swapping, no cross-fade.
+  // Active banners are loaded from the existing backend and sorted by
+  // priority — admin control is preserved.
+  // ────────────────────────────────────────────────────────────────
+
+  const API_BASE = String(window.CONFIG?.API_BASE_URL || window.API_BASE_URL || 'https://eatswada.onrender.com/api').replace(/\/$/, '');
+
+  const header   = document.getElementById('home-header');
+  const viewport = document.getElementById('banner-carousel');
+  const track    = document.getElementById('header-carousel-track');
+  const dotsWrap = document.getElementById('banner-controls');
+  if (!header || !viewport || !track) return;
+
+  // Initialise exactly once, even if the script is somehow loaded twice.
+  if (viewport.dataset.carouselReady === '1') return;
+  viewport.dataset.carouselReady = '1';
+
+  const AUTOPLAY_MS = 5000;   // time each slide is shown
+  const RESUME_MS   = 4000;   // wait after a gesture before autoplay resumes
+  const SWIPE_MIN   = 50;     // px of horizontal travel needed to change slide
+  const LOCK_MIN    = 8;      // px before we decide the gesture is horiz/vert
+
+  let banners = [];
+  let active  = 0;
   let autoTimer = null;
-  let autoEnabled = false;
+  let resumeTimer = null;
+  let gesturesBound = false;
+
+  // One AbortController lets us detach every listener cleanly if we ever
+  // rebuild, so we never stack duplicate listeners/timers.
+  const bag = new AbortController();
+
+  const n = () => track.children.length;
 
   const safeUrl = v => { v = String(v || '').trim(); return (v.startsWith('/') && !v.startsWith('//')) || /^https:\/\//i.test(v) ? v : ''; };
-  const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const theme = v => ['anime','pink','lavender','magenta'].includes(v) ? v : 'anime';
+  const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+  const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
 
-  function render() {
-    if (!headers.length) {
-      header.dataset.theme = 'anime';
-      art.style.backgroundImage = '';
-      carousel.innerHTML = `<article class="banner-slide is-active"><div class="banner-copy"><h2 class="banner-title">Good Food.<br><span style="color:#d20a61">Closer to Home.</span></h2><p class="banner-subtitle">Discover great food around Maynaguri.</p><a class="banner-cta" href="restaurants.html">Order Now <i class="fa-solid fa-arrow-right"></i></a></div></article>`;
-      return;
-    }
-    active = (active + headers.length) % headers.length;
-    const b = headers[active] || {};
+  // ── Rendering ───────────────────────────────────────────────────
+  function slideHtml(b, i) {
     const t = theme(b.headerTheme);
-    header.dataset.theme = t;
-    header.dataset.headerIndex = String(active);
-    const image = b.mobileImage || b.image || '';
-    art.style.backgroundImage = image ? `url("${String(image).replace(/"/g, '%22')}")` : '';
-    art.style.backgroundColor = t === 'anime' ? '#fff' : (b.background || 'transparent');
-
-    const title = b.title || 'Good Food. Closer to Home.';
+    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
+    const titleHtml = b.title
+      ? esc(b.title).replace(/\n/g, '<br>')
+      : (t === 'anime' ? 'Good Food.<br><span style="color:#d20a61">Closer to Home.</span>' : 'Good Food. Closer to Home.');
     const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
     const url = safeUrl(b.ctaUrl);
-    const cta = b.ctaText || 'Order Now';
-    const titleHtml = t === 'anime' && !b.title ? 'Good Food.<br><span style="color:#d20a61">Closer to Home.</span>' : esc(title).replace(/\n/g,'<br>');
+    const cta = b.ctaText || (url ? 'Order Now' : '');
+    const artHtml = image
+      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+      : '';
 
-    carousel.innerHTML = `<article class="banner-slide is-active ${b.textColor === 'dark' || ['anime','pink','lavender'].includes(t) ? 'text-dark' : ''}">
-      <div class="banner-copy">
-        ${b.badgeText ? `<span class="banner-badge">${esc(b.badgeText)}</span>` : ''}
-        <h2 class="banner-title">${titleHtml}</h2>
-        ${subtitle ? `<p class="banner-subtitle">${esc(subtitle)}</p>` : ''}
-        ${b.offerText ? `<div class="banner-offer">${esc(b.offerText)}</div>` : ''}
-        ${url && cta ? `<a class="banner-cta" href="${esc(url)}">${esc(cta)} <i class="fa-solid fa-arrow-right"></i></a>` : ''}
+    return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
+      <div class="header-slide__panel">
+        <div class="header-slide__copy">
+          ${b.badgeText ? `<span class="banner-badge">${esc(b.badgeText)}</span>` : ''}
+          <h2 class="banner-title">${titleHtml}</h2>
+          ${subtitle ? `<p class="banner-subtitle">${esc(subtitle)}</p>` : ''}
+          ${b.offerText ? `<div class="banner-offer">${esc(b.offerText)}</div>` : ''}
+          ${url && cta ? `<a class="banner-cta" href="${esc(url)}">${esc(cta)} <i class="fa-solid fa-arrow-right"></i></a>` : ''}
+        </div>
+        ${artHtml}
       </div>
-    </article>
-    ${headers.length > 1 ? `<div class="banner-controls" role="tablist">${headers.map((_,i)=>`<button type="button" class="banner-dot ${i===active?'is-active':''}" data-banner-index="${i}" aria-label="Show header ${i+1}"></button>`).join('')}</div>` : ''}`;
-    carousel.querySelectorAll('.banner-dot').forEach(btn => btn.addEventListener('click', () => go(Number(btn.dataset.bannerIndex))));
+    </article>`;
   }
 
-  function go(next) {
-    if (headers.length < 2) return;
-    const old = active;
-    active = (next + headers.length) % headers.length;
-    const dir = active > old || (old === headers.length - 1 && active === 0) ? 'next' : 'prev';
-    header.classList.remove('theme-slide-next','theme-slide-prev');
-    void header.offsetWidth;
-    header.classList.add(dir === 'next' ? 'theme-slide-next' : 'theme-slide-prev');
-    render();
-  }
+  function build() {
+    // No active banners → single safe fallback slide (no swipe/autoplay).
+    const list = banners.length ? banners : [{ headerTheme: 'anime' }];
+    track.innerHTML = list.map(slideHtml).join('');
 
-  function onTouchStart(e) { touchStartX = e.changedTouches[0]?.clientX || 0; }
-  function onTouchEnd(e) {
-    const end = e.changedTouches[0]?.clientX || 0;
-    const delta = end - touchStartX;
-    if (Math.abs(delta) >= 55 && headers.length > 1) go(active + (delta < 0 ? 1 : -1));
-  }
-  header.addEventListener('touchstart', onTouchStart, {passive:true});
-  header.addEventListener('touchend', onTouchEnd, {passive:true});
-
-  async function load() {
-    try {
-      const r = await fetch(`${API_BASE}/home-banners`, {headers:{Accept:'application/json'}, cache:'no-store'});
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-      headers = (Array.isArray(j?.data) ? j.data : []).filter(b => b && b.active !== false).sort((a,b)=>Number(b.priority||0)-Number(a.priority||0));
-      render();
-      if (autoEnabled && headers.length > 1) {
-        clearInterval(autoTimer);
-        autoTimer = setInterval(()=>go(active+1), 5000);
+    const count = n();
+    if (dotsWrap) {
+      if (count > 1) {
+        dotsWrap.hidden = false;
+        dotsWrap.innerHTML = Array.from({ length: count }, (_, i) =>
+          `<button type="button" class="banner-dot${i === 0 ? ' is-active' : ''}" data-idx="${i}" role="tab" aria-label="Go to banner ${i + 1}"></button>`
+        ).join('');
+        dotsWrap.querySelectorAll('.banner-dot').forEach(d =>
+          d.addEventListener('click', () => userGoTo(Number(d.dataset.idx)), { signal: bag.signal }));
+      } else {
+        dotsWrap.hidden = true;
+        dotsWrap.innerHTML = '';
       }
-    } catch (e) {
-      console.warn('[Eatswada] Header feed unavailable:', e.message);
-      headers = [];
-      render();
+    }
+
+    active = 0;
+    jumpTo(0);
+
+    if (count > 1) {
+      bindGestures();
+      startAuto();
+    } else {
+      stopAuto();
     }
   }
+
+  // ── Track movement ──────────────────────────────────────────────
+  function offsetFor(i) {
+    const el = track.children[i];
+    return el ? el.offsetLeft : 0;   // offsetLeft already includes the flex gap
+  }
+  function setTransform(px, animate) {
+    track.classList.toggle('is-dragging', !animate);
+    track.style.transform = `translate3d(${-px}px,0,0)`;
+  }
+  function jumpTo(i) {              // no animation (initial layout / resize)
+    setTransform(offsetFor(i), false);
+    updateDots();
+  }
+  function moveTo(i, animate) {     // wraps around
+    active = (i + n()) % n();
+    setTransform(offsetFor(active), animate);
+    updateDots();
+  }
+  function updateDots() {
+    if (!dotsWrap) return;
+    dotsWrap.querySelectorAll('.banner-dot').forEach((d, i) =>
+      d.classList.toggle('is-active', i === active));
+  }
+
+  // ── Autoplay ────────────────────────────────────────────────────
+  function startAuto() {
+    stopAuto();
+    if (n() > 1) autoTimer = setInterval(() => moveTo(active + 1, true), AUTOPLAY_MS);
+  }
+  function stopAuto() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  }
+  function pauseAuto() {
+    stopAuto();
+    if (resumeTimer) { clearTimeout(resumeTimer); resumeTimer = null; }
+  }
+  function scheduleResume() {
+    if (resumeTimer) clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(startAuto, RESUME_MS);
+  }
+  function userGoTo(i) {
+    pauseAuto();
+    moveTo(i, true);
+    scheduleResume();
+  }
+
+  // ── Gestures (finger-follow drag) ───────────────────────────────
+  let dragging = false, axis = null, startX = 0, startY = 0, basePx = 0, lastDx = 0, capturedId = null;
+
+  const point = e => (e.touches && e.touches[0])
+    ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    : (e.changedTouches && e.changedTouches[0])
+      ? { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+      : { x: e.clientX, y: e.clientY };
+
+  function onStart(e) {
+    if (n() < 2) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const p = point(e);
+    dragging = true; axis = null; lastDx = 0;
+    startX = p.x; startY = p.y;
+    basePx = offsetFor(active);
+    capturedId = (e.pointerId != null) ? e.pointerId : null;
+    pauseAuto();               // hold autoplay while the finger is down
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const p = point(e);
+    const dx = p.x - startX;
+    const dy = p.y - startY;
+
+    if (axis === null) {
+      if (Math.abs(dx) < LOCK_MIN && Math.abs(dy) < LOCK_MIN) return;
+      // Only treat as a carousel swipe when horizontal clearly dominates.
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (axis === 'y') {      // vertical → let the page scroll, abort drag
+        dragging = false;
+        setTransform(basePx, true);
+        return;
+      }
+      // Lock horizontal: capture the pointer so the release can't fire a
+      // stray click on a CTA, and so moves keep coming to us.
+      if (capturedId != null && viewport.setPointerCapture) {
+        try { viewport.setPointerCapture(capturedId); } catch (_) {}
+      }
+    }
+    if (axis !== 'x') return;
+
+    if (e.cancelable) e.preventDefault();   // stop native horizontal panning
+    lastDx = dx;
+    let move = dx;
+    // Rubber-band resistance past the first/last slide.
+    if ((active === 0 && move > 0) || (active === n() - 1 && move < 0)) move *= 0.35;
+    setTransform(basePx - move, false);      // follow the finger, no transition
+  }
+
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    if (capturedId != null && viewport.releasePointerCapture) {
+      try { viewport.releasePointerCapture(capturedId); } catch (_) {}
+    }
+    capturedId = null;
+
+    if (axis === 'x' && Math.abs(lastDx) >= SWIPE_MIN) {
+      moveTo(active + (lastDx < 0 ? 1 : -1), true);   // commit to next/prev
+    } else {
+      moveTo(active, true);                            // snap back
+    }
+    axis = null;
+    scheduleResume();
+  }
+
+  function bindGestures() {
+    if (gesturesBound) return;
+    gesturesBound = true;
+    const sig = { signal: bag.signal };
+
+    if (window.PointerEvent) {
+      viewport.addEventListener('pointerdown', onStart, sig);
+      viewport.addEventListener('pointermove', onMove, sig);
+      viewport.addEventListener('pointerup', onEnd, sig);
+      viewport.addEventListener('pointercancel', onEnd, sig);
+    } else {
+      viewport.addEventListener('touchstart', onStart, { passive: true, signal: bag.signal });
+      viewport.addEventListener('touchmove', onMove, { passive: false, signal: bag.signal });
+      viewport.addEventListener('touchend', onEnd, { passive: true, signal: bag.signal });
+      viewport.addEventListener('touchcancel', onEnd, { passive: true, signal: bag.signal });
+    }
+  }
+
+  // Keep the active slide aligned when the viewport width changes.
+  let rz;
+  window.addEventListener('resize', () => {
+    clearTimeout(rz);
+    rz = setTimeout(() => jumpTo(active), 120);
+  }, { signal: bag.signal });
+
+  // Save cycles / battery when the tab is hidden.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopAuto();
+    else if (n() > 1 && !dragging) startAuto();
+  }, { signal: bag.signal });
+
+  // ── Data ────────────────────────────────────────────────────────
+  async function load() {
+    try {
+      const r = await fetch(`${API_BASE}/home-banners`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      banners = (Array.isArray(j?.data) ? j.data : [])
+        .filter(b => b && b.active !== false)
+        .sort((a, b) => Number(b.priority || 0) - Number(a.priority || 0));
+    } catch (e) {
+      console.warn('[Eatswada] Header feed unavailable:', e.message);
+      banners = [];
+    }
+    build();
+  }
+
   load();
 })();
