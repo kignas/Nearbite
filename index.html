@@ -95,7 +95,7 @@
     isolation:isolate;
     overflow:hidden;
     box-shadow:0 18px 38px -24px rgba(15,23,42,.48);
-    transition:background .7s ease,box-shadow .7s ease,color .4s ease;
+    transition:transform .48s cubic-bezier(.22,1,.36,1),opacity .48s ease,box-shadow .7s ease,color .4s ease;
   }
   .hero-header[data-theme="pink"]{--hero-bg:#D20A61;--hero-bg-2:#9B0045;--hero-accent:#FFD45C;}
   .hero-header[data-theme="lavender"]{--hero-bg:#8060D8;--hero-bg-2:#5837A8;--hero-accent:#FFE37A;}
@@ -128,6 +128,12 @@
     filter:saturate(.92) contrast(.98);
   }
   .anime-art{display:none;}
+
+  /* Future header themes enter horizontally, never by colour cross-fade. */
+  .hero-header.theme-slide-next{animation:esHeaderSlideNext .48s cubic-bezier(.22,1,.36,1) both;}
+  .hero-header.theme-slide-prev{animation:esHeaderSlidePrev .48s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes esHeaderSlideNext{from{opacity:.35;transform:translateX(34px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes esHeaderSlidePrev{from{opacity:.35;transform:translateX(-34px)}to{opacity:1;transform:translateX(0)}}
 
   @keyframes esHeaderEnter{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
   .hero-header{animation:esHeaderEnter .55s cubic-bezier(.22,1,.36,1) both;}
@@ -415,7 +421,7 @@
 
 <body>
 
-<header class="hero-header" id="home-header" data-theme="pink">
+<header class="hero-header" id="home-header" data-theme="anime">
   <img class="anime-art" src="anime_header_character.png" alt="" aria-hidden="true">
   <div class="loc-row es-header-item">
     <a class="loc-left tap" href="address.html">
@@ -532,20 +538,35 @@
   "use strict";
   const header = document.getElementById("home-header");
   if (!header) return;
-  const themes = ["pink", "lavender", "magenta", "anime"];
-  let index = 0;
-  let timer;
-  const apply = () => {
-    header.dataset.theme = themes[index];
-    index = (index + 1) % themes.length;
-  };
-  // The header changes only; the rest of the homepage is untouched.
-  apply();
-  timer = setInterval(apply, 14000);
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { clearInterval(timer); }
-    else { clearInterval(timer); timer = setInterval(apply, 14000); }
-  });
+
+  // Phase 1: Anime header only.
+  // The theme system is intentionally swipe-ready so the future 4-header
+  // rotation can move horizontally instead of fading between colours.
+  header.dataset.theme = "anime";
+  header.dataset.headerIndex = "0";
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let tracking = false;
+
+  header.addEventListener("touchstart", (e) => {
+    const t = e.changedTouches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    tracking = true;
+  }, { passive: true });
+
+  header.addEventListener("touchend", (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy)) return;
+
+    // No theme switch yet: only Anime is enabled in this first rollout.
+    // Future admin-enabled themes will use the same horizontal swipe hook.
+  }, { passive: true });
 })();
 </script>
 </body>
