@@ -288,6 +288,34 @@
     }, { capture: true, signal: bag.signal });
   }
 
+  // Optional real voice search for the benchmark microphone affordance.
+  const voiceMic = document.getElementById('header-voice-search');
+  if (voiceMic) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      voiceMic.hidden = true;
+    } else {
+      const startVoiceSearch = () => {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-IN';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        voiceMic.classList.add('is-listening');
+        recognition.onresult = e => {
+          const query = String(e.results?.[0]?.[0]?.transcript || '').trim();
+          if (query) window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+        };
+        recognition.onend = () => voiceMic.classList.remove('is-listening');
+        recognition.onerror = () => voiceMic.classList.remove('is-listening');
+        try { recognition.start(); } catch (_) { voiceMic.classList.remove('is-listening'); }
+      };
+      voiceMic.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); startVoiceSearch(); }, {signal:bag.signal});
+      voiceMic.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); startVoiceSearch(); }
+      }, {signal:bag.signal});
+    }
+  }
+
   // Keep the active slide aligned when the viewport width changes.
   let rz;
   window.addEventListener('resize', () => {
