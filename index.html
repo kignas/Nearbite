@@ -93,8 +93,8 @@
     overflow:hidden;
     transition:background .35s ease,color .25s ease;
   }
-  .hero-header[data-theme="anime"]{--hd-bg:#f9dfe8;--hd-ink:#202431;--hd-muted:#687386;--hd-accent:#d20a61;}
-  .hero-header[data-theme="pink"]{--hd-bg:#f9dfe8;--hd-ink:#202431;--hd-muted:#596171;--hd-accent:#c90057;}
+  .hero-header[data-theme="anime"]{--hd-bg:#f9cbd8;--hd-ink:#202431;--hd-muted:#687386;--hd-accent:#d20a61;}
+  .hero-header[data-theme="pink"]{--hd-bg:#f9cbd8;--hd-ink:#202431;--hd-muted:#596171;--hd-accent:#c90057;}
   .hero-header[data-theme="lavender"]{--hd-bg:#8060d8;--hd-ink:#fff;--hd-muted:rgba(255,255,255,.86);--hd-accent:#ffe477;}
   .hero-header[data-theme="magenta"]{--hd-bg:#ad0051;--hd-ink:#fff;--hd-muted:rgba(255,255,255,.86);--hd-accent:#ffdf70;}
   .hero-header>*{position:relative;z-index:2;}
@@ -115,8 +115,8 @@
   .loc-sub{margin:4px 0 0;font-size:10px;font-weight:600;color:var(--hd-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;}
   .loc-right{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
   .btn-store{width:78px;height:42px;border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;background:rgba(255,255,255,.56);border:1px solid rgba(210,10,97,.10);box-shadow:0 3px 10px rgba(15,23,42,.035);}
-  .hero-header[data-theme="anime"] .btn-store{background:rgba(255,255,255,.78);border-color:#f1dce6;}
-  .hero-header[data-theme="pink"] .btn-store{background:rgba(255,255,255,.34);border-color:rgba(201,0,87,.12);}
+  .hero-header[data-theme="anime"] .btn-store{background:rgba(255,205,219,.72);border-color:rgba(210,10,97,.08);}
+  .hero-header[data-theme="pink"] .btn-store{background:rgba(255,205,219,.72);border-color:rgba(201,0,87,.08);}
   .hero-header[data-theme="lavender"] .btn-store,.hero-header[data-theme="magenta"] .btn-store{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);}
   .store-top{font-size:8px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;line-height:1;color:var(--hd-muted);}
   .store-bot{font-size:17px;font-weight:900;line-height:1.1;color:var(--hd-accent);}
@@ -145,7 +145,7 @@
   .hero-header[data-theme="pink"] .btn-profile,.hero-header[data-theme="lavender"] .btn-profile,.hero-header[data-theme="magenta"] .btn-profile{background:rgba(255,255,255,.92);}
   .hero-header[data-theme="pink"] .profile-initial{color:#c50057;}
 
-  .banner-wrap{position:relative;width:calc(100% + 40px);aspect-ratio:1.69/1;height:auto;margin:10px -20px 0;padding:0;z-index:3;overflow:hidden;transform:translateZ(0);border-radius:0 0 34px 34px;box-shadow:none;}
+  .banner-wrap{position:relative;width:calc(100% + 40px);aspect-ratio:1.69/1;height:auto;margin:0 -20px 0;padding:0;z-index:3;overflow:hidden;transform:translateZ(0);border-radius:0 0 34px 34px;box-shadow:none;}
   .header-carousel{position:relative;width:100%;height:100%;overflow:hidden;touch-action:pan-y;overscroll-behavior-x:contain;}
   .header-carousel-track{display:flex;height:100%;gap:0;will-change:transform;transform:translate3d(0,0,0);transition:transform .42s cubic-bezier(.22,1,.36,1);}
   .header-carousel-track.is-dragging{transition:none;}
@@ -242,16 +242,16 @@
       width:calc(100% + 40px);
       aspect-ratio:1.69 / 1;
       height:auto;
-      margin:10px -20px 0;
+      margin:0 -20px 0;
       border-radius:0 0 34px 34px;
       box-shadow:none;
     }
     .header-slide{border-radius:0;}
     .header-slide__art{
-      width:61%;
-      height:97%;
-      right:-1%;
-      top:3%;
+      width:76%;
+      height:112%;
+      right:-6%;
+      top:-3%;
       bottom:auto;
       object-position:right center;
     }
@@ -262,9 +262,10 @@
       padding-bottom:4px;
     }
     .banner-title{
-      font-size:25px;
-      line-height:1.04;
-      letter-spacing:-.75px;
+      font-size:27px;
+      line-height:.99;
+      letter-spacing:-1.15px;
+      font-weight:900;
     }
     .banner-subtitle{
       font-size:11px;
@@ -329,10 +330,16 @@
     .banner-wrap{
       width:calc(100% + 28px);
       aspect-ratio:1.69 / 1;
-      margin:10px -14px 0;
+      margin:0 -14px 0;
       border-radius:0 0 30px 30px;
     }
     .header-slide{border-radius:0;}
+    .header-slide__art{
+      width:76%;
+      height:112%;
+      right:-6%;
+      top:-3%;
+    }
     .header-slide__copy{left:28px;width:50%;max-width:50%;}
     .banner-title{font-size:23px;}
     .banner-subtitle--default{font-size:19px;}
