@@ -93,8 +93,8 @@
     overflow:hidden;
     transition:background .35s ease,color .25s ease;
   }
-  .hero-header[data-theme="anime"]{--hd-bg:#fff5fa;--hd-ink:#202431;--hd-muted:#687386;--hd-accent:#d20a61;}
-  .hero-header[data-theme="pink"]{--hd-bg:#f7b5cc;--hd-ink:#202431;--hd-muted:#596171;--hd-accent:#c90057;}
+  .hero-header[data-theme="anime"]{--hd-bg:#fcdee9;--hd-ink:#202431;--hd-muted:#687386;--hd-accent:#d20a61;}
+  .hero-header[data-theme="pink"]{--hd-bg:#fcdee9;--hd-ink:#202431;--hd-muted:#596171;--hd-accent:#c90057;}
   .hero-header[data-theme="lavender"]{--hd-bg:#8060d8;--hd-ink:#fff;--hd-muted:rgba(255,255,255,.86);--hd-accent:#ffe477;}
   .hero-header[data-theme="magenta"]{--hd-bg:#ad0051;--hd-ink:#fff;--hd-muted:rgba(255,255,255,.86);--hd-accent:#ffdf70;}
   .hero-header>*{position:relative;z-index:2;}
@@ -150,8 +150,8 @@
   .header-carousel-track{display:flex;height:100%;gap:0;will-change:transform;transform:translate3d(0,0,0);transition:transform .42s cubic-bezier(.22,1,.36,1);}
   .header-carousel-track.is-dragging{transition:none;}
   .header-slide{position:relative;flex:0 0 100%;width:100%;height:100%;overflow:hidden;background:#fff;}
-  .header-slide[data-theme="anime"]{background:#fff9fc;--sl-ink:#1f2430;--sl-muted:#687386;--sl-accent:#d20a61;--sl-cta-bg:#d20a61;--sl-cta-ink:#fff;}
-  .header-slide[data-theme="pink"]{background:#f7b5cc;--sl-ink:#172033;--sl-muted:#4d5564;--sl-accent:#c50057;--sl-cta-bg:#c50057;--sl-cta-ink:#fff;}
+  .header-slide[data-theme="anime"]{background:#fdd0dc;--sl-ink:#1f2430;--sl-muted:#687386;--sl-accent:#d20a61;--sl-cta-bg:#d20a61;--sl-cta-ink:#fff;}
+  .header-slide[data-theme="pink"]{background:#fdd0dc;--sl-ink:#172033;--sl-muted:#4d5564;--sl-accent:#c50057;--sl-cta-bg:#c50057;--sl-cta-ink:#fff;}
   .header-slide[data-theme="lavender"]{background:#8060d8;--sl-ink:#fff;--sl-muted:rgba(255,255,255,.92);--sl-accent:#ffe078;--sl-cta-bg:#fff;--sl-cta-ink:#5a2ea6;}
   .header-slide[data-theme="magenta"]{background:#ad0051;--sl-ink:#fff;--sl-muted:rgba(255,255,255,.92);--sl-accent:#ffdf70;--sl-cta-bg:#fff;--sl-cta-ink:#a1004b;}
   .header-slide__panel{position:absolute;inset:0;background:transparent;}
@@ -239,15 +239,17 @@
 
     /* The benchmark uses an inset promotional card rather than a full-bleed
        banner. The aspect ratio is retained so artwork scales predictably. */
+    /* Benchmark hero: full-bleed inside the pink header.
+       No inset card, no corner radius, no shadow. */
     .banner-wrap{
-      width:calc(100% - 12px);
+      width:calc(100% + 40px);
       aspect-ratio:1.64 / 1;
       height:auto;
-      margin:9px 6px 0;
-      border-radius:22px;
-      box-shadow:0 8px 22px rgba(31,36,48,.055);
+      margin:9px -20px 0;
+      border-radius:0;
+      box-shadow:none;
     }
-    .header-slide{border-radius:22px;}
+    .header-slide{border-radius:0;}
     .header-slide__art{
       width:55%;
       height:94%;
@@ -294,7 +296,7 @@
     .hero-header{padding-left:14px;padding-right:14px;}
     .loc-name{font-size:17px;}
     .loc-sub{max-width:175px;}
-    .banner-wrap{width:calc(100% - 10px);margin-left:5px;margin-right:5px;}
+    .banner-wrap{width:calc(100% + 28px);margin-left:-14px;margin-right:-14px;border-radius:0;}
     .header-slide__copy{left:16px;}
   }
 

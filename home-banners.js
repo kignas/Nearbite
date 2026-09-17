@@ -45,12 +45,12 @@
 
   const safeUrl = v => { v = String(v || '').trim(); return (v.startsWith('/') && !v.startsWith('//')) || /^https:\/\//i.test(v) ? v : ''; };
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
-  const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
+  const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'pink';
 
   // Resolve the admin-controlled theme safely. Older versions of this file
   // called resolveTheme()/safeCssBackground() without defining them, which
   // stopped build() before any banner could be rendered.
-  const resolveTheme = b => theme(String(b?.headerTheme || b?.theme || 'anime').toLowerCase());
+  const resolveTheme = b => theme(String(b?.headerTheme || b?.theme || 'pink').toLowerCase());
   const safeCssBackground = v => {
     const value = String(v || '').trim();
     // Background is currently not used as the primary visual theme, but keep
@@ -99,7 +99,7 @@
 
   function build() {
     // No active banners → single safe fallback slide (no swipe/autoplay).
-    const list = banners.length ? banners : [{ headerTheme: 'anime' }];
+    const list = banners.length ? banners : [{ headerTheme: 'pink' }];
     track.innerHTML = list.map(slideHtml).join('');
 
     const count = n();
