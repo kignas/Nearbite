@@ -238,30 +238,36 @@
     }
 
     /* FINAL BENCHMARK HERO
-       The promotion is an inset rounded card inside the pink header shell.
-       Keep the header/search chrome outside the card. */
+       Continuous with the pink header — no inner card, no border,
+       no corner radius and no shadow. */
     .banner-wrap{
-      width:100%;
-      aspect-ratio:1.64 / 1;
+      width:calc(100% + 40px);
+      aspect-ratio:1.50 / 1;
       height:auto;
-      margin:9px 0 0;
-      border-radius:24px;
-      overflow:hidden;
+      margin:8px -20px 0;
+      border-radius:0;
       box-shadow:none;
     }
-    .header-slide{
-      border-radius:24px;
-    }
+    .header-slide{border-radius:0;}
     .header-slide[data-theme="anime"],
     .header-slide[data-theme="pink"]{
       background:#facbd8;
     }
     .header-slide__art{
-      width:57%;
-      height:96%;
-      right:-1%;
+      width:59%;
+      height:100%;
+      right:-2%;
       object-position:right center;
     }
+    .header-slide__copy{
+      left:18px;
+      width:50%;
+      max-width:50%;
+      padding-bottom:10px;
+    }
+    .banner-title{font-size:24px;}
+    .banner-subtitle{font-size:11px;line-height:1.4;max-width:23ch;}
+    .banner-cta{min-height:36px;padding:0 16px;font-size:11.5px;}
     .header-slide__copy{
       left:17px;
       width:50%;
@@ -303,9 +309,16 @@
     .hero-header{padding-left:14px;padding-right:14px;}
     .loc-name{font-size:17px;}
     .loc-sub{max-width:175px;}
-    .banner-wrap{width:100%;margin-left:0;margin-right:0;border-radius:22px;}
-    .header-slide{border-radius:22px;}
+    .banner-wrap{
+      width:calc(100% + 28px);
+      aspect-ratio:1.50 / 1;
+      margin-left:-14px;
+      margin-right:-14px;
+      border-radius:0;
+    }
+    .header-slide{border-radius:0;}
     .header-slide__copy{left:16px;}
+    .banner-title{font-size:22px;}
   }
 
   /* ══════════════════════════════════════════════════════════════
