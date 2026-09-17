@@ -1237,6 +1237,11 @@ body.menu-search-open .cat-nav{top:118px!important}
     const numOriginal = Number(originalPrice) || 0;
     const isItemAvailable = inStock !== false && isRestaurantOpen;
 
+    // Items with real customization groups open the sheet instead of adding directly.
+    if (isItemAvailable && window.__ewCust && window.__ewCust[menuItemId]) {
+      return `<button onclick="ewOpenCustomize(${safeMenuItemId})" class="nb-add-btn nb-add-btn--cust" aria-label="Customise ${escapeMenuHtml(itemName)}">ADD <span class="nb-add-plus" aria-hidden="true">+</span></button>`;
+    }
+
     if (qty > 0) {
       // Disables adding if unavailable. Allows removing if the restaurant is OPEN but the item is out of stock.
       // If the restaurant is CLOSED, all changes (add and remove) are disabled.
@@ -1546,7 +1551,12 @@ body.menu-search-open .cat-nav{top:118px!important}
           ? item.desc.trim()
           : (typeof item.description === 'string' ? item.description.trim() : '');
 
-        const isCustomisable = item.isCustomisable === true || item.customisable === true;
+        const ewHasCustom = Array.isArray(item.customizations) && item.customizations.some(g => g && Array.isArray(g.options) && g.options.length);
+        if (ewHasCustom) {
+          window.__ewCust = window.__ewCust || {};
+          window.__ewCust[item._id] = { name: item.name, price: Number(cleanPrice) || Number(item.price) || 0, resId, menuItemId: item._id, image: imageSrc, isVeg: item.isVeg, originalPrice, groups: item.customizations };
+        }
+        const isCustomisable = item.isCustomisable === true || item.customisable === true || ewHasCustom;
 
         return `
           <div class="menu-item nb-menu-item"
@@ -2125,5 +2135,176 @@ body.menu-search-open .cat-nav{top:118px!important}
   </script>
 
 <script src="navigation.js"></script>
+<style id="ewcs-css">
+:root{--ewcs-green:#159A62;--ewcs-green-ink:#0F7A4D;--ewcs-green-soft:#E6F4EC;--ewcs-ink:#101828;--ewcs-ink-3:#697077;--ewcs-line:#E7EAED;}
+.nb-add-btn--cust .nb-add-plus{font-size:12px!important;margin-left:1px!important;opacity:.85!important}
+.ewcs-backdrop{position:fixed;inset:0;z-index:900;background:rgba(16,24,40,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+.ewcs-backdrop.show{opacity:1;pointer-events:auto}
+.ewcs-sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:520px;z-index:901;background:#fff;border-radius:22px 22px 0 0;max-height:90dvh;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 -12px 40px rgba(16,24,40,.18)}
+.ewcs-sheet.show{transform:translate(-50%,0)}
+.ewcs-handle{width:38px;height:4px;border-radius:99px;background:#D8DDE3;margin:10px auto 4px}
+.ewcs-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 18px 12px;border-bottom:1px solid var(--ewcs-line)}
+.ewcs-head h3{margin:0;font-size:18px;font-weight:800;color:var(--ewcs-ink);letter-spacing:-.02em}
+.ewcs-htitle{display:flex;align-items:center;gap:8px}
+.ewcs-close{flex:none;width:32px;height:32px;border:0;border-radius:50%;background:#F2F4F7;color:#475467;font-size:16px;cursor:pointer}
+.ewcs-body{overflow:auto;padding:4px 0 8px}
+.ewcs-group{padding:14px 18px;border-bottom:8px solid #F5F7F8}
+.ewcs-group:last-child{border-bottom:0}
+.ewcs-gtitle{font-size:15px;font-weight:800;color:var(--ewcs-ink)}
+.ewcs-grule{font-size:12px;color:var(--ewcs-ink-3);margin:2px 0 10px;font-weight:600}
+.ewcs-grule .req{color:#B54708}
+.ewcs-opt{display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer}
+.ewcs-opt .veg{width:14px;height:14px;border-radius:3px;border:1.5px solid;display:flex;align-items:center;justify-content:center;flex:none}
+.ewcs-opt .veg::after{content:"";width:6px;height:6px;border-radius:50%}
+.ewcs-opt .veg.v{border-color:#0F7A4D}.ewcs-opt .veg.v::after{background:#0F7A4D}
+.ewcs-opt .veg.n{border-color:#B42318}.ewcs-opt .veg.n::after{background:#B42318}
+.ewcs-opt .lbl{flex:1;font-size:14px;color:var(--ewcs-ink);font-weight:600}
+.ewcs-opt .pr{font-size:13px;color:var(--ewcs-ink-3);font-weight:700;white-space:nowrap}
+.ewcs-opt .pr.free{color:var(--ewcs-green-ink)}
+.ewcs-opt input{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:none;border:2px solid #C6CDD5;cursor:pointer;position:relative;margin:0}
+.ewcs-opt input[type=radio]{border-radius:50%}.ewcs-opt input[type=checkbox]{border-radius:6px}
+.ewcs-opt input:checked{border-color:var(--ewcs-green);background:var(--ewcs-green)}
+.ewcs-opt input:checked::after{content:"";position:absolute;inset:0;margin:auto;width:8px;height:8px;background:#fff;border-radius:50%}
+.ewcs-opt input[type=checkbox]:checked::after{width:10px;height:6px;background:transparent;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg);top:-2px}
+.ewcs-opt input:disabled{opacity:.4;cursor:not-allowed}
+.ewcs-foot{display:flex;align-items:center;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--ewcs-line);background:#fff}
+.ewcs-qty{display:flex;align-items:center;gap:2px;border:1.5px solid var(--ewcs-green);border-radius:12px;height:48px;flex:none}
+.ewcs-qty button{width:40px;height:100%;border:0;background:transparent;color:var(--ewcs-green);font-size:20px;font-weight:800;cursor:pointer}
+.ewcs-qty span{min-width:22px;text-align:center;font-weight:800;color:var(--ewcs-ink)}
+.ewcs-add{flex:1;height:48px;border:0;border-radius:12px;background:var(--ewcs-green);color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(21,154,98,.3)}
+.ewcs-add:disabled{background:#C6CDD5;box-shadow:none;cursor:not-allowed}
+@media(prefers-reduced-motion:reduce){.ewcs-sheet,.ewcs-backdrop{transition:none}}
+</style>
+<script>
+(function(){
+  var cur = null; // { base, qty, sel: [Set per group] }
+  var el = {};
+  function build(){
+    if (document.getElementById('ewcs-sheet')) return;
+    var bd = document.createElement('div'); bd.className='ewcs-backdrop'; bd.id='ewcs-backdrop';
+    var sh = document.createElement('div'); sh.className='ewcs-sheet'; sh.id='ewcs-sheet'; sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
+    sh.innerHTML =
+      '<div class="ewcs-handle"></div>'+
+      '<div class="ewcs-head"><div class="ewcs-htitle"><span class="ewcs-vegdot"></span><h3 id="ewcs-title"></h3></div><button class="ewcs-close" id="ewcs-close" aria-label="Close">✕</button></div>'+
+      '<div class="ewcs-body" id="ewcs-body"></div>'+
+      '<div class="ewcs-foot"><div class="ewcs-qty"><button id="ewcs-minus" aria-label="Decrease">−</button><span id="ewcs-qty">1</span><button id="ewcs-plus" aria-label="Increase">+</button></div><button class="ewcs-add" id="ewcs-add">Add item</button></div>';
+    document.body.appendChild(bd); document.body.appendChild(sh);
+    el = { bd:bd, sh:sh, title:document.getElementById('ewcs-title'), body:document.getElementById('ewcs-body'), qty:document.getElementById('ewcs-qty'), add:document.getElementById('ewcs-add') };
+    bd.addEventListener('click', close);
+    document.getElementById('ewcs-close').addEventListener('click', close);
+    document.getElementById('ewcs-minus').addEventListener('click', function(){ cur.qty=Math.max(1,cur.qty-1); el.qty.textContent=cur.qty; refresh(); });
+    document.getElementById('ewcs-plus').addEventListener('click', function(){ cur.qty=Math.min(20,cur.qty+1); el.qty.textContent=cur.qty; refresh(); });
+    el.add.addEventListener('click', confirmAdd);
+    el.body.addEventListener('change', refresh);
+  }
+  function money(n){ return '₹'+ (Math.round(Number(n)||0)); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  window.ewOpenCustomize = function(id){
+    var base = window.__ewCust && window.__ewCust[id];
+    if (!base){ return; }
+    build();
+    cur = { base:base, qty:1 };
+    el.title.textContent = base.name;
+    document.querySelector('.ewcs-vegdot').className = 'ewcs-vegdot';
+    el.qty.textContent = '1';
+    // render groups
+    var html = '';
+    (base.groups||[]).forEach(function(g, gi){
+      var max = Number(g.maxSelect||1)||1;
+      var required = !!g.required;
+      var multi = max > 1;
+      var rule = multi ? ('Select up to '+max) : (required ? 'Required · Select 1' : 'Select 1');
+      html += '<div class="ewcs-group" data-gi="'+gi+'" data-max="'+max+'" data-required="'+(required?1:0)+'" data-multi="'+(multi?1:0)+'" data-title="'+esc(g.title)+'">'+
+        '<div class="ewcs-gtitle">'+esc(g.title||'Options')+'</div>'+
+        '<div class="ewcs-grule">'+(required?'<span class="req">Required</span> · ':'')+esc(multi?('Select up to '+max):'Select 1')+'</div>';
+      (g.options||[]).forEach(function(o, oi){
+        var extra = Number(o.extraPrice||0);
+        var priceTxt = extra>0 ? ('+'+money(extra)) : (required||multi ? 'Free' : '');
+        var checkedDefault = (!multi && required && oi===0) ? 'checked' : '';
+        html += '<label class="ewcs-opt">'+
+            '<span class="veg '+(o.isVeg!==false?'v':'n')+'"></span>'+
+            '<span class="lbl">'+esc(o.label)+'</span>'+
+            (priceTxt?'<span class="pr '+(extra>0?'':'free')+'">'+priceTxt+'</span>':'')+
+            '<input type="'+(multi?'checkbox':'radio')+'" name="ewcs-g'+gi+'" value="'+oi+'" data-extra="'+extra+'" '+checkedDefault+'>'+
+          '</label>';
+      });
+      html += '</div>';
+    });
+    el.body.innerHTML = html;
+    refresh();
+    el.bd.classList.add('show');
+    requestAnimationFrame(function(){ el.sh.classList.add('show'); });
+  };
+
+  function refresh(){
+    if (!cur) return;
+    var extra = 0, valid = true;
+    el.body.querySelectorAll('.ewcs-group').forEach(function(grp){
+      var multi = grp.getAttribute('data-multi')==='1';
+      var max = Number(grp.getAttribute('data-max'))||1;
+      var required = grp.getAttribute('data-required')==='1';
+      var checked = grp.querySelectorAll('input:checked');
+      checked.forEach(function(c){ extra += Number(c.getAttribute('data-extra'))||0; });
+      // enforce max on multi by disabling unchecked when full
+      if (multi){
+        var full = checked.length >= max;
+        grp.querySelectorAll('input[type=checkbox]').forEach(function(c){ if(!c.checked) c.disabled = full; });
+      }
+      if (required && checked.length < 1) valid = false;
+    });
+    var unit = Number(cur.base.price) + extra;
+    el.add.disabled = !valid;
+    el.add.textContent = valid ? ('Add item · '+money(unit*cur.qty)) : 'Select required options';
+    cur._unit = unit;
+  }
+
+  function confirmAdd(){
+    if (!cur || el.add.disabled) return;
+    var flat = [], labels = [];
+    el.body.querySelectorAll('.ewcs-group').forEach(function(grp){
+      var title = grp.getAttribute('data-title');
+      grp.querySelectorAll('input:checked').forEach(function(c){
+        var lbl = c.closest('.ewcs-opt').querySelector('.lbl').textContent;
+        var vegEl = c.closest('.ewcs-opt').querySelector('.veg');
+        flat.push({ title:title, label:lbl, extraPrice:Number(c.getAttribute('data-extra'))||0, isVeg:!vegEl.classList.contains('n') });
+        labels.push(lbl);
+      });
+    });
+    var base = cur.base;
+    var compositeName = labels.length ? (base.name + ' (' + labels.join(', ') + ')') : base.name;
+    var unit = Number(cur._unit) || Number(base.price);
+    var resName = '';
+    try { resName = (window.currentRestaurant && window.currentRestaurant.name) || (document.getElementById('res-name') && document.getElementById('res-name').textContent.trim()) || ''; } catch(e){}
+    var cart = {};
+    try { cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch(e){ cart = {}; }
+    if (cart[compositeName]) {
+      cart[compositeName].quantity += cur.qty;
+    } else {
+      cart[compositeName] = {
+        quantity: cur.qty,
+        price: unit,
+        originalPrice: (Number(base.originalPrice) > Number(base.price)) ? (Number(base.originalPrice) + (unit - Number(base.price))) : null,
+        resId: base.resId,
+        menuItem: base.menuItemId,
+        image: base.image,
+        name: compositeName,
+        isVeg: base.isVeg,
+        restaurantName: resName,
+        customizations: flat
+      };
+    }
+    try { localStorage.setItem('nearbite_cart', JSON.stringify(cart)); } catch(e){}
+    if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+    close();
+  }
+
+  function close(){
+    if (!el.sh) return;
+    el.sh.classList.remove('show'); el.bd.classList.remove('show');
+    cur = null;
+  }
+})();
+</script>
 </body>
 </html>
