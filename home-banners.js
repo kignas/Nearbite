@@ -4,7 +4,8 @@
   // ────────────────────────────────────────────────────────────────
   // Eatswada home header carousel
   // Real horizontal swipe track. The location row and search bar are
-  // fixed header chrome; only the promotional hero area is a carousel.
+  // The location row, search controls and promotional hero share one
+  // themed header shell. Only the hero artwork/copy is a carousel.
   // Each banner is rendered ONCE as a complete .header-slide, and the
   // track is moved with translate3d. No colour-swapping, no cross-fade.
   // Active banners are loaded from the existing backend and sorted by
@@ -51,8 +52,7 @@
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
     const t = theme(b.headerTheme);
-    const desktopImage = safeUrl(b.image) || safeUrl(b.mobileImage) || (b.image || b.mobileImage || '');
-    const mobileImage = safeUrl(b.mobileImage) || desktopImage;
+    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
@@ -68,8 +68,8 @@
     const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || (url ? 'Order Now' : '');
-    const artHtml = desktopImage
-      ? `<picture class="header-slide__art-wrap"><source media="(max-width: 619px)" srcset="${esc(mobileImage)}"><img class="header-slide__art" src="${esc(desktopImage)}" alt="" aria-hidden="true" loading="lazy" decoding="async"></picture>`
+    const artHtml = image
+      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
       : '';
 
     return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
@@ -129,8 +129,7 @@
   function applyHeaderTheme() {
     const b = banners[active];
     header.dataset.theme = theme(b?.headerTheme);
-    // The selected theme owns the header surface. Legacy banner background
-    // values must never override it (prevents an old/default green leaking in).
+    // Theme CSS owns the complete header surface. Legacy banner.background is intentionally ignored.
     header.style.removeProperty('--hd-bg');
     // Admin-controlled search hint: "Search "Momos"". Falls back to the
     // page default when this banner has no searchPlaceholder set.
