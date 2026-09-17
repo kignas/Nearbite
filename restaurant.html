@@ -951,13 +951,196 @@ body.menu-search-open .cat-nav{top:118px!important}
 @media(prefers-reduced-motion:reduce){
   .menu-search-field,.veg-chip,.order-hint{transition:none!important}
 }
+<style id="eatswada-benchmark-menu-pass">
+/* ============================================================
+   EATSWADA — BENCHMARK MENU PASS
+   Visual-only layer. Existing API, cart, filters, search and JS hooks stay intact.
+   Goal: structured food-delivery UI instead of card-heavy/template UI.
+============================================================ */
+
+:root{
+  --ew-bg:#fff;
+  --ew-surface:#fff;
+  --ew-ink:#151A24;
+  --ew-muted:#747B87;
+  --ew-soft:#A0A6B0;
+  --ew-line:#E7E9ED;
+  --ew-green:#159A62;
+  --ew-green-dark:#0E7C4C;
+  --ew-green-soft:#EFF9F4;
+}
+
+html,body{background:#fff!important;color:var(--ew-ink)!important}
+body{padding-bottom:120px!important}
+
+/* ---------- Top navigation ---------- */
+.top-bar{
+  position:sticky!important;top:0!important;z-index:200!important;
+  height:58px!important;padding:0 18px!important;
+  background:#fff!important;border-bottom:1px solid #ECEEF1!important;
+  box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+}
+.top-bar-left{display:flex;align-items:center;min-width:0;gap:10px}
+.menu-context{display:flex;align-items:center;min-width:0;gap:9px;white-space:nowrap}
+.menu-context-parent{font-size:14px;font-weight:500;color:#7D838D;letter-spacing:-.1px}
+.menu-context-diamond{width:6px;height:6px;flex:none;background:#B8A9D9;transform:rotate(45deg);border-radius:1px}
+.menu-context-name{max-width:150px;overflow:hidden;text-overflow:ellipsis;font-size:15px;font-weight:800;color:var(--ew-ink);letter-spacing:-.25px}
+.icon-btn{
+  width:40px!important;height:40px!important;border-radius:50%!important;
+  background:#fff!important;border:1px solid #ECEEF1!important;box-shadow:none!important;
+}
+.icon-btn i{font-size:14px!important;color:#202630!important}
+.icon-btn:active{background:#F4F5F7!important;transform:scale(.96)!important}
+.top-actions{gap:8px!important}
+
+/* ---------- Restaurant summary: remove the giant floating-card feel ---------- */
+.res-card{
+  margin:0!important;background:#fff!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;overflow:visible!important;
+}
+.res-card-body{padding:19px 18px 15px!important}
+.res-name{
+  font-size:25px!important;line-height:1.12!important;font-weight:800!important;
+  letter-spacing:-.75px!important;color:var(--ew-ink)!important;
+}
+.res-cuisine{
+  margin-top:5px!important;font-size:13px!important;font-weight:500!important;
+  color:#9AA0AA!important;line-height:1.4!important;
+}
+.res-meta-row{margin-top:13px!important;gap:7px!important}
+.rating-pill{
+  padding:5px 8px!important;border-radius:6px!important;background:var(--ew-green)!important;
+}
+.rating-num{font-size:12px!important}
+.rating-count{font-size:10px!important}
+.meta-chip{font-size:12.5px!important;font-weight:600!important;color:#515966!important}
+.meta-dot{color:#CDD1D7!important}
+
+/* Delivery line becomes a quiet information row, not another card. */
+.delivery-strip{
+  margin:0!important;padding:11px 18px!important;background:#FBFCFC!important;
+  border-top:1px solid #F0F1F3!important;border-bottom:1px solid #F0F1F3!important;
+}
+.del-chip{font-size:12px!important;font-weight:600!important;color:#59616D!important}
+.del-chip .orange{color:var(--ew-green)!important}
+
+/* ---------- Filters: light controls, no container ---------- */
+.filter-bar{
+  margin:0!important;padding:12px 18px 9px!important;
+  min-height:0!important;background:#fff!important;border:0!important;
+  box-shadow:none!important;display:flex!important;justify-content:flex-start!important;
+  gap:8px!important;overflow-x:auto!important;scrollbar-width:none!important;
+}
+.filter-bar::-webkit-scrollbar{display:none}
+.advanced-filter-btn,.veg-chip{
+  flex:none!important;min-height:38px!important;height:38px!important;
+  border-radius:9px!important;background:#fff!important;
+  border:1px solid #D9DDE3!important;box-shadow:none!important;
+  font-size:12px!important;font-weight:800!important;letter-spacing:0!important;
+}
+.advanced-filter-btn{padding:8px 12px!important;color:#252B35!important}
+.advanced-filter-btn i{color:#5C6570!important}
+.filter-count-badge{width:18px!important;height:18px!important;min-width:18px!important;font-size:9px!important}
+.veg-toggle-row{display:flex!important;gap:8px!important;flex:none!important}
+.veg-chip{padding:8px 12px!important}
+.veg-chip.veg-type{color:#247A59!important;border-color:#CFE5D9!important;background:#fff!important}
+.veg-chip.nonveg-type{color:#B83B45!important;border-color:#ECD4D7!important;background:#fff!important}
+.veg-chip.veg-type.active{color:#fff!important;background:var(--ew-green)!important;border-color:var(--ew-green)!important}
+.veg-chip.nonveg-type.active{color:#fff!important;background:#D43E49!important;border-color:#D43E49!important}
+
+/* ---------- Menu structure ---------- */
+.menu-section{padding:0 18px!important;margin-top:5px!important}
+.menu-cat-group{margin:0!important}
+.menu-cat-header{
+  padding:17px 0 11px!important;border-bottom:1px solid var(--ew-line)!important;
+}
+.menu-cat-title{font-size:20px!important;font-weight:800!important;letter-spacing:-.5px!important;color:var(--ew-ink)!important}
+.menu-cat-count{font-size:12px!important;color:#A1A6AE!important;font-weight:600!important}
+.menu-cat-chevron{
+  width:28px!important;height:28px!important;border-radius:50%!important;
+  background:#F5F6F8!important;color:#4F5661!important;font-size:10px!important;
+}
+
+/* ---------- Menu item: one clean row ---------- */
+.nb-menu-item{
+  display:flex!important;align-items:flex-start!important;gap:16px!important;
+  padding:18px 0!important;background:transparent!important;border-radius:0!important;
+  box-shadow:none!important;border-bottom:1px solid #ECEEF1!important;
+  animation:none!important;
+}
+.menu-cat-items .nb-menu-item:last-child{border-bottom:0!important}
+.nb-item-main{min-width:0!important;padding-top:1px!important}
+.nb-item-tag-row{gap:6px!important;margin-bottom:7px!important;min-height:15px!important}
+.nb-veg-mark{width:15px!important;height:15px!important;border-radius:3px!important}
+.nb-item-badge,.nb-item-coupon{
+  border-radius:4px!important;padding:3px 6px!important;font-size:9.5px!important;
+  box-shadow:none!important
+}
+.nb-item-title{
+  font-size:17px!important;line-height:1.28!important;font-weight:750!important;
+  letter-spacing:-.25px!important;color:#161B24!important;
+}
+.nb-item-price-row{gap:7px!important;margin-top:7px!important}
+.nb-item-current-price{font-size:15px!important;font-weight:800!important;color:#171C25!important}
+.nb-item-original-price{font-size:12px!important;color:#9DA3AD!important}
+.nb-item-discount{border-radius:4px!important;padding:2px 5px!important;font-size:9.5px!important}
+.nb-item-desc{
+  margin-top:7px!important;font-size:12.5px!important;font-weight:500!important;
+  line-height:1.45!important;color:#8B929D!important;
+}
+
+/* ---------- Food media: clean image, restrained CTA ---------- */
+:root{--nb-item-img:122px!important}
+@media(max-width:380px){:root{--nb-item-img:112px!important}}
+@media(max-width:340px){:root{--nb-item-img:98px!important}}
+.nb-item-media{width:var(--nb-item-img)!important;flex:0 0 var(--nb-item-img)!important}
+.nb-item-image-wrap{
+  border-radius:12px!important;box-shadow:none!important;background:#F3F4F5!important;
+}
+.nb-item-cta{margin-top:-17px!important}
+.nb-add-btn,.nb-qty{
+  min-width:92px!important;height:36px!important;border-radius:9px!important;
+  border:1px solid #B8DEC9!important;background:#fff!important;
+  box-shadow:0 2px 7px rgba(16,24,40,.10)!important;
+}
+.nb-add-btn{color:var(--ew-green)!important;font-size:13px!important;font-weight:800!important;letter-spacing:.02em!important}
+.nb-qty{border-color:#B8DEC9!important}
+.nb-qty-btn{color:var(--ew-green)!important}
+.nb-item-customisable{margin-top:6px!important;font-size:10px!important;color:#999FA8!important}
+
+/* ---------- Search ---------- */
+.menu-search-row{top:58px!important;padding:9px 18px!important;background:#fff!important;box-shadow:none!important}
+.menu-search-field{height:40px!important;border-radius:10px!important;background:#F3F4F6!important}
+
+/* ---------- Remove visual heaviness from empty states ---------- */
+.empty-filter-msg,.menu-state{border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important}
+
+@media(max-width:380px){
+  .top-bar{padding:0 14px!important}
+  .menu-context-name{max-width:118px}
+  .res-card-body{padding-left:14px!important;padding-right:14px!important}
+  .delivery-strip{padding-left:14px!important;padding-right:14px!important}
+  .filter-bar{padding-left:14px!important;padding-right:14px!important}
+  .menu-section{padding-left:14px!important;padding-right:14px!important}
+  .nb-menu-item{gap:12px!important;padding:17px 0!important}
+  .nb-item-title{font-size:16px!important}
+}
+</style>
 </style>
 
 </head>
 <body>
 
   <div class="top-bar">
-    <button class="icon-btn" onclick="window.nearbiteSafeBack()"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="top-bar-left">
+      <button class="icon-btn" onclick="window.nearbiteSafeBack()" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+      <div class="menu-context" aria-label="Restaurant menu">
+        <span class="menu-context-parent">Restaurants</span>
+        <span class="menu-context-diamond" aria-hidden="true"></span>
+        <span id="top-res-name" class="menu-context-name">Restaurant</span>
+      </div>
+    </div>
     <div class="top-actions">
       <button class="icon-btn" type="button" onclick="openRestaurantDetails()" aria-label="Restaurant information"><i class="fa-solid fa-circle-info"></i></button>
       <button class="icon-btn" type="button" id="menu-search-btn" onclick="toggleMenuSearch()" aria-label="Search this menu" aria-expanded="false"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -1389,7 +1572,10 @@ body.menu-search-open .cat-nav{top:118px!important}
     currentRestaurant = restaurant;   // used by the minimum-order hint
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
-    document.getElementById('res-name').innerText = restaurant.name || 'Restaurant';
+    const restaurantName = restaurant.name || 'Restaurant';
+    document.getElementById('res-name').innerText = restaurantName;
+    const topResName = document.getElementById('top-res-name');
+    if (topResName) topResName.innerText = restaurantName;
 
     const cuisine = cuisineText(restaurant);
     const cuisineEl = document.getElementById('res-cuisine');
