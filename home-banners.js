@@ -46,27 +46,7 @@
   const safeUrl = v => { v = String(v || '').trim(); return (v.startsWith('/') && !v.startsWith('//')) || /^https:\/\//i.test(v) ? v : ''; };
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
-
-  // Guard against an accidentally mismatched admin theme while keeping explicit
-  // non-anime themes authoritative. This is especially useful during artwork setup.
-  function resolveTheme(b) {
-    const explicit = theme(b?.headerTheme);
-    if (explicit !== 'anime') return explicit;
-    const hay = [b?.image, b?.mobileImage, b?.title, b?.subtitle, b?.offerText, b?.searchPlaceholder, b?.badgeText]
-      .map(v => String(v || '').toLowerCase()).join(' ');
-    if (/burger|hamburger|cheeseburger/.test(hay)) return 'pink';
-    if (/pizza/.test(hay)) return 'lavender';
-    if (/biryani/.test(hay)) return 'magenta';
-    return explicit;
-  }
-
-  // Admin-controlled hero/header background. Only allow simple CSS colors/gradients.
-  const safeCssBackground = v => {
-    v = String(v || '').trim();
-    if (!v || v.length > 180) return '';
-    const ok = /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([\d\s.,%+\-]+\)|hsla?\([\d\s.,%+\-]+\)|(?:linear|radial)-gradient\([\w\s.,%+\-#()]+\)|transparent)$/i;
-    return ok.test(v) ? v : '';
-  };
+  // Theme is derived from the active banner headerTheme; legacy background is ignored.
 
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
@@ -77,17 +57,18 @@
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
     let titleHtml;
-    if (b.title) {
+    const legacyWelcome = /^welcome\s+to\s+eatswada$/i.test(String(b.title || '').trim());
+    if (b.title && !legacyWelcome) {
       const parts = esc(b.title).split('\n');
       titleHtml = parts[0] + (parts.length > 1
         ? '<br><span class="banner-title-accent">' + parts.slice(1).join('<br>') + '</span>'
         : '');
     } else {
-      titleHtml = 'Good Food.<br><span class="banner-title-accent">Closer to Home.</span>';
+      titleHtml = 'Good Food<br><span class="banner-title-accent">Closer to Home.</span>'; 
     }
     const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
     const url = safeUrl(b.ctaUrl);
-    const cta = b.ctaText || (url ? 'Order Now' : '');
+    const cta = b.ctaText || 'Order Now';
     const artHtml = image
       ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
       : '';
@@ -99,7 +80,7 @@
           <h2 class="banner-title">${titleHtml}</h2>
           ${subtitle ? `<p class="banner-subtitle">${esc(subtitle)}</p>` : ''}
           ${b.offerText ? `<div class="banner-offer">${esc(b.offerText)}</div>` : ''}
-          ${url && cta ? `<a class="banner-cta" href="${esc(url)}">${esc(cta)} <i class="fa-solid fa-arrow-right"></i></a>` : ''}
+          ${cta ? `<a class="banner-cta" href="${esc(url || 'search.html')}">${esc(cta)} <i class="fa-solid fa-arrow-right"></i></a>` : ''}
         </div>
         ${artHtml}
       </div>
