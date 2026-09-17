@@ -2714,6 +2714,11 @@ body{padding-bottom:120px!important}
     try { localStorage.setItem('nearbite_cart', JSON.stringify(cart)); } catch(e){}
     if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
     try { refreshCustomizedCartQuantities(); } catch (e) { console.warn('[restaurant] custom cart count refresh failed:', e); }
+    // Customised items bypass cart-bar.js's normal updateCart() path, so the
+    // free-delivery threshold must be evaluated explicitly after the custom
+    // item is committed to localStorage. This is what triggers the one-time
+    // congratulations toast exactly when the order crosses the threshold.
+    try { renderOrderHint(); } catch (e) { console.warn('[restaurant] free-delivery state refresh failed:', e); }
     close();
   }
 
