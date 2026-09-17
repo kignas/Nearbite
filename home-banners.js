@@ -17,6 +17,8 @@
   const viewport = document.getElementById('banner-carousel');
   const track    = document.getElementById('header-carousel-track');
   const dotsWrap = document.getElementById('banner-controls');
+  const searchPlaceholderEl = document.getElementById('search-placeholder');
+  const defaultSearchPlaceholder = searchPlaceholderEl ? searchPlaceholderEl.textContent : '';
   if (!header || !viewport || !track) return;
 
   // Initialise exactly once, even if the script is somehow loaded twice.
@@ -45,19 +47,12 @@
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
 
-  // Admin-controlled hero/header background. Only allow simple CSS colors/gradients.
-  const safeCssBackground = v => {
-    v = String(v || '').trim();
-    if (!v || v.length > 180) return '';
-    const ok = /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([\d\s.,%+\-]+\)|hsla?\([\d\s.,%+\-]+\)|(?:linear|radial)-gradient\([\w\s.,%+\-#()]+\)|transparent)$/i;
-    return ok.test(v) ? v : '';
-  };
 
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
     const t = theme(b.headerTheme);
-    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
-    const bannerBg = safeCssBackground(b.background);
+    const desktopImage = safeUrl(b.image) || safeUrl(b.mobileImage) || (b.image || b.mobileImage || '');
+    const mobileImage = safeUrl(b.mobileImage) || desktopImage;
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
@@ -73,8 +68,8 @@
     const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || (url ? 'Order Now' : '');
-    const artHtml = image
-      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+    const artHtml = desktopImage
+      ? `<picture class="header-slide__art-wrap"><source media="(max-width: 619px)" srcset="${esc(mobileImage)}"><img class="header-slide__art" src="${esc(desktopImage)}" alt="" aria-hidden="true" loading="lazy" decoding="async"></picture>`
       : '';
 
     return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
@@ -134,9 +129,15 @@
   function applyHeaderTheme() {
     const b = banners[active];
     header.dataset.theme = theme(b?.headerTheme);
-    const bg = safeCssBackground(b?.background);
-    if (bg) header.style.setProperty('--hd-bg', bg);
-    else header.style.removeProperty('--hd-bg');
+    // The selected theme owns the header surface. Legacy banner background
+    // values must never override it (prevents an old/default green leaking in).
+    header.style.removeProperty('--hd-bg');
+    // Admin-controlled search hint: "Search "Momos"". Falls back to the
+    // page default when this banner has no searchPlaceholder set.
+    if (searchPlaceholderEl) {
+      const hint = String(b?.searchPlaceholder || '').trim();
+      searchPlaceholderEl.textContent = hint ? `Search "${hint}"` : defaultSearchPlaceholder;
+    }
   }
   // Marking the active slide (re)triggers its text wobble each time it
   // becomes active — on load, on swipe, and on every autoplay step.
