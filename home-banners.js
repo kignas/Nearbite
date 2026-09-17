@@ -47,6 +47,19 @@
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
 
+  // Guard against an accidentally mismatched admin theme while keeping explicit
+  // non-anime themes authoritative. This is especially useful during artwork setup.
+  function resolveTheme(b) {
+    const explicit = theme(b?.headerTheme);
+    if (explicit !== 'anime') return explicit;
+    const hay = [b?.image, b?.mobileImage, b?.title, b?.subtitle, b?.offerText, b?.searchPlaceholder, b?.badgeText]
+      .map(v => String(v || '').toLowerCase()).join(' ');
+    if (/burger|hamburger|cheeseburger/.test(hay)) return 'pink';
+    if (/pizza/.test(hay)) return 'lavender';
+    if (/biryani/.test(hay)) return 'magenta';
+    return explicit;
+  }
+
   // Admin-controlled hero/header background. Only allow simple CSS colors/gradients.
   const safeCssBackground = v => {
     v = String(v || '').trim();
@@ -57,7 +70,7 @@
 
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
-    const t = theme(b.headerTheme);
+    const t = resolveTheme(b);
     const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
     const bannerBg = safeCssBackground(b.background);
     // Title: first line in the theme ink, any following lines in the accent
@@ -135,7 +148,7 @@
   }
   function applyHeaderTheme() {
     const b = banners[active];
-    header.dataset.theme = theme(b?.headerTheme);
+    header.dataset.theme = resolveTheme(b);
     // The banner's legacy `background` field must not override the visual theme.
     // The active header theme is the single source of truth for the shell.
     header.style.removeProperty('--hd-bg');
