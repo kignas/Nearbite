@@ -4,8 +4,7 @@
   // ────────────────────────────────────────────────────────────────
   // Eatswada home header carousel
   // Real horizontal swipe track. The location row and search bar are
-  // The location row, search controls and promotional hero share one
-  // themed header shell. Only the hero artwork/copy is a carousel.
+  // fixed header chrome; only the promotional hero area is a carousel.
   // Each banner is rendered ONCE as a complete .header-slide, and the
   // track is moved with translate3d. No colour-swapping, no cross-fade.
   // Active banners are loaded from the existing backend and sorted by
@@ -48,6 +47,13 @@
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
 
+  // Admin-controlled hero/header background. Only allow simple CSS colors/gradients.
+  const safeCssBackground = v => {
+    v = String(v || '').trim();
+    if (!v || v.length > 180) return '';
+    const ok = /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([\d\s.,%+\-]+\)|hsla?\([\d\s.,%+\-]+\)|(?:linear|radial)-gradient\([\w\s.,%+\-#()]+\)|transparent)$/i;
+    return ok.test(v) ? v : '';
+  };
 
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
@@ -56,18 +62,26 @@
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
+    let rawTitle = String(b.title || '').trim();
+    // Convert the old welcome copy to the benchmark headline while keeping
+    // genuinely custom admin copy untouched.
+    if (!rawTitle || /welcome to\s*eatswada/i.test(rawTitle)) rawTitle = 'Good Food\nCloser to Home.';
     let titleHtml;
-    if (b.title) {
-      const parts = esc(b.title).split('\n');
+    {
+      const parts = esc(rawTitle).split('\n');
       titleHtml = parts[0] + (parts.length > 1
         ? '<br><span class="banner-title-accent">' + parts.slice(1).join('<br>') + '</span>'
         : '');
-    } else {
-      titleHtml = 'Good Food.<br><span class="banner-title-accent">Closer to Home.</span>';
     }
-    const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
-    const url = safeUrl(b.ctaUrl);
-    const cta = b.ctaText || (url ? 'Order Now' : '');
+    const benchmark = {
+      anime: { subtitle: 'Discover great food around Maynaguri.' },
+      pink: { subtitle: 'Tasty food. Happier you. ♥' },
+      lavender: { subtitle: 'Pizza makes everything better! ♥' },
+      magenta: { subtitle: 'Biryani starts at ₹79' }
+    };
+    const subtitle = b.subtitle || benchmark[t]?.subtitle || 'Discover great food around Maynaguri.';
+    const url = safeUrl(b.ctaUrl) || 'under99.html';
+    const cta = b.ctaText || 'Order Now';
     const artHtml = image
       ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
       : '';
@@ -129,12 +143,12 @@
   function applyHeaderTheme() {
     const b = banners[active];
     header.dataset.theme = theme(b?.headerTheme);
-    // Theme CSS owns the complete header surface. Legacy banner.background is intentionally ignored.
     header.style.removeProperty('--hd-bg');
     // Admin-controlled search hint: "Search "Momos"". Falls back to the
     // page default when this banner has no searchPlaceholder set.
     if (searchPlaceholderEl) {
-      const hint = String(b?.searchPlaceholder || '').trim();
+      const defaults = { anime: 'Momos', pink: 'Burger', lavender: 'Pizza', magenta: 'Biryani' };
+      const hint = String(b?.searchPlaceholder || defaults[theme(b?.headerTheme)] || '').trim();
       searchPlaceholderEl.textContent = hint ? `Search "${hint}"` : defaultSearchPlaceholder;
     }
   }
