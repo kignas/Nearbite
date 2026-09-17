@@ -59,29 +59,22 @@
   function slideHtml(b, i) {
     const t = theme(b.headerTheme);
     const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
+    const bannerBg = safeCssBackground(b.background);
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
-    let rawTitle = String(b.title || '').trim();
-    // Convert the old welcome copy to the benchmark headline while keeping
-    // genuinely custom admin copy untouched.
-    if (!rawTitle || /welcome to\s*eatswada/i.test(rawTitle)) rawTitle = 'Good Food\nCloser to Home.';
     let titleHtml;
-    {
-      const parts = esc(rawTitle).split('\n');
+    if (b.title) {
+      const parts = esc(b.title).split('\n');
       titleHtml = parts[0] + (parts.length > 1
         ? '<br><span class="banner-title-accent">' + parts.slice(1).join('<br>') + '</span>'
         : '');
+    } else {
+      titleHtml = 'Good Food.<br><span class="banner-title-accent">Closer to Home.</span>';
     }
-    const benchmark = {
-      anime: { subtitle: 'Discover great food around Maynaguri.' },
-      pink: { subtitle: 'Tasty food. Happier you. ♥' },
-      lavender: { subtitle: 'Pizza makes everything better! ♥' },
-      magenta: { subtitle: 'Biryani starts at ₹79' }
-    };
-    const subtitle = b.subtitle || benchmark[t]?.subtitle || 'Discover great food around Maynaguri.';
-    const url = safeUrl(b.ctaUrl) || 'under99.html';
-    const cta = b.ctaText || 'Order Now';
+    const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
+    const url = safeUrl(b.ctaUrl);
+    const cta = b.ctaText || (url ? 'Order Now' : '');
     const artHtml = image
       ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
       : '';
@@ -143,12 +136,13 @@
   function applyHeaderTheme() {
     const b = banners[active];
     header.dataset.theme = theme(b?.headerTheme);
+    // The banner's legacy `background` field must not override the visual theme.
+    // The active header theme is the single source of truth for the shell.
     header.style.removeProperty('--hd-bg');
     // Admin-controlled search hint: "Search "Momos"". Falls back to the
     // page default when this banner has no searchPlaceholder set.
     if (searchPlaceholderEl) {
-      const defaults = { anime: 'Momos', pink: 'Burger', lavender: 'Pizza', magenta: 'Biryani' };
-      const hint = String(b?.searchPlaceholder || defaults[theme(b?.headerTheme)] || '').trim();
+      const hint = String(b?.searchPlaceholder || '').trim();
       searchPlaceholderEl.textContent = hint ? `Search "${hint}"` : defaultSearchPlaceholder;
     }
   }
