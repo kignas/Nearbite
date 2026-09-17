@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <!-- Switched to Manrope for a more space-efficient, native-app feel -->
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Manrope:wght@400..800&display=swap" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
 <style>
   /* ══════════════════════════════════════════════════════════════
@@ -145,13 +145,13 @@
   .hero-header[data-theme="pink"] .btn-profile,.hero-header[data-theme="lavender"] .btn-profile,.hero-header[data-theme="magenta"] .btn-profile{background:rgba(255,255,255,.92);}
   .hero-header[data-theme="pink"] .profile-initial{color:#c50057;}
 
-  .banner-wrap{position:relative;width:calc(100% + 32px);aspect-ratio:1.64/1;height:auto;margin:7px -16px 0;padding:0;z-index:3;border-radius:23px;overflow:hidden;box-shadow:none;}
+  .banner-wrap{position:relative;width:calc(100% + 40px);aspect-ratio:1.69/1;height:auto;margin:10px -20px 0;padding:0;z-index:3;overflow:hidden;transform:translateZ(0);border-radius:0 0 34px 34px;box-shadow:none;}
   .header-carousel{position:relative;width:100%;height:100%;overflow:hidden;touch-action:pan-y;overscroll-behavior-x:contain;}
   .header-carousel-track{display:flex;height:100%;gap:0;will-change:transform;transform:translate3d(0,0,0);transition:transform .42s cubic-bezier(.22,1,.36,1);}
   .header-carousel-track.is-dragging{transition:none;}
-  .header-slide{position:relative;flex:0 0 100%;width:100%;height:100%;overflow:hidden;background:#fff;}
-  .header-slide[data-theme="anime"]{background:#fdd0dc;--sl-ink:#1f2430;--sl-muted:#687386;--sl-accent:#d20a61;--sl-cta-bg:#d20a61;--sl-cta-ink:#fff;}
-  .header-slide[data-theme="pink"]{background:#fdd0dc;--sl-ink:#172033;--sl-muted:#4d5564;--sl-accent:#c50057;--sl-cta-bg:#c50057;--sl-cta-ink:#fff;}
+  .header-slide{position:relative;flex:0 0 100%;width:100%;height:100%;overflow:hidden;border-radius:0;background:#fff;}
+  .header-slide[data-theme="anime"]{background:linear-gradient(157deg,#fcd4e0 0%,#f9c8d7 55%,#f4bccd 100%);--sl-ink:#141726;--sl-muted:#5b5560;--sl-accent:#d30756;--sl-cta-bg:#c6004e;--sl-cta-ink:#fff;}
+  .header-slide[data-theme="pink"]{background:linear-gradient(157deg,#fcd4e0 0%,#f9c8d7 55%,#f4bccd 100%);--sl-ink:#141726;--sl-muted:#5b5560;--sl-accent:#d30756;--sl-cta-bg:#c6004e;--sl-cta-ink:#fff;}
   .header-slide[data-theme="lavender"]{background:#8060d8;--sl-ink:#fff;--sl-muted:rgba(255,255,255,.92);--sl-accent:#ffe078;--sl-cta-bg:#fff;--sl-cta-ink:#5a2ea6;}
   .header-slide[data-theme="magenta"]{background:#ad0051;--sl-ink:#fff;--sl-muted:rgba(255,255,255,.92);--sl-accent:#ffdf70;--sl-cta-bg:#fff;--sl-cta-ink:#a1004b;}
   .header-slide__panel{position:absolute;inset:0;background:transparent;}
@@ -159,16 +159,19 @@
   .header-slide__panel::after{content:"";position:absolute;left:0;top:0;bottom:0;width:46%;z-index:2;pointer-events:none;background:linear-gradient(90deg,var(--sl-fade,rgba(255,255,255,0)) 60%,rgba(255,255,255,0) 100%);}
   .header-slide__copy{position:absolute;left:18px;top:0;bottom:0;width:49%;max-width:49%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-bottom:8px;z-index:3;color:var(--sl-ink);}
   .banner-badge{display:inline-flex;align-items:center;min-height:19px;padding:0 8px;margin-bottom:6px;border-radius:999px;background:rgba(255,255,255,.55);font-size:7px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--sl-ink);}
-  .banner-title{margin:0;font-size:24px;line-height:1.04;letter-spacing:-.8px;font-weight:900;color:var(--sl-ink);max-width:12ch;}
+  .banner-title{margin:0;font-size:26px;line-height:1.02;letter-spacing:-.8px;font-weight:900;color:var(--sl-ink);max-width:13ch;}
   .banner-title-accent{color:var(--sl-accent);}
   .banner-subtitle{margin:7px 0 0;font-size:11px;line-height:1.35;font-weight:650;color:var(--sl-muted);max-width:22ch;}
+  .banner-subtitle--default{font-family:'Caveat','Manrope',cursive;font-size:21px;line-height:1.12;font-weight:600;letter-spacing:.3px;margin-top:9px;max-width:none;}
+  .banner-heart{color:var(--sl-accent);font-size:.9em;}
   .banner-offer{margin:5px 0 0;font-size:13px;line-height:1.2;font-weight:900;color:var(--sl-ink);}
-  .banner-cta{margin-top:9px;display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 15px;border-radius:999px;background:var(--sl-cta-bg);color:var(--sl-cta-ink);font-size:11px;font-weight:900;text-decoration:none;box-shadow:0 5px 12px -9px rgba(0,0,0,.45);}
-  .banner-cta i{font-size:9px;}
-  .banner-controls{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;z-index:5;}
+  .banner-cta{margin-top:13px;display:inline-flex;align-items:center;gap:10px;min-height:42px;padding:0 8px 0 22px;border-radius:999px;background:var(--sl-cta-bg);color:var(--sl-cta-ink);font-size:14px;font-weight:800;letter-spacing:.1px;text-decoration:none;box-shadow:0 12px 22px -12px rgba(153,0,74,.75);}
+  .banner-cta__chev{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.22);flex:0 0 auto;}
+  .banner-cta__chev i{font-size:11px;line-height:1;}
+  .banner-controls{position:absolute;left:0;right:0;bottom:14px;display:flex;align-items:center;justify-content:center;gap:7px;z-index:5;}
   .banner-controls[hidden]{display:none;}
   .banner-dot{width:7px;height:7px;border:0;padding:0;border-radius:999px;background:rgba(110,120,140,.38);transition:width .25s ease,background .25s ease;cursor:pointer;}
-  .banner-dot.is-active{width:18px;background:#d20a61;}
+  .banner-dot.is-active{width:18px;background:#d30756;}
   .hero-header[data-theme="lavender"] .banner-dot,.hero-header[data-theme="magenta"] .banner-dot{background:rgba(255,255,255,.48);}
   .hero-header[data-theme="lavender"] .banner-dot.is-active,.hero-header[data-theme="magenta"] .banner-dot.is-active{background:#fff;}
 
@@ -181,9 +184,7 @@
     .loc-row{margin-bottom:7px;}.loc-name{font-size:17px;}.loc-sub{font-size:9.5px;max-width:175px;}
     .loc-pin-wrap{flex-basis:40px;width:40px;height:40px;}.btn-store{width:74px;height:40px;}.btn-profile{width:40px;height:40px;}
     .search-row{height:50px;}.search-box,.veg-box{height:50px;}.veg-box{flex-basis:56px;width:56px;}
-    .banner-wrap{width:calc(100% + 16px);margin:6px -8px 0;border-radius:21px;}
-    .header-slide__copy{left:17px;width:49%;max-width:49%;}.banner-title{font-size:22px;}.banner-subtitle{font-size:10.5px;}.banner-cta{min-height:32px;padding:0 14px;}
-    .banner-controls{bottom:9px;}
+    .header-slide__copy{left:17px;width:52%;max-width:52%;}.banner-title{font-size:22px;}.banner-subtitle{font-size:10.5px;}
   }
   @media(min-width:600px){
     .hero-header{padding-left:24px;padding-right:24px;}
@@ -197,128 +198,145 @@
 
 
   /* ══════════════════════════════════════════════════════════════
-     FINAL MOBILE PIXEL PASS — benchmark alignment
-     Keep the existing desktop/tablet composition untouched.
+     FINAL MOBILE BENCHMARK PASS
+     Pink shell continues behind the hero and ends with a rounded
+     bottom edge into the white category section.
      ══════════════════════════════════════════════════════════════ */
-  @media (max-width: 599px){
+  @media (max-width:599px){
     .hero-header{
-      padding:10px 20px 10px;
+      padding:10px 20px 0;
+      background:#fff;
+      overflow:visible;
     }
-
+    .hero-header::before{
+      content:"";
+      position:absolute;
+      z-index:0;
+      left:0; right:0; top:0; bottom:0;
+      background:#f9cbd8;
+      border-bottom-left-radius:34px;
+      border-bottom-right-radius:34px;
+      pointer-events:none;
+    }
     .loc-row{
       min-height:46px;
       margin-bottom:8px;
       gap:8px;
     }
     .loc-left{gap:9px;}
-    .loc-pin-wrap{
-      flex-basis:42px;
-      width:42px;
-      height:42px;
-    }
+    .loc-pin-wrap{flex-basis:42px;width:42px;height:42px;}
     .loc-name{font-size:18px;}
     .loc-sub{font-size:10px;max-width:185px;}
     .btn-store{width:76px;height:42px;border-radius:15px;}
     .btn-profile{width:42px;height:42px;}
 
-    .search-row{
-      height:52px;
-      gap:9px;
-    }
+    .search-row{height:52px;gap:9px;}
     .search-box,.veg-box{height:52px;}
-    .search-box{
-      padding:0 15px;
-      border-radius:17px;
-    }
+    .search-box{padding:0 15px;border-radius:17px;}
     .search-text{font-size:14px;}
-    .veg-box{
-      flex:0 0 58px;
-      width:58px;
-      border-radius:17px;
-    }
+    .veg-box{flex:0 0 58px;width:58px;border-radius:17px;}
 
-    /* FINAL BENCHMARK HERO
-       Continuous with the pink header — no inner card, no border,
-       no corner radius and no shadow. */
+    /* Full-width hero: no top/side card corners. Only the shell has
+       the rounded bottom transition into the white content. */
     .banner-wrap{
       width:calc(100% + 40px);
-      aspect-ratio:1.50 / 1;
+      aspect-ratio:1.69 / 1;
       height:auto;
-      margin:8px -20px 0;
-      border-radius:0;
+      margin:10px -20px 0;
+      border-radius:0 0 34px 34px;
       box-shadow:none;
     }
     .header-slide{border-radius:0;}
-    .header-slide[data-theme="anime"],
-    .header-slide[data-theme="pink"]{
-      background:#facbd8;
-    }
     .header-slide__art{
-      width:59%;
-      height:100%;
-      right:-2%;
+      width:61%;
+      height:101%;
+      right:-1%;
+      top:0;
+      bottom:auto;
       object-position:right center;
     }
     .header-slide__copy{
-      left:18px;
-      width:50%;
-      max-width:50%;
-      padding-bottom:10px;
-    }
-    .banner-title{font-size:24px;}
-    .banner-subtitle{font-size:11px;line-height:1.4;max-width:23ch;}
-    .banner-cta{min-height:36px;padding:0 16px;font-size:11.5px;}
-    .header-slide__copy{
-      left:17px;
-      width:50%;
-      max-width:50%;
-      padding-bottom:7px;
+      left:38px;
+      width:48%;
+      max-width:48%;
+      padding-bottom:4px;
     }
     .banner-title{
-      font-size:22px;
+      font-size:25px;
       line-height:1.04;
-      letter-spacing:-.7px;
+      letter-spacing:-.75px;
     }
     .banner-subtitle{
-      margin-top:7px;
-      font-size:10.5px;
-      line-height:1.35;
+      font-size:11px;
+      line-height:1.4;
+      max-width:25ch;
+    }
+    .banner-subtitle--default{
+      font-size:21px;
+      line-height:1.12;
+      margin-top:10px;
     }
     .banner-cta{
-      min-height:33px;
-      margin-top:9px;
-      padding:0 14px;
-      font-size:11px;
+      min-height:42px;
+      margin-top:13px;
+      padding:0 8px 0 22px;
+      font-size:14px;
+      border-radius:999px;
     }
-    .banner-controls{bottom:9px;gap:6px;}
-    .banner-dot{width:7px;height:7px;}
-    .banner-dot.is-active{width:17px;}
+    .banner-cta__chev{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+    }
+    .banner-controls{
+      bottom:17px;
+      gap:8px;
+    }
+    .banner-dot{width:8px;height:8px;}
+    .banner-dot.is-active{width:18px;}
 
-    /* Bring the category section closer to the benchmark card rhythm. */
-    #mind-section{padding-top:17px !important;}
-    #mind-section .sec-head{margin-bottom:14px;}
-    #mind-section .sec-title{font-size:12px;letter-spacing:1.45px;}
-    #mind-section .cat-scroll{
-      gap:16px 12px;
-      padding-top:3px;
-      padding-bottom:18px;
+    /* Strong, unmistakable active Veg state. */
+    .veg-track.on{
+      background:#19b963;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);
     }
+    .veg-track.on .veg-thumb{
+      transform:translateX(17px);
+    }
+
+    #mind-section{
+      padding-top:20px !important;
+      background:#fff;
+    }
+    #mind-section .sec-head{margin-bottom:16px;}
+    #mind-section .sec-title{font-size:12px;letter-spacing:1.5px;}
+    #mind-section .cat-scroll{
+      gap:18px 12px;
+      padding-top:4px;
+      padding-bottom:20px;
+    }
+    .cat-name{font-size:14px;font-weight:700;}
   }
 
   @media (max-width:380px){
     .hero-header{padding-left:14px;padding-right:14px;}
+    .hero-header::before{
+      border-bottom-left-radius:30px;
+      border-bottom-right-radius:30px;
+    }
     .loc-name{font-size:17px;}
     .loc-sub{max-width:175px;}
     .banner-wrap{
       width:calc(100% + 28px);
-      aspect-ratio:1.50 / 1;
-      margin-left:-14px;
-      margin-right:-14px;
-      border-radius:0;
+      aspect-ratio:1.69 / 1;
+      margin:10px -14px 0;
+      border-radius:0 0 30px 30px;
     }
     .header-slide{border-radius:0;}
-    .header-slide__copy{left:16px;}
-    .banner-title{font-size:22px;}
+    .header-slide__copy{left:28px;width:50%;max-width:50%;}
+    .banner-title{font-size:23px;}
+    .banner-subtitle--default{font-size:19px;}
+    .banner-cta{min-height:40px;padding:0 8px 0 19px;font-size:13px;}
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -677,6 +695,18 @@
 <script src="restaurant-card.js"></script>
 <script src="home.js"></script>
 <script src="home-banners.js?v=20260917-2"></script>
+<script>
+(function(){
+  const normalize = () => {
+    document.querySelectorAll('#cat-scroll .cat-name').forEach(el => {
+      if (/^pizaa$/i.test(el.textContent.trim())) el.textContent = 'Pizza';
+    });
+  };
+  normalize();
+  const root = document.getElementById('cat-scroll');
+  if (root) new MutationObserver(normalize).observe(root,{childList:true,subtree:true,characterData:true});
+})();
+</script>
 <script src="cart-bar.js"></script>
 <script src="bottom-tab-bar.js"></script>
 
