@@ -76,12 +76,7 @@
     } else {
       titleHtml = 'Good Food<br><span class="banner-title-accent">Closer to Home.</span>'; 
     }
-    // Admin subtitle wins (escaped, single line). With none set, show the
-    // playful default two-liner with a heart — trusted markup, no user data.
-    const hasSubtitle = b.subtitle != null && String(b.subtitle).trim() !== '';
-    const subtitleHtml = hasSubtitle
-      ? `<p class="banner-subtitle">${esc(b.subtitle)}</p>`
-      : `<p class="banner-subtitle banner-subtitle--default">Tasty food<br>Happier you. <span class="banner-heart" aria-hidden="true">♥</span></p>`;
+    const subtitle = b.subtitle || 'Discover great food around Maynaguri.';
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || 'Order Now';
     const artHtml = image
@@ -93,9 +88,9 @@
         <div class="header-slide__copy">
           ${b.badgeText ? `<span class="banner-badge">${esc(b.badgeText)}</span>` : ''}
           <h2 class="banner-title">${titleHtml}</h2>
-          ${subtitleHtml}
+          ${subtitle ? `<p class="banner-subtitle">${esc(subtitle)}</p>` : ''}
           ${b.offerText ? `<div class="banner-offer">${esc(b.offerText)}</div>` : ''}
-          ${cta ? `<a class="banner-cta" href="${esc(url || 'search.html')}">${esc(cta)} <span class="banner-cta__chev" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span></a>` : ''}
+          ${cta ? `<a class="banner-cta" href="${esc(url || 'search.html')}">${esc(cta)} <i class="fa-solid fa-arrow-right"></i></a>` : ''}
         </div>
         ${artHtml}
       </div>
