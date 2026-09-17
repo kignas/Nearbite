@@ -1520,6 +1520,57 @@ body{padding-bottom:120px!important}
     return escapeMenuHtml(JSON.stringify(String(value == null ? '' : value)));
   }
 
+  function getCustomizedCartQuantity(itemName, menuItemId) {
+    let cart = {};
+    try { cart = JSON.parse(localStorage.getItem('nearbite_cart') || '{}') || {}; } catch (e) { cart = {}; }
+
+    const baseName = String(itemName == null ? '' : itemName).trim();
+    const id = String(menuItemId == null ? '' : menuItemId);
+    let total = 0;
+
+    Object.keys(cart).forEach(function(key) {
+      const entry = cart[key];
+      if (!entry || !Number.isFinite(Number(entry.quantity)) || Number(entry.quantity) <= 0) return;
+
+      // Prefer the menuItem id when it is available. Fall back to the
+      // composite-name prefix for carts created by the older implementation.
+      const entryMenuId = String(entry.menuItem == null ? '' : entry.menuItem);
+      const sameMenuItem = id && entryMenuId && entryMenuId === id;
+      const compositeForItem = key === baseName || key.indexOf(baseName + ' (') === 0;
+
+      if (sameMenuItem || compositeForItem) total += Number(entry.quantity);
+    });
+
+    return total;
+  }
+
+  function refreshCustomizedCartQuantities() {
+    document.querySelectorAll('.nb-add-btn--cust[data-menu-item-id]').forEach(function(btn) {
+      const id = btn.getAttribute('data-menu-item-id') || '';
+      const base = window.__ewCust && window.__ewCust[id];
+      if (!base) return;
+
+      const qty = getCustomizedCartQuantity(base.name, id);
+      let badge = btn.querySelector('.nb-custom-qty');
+
+      if (qty > 0) {
+        btn.classList.add('has-cart-qty');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'nb-custom-qty';
+          badge.setAttribute('aria-hidden', 'true');
+          btn.appendChild(badge);
+        }
+        badge.textContent = qty;
+      } else {
+        btn.classList.remove('has-cart-qty');
+        if (badge) badge.remove();
+      }
+
+      btn.setAttribute('aria-label', 'Customise ' + base.name + (qty > 0 ? ', ' + qty + ' in cart' : ''));
+    });
+  }
+
   window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     const safeName = jsArg(itemName);
     const safeId = jsArg(rId);
@@ -1531,8 +1582,12 @@ body{padding-bottom:120px!important}
     const isItemAvailable = inStock !== false && isRestaurantOpen;
 
     // Items with real customization groups open the sheet instead of adding directly.
+    // Customized variants are stored under composite cart keys such as
+    // "Pizza (Large, Extra Cheese)", so the normal base-item `qty` is not
+    // enough to show how many customized units are already in the cart.
     if (isItemAvailable && window.__ewCust && window.__ewCust[menuItemId]) {
-      return `<button onclick="ewOpenCustomize(${safeMenuItemId})" class="nb-add-btn nb-add-btn--cust" aria-label="Customise ${escapeMenuHtml(itemName)}">ADD <span class="nb-add-plus" aria-hidden="true">+</span></button>`;
+      const customQty = getCustomizedCartQuantity(itemName, menuItemId);
+      return `<button onclick="ewOpenCustomize(${safeMenuItemId})" class="nb-add-btn nb-add-btn--cust${customQty > 0 ? ' has-cart-qty' : ''}" data-menu-item-id="${escapeMenuHtml(String(menuItemId || ''))}" aria-label="Customise ${escapeMenuHtml(itemName)}${customQty > 0 ? ', ' + customQty + ' in cart' : ''}">ADD <span class="nb-add-plus" aria-hidden="true">+</span>${customQty > 0 ? `<span class="nb-custom-qty" aria-hidden="true">${customQty}</span>` : ''}</button>`;
     }
 
     if (qty > 0) {
@@ -2465,6 +2520,7 @@ body{padding-bottom:120px!important}
     const wrapped = function () {
       const result = original.apply(this, arguments);
       try { renderOrderHint(); } catch (e) { console.warn('[restaurant] order hint failed:', e); }
+      try { refreshCustomizedCartQuantities(); } catch (e) { console.warn('[restaurant] custom cart count refresh failed:', e); }
       return result;
     };
     wrapped.__ewHinted = true;
@@ -2496,6 +2552,9 @@ body{padding-bottom:120px!important}
 <style id="ewcs-css">
 :root{--ewcs-green:#159A62;--ewcs-green-ink:#0F7A4D;--ewcs-green-soft:#E6F4EC;--ewcs-ink:#101828;--ewcs-ink-3:#697077;--ewcs-line:#E7EAED;}
 .nb-add-btn--cust .nb-add-plus{font-size:12px!important;margin-left:1px!important;opacity:.85!important}
+.nb-add-btn--cust{position:relative!important;padding-left:15px!important;padding-right:15px!important}
+.nb-add-btn--cust.has-cart-qty{padding-right:34px!important}
+.nb-custom-qty{position:absolute!important;right:7px!important;top:50%!important;transform:translateY(-50%)!important;min-width:22px!important;height:22px!important;padding:0 5px!important;border-radius:999px!important;background:var(--ew-green,#159A62)!important;color:#fff!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:11px!important;font-weight:800!important;line-height:1!important;box-shadow:0 1px 2px rgba(16,24,40,.12)!important}
 .ewcs-backdrop{position:fixed;inset:0;z-index:900;background:rgba(16,24,40,.5);opacity:0;pointer-events:none;transition:opacity .2s}
 .ewcs-backdrop.show{opacity:1;pointer-events:auto}
 .ewcs-sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:520px;z-index:901;background:#fff;border-radius:22px 22px 0 0;max-height:90dvh;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 -12px 40px rgba(16,24,40,.18)}
@@ -2654,6 +2713,7 @@ body{padding-bottom:120px!important}
     }
     try { localStorage.setItem('nearbite_cart', JSON.stringify(cart)); } catch(e){}
     if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+    try { refreshCustomizedCartQuantities(); } catch (e) { console.warn('[restaurant] custom cart count refresh failed:', e); }
     close();
   }
 
