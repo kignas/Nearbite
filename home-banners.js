@@ -51,7 +51,7 @@
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
     const t = resolveTheme(b);
-    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || (b.mobileImage || b.image || '');
+    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || safeUrl(b.imageUrl) || safeUrl(b.mobileImageUrl) || '';
     const bannerBg = safeCssBackground(b.background);
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
