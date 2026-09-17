@@ -93,8 +93,8 @@
     overflow:hidden;
     transition:background .35s ease,color .25s ease;
   }
-  .hero-header[data-theme="anime"]{--hd-bg:#fcdee9;--hd-ink:#202431;--hd-muted:#687386;--hd-accent:#d20a61;}
-  .hero-header[data-theme="pink"]{--hd-bg:#fcdee9;--hd-ink:#202431;--hd-muted:#596171;--hd-accent:#c90057;}
+  .hero-header[data-theme="anime"]{--hd-bg:#f9dfe8;--hd-ink:#202431;--hd-muted:#687386;--hd-accent:#d20a61;}
+  .hero-header[data-theme="pink"]{--hd-bg:#f9dfe8;--hd-ink:#202431;--hd-muted:#596171;--hd-accent:#c90057;}
   .hero-header[data-theme="lavender"]{--hd-bg:#8060d8;--hd-ink:#fff;--hd-muted:rgba(255,255,255,.86);--hd-accent:#ffe477;}
   .hero-header[data-theme="magenta"]{--hd-bg:#ad0051;--hd-ink:#fff;--hd-muted:rgba(255,255,255,.86);--hd-accent:#ffdf70;}
   .hero-header>*{position:relative;z-index:2;}
@@ -103,8 +103,8 @@
   .loc-left{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:var(--hd-ink);}
   .loc-pin-wrap{flex:0 0 42px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.72);box-shadow:0 3px 12px rgba(15,23,42,.06);}
   .loc-pin-wrap i{font-size:17px;color:var(--hd-accent);}
-  .hero-header[data-theme="anime"] .loc-pin-wrap{background:#d20a61;box-shadow:0 4px 12px rgba(210,10,97,.26);}
-  .hero-header[data-theme="anime"] .loc-pin-wrap i{color:#fff;}
+  .hero-header[data-theme="anime"] .loc-pin-wrap{background:rgba(255,255,255,.92);box-shadow:0 3px 12px rgba(15,23,42,.06);}
+  .hero-header[data-theme="anime"] .loc-pin-wrap i{color:#d20a61;}
   .hero-header[data-theme="pink"] .loc-pin-wrap{background:rgba(255,255,255,.48);}
   .hero-header[data-theme="lavender"] .loc-pin-wrap,.hero-header[data-theme="magenta"] .loc-pin-wrap{background:rgba(255,255,255,.16);box-shadow:none;}
   .hero-header[data-theme="lavender"] .loc-pin-wrap i,.hero-header[data-theme="magenta"] .loc-pin-wrap i{color:#fff;}
@@ -237,22 +237,29 @@
       border-radius:17px;
     }
 
-    /* The benchmark uses an inset promotional card rather than a full-bleed
-       banner. The aspect ratio is retained so artwork scales predictably. */
-    /* Benchmark hero: full-bleed inside the pink header.
-       No inset card, no corner radius, no shadow. */
+    /* FINAL BENCHMARK HERO
+       The promotion is an inset rounded card inside the pink header shell.
+       Keep the header/search chrome outside the card. */
     .banner-wrap{
-      width:calc(100% + 40px);
+      width:100%;
       aspect-ratio:1.64 / 1;
       height:auto;
-      margin:9px -20px 0;
-      border-radius:0;
+      margin:9px 0 0;
+      border-radius:24px;
+      overflow:hidden;
       box-shadow:none;
     }
-    .header-slide{border-radius:0;}
+    .header-slide{
+      border-radius:24px;
+    }
+    .header-slide[data-theme="anime"],
+    .header-slide[data-theme="pink"]{
+      background:#facbd8;
+    }
     .header-slide__art{
-      width:55%;
-      height:94%;
+      width:57%;
+      height:96%;
+      right:-1%;
       object-position:right center;
     }
     .header-slide__copy{
@@ -296,7 +303,8 @@
     .hero-header{padding-left:14px;padding-right:14px;}
     .loc-name{font-size:17px;}
     .loc-sub{max-width:175px;}
-    .banner-wrap{width:calc(100% + 28px);margin-left:-14px;margin-right:-14px;border-radius:0;}
+    .banner-wrap{width:100%;margin-left:0;margin-right:0;border-radius:22px;}
+    .header-slide{border-radius:22px;}
     .header-slide__copy{left:16px;}
   }
 
