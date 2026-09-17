@@ -929,18 +929,19 @@ body.menu-search-open .cat-nav{top:118px!important}
    only — no JS writes style.display to .menu-cat-group. */
 .cat-group-empty{display:none!important}
 
-/* ── Minimum order / free delivery hint ──────────────────── */
+/* ── Minimum order / free-delivery progress hint ─────────── */
 .order-hint{
   display:flex;align-items:center;gap:8px;
   margin-top:9px;padding:9px 10px;
-  background:var(--ew-green-soft);border:1px solid var(--ew-green-line);
-  border-radius:11px;
-  font-size:12px;font-weight:600;line-height:1.4;color:#0E6B47;
+  background:#FBFCFC;border:1px solid #E9ECEF;
+  border-radius:10px;
+  font-size:12px;font-weight:600;line-height:1.4;color:#59616D;
 }
 .order-hint[hidden]{display:none}
-.order-hint i{flex:none;font-size:12px}
-.order-hint b{font-weight:800}
-.order-hint.is-short{background:#FFF6E8;border-color:#F7E2C0;color:#8A5312}
+.order-hint i{flex:none;font-size:12px;color:var(--ew-green)}
+.order-hint b{font-weight:800;color:#26313D}
+.order-hint.is-short{background:#FFF9F0;border-color:#F3E2C7;color:#7A5A2A}
+.order-hint.is-short i{color:#B7791F}
 
 /* ── Empty states ────────────────────────────────────────── */
 .empty-filter-msg{padding:44px 24px!important}
@@ -1109,6 +1110,105 @@ body{padding-bottom:120px!important}
 .nb-qty-btn{color:var(--ew-green)!important}
 .nb-item-customisable{margin-top:6px!important;font-size:10px!important;color:#999FA8!important}
 
+/* ---------- Ratings: clean, reliable icon treatment ---------- */
+.rating-pill{
+  align-items:center!important;
+  gap:5px!important;
+  min-height:28px!important;
+  padding:5px 9px!important;
+  border-radius:7px!important;
+}
+.rating-star{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:11px!important;
+  height:11px!important;
+  color:#fff!important;
+  font-family:Arial,sans-serif!important;
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:700!important;
+}
+.rating-num{font-variant-numeric:tabular-nums!important}
+.rating-count{font-variant-numeric:tabular-nums!important}
+
+/* ---------- Per-item ratings ---------- */
+.nb-item-rating{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  margin-top:8px!important;
+  min-height:16px!important;
+  color:#159A62!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  line-height:1!important;
+}
+.nb-item-rating-star{
+  font-family:Arial,sans-serif!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:700!important;
+}
+.nb-item-rating-value{font-variant-numeric:tabular-nums!important}
+.nb-item-rating-count{
+  color:#8B929D!important;
+  font-size:11px!important;
+  font-weight:600!important;
+}
+
+/* ---------- Free-delivery congratulations toast ---------- */
+.ew-free-delivery-toast{
+  position:fixed!important;
+  left:50%!important;
+  bottom:92px!important;
+  z-index:1000!important;
+  width:min(calc(100vw - 32px),360px)!important;
+  transform:translate(-50%,18px)!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  padding:13px 15px!important;
+  background:#fff!important;
+  border:1px solid #DDE9E3!important;
+  border-radius:14px!important;
+  box-shadow:0 10px 30px rgba(16,24,40,.16)!important;
+  transition:opacity .22s ease,transform .22s ease!important;
+}
+.ew-free-delivery-toast.show{
+  opacity:1!important;
+  transform:translate(-50%,0)!important;
+}
+.ew-free-delivery-toast-icon{
+  width:32px!important;
+  height:32px!important;
+  flex:0 0 32px!important;
+  border-radius:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#E7F6EE!important;
+  color:#159A62!important;
+  font-size:14px!important;
+}
+.ew-free-delivery-toast-copy{min-width:0!important}
+.ew-free-delivery-toast-title{
+  font-size:14px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+  color:#17202B!important;
+}
+.ew-free-delivery-toast-sub{
+  margin-top:2px!important;
+  font-size:11.5px!important;
+  line-height:1.35!important;
+  font-weight:600!important;
+  color:#737B87!important;
+}
+
 /* ---------- Search ---------- */
 .menu-search-row{top:58px!important;padding:9px 18px!important;background:#fff!important;box-shadow:none!important}
 .menu-search-field{height:40px!important;border-radius:10px!important;background:#F3F4F6!important}
@@ -1117,6 +1217,8 @@ body{padding-bottom:120px!important}
 .empty-filter-msg,.menu-state{border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important}
 
 @media(max-width:380px){
+  .nb-item-rating{font-size:11.5px!important}
+  .nb-item-rating-count{font-size:10.5px!important}
   .top-bar{padding:0 14px!important}
   .menu-context-name{max-width:118px}
   .res-card-body{padding-left:14px!important;padding-right:14px!important}
@@ -1131,6 +1233,14 @@ body{padding-bottom:120px!important}
 
 </head>
 <body>
+
+  <div class="ew-free-delivery-toast" id="ew-free-delivery-toast" role="status" aria-live="polite" aria-atomic="true">
+    <div class="ew-free-delivery-toast-icon"><i class="fa-solid fa-check"></i></div>
+    <div class="ew-free-delivery-toast-copy">
+      <div class="ew-free-delivery-toast-title">Congratulations!</div>
+      <div class="ew-free-delivery-toast-sub">Free delivery is now unlocked for your order.</div>
+    </div>
+  </div>
 
   <div class="top-bar">
     <div class="top-bar-left">
@@ -1170,8 +1280,8 @@ body{padding-bottom:120px!important}
         </div>
       </div>
       <div class="res-meta-row">
-        <div class="rating-pill">
-          <i class="fa-solid fa-star rating-star"></i>
+        <div class="rating-pill" aria-label="Restaurant rating">
+          <span class="rating-star" aria-hidden="true">★</span>
           <span id="res-rating-num" class="rating-num">–</span>
           <div class="rating-divider"></div>
           <span id="res-rating-count" class="rating-count">— ratings</span>
@@ -1673,6 +1783,18 @@ body{padding-bottom:120px!important}
     document.querySelector('.res-card').insertAdjacentHTML('beforebegin', warningHtml);
   }
 
+  function formatCompactCount(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) return '';
+    if (n < 1000) return Math.round(n).toLocaleString('en-IN');
+    if (n < 1000000) {
+      const k = n / 1000;
+      return (k >= 10 ? Math.round(k) : Number(k.toFixed(1))) + 'k';
+    }
+    const m = n / 1000000;
+    return (m >= 10 ? Math.round(m) : Number(m.toFixed(1))) + 'M';
+  }
+
   function renderMenu(groups, resId) {
     const menuContainer = document.getElementById('menu-container');
     const navInner = document.getElementById('cat-nav-inner');
@@ -1763,6 +1885,24 @@ body{padding-bottom:120px!important}
                 <span class="nb-item-current-price">₹${cleanPrice}</span>
                 ${originalPrice ? `<span class="nb-item-original-price">₹${originalPrice}</span><span class="nb-item-discount">${discountPercent}% OFF</span>` : ''}
               </div>
+
+              ${(() => {
+                const itemRating = Number(
+                  item.rating ?? item.itemRating ?? item.avgRating ?? item.averageRating
+                );
+                const itemRatingCount = Number(
+                  item.ratingCount ?? item.itemRatingCount ?? item.reviewCount ?? item.reviewsCount ?? item.ratingsCount
+                );
+                if (!Number.isFinite(itemRating) || itemRating <= 0) return '';
+                const countText = Number.isFinite(itemRatingCount) && itemRatingCount > 0
+                  ? ' <span class="nb-item-rating-count">(' + formatCompactCount(itemRatingCount) + ')</span>'
+                  : '';
+                return '<div class="nb-item-rating" aria-label="Item rating ' + itemRating.toFixed(1) + '">'
+                  + '<span class="nb-item-rating-star" aria-hidden="true">★</span>'
+                  + '<span class="nb-item-rating-value">' + itemRating.toFixed(1) + '</span>'
+                  + countText
+                  + '</div>';
+              })()}
 
               ${description ? `<p class="nb-item-desc">${escapeMenuHtml(description)}</p>` : ''}
             </div>
@@ -2242,6 +2382,19 @@ body{padding-bottom:120px!important}
     return priced ? subtotal : null;
   }
 
+  let freeDeliveryUnlockState = null;
+  let freeDeliveryToastTimer = null;
+
+  function showFreeDeliveryCongratulations() {
+    const toast = document.getElementById('ew-free-delivery-toast');
+    if (!toast) return;
+    clearTimeout(freeDeliveryToastTimer);
+    toast.classList.add('show');
+    freeDeliveryToastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3200);
+  }
+
   function renderOrderHint() {
     const box = document.getElementById('order-hint');
     if (!box) return;
@@ -2249,7 +2402,11 @@ body{padding-bottom:120px!important}
     const restaurant = currentRestaurant;
     const subtotal = cartSubtotalForRestaurant();
 
-    if (!restaurant || subtotal === null || subtotal <= 0) { box.hidden = true; return; }
+    if (!restaurant || subtotal === null || subtotal <= 0) {
+      box.hidden = true;
+      freeDeliveryUnlockState = null;
+      return;
+    }
 
     // Minimum order is measured on the food subtotal only — no delivery fee,
     // no tip. The backend stays the final authority at checkout.
@@ -2262,6 +2419,19 @@ body{padding-bottom:120px!important}
       ? null
       : firstPositiveNumber(restaurant.freeDeliveryAbove);
 
+    if (freeAbove === null) {
+      freeDeliveryUnlockState = null;
+    } else {
+      const unlockedNow = subtotal >= freeAbove;
+      if (freeDeliveryUnlockState === false && unlockedNow) {
+        showFreeDeliveryCongratulations();
+      }
+      if (freeDeliveryUnlockState === null) {
+        // Establish the initial state silently. Do not pop a message on page load.
+      }
+      freeDeliveryUnlockState = unlockedNow;
+    }
+
     let html = '';
     let short = false;
 
@@ -2269,16 +2439,18 @@ body{padding-bottom:120px!important}
       short = true;
       html = '<i class="fa-solid fa-circle-info" aria-hidden="true"></i>' +
              '<span>Minimum order ' + money(minimum) +
-             ' \u00B7 <b>Add ' + money(minimum - subtotal) + ' more</b></span>';
+             ' · <b>Add ' + money(minimum - subtotal) + ' more</b></span>';
     } else if (freeAbove && subtotal < freeAbove) {
       html = '<i class="fa-solid fa-motorcycle" aria-hidden="true"></i>' +
              '<span>Add <b>' + money(freeAbove - subtotal) + ' more</b> for FREE delivery</span>';
-    } else if (freeAbove && subtotal >= freeAbove) {
-      html = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i>' +
-             '<span>FREE delivery unlocked on this order</span>';
     }
 
-    if (!html) { box.hidden = true; return; }
+    // Once free delivery is reached, the persistent "unlocked" banner is gone.
+    if (!html) {
+      box.hidden = true;
+      return;
+    }
+
     box.innerHTML = html;
     box.classList.toggle('is-short', short);
     box.hidden = false;
