@@ -195,6 +195,109 @@
     .search-mic.is-listening{animation:none;}
   }
 
+
+  /* ══════════════════════════════════════════════════════════════
+     FINAL MOBILE PIXEL PASS — benchmark alignment
+     Keep the existing desktop/tablet composition untouched.
+     ══════════════════════════════════════════════════════════════ */
+  @media (max-width: 599px){
+    .hero-header{
+      padding:10px 20px 10px;
+    }
+
+    .loc-row{
+      min-height:46px;
+      margin-bottom:8px;
+      gap:8px;
+    }
+    .loc-left{gap:9px;}
+    .loc-pin-wrap{
+      flex-basis:42px;
+      width:42px;
+      height:42px;
+    }
+    .loc-name{font-size:18px;}
+    .loc-sub{font-size:10px;max-width:185px;}
+    .btn-store{width:76px;height:42px;border-radius:15px;}
+    .btn-profile{width:42px;height:42px;}
+
+    .search-row{
+      height:52px;
+      gap:9px;
+    }
+    .search-box,.veg-box{height:52px;}
+    .search-box{
+      padding:0 15px;
+      border-radius:17px;
+    }
+    .search-text{font-size:14px;}
+    .veg-box{
+      flex:0 0 58px;
+      width:58px;
+      border-radius:17px;
+    }
+
+    /* The benchmark uses an inset promotional card rather than a full-bleed
+       banner. The aspect ratio is retained so artwork scales predictably. */
+    .banner-wrap{
+      width:calc(100% - 12px);
+      aspect-ratio:1.64 / 1;
+      height:auto;
+      margin:9px 6px 0;
+      border-radius:22px;
+      box-shadow:0 8px 22px rgba(31,36,48,.055);
+    }
+    .header-slide{border-radius:22px;}
+    .header-slide__art{
+      width:55%;
+      height:94%;
+      object-position:right center;
+    }
+    .header-slide__copy{
+      left:17px;
+      width:50%;
+      max-width:50%;
+      padding-bottom:7px;
+    }
+    .banner-title{
+      font-size:22px;
+      line-height:1.04;
+      letter-spacing:-.7px;
+    }
+    .banner-subtitle{
+      margin-top:7px;
+      font-size:10.5px;
+      line-height:1.35;
+    }
+    .banner-cta{
+      min-height:33px;
+      margin-top:9px;
+      padding:0 14px;
+      font-size:11px;
+    }
+    .banner-controls{bottom:9px;gap:6px;}
+    .banner-dot{width:7px;height:7px;}
+    .banner-dot.is-active{width:17px;}
+
+    /* Bring the category section closer to the benchmark card rhythm. */
+    #mind-section{padding-top:17px !important;}
+    #mind-section .sec-head{margin-bottom:14px;}
+    #mind-section .sec-title{font-size:12px;letter-spacing:1.45px;}
+    #mind-section .cat-scroll{
+      gap:16px 12px;
+      padding-top:3px;
+      padding-bottom:18px;
+    }
+  }
+
+  @media (max-width:380px){
+    .hero-header{padding-left:14px;padding-right:14px;}
+    .loc-name{font-size:17px;}
+    .loc-sub{max-width:175px;}
+    .banner-wrap{width:calc(100% - 10px);margin-left:5px;margin-right:5px;}
+    .header-slide__copy{left:16px;}
+  }
+
   /* ══════════════════════════════════════════════════════════════
      4. PAGE SECTIONS — shared, transparent, one background
      ══════════════════════════════════════════════════════════════ */
