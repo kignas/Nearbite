@@ -46,13 +46,23 @@
   const safeUrl = v => { v = String(v || '').trim(); return (v.startsWith('/') && !v.startsWith('//')) || /^https:\/\//i.test(v) ? v : ''; };
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'anime';
-  // Theme is derived from the active banner headerTheme; legacy background is ignored.
+
+  // Resolve the admin-controlled theme safely. Older versions of this file
+  // called resolveTheme()/safeCssBackground() without defining them, which
+  // stopped build() before any banner could be rendered.
+  const resolveTheme = b => theme(String(b?.headerTheme || b?.theme || 'anime').toLowerCase());
+  const safeCssBackground = v => {
+    const value = String(v || '').trim();
+    // Background is currently not used as the primary visual theme, but keep
+    // this helper safe for legacy banner records.
+    return /^(#[0-9a-f]{3,8}|rgb\(|rgba\(|hsl\(|hsla\(|linear-gradient\(|radial-gradient\()/i.test(value) ? value : '';
+  };
 
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
     const t = resolveTheme(b);
-    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || safeUrl(b.imageUrl) || safeUrl(b.mobileImageUrl) || '';
-    const bannerBg = safeCssBackground(b.background);
+    const image = safeUrl(b.mobileImage) || safeUrl(b.image) || safeUrl(b.mobileImageUrl) || safeUrl(b.imageUrl) || '';
+    safeCssBackground(b.background);
     // Title: first line in the theme ink, any following lines in the accent
     // colour (e.g. "Good Food" / "Closer to Home."). Admin text drives it;
     // fall back to the default two-liner when no title is set.
