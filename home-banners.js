@@ -109,16 +109,9 @@
 
     const count = n();
     if (dotsWrap) {
-      // Keep the benchmark pagination visible even when the live API currently
-      // returns one banner. With 2+ banners, the same dots become fully
-      // interactive and follow the active slide.
-      const dotCount = Math.max(count, 4);
-      dotsWrap.hidden = dotCount === 0;
-      dotsWrap.innerHTML = Array.from({ length: dotCount }, (_, i) =>
-        `<button type="button" class="banner-dot${i === 0 ? ' is-active' : ''}" data-idx="${i}" role="tab" aria-label="Go to banner ${i + 1}"${i >= count ? ' aria-hidden="true"' : ''}></button>`
-      ).join('');
-      dotsWrap.querySelectorAll('.banner-dot').forEach(d =>
-        d.addEventListener('click', () => { const idx = Number(d.dataset.idx); if (idx < count) userGoTo(idx); }, { signal: bag.signal }));
+      // No pagination UI: there is currently no next banner to indicate.
+      dotsWrap.hidden = true;
+      dotsWrap.innerHTML = '';
     }
 
     active = 0;
