@@ -8,224 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-    body { background: #f4f4f6; padding-bottom: 140px; }
-
-    /* ── STICKY HEADER ── */
-    .store-header {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-    }
-
-    .header-top {
-      padding: 14px 16px 12px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .header-left { display: flex; align-items: center; gap: 12px; }
-    .icon-btn {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: #f3f3f5; border: none;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background 0.15s, transform 0.12s;
-      text-decoration: none;
-    }
-    .icon-btn:active { transform: scale(0.92); background: #eaeaed; }
-    .icon-btn i { font-size: 13px; color: #333; }
-    .header-title-wrap {}
-    .header-title-row { display: flex; align-items: center; gap: 7px; }
-    .header-title { font-size: 18px; font-weight: 900; color: #111; }
-    .official-badge {
-      background: #FC8019; color: #fff;
-      font-size: 7px; font-weight: 900;
-      padding: 2px 6px; border-radius: 5px;
-      letter-spacing: 0.8px; text-transform: uppercase;
-    }
-    .header-sub { font-size: 10px; font-weight: 700; color: #bbb; margin-top: 2px; letter-spacing: 0.3px; }
-    .header-actions { display: flex; gap: 10px; }
-
-    /* Filter pills row */
-    .filter-row {
-      padding: 0 16px 12px;
-      display: flex; gap: 8px; overflow-x: auto;
-    }
-    .filter-row::-webkit-scrollbar { display: none; }
-    .filter-sep { width: 1px; background: #eee; align-self: center; height: 20px; flex-shrink: 0; margin: 0 2px; }
-
-    /* Veg + countdown sub-bar */
-    .sub-bar {
-      padding: 10px 16px;
-      background: #fafafa;
-      border-top: 1px solid rgba(0,0,0,0.05);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .veg-toggle-row { display: flex; align-items: center; gap: 8px; }
-    .veg-label { font-size: 10px; font-weight: 800; color: #888; letter-spacing: 0.5px; text-transform: uppercase; }
-    .veg-switch {
-      width: 34px; height: 18px;
-      background: #ddd; border-radius: 999px;
-      position: relative; cursor: pointer;
-      transition: background 0.25s;
-    }
-    .veg-switch.on { background: #16a34a; }
-    .veg-thumb {
-      position: absolute; top: 2px; left: 2px;
-      width: 14px; height: 14px;
-      background: #fff; border-radius: 50%;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-      transition: transform 0.25s;
-    }
-    .veg-switch.on .veg-thumb { transform: translateX(16px); }
-
-    .countdown-wrap { display: flex; align-items: center; gap: 6px; }
-    .countdown-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1.2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
-    .countdown-text { font-size: 10px; font-weight: 800; color: #ef4444; letter-spacing: 0.5px; font-family: 'Poppins', sans-serif; }
-
-    /* ── MAIN CONTENT ── */
-    main { padding: 16px 14px 0; }
-    .items-found-label { font-size: 11px; font-weight: 800; color: #bbb; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
-
-    /* ── PRODUCT GRID ── */
-    .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
-
-    /* ── PRODUCT CARD ── */
-    .product-card {
-      background: #fff;
-      border-radius: 20px;
-      overflow: visible;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.05);
-      padding-bottom: 14px;
-    }
-
-    /* Image section */
-    .card-img-wrap {
-      position: relative;
-      margin: 0;
-      border-radius: 19px 19px 0 0;
-      overflow: hidden;
-      background: #f8f8f8;
-      aspect-ratio: 1;
-    }
-    .card-img-wrap img {
-      width: 100%; height: 100%;
-      object-fit: cover; display: block;
-    }
-
-    /* Price badge on image */
-    .price-badge {
-      position: absolute; bottom: 10px; right: 10px;
-      background: #FC8019;
-      color: black;
-      font-size: 12px; font-weight: 900;
-      padding: 4px 9px; border-radius: 9px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      letter-spacing: 0.2px;
-    }
-
-    /* Floating ADD/stepper on card */
-    .card-btn-float {
-      position: relative;
-      display: flex; justify-content: center;
-      margin-top: -14px;
-      margin-bottom: 10px;
-      z-index: 5;
-    }
-    .card-add-wrap {
-      min-width: 88px; height: 34px;
-      background: #fff;
-      border: 1.5px solid #efefef;
-      border-radius: 11px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    .card-add-single {
-      width: 100%; height: 100%; background: transparent; border: none;
-      font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800;
-      color: #FC8019; letter-spacing: 0.6px; cursor: pointer;
-      transition: background 0.12s;
-    }
-    .card-add-single:active { background: #fff8f2; }
-    .card-stepper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; }
-    .card-s-btn {
-      width: 32px; height: 100%; background: transparent; border: none;
-      font-size: 17px; font-weight: 700; color: #FC8019; cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.12s;
-    }
-    .card-s-btn:active { background: #fff8f2; }
-    .card-s-count { font-size: 13px; font-weight: 900; color: #111; min-width: 18px; text-align: center; pointer-events: none; }
-
-    /* Card body */
-    .card-body { padding: 0 12px; }
-    .card-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
-    .card-rating {
-      display: inline-flex; align-items: center; gap: 3px;
-      background: #f0faf5; border: 1px solid #c6ead8;
-      border-radius: 6px; padding: 2px 6px;
-    }
-    .card-rating i { font-size: 8px; color: #1ba672; }
-    .card-rating span { font-size: 10px; font-weight: 800; color: #1ba672; }
-    .card-name { font-size: 13px; font-weight: 800; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-    .card-rest { font-size: 10px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* Skeleton grid */
-    .skel-card { background: #fff; border-radius: 20px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
-    .skel-img { aspect-ratio: 1; }
-    .skel-body { padding: 12px; display: flex; flex-direction: column; gap: 7px; }
-
-    /* Empty state */
-    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; }
-    .empty-state i { font-size: 44px; color: #e0e0e0; margin-bottom: 14px; display: block; }
-    .empty-state h3 { font-size: 16px; font-weight: 800; color: #555; }
-    .empty-state p  { font-size: 12px; color: #bbb; margin-top: 6px; font-weight: 500; }
-    
-    /* ─── Premium Bottom Nav ─── */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 68px;
-      background: rgba(255,255,255,0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch;
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 9999;
-      padding-bottom: env(safe-area-inset-bottom);
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    .bottom-nav-hidden { transform: translateY(100%); }
-
-    .nav-item {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; font-size: 10px; font-weight: 700; color: #94a3b8; text-decoration: none;
-      position: relative; transition: color 0.2s ease; -webkit-tap-highlight-color: transparent;
-    }
-    /* Only the active tab turns Orange */
-    .nav-item.active { color: #FC8019; }
-
-    .nav-icon { font-size: 20px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .nav-item:active .nav-icon { transform: scale(0.8); transition: transform 0.1s ease-out; }
-
-    /* The Swiggy-style Circle for Food */
-    .nav-food-circle {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: #f1f5f9; color: #94a3b8;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; transition: all 0.3s ease; margin-bottom: 2px;
-    }
-    .nav-item.active .nav-food-circle {
-      background: #FC8019; color: #fff;
-      box-shadow: 0 4px 12px rgba(252,128,25,0.3);
-    }
-    .nav-item:active .nav-food-circle { transform: scale(0.85); transition: transform 0.1s ease-out; }
-
-    .nav-new-badge {
-      position: absolute; top: 6px; right: 12px;
-      background: #ef4444; color: #fff; font-size: 7px; font-weight: 900;
-      padding: 2px 5px; border-radius: 6px; letter-spacing: 0.5px;
-    }
-    
-  </style>
 </head>
 
 <style>
@@ -301,137 +83,12 @@ svg{display:block}
 .filter-pill.active svg{stroke:var(--pink)}
 
 main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
+.restaurant-feed{display:flex;flex-direction:column;gap:16px}
 .items-found-label{
   margin:0 5px 13px;font-size:20px;line-height:1.2;
   font-weight:900;letter-spacing:-.45px;
 }
 
-.restaurant-feed{display:flex;flex-direction:column;gap:16px}
-.restaurant-card{
-  background:#fff;border:1px solid var(--line);border-radius:21px;
-  box-shadow:var(--shadow);padding:14px;overflow:hidden;
-}
-.restaurant-head{position:relative;padding-right:67px}
-.discount-line{
-  color:var(--pink);font-size:15px;line-height:1.15;
-  font-weight:900;letter-spacing:-.2px;margin-bottom:5px;
-}
-.restaurant-name{
-  margin:0 0 7px;font-size:22px;line-height:1.12;
-  font-weight:900;letter-spacing:-.65px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.stamp{
-  position:absolute;right:-2px;top:-2px;
-  width:69px;height:69px;border:2px solid rgba(225,29,141,.25);
-  border-radius:50%;display:grid;place-items:center;text-align:center;
-  color:rgba(225,29,141,.38);font-size:7px;line-height:1.15;
-  font-weight:900;transform:rotate(-11deg);pointer-events:none;
-}
-.meta{
-  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
-  color:#424850;font-size:12px;font-weight:600;
-}
-.rating{
-  display:inline-flex;align-items:center;gap:5px;
-  color:#30353b;background:transparent;
-}
-.rating-star{color:var(--gold);font-size:17px;line-height:1}
-.rating-value{font-weight:700}
-.rating-count{color:#747b84;font-weight:500}
-.dot-sep{color:#a8adb4}
-.meta-item{white-space:nowrap}
-.cuisine{max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.delivery{
-  display:inline-flex;align-items:center;gap:5px;
-}
-.delivery svg{width:17px;height:17px;stroke:#59616b}
-.free-row{
-  margin-top:8px;display:flex;align-items:center;gap:7px;
-  font-size:12px;font-weight:700;color:#262c33;
-}
-.free-icon{
-  width:22px;height:22px;display:grid;place-items:center;
-  color:#fff;background:var(--green);border-radius:7px;flex:0 0 22px;
-}
-.free-icon svg{width:13px;height:13px}
-.info-btn{
-  width:17px;height:17px;border:0;background:transparent;padding:0;
-  color:#9298a0;display:inline-grid;place-items:center;margin-left:1px;
-}
-.info-btn svg{width:16px;height:16px}
-
-.item-carousel{
-  display:flex;gap:11px;overflow-x:auto;scroll-snap-type:x mandatory;
-  padding:13px 0 2px;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-}
-.item-carousel::-webkit-scrollbar{display:none}
-.item-card{
-  min-width:calc((100% - 22px)/3);width:calc((100% - 22px)/3);
-  scroll-snap-align:start;overflow:visible;
-}
-.item-image{
-  position:relative;width:100%;aspect-ratio:1.06/1;
-  border-radius:15px;overflow:hidden;background:#f0f1f3;
-  border:1px solid #e9eaed;
-}
-.item-image img{width:100%;height:100%;object-fit:cover;display:block}
-.item-image .fallback{
-  width:100%;height:100%;display:grid;place-items:center;color:#c7cbd1;
-}
-.popular{
-  position:absolute;left:7px;top:7px;z-index:2;
-  background:#fff;color:var(--green);border-radius:999px;
-  padding:5px 9px;font-size:10px;line-height:1;font-weight:900;
-  box-shadow:0 2px 8px rgba(16,24,40,.08);
-}
-.add-btn{
-  position:absolute;right:7px;bottom:7px;z-index:3;
-  width:43px;height:43px;border-radius:50%;
-  border:3px solid var(--pink2);background:#fff;color:var(--pink);
-  display:grid;place-items:center;box-shadow:0 3px 9px rgba(16,24,40,.13);
-  font-size:28px;line-height:1;font-weight:500;
-}
-.add-btn:active{transform:scale(.93)}
-.stepper{
-  position:absolute;right:7px;bottom:7px;z-index:3;
-  height:37px;min-width:88px;padding:0 4px;
-  border:1.5px solid var(--pink);border-radius:12px;
-  background:#fff;display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 3px 9px rgba(16,24,40,.12);
-}
-.stepper button{
-  width:28px;height:30px;border:0;background:transparent;
-  color:var(--pink);font-size:18px;font-weight:900;display:grid;place-items:center;
-}
-.stepper span{font-size:12px;font-weight:900;color:#171a20}
-.item-name{
-  margin:8px 2px 0;min-height:36px;
-  display:flex;align-items:flex-start;gap:6px;
-  font-size:13px;line-height:1.28;font-weight:700;color:#171a20;
-}
-.dietary{
-  width:17px;height:17px;flex:0 0 17px;margin-top:0;
-  border:1.7px solid var(--green);border-radius:4px;
-  display:grid;place-items:center;
-}
-.dietary:after{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
-.dietary.nonveg{border-color:var(--red)}
-.dietary.nonveg:after{
-  width:0;height:0;border-radius:0;background:none;
-  border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid var(--red);
-}
-.price-row{
-  display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:7px 2px 0;
-}
-.price{font-size:18px;font-weight:900;color:#111827}
-.old-price{font-size:11px;color:#8d939b;text-decoration:line-through}
-.off{
-  background:var(--pink-soft);color:var(--pink);
-  padding:5px 8px;border-radius:999px;font-size:9px;line-height:1;font-weight:900;
-  white-space:nowrap;
-}
 
 .skeleton-feed{display:flex;flex-direction:column;gap:16px}
 .skeleton-card{
@@ -586,140 +243,80 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
 <div id="toast" class="toast"></div>
 
 <script src="cart-bar.js"></script>
+<script src="under99card.js"></script>
 <script>
 (() => {
   const API = 'https://eatswada.onrender.com/api/restaurants/under99';
-  const CACHE = 'es_under99_benchmark_v10';
-
-  let allItems = [];
-  let maxPrice = 1000;       // benchmark allows items such as ₹229
-  let vegOnly = false;
-  let discountOnly = true;
-  let sortMode = 'default';
-
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-  const escJs = value => String(value ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-
-  function num(v, fallback=0){
-    const n = parseFloat(String(v ?? '').replace(/[^0-9.]/g,''));
+  const num = (value, fallback=0) => {
+    const n = Number(value);
     return Number.isFinite(n) ? n : fallback;
+  };
+
+  let allRestaurants = [];
+  let maxPrice = 99;
+  let vegOnly = false;
+  let discountOnly = true;
+  let sortMode = 'default';
+
+  function showToast(message){
+    const t=$('toast');
+    if(!t)return;
+    t.textContent=message;
+    t.style.display='block';
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer=setTimeout(()=>t.style.display='none',1800);
   }
-  function first(obj, keys, fallback=''){
-    for(const key of keys){
-      const parts = key.split('.');
-      let value=obj;
-      for(const part of parts){ value=value?.[part]; }
-      if(value!==undefined && value!==null && value!=='') return value;
-    }
-    return fallback;
-  }
+  window.showToast = showToast;
 
-  function normalize(raw){
-    const restaurant = raw.restaurant && typeof raw.restaurant === 'object' ? raw.restaurant : {};
-    const price = num(raw.price,99);
+  function normalizeRestaurant(raw){
+    const r = raw?.restaurant && typeof raw.restaurant === 'object'
+      ? raw.restaurant : raw;
+    const menu = Array.isArray(raw?.menu) ? raw.menu.map(item => ({
+      id:item.id || item._id || '',
+      name:item.name || 'Item',
+      description:item.description || '',
+      price:num(item.price),
+      originalPrice:item.originalPrice == null ? null : num(item.originalPrice),
+      discountPercent:item.discountPercent == null ? null : num(item.discountPercent),
+      image:item.image || '',
+      isVeg:Boolean(item.isVeg),
+      category:item.category || 'Recommended',
+      isUnder99:Boolean(item.isUnder99 ?? num(item.price) <= 99),
+      isBestseller:Boolean(item.isBestseller),
+      isRecommended:Boolean(item.isRecommended),
+      inStock:item.inStock !== false,
+      customizations:Array.isArray(item.customizations) ? item.customizations : []
+    })).filter(item => item.price > 0) : [];
 
-    let original = first(raw,['originalPrice','mrp','compareAtPrice','oldPrice'],null);
-    let discount = first(raw,['discountPercentage','discountPercent','discount'],null);
-
-    if(original===null && discount!==null && num(discount)>0){
-      original = Math.round(price/(1-num(discount)/100));
-    }
-    if(original===null) original = price > 0 ? Math.round(price*1.4) : 0;
-
-    const discountPct = original>price ? Math.round((1-price/original)*100) : num(discount,0);
-
-    let cuisine = first(raw,['cuisine','cuisines','category'], '');
-    if(!cuisine) cuisine=first(restaurant,['cuisine','cuisines','category'],'');
-    if(Array.isArray(cuisine)) cuisine=cuisine.join(', ');
-
-    let delivery = first(raw,['deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time'],'');
-    if(!delivery) delivery=first(restaurant,['deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time','estimatedDeliveryTime'],'');
-    if(!delivery) delivery='30–40 mins';
-
-    let freeAbove = first(raw,['freeDeliveryAbove','free_delivery_above','freeDeliveryThreshold'],null);
-    if(freeAbove===null) freeAbove=first(restaurant,['freeDeliveryAbove','free_delivery_above','freeDeliveryThreshold'],null);
-
-    const rating = num(first(raw,['rating','resRating'],first(restaurant,['rating'],0)),0);
-    const ratingCount = first(raw,['ratingCount','ratingsCount','reviewCount'],first(restaurant,['ratingCount','ratingsCount','reviewCount'],''));
-
+    menu.sort((a,b) => a.price-b.price || String(a.name).localeCompare(String(b.name)));
     return {
-      id:raw._id || raw.id || '',
-      name:raw.name || 'Special Item',
-      price,
-      originalPrice:num(original,0),
-      discountPct,
-      isVeg:Boolean(raw.isVeg),
-      image:raw.image || raw.img || '',
-      menuItem:raw._id || raw.id || '',
-      resId:String(restaurant._id || restaurant.id || raw.restaurant || 'unknown'),
-      resName:restaurant.name || raw.restaurantName || 'EatSwada Partner',
-      rating,
-      ratingCount,
-      delivery:String(delivery),
-      cuisine:String(cuisine || ''),
-      freeAbove:freeAbove===null ? null : num(freeAbove),
-      popular:Boolean(raw.isBestseller || raw.isPopular || raw.popular || raw.bestseller)
+      id:String(r?.id || r?._id || ''),
+      name:r?.name || 'Restaurant',
+      image:r?.image || '',
+      images:Array.isArray(r?.images) ? r.images : [],
+      rating:num(r?.rating,0),
+      ratingCount:r?.ratingCount ?? '',
+      deliveryTime:String(r?.deliveryTime || ''),
+      cuisine:Array.isArray(r?.cuisine) ? r.cuisine.join(', ') : String(r?.cuisine || ''),
+      offer:String(r?.offer || ''),
+      freeDeliveryAbove:r?.freeDeliveryAbove == null ? null : num(r.freeDeliveryAbove),
+      deliveryFee:r?.deliveryFee,
+      menu
     };
   }
 
-  function groupItems(items){
-    const map = new Map();
-    items.forEach(item => {
-      const key = item.resId + '|' + item.resName;
-      if(!map.has(key)) map.set(key,[]);
-      map.get(key).push(item);
+  function passesFilters(r){
+    const visible = r.menu.filter(item => {
+      if(item.price > maxPrice) return false;
+      if(vegOnly && !item.isVeg) return false;
+      if(discountOnly && !(num(item.discountPercent) >= 20)) return false;
+      return true;
     });
-    let groups=[...map.values()];
-    groups.forEach(g=>g.sort((a,b)=>a.price-b.price));
-    if(sortMode==='rating') groups.sort((a,b)=>b[0].rating-a[0].rating);
-    if(sortMode==='price') groups.sort((a,b)=>a[0].price-b[0].price);
-    return groups;
-  }
-
-  function getCart(){
-    try{return JSON.parse(localStorage.getItem('nearbite_cart')) || {}}
-    catch(e){return {}}
-  }
-
-  function qtyFor(item){
-    const cart=getCart();
-    return cart[item.name]?.quantity || 0;
-  }
-
-  function cartAdd(item, change){
-    let cart=getCart();
-    if(!cart[item.name]){
-      cart[item.name]={
-        quantity:0,
-        price:item.price,
-        originalPrice:item.originalPrice>item.price?item.originalPrice:null,
-        resId:item.resId,
-        menuItem:item.menuItem,
-        image:item.image,
-        name:item.name,
-        isVeg:item.isVeg
-      };
-    }
-    cart[item.name].quantity += change;
-    if(cart[item.name].quantity<=0) delete cart[item.name];
-    localStorage.setItem('nearbite_cart',JSON.stringify(cart));
-    render();
-    if(typeof window.updateGlobalCart==='function') window.updateGlobalCart();
-  }
-
-  function addButton(item){
-    const q=qtyFor(item);
-    if(q>0){
-      return '<div class="stepper" role="group" aria-label="Quantity">'+
-        '<button type="button" onclick="event.stopPropagation();window.__99Cart('+JSON.stringify(item.name)+',-1)" aria-label="Remove">−</button>'+
-        '<span>'+q+'</span>'+
-        '<button type="button" onclick="event.stopPropagation();window.__99Cart('+JSON.stringify(item.name)+',1)" aria-label="Add">+</button>'+
-      '</div>';
-    }
-    return '<button type="button" class="add-btn" onclick="event.stopPropagation();window.__99Cart('+JSON.stringify(item.name)+',1)" aria-label="Add '+esc(item.name)+'">+</button>';
+    return { visible, qualifies: visible.length > 0 };
   }
 
   function render(){
@@ -727,19 +324,14 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
     const skeleton=$('skeleton-feed');
     if(!list)return;
 
-    let filtered=allItems.filter(item=>{
-      if(item.price>maxPrice)return false;
-      if(vegOnly && !item.isVeg)return false;
-      if(discountOnly && item.discountPct<20)return false;
-      return true;
-    });
-
-    const groups=groupItems(filtered);
+    let groups = allRestaurants.map(r => ({r, ...passesFilters(r)})).filter(x => x.qualifies);
+    if(sortMode==='rating') groups.sort((a,b)=>b.r.rating-a.r.rating);
+    if(sortMode==='price') groups.sort((a,b)=>(a.visible[0]?.price||Infinity)-(b.visible[0]?.price||Infinity));
 
     skeleton.style.display='none';
     list.style.display='flex';
-    $('item-count').textContent=groups.length
-      ? groups.length+' Restaurant'+(groups.length===1?'':'s')
+    $('item-count').textContent = groups.length
+      ? `${groups.length} Restaurant${groups.length===1?'':'s'}`
       : 'Deals for you';
 
     if(!groups.length){
@@ -747,70 +339,17 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
       return;
     }
 
-    list.innerHTML=groups.map((group,index)=>{
-      const r=group[0];
-      const discount=Math.max(15,Math.round(r.discountPct||15));
-      const freeText=r.freeAbove!==null ? 'Free delivery above ₹'+r.freeAbove : 'Free delivery above ₹200';
-      const count=r.ratingCount ? '<span class="rating-count">('+esc(r.ratingCount)+')</span>' : '';
-      const cuisine=r.cuisine ? '<span class="dot-sep">•</span><span class="cuisine">'+esc(r.cuisine)+'</span>' : '';
-
-      const cards=group.slice(0,6).map(item=>{
-        const dietary='<span class="dietary '+(item.isVeg?'':'nonveg')+'"></span>';
-        const image=item.image
-          ? '<img src="'+esc(item.image)+'" alt="'+esc(item.name)+'" loading="lazy" onerror="this.style.display=\\'none\\'">'
-          : '<div class="fallback"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19h16M6 16l3-5 3 3 3-6 3 8"/></svg></div>';
-        return '<article class="item-card">'+
-          '<div class="item-image">'+
-            (item.popular?'<span class="popular">Popular</span>':'')+
-            image+
-            addButton(item)+
-          '</div>'+
-          '<div class="item-name">'+dietary+'<span>'+esc(item.name)+'</span></div>'+
-          '<div class="price-row">'+
-            '<span class="price">₹'+item.price+'</span>'+
-            (item.originalPrice>item.price?'<span class="old-price">₹'+item.originalPrice+'</span>':'')+
-            (item.discountPct>0?'<span class="off">'+item.discountPct+'% OFF</span>':'')+
-          '</div>'+
-        '</article>';
-      }).join('');
-
-      return '<article class="restaurant-card" style="animation:fadeUp .3s ease both;animation-delay:'+Math.min(index*.035,.25)+'s">'+
-        '<div class="restaurant-head">'+
-          '<div class="discount-line">'+discount+'% LOWER PRICES</div>'+
-          '<h2 class="restaurant-name">'+esc(r.resName)+'</h2>'+
-          '<div class="stamp">EVERYDAY<br>LOWEST PRICE<br>EVERYDAY</div>'+
-          '<div class="meta">'+
-            '<span class="rating"><span class="rating-star">★</span><span class="rating-value">'+(r.rating?r.rating.toFixed(1):'—')+'</span>'+count+'</span>'+
-            '<span class="dot-sep">•</span>'+
-            '<span class="delivery">'+
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>'+
-              esc(r.delivery)+
-            '</span>'+
-            cuisine+
-          '</div>'+
-          '<div class="free-row">'+
-            '<span class="free-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h10a3 3 0 0 0 0-6H7a3 3 0 0 0 0 6h10a3 3 0 0 1 0 6H6a3 3 0 0 1 0-6h1"/></svg></span>'+
-            '<span>'+freeText+'</span>'+
-            '<button class="info-btn" onclick="event.stopPropagation();showToast(\\'Free delivery threshold for this restaurant\\')" aria-label="Info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg></button>'+
-          '</div>'+
-        '</div>'+
-        '<div class="item-carousel">'+cards+'</div>'+
-      '</article>';
-    }).join('');
-
-    if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
+    list.innerHTML='';
+    groups.forEach(({r, visible}, index) => {
+      // The component receives the restaurant's COMPLETE menu, not only the filtered items.
+      const cardData={...r, menu:r.menu};
+      const host=window.Eatswada99Card.createRestaurantCard(cardData);
+      host.style.animation=`fadeUp .3s ease both`;
+      host.style.animationDelay=`${Math.min(index*.035,.25)}s`;
+      list.appendChild(host);
+    });
+    if(typeof window.updateGlobalCart==='function') window.updateGlobalCart();
   }
-
-  window.__99Cart=(name,change)=>{
-    const item=allItems.find(x=>x.name===name);
-    if(item)cartAdd(item,change);
-  };
-
-  window.showToast=(message)=>{
-    const t=$('toast');t.textContent=message;t.style.display='block';
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer=setTimeout(()=>t.style.display='none',1800);
-  };
 
   window.toggleVegFilter=()=>{
     vegOnly=!vegOnly;
@@ -826,9 +365,9 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
 
   window.cyclePrice=()=>{
     const btn=$('price-btn');
-    if(maxPrice===1000){maxPrice=99;btn.innerHTML='₹99 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
-    else if(maxPrice===99){maxPrice=149;btn.innerHTML='₹149 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
-    else {maxPrice=1000;btn.innerHTML='₹99 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
+    if(maxPrice===99){maxPrice=149;btn.innerHTML='₹149 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
+    else if(maxPrice===149){maxPrice=1000;btn.innerHTML='₹1000 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
+    else {maxPrice=99;btn.innerHTML='₹99 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
     render();
   };
 
@@ -839,212 +378,23 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
   };
 
   async function load(){
-    const skeleton = $('skeleton-feed');
-    const list = $('under99-list');
-
-    // IMPORTANT:
-    // The working Eatswada homepage loads /api/restaurants and receives:
-    // restaurant metadata + restaurant.menu[].
-    // The previous version of this page depended only on /restaurants/under99,
-    // which is why this page could remain on the skeleton even though the
-    // homepage had valid restaurant/menu data.
-    const HOME_API = 'https://eatswada.onrender.com/api/restaurants';
-    const CACHE = 'es_home_restaurants_v2';
-
+    const skeleton=$('skeleton-feed');
+    const list=$('under99-list');
     try{
-      let restaurants = null;
-
-      // Reuse the exact homepage dataset first.
-      const cachedHome = sessionStorage.getItem(CACHE);
-      if(cachedHome){
-        try{
-          const parsed = JSON.parse(cachedHome);
-          if(Array.isArray(parsed) && parsed.length) restaurants = parsed;
-        }catch(e){}
-      }
-
-      // If the homepage cache isn't available, fetch it directly.
-      if(!restaurants){
-        const response = await fetch(HOME_API, {
-          method:'GET',
-          headers:{'Accept':'application/json'},
-          cache:'no-store'
-        });
-
-        if(!response.ok) throw new Error('Restaurant API HTTP '+response.status);
-
-        const result = await response.json();
-
-        if(result && result.success && Array.isArray(result.data)){
-          restaurants = result.data;
-          sessionStorage.setItem(CACHE, JSON.stringify(restaurants));
-        }else if(Array.isArray(result)){
-          restaurants = result;
-          sessionStorage.setItem(CACHE, JSON.stringify(restaurants));
-        }else{
-          throw new Error('Restaurant API returned no usable data');
-        }
-      }
-
-      // Convert restaurant.menu[] into the item structure used by this page.
-      const extracted = [];
-
-      restaurants.forEach(restaurant => {
-        const menu = Array.isArray(restaurant.menu) ? restaurant.menu : [];
-
-        menu.forEach(dish => {
-          const price = num(dish.price, 0);
-
-          // ₹99 Store is a merchandising section, not a hard-coded
-          // "only <= ₹99" page. Keep items up to ₹1000 as shown by the
-          // benchmark, while the price filter controls the visible range.
-          if(price <= 0 || price > 1000) return;
-
-          let original = first(dish, [
-            'originalPrice','mrp','compareAtPrice','oldPrice',
-            'strikedPrice','basePrice'
-          ], null);
-
-          let discount = first(dish, [
-            'discountPercentage','discountPercent','discount'
-          ], null);
-
-          if(original === null && discount !== null && num(discount) > 0){
-            original = Math.round(price / (1 - num(discount)/100));
-          }
-
-          if(original === null){
-            original = Math.round(price * 1.4);
-          }
-
-          const originalNum = num(original, price);
-          const discountPct = originalNum > price
-            ? Math.round((1 - price/originalNum) * 100)
-            : num(discount, 0);
-
-          let cuisine = first(restaurant, [
-            'cuisine','cuisines','category','cuisineDisplay'
-          ], '');
-
-          if(Array.isArray(cuisine)) cuisine = cuisine.join(', ');
-
-          // Preserve any restaurant/menu fields that are already present.
-          const delivery = first(restaurant, [
-            'deliveryTime','deliveryTimeText','eta',
-            'deliveryEta','delivery_time','estimatedDeliveryTime'
-          ], '30–40 mins');
-
-          const freeAbove = first(restaurant, [
-            'freeDeliveryAbove','free_delivery_above',
-            'freeDeliveryThreshold'
-          ], null);
-
-          extracted.push({
-            id:dish._id || dish.id || '',
-            name:dish.name || 'Special Item',
-            price,
-            originalPrice:originalNum,
-            discountPct,
-            isVeg:Boolean(dish.isVeg),
-            image:dish.image || dish.img || '',
-            menuItem:dish._id || dish.id || '',
-            resId:String(restaurant._id || restaurant.id || ''),
-            resName:restaurant.name || 'EatSwada Partner',
-            rating:num(restaurant.rating, 0),
-            ratingCount:first(restaurant, [
-              'ratingCount','ratingsCount','reviewCount'
-            ], ''),
-            delivery:String(delivery),
-            cuisine:String(cuisine || ''),
-            freeAbove:freeAbove === null ? null : num(freeAbove),
-            popular:Boolean(
-              dish.isBestseller ||
-              dish.isPopular ||
-              dish.popular ||
-              dish.bestseller
-            )
-          });
-        });
-      });
-
-      // If nested menus are absent, make one final direct API attempt.
-      // This keeps the page resilient without replacing the known working
-      // homepage data source.
-      if(!extracted.length){
-        const fallback = await fetch(
-          'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
-          {headers:{'Accept':'application/json'},cache:'no-store'}
-        );
-
-        if(fallback.ok){
-          const result = await fallback.json();
-          const raw = Array.isArray(result?.data)
-            ? result.data
-            : (Array.isArray(result) ? result : []);
-
-          raw.forEach(dbItem=>{
-            const restaurant =
-              dbItem.restaurant && typeof dbItem.restaurant === 'object'
-                ? dbItem.restaurant : {};
-
-            const price=num(dbItem.price,99);
-            if(price<=0 || price>1000)return;
-
-            const original=Math.round(price*1.4);
-
-            extracted.push({
-              id:dbItem._id || dbItem.id || '',
-              name:dbItem.name || 'Special Item',
-              price,
-              originalPrice:original,
-              discountPct:Math.round((1-price/original)*100),
-              isVeg:Boolean(dbItem.isVeg),
-              image:dbItem.image || dbItem.img || '',
-              menuItem:dbItem._id || dbItem.id || '',
-              resId:String(restaurant._id || restaurant.id || dbItem.restaurant || ''),
-              resName:restaurant.name || dbItem.restaurantName || 'EatSwada Partner',
-              rating:num(restaurant.rating || dbItem.rating,4.2),
-              ratingCount:restaurant.ratingCount || dbItem.ratingCount || '',
-              delivery:restaurant.deliveryTime || dbItem.deliveryTime || '30–40 mins',
-              cuisine:restaurant.cuisine || dbItem.cuisine || 'Indian, Fast Food',
-              freeAbove:restaurant.freeDeliveryAbove ?? dbItem.freeDeliveryAbove ?? null,
-              popular:Boolean(dbItem.isBestseller || dbItem.isPopular || dbItem.popular)
-            });
-          });
-        }
-      }
-
-      if(!extracted.length){
-        throw new Error('Restaurants loaded, but no menu items were returned.');
-      }
-
-      // Deduplicate items so a cached/embedded menu cannot create duplicates.
-      const seen = new Set();
-      allItems = extracted.filter(item=>{
-        const key = String(item.resId)+'|'+String(item.menuItem)+'|'+String(item.name);
-        if(seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-
-      // Force a real render immediately; skeleton must never remain visible
-      // after a successful data load.
-      if(skeleton) skeleton.style.display='none';
+      const response=await fetch(API,{headers:{Accept:'application/json'},cache:'no-store'});
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result=await response.json();
+      const raw=Array.isArray(result?.data) ? result.data : (Array.isArray(result) ? result : []);
+      allRestaurants=raw.map(normalizeRestaurant).filter(r=>r.id && r.menu.length);
+      if(!allRestaurants.length) throw new Error('No restaurant menu data returned');
       render();
-
     }catch(error){
-      console.error('[99 Store] Data load failed:', error);
-      if(skeleton) skeleton.style.display='none';
+      console.error('[99 Store] load failed:',error);
+      if(skeleton)skeleton.style.display='none';
       if(list){
         list.style.display='flex';
-        list.innerHTML=
-          '<div class="empty">'+
-          '<div style="font-size:35px">!</div>'+
-          '<h3>Couldn’t load deals</h3>'+
-          '<p>We could not load the restaurant menu data right now.</p>'+
-          '<button onclick="sessionStorage.removeItem(\\''+CACHE+'\\');location.reload()" '+
-          'style="margin-top:14px;border:0;border-radius:10px;padding:10px 16px;background:#e11d8d;color:#fff;font-weight:800">Retry</button>'+
-          '</div>';
+        list.innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>We could not load the restaurant menu data right now.</p><button id="u99-retry" style="margin-top:14px;border:0;border-radius:10px;padding:10px 16px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
+        $('u99-retry')?.addEventListener('click',load);
       }
     }
   }
