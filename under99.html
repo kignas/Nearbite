@@ -4,865 +4,870 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="view-transition" content="same-origin">
-  <title>₹99 Store – </title>
+  <title>99 Store – Eatswada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    :root{
-      --ink:#111827;
-      --muted:#6b7280;
-      --line:#e7e7ea;
-      --pink:#e51b8b;
-      --pink-soft:#fff0f8;
-      --green:#168653;
-      --green-soft:#eaf7f0;
-      --red:#e21d3e;
-      --surface:#fff;
-      --page:#f7f8fa;
-    }
-    *{box-sizing:border-box}
-    html{background:#fff}
-    body{
-      margin:0;
-      background:var(--page);
-      color:var(--ink);
-      font-family:'Poppins',sans-serif;
-      padding-bottom:82px;
-      -webkit-font-smoothing:antialiased;
+<style>
+    body { background: #f4f4f6; padding-bottom: 140px; }
+
+    /* ── STICKY HEADER ── */
+    .store-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
 
-    /* Compact mobile header — no logo/banner */
-    .store-header{
-      position:sticky;
-      top:0;
-      z-index:1000;
-      background:rgba(255,255,255,.97);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      border-bottom:1px solid rgba(0,0,0,.07);
+    .header-top {
+      padding: 14px 16px 12px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .header-top{
-      height:70px;
-      padding:10px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #f3f3f5; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s, transform 0.12s;
+      text-decoration: none;
     }
-    .header-left{display:flex;align-items:center;gap:12px;min-width:0}
-    .icon-btn{
-      width:42px;height:42px;flex:0 0 42px;
-      border:1px solid #e5e7eb;border-radius:50%;
-      background:#fff;color:#111827;
-      display:flex;align-items:center;justify-content:center;
-      text-decoration:none;cursor:pointer;
-      box-shadow:0 1px 3px rgba(0,0,0,.03);
+    .icon-btn:active { transform: scale(0.92); background: #eaeaed; }
+    .icon-btn i { font-size: 13px; color: #333; }
+    .header-title-wrap {}
+    .header-title-row { display: flex; align-items: center; gap: 7px; }
+    .header-title { font-size: 18px; font-weight: 900; color: #111; }
+    .official-badge {
+      background: #FC8019; color: #fff;
+      font-size: 7px; font-weight: 900;
+      padding: 2px 6px; border-radius: 5px;
+      letter-spacing: 0.8px; text-transform: uppercase;
     }
-    .icon-btn:active{transform:scale(.96)}
-    .icon-btn i{font-size:16px}
-    .header-title-wrap{min-width:0}
-    .header-title-row{display:flex;align-items:center;gap:7px}
-    .header-title{
-      margin:0;
-      font-size:20px;
-      line-height:1.15;
-      font-weight:900;
-      white-space:nowrap;
-      letter-spacing:-.5px;
-    }
-    .official-badge{display:none}
-    .header-sub{
-      margin:2px 0 0;
-      color:#8b919a;
-      font-size:10px;
-      font-weight:500;
-      white-space:nowrap;
-    }
-    .header-actions{display:flex;gap:8px}
+    .header-sub { font-size: 10px; font-weight: 700; color: #bbb; margin-top: 2px; letter-spacing: 0.3px; }
+    .header-actions { display: flex; gap: 10px; }
 
-    .filter-row{
-      display:flex;
-      gap:8px;
-      padding:0 16px 11px;
-      overflow-x:auto;
-      scrollbar-width:none;
-      -webkit-overflow-scrolling:touch;
+    /* Filter pills row */
+    .filter-row {
+      padding: 0 16px 12px;
+      display: flex; gap: 8px; overflow-x: auto;
     }
-    .filter-row::-webkit-scrollbar{display:none}
-    .filter-pill{
-      flex:0 0 auto;
-      min-height:40px;
-      padding:0 15px;
-      border:1px solid #dedfe4;
-      border-radius:22px;
-      background:#fff;
-      color:#25282d;
-      font-family:inherit;
-      font-size:12px;
-      font-weight:600;
-      white-space:nowrap;
-    }
-    .filter-pill.active{
-      color:var(--pink);
-      border-color:#f4b7d8;
-      background:var(--pink-soft);
-    }
-    .filter-pill i{font-size:9px;margin-left:4px}
-    .filter-sep{display:none}
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-sep { width: 1px; background: #eee; align-self: center; height: 20px; flex-shrink: 0; margin: 0 2px; }
 
-    .sub-bar{display:none}
-
-    main{
-      max-width:760px;
-      margin:0 auto;
-      padding:16px 12px 24px;
+    /* Veg + countdown sub-bar */
+    .sub-bar {
+      padding: 10px 16px;
+      background: #fafafa;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .items-found-label{
-      margin:0 4px 12px;
-      font-size:18px;
-      line-height:1.2;
-      font-weight:800;
-      letter-spacing:-.35px;
-      color:#151922;
-      text-transform:none;
+    .veg-toggle-row { display: flex; align-items: center; gap: 8px; }
+    .veg-label { font-size: 10px; font-weight: 800; color: #888; letter-spacing: 0.5px; text-transform: uppercase; }
+    .veg-switch {
+      width: 34px; height: 18px;
+      background: #ddd; border-radius: 999px;
+      position: relative; cursor: pointer;
+      transition: background 0.25s;
+    }
+    .veg-switch.on { background: #16a34a; }
+    .veg-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      background: #fff; border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: transform 0.25s;
+    }
+    .veg-switch.on .veg-thumb { transform: translateX(16px); }
+
+    .countdown-wrap { display: flex; align-items: center; gap: 6px; }
+    .countdown-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+    .countdown-text { font-size: 10px; font-weight: 800; color: #ef4444; letter-spacing: 0.5px; font-family: 'Poppins', sans-serif; }
+
+    /* ── MAIN CONTENT ── */
+    main { padding: 16px 14px 0; }
+    .items-found-label { font-size: 11px; font-weight: 800; color: #bbb; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
+
+    /* ── PRODUCT GRID ── */
+    .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+
+    /* ── PRODUCT CARD ── */
+    .product-card {
+      background: #fff;
+      border-radius: 20px;
+      overflow: visible;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.05);
+      padding-bottom: 14px;
     }
 
-    /* Restaurant deal cards */
-    .product-grid{
-      display:flex!important;
-      flex-direction:column;
-      gap:16px!important;
+    /* Image section */
+    .card-img-wrap {
+      position: relative;
+      margin: 0;
+      border-radius: 19px 19px 0 0;
+      overflow: hidden;
+      background: #f8f8f8;
+      aspect-ratio: 1;
     }
-    .restaurant-deal{
-      width:100%;
-      background:#fff;
-      border:1px solid #e4e5e8;
-      border-radius:20px;
-      padding:14px;
-      overflow:hidden;
-      box-shadow:0 3px 14px rgba(0,0,0,.045);
-      animation:cardFadeUp .28s ease both;
-    }
-    .deal-head{
-      position:relative;
-      min-width:0;
-      padding-right:64px;
-    }
-    .deal-discount{
-      display:inline-block;
-      margin:0 0 4px;
-      padding:0;
-      color:var(--pink);
-      font-size:15px;
-      line-height:1.2;
-      font-weight:900;
-      letter-spacing:-.25px;
-    }
-    .deal-name{
-      margin:0 0 7px;
-      font-size:21px;
-      line-height:1.14;
-      font-weight:900;
-      letter-spacing:-.55px;
-      color:#111827;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .deal-stamp{
-      position:absolute;
-      right:-5px;
-      top:-4px;
-      width:70px;
-      height:70px;
-      border:2px solid rgba(229,27,139,.25);
-      border-radius:50%;
-      color:rgba(229,27,139,.34);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-size:7px;
-      line-height:1.15;
-      font-weight:900;
-      transform:rotate(-11deg);
-      pointer-events:none;
-    }
-    .deal-meta{
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:6px;
-      min-width:0;
-      color:#3f4650;
-      font-size:12px;
-      font-weight:600;
-    }
-    .deal-rating{
-      display:inline-flex;
-      align-items:center;
-      gap:5px;
-      color:#fff;
-      background:var(--green);
-      border-radius:999px;
-      padding:4px 8px;
-      font-size:12px;
-      font-weight:800;
-    }
-    .deal-rating .star{font-size:11px;color:#fff}
-    .deal-rating-count{color:#777e88;font-weight:500}
-    .deal-sep{color:#a6abb2}
-    .deal-time{white-space:nowrap}
-    .deal-cuisine{
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:42%;
-    }
-    .deal-free{
-      display:flex;
-      align-items:center;
-      gap:7px;
-      margin-top:8px;
-      color:#222a31;
-      font-size:12px;
-      font-weight:700;
-    }
-    .deal-free-icon{
-      width:23px;height:23px;flex:0 0 23px;
-      display:flex;align-items:center;justify-content:center;
-      color:var(--green);
-      background:var(--green-soft);
-      border-radius:7px;
-      font-size:11px;
+    .card-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
     }
 
-    .deal-items{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:10px;
-      margin-top:13px;
-    }
-    .deal-item{min-width:0}
-    .deal-image{
-      position:relative;
-      width:100%;
-      aspect-ratio:1.18/1;
-      border:1px solid #e9eaed;
-      border-radius:15px;
-      overflow:hidden;
-      background:#f2f3f5;
-    }
-    .deal-image img{
-      width:100%;height:100%;
-      display:block;
-      object-fit:cover;
-    }
-    .deal-image-fallback{
-      width:100%;height:100%;
-      display:flex;align-items:center;justify-content:center;
-      color:#c4c8cd;font-size:25px;
-    }
-    .deal-popular{
-      position:absolute;
-      left:7px;top:7px;
-      z-index:2;
-      background:#fff;
-      color:var(--green);
-      border-radius:999px;
-      padding:5px 9px;
-      font-size:10px;
-      line-height:1;
-      font-weight:900;
-      box-shadow:0 2px 7px rgba(0,0,0,.08);
-    }
-    .deal-plus{
-      position:absolute;
-      right:7px;
-      bottom:7px;
-      width:42px;height:42px;
-      border-radius:50%;
-      border:3px solid #ff8fc8;
-      background:#fff;
-      color:var(--pink);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family:inherit;
-      font-size:27px;
-      font-weight:500;
-      line-height:1;
-      box-shadow:0 3px 9px rgba(0,0,0,.12);
-      cursor:pointer;
-      z-index:3;
-    }
-    .deal-plus:active{transform:scale(.94)}
-    .deal-qty{
-      position:absolute;
-      right:7px;
-      bottom:7px;
-      z-index:3;
-      height:36px;
-      min-width:86px;
-      padding:0 5px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      background:#fff;
-      border:1.5px solid #f08abf;
-      border-radius:12px;
-      box-shadow:0 3px 9px rgba(0,0,0,.11);
-    }
-    .deal-qty button{
-      width:27px;height:30px;
-      border:0;background:transparent;
-      color:var(--pink);
-      font:900 17px/1 'Poppins',sans-serif;
-      cursor:pointer;
-    }
-    .deal-qty span{font-size:12px;font-weight:900;color:#111827}
-
-    .deal-item-name{
-      display:flex;
-      align-items:flex-start;
-      gap:5px;
-      margin:8px 3px 0;
-      min-height:34px;
-      font-size:14px;
-      line-height:1.25;
-      font-weight:700;
-      color:#171a20;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
-    }
-    .veg-mark{
-      width:16px;height:16px;
-      flex:0 0 16px;
-      margin-top:1px;
-      border:1.6px solid var(--green);
-      border-radius:3px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .veg-mark::after{
-      content:"";
-      width:7px;height:7px;border-radius:50%;
-      background:var(--green);
-    }
-    .veg-mark.non{border-color:var(--red)}
-    .veg-mark.non::after{
-      width:0;height:0;border-radius:0;background:transparent;
-      border-left:4px solid transparent;
-      border-right:4px solid transparent;
-      border-bottom:7px solid var(--red);
-    }
-    .deal-price-row{
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:5px;
-      margin:7px 3px 0;
-    }
-    .deal-price{font-size:18px;font-weight:900;color:#111827}
-    .deal-old{font-size:12px;color:#8f959d;text-decoration:line-through}
-    .deal-off{
-      padding:4px 8px;
-      border-radius:999px;
-      background:var(--pink-soft);
-      color:var(--pink);
-      font-size:10px;
-      line-height:1;
-      font-weight:900;
-      white-space:nowrap;
+    /* Price badge on image */
+    .price-badge {
+      position: absolute; bottom: 10px; right: 10px;
+      background: #FC8019;
+      color: black;
+      font-size: 12px; font-weight: 900;
+      padding: 4px 9px; border-radius: 9px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      letter-spacing: 0.2px;
     }
 
-    .skel-card{
-      background:#fff;
-      border-radius:20px;
-      padding:14px;
-      border:1px solid #e5e6e9;
+    /* Floating ADD/stepper on card */
+    .card-btn-float {
+      position: relative;
+      display: flex; justify-content: center;
+      margin-top: -14px;
+      margin-bottom: 10px;
+      z-index: 5;
     }
-    .skel-img{height:150px;border-radius:15px}
-    .skel-body{padding:12px 0}
-    .empty-state{padding:50px 20px;text-align:center}
-    .empty-state i{font-size:40px;color:#d8dbe0}
-    .empty-state h3{font-size:16px;margin:12px 0 4px}
-    .empty-state p{font-size:12px;color:#8b9199}
+    .card-add-wrap {
+      min-width: 88px; height: 34px;
+      background: #fff;
+      border: 1.5px solid #efefef;
+      border-radius: 11px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .card-add-single {
+      width: 100%; height: 100%; background: transparent; border: none;
+      font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800;
+      color: #FC8019; letter-spacing: 0.6px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .card-add-single:active { background: #fff8f2; }
+    .card-stepper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .card-s-btn {
+      width: 32px; height: 100%; background: transparent; border: none;
+      font-size: 17px; font-weight: 700; color: #FC8019; cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s;
+    }
+    .card-s-btn:active { background: #fff8f2; }
+    .card-s-count { font-size: 13px; font-weight: 900; color: #111; min-width: 18px; text-align: center; pointer-events: none; }
 
-    .bottom-nav{
-      position:fixed;
-      left:0;right:0;bottom:0;
-      height:68px;
-      padding-bottom:env(safe-area-inset-bottom);
-      background:rgba(255,255,255,.98);
-      border-top:1px solid rgba(0,0,0,.06);
-      box-shadow:0 -4px 22px rgba(0,0,0,.06);
-      display:flex;
-      z-index:9999;
+    /* Card body */
+    .card-body { padding: 0 12px; }
+    .card-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .card-rating {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #f0faf5; border: 1px solid #c6ead8;
+      border-radius: 6px; padding: 2px 6px;
     }
-    .nav-item{
-      flex:1;
-      color:#9aa3b2;
-      text-decoration:none;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-      font-size:9px;
-      font-weight:700;
-    }
-    .nav-item.active{color:var(--pink)}
-    .nav-icon{font-size:19px}
-    .nav-food-circle{
-      width:34px;height:34px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      background:#f1f3f6;
-      font-size:16px;
-    }
-    .nav-item.active .nav-food-circle{background:var(--pink);color:#fff}
-    .nav-new-badge{display:none}
+    .card-rating i { font-size: 8px; color: #1ba672; }
+    .card-rating span { font-size: 10px; font-weight: 800; color: #1ba672; }
+    .card-name { font-size: 13px; font-weight: 800; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .card-rest { font-size: 10px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:88px;
-      transform:translateX(-50%);
-      z-index:11000;
-      background:#17191d;
-      color:#fff;
-      padding:10px 15px;
-      border-radius:12px;
-      font-size:12px;
-      font-weight:700;
-      box-shadow:0 8px 25px rgba(0,0,0,.2);
-      display:none;
-    }
+    /* Skeleton grid */
+    .skel-card { background: #fff; border-radius: 20px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+    .skel-img { aspect-ratio: 1; }
+    .skel-body { padding: 12px; display: flex; flex-direction: column; gap: 7px; }
 
-    @keyframes cardFadeUp{
-      from{opacity:0;transform:translateY(8px)}
-      to{opacity:1;transform:translateY(0)}
+    /* Empty state */
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; }
+    .empty-state i { font-size: 44px; color: #e0e0e0; margin-bottom: 14px; display: block; }
+    .empty-state h3 { font-size: 16px; font-weight: 800; color: #555; }
+    .empty-state p  { font-size: 12px; color: #bbb; margin-top: 6px; font-weight: 500; }
+    
+    /* ─── Premium Bottom Nav ─── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 68px;
+      background: rgba(255,255,255,0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: stretch;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 9999;
+      padding-bottom: env(safe-area-inset-bottom);
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
+    .bottom-nav-hidden { transform: translateY(100%); }
 
-    /* Tablet / wider phones: preserve the same card, simply breathe a little more. */
-    @media (min-width:560px){
-      main{padding-left:18px;padding-right:18px}
-      .restaurant-deal{padding:16px}
-      .deal-items{gap:14px}
-      .deal-name{font-size:23px}
-      .deal-image{border-radius:17px}
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; font-size: 10px; font-weight: 700; color: #94a3b8; text-decoration: none;
+      position: relative; transition: color 0.2s ease; -webkit-tap-highlight-color: transparent;
     }
-    @media (max-width:380px){
-      .header-title{font-size:18px}
-      .header-sub{font-size:9px}
-      .deal-name{font-size:19px}
-      .deal-discount{font-size:14px}
-      .deal-meta,.deal-free{font-size:11px}
-      .deal-item-name{font-size:12px}
-      .deal-price{font-size:16px}
-      .deal-plus{width:38px;height:38px;font-size:24px}
-      .deal-qty{min-width:78px;height:34px}
-      .deal-qty button{width:24px}
+    /* Only the active tab turns Orange */
+    .nav-item.active { color: #FC8019; }
+
+    .nav-icon { font-size: 20px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .nav-item:active .nav-icon { transform: scale(0.8); transition: transform 0.1s ease-out; }
+
+    /* The Swiggy-style Circle for Food */
+    .nav-food-circle {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #f1f5f9; color: #94a3b8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; transition: all 0.3s ease; margin-bottom: 2px;
     }
+    .nav-item.active .nav-food-circle {
+      background: #FC8019; color: #fff;
+      box-shadow: 0 4px 12px rgba(252,128,25,0.3);
+    }
+    .nav-item:active .nav-food-circle { transform: scale(0.85); transition: transform 0.1s ease-out; }
+
+    .nav-new-badge {
+      position: absolute; top: 6px; right: 12px;
+      background: #ef4444; color: #fff; font-size: 7px; font-weight: 900;
+      padding: 2px 5px; border-radius: 6px; letter-spacing: 0.5px;
+    }
+    
   </style>
 </head>
+
+<style>
+:root{
+  --ink:#101828;
+  --muted:#737983;
+  --soft:#f7f8fa;
+  --line:#e7e8eb;
+  --pink:#e11d8d;
+  --pink2:#ff9ed1;
+  --pink-soft:#fff0f8;
+  --green:#16865a;
+  --green-soft:#edf9f3;
+  --red:#dc2446;
+  --gold:#f4aa22;
+  --shadow:0 3px 16px rgba(16,24,40,.055);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--soft);color:var(--ink);font-family:Poppins,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,a{font:inherit}
+button{cursor:pointer}
+body{padding-bottom:78px}
+svg{display:block}
+
+.store-header{
+  position:sticky;top:0;z-index:1000;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(16,24,40,.06);
+}
+.header-top{
+  height:72px;padding:10px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.header-left{display:flex;align-items:center;gap:12px;min-width:0}
+.icon-btn{
+  width:44px;height:44px;flex:0 0 44px;
+  border:1px solid #e2e4e8;border-radius:50%;
+  background:#fff;color:#101828;
+  display:grid;place-items:center;
+  box-shadow:0 1px 3px rgba(16,24,40,.025);
+  -webkit-tap-highlight-color:transparent;
+}
+.icon-btn:active{transform:scale(.95)}
+.icon-btn svg{width:21px;height:21px}
+.header-copy{min-width:0}
+.header-title{
+  margin:0;font-size:20px;line-height:1.1;font-weight:900;
+  letter-spacing:-.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.header-sub{
+  margin:3px 0 0;font-size:10px;line-height:1.2;
+  color:#7e858e;font-weight:600;white-space:nowrap;
+}
+.filter-row{
+  display:flex;gap:8px;overflow-x:auto;
+  padding:0 18px 11px;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-pill{
+  height:42px;flex:0 0 auto;padding:0 16px;
+  border:1px solid #dedfe4;border-radius:23px;
+  background:#fff;color:#2c3138;
+  font-size:12px;font-weight:700;white-space:nowrap;
+  display:flex;align-items:center;gap:7px;
+  box-shadow:0 1px 2px rgba(16,24,40,.02);
+}
+.filter-pill.active{
+  color:var(--pink);border-color:#f1b3d5;background:var(--pink-soft);
+}
+.filter-pill svg{width:17px;height:17px}
+.filter-pill.active svg{stroke:var(--pink)}
+
+main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
+.items-found-label{
+  margin:0 5px 13px;font-size:20px;line-height:1.2;
+  font-weight:900;letter-spacing:-.45px;
+}
+
+.restaurant-feed{display:flex;flex-direction:column;gap:16px}
+.restaurant-card{
+  background:#fff;border:1px solid var(--line);border-radius:21px;
+  box-shadow:var(--shadow);padding:14px;overflow:hidden;
+}
+.restaurant-head{position:relative;padding-right:67px}
+.discount-line{
+  color:var(--pink);font-size:15px;line-height:1.15;
+  font-weight:900;letter-spacing:-.2px;margin-bottom:5px;
+}
+.restaurant-name{
+  margin:0 0 7px;font-size:22px;line-height:1.12;
+  font-weight:900;letter-spacing:-.65px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.stamp{
+  position:absolute;right:-2px;top:-2px;
+  width:69px;height:69px;border:2px solid rgba(225,29,141,.25);
+  border-radius:50%;display:grid;place-items:center;text-align:center;
+  color:rgba(225,29,141,.38);font-size:7px;line-height:1.15;
+  font-weight:900;transform:rotate(-11deg);pointer-events:none;
+}
+.meta{
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+  color:#424850;font-size:12px;font-weight:600;
+}
+.rating{
+  display:inline-flex;align-items:center;gap:5px;
+  color:#30353b;background:transparent;
+}
+.rating-star{color:var(--gold);font-size:17px;line-height:1}
+.rating-value{font-weight:700}
+.rating-count{color:#747b84;font-weight:500}
+.dot-sep{color:#a8adb4}
+.meta-item{white-space:nowrap}
+.cuisine{max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.delivery{
+  display:inline-flex;align-items:center;gap:5px;
+}
+.delivery svg{width:17px;height:17px;stroke:#59616b}
+.free-row{
+  margin-top:8px;display:flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:700;color:#262c33;
+}
+.free-icon{
+  width:22px;height:22px;display:grid;place-items:center;
+  color:#fff;background:var(--green);border-radius:7px;flex:0 0 22px;
+}
+.free-icon svg{width:13px;height:13px}
+.info-btn{
+  width:17px;height:17px;border:0;background:transparent;padding:0;
+  color:#9298a0;display:inline-grid;place-items:center;margin-left:1px;
+}
+.info-btn svg{width:16px;height:16px}
+
+.item-carousel{
+  display:flex;gap:11px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:13px 0 2px;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.item-carousel::-webkit-scrollbar{display:none}
+.item-card{
+  min-width:calc((100% - 22px)/3);width:calc((100% - 22px)/3);
+  scroll-snap-align:start;overflow:visible;
+}
+.item-image{
+  position:relative;width:100%;aspect-ratio:1.06/1;
+  border-radius:15px;overflow:hidden;background:#f0f1f3;
+  border:1px solid #e9eaed;
+}
+.item-image img{width:100%;height:100%;object-fit:cover;display:block}
+.item-image .fallback{
+  width:100%;height:100%;display:grid;place-items:center;color:#c7cbd1;
+}
+.popular{
+  position:absolute;left:7px;top:7px;z-index:2;
+  background:#fff;color:var(--green);border-radius:999px;
+  padding:5px 9px;font-size:10px;line-height:1;font-weight:900;
+  box-shadow:0 2px 8px rgba(16,24,40,.08);
+}
+.add-btn{
+  position:absolute;right:7px;bottom:7px;z-index:3;
+  width:43px;height:43px;border-radius:50%;
+  border:3px solid var(--pink2);background:#fff;color:var(--pink);
+  display:grid;place-items:center;box-shadow:0 3px 9px rgba(16,24,40,.13);
+  font-size:28px;line-height:1;font-weight:500;
+}
+.add-btn:active{transform:scale(.93)}
+.stepper{
+  position:absolute;right:7px;bottom:7px;z-index:3;
+  height:37px;min-width:88px;padding:0 4px;
+  border:1.5px solid var(--pink);border-radius:12px;
+  background:#fff;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 3px 9px rgba(16,24,40,.12);
+}
+.stepper button{
+  width:28px;height:30px;border:0;background:transparent;
+  color:var(--pink);font-size:18px;font-weight:900;display:grid;place-items:center;
+}
+.stepper span{font-size:12px;font-weight:900;color:#171a20}
+.item-name{
+  margin:8px 2px 0;min-height:36px;
+  display:flex;align-items:flex-start;gap:6px;
+  font-size:13px;line-height:1.28;font-weight:700;color:#171a20;
+}
+.dietary{
+  width:17px;height:17px;flex:0 0 17px;margin-top:0;
+  border:1.7px solid var(--green);border-radius:4px;
+  display:grid;place-items:center;
+}
+.dietary:after{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.dietary.nonveg{border-color:var(--red)}
+.dietary.nonveg:after{
+  width:0;height:0;border-radius:0;background:none;
+  border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid var(--red);
+}
+.price-row{
+  display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:7px 2px 0;
+}
+.price{font-size:18px;font-weight:900;color:#111827}
+.old-price{font-size:11px;color:#8d939b;text-decoration:line-through}
+.off{
+  background:var(--pink-soft);color:var(--pink);
+  padding:5px 8px;border-radius:999px;font-size:9px;line-height:1;font-weight:900;
+  white-space:nowrap;
+}
+
+.skeleton-feed{display:flex;flex-direction:column;gap:16px}
+.skeleton-card{
+  background:#fff;border:1px solid var(--line);border-radius:21px;padding:14px;
+}
+.skeleton-big{height:42px;border-radius:8px;margin-bottom:12px}
+.skeleton-row{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.skeleton-img{aspect-ratio:1.06/1;border-radius:15px}
+.skeleton-line{height:12px;border-radius:6px;margin-top:9px}
+.skeleton{
+  background:linear-gradient(90deg,#f0f1f3 25%,#fafafa 37%,#f0f1f3 63%);
+  background-size:400% 100%;animation:shimmer 1.25s ease-in-out infinite;
+}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+.empty{
+  background:#fff;border:1px solid var(--line);border-radius:20px;
+  text-align:center;padding:55px 20px;color:#737983;
+}
+.empty h3{margin:12px 0 5px;color:#363b42;font-size:16px}
+.empty p{margin:0;font-size:12px}
+
+.bottom-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:9999;
+  height:68px;padding-bottom:env(safe-area-inset-bottom);
+  display:flex;background:rgba(255,255,255,.98);
+  border-top:1px solid rgba(16,24,40,.06);
+  box-shadow:0 -5px 24px rgba(16,24,40,.06);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;color:#9aa2ae;text-decoration:none;font-size:10px;font-weight:700;
+}
+.nav-item.active{color:var(--pink)}
+.nav-item svg{width:20px;height:20px}
+.nav-item.active svg{stroke:var(--pink)}
+.nav-new-badge{display:none}
+
+.toast{
+  position:fixed;left:50%;bottom:82px;z-index:12000;
+  transform:translateX(-50%);display:none;
+  background:#17191d;color:#fff;padding:10px 14px;border-radius:11px;
+  font-size:12px;font-weight:700;box-shadow:0 8px 25px rgba(0,0,0,.2);
+  white-space:nowrap;
+}
+
+@media(max-width:430px){
+  .header-top{height:70px;padding-left:14px;padding-right:14px}
+  .header-title{font-size:19px}
+  main{padding-left:12px;padding-right:12px}
+  .restaurant-card{padding:13px;border-radius:20px}
+  .restaurant-name{font-size:20px}
+  .discount-line{font-size:14px}
+  .item-card{min-width:calc((100% - 22px)/3);width:calc((100% - 22px)/3)}
+}
+@media(max-width:370px){
+  .header-title{font-size:17px}
+  .header-sub{font-size:9px}
+  .icon-btn{width:40px;height:40px;flex-basis:40px}
+  .filter-pill{padding:0 13px;font-size:11px}
+  .restaurant-name{font-size:18px}
+  .meta,.free-row{font-size:11px}
+  .item-name{font-size:12px}
+  .price{font-size:16px}
+}
+@media(min-width:700px){
+  main{padding-left:20px;padding-right:20px}
+  .restaurant-card{padding:16px}
+  .restaurant-name{font-size:24px}
+}
+</style>
 
 <body>
 <header class="store-header">
   <div class="header-top">
     <div class="header-left">
-      <a href="index.html" class="icon-btn" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
-      <div class="header-title-wrap">
-        <div class="header-title-row">
-          <h1 class="header-title">Meals Under ₹99 – 1000</h1>
-          <span class="official-badge">PRO</span>
-        </div>
+      <a href="index.html" class="icon-btn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      </a>
+      <div class="header-copy">
+        <h1 class="header-title">Meals Under ₹99 – 1000</h1>
         <p class="header-sub">Great food. Lower prices. Everyday.</p>
       </div>
     </div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
-    </div>
+    <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m17 17 4 4"/></svg>
+    </button>
   </div>
 
-  <div class="filter-row no-scrollbar">
-    <button onclick="setSortFilter()" id="sort-btn" class="filter-pill">
-      <i class="fa-solid fa-sliders"></i>
+  <div class="filter-row">
+    <button class="filter-pill" id="sort-btn" onclick="cycleSort()" aria-label="Filters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
     </button>
-    <button onclick="setDiscountFilter()" id="discount-btn" class="filter-pill active">
-      ✨ 40–60% Lower Prices
+
+    <button class="filter-pill active" id="discount-btn" onclick="toggleDiscount()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/><path d="M19 5 5 19"/></svg>
+      40–60% Lower Prices
     </button>
-    <button onclick="setVegFilter()" id="veg-filter" class="filter-pill">
-      Veg/Non-Veg <i class="fa-solid fa-chevron-down"></i>
+
+    <button class="filter-pill" id="veg-btn" onclick="toggleVegFilter()">
+      Veg/Non-Veg
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
     </button>
-    <button onclick="setPriceFilter(99)" id="filter-99" class="filter-pill">
-      ₹99 &amp; under <i class="fa-solid fa-chevron-down"></i>
+
+    <button class="filter-pill" id="price-btn" onclick="cyclePrice()">
+      ₹99 &amp; under
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
     </button>
-    <button onclick="setRatingFilter()" id="rating-btn" class="filter-pill">Rating 4.0+</button>
   </div>
 </header>
 
 <main>
   <p id="item-count" class="items-found-label">Deals for you</p>
 
-  <div id="skeleton-grid" class="product-grid">
-    <div class="skel-card"><div class="skel-img skeleton"></div><div class="skel-body"><div class="skeleton" style="height:14px;width:65%;border-radius:6px"></div><div class="skeleton" style="height:11px;width:45%;border-radius:6px;margin-top:8px"></div></div></div>
-    <div class="skel-card"><div class="skel-img skeleton"></div><div class="skel-body"><div class="skeleton" style="height:14px;width:70%;border-radius:6px"></div><div class="skeleton" style="height:11px;width:50%;border-radius:6px;margin-top:8px"></div></div></div>
-  </div>
+  <section id="skeleton-feed" class="skeleton-feed" aria-hidden="true">
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-big"></div>
+      <div class="skeleton-row">
+        <div><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div></div>
+        <div><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div></div>
+        <div><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div></div>
+      </div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-big"></div>
+      <div class="skeleton-row">
+        <div><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div></div>
+        <div><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div></div>
+        <div><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line"></div></div>
+      </div>
+    </div>
+  </section>
 
-  <div id="under99-list" class="product-grid" style="display:none"></div>
+  <section id="under99-list" class="restaurant-feed" style="display:none"></section>
 </main>
 
-
-<!-- ══════════════════════════════════════════
-     BOTTOM NAVIGATION
-══════════════════════════════════════════ -->
 <nav class="bottom-nav">
-  
-  <a href="index.html" class="nav-item"> 
-    <div class="nav-food-circle"><i class="fa-solid fa-bowl-food"></i></div>
+  <a href="index.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M9 20v-5h6v5"/></svg>
     <span>Food</span>
   </a>
-
   <a href="under99.html" class="nav-item active">
-    <i class="fa-solid fa-tag nav-icon"></i>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 13-7 7-9-9V4h7z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
     <span>99 Store</span>
-    <span class="nav-new-badge">NEW</span>
   </a>
-
   <a href="orders.html" class="nav-item">
-    <i class="fa-solid fa-receipt nav-icon"></i>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v18H7z"/><path d="M9 7h6M9 11h6M9 15h6"/></svg>
     <span>Orders</span>
   </a>
 </nav>
 
+<div id="toast" class="toast"></div>
 
-<script src="home.js"></script>
-<script src="under99.js"></script>
 <script src="cart-bar.js"></script>
 <script>
-  // ── RESTAURANT DEAL FEED ──
-  const API_BASE_URL = 'https://eatswada.onrender.com/api';
-  let currentMaxPrice = 99;
-  let vegOnly99 = false;
-  let sortByRating = false;
-  let discountOnly = true;
+(() => {
+  const API = 'https://eatswada.onrender.com/api/restaurants/under99';
+  const CACHE = 'es_under99_benchmark_v10';
 
-  function esc(v){
-    return String(v == null ? '' : v)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  let allItems = [];
+  let maxPrice = 1000;       // benchmark allows items such as ₹229
+  let vegOnly = false;
+  let discountOnly = true;
+  let sortMode = 'default';
+
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  const escJs = value => String(value ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+  function num(v, fallback=0){
+    const n = parseFloat(String(v ?? '').replace(/[^0-9.]/g,''));
+    return Number.isFinite(n) ? n : fallback;
   }
-  function getField(obj, paths, fallback=''){
-    for(const p of paths){
-      let cur=obj;
-      for(const k of p.split('.')){
-        if(cur==null) break;
-        cur=cur[k];
-      }
-      if(cur!==undefined && cur!==null && cur!=='') return cur;
+  function first(obj, keys, fallback=''){
+    for(const key of keys){
+      const parts = key.split('.');
+      let value=obj;
+      for(const part of parts){ value=value?.[part]; }
+      if(value!==undefined && value!==null && value!=='') return value;
     }
     return fallback;
   }
-  function money(v){ return Math.round(Number(v)||0); }
 
-  function normalizeItem(dbItem){
-    let price = money(dbItem.price);
-    let restaurant = (dbItem.restaurant && typeof dbItem.restaurant === 'object') ? dbItem.restaurant : {};
-    let rId = restaurant._id || restaurant.id || dbItem.restaurant || 'unknown';
-    let rName = restaurant.name || dbItem.restaurantName || 'EatSwada Partner';
-    let rRating = restaurant.rating ?? dbItem.resRating ?? 0;
+  function normalize(raw){
+    const restaurant = raw.restaurant && typeof raw.restaurant === 'object' ? raw.restaurant : {};
+    const price = num(raw.price,99);
 
-    let delivery = getField(dbItem,[
-      'deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time'
-    ],'');
-    if(!delivery) delivery=getField(restaurant,[
-      'deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time','estimatedDeliveryTime'
-    ],'');
+    let original = first(raw,['originalPrice','mrp','compareAtPrice','oldPrice'],null);
+    let discount = first(raw,['discountPercentage','discountPercent','discount'],null);
 
-    let freeAbove = getField(dbItem,[
-      'freeDeliveryAbove','free_delivery_above'
-    ],null);
-    if(freeAbove==null) freeAbove=getField(restaurant,[
-      'freeDeliveryAbove','free_delivery_above','freeDeliveryThreshold'
-    ],null);
+    if(original===null && discount!==null && num(discount)>0){
+      original = Math.round(price/(1-num(discount)/100));
+    }
+    if(original===null) original = price > 0 ? Math.round(price*1.4) : 0;
 
-    let cuisine = getField(dbItem,['cuisine','cuisines','category'], '');
-    if(!cuisine) cuisine=getField(restaurant,['cuisine','cuisines','category'], '');
+    const discountPct = original>price ? Math.round((1-price/original)*100) : num(discount,0);
+
+    let cuisine = first(raw,['cuisine','cuisines','category'], '');
+    if(!cuisine) cuisine=first(restaurant,['cuisine','cuisines','category'],'');
     if(Array.isArray(cuisine)) cuisine=cuisine.join(', ');
 
-    let original = getField(dbItem,['originalPrice','mrp','compareAtPrice','oldPrice'],null);
-    let discount = getField(dbItem,['discountPercentage','discountPercent','discount'],null);
-    if(original==null && discount!=null && Number(discount)>0){
-      original = Math.round(price/(1-Number(discount)/100));
-    }
-    if(original==null && price>0) original=Math.round(price*1.4);
-    let discountPct = (original && original>price)
-      ? Math.round((1-price/original)*100)
-      : (Number(discount)||0);
+    let delivery = first(raw,['deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time'],'');
+    if(!delivery) delivery=first(restaurant,['deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time','estimatedDeliveryTime'],'');
+    if(!delivery) delivery='30–40 mins';
+
+    let freeAbove = first(raw,['freeDeliveryAbove','free_delivery_above','freeDeliveryThreshold'],null);
+    if(freeAbove===null) freeAbove=first(restaurant,['freeDeliveryAbove','free_delivery_above','freeDeliveryThreshold'],null);
+
+    const rating = num(first(raw,['rating','resRating'],first(restaurant,['rating'],0)),0);
+    const ratingCount = first(raw,['ratingCount','ratingsCount','reviewCount'],first(restaurant,['ratingCount','ratingsCount','reviewCount'],''));
 
     return {
-      id: dbItem._id || dbItem.id || '',
-      name: dbItem.name || 'Special Item',
+      id:raw._id || raw.id || '',
+      name:raw.name || 'Special Item',
       price,
-      originalPrice: money(original),
+      originalPrice:num(original,0),
       discountPct,
-      isVeg: Boolean(dbItem.isVeg),
-      img: dbItem.image || dbItem.img || '',
-      resId:String(rId),
-      resName:rName,
-      resRating:Number(rRating)||0,
-      ratingCount:getField(dbItem,['ratingCount','ratingsCount','reviewCount'], getField(restaurant,['ratingCount','ratingsCount','reviewCount'],'')),
-      delivery:String(delivery||''),
-      cuisine:String(cuisine||''),
-      freeAbove: freeAbove==null ? null : money(freeAbove),
-      popular:Boolean(dbItem.isBestseller || dbItem.isPopular || dbItem.popular || dbItem.bestseller),
-      menuItem:dbItem._id || dbItem.id || ''
+      isVeg:Boolean(raw.isVeg),
+      image:raw.image || raw.img || '',
+      menuItem:raw._id || raw.id || '',
+      resId:String(restaurant._id || restaurant.id || raw.restaurant || 'unknown'),
+      resName:restaurant.name || raw.restaurantName || 'EatSwada Partner',
+      rating,
+      ratingCount,
+      delivery:String(delivery),
+      cuisine:String(cuisine || ''),
+      freeAbove:freeAbove===null ? null : num(freeAbove),
+      popular:Boolean(raw.isBestseller || raw.isPopular || raw.popular || raw.bestseller)
     };
   }
 
-  function readCart(){
-    try{return JSON.parse(localStorage.getItem('nearbite_cart'))||{};}catch(e){return {};}
-  }
-  function itemQty(item, cart){
-    if(cart[item.name] && cart[item.name].quantity) return cart[item.name].quantity;
-    return 0;
+  function groupItems(items){
+    const map = new Map();
+    items.forEach(item => {
+      const key = item.resId + '|' + item.resName;
+      if(!map.has(key)) map.set(key,[]);
+      map.get(key).push(item);
+    });
+    let groups=[...map.values()];
+    groups.forEach(g=>g.sort((a,b)=>a.price-b.price));
+    if(sortMode==='rating') groups.sort((a,b)=>b[0].rating-a[0].rating);
+    if(sortMode==='price') groups.sort((a,b)=>a[0].price-b[0].price);
+    return groups;
   }
 
-  function renderItems(items){
-    const listEl=document.getElementById('under99-list');
-    const skeleton=document.getElementById('skeleton-grid');
-    const countEl=document.getElementById('item-count');
-    if(!listEl) return;
+  function getCart(){
+    try{return JSON.parse(localStorage.getItem('nearbite_cart')) || {}}
+    catch(e){return {}}
+  }
 
-    let filtered=items.filter(item=>{
-      if(currentMaxPrice===99 && item.price>99) return false;
-      if(currentMaxPrice===149 && item.price>149) return false;
-      if(vegOnly99 && !item.isVeg) return false;
-      if(sortByRating && item.resRating<4) return false;
+  function qtyFor(item){
+    const cart=getCart();
+    return cart[item.name]?.quantity || 0;
+  }
+
+  function cartAdd(item, change){
+    let cart=getCart();
+    if(!cart[item.name]){
+      cart[item.name]={
+        quantity:0,
+        price:item.price,
+        originalPrice:item.originalPrice>item.price?item.originalPrice:null,
+        resId:item.resId,
+        menuItem:item.menuItem,
+        image:item.image,
+        name:item.name,
+        isVeg:item.isVeg
+      };
+    }
+    cart[item.name].quantity += change;
+    if(cart[item.name].quantity<=0) delete cart[item.name];
+    localStorage.setItem('nearbite_cart',JSON.stringify(cart));
+    render();
+    if(typeof window.updateGlobalCart==='function') window.updateGlobalCart();
+  }
+
+  function addButton(item){
+    const q=qtyFor(item);
+    if(q>0){
+      return '<div class="stepper" role="group" aria-label="Quantity">'+
+        '<button type="button" onclick="event.stopPropagation();window.__99Cart('+JSON.stringify(item.name)+',-1)" aria-label="Remove">−</button>'+
+        '<span>'+q+'</span>'+
+        '<button type="button" onclick="event.stopPropagation();window.__99Cart('+JSON.stringify(item.name)+',1)" aria-label="Add">+</button>'+
+      '</div>';
+    }
+    return '<button type="button" class="add-btn" onclick="event.stopPropagation();window.__99Cart('+JSON.stringify(item.name)+',1)" aria-label="Add '+esc(item.name)+'">+</button>';
+  }
+
+  function render(){
+    const list=$('under99-list');
+    const skeleton=$('skeleton-feed');
+    if(!list)return;
+
+    let filtered=allItems.filter(item=>{
+      if(item.price>maxPrice)return false;
+      if(vegOnly && !item.isVeg)return false;
+      if(discountOnly && item.discountPct<20)return false;
       return true;
     });
 
-    const groups={};
-    filtered.forEach(item=>{
-      const key=item.resId || ('unknown-'+item.resName);
-      if(!groups[key]) groups[key]=[];
-      groups[key].push(item);
-    });
+    const groups=groupItems(filtered);
 
-    let restaurants=Object.values(groups).map(itemsInRestaurant=>{
-      itemsInRestaurant.sort((a,b)=>a.price-b.price);
-      return {items:itemsInRestaurant};
-    });
+    skeleton.style.display='none';
+    list.style.display='flex';
+    $('item-count').textContent=groups.length
+      ? groups.length+' Restaurant'+(groups.length===1?'':'s')
+      : 'Deals for you';
 
-    if(sortByRating){
-      restaurants.sort((a,b)=>b.items[0].resRating-a.items[0].resRating);
-    }else{
-      restaurants.sort((a,b)=>a.items[0].price-b.items[0].price);
-    }
-
-    if(skeleton) skeleton.style.display='none';
-    listEl.style.display='flex';
-
-    if(countEl){
-      countEl.textContent=restaurants.length
-        ? restaurants.length+' Restaurant'+(restaurants.length===1?'':'s')
-        : 'Deals for you';
-    }
-
-    if(!restaurants.length){
-      listEl.innerHTML='<div class="empty-state"><i class="fa-solid fa-tag"></i><h3>No deals match these filters</h3><p>Try changing the price or food preference.</p></div>';
+    if(!groups.length){
+      list.innerHTML='<div class="empty"><div style="font-size:35px">₹</div><h3>No deals match these filters</h3><p>Try another price or food preference.</p></div>';
       return;
     }
 
-    const cart=readCart();
+    list.innerHTML=groups.map((group,index)=>{
+      const r=group[0];
+      const discount=Math.max(15,Math.round(r.discountPct||15));
+      const freeText=r.freeAbove!==null ? 'Free delivery above ₹'+r.freeAbove : 'Free delivery above ₹200';
+      const count=r.ratingCount ? '<span class="rating-count">('+esc(r.ratingCount)+')</span>' : '';
+      const cuisine=r.cuisine ? '<span class="dot-sep">•</span><span class="cuisine">'+esc(r.cuisine)+'</span>' : '';
 
-    listEl.innerHTML=restaurants.map((r,index)=>{
-      const first=r.items[0];
-      const rating=first.resRating ? first.resRating.toFixed(1) : '—';
-      const ratingCount=first.ratingCount ? '('+esc(first.ratingCount)+')' : '';
-      const delivery=first.delivery || '30–40 mins';
-      const cuisine=first.cuisine || '';
-      const freeAbove=first.freeAbove;
-      const lowest=first.price;
-
-      const itemsHtml=r.items.slice(0,3).map(item=>{
-        const qty=itemQty(item,cart);
-        const vegMark='<span class="veg-mark '+(item.isVeg?'':'non')+'"></span>';
-        const btn=qty>0
-          ? '<div class="deal-qty">'+
-              '<button onclick="event.stopPropagation();updateCart(\\''+escJs(item.name)+'\\',-1,'+item.price+',\\''+escJs(item.resId)+'\\')">−</button>'+
-              '<span>'+qty+'</span>'+
-              '<button onclick="event.stopPropagation();updateCart(\\''+escJs(item.name)+'\\',1,'+item.price+',\\''+escJs(item.resId)+'\\')">+</button>'+
-            '</div>'
-          : '<button class="deal-plus" onclick="event.stopPropagation();updateCart(\\''+escJs(item.name)+'\\',1,'+item.price+',\\''+escJs(item.resId)+'\\')" aria-label="Add '+esc(item.name)+'">+</button>';
-
-        return '<div class="deal-item">'+
-          '<div class="deal-image">'+
-            (item.popular?'<span class="deal-popular">Popular</span>':'')+
-            (item.img
-              ? '<img src="'+esc(item.img)+'" alt="'+esc(item.name)+'" loading="lazy" onerror="this.style.display=\\'none\\'">'
-              : '<div class="deal-image-fallback"><i class="fa-solid fa-utensils"></i></div>')+
-            btn+
+      const cards=group.slice(0,6).map(item=>{
+        const dietary='<span class="dietary '+(item.isVeg?'':'nonveg')+'"></span>';
+        const image=item.image
+          ? '<img src="'+esc(item.image)+'" alt="'+esc(item.name)+'" loading="lazy" onerror="this.style.display=\\'none\\'">'
+          : '<div class="fallback"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19h16M6 16l3-5 3 3 3-6 3 8"/></svg></div>';
+        return '<article class="item-card">'+
+          '<div class="item-image">'+
+            (item.popular?'<span class="popular">Popular</span>':'')+
+            image+
+            addButton(item)+
           '</div>'+
-          '<div class="deal-item-name">'+vegMark+'<span>'+esc(item.name)+'</span></div>'+
-          '<div class="deal-price-row">'+
-            '<span class="deal-price">₹'+item.price+'</span>'+
-            (item.originalPrice>item.price?'<span class="deal-old">₹'+item.originalPrice+'</span>':'')+
-            (item.discountPct>0?'<span class="deal-off">'+item.discountPct+'% OFF</span>':'')+
+          '<div class="item-name">'+dietary+'<span>'+esc(item.name)+'</span></div>'+
+          '<div class="price-row">'+
+            '<span class="price">₹'+item.price+'</span>'+
+            (item.originalPrice>item.price?'<span class="old-price">₹'+item.originalPrice+'</span>':'')+
+            (item.discountPct>0?'<span class="off">'+item.discountPct+'% OFF</span>':'')+
           '</div>'+
-        '</div>';
+        '</article>';
       }).join('');
 
-      return '<article class="restaurant-deal" style="animation-delay:'+Math.min(index*.035,.3)+'s">'+
-        '<div class="deal-head">'+
-          '<div class="deal-discount">'+(first.discountPct>0?first.discountPct:15)+'% LOWER PRICES</div>'+
-          '<h2 class="deal-name">'+esc(first.resName)+'</h2>'+
-          '<div class="deal-stamp">EVERYDAY<br>LOWEST PRICE<br>EVERYDAY</div>'+
-          '<div class="deal-meta">'+
-            '<span class="deal-rating"><span class="star">★</span> '+rating+'</span>'+
-            (ratingCount?'<span class="deal-rating-count">'+ratingCount+'</span>':'')+
-            '<span class="deal-sep">•</span>'+
-            '<span class="deal-time">'+esc(delivery)+'</span>'+
-            (cuisine?'<span class="deal-sep">•</span><span class="deal-cuisine">'+esc(cuisine)+'</span>':'')+
+      return '<article class="restaurant-card" style="animation:fadeUp .3s ease both;animation-delay:'+Math.min(index*.035,.25)+'s">'+
+        '<div class="restaurant-head">'+
+          '<div class="discount-line">'+discount+'% LOWER PRICES</div>'+
+          '<h2 class="restaurant-name">'+esc(r.resName)+'</h2>'+
+          '<div class="stamp">EVERYDAY<br>LOWEST PRICE<br>EVERYDAY</div>'+
+          '<div class="meta">'+
+            '<span class="rating"><span class="rating-star">★</span><span class="rating-value">'+(r.rating?r.rating.toFixed(1):'—')+'</span>'+count+'</span>'+
+            '<span class="dot-sep">•</span>'+
+            '<span class="delivery">'+
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg>'+
+              esc(r.delivery)+
+            '</span>'+
+            cuisine+
           '</div>'+
-          '<div class="deal-free">'+
-            '<span class="deal-free-icon"><i class="fa-solid fa-percent"></i></span>'+
-            (freeAbove!=null
-              ? 'Free delivery above ₹'+freeAbove
-              : 'Free delivery')+
+          '<div class="free-row">'+
+            '<span class="free-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h10a3 3 0 0 0 0-6H7a3 3 0 0 0 0 6h10a3 3 0 0 1 0 6H6a3 3 0 0 1 0-6h1"/></svg></span>'+
+            '<span>'+freeText+'</span>'+
+            '<button class="info-btn" onclick="event.stopPropagation();showToast(\\'Free delivery threshold for this restaurant\\')" aria-label="Info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg></button>'+
           '</div>'+
         '</div>'+
-        '<div class="deal-items">'+itemsHtml+'</div>'+
+        '<div class="item-carousel">'+cards+'</div>'+
       '</article>';
     }).join('');
 
-    if(typeof window.renderCartBar==='function') window.renderCartBar();
+    if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
   }
 
-  function escJs(v){
-    return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  }
-
-  window.renderItems=async function(){
-    const skeleton=document.getElementById('skeleton-grid');
-    const listEl=document.getElementById('under99-list');
-    const cached=sessionStorage.getItem('es_under99_data_v9');
-    let items=[];
-
-    if(cached && cached!=='[]'){
-      try{items=JSON.parse(cached);}catch(e){items=[];}
-    }
-
-    if(!items.length){
-      try{
-        if(skeleton) skeleton.style.display='flex';
-        const response=await fetch(API_BASE_URL+'/restaurants/under99');
-        const result=await response.json();
-        const raw=Array.isArray(result.data)?result.data:(Array.isArray(result)?result:[]);
-        items=raw.map(normalizeItem).filter(item=>item.price<=99);
-        sessionStorage.setItem('es_under99_data_v9',JSON.stringify(items));
-      }catch(error){
-        if(skeleton) skeleton.style.display='none';
-        if(listEl){
-          listEl.style.display='flex';
-          listEl.innerHTML='<div class="empty-state"><i class="fa-solid fa-wifi"></i><h3>Couldn’t load deals</h3><p>Please try again.</p><button onclick="sessionStorage.removeItem(\\'es_under99_data_v9\\');location.reload()" style="margin-top:14px;padding:10px 16px;border:0;border-radius:10px;background:#e51b8b;color:#fff;font-weight:800">Retry</button></div>';
-        }
-        return;
-      }
-    }
-    window.__under99Items=items;
-    renderItems(items);
+  window.__99Cart=(name,change)=>{
+    const item=allItems.find(x=>x.name===name);
+    if(item)cartAdd(item,change);
   };
 
-  window.updateCart=function(itemName,change,price,rId){
-    let cart=readCart();
-    if(!cart[itemName]) cart[itemName]={quantity:0,price:price,resId:rId};
-    cart[itemName].quantity+=change;
-    if(cart[itemName].quantity<=0) delete cart[itemName];
-    localStorage.setItem('nearbite_cart',JSON.stringify(cart));
-
-    if(window.__under99Items) renderItems(window.__under99Items);
-    if(typeof window.updateGlobalCart==='function') window.updateGlobalCart();
-    if(typeof window.renderCartBar==='function') window.renderCartBar();
+  window.showToast=(message)=>{
+    const t=$('toast');t.textContent=message;t.style.display='block';
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer=setTimeout(()=>t.style.display='none',1800);
   };
 
-  window.setPriceFilter=function(max){
-    currentMaxPrice=max;
-    document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
-    const target=document.getElementById(max===99?'filter-99':'filter-149');
-    if(target) target.classList.add('active');
-    if(window.__under99Items) renderItems(window.__under99Items);
+  window.toggleVegFilter=()=>{
+    vegOnly=!vegOnly;
+    $('veg-btn').classList.toggle('active',vegOnly);
+    render();
   };
-  window.setRatingFilter=function(){
-    sortByRating=!sortByRating;
-    const b=document.getElementById('rating-btn');
-    if(b) b.classList.toggle('active',sortByRating);
-    if(window.__under99Items) renderItems(window.__under99Items);
-  };
-  window.setDiscountFilter=function(){
+
+  window.toggleDiscount=()=>{
     discountOnly=!discountOnly;
-    const b=document.getElementById('discount-btn');
-    if(b) b.classList.toggle('active',discountOnly);
-    if(window.__under99Items) renderItems(window.__under99Items);
-  };
-  window.setVegFilter=function(){
-    vegOnly99=!vegOnly99;
-    const b=document.getElementById('veg-filter');
-    if(b) b.classList.toggle('active',vegOnly99);
-    if(window.__under99Items) renderItems(window.__under99Items);
-  };
-  window.setSortFilter=function(){
-    sortByRating=!sortByRating;
-    if(window.__under99Items) renderItems(window.__under99Items);
+    $('discount-btn').classList.toggle('active',discountOnly);
+    render();
   };
 
-  window.addEventListener('DOMContentLoaded',window.renderItems);
+  window.cyclePrice=()=>{
+    const btn=$('price-btn');
+    if(maxPrice===1000){maxPrice=99;btn.innerHTML='₹99 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
+    else if(maxPrice===99){maxPrice=149;btn.innerHTML='₹149 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
+    else {maxPrice=1000;btn.innerHTML='₹99 &amp; under <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 10 5 5 5-5"/></svg>';}
+    render();
+  };
 
-  const bottomNav=document.querySelector('.bottom-nav');
-  let lastScrollTop=0;
-  window.addEventListener('scroll',()=>{
-    const current=window.pageYOffset||document.documentElement.scrollTop;
-    if(Math.abs(lastScrollTop-current)<=15)return;
-    if(current>lastScrollTop && current>180){
-      if(bottomNav)bottomNav.classList.add('bottom-nav-hidden');
-    }else{
-      if(bottomNav)bottomNav.classList.remove('bottom-nav-hidden');
+  window.cycleSort=()=>{
+    sortMode=sortMode==='default'?'rating':sortMode==='rating'?'price':'default';
+    $('sort-btn').classList.toggle('active',sortMode!=='default');
+    render();
+  };
+
+  async function load(){
+    try{
+      const cached=sessionStorage.getItem(CACHE);
+      if(cached){
+        const parsed=JSON.parse(cached);
+        if(Array.isArray(parsed)&&parsed.length){allItems=parsed;render();return;}
+      }
+
+      const response=await fetch(API);
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      const result=await response.json();
+      const raw=Array.isArray(result?.data)?result.data:(Array.isArray(result)?result:[]);
+      allItems=raw.map(normalize).filter(x=>x.price>0&&x.price<=1000);
+
+      if(!allItems.length)throw new Error('No items');
+      sessionStorage.setItem(CACHE,JSON.stringify(allItems));
+      render();
+    }catch(error){
+      $('skeleton-feed').style.display='none';
+      $('under99-list').style.display='flex';
+      $('under99-list').innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>Please check your connection and try again.</p><button onclick="sessionStorage.removeItem(\\''+CACHE+'\\');location.reload()" style="margin-top:14px;border:0;border-radius:10px;padding:10px 16px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
+      console.error(error);
     }
-    lastScrollTop=current;
-  },{passive:true});
+  }
 
-  // ── 3. FILTER & SCROLL LOGIC ──
-  window.toggleVeg = function() {
-    if(typeof vegOnly99 !== 'undefined') vegOnly99 = !vegOnly99;
-    const sw = document.getElementById('veg99-switch');
-    if (sw) sw.classList.toggle('on');
-    window.renderItems(); 
-  };
-
-  window.addEventListener('DOMContentLoaded', window.renderItems);
-
-  const bottomNav = document.querySelector('.bottom-nav'); 
-  let lastScrollTop = 0;
-  window.addEventListener('scroll', () => {
-    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (Math.abs(lastScrollTop - currentScroll) <= 15) return;
-    if (currentScroll > lastScrollTop && currentScroll > 180) {
-      if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); 
-    } else {
-      if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); 
-    }
-    lastScrollTop = currentScroll;
-  }, { passive: true }); 
+  document.addEventListener('DOMContentLoaded',load);
+})();
 </script>
-
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </body>
 </html>
