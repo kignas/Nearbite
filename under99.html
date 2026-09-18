@@ -23,13 +23,32 @@
 .header-sub{margin:2px 0 0;color:#777;font-size:11px;font-weight:500}
 .header-actions{display:flex;gap:16px; align-items:center;}
 
-.hero{margin:16px 16px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffeedb,#fff);display:flex;align-items:center;justify-content:space-between;gap:12px; position:relative; overflow:hidden;}
-.hero::before{content:""; position:absolute; right:-20px; bottom:-20px; width:100px; height:100px; background:var(--orange); opacity:0.1; border-radius:50%;}
-.hero-copy strong{display:block;font-size:18px;font-weight:800; line-height:1.2; color:#d64a00;}
-.hero-copy span{display:block;margin-top:6px;color:#555;font-size:12px; font-weight:500;}
-.hero-badge{width:56px;height:56px;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(252,128,25,.15);display:flex;align-items:center;justify-content:center;color:var(--orange);font-size:24px; z-index:1;}
+.hero{position:relative;overflow:hidden;padding:16px 16px 30px;background:linear-gradient(150deg,#1E7A4A 0%,#0E5233 100%);color:#fff;}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px;opacity:.7;}
+.hero-nav{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;}
+.hero-icon{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.26);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;}
+.hero-copy{position:relative;z-index:2;margin-top:24px;max-width:60%;}
+.hero-kicker{display:block;font-size:22px;font-weight:800;color:#fff;-webkit-text-stroke:1px #FF6DB0;text-shadow:0 1px 0 rgba(0,0,0,.15);text-transform:uppercase;letter-spacing:.01em;}
+.hero-amt{display:block;font-size:62px;font-weight:800;line-height:.95;color:#fff;-webkit-text-stroke:2px #FF6DB0;margin-top:2px;text-shadow:0 3px 0 rgba(0,0,0,.12);}
+.hero-food{position:absolute;right:-4px;bottom:-4px;width:55%;max-width:330px;height:auto;z-index:1;object-fit:contain;pointer-events:none;}
+.filter-pill.value{border-color:#FBD9E7;color:#E1477E;background:#FFF3F8;font-weight:800;}
+.filter-pill.value i{color:#E1477E;}
+.pop-badge{position:absolute;left:8px;top:8px;z-index:2;background:#fff;color:#0F7A4D;font-size:10px;font-weight:800;padding:3px 9px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.off-badge{font-size:10px;font-weight:800;color:#E1477E;background:#FFF0F6;padding:2px 7px;border-radius:6px;margin-left:6px;}
+.rating-pill{position:absolute;left:8px;bottom:8px;z-index:2;background:#fff;color:#1C2024;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.16);display:flex;align-items:center;gap:3px;}
+.rating-pill i{color:#1C2024;font-size:9px;}
+.cta-fab{position:absolute;right:8px;bottom:8px;z-index:3;}
+.add-fab{width:42px;height:42px;border-radius:50%;border:0;background:#E1477E;color:#fff;font-size:22px;font-weight:800;line-height:1;box-shadow:0 6px 16px rgba(225,71,126,.4);cursor:pointer;}
+.add-fab:active{transform:scale(.92);}
+.qty-fab{display:flex;align-items:center;background:#E1477E;border-radius:999px;height:42px;box-shadow:0 6px 16px rgba(225,71,126,.4);overflow:hidden;}
+.qty-fab button{width:32px;height:100%;border:0;background:transparent;color:#fff;font-size:18px;font-weight:800;cursor:pointer;}
+.qty-fab span{min-width:18px;text-align:center;color:#fff;font-weight:800;font-size:14px;}
+.veg-mark{display:inline-flex;width:14px;height:14px;border:1.5px solid;border-radius:3px;align-items:center;justify-content:center;margin-right:5px;vertical-align:middle;flex:none;}
+.veg-mark i{font-size:7px;}
+.veg-mark.veg{border-color:#0F7A4D;}.veg-mark.veg i{color:#0F7A4D;}
+.veg-mark.non{border-color:#B42318;}.veg-mark.non i{color:#B42318;}
 
-.filter-row{display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto; background:#fff;}
+.filter-row{display:flex;gap:10px;padding:14px 16px;overflow-x:auto; background:#fff;}
 .filter-row::-webkit-scrollbar{display:none}
 .filter-pill{height:36px;padding:0 16px;border:1px solid #e8e8e8;border-radius:999px;background:#fff;color:#555;font:600 12px var(--font-sans);white-space:nowrap; transition:all 0.2s; display:flex; align-items:center; gap:6px;}
 .filter-pill.active{background:#333;border-color:#333;color:#fff;}
@@ -61,7 +80,7 @@ main{padding:16px 14px 20px}
 
 .add-btn{height:32px;min-width:68px;border-radius:8px;border:1px solid #fc8019;background:#fffcf9;color:var(--orange);font:700 12px var(--font-sans);box-shadow:0 2px 8px rgba(252,128,25,.1); cursor:pointer;}
 .add-btn:active{transform:scale(.96);}
-.restaurant-link{display:flex;align-items:center;gap:4px;margin-top:10px;color:#fc8019;font-size:11px;font-weight:700;text-decoration:none; justify-content:center; background:#fff5eb; padding:6px; border-radius:6px;}
+.restaurant-link{display:inline-flex;align-items:center;gap:4px;margin-top:8px;color:#98A0AC;font-size:11px;font-weight:600;text-decoration:none;}
 
 .skeleton-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px}
 .skeleton-card{height:280px;border-radius:16px;background:linear-gradient(90deg,#f0f1f3 25%,#e7e8ea 37%,#f0f1f3 63%);background-size:400% 100%;animation:shimmer 1.35s infinite}
@@ -105,31 +124,22 @@ main{padding:16px 14px 20px}
 </head>
 <body>
 
-<header class="store-header">
-  <div class="header-top">
-    <div class="header-left">
-      <a href="index.html" class="icon-btn" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
-      <div>
-        <div class="header-title-row"><h1 class="header-title">₹99 Store</h1></div>
-        <p class="header-sub">Quality guaranteed · Free delivery</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <a class="icon-btn" href="search.html" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
-    </div>
+<header class="hero">
+  <div class="hero-nav">
+    <a href="index.html" class="hero-icon" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="search.html" class="hero-icon" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
   </div>
-  <div class="filter-row">
-    <button class="filter-pill" id="vegBtn" onclick="toggleVeg()">Veg Only</button>
-    <button class="filter-pill" id="ratingBtn" onclick="toggleRating()">⭐ 4.0+</button>
+  <div class="hero-copy">
+    <span class="hero-kicker">Meals under</span>
+    <strong class="hero-amt">₹99</strong>
   </div>
+  <img class="hero-food" src="under99-hero.png" alt="" onerror="this.style.display='none'">
 </header>
 
-<div class="hero">
-  <div class="hero-copy">
-    <strong>Big cravings.<br>Small prices.</strong>
-    <span id="hero-sub">Top food deals under ₹99</span>
-  </div>
-  <div class="hero-badge"><i class="fa-solid fa-fire"></i></div>
+<div class="filter-row">
+  <span class="filter-pill value"><i class="fa-solid fa-bolt"></i> Lowest ₹99 deals</span>
+  <button class="filter-pill" id="vegBtn" onclick="toggleVeg()">Veg Only</button>
+  <button class="filter-pill" id="ratingBtn" onclick="toggleRating()">⭐ 4.0+</button>
 </div>
 
 <main>
@@ -238,13 +248,13 @@ main{padding:16px 14px 20px}
   function buttonHtml(item, qty) {
     var payload = cartPayload(item);
     if (qty > 0) {
-      return '<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);">' +
-        '<button onclick="updateCart(\'' + payload + '\', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:800;font-size:16px;cursor:pointer;">−</button>' +
-        '<span style="font-size:13px;font-weight:800;color:#FC8019;">' + qty + '</span>' +
-        '<button onclick="updateCart(\'' + payload + '\', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:800;font-size:14px;cursor:pointer;">+</button>' +
+      return '<div class="qty-fab">' +
+        '<button onclick="updateCart(\'' + payload + '\', -1)" aria-label="Decrease">−</button>' +
+        '<span>' + qty + '</span>' +
+        '<button onclick="updateCart(\'' + payload + '\', 1)" aria-label="Increase">+</button>' +
         '</div>';
     }
-    return '<button class="add-btn" onclick="updateCart(\'' + payload + '\', 1)">ADD</button>';
+    return '<button class="add-fab" onclick="updateCart(\'' + payload + '\', 1)" aria-label="Add">+</button>';
   }
 
   function render() {
@@ -269,40 +279,41 @@ main{padding:16px 14px 20px}
 
     list.innerHTML = data.map(function (item) {
       var qty = cart[item.name] ? cart[item.name].quantity : 0;
-      var vegDot = item.isVeg === null
+      var isPopular = item.isBestseller === true || item.isPopular === true || item.popular === true || item.bestseller === true;
+      var popBadge = isPopular ? '<span class="pop-badge">Popular</span>' : '';
+      var offPct = (item.originalPrice && Number(item.originalPrice) > Number(item.price)) ? Math.round((1 - Number(item.price) / Number(item.originalPrice)) * 100) : 0;
+      var offBadge = offPct > 0 ? '<span class="off-badge">' + offPct + '% OFF</span>' : '';
+      var ratingPill = item.resRating != null
+        ? '<span class="rating-pill"><i class="fa-solid fa-star"></i> ' + item.resRating.toFixed(1) + '</span>'
+        : '';
+      var vegMark = item.isVeg === null
         ? ''
-        : '<span class="veg-dot ' + (item.isVeg ? 'veg' : 'non') + '">' +
-          '<i class="fa-solid ' + (item.isVeg ? 'fa-circle' : 'fa-caret-up') + '"></i></span>';
+        : '<span class="veg-mark ' + (item.isVeg ? 'veg' : 'non') + '"><i class="fa-solid ' + (item.isVeg ? 'fa-circle' : 'fa-play') + '"></i></span>';
 
       return '<article class="card">' +
-        '<div class="image-wrap">' +
+        '<div class="image-wrap">' + popBadge +
           (safeUrl(item.image)
             ? '<img src="' + esc(safeUrl(item.image)) + '" alt="' + esc(item.name) +
               '" loading="lazy" class="food-img' + (item.image.indexOf('png') !== -1 ? ' food-img-contain' : '') +
               '" onerror="this.closest(\'.image-wrap\').classList.add(\'no-image\'); this.remove();">'
             : '<div class="img-fallback"><i class="fa-solid fa-utensils"></i></div>') +
-          vegDot +
+          ratingPill +
+          '<span id="btn-container-' + esc(containerKey(item)) + '" class="cta-fab">' + buttonHtml(item, qty) + '</span>' +
         '</div>' +
         '<div class="card-body">' +
-          '<div class="item-name">' + esc(item.name) + '</div>' +
           (item.resName ? '<div class="restaurant">' + esc(item.resName) + '</div>' : '') +
-          (item.resRating != null
-            ? '<div class="rating"><i class="fa-solid fa-star"></i> ' + item.resRating.toFixed(1) + '</div>'
-            : '') +
-          '<div class="meta">' +
-            '<div class="price-box">' +
-              (item.originalPrice ? '<span class="price-old">₹' + item.originalPrice + '</span>' : '') +
-              '<span class="price">₹' + item.price + '</span>' +
-            '</div>' +
-            '<span id="btn-container-' + esc(containerKey(item)) + '">' + buttonHtml(item, qty) + '</span>' +
+          '<div class="item-name">' + vegMark + esc(item.name) + '</div>' +
+          '<div class="price-box">' +
+            (item.originalPrice ? '<span class="price-old">₹' + item.originalPrice + '</span>' : '') +
+            '<span class="price">₹' + item.price + '</span>' +
+            offBadge +
           '</div>' +
-          '<a class="restaurant-link" href="restaurant.html?id=' + encodeURIComponent(item.resId) + '">View restaurant &rarr;</a>' +
         '</div>' +
       '</article>';
     }).join('');
 
     var counter = el('item-count');
-    if (counter) counter.textContent = data.length + ' deal' + (data.length !== 1 ? 's' : '');
+    if (counter) counter.textContent = 'All ' + data.length + ' Item' + (data.length !== 1 ? 's' : '');
 
     var heroSub = el('hero-sub');
     if (heroSub && data.length) {
