@@ -51,6 +51,31 @@ body{padding-bottom:82px}
 }
 .header-top>.icon-btn{margin-left:auto}
 
+.loc-pill{
+  display:flex;align-items:center;gap:9px;min-width:0;flex:1;
+  padding:6px 11px;border:1px solid #E4E7EB;border-radius:14px;
+  background:#fff;color:#101828;text-align:left;
+  box-shadow:0 1px 2px rgba(16,24,40,.03);-webkit-tap-highlight-color:transparent;
+}
+.loc-pill:active{transform:scale(.99);background:#F8F9FA}
+.loc-pin{width:20px;height:20px;flex:0 0 20px;color:var(--pink)}
+.loc-text{min-width:0;display:flex;flex-direction:column;gap:1px}
+.loc-name-row{display:flex;align-items:center;gap:4px;min-width:0}
+.loc-name{
+  font-size:15px;font-weight:800;letter-spacing:-.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.loc-caret{width:16px;height:16px;flex:0 0 16px;color:#747B87}
+.loc-sub{
+  font-size:11.5px;font-weight:600;color:#747B87;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.loc-pill.loc-unset .loc-name{color:var(--pink)}
+@media(max-width:430px){
+  .loc-name{font-size:14.5px}
+  .loc-sub{font-size:11px}
+}
+
 .filter-row{
   display:flex;gap:9px;overflow-x:auto;padding:0 20px 12px;
   scrollbar-width:none;-webkit-overflow-scrolling:touch;
@@ -317,10 +342,16 @@ body.filter-open{overflow:hidden}
       <a href="index.html" class="icon-btn" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
       </a>
-      <div class="header-copy">
-        <h1 class="header-title">Meals Under ₹99 - 1000</h1>
-        <p class="header-sub">Great food. Lower prices. Everyday.</p>
-      </div>
+      <button type="button" class="loc-pill loc-unset" id="loc-pill" aria-label="Change delivery location">
+        <svg class="loc-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.686 7-11a7 7 0 1 0-14 0c0 5.314 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        <span class="loc-text">
+          <span class="loc-name-row">
+            <span id="loc-name" class="loc-name">Set location</span>
+            <svg class="loc-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
+          </span>
+          <span id="loc-sub" class="loc-sub">Tap to choose your area</span>
+        </span>
+      </button>
     </div>
     <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m17 17 4 4"/></svg>
@@ -758,5 +789,52 @@ body.filter-open{overflow:hidden}
 <style>
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
+
+<script>
+/* ===== 99 STORE HEADER — REAL DELIVERY LOCATION (no hard-coded city) ===== */
+(() => {
+  // CONFIG — these MUST match what your home page / location-onboarding.html
+  // actually uses. Confirm the real key + page name and adjust if different.
+  const LOCATION_KEYS = ['eatswada_location','userLocation','deliveryLocation','selectedLocation','location'];
+  const CHANGE_LOCATION_URL = 'location-onboarding.html';
+
+  function readSavedLocation(){
+    for(const key of LOCATION_KEYS){
+      let val;
+      try{ val = localStorage.getItem(key); }catch{ return null; }
+      if(!val) continue;
+      try{
+        const obj = JSON.parse(val);
+        const name = obj && (obj.area || obj.locality || obj.name || obj.label || obj.address || obj.city);
+        if(name) return String(name).trim();
+      }catch{
+        if(val.trim()) return val.trim();
+      }
+    }
+    return null;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const pill = document.getElementById('loc-pill');
+    const nameEl = document.getElementById('loc-name');
+    const subEl = document.getElementById('loc-sub');
+    if(!pill || !nameEl) return;
+
+    const saved = readSavedLocation();
+    if(saved){
+      nameEl.textContent = saved;
+      if(subEl) subEl.textContent = 'Within 10 km';
+      pill.classList.remove('loc-unset');
+    }else{
+      // No real location saved yet — prompt to set it, never invent one.
+      nameEl.textContent = 'Set location';
+      if(subEl) subEl.textContent = 'Tap to choose your area';
+      pill.classList.add('loc-unset');
+    }
+
+    pill.addEventListener('click', () => { window.location.href = CHANGE_LOCATION_URL; });
+  });
+})();
+</script>
 </body>
 </html>
