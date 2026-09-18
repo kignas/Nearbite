@@ -185,6 +185,129 @@ body.filter-open{overflow:hidden}
   .filter-option{font-size:16px}
 }
 
+
+/* ===== 99 STORE BACKEND-CONTROLLED HERO ===== */
+.u99-hero{
+  position:relative;
+  overflow:hidden;
+  min-height:190px;
+  margin:0;
+  padding:24px 20px 22px;
+  color:#fff;
+  background:linear-gradient(135deg,#f01891 0%,#e31382 58%,#c80b72 100%);
+  border-radius:0 0 30px 30px;
+  isolation:isolate;
+}
+.u99-hero::before{
+  content:"";
+  position:absolute;
+  width:230px;height:230px;
+  right:-80px;top:-105px;
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+  z-index:-1;
+}
+.u99-hero::after{
+  content:"";
+  position:absolute;
+  width:180px;height:180px;
+  right:95px;bottom:-135px;
+  border-radius:50%;
+  background:rgba(255,255,255,.08);
+  z-index:-1;
+}
+.u99-hero-inner{
+  position:relative;
+  min-height:144px;
+  display:flex;
+  align-items:center;
+}
+.u99-hero-copy{
+  position:relative;
+  z-index:3;
+  width:62%;
+  min-width:0;
+}
+.u99-hero-kicker{
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:5px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.24);
+  font-size:10px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+.u99-hero-title{
+  margin:9px 0 0;
+  font-size:30px;
+  line-height:1.02;
+  font-weight:850;
+  letter-spacing:-1.15px;
+}
+.u99-hero-price{
+  margin:5px 0 0;
+  font-size:43px;
+  line-height:.95;
+  font-weight:900;
+  letter-spacing:-2px;
+}
+.u99-hero-sub{
+  margin:8px 0 0;
+  max-width:230px;
+  font-size:12px;
+  line-height:1.35;
+  font-weight:600;
+  color:rgba(255,255,255,.9);
+}
+.u99-hero-cta{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-top:12px;
+  min-height:34px;
+  padding:0 13px;
+  border:0;
+  border-radius:999px;
+  background:#fff;
+  color:#d80e7b;
+  font-size:12px;
+  font-weight:850;
+  text-decoration:none;
+  box-shadow:0 5px 16px rgba(75,0,42,.16);
+}
+.u99-hero-cta svg{width:14px;height:14px}
+.u99-hero-art{
+  position:absolute;
+  z-index:2;
+  right:-4px;
+  bottom:-24px;
+  width:min(45%,260px);
+  max-height:185px;
+  object-fit:contain;
+  object-position:center bottom;
+  filter:drop-shadow(0 14px 15px rgba(71,0,39,.20));
+  pointer-events:none;
+}
+.u99-hero-empty{display:none}
+@media(max-width:430px){
+  .u99-hero{
+    min-height:184px;
+    padding:22px 16px 20px;
+    border-radius:0 0 26px 26px;
+  }
+  .u99-hero-inner{min-height:142px}
+  .u99-hero-copy{width:61%}
+  .u99-hero-title{font-size:27px;letter-spacing:-1px}
+  .u99-hero-price{font-size:39px}
+  .u99-hero-sub{font-size:11px;max-width:205px}
+  .u99-hero-art{right:-7px;bottom:-20px;width:47%;max-height:176px}
+}
+
 </style>
 
 <body>
@@ -203,6 +326,23 @@ body.filter-open{overflow:hidden}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m17 17 4 4"/></svg>
     </button>
   </div>
+
+
+  <section id="u99-hero" class="u99-hero" aria-label="99 Store promotion">
+    <div class="u99-hero-inner">
+      <div class="u99-hero-copy">
+        <span id="u99-hero-kicker" class="u99-hero-kicker">99 STORE</span>
+        <h2 id="u99-hero-title" class="u99-hero-title">Meals Under</h2>
+        <div id="u99-hero-price" class="u99-hero-price">₹99</div>
+        <p id="u99-hero-sub" class="u99-hero-sub">Great food. Lower prices. Everyday.</p>
+        <a id="u99-hero-cta" class="u99-hero-cta" href="#under99-list">
+          Explore deals
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+      <img id="u99-hero-art" class="u99-hero-art" alt="" hidden>
+    </div>
+  </section>
 
   <div class="filter-row">
     <button class="filter-pill" id="sort-btn" type="button" data-open-filter="delivery" aria-label="Filters">
@@ -528,6 +668,68 @@ body.filter-open{overflow:hidden}
     if(event.key==='Escape' && activeSheet) closeFilter();
   });
 
+
+  /* 99 Store hero is managed from Admin > Home Banners > Placement: 99 Store. */
+  const HERO_API = 'https://eatswada.onrender.com/api/home-banners?placement=under99';
+
+  async function loadUnder99Hero(){
+    const hero = $('u99-hero');
+    const art = $('u99-hero-art');
+    const title = $('u99-hero-title');
+    const price = $('u99-hero-price');
+    const sub = $('u99-hero-sub');
+    const kicker = $('u99-hero-kicker');
+    const cta = $('u99-hero-cta');
+
+    try{
+      const response = await fetch(HERO_API,{headers:{Accept:'application/json'},cache:'no-store'});
+      if(!response.ok) throw new Error(`Hero HTTP ${response.status}`);
+
+      const result = await response.json();
+      const banners = Array.isArray(result?.data) ? result.data : [];
+      const banner = banners[0];
+      if(!banner) return;
+
+      if(hero && banner.background){
+        hero.style.background = String(banner.background);
+      }
+
+      if(kicker) kicker.textContent = String(banner.badgeText || banner.offerText || '99 STORE').trim();
+
+      const rawTitle = String(banner.title || '').trim();
+      if(title) title.textContent = rawTitle || 'Meals Under';
+
+      const rawOffer = String(banner.offerText || '').trim();
+      if(price) price.textContent = rawOffer || '₹99';
+
+      if(sub) sub.textContent = String(
+        banner.subtitle || 'Great food. Lower prices. Everyday.'
+      ).trim();
+
+      if(cta){
+        const ctaText = String(banner.ctaText || 'Explore deals').trim();
+        cta.childNodes[0].nodeValue = ctaText + ' ';
+        const url = String(banner.ctaUrl || '').trim();
+        cta.href = url || '#under99-list';
+        if(/^https?:\/\//i.test(url)){
+          cta.target = '_blank';
+          cta.rel = 'noopener noreferrer';
+        }else{
+          cta.removeAttribute('target');
+          cta.removeAttribute('rel');
+        }
+      }
+
+      const image = String(banner.mobileImage || banner.image || '').trim();
+      if(image && art){
+        art.src = image;
+        art.hidden = false;
+      }
+    }catch(error){
+      console.warn('[99 Store Hero] Could not load backend banner:',error);
+    }
+  }
+
   async function load(){
     const skeleton=$('skeleton-feed');
     const list=$('under99-list');
@@ -550,7 +752,7 @@ body.filter-open{overflow:hidden}
     }
   }
 
-  document.addEventListener('DOMContentLoaded',load);
+  document.addEventListener('DOMContentLoaded',()=>{ loadUnder99Hero(); load(); });
 })();
 </script>
 <style>
