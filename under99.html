@@ -839,27 +839,213 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
   };
 
   async function load(){
+    const skeleton = $('skeleton-feed');
+    const list = $('under99-list');
+
+    // IMPORTANT:
+    // The working Eatswada homepage loads /api/restaurants and receives:
+    // restaurant metadata + restaurant.menu[].
+    // The previous version of this page depended only on /restaurants/under99,
+    // which is why this page could remain on the skeleton even though the
+    // homepage had valid restaurant/menu data.
+    const HOME_API = 'https://eatswada.onrender.com/api/restaurants';
+    const CACHE = 'es_home_restaurants_v2';
+
     try{
-      const cached=sessionStorage.getItem(CACHE);
-      if(cached){
-        const parsed=JSON.parse(cached);
-        if(Array.isArray(parsed)&&parsed.length){allItems=parsed;render();return;}
+      let restaurants = null;
+
+      // Reuse the exact homepage dataset first.
+      const cachedHome = sessionStorage.getItem(CACHE);
+      if(cachedHome){
+        try{
+          const parsed = JSON.parse(cachedHome);
+          if(Array.isArray(parsed) && parsed.length) restaurants = parsed;
+        }catch(e){}
       }
 
-      const response=await fetch(API);
-      if(!response.ok)throw new Error('HTTP '+response.status);
-      const result=await response.json();
-      const raw=Array.isArray(result?.data)?result.data:(Array.isArray(result)?result:[]);
-      allItems=raw.map(normalize).filter(x=>x.price>0&&x.price<=1000);
+      // If the homepage cache isn't available, fetch it directly.
+      if(!restaurants){
+        const response = await fetch(HOME_API, {
+          method:'GET',
+          headers:{'Accept':'application/json'},
+          cache:'no-store'
+        });
 
-      if(!allItems.length)throw new Error('No items');
-      sessionStorage.setItem(CACHE,JSON.stringify(allItems));
+        if(!response.ok) throw new Error('Restaurant API HTTP '+response.status);
+
+        const result = await response.json();
+
+        if(result && result.success && Array.isArray(result.data)){
+          restaurants = result.data;
+          sessionStorage.setItem(CACHE, JSON.stringify(restaurants));
+        }else if(Array.isArray(result)){
+          restaurants = result;
+          sessionStorage.setItem(CACHE, JSON.stringify(restaurants));
+        }else{
+          throw new Error('Restaurant API returned no usable data');
+        }
+      }
+
+      // Convert restaurant.menu[] into the item structure used by this page.
+      const extracted = [];
+
+      restaurants.forEach(restaurant => {
+        const menu = Array.isArray(restaurant.menu) ? restaurant.menu : [];
+
+        menu.forEach(dish => {
+          const price = num(dish.price, 0);
+
+          // ₹99 Store is a merchandising section, not a hard-coded
+          // "only <= ₹99" page. Keep items up to ₹1000 as shown by the
+          // benchmark, while the price filter controls the visible range.
+          if(price <= 0 || price > 1000) return;
+
+          let original = first(dish, [
+            'originalPrice','mrp','compareAtPrice','oldPrice',
+            'strikedPrice','basePrice'
+          ], null);
+
+          let discount = first(dish, [
+            'discountPercentage','discountPercent','discount'
+          ], null);
+
+          if(original === null && discount !== null && num(discount) > 0){
+            original = Math.round(price / (1 - num(discount)/100));
+          }
+
+          if(original === null){
+            original = Math.round(price * 1.4);
+          }
+
+          const originalNum = num(original, price);
+          const discountPct = originalNum > price
+            ? Math.round((1 - price/originalNum) * 100)
+            : num(discount, 0);
+
+          let cuisine = first(restaurant, [
+            'cuisine','cuisines','category','cuisineDisplay'
+          ], '');
+
+          if(Array.isArray(cuisine)) cuisine = cuisine.join(', ');
+
+          // Preserve any restaurant/menu fields that are already present.
+          const delivery = first(restaurant, [
+            'deliveryTime','deliveryTimeText','eta',
+            'deliveryEta','delivery_time','estimatedDeliveryTime'
+          ], '30–40 mins');
+
+          const freeAbove = first(restaurant, [
+            'freeDeliveryAbove','free_delivery_above',
+            'freeDeliveryThreshold'
+          ], null);
+
+          extracted.push({
+            id:dish._id || dish.id || '',
+            name:dish.name || 'Special Item',
+            price,
+            originalPrice:originalNum,
+            discountPct,
+            isVeg:Boolean(dish.isVeg),
+            image:dish.image || dish.img || '',
+            menuItem:dish._id || dish.id || '',
+            resId:String(restaurant._id || restaurant.id || ''),
+            resName:restaurant.name || 'EatSwada Partner',
+            rating:num(restaurant.rating, 0),
+            ratingCount:first(restaurant, [
+              'ratingCount','ratingsCount','reviewCount'
+            ], ''),
+            delivery:String(delivery),
+            cuisine:String(cuisine || ''),
+            freeAbove:freeAbove === null ? null : num(freeAbove),
+            popular:Boolean(
+              dish.isBestseller ||
+              dish.isPopular ||
+              dish.popular ||
+              dish.bestseller
+            )
+          });
+        });
+      });
+
+      // If nested menus are absent, make one final direct API attempt.
+      // This keeps the page resilient without replacing the known working
+      // homepage data source.
+      if(!extracted.length){
+        const fallback = await fetch(
+          'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
+          {headers:{'Accept':'application/json'},cache:'no-store'}
+        );
+
+        if(fallback.ok){
+          const result = await fallback.json();
+          const raw = Array.isArray(result?.data)
+            ? result.data
+            : (Array.isArray(result) ? result : []);
+
+          raw.forEach(dbItem=>{
+            const restaurant =
+              dbItem.restaurant && typeof dbItem.restaurant === 'object'
+                ? dbItem.restaurant : {};
+
+            const price=num(dbItem.price,99);
+            if(price<=0 || price>1000)return;
+
+            const original=Math.round(price*1.4);
+
+            extracted.push({
+              id:dbItem._id || dbItem.id || '',
+              name:dbItem.name || 'Special Item',
+              price,
+              originalPrice:original,
+              discountPct:Math.round((1-price/original)*100),
+              isVeg:Boolean(dbItem.isVeg),
+              image:dbItem.image || dbItem.img || '',
+              menuItem:dbItem._id || dbItem.id || '',
+              resId:String(restaurant._id || restaurant.id || dbItem.restaurant || ''),
+              resName:restaurant.name || dbItem.restaurantName || 'EatSwada Partner',
+              rating:num(restaurant.rating || dbItem.rating,4.2),
+              ratingCount:restaurant.ratingCount || dbItem.ratingCount || '',
+              delivery:restaurant.deliveryTime || dbItem.deliveryTime || '30–40 mins',
+              cuisine:restaurant.cuisine || dbItem.cuisine || 'Indian, Fast Food',
+              freeAbove:restaurant.freeDeliveryAbove ?? dbItem.freeDeliveryAbove ?? null,
+              popular:Boolean(dbItem.isBestseller || dbItem.isPopular || dbItem.popular)
+            });
+          });
+        }
+      }
+
+      if(!extracted.length){
+        throw new Error('Restaurants loaded, but no menu items were returned.');
+      }
+
+      // Deduplicate items so a cached/embedded menu cannot create duplicates.
+      const seen = new Set();
+      allItems = extracted.filter(item=>{
+        const key = String(item.resId)+'|'+String(item.menuItem)+'|'+String(item.name);
+        if(seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      // Force a real render immediately; skeleton must never remain visible
+      // after a successful data load.
+      if(skeleton) skeleton.style.display='none';
       render();
+
     }catch(error){
-      $('skeleton-feed').style.display='none';
-      $('under99-list').style.display='flex';
-      $('under99-list').innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>Please check your connection and try again.</p><button onclick="sessionStorage.removeItem(\\''+CACHE+'\\');location.reload()" style="margin-top:14px;border:0;border-radius:10px;padding:10px 16px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
-      console.error(error);
+      console.error('[99 Store] Data load failed:', error);
+      if(skeleton) skeleton.style.display='none';
+      if(list){
+        list.style.display='flex';
+        list.innerHTML=
+          '<div class="empty">'+
+          '<div style="font-size:35px">!</div>'+
+          '<h3>Couldn’t load deals</h3>'+
+          '<p>We could not load the restaurant menu data right now.</p>'+
+          '<button onclick="sessionStorage.removeItem(\\''+CACHE+'\\');location.reload()" '+
+          'style="margin-top:14px;border:0;border-radius:10px;padding:10px 16px;background:#e11d8d;color:#fff;font-weight:800">Retry</button>'+
+          '</div>';
+      }
     }
   }
 
