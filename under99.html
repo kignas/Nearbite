@@ -121,6 +121,41 @@ main{padding:16px 14px 20px}
   .filter-pill[hidden] { display: none; }
 </style>
 <link rel="stylesheet" href="style.css">
+
+<style>
+/* 99 STORE RESTAURANT-CARD DEMO */
+body{background:#fff}
+.hero{margin:14px 16px 0;border-radius:24px;min-height:235px;background:linear-gradient(145deg,#207c51,#075b37);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.hero-copy{max-width:70%;margin-top:32px}
+.hero-kicker{font-size:21px;color:#ff76b8;-webkit-text-stroke:1px #ff76b8;text-shadow:none}
+.hero-amt{font-size:58px}
+.filter-row{position:sticky;top:0;z-index:50;border-bottom:1px solid #eee;box-shadow:0 3px 12px rgba(0,0,0,.05);padding:10px 16px}
+.filter-pill{height:40px;border-radius:22px;font-size:13px}
+main{padding:20px 14px 30px}
+.section-label strong{font-size:18px}
+.restaurant-deal{background:#fff;border:1px solid #ddd;border-radius:24px;margin:0 0 20px;padding:18px 14px 16px;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.045)}
+.deal-top{position:relative;padding-right:72px}
+.deal-discount{color:#d92d8a;font-size:17px;font-weight:900;text-transform:uppercase}
+.deal-name{font-size:23px;line-height:1.12;font-weight:900;color:#111;margin:3px 0 8px}
+.deal-stamp{position:absolute;right:-10px;top:-8px;width:86px;height:86px;border:3px solid rgba(217,45,138,.2);border-radius:50%;color:rgba(217,45,138,.3);display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:900;transform:rotate(-12deg)}
+.deal-meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;color:#30343a;font-size:13px;font-weight:700}
+.deal-rating{display:inline-flex;align-items:center;gap:5px;color:#fff;background:#168653;border-radius:999px;padding:4px 8px}
+.deal-free{margin-top:9px;display:flex;align-items:center;gap:7px;color:#2b3338;font-size:13px;font-weight:700}
+.deal-free i{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#dff3e8;color:#118451}
+.deal-items{display:flex;gap:12px;overflow-x:auto;padding:16px 0 4px}
+.deal-items::-webkit-scrollbar{display:none}
+.deal-item{flex:0 0 76%;max-width:280px}
+.deal-image{position:relative;height:175px;border-radius:20px;overflow:hidden;background:#f4f5f6;border:1px solid #ececec}
+.deal-image img{width:100%;height:100%;object-fit:cover;display:block}
+.deal-plus{position:absolute;right:10px;bottom:10px;width:52px;height:52px;border-radius:50%;background:#fff;color:#e53b9a;border:4px solid #ff91ca;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.deal-popular{position:absolute;left:10px;top:10px;background:#fff;color:#13824d;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:900;z-index:2}
+.deal-item-name{margin:10px 5px 0;font-size:17px;font-weight:800;line-height:1.22;min-height:42px}
+.deal-price{margin:8px 5px 0;font-size:20px;font-weight:900}
+.deal-old{margin-left:6px;font-size:13px;color:#969aa0;text-decoration:line-through}
+.deal-off{display:inline-block;margin-left:6px;background:#fdeaf4;color:#d92d8a;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900}
+.deal-other{margin:9px 5px 0;color:#777c83;font-size:12px;font-weight:700}
+@media(min-width:700px){.deal-item{flex-basis:31%}.deal-image{height:210px}}
+</style>
 </head>
 <body>
 
@@ -130,7 +165,7 @@ main{padding:16px 14px 20px}
     <a href="search.html" class="hero-icon" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
   </div>
   <div class="hero-copy">
-    <span class="hero-kicker">Meals under</span>
+    <span class="hero-kicker">15% LOWER PRICES</span>
     <strong class="hero-amt">₹99</strong>
   </div>
   <img class="hero-food" src="under99-hero.png" alt="" onerror="this.style.display='none'">
@@ -259,66 +294,71 @@ main{padding:16px 14px 20px}
 
   function render() {
     var list = el('under99-list');
-
-    var data = state.items.filter(function (item) {
+    var filtered = state.items.filter(function(item) {
       if (state.vegOnly && item.isVeg !== true) return false;
       if (state.ratingOnly && (item.resRating == null || item.resRating < 4)) return false;
       return true;
-    }).sort(function (a, b) { return a.price - b.price; });
+    });
 
-    list.style.display = 'grid';
+    var groups = {};
+    filtered.forEach(function(item) {
+      var key = item.resId || ('unknown-' + item.resName);
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
+    });
 
-    if (!data.length) {
-      list.innerHTML = '<div class="empty"><i class="fa-solid fa-tag"></i>' +
-        '<strong>No deals available right now</strong>' +
-        '<span>Check back soon for fresh offers.</span></div>';
+    var restaurants = Object.keys(groups).map(function(key) {
+      var items = groups[key].slice().sort(function(a,b){return a.price-b.price;});
+      return {id:key,name:items[0].resName || 'EatSwada Partner',rating:items[0].resRating,items:items};
+    }).sort(function(a,b){return a.items[0].price-b.items[0].price;});
+
+    list.style.display = 'block';
+
+    if (!restaurants.length) {
+      list.innerHTML='<div class="empty"><i class="fa-solid fa-tag"></i><strong>No deals available right now</strong><span>Check back soon for fresh offers.</span></div>';
       return;
     }
 
     var cart = readCart();
 
-    list.innerHTML = data.map(function (item) {
-      var qty = cart[item.name] ? cart[item.name].quantity : 0;
-      var isPopular = item.isBestseller === true || item.isPopular === true || item.popular === true || item.bestseller === true;
-      var popBadge = isPopular ? '<span class="pop-badge">Popular</span>' : '';
-      var offPct = (item.originalPrice && Number(item.originalPrice) > Number(item.price)) ? Math.round((1 - Number(item.price) / Number(item.originalPrice)) * 100) : 0;
-      var offBadge = offPct > 0 ? '<span class="off-badge">' + offPct + '% OFF</span>' : '';
-      var ratingPill = item.resRating != null
-        ? '<span class="rating-pill"><i class="fa-solid fa-star"></i> ' + item.resRating.toFixed(1) + '</span>'
-        : '';
-      var vegMark = item.isVeg === null
-        ? ''
-        : '<span class="veg-mark ' + (item.isVeg ? 'veg' : 'non') + '"><i class="fa-solid ' + (item.isVeg ? 'fa-circle' : 'fa-play') + '"></i></span>';
+    list.innerHTML = restaurants.map(function(r,ri) {
+      var lowest=r.items[0];
+      var rating=r.rating!=null ? Number(r.rating).toFixed(1) : '';
+      var itemsHtml=r.items.slice(0,6).map(function(item) {
+        var qty=cart[item.name] ? cart[item.name].quantity : 0;
+        var payload=cartPayload(item);
+        var old=item.originalPrice!=null ? Number(item.originalPrice) : null;
+        var off=old && old>item.price ? Math.round((1-item.price/old)*100) : 0;
+        var popular=item.isBestseller===true || item.isPopular===true || item.popular===true || item.bestseller===true;
+        var veg=item.isVeg===null?'':'<span class="veg-mark '+(item.isVeg?'veg':'non')+'"><i class="fa-solid '+(item.isVeg?'fa-circle':'fa-play')+'"></i></span>';
+        var button=qty>0
+          ? '<div class="qty-fab"><button onclick="event.stopPropagation();event.preventDefault();updateCart(\''+payload+'\',-1)">−</button><span>'+qty+'</span><button onclick="event.stopPropagation();event.preventDefault();updateCart(\''+payload+'\',1)">+</button></div>'
+          : '<button class="deal-plus" onclick="event.stopPropagation();event.preventDefault();updateCart(\''+payload+'\',1)">+</button>';
 
-      return '<article class="card">' +
-        '<div class="image-wrap">' + popBadge +
-          (safeUrl(item.image)
-            ? '<img src="' + esc(safeUrl(item.image)) + '" alt="' + esc(item.name) +
-              '" loading="lazy" class="food-img' + (item.image.indexOf('png') !== -1 ? ' food-img-contain' : '') +
-              '" onerror="this.closest(\'.image-wrap\').classList.add(\'no-image\'); this.remove();">'
-            : '<div class="img-fallback"><i class="fa-solid fa-utensils"></i></div>') +
-          ratingPill +
-          '<span id="btn-container-' + esc(containerKey(item)) + '" class="cta-fab">' + buttonHtml(item, qty) + '</span>' +
-        '</div>' +
-        '<div class="card-body">' +
-          (item.resName ? '<div class="restaurant">' + esc(item.resName) + '</div>' : '') +
-          '<div class="item-name">' + vegMark + esc(item.name) + '</div>' +
-          '<div class="price-box">' +
-            (item.originalPrice ? '<span class="price-old">₹' + item.originalPrice + '</span>' : '') +
-            '<span class="price">₹' + item.price + '</span>' +
-            offBadge +
-          '</div>' +
-        '</div>' +
-      '</article>';
+        return '<div class="deal-item"><div class="deal-image">'+
+          (popular?'<span class="deal-popular">Popular</span>':'')+
+          (safeUrl(item.image)?'<img src="'+esc(safeUrl(item.image))+'" alt="'+esc(item.name)+'" loading="lazy">':'<div class="img-fallback"><i class="fa-solid fa-utensils"></i></div>')+
+          button+'</div><div class="deal-item-name">'+veg+esc(item.name)+'</div>'+
+          '<div class="deal-price">₹'+item.price+
+          (old?'<span class="deal-old">₹'+old+'</span>':'')+
+          (off?'<span class="deal-off">'+off+'% OFF</span>':'')+
+          '</div><div class="deal-other">◉◉ Other apps: —</div></div>';
+      }).join('');
+
+      return '<article class="restaurant-deal"><div class="deal-top">'+
+        '<div class="deal-discount">15% LOWER PRICES</div>'+
+        '<div class="deal-name">'+esc(r.name)+'</div>'+
+        '<div class="deal-stamp">EVERYDAY<br>LOWEST<br>PRICE</div>'+
+        '<div class="deal-meta">'+(rating?'<span class="deal-rating"><i class="fa-solid fa-star"></i> '+rating+'</span>':'')+
+        '<span>•</span><span>Delivery time</span></div>'+
+        '<div class="deal-free"><i class="fa-solid fa-percent"></i> Free Delivery · Items At ₹'+lowest.price+'</div>'+
+        '</div><div class="deal-items">'+itemsHtml+'</div></article>';
     }).join('');
 
-    var counter = el('item-count');
-    if (counter) counter.textContent = 'All ' + data.length + ' Item' + (data.length !== 1 ? 's' : '');
-
-    var heroSub = el('hero-sub');
-    if (heroSub && data.length) {
-      heroSub.textContent = 'Top food deals starting from ₹' + data[0].price;
-    }
+    var counter=el('item-count');
+    if(counter) counter.textContent=restaurants.length+' Restaurant'+(restaurants.length!==1?'s':'');
+    var heroSub=el('hero-sub');
+    if(heroSub) heroSub.textContent='Lowest deals starting from ₹'+restaurants[0].items[0].price;
   }
 
   function syncFilters() {
