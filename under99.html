@@ -11,154 +11,19 @@
 </head>
 
 <style>
-:root{
-  --ink:#101828;
-  --muted:#737983;
-  --soft:#f7f8fa;
-  --line:#e7e8eb;
-  --pink:#e11d8d;
-  --pink2:#ff9ed1;
-  --pink-soft:#fff0f8;
-  --green:#16865a;
-  --green-soft:#edf9f3;
-  --red:#dc2446;
-  --gold:#f4aa22;
-  --shadow:0 3px 16px rgba(16,24,40,.055);
-}
+:root{--ink:#07152D;--muted:#6B7488;--soft:#FAFBFD;--line:#E8ECF2;--pink:#EC168C;--pink-soft:#FFF1F8;--green:#16885D;--gold:#F5B51B}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--soft);color:var(--ink);font-family:Poppins,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-button,a{font:inherit}
-button{cursor:pointer}
-body{padding-bottom:78px}
-svg{display:block}
-
-.store-header{
-  position:sticky;top:0;z-index:1000;
-  background:rgba(255,255,255,.97);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-bottom:1px solid rgba(16,24,40,.06);
-}
-.header-top{
-  height:72px;padding:10px 18px;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-}
-.header-left{display:flex;align-items:center;gap:12px;min-width:0}
-.icon-btn{
-  width:44px;height:44px;flex:0 0 44px;
-  border:1px solid #e2e4e8;border-radius:50%;
-  background:#fff;color:#101828;
-  display:grid;place-items:center;
-  box-shadow:0 1px 3px rgba(16,24,40,.025);
-  -webkit-tap-highlight-color:transparent;
-}
-.icon-btn:active{transform:scale(.95)}
-.icon-btn svg{width:21px;height:21px}
-.header-copy{min-width:0}
-.header-title{
-  margin:0;font-size:20px;line-height:1.1;font-weight:900;
-  letter-spacing:-.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.header-sub{
-  margin:3px 0 0;font-size:10px;line-height:1.2;
-  color:#7e858e;font-weight:600;white-space:nowrap;
-}
-.filter-row{
-  display:flex;gap:8px;overflow-x:auto;
-  padding:0 18px 11px;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-}
-.filter-row::-webkit-scrollbar{display:none}
-.filter-pill{
-  height:42px;flex:0 0 auto;padding:0 16px;
-  border:1px solid #dedfe4;border-radius:23px;
-  background:#fff;color:#2c3138;
-  font-size:12px;font-weight:700;white-space:nowrap;
-  display:flex;align-items:center;gap:7px;
-  box-shadow:0 1px 2px rgba(16,24,40,.02);
-}
-.filter-pill.active{
-  color:var(--pink);border-color:#f1b3d5;background:var(--pink-soft);
-}
-.filter-pill svg{width:17px;height:17px}
-.filter-pill.active svg{stroke:var(--pink)}
-
-main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
-.restaurant-feed{display:flex;flex-direction:column;gap:16px}
-.items-found-label{
-  margin:0 5px 13px;font-size:20px;line-height:1.2;
-  font-weight:900;letter-spacing:-.45px;
-}
-
-
-.skeleton-feed{display:flex;flex-direction:column;gap:16px}
-.skeleton-card{
-  background:#fff;border:1px solid var(--line);border-radius:21px;padding:14px;
-}
-.skeleton-big{height:42px;border-radius:8px;margin-bottom:12px}
-.skeleton-row{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
-.skeleton-img{aspect-ratio:1.06/1;border-radius:15px}
-.skeleton-line{height:12px;border-radius:6px;margin-top:9px}
-.skeleton{
-  background:linear-gradient(90deg,#f0f1f3 25%,#fafafa 37%,#f0f1f3 63%);
-  background-size:400% 100%;animation:shimmer 1.25s ease-in-out infinite;
-}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-
-.empty{
-  background:#fff;border:1px solid var(--line);border-radius:20px;
-  text-align:center;padding:55px 20px;color:#737983;
-}
-.empty h3{margin:12px 0 5px;color:#363b42;font-size:16px}
-.empty p{margin:0;font-size:12px}
-
-.bottom-nav{
-  position:fixed;left:0;right:0;bottom:0;z-index:9999;
-  height:68px;padding-bottom:env(safe-area-inset-bottom);
-  display:flex;background:rgba(255,255,255,.98);
-  border-top:1px solid rgba(16,24,40,.06);
-  box-shadow:0 -5px 24px rgba(16,24,40,.06);
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;color:#9aa2ae;text-decoration:none;font-size:10px;font-weight:700;
-}
-.nav-item.active{color:var(--pink)}
-.nav-item svg{width:20px;height:20px}
-.nav-item.active svg{stroke:var(--pink)}
-.nav-new-badge{display:none}
-
-.toast{
-  position:fixed;left:50%;bottom:82px;z-index:12000;
-  transform:translateX(-50%);display:none;
-  background:#17191d;color:#fff;padding:10px 14px;border-radius:11px;
-  font-size:12px;font-weight:700;box-shadow:0 8px 25px rgba(0,0,0,.2);
-  white-space:nowrap;
-}
-
-@media(max-width:430px){
-  .header-top{height:70px;padding-left:14px;padding-right:14px}
-  .header-title{font-size:19px}
-  main{padding-left:12px;padding-right:12px}
-  .restaurant-card{padding:13px;border-radius:20px}
-  .restaurant-name{font-size:20px}
-  .discount-line{font-size:14px}
-  .item-card{min-width:calc((100% - 22px)/3);width:calc((100% - 22px)/3)}
-}
-@media(max-width:370px){
-  .header-title{font-size:17px}
-  .header-sub{font-size:9px}
-  .icon-btn{width:40px;height:40px;flex-basis:40px}
-  .filter-pill{padding:0 13px;font-size:11px}
-  .restaurant-name{font-size:18px}
-  .meta,.free-row{font-size:11px}
-  .item-name{font-size:12px}
-  .price{font-size:16px}
-}
-@media(min-width:700px){
-  main{padding-left:20px;padding-right:20px}
-  .restaurant-card{padding:16px}
-  .restaurant-name{font-size:24px}
-}
+button,a{font:inherit}button{cursor:pointer}svg{display:block}body{padding-bottom:82px}
+.store-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid #EEF1F5}
+.header-top{min-height:82px;padding:12px 24px 9px;display:flex;align-items:center;gap:14px}.header-left{display:flex;align-items:center;gap:14px;min-width:0;flex:1}.icon-btn{width:52px;height:52px;flex:0 0 52px;border:1px solid #E2E6EC;border-radius:50%;background:#fff;color:#07152D;display:grid;place-items:center;box-shadow:0 1px 3px rgba(7,21,45,.025);-webkit-tap-highlight-color:transparent}.icon-btn:active{transform:scale(.96)}.icon-btn svg{width:24px;height:24px}.header-copy{min-width:0}.header-title{margin:0;font-size:23px;line-height:1.08;font-weight:700;letter-spacing:-.65px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.header-sub{margin:5px 0 0;font-size:13px;line-height:1.2;color:#6B7488;font-weight:500;white-space:nowrap}.header-top>.icon-btn{margin-left:auto}
+.filter-row{display:flex;gap:10px;overflow-x:auto;padding:0 24px 13px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.filter-row::-webkit-scrollbar{display:none}.filter-pill{height:48px;flex:0 0 auto;padding:0 17px;border:1px solid #DCE1E8;border-radius:25px;background:#fff;color:#18243A;font-size:14px;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:8px;box-shadow:0 1px 2px rgba(7,21,45,.018)}.filter-pill.active{color:var(--pink);border-color:#F1B4D5;background:var(--pink-soft);font-weight:600}.filter-pill svg{width:19px;height:19px}.filter-pill.active svg{stroke:var(--pink)}
+main{max-width:920px;margin:0 auto;padding:18px 24px 30px}.items-found-label{display:none}.restaurant-feed{display:flex;flex-direction:column;gap:24px}.skeleton-feed{display:flex;flex-direction:column;gap:24px}.skeleton-card{background:#fff;border:1px solid var(--line);border-radius:26px;padding:18px}.skeleton-big{height:42px;border-radius:9px;margin-bottom:14px}.skeleton-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.skeleton-img{aspect-ratio:1.42/1;border-radius:15px}.skeleton-line{height:11px;border-radius:6px;margin-top:9px}.skeleton{background:linear-gradient(90deg,#F0F2F5 25%,#FAFBFD 37%,#F0F2F5 63%);background-size:400% 100%;animation:shimmer 1.25s ease-in-out infinite}@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.empty{background:#fff;border:1px solid var(--line);border-radius:26px;text-align:center;padding:55px 20px;color:var(--muted)}.empty h3{margin:12px 0 5px;color:var(--ink);font-size:16px}.empty p{margin:0;font-size:12px}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:9999;height:72px;padding-bottom:env(safe-area-inset-bottom);display:flex;background:rgba(255,255,255,.98);border-top:1px solid #EEF1F5;box-shadow:0 -5px 24px rgba(7,21,45,.055)}.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#9AA3B1;text-decoration:none;font-size:11px;font-weight:600}.nav-item.active{color:var(--pink)}.nav-item svg{width:22px;height:22px}.nav-item.active svg{stroke:var(--pink)}
+.toast{position:fixed;left:50%;bottom:88px;z-index:12000;transform:translateX(-50%);display:none;background:#17191d;color:#fff;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;box-shadow:0 8px 25px rgba(0,0,0,.2);white-space:nowrap}
+@media(max-width:600px){.header-top{padding-left:20px;padding-right:20px}.header-title{font-size:20px}.header-sub{font-size:11px}.icon-btn{width:48px;height:48px;flex-basis:48px}.filter-row{padding-left:20px;padding-right:20px}.filter-pill{height:46px;font-size:13px;padding:0 16px}main{padding-left:20px;padding-right:20px}}
+@media(max-width:430px){.header-top{min-height:76px;padding-top:10px;padding-bottom:8px;gap:10px}.header-left{gap:11px}.header-title{font-size:19px;letter-spacing:-.5px}.header-sub{font-size:10.5px;margin-top:4px}.icon-btn{width:46px;height:46px;flex-basis:46px}.icon-btn svg{width:22px;height:22px}.filter-row{gap:8px;padding-left:16px;padding-right:16px;padding-bottom:11px}.filter-pill{height:44px;font-size:12.5px;padding:0 15px}.filter-pill svg{width:18px;height:18px}main{padding:16px 16px 26px}.restaurant-feed{gap:22px}}
 </style>
 
 <body>
@@ -169,7 +34,7 @@ main{max-width:820px;margin:0 auto;padding:18px 14px 28px}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
       </a>
       <div class="header-copy">
-        <h1 class="header-title">Meals Under ₹99 – 1000</h1>
+        <h1 class="header-title">Meals Under ₹99 - 1000</h1>
         <p class="header-sub">Great food. Lower prices. Everyday.</p>
       </div>
     </div>
