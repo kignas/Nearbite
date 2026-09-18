@@ -1,426 +1,868 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#ffffff">
-<title>₹99 Store – Eatswada</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="view-transition" content="same-origin">
+  <title>₹99 Store – </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root{
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#e7e7ea;
+      --pink:#e51b8b;
+      --pink-soft:#fff0f8;
+      --green:#168653;
+      --green-soft:#eaf7f0;
+      --red:#e21d3e;
+      --surface:#fff;
+      --page:#f7f8fa;
+    }
+    *{box-sizing:border-box}
+    html{background:#fff}
+    body{
+      margin:0;
+      background:var(--page);
+      color:var(--ink);
+      font-family:'Poppins',sans-serif;
+      padding-bottom:82px;
+      -webkit-font-smoothing:antialiased;
+    }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<style>
-:root{--orange:#fc8019;--ink:#171a21;--muted:#7c8490;--line:#eceef1;--bg:#f2f4f7;--green:#159a62; --red:#e53935;}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);padding-bottom:110px}
+    /* Compact mobile header — no logo/banner */
+    .store-header{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      background:rgba(255,255,255,.97);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      border-bottom:1px solid rgba(0,0,0,.07);
+    }
+    .header-top{
+      height:70px;
+      padding:10px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .header-left{display:flex;align-items:center;gap:12px;min-width:0}
+    .icon-btn{
+      width:42px;height:42px;flex:0 0 42px;
+      border:1px solid #e5e7eb;border-radius:50%;
+      background:#fff;color:#111827;
+      display:flex;align-items:center;justify-content:center;
+      text-decoration:none;cursor:pointer;
+      box-shadow:0 1px 3px rgba(0,0,0,.03);
+    }
+    .icon-btn:active{transform:scale(.96)}
+    .icon-btn i{font-size:16px}
+    .header-title-wrap{min-width:0}
+    .header-title-row{display:flex;align-items:center;gap:7px}
+    .header-title{
+      margin:0;
+      font-size:20px;
+      line-height:1.15;
+      font-weight:900;
+      white-space:nowrap;
+      letter-spacing:-.5px;
+    }
+    .official-badge{display:none}
+    .header-sub{
+      margin:2px 0 0;
+      color:#8b919a;
+      font-size:10px;
+      font-weight:500;
+      white-space:nowrap;
+    }
+    .header-actions{display:flex;gap:8px}
 
-.store-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
-.header-top{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.header-left{display:flex;align-items:center;gap:12px}
-.icon-btn{color:#333;text-decoration:none;font-size:18px; padding: 4px;}
-.header-title-row{display:flex;align-items:center;gap:8px}
-.header-title{font-size:18px;font-weight:800;margin:0;}
-.header-sub{margin:2px 0 0;color:#777;font-size:11px;font-weight:500}
-.header-actions{display:flex;gap:16px; align-items:center;}
+    .filter-row{
+      display:flex;
+      gap:8px;
+      padding:0 16px 11px;
+      overflow-x:auto;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+    .filter-row::-webkit-scrollbar{display:none}
+    .filter-pill{
+      flex:0 0 auto;
+      min-height:40px;
+      padding:0 15px;
+      border:1px solid #dedfe4;
+      border-radius:22px;
+      background:#fff;
+      color:#25282d;
+      font-family:inherit;
+      font-size:12px;
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .filter-pill.active{
+      color:var(--pink);
+      border-color:#f4b7d8;
+      background:var(--pink-soft);
+    }
+    .filter-pill i{font-size:9px;margin-left:4px}
+    .filter-sep{display:none}
 
-.hero{position:relative;overflow:hidden;padding:16px 16px 30px;background:linear-gradient(150deg,#1E7A4A 0%,#0E5233 100%);color:#fff;}
-.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px;opacity:.7;}
-.hero-nav{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;}
-.hero-icon{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.26);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;}
-.hero-copy{position:relative;z-index:2;margin-top:24px;max-width:60%;}
-.hero-kicker{display:block;font-size:22px;font-weight:800;color:#fff;-webkit-text-stroke:1px #FF6DB0;text-shadow:0 1px 0 rgba(0,0,0,.15);text-transform:uppercase;letter-spacing:.01em;}
-.hero-amt{display:block;font-size:62px;font-weight:800;line-height:.95;color:#fff;-webkit-text-stroke:2px #FF6DB0;margin-top:2px;text-shadow:0 3px 0 rgba(0,0,0,.12);}
-.hero-food{position:absolute;right:-4px;bottom:-4px;width:55%;max-width:330px;height:auto;z-index:1;object-fit:contain;pointer-events:none;}
-.filter-pill.value{border-color:#FBD9E7;color:#E1477E;background:#FFF3F8;font-weight:800;}
-.filter-pill.value i{color:#E1477E;}
-.pop-badge{position:absolute;left:8px;top:8px;z-index:2;background:#fff;color:#0F7A4D;font-size:10px;font-weight:800;padding:3px 9px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12);}
-.off-badge{font-size:10px;font-weight:800;color:#E1477E;background:#FFF0F6;padding:2px 7px;border-radius:6px;margin-left:6px;}
-.rating-pill{position:absolute;left:8px;bottom:8px;z-index:2;background:#fff;color:#1C2024;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.16);display:flex;align-items:center;gap:3px;}
-.rating-pill i{color:#1C2024;font-size:9px;}
-.cta-fab{position:absolute;right:8px;bottom:8px;z-index:3;}
-.add-fab{width:42px;height:42px;border-radius:50%;border:0;background:#E1477E;color:#fff;font-size:22px;font-weight:800;line-height:1;box-shadow:0 6px 16px rgba(225,71,126,.4);cursor:pointer;}
-.add-fab:active{transform:scale(.92);}
-.qty-fab{display:flex;align-items:center;background:#E1477E;border-radius:999px;height:42px;box-shadow:0 6px 16px rgba(225,71,126,.4);overflow:hidden;}
-.qty-fab button{width:32px;height:100%;border:0;background:transparent;color:#fff;font-size:18px;font-weight:800;cursor:pointer;}
-.qty-fab span{min-width:18px;text-align:center;color:#fff;font-weight:800;font-size:14px;}
-.veg-mark{display:inline-flex;width:14px;height:14px;border:1.5px solid;border-radius:3px;align-items:center;justify-content:center;margin-right:5px;vertical-align:middle;flex:none;}
-.veg-mark i{font-size:7px;}
-.veg-mark.veg{border-color:#0F7A4D;}.veg-mark.veg i{color:#0F7A4D;}
-.veg-mark.non{border-color:#B42318;}.veg-mark.non i{color:#B42318;}
+    .sub-bar{display:none}
 
-.filter-row{display:flex;gap:10px;padding:14px 16px;overflow-x:auto; background:#fff;}
-.filter-row::-webkit-scrollbar{display:none}
-.filter-pill{height:36px;padding:0 16px;border:1px solid #e8e8e8;border-radius:999px;background:#fff;color:#555;font:600 12px var(--font-sans);white-space:nowrap; transition:all 0.2s; display:flex; align-items:center; gap:6px;}
-.filter-pill.active{background:#333;border-color:#333;color:#fff;}
-.filter-pill.orange-active{border-color:#fc8019;color:var(--orange);background:#fff9f5;}
+    main{
+      max-width:760px;
+      margin:0 auto;
+      padding:16px 12px 24px;
+    }
+    .items-found-label{
+      margin:0 4px 12px;
+      font-size:18px;
+      line-height:1.2;
+      font-weight:800;
+      letter-spacing:-.35px;
+      color:#151922;
+      text-transform:none;
+    }
 
-main{padding:16px 14px 20px}
-.section-label{display:flex;align-items:center;justify-content:space-between;margin:0 4px 16px}
-.section-label strong{font-size:15px;color:#333; font-weight:800;}
-.product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}
+    /* Restaurant deal cards */
+    .product-grid{
+      display:flex!important;
+      flex-direction:column;
+      gap:16px!important;
+    }
+    .restaurant-deal{
+      width:100%;
+      background:#fff;
+      border:1px solid #e4e5e8;
+      border-radius:20px;
+      padding:14px;
+      overflow:hidden;
+      box-shadow:0 3px 14px rgba(0,0,0,.045);
+      animation:cardFadeUp .28s ease both;
+    }
+    .deal-head{
+      position:relative;
+      min-width:0;
+      padding-right:64px;
+    }
+    .deal-discount{
+      display:inline-block;
+      margin:0 0 4px;
+      padding:0;
+      color:var(--pink);
+      font-size:15px;
+      line-height:1.2;
+      font-weight:900;
+      letter-spacing:-.25px;
+    }
+    .deal-name{
+      margin:0 0 7px;
+      font-size:21px;
+      line-height:1.14;
+      font-weight:900;
+      letter-spacing:-.55px;
+      color:#111827;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .deal-stamp{
+      position:absolute;
+      right:-5px;
+      top:-4px;
+      width:70px;
+      height:70px;
+      border:2px solid rgba(229,27,139,.25);
+      border-radius:50%;
+      color:rgba(229,27,139,.34);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:7px;
+      line-height:1.15;
+      font-weight:900;
+      transform:rotate(-11deg);
+      pointer-events:none;
+    }
+    .deal-meta{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:6px;
+      min-width:0;
+      color:#3f4650;
+      font-size:12px;
+      font-weight:600;
+    }
+    .deal-rating{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      color:#fff;
+      background:var(--green);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .deal-rating .star{font-size:11px;color:#fff}
+    .deal-rating-count{color:#777e88;font-weight:500}
+    .deal-sep{color:#a6abb2}
+    .deal-time{white-space:nowrap}
+    .deal-cuisine{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:42%;
+    }
+    .deal-free{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      margin-top:8px;
+      color:#222a31;
+      font-size:12px;
+      font-weight:700;
+    }
+    .deal-free-icon{
+      width:23px;height:23px;flex:0 0 23px;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--green);
+      background:var(--green-soft);
+      border-radius:7px;
+      font-size:11px;
+    }
 
-.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.04);min-width:0; position:relative;}
-.image-wrap{position:relative;aspect-ratio:1/0.9;background:#f9f9f9;overflow:hidden}
-.image-wrap img{width:100%;height:100%;display:block;object-fit:cover}
-.veg-dot{position:absolute;right:10px;top:10px;width:18px;height:18px;border-radius:4px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
-.veg-dot i{font-size:8px}
-.veg-dot.veg i{color:var(--green)}
-.veg-dot.non i{color:var(--red)}
+    .deal-items{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin-top:13px;
+    }
+    .deal-item{min-width:0}
+    .deal-image{
+      position:relative;
+      width:100%;
+      aspect-ratio:1.18/1;
+      border:1px solid #e9eaed;
+      border-radius:15px;
+      overflow:hidden;
+      background:#f2f3f5;
+    }
+    .deal-image img{
+      width:100%;height:100%;
+      display:block;
+      object-fit:cover;
+    }
+    .deal-image-fallback{
+      width:100%;height:100%;
+      display:flex;align-items:center;justify-content:center;
+      color:#c4c8cd;font-size:25px;
+    }
+    .deal-popular{
+      position:absolute;
+      left:7px;top:7px;
+      z-index:2;
+      background:#fff;
+      color:var(--green);
+      border-radius:999px;
+      padding:5px 9px;
+      font-size:10px;
+      line-height:1;
+      font-weight:900;
+      box-shadow:0 2px 7px rgba(0,0,0,.08);
+    }
+    .deal-plus{
+      position:absolute;
+      right:7px;
+      bottom:7px;
+      width:42px;height:42px;
+      border-radius:50%;
+      border:3px solid #ff8fc8;
+      background:#fff;
+      color:var(--pink);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:inherit;
+      font-size:27px;
+      font-weight:500;
+      line-height:1;
+      box-shadow:0 3px 9px rgba(0,0,0,.12);
+      cursor:pointer;
+      z-index:3;
+    }
+    .deal-plus:active{transform:scale(.94)}
+    .deal-qty{
+      position:absolute;
+      right:7px;
+      bottom:7px;
+      z-index:3;
+      height:36px;
+      min-width:86px;
+      padding:0 5px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#fff;
+      border:1.5px solid #f08abf;
+      border-radius:12px;
+      box-shadow:0 3px 9px rgba(0,0,0,.11);
+    }
+    .deal-qty button{
+      width:27px;height:30px;
+      border:0;background:transparent;
+      color:var(--pink);
+      font:900 17px/1 'Poppins',sans-serif;
+      cursor:pointer;
+    }
+    .deal-qty span{font-size:12px;font-weight:900;color:#111827}
 
-.card-body{padding:12px}
-.item-name{font-size:14px;font-weight:700;line-height:1.3;min-height:36px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; color:#222;}
-.restaurant{font-size:11px;color:#777;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; margin-top:4px;}
-.rating{font-size:10px; font-weight:800; color:#555; display:flex; align-items:center; gap:2px; margin-top:4px;}
-.rating i{color:#f59e0b;}
+    .deal-item-name{
+      display:flex;
+      align-items:flex-start;
+      gap:5px;
+      margin:8px 3px 0;
+      min-height:34px;
+      font-size:14px;
+      line-height:1.25;
+      font-weight:700;
+      color:#171a20;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .veg-mark{
+      width:16px;height:16px;
+      flex:0 0 16px;
+      margin-top:1px;
+      border:1.6px solid var(--green);
+      border-radius:3px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .veg-mark::after{
+      content:"";
+      width:7px;height:7px;border-radius:50%;
+      background:var(--green);
+    }
+    .veg-mark.non{border-color:var(--red)}
+    .veg-mark.non::after{
+      width:0;height:0;border-radius:0;background:transparent;
+      border-left:4px solid transparent;
+      border-right:4px solid transparent;
+      border-bottom:7px solid var(--red);
+    }
+    .deal-price-row{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:5px;
+      margin:7px 3px 0;
+    }
+    .deal-price{font-size:18px;font-weight:900;color:#111827}
+    .deal-old{font-size:12px;color:#8f959d;text-decoration:line-through}
+    .deal-off{
+      padding:4px 8px;
+      border-radius:999px;
+      background:var(--pink-soft);
+      color:var(--pink);
+      font-size:10px;
+      line-height:1;
+      font-weight:900;
+      white-space:nowrap;
+    }
 
-.meta{margin-top:12px;display:flex;align-items:center;justify-content:space-between;}
-.price-box{display:flex; flex-direction:column;}
-.price-old{font-size:10px;color:#999;text-decoration:line-through}
-.price{font-size:15px;font-weight:800;color:#222;}
+    .skel-card{
+      background:#fff;
+      border-radius:20px;
+      padding:14px;
+      border:1px solid #e5e6e9;
+    }
+    .skel-img{height:150px;border-radius:15px}
+    .skel-body{padding:12px 0}
+    .empty-state{padding:50px 20px;text-align:center}
+    .empty-state i{font-size:40px;color:#d8dbe0}
+    .empty-state h3{font-size:16px;margin:12px 0 4px}
+    .empty-state p{font-size:12px;color:#8b9199}
 
-.add-btn{height:32px;min-width:68px;border-radius:8px;border:1px solid #fc8019;background:#fffcf9;color:var(--orange);font:700 12px var(--font-sans);box-shadow:0 2px 8px rgba(252,128,25,.1); cursor:pointer;}
-.add-btn:active{transform:scale(.96);}
-.restaurant-link{display:inline-flex;align-items:center;gap:4px;margin-top:8px;color:#98A0AC;font-size:11px;font-weight:600;text-decoration:none;}
+    .bottom-nav{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      height:68px;
+      padding-bottom:env(safe-area-inset-bottom);
+      background:rgba(255,255,255,.98);
+      border-top:1px solid rgba(0,0,0,.06);
+      box-shadow:0 -4px 22px rgba(0,0,0,.06);
+      display:flex;
+      z-index:9999;
+    }
+    .nav-item{
+      flex:1;
+      color:#9aa3b2;
+      text-decoration:none;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      font-size:9px;
+      font-weight:700;
+    }
+    .nav-item.active{color:var(--pink)}
+    .nav-icon{font-size:19px}
+    .nav-food-circle{
+      width:34px;height:34px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:#f1f3f6;
+      font-size:16px;
+    }
+    .nav-item.active .nav-food-circle{background:var(--pink);color:#fff}
+    .nav-new-badge{display:none}
 
-.skeleton-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px}
-.skeleton-card{height:280px;border-radius:16px;background:linear-gradient(90deg,#f0f1f3 25%,#e7e8ea 37%,#f0f1f3 63%);background-size:400% 100%;animation:shimmer 1.35s infinite}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:88px;
+      transform:translateX(-50%);
+      z-index:11000;
+      background:#17191d;
+      color:#fff;
+      padding:10px 15px;
+      border-radius:12px;
+      font-size:12px;
+      font-weight:700;
+      box-shadow:0 8px 25px rgba(0,0,0,.2);
+      display:none;
+    }
 
-.empty{grid-column:1/-1;text-align:center;background:#fff;border-radius:16px;padding:60px 20px}
-.empty i{font-size:40px;color:#e8e8e8}
-.empty strong{display:block;margin-top:12px;font-size:16px; font-weight:800;}
-.empty span{display:block;margin-top:6px;color:#777;font-size:13px}
+    @keyframes cardFadeUp{
+      from{opacity:0;transform:translateY(8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
 
-/* Modal and Cart Styles */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.modal-box{background:#fff;width:90%;max-width:340px;border-radius:20px;padding:24px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.2); transform:scale(0.95); transition:all 0.2s;}
-.modal-overlay.active{display:flex;}
-.modal-overlay.active .modal-box{transform:scale(1);}
-.modal-box h3{margin:0 0 10px;font-size:16px;font-weight:800;color:#222;}
-.modal-box p{margin:0 0 24px;font-size:13px;color:#666;line-height:1.5;}
-.modal-actions{display:flex;gap:12px;}
-.modal-btn{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;}
-.btn-cancel{background:#f2f4f7;color:#555;}
-.btn-confirm{background:var(--orange);color:#fff;box-shadow:0 4px 12px rgba(252,128,25,0.3);}
-
-.floating-cart{position:fixed;bottom:78px;left:16px;right:16px;background:#333;color:#fff;padding:12px 16px;border-radius:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9000; transform:translateY(150%); transition:transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);}
-.floating-cart.visible{transform:translateY(0);}
-.cart-info{font-size:13px;font-weight:700;}
-.cart-info small{display:block;font-size:10px;color:#aaa;font-weight:500;}
-.cart-btn{color:#fc8019;font-weight:800;font-size:13px;text-decoration:none;}
-
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:#9aa2ad;font-size:10px;font-weight:700}
-.nav-item.active{color:var(--orange)}
-.nav-item i{font-size:20px}
-
-  .image-wrap.no-image, .img-fallback {
-    display: flex; align-items: center; justify-content: center;
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg,#edf0f4,#e2e7ee); color: #b7bfcb; font-size: 22px;
-  }
-  .filter-pill[hidden] { display: none; }
-</style>
-<link rel="stylesheet" href="style.css">
-
-<style>
-/* 99 STORE RESTAURANT-CARD DEMO */
-body{background:#fff}
-.hero{margin:14px 16px 0;border-radius:24px;min-height:235px;background:linear-gradient(145deg,#207c51,#075b37);box-shadow:0 8px 24px rgba(0,0,0,.08)}
-.hero-copy{max-width:70%;margin-top:32px}
-.hero-kicker{font-size:21px;color:#ff76b8;-webkit-text-stroke:1px #ff76b8;text-shadow:none}
-.hero-amt{font-size:58px}
-.filter-row{position:sticky;top:0;z-index:50;border-bottom:1px solid #eee;box-shadow:0 3px 12px rgba(0,0,0,.05);padding:10px 16px}
-.filter-pill{height:40px;border-radius:22px;font-size:13px}
-main{padding:20px 14px 30px}
-.section-label strong{font-size:18px}
-.restaurant-deal{background:#fff;border:1px solid #ddd;border-radius:24px;margin:0 0 20px;padding:18px 14px 16px;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.045)}
-.deal-top{position:relative;padding-right:72px}
-.deal-discount{color:#d92d8a;font-size:17px;font-weight:900;text-transform:uppercase}
-.deal-name{font-size:23px;line-height:1.12;font-weight:900;color:#111;margin:3px 0 8px}
-.deal-stamp{position:absolute;right:-10px;top:-8px;width:86px;height:86px;border:3px solid rgba(217,45,138,.2);border-radius:50%;color:rgba(217,45,138,.3);display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:900;transform:rotate(-12deg)}
-.deal-meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;color:#30343a;font-size:13px;font-weight:700}
-.deal-rating{display:inline-flex;align-items:center;gap:5px;color:#fff;background:#168653;border-radius:999px;padding:4px 8px}
-.deal-free{margin-top:9px;display:flex;align-items:center;gap:7px;color:#2b3338;font-size:13px;font-weight:700}
-.deal-free i{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#dff3e8;color:#118451}
-.deal-items{display:flex;gap:12px;overflow-x:auto;padding:16px 0 4px}
-.deal-items::-webkit-scrollbar{display:none}
-.deal-item{flex:0 0 76%;max-width:280px}
-.deal-image{position:relative;height:175px;border-radius:20px;overflow:hidden;background:#f4f5f6;border:1px solid #ececec}
-.deal-image img{width:100%;height:100%;object-fit:cover;display:block}
-.deal-plus{position:absolute;right:10px;bottom:10px;width:52px;height:52px;border-radius:50%;background:#fff;color:#e53b9a;border:4px solid #ff91ca;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-.deal-popular{position:absolute;left:10px;top:10px;background:#fff;color:#13824d;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:900;z-index:2}
-.deal-item-name{margin:10px 5px 0;font-size:17px;font-weight:800;line-height:1.22;min-height:42px}
-.deal-price{margin:8px 5px 0;font-size:20px;font-weight:900}
-.deal-old{margin-left:6px;font-size:13px;color:#969aa0;text-decoration:line-through}
-.deal-off{display:inline-block;margin-left:6px;background:#fdeaf4;color:#d92d8a;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900}
-.deal-other{margin:9px 5px 0;color:#777c83;font-size:12px;font-weight:700}
-@media(min-width:700px){.deal-item{flex-basis:31%}.deal-image{height:210px}}
-</style>
+    /* Tablet / wider phones: preserve the same card, simply breathe a little more. */
+    @media (min-width:560px){
+      main{padding-left:18px;padding-right:18px}
+      .restaurant-deal{padding:16px}
+      .deal-items{gap:14px}
+      .deal-name{font-size:23px}
+      .deal-image{border-radius:17px}
+    }
+    @media (max-width:380px){
+      .header-title{font-size:18px}
+      .header-sub{font-size:9px}
+      .deal-name{font-size:19px}
+      .deal-discount{font-size:14px}
+      .deal-meta,.deal-free{font-size:11px}
+      .deal-item-name{font-size:12px}
+      .deal-price{font-size:16px}
+      .deal-plus{width:38px;height:38px;font-size:24px}
+      .deal-qty{min-width:78px;height:34px}
+      .deal-qty button{width:24px}
+    }
+  </style>
 </head>
-<body>
 
-<header class="hero">
-  <div class="hero-nav">
-    <a href="index.html" class="hero-icon" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
-    <a href="search.html" class="hero-icon" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
+<body>
+<header class="store-header">
+  <div class="header-top">
+    <div class="header-left">
+      <a href="index.html" class="icon-btn" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="header-title-wrap">
+        <div class="header-title-row">
+          <h1 class="header-title">Meals Under ₹99 – 1000</h1>
+          <span class="official-badge">PRO</span>
+        </div>
+        <p class="header-sub">Great food. Lower prices. Everyday.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </div>
   </div>
-  <div class="hero-copy">
-    <span class="hero-kicker">15% LOWER PRICES</span>
-    <strong class="hero-amt">₹99</strong>
+
+  <div class="filter-row no-scrollbar">
+    <button onclick="setSortFilter()" id="sort-btn" class="filter-pill">
+      <i class="fa-solid fa-sliders"></i>
+    </button>
+    <button onclick="setDiscountFilter()" id="discount-btn" class="filter-pill active">
+      ✨ 40–60% Lower Prices
+    </button>
+    <button onclick="setVegFilter()" id="veg-filter" class="filter-pill">
+      Veg/Non-Veg <i class="fa-solid fa-chevron-down"></i>
+    </button>
+    <button onclick="setPriceFilter(99)" id="filter-99" class="filter-pill">
+      ₹99 &amp; under <i class="fa-solid fa-chevron-down"></i>
+    </button>
+    <button onclick="setRatingFilter()" id="rating-btn" class="filter-pill">Rating 4.0+</button>
   </div>
-  <img class="hero-food" src="under99-hero.png" alt="" onerror="this.style.display='none'">
 </header>
 
-<div class="filter-row">
-  <span class="filter-pill value"><i class="fa-solid fa-bolt"></i> Lowest ₹99 deals</span>
-  <button class="filter-pill" id="vegBtn" onclick="toggleVeg()">Veg Only</button>
-  <button class="filter-pill" id="ratingBtn" onclick="toggleRating()">⭐ 4.0+</button>
-</div>
-
 <main>
-  <div class="section-label"><strong id="item-count">Top Deals For You</strong></div>
-  <div id="skeleton" class="skeleton-grid">
-    <div class="skeleton-card"></div><div class="skeleton-card"></div>
-    <div class="skeleton-card"></div><div class="skeleton-card"></div>
+  <p id="item-count" class="items-found-label">Deals for you</p>
+
+  <div id="skeleton-grid" class="product-grid">
+    <div class="skel-card"><div class="skel-img skeleton"></div><div class="skel-body"><div class="skeleton" style="height:14px;width:65%;border-radius:6px"></div><div class="skeleton" style="height:11px;width:45%;border-radius:6px;margin-top:8px"></div></div></div>
+    <div class="skel-card"><div class="skel-img skeleton"></div><div class="skel-body"><div class="skeleton" style="height:14px;width:70%;border-radius:6px"></div><div class="skeleton" style="height:11px;width:50%;border-radius:6px;margin-top:8px"></div></div></div>
   </div>
+
   <div id="under99-list" class="product-grid" style="display:none"></div>
 </main>
 
-<script src="config.js"></script>
-<script src="safe-html.js"></script>
-<script src="api.js"></script>
+
+<!-- ══════════════════════════════════════════
+     BOTTOM NAVIGATION
+══════════════════════════════════════════ -->
+<nav class="bottom-nav">
+  
+  <a href="index.html" class="nav-item"> 
+    <div class="nav-food-circle"><i class="fa-solid fa-bowl-food"></i></div>
+    <span>Food</span>
+  </a>
+
+  <a href="under99.html" class="nav-item active">
+    <i class="fa-solid fa-tag nav-icon"></i>
+    <span>99 Store</span>
+    <span class="nav-new-badge">NEW</span>
+  </a>
+
+  <a href="orders.html" class="nav-item">
+    <i class="fa-solid fa-receipt nav-icon"></i>
+    <span>Orders</span>
+  </a>
+</nav>
+
+
+<script src="home.js"></script>
+<script src="under99.js"></script>
+<script src="cart-bar.js"></script>
 <script>
-/* ================================================================
-   ₹99 STORE
-   Uses the ONE shared cart engine (cart-bar.js -> window.updateCart).
-   This page previously wrote a different cart shape into the same
-   localStorage key, which corrupted the cart for every other page.
-   ================================================================ */
-(function () {
-  'use strict';
+  // ── RESTAURANT DEAL FEED ──
+  const API_BASE_URL = 'https://eatswada.onrender.com/api';
+  let currentMaxPrice = 99;
+  let vegOnly99 = false;
+  let sortByRating = false;
+  let discountOnly = true;
 
-  var state = { items: [], vegOnly: false, ratingOnly: false };
-
-  var esc = function (v) {
-    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  };
-
-  function el(id) { return document.getElementById(id); }
-
-  function toNumber(value) {
-    var n = Number(value);
-    if (Number.isFinite(n)) return n;
-    var parsed = parseFloat(String(value == null ? '' : value).replace(/[^\d.]/g, ''));
-    return Number.isFinite(parsed) ? parsed : null;
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
-
-  /* Maps an API deal onto the fields the shared cart needs.
-     Anything the API does not supply stays null — no invented ratings,
-     no invented "original" prices, no random menu item ids. */
-  function mapItem(raw) {
-    var price = toNumber(raw.price);
-    if (price == null) return null;
-
-    var menuItemId = raw._id || raw.id || raw.menuItem || '';
-
-    var restaurant = raw.restaurant;
-    var resId = raw.restaurantId || raw.resId || raw.restaurant_id || '';
-    var resName = raw.resName || raw.restaurantName || '';
-    var resRating = toNumber(raw.resRating != null ? raw.resRating : raw.restaurantRating);
-
-    if (restaurant && typeof restaurant === 'object') {
-      resId = restaurant._id || restaurant.id || resId;
-      resName = restaurant.name || resName;
-      if (resRating == null) resRating = toNumber(restaurant.rating);
-    } else if (typeof restaurant === 'string' && restaurant) {
-      resId = restaurant;
+  function getField(obj, paths, fallback=''){
+    for(const p of paths){
+      let cur=obj;
+      for(const k of p.split('.')){
+        if(cur==null) break;
+        cur=cur[k];
+      }
+      if(cur!==undefined && cur!==null && cur!=='') return cur;
     }
+    return fallback;
+  }
+  function money(v){ return Math.round(Number(v)||0); }
 
-    if (!resId || !menuItemId) return null; // cannot be ordered — do not show ADD
+  function normalizeItem(dbItem){
+    let price = money(dbItem.price);
+    let restaurant = (dbItem.restaurant && typeof dbItem.restaurant === 'object') ? dbItem.restaurant : {};
+    let rId = restaurant._id || restaurant.id || dbItem.restaurant || 'unknown';
+    let rName = restaurant.name || dbItem.restaurantName || 'EatSwada Partner';
+    let rRating = restaurant.rating ?? dbItem.resRating ?? 0;
 
-    var originalPrice = toNumber(raw.originalPrice);
-    if (originalPrice == null || originalPrice <= price) originalPrice = null;
+    let delivery = getField(dbItem,[
+      'deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time'
+    ],'');
+    if(!delivery) delivery=getField(restaurant,[
+      'deliveryTime','deliveryTimeText','eta','deliveryEta','delivery_time','estimatedDeliveryTime'
+    ],'');
+
+    let freeAbove = getField(dbItem,[
+      'freeDeliveryAbove','free_delivery_above'
+    ],null);
+    if(freeAbove==null) freeAbove=getField(restaurant,[
+      'freeDeliveryAbove','free_delivery_above','freeDeliveryThreshold'
+    ],null);
+
+    let cuisine = getField(dbItem,['cuisine','cuisines','category'], '');
+    if(!cuisine) cuisine=getField(restaurant,['cuisine','cuisines','category'], '');
+    if(Array.isArray(cuisine)) cuisine=cuisine.join(', ');
+
+    let original = getField(dbItem,['originalPrice','mrp','compareAtPrice','oldPrice'],null);
+    let discount = getField(dbItem,['discountPercentage','discountPercent','discount'],null);
+    if(original==null && discount!=null && Number(discount)>0){
+      original = Math.round(price/(1-Number(discount)/100));
+    }
+    if(original==null && price>0) original=Math.round(price*1.4);
+    let discountPct = (original && original>price)
+      ? Math.round((1-price/original)*100)
+      : (Number(discount)||0);
 
     return {
-      menuItemId: String(menuItemId),
-      name: raw.name || '',
-      price: price,
-      originalPrice: originalPrice,
-      isVeg: typeof raw.isVeg === 'boolean' ? raw.isVeg : null,
-      image: raw.image || raw.img || '',
-      resId: String(resId),
-      resName: resName,
-      resRating: resRating
+      id: dbItem._id || dbItem.id || '',
+      name: dbItem.name || 'Special Item',
+      price,
+      originalPrice: money(original),
+      discountPct,
+      isVeg: Boolean(dbItem.isVeg),
+      img: dbItem.image || dbItem.img || '',
+      resId:String(rId),
+      resName:rName,
+      resRating:Number(rRating)||0,
+      ratingCount:getField(dbItem,['ratingCount','ratingsCount','reviewCount'], getField(restaurant,['ratingCount','ratingsCount','reviewCount'],'')),
+      delivery:String(delivery||''),
+      cuisine:String(cuisine||''),
+      freeAbove: freeAbove==null ? null : money(freeAbove),
+      popular:Boolean(dbItem.isBestseller || dbItem.isPopular || dbItem.popular || dbItem.bestseller),
+      menuItem:dbItem._id || dbItem.id || ''
     };
   }
 
-  function cartPayload(item) {
-    return encodeURIComponent(JSON.stringify({
-      name: item.name,
-      price: item.price,
-      originalPrice: item.originalPrice,
-      resId: item.resId,
-      menuItem: item.menuItemId,
-      image: item.image,
-      isVeg: item.isVeg === true
-    }));
+  function readCart(){
+    try{return JSON.parse(localStorage.getItem('nearbite_cart'))||{};}catch(e){return {};}
+  }
+  function itemQty(item, cart){
+    if(cart[item.name] && cart[item.name].quantity) return cart[item.name].quantity;
+    return 0;
   }
 
-  function readCart() {
-    try {
-      var parsed = JSON.parse(localStorage.getItem('nearbite_cart') || '{}');
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-      return parsed;
-    } catch (e) { return {}; }
-  }
+  function renderItems(items){
+    const listEl=document.getElementById('under99-list');
+    const skeleton=document.getElementById('skeleton-grid');
+    const countEl=document.getElementById('item-count');
+    if(!listEl) return;
 
-  function containerKey(item) { return String(item.name).replace(/\s+/g, ''); }
-
-  /* Markup matches what cart-bar.js re-renders after every change, so the
-     button never falls out of sync with the cart. */
-  function buttonHtml(item, qty) {
-    var payload = cartPayload(item);
-    if (qty > 0) {
-      return '<div class="qty-fab">' +
-        '<button onclick="updateCart(\'' + payload + '\', -1)" aria-label="Decrease">−</button>' +
-        '<span>' + qty + '</span>' +
-        '<button onclick="updateCart(\'' + payload + '\', 1)" aria-label="Increase">+</button>' +
-        '</div>';
-    }
-    return '<button class="add-fab" onclick="updateCart(\'' + payload + '\', 1)" aria-label="Add">+</button>';
-  }
-
-  function render() {
-    var list = el('under99-list');
-    var filtered = state.items.filter(function(item) {
-      if (state.vegOnly && item.isVeg !== true) return false;
-      if (state.ratingOnly && (item.resRating == null || item.resRating < 4)) return false;
+    let filtered=items.filter(item=>{
+      if(currentMaxPrice===99 && item.price>99) return false;
+      if(currentMaxPrice===149 && item.price>149) return false;
+      if(vegOnly99 && !item.isVeg) return false;
+      if(sortByRating && item.resRating<4) return false;
       return true;
     });
 
-    var groups = {};
-    filtered.forEach(function(item) {
-      var key = item.resId || ('unknown-' + item.resName);
-      if (!groups[key]) groups[key] = [];
+    const groups={};
+    filtered.forEach(item=>{
+      const key=item.resId || ('unknown-'+item.resName);
+      if(!groups[key]) groups[key]=[];
       groups[key].push(item);
     });
 
-    var restaurants = Object.keys(groups).map(function(key) {
-      var items = groups[key].slice().sort(function(a,b){return a.price-b.price;});
-      return {id:key,name:items[0].resName || 'EatSwada Partner',rating:items[0].resRating,items:items};
-    }).sort(function(a,b){return a.items[0].price-b.items[0].price;});
+    let restaurants=Object.values(groups).map(itemsInRestaurant=>{
+      itemsInRestaurant.sort((a,b)=>a.price-b.price);
+      return {items:itemsInRestaurant};
+    });
 
-    list.style.display = 'block';
+    if(sortByRating){
+      restaurants.sort((a,b)=>b.items[0].resRating-a.items[0].resRating);
+    }else{
+      restaurants.sort((a,b)=>a.items[0].price-b.items[0].price);
+    }
 
-    if (!restaurants.length) {
-      list.innerHTML='<div class="empty"><i class="fa-solid fa-tag"></i><strong>No deals available right now</strong><span>Check back soon for fresh offers.</span></div>';
+    if(skeleton) skeleton.style.display='none';
+    listEl.style.display='flex';
+
+    if(countEl){
+      countEl.textContent=restaurants.length
+        ? restaurants.length+' Restaurant'+(restaurants.length===1?'':'s')
+        : 'Deals for you';
+    }
+
+    if(!restaurants.length){
+      listEl.innerHTML='<div class="empty-state"><i class="fa-solid fa-tag"></i><h3>No deals match these filters</h3><p>Try changing the price or food preference.</p></div>';
       return;
     }
 
-    var cart = readCart();
+    const cart=readCart();
 
-    list.innerHTML = restaurants.map(function(r,ri) {
-      var lowest=r.items[0];
-      var rating=r.rating!=null ? Number(r.rating).toFixed(1) : '';
-      var itemsHtml=r.items.slice(0,6).map(function(item) {
-        var qty=cart[item.name] ? cart[item.name].quantity : 0;
-        var payload=cartPayload(item);
-        var old=item.originalPrice!=null ? Number(item.originalPrice) : null;
-        var off=old && old>item.price ? Math.round((1-item.price/old)*100) : 0;
-        var popular=item.isBestseller===true || item.isPopular===true || item.popular===true || item.bestseller===true;
-        var veg=item.isVeg===null?'':'<span class="veg-mark '+(item.isVeg?'veg':'non')+'"><i class="fa-solid '+(item.isVeg?'fa-circle':'fa-play')+'"></i></span>';
-        var button=qty>0
-          ? '<div class="qty-fab"><button onclick="event.stopPropagation();event.preventDefault();updateCart(\''+payload+'\',-1)">−</button><span>'+qty+'</span><button onclick="event.stopPropagation();event.preventDefault();updateCart(\''+payload+'\',1)">+</button></div>'
-          : '<button class="deal-plus" onclick="event.stopPropagation();event.preventDefault();updateCart(\''+payload+'\',1)">+</button>';
+    listEl.innerHTML=restaurants.map((r,index)=>{
+      const first=r.items[0];
+      const rating=first.resRating ? first.resRating.toFixed(1) : '—';
+      const ratingCount=first.ratingCount ? '('+esc(first.ratingCount)+')' : '';
+      const delivery=first.delivery || '30–40 mins';
+      const cuisine=first.cuisine || '';
+      const freeAbove=first.freeAbove;
+      const lowest=first.price;
 
-        return '<div class="deal-item"><div class="deal-image">'+
-          (popular?'<span class="deal-popular">Popular</span>':'')+
-          (safeUrl(item.image)?'<img src="'+esc(safeUrl(item.image))+'" alt="'+esc(item.name)+'" loading="lazy">':'<div class="img-fallback"><i class="fa-solid fa-utensils"></i></div>')+
-          button+'</div><div class="deal-item-name">'+veg+esc(item.name)+'</div>'+
-          '<div class="deal-price">₹'+item.price+
-          (old?'<span class="deal-old">₹'+old+'</span>':'')+
-          (off?'<span class="deal-off">'+off+'% OFF</span>':'')+
-          '</div><div class="deal-other">◉◉ Other apps: —</div></div>';
+      const itemsHtml=r.items.slice(0,3).map(item=>{
+        const qty=itemQty(item,cart);
+        const vegMark='<span class="veg-mark '+(item.isVeg?'':'non')+'"></span>';
+        const btn=qty>0
+          ? '<div class="deal-qty">'+
+              '<button onclick="event.stopPropagation();updateCart(\\''+escJs(item.name)+'\\',-1,'+item.price+',\\''+escJs(item.resId)+'\\')">−</button>'+
+              '<span>'+qty+'</span>'+
+              '<button onclick="event.stopPropagation();updateCart(\\''+escJs(item.name)+'\\',1,'+item.price+',\\''+escJs(item.resId)+'\\')">+</button>'+
+            '</div>'
+          : '<button class="deal-plus" onclick="event.stopPropagation();updateCart(\\''+escJs(item.name)+'\\',1,'+item.price+',\\''+escJs(item.resId)+'\\')" aria-label="Add '+esc(item.name)+'">+</button>';
+
+        return '<div class="deal-item">'+
+          '<div class="deal-image">'+
+            (item.popular?'<span class="deal-popular">Popular</span>':'')+
+            (item.img
+              ? '<img src="'+esc(item.img)+'" alt="'+esc(item.name)+'" loading="lazy" onerror="this.style.display=\\'none\\'">'
+              : '<div class="deal-image-fallback"><i class="fa-solid fa-utensils"></i></div>')+
+            btn+
+          '</div>'+
+          '<div class="deal-item-name">'+vegMark+'<span>'+esc(item.name)+'</span></div>'+
+          '<div class="deal-price-row">'+
+            '<span class="deal-price">₹'+item.price+'</span>'+
+            (item.originalPrice>item.price?'<span class="deal-old">₹'+item.originalPrice+'</span>':'')+
+            (item.discountPct>0?'<span class="deal-off">'+item.discountPct+'% OFF</span>':'')+
+          '</div>'+
+        '</div>';
       }).join('');
 
-      return '<article class="restaurant-deal"><div class="deal-top">'+
-        '<div class="deal-discount">15% LOWER PRICES</div>'+
-        '<div class="deal-name">'+esc(r.name)+'</div>'+
-        '<div class="deal-stamp">EVERYDAY<br>LOWEST<br>PRICE</div>'+
-        '<div class="deal-meta">'+(rating?'<span class="deal-rating"><i class="fa-solid fa-star"></i> '+rating+'</span>':'')+
-        '<span>•</span><span>Delivery time</span></div>'+
-        '<div class="deal-free"><i class="fa-solid fa-percent"></i> Free Delivery · Items At ₹'+lowest.price+'</div>'+
-        '</div><div class="deal-items">'+itemsHtml+'</div></article>';
+      return '<article class="restaurant-deal" style="animation-delay:'+Math.min(index*.035,.3)+'s">'+
+        '<div class="deal-head">'+
+          '<div class="deal-discount">'+(first.discountPct>0?first.discountPct:15)+'% LOWER PRICES</div>'+
+          '<h2 class="deal-name">'+esc(first.resName)+'</h2>'+
+          '<div class="deal-stamp">EVERYDAY<br>LOWEST PRICE<br>EVERYDAY</div>'+
+          '<div class="deal-meta">'+
+            '<span class="deal-rating"><span class="star">★</span> '+rating+'</span>'+
+            (ratingCount?'<span class="deal-rating-count">'+ratingCount+'</span>':'')+
+            '<span class="deal-sep">•</span>'+
+            '<span class="deal-time">'+esc(delivery)+'</span>'+
+            (cuisine?'<span class="deal-sep">•</span><span class="deal-cuisine">'+esc(cuisine)+'</span>':'')+
+          '</div>'+
+          '<div class="deal-free">'+
+            '<span class="deal-free-icon"><i class="fa-solid fa-percent"></i></span>'+
+            (freeAbove!=null
+              ? 'Free delivery above ₹'+freeAbove
+              : 'Free delivery')+
+          '</div>'+
+        '</div>'+
+        '<div class="deal-items">'+itemsHtml+'</div>'+
+      '</article>';
     }).join('');
 
-    var counter=el('item-count');
-    if(counter) counter.textContent=restaurants.length+' Restaurant'+(restaurants.length!==1?'s':'');
-    var heroSub=el('hero-sub');
-    if(heroSub) heroSub.textContent='Lowest deals starting from ₹'+restaurants[0].items[0].price;
+    if(typeof window.renderCartBar==='function') window.renderCartBar();
   }
 
-  function syncFilters() {
-    var hasVeg = state.items.some(function (i) { return i.isVeg !== null; });
-    var hasRating = state.items.some(function (i) { return i.resRating != null; });
-    if (el('vegBtn')) el('vegBtn').hidden = !hasVeg;
-    if (el('ratingBtn')) el('ratingBtn').hidden = !hasRating;
+  function escJs(v){
+    return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   }
 
-  function showError(message) {
-    var list = el('under99-list');
-    list.style.display = 'grid';
-    list.innerHTML = '<div class="empty"><i class="fa-solid fa-wifi"></i>' +
-      '<strong>Couldn\u2019t load deals</strong><span>' + esc(message || 'Please try again.') + '</span>' +
-      '<button class="add-btn" style="margin-top:16px" id="u99-retry">Try Again</button></div>';
+  window.renderItems=async function(){
+    const skeleton=document.getElementById('skeleton-grid');
+    const listEl=document.getElementById('under99-list');
+    const cached=sessionStorage.getItem('es_under99_data_v9');
+    let items=[];
 
-    var retry = el('u99-retry');
-    if (retry) {
-      retry.addEventListener('click', function () {
-        retry.disabled = true;
-        retry.textContent = 'Retrying…';
-        load();
-      });
+    if(cached && cached!=='[]'){
+      try{items=JSON.parse(cached);}catch(e){items=[];}
     }
-  }
 
-  function load() {
-    var skeleton = el('skeleton');
-
-    return window.API.getList(window.API.routes.under99)
-      .then(function (data) {
-        state.items = data.map(mapItem).filter(function (item) {
-          return item && item.price <= 99;
-        });
-        if (skeleton) skeleton.style.display = 'none';
-        syncFilters();
-        render();
-        if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
-      })
-      .catch(function (error) {
-        console.error('[under99] load failed:', error);
-        if (skeleton) skeleton.style.display = 'none';
-        showError(error && error.message);
-      });
-  }
-
-  window.toggleVeg = function () {
-    state.vegOnly = !state.vegOnly;
-    el('vegBtn').classList.toggle('orange-active', state.vegOnly);
-    render();
+    if(!items.length){
+      try{
+        if(skeleton) skeleton.style.display='flex';
+        const response=await fetch(API_BASE_URL+'/restaurants/under99');
+        const result=await response.json();
+        const raw=Array.isArray(result.data)?result.data:(Array.isArray(result)?result:[]);
+        items=raw.map(normalizeItem).filter(item=>item.price<=99);
+        sessionStorage.setItem('es_under99_data_v9',JSON.stringify(items));
+      }catch(error){
+        if(skeleton) skeleton.style.display='none';
+        if(listEl){
+          listEl.style.display='flex';
+          listEl.innerHTML='<div class="empty-state"><i class="fa-solid fa-wifi"></i><h3>Couldn’t load deals</h3><p>Please try again.</p><button onclick="sessionStorage.removeItem(\\'es_under99_data_v9\\');location.reload()" style="margin-top:14px;padding:10px 16px;border:0;border-radius:10px;background:#e51b8b;color:#fff;font-weight:800">Retry</button></div>';
+        }
+        return;
+      }
+    }
+    window.__under99Items=items;
+    renderItems(items);
   };
 
-  window.toggleRating = function () {
-    state.ratingOnly = !state.ratingOnly;
-    el('ratingBtn').classList.toggle('orange-active', state.ratingOnly);
-    render();
+  window.updateCart=function(itemName,change,price,rId){
+    let cart=readCart();
+    if(!cart[itemName]) cart[itemName]={quantity:0,price:price,resId:rId};
+    cart[itemName].quantity+=change;
+    if(cart[itemName].quantity<=0) delete cart[itemName];
+    localStorage.setItem('nearbite_cart',JSON.stringify(cart));
+
+    if(window.__under99Items) renderItems(window.__under99Items);
+    if(typeof window.updateGlobalCart==='function') window.updateGlobalCart();
+    if(typeof window.renderCartBar==='function') window.renderCartBar();
   };
 
-  document.addEventListener('DOMContentLoaded', load);
-})();
+  window.setPriceFilter=function(max){
+    currentMaxPrice=max;
+    document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+    const target=document.getElementById(max===99?'filter-99':'filter-149');
+    if(target) target.classList.add('active');
+    if(window.__under99Items) renderItems(window.__under99Items);
+  };
+  window.setRatingFilter=function(){
+    sortByRating=!sortByRating;
+    const b=document.getElementById('rating-btn');
+    if(b) b.classList.toggle('active',sortByRating);
+    if(window.__under99Items) renderItems(window.__under99Items);
+  };
+  window.setDiscountFilter=function(){
+    discountOnly=!discountOnly;
+    const b=document.getElementById('discount-btn');
+    if(b) b.classList.toggle('active',discountOnly);
+    if(window.__under99Items) renderItems(window.__under99Items);
+  };
+  window.setVegFilter=function(){
+    vegOnly99=!vegOnly99;
+    const b=document.getElementById('veg-filter');
+    if(b) b.classList.toggle('active',vegOnly99);
+    if(window.__under99Items) renderItems(window.__under99Items);
+  };
+  window.setSortFilter=function(){
+    sortByRating=!sortByRating;
+    if(window.__under99Items) renderItems(window.__under99Items);
+  };
+
+  window.addEventListener('DOMContentLoaded',window.renderItems);
+
+  const bottomNav=document.querySelector('.bottom-nav');
+  let lastScrollTop=0;
+  window.addEventListener('scroll',()=>{
+    const current=window.pageYOffset||document.documentElement.scrollTop;
+    if(Math.abs(lastScrollTop-current)<=15)return;
+    if(current>lastScrollTop && current>180){
+      if(bottomNav)bottomNav.classList.add('bottom-nav-hidden');
+    }else{
+      if(bottomNav)bottomNav.classList.remove('bottom-nav-hidden');
+    }
+    lastScrollTop=current;
+  },{passive:true});
+
+  // ── 3. FILTER & SCROLL LOGIC ──
+  window.toggleVeg = function() {
+    if(typeof vegOnly99 !== 'undefined') vegOnly99 = !vegOnly99;
+    const sw = document.getElementById('veg99-switch');
+    if (sw) sw.classList.toggle('on');
+    window.renderItems(); 
+  };
+
+  window.addEventListener('DOMContentLoaded', window.renderItems);
+
+  const bottomNav = document.querySelector('.bottom-nav'); 
+  let lastScrollTop = 0;
+  window.addEventListener('scroll', () => {
+    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    if (Math.abs(lastScrollTop - currentScroll) <= 15) return;
+    if (currentScroll > lastScrollTop && currentScroll > 180) {
+      if (bottomNav) bottomNav.classList.add('bottom-nav-hidden'); 
+    } else {
+      if (bottomNav) bottomNav.classList.remove('bottom-nav-hidden'); 
+    }
+    lastScrollTop = currentScroll;
+  }, { passive: true }); 
 </script>
-  <script src="cart-bar.js"></script>
-  <script src="bottom-tab-bar.js"></script>
+
 </body>
 </html>
