@@ -106,18 +106,230 @@
     });
     return total;
   }
+  /* ── 99 Store customization sheet ─────────────────────────────────────
+     99 Store is a real ordering surface, so customizable items must open
+     the same kind of option sheet here instead of navigating away.
+     Cart entries use the same shape as restaurant.html.
+  */
+  let custCurrent=null;
+  let custEls=null;
+
+  function custMoney(n){ return '₹'+Math.round(Number(n)||0); }
+  function custEsc(s){
+    return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  window.__ew99OwnCustomize=true;
+
+  function ensureCustomizeSheet(){
+    if(document.getElementById('u99-cust-sheet')) return;
+
+    const bd=document.createElement('div');
+    bd.id='u99-cust-backdrop';
+    bd.className='u99-cust-backdrop';
+
+    const sh=document.createElement('div');
+    sh.id='u99-cust-sheet';
+    sh.className='u99-cust-sheet';
+    sh.setAttribute('role','dialog');
+    sh.setAttribute('aria-modal','true');
+
+    sh.innerHTML=
+      '<div class="u99-cust-handle"></div>'+
+      '<div class="u99-cust-head">'+
+        '<div><h3 id="u99-cust-title"></h3><p id="u99-cust-base"></p></div>'+
+        '<button type="button" class="u99-cust-close" id="u99-cust-close" aria-label="Close">×</button>'+
+      '</div>'+
+      '<div class="u99-cust-body" id="u99-cust-body"></div>'+
+      '<div class="u99-cust-foot">'+
+        '<div class="u99-cust-qty"><button type="button" id="u99-cust-minus" aria-label="Decrease">−</button><span id="u99-cust-qty">1</span><button type="button" id="u99-cust-plus" aria-label="Increase">+</button></div>'+
+        '<button type="button" class="u99-cust-add" id="u99-cust-add">Add item</button>'+
+      '</div>';
+
+    document.body.appendChild(bd);
+    document.body.appendChild(sh);
+
+    custEls={
+      bd,
+      sh,
+      title:document.getElementById('u99-cust-title'),
+      base:document.getElementById('u99-cust-base'),
+      body:document.getElementById('u99-cust-body'),
+      qty:document.getElementById('u99-cust-qty'),
+      add:document.getElementById('u99-cust-add')
+    };
+
+    bd.addEventListener('click',closeCustomize);
+    document.getElementById('u99-cust-close').addEventListener('click',closeCustomize);
+    document.getElementById('u99-cust-minus').addEventListener('click',()=>{
+      if(!custCurrent)return;
+      custCurrent.qty=Math.max(1,custCurrent.qty-1);
+      custEls.qty.textContent=custCurrent.qty;
+      refreshCustomize();
+    });
+    document.getElementById('u99-cust-plus').addEventListener('click',()=>{
+      if(!custCurrent)return;
+      custCurrent.qty=Math.min(20,custCurrent.qty+1);
+      custEls.qty.textContent=custCurrent.qty;
+      refreshCustomize();
+    });
+    custEls.add.addEventListener('click',confirmCustomize);
+    custEls.body.addEventListener('change',refreshCustomize);
+
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape' && custCurrent)closeCustomize();
+    });
+  }
+
   function openCustomize(item,r){
-    registerCustomization(item,r); // guarantee data is present before opening
+    registerCustomization(item,r);
     const id=itemId(item);
-    if(typeof window.ewOpenCustomize==='function'){
+    if(!id)return false;
+
+    // If another page/component already provides the shared sheet, use it.
+    if(typeof window.ewOpenCustomize==='function' && !window.__ew99OwnCustomize){
       window.ewOpenCustomize(id);
       return true;
     }
-    // Shared sheet not present on this page: never silently add the base item.
-    // Send the customer to the full restaurant page, which owns the sheet.
-    const resId=restaurantId(r);
-    if(resId)window.location.href=`restaurant.html?id=${encodeURIComponent(resId)}`;
-    return false;
+
+    ensureCustomizeSheet();
+    custCurrent={base:window.__ewCust[id],qty:1};
+    if(!custCurrent.base)return false;
+
+    custEls.title.textContent=custCurrent.base.name;
+    custEls.base.textContent='Base price · '+custMoney(custCurrent.base.price);
+    custEls.qty.textContent='1';
+
+    let html='';
+    (custCurrent.base.groups||[]).forEach((g,gi)=>{
+      const max=Math.max(1,Number(g.maxSelect||1)||1);
+      const required=Boolean(g.required);
+      const multi=max>1;
+      html+=`<section class="u99-cust-group" data-max="${max}" data-required="${required?'1':'0'}" data-multi="${multi?'1':'0'}" data-title="${custEsc(g.title||'Options')}">`;
+      html+=`<div class="u99-cust-group-title">${custEsc(g.title||'Options')}</div>`;
+      html+=`<div class="u99-cust-rule">${required?'<b>Required</b> · ':''}${multi?`Select up to ${max}`:'Select 1'}</div>`;
+
+      (g.options||[]).forEach((o,oi)=>{
+        const extra=Number(o.extraPrice||0);
+        const priceText=extra>0 ? '+'+custMoney(extra) : ((required||multi)?'Free':'');
+        const checked=(!multi && required && oi===0)?' checked':'';
+        html+=
+          `<label class="u99-cust-option">`+
+            `<span class="u99-cust-diet ${o.isVeg!==false?'veg':'nonveg'}"></span>`+
+            `<span class="u99-cust-label">${custEsc(o.label||'Option')}</span>`+
+            (priceText?`<span class="u99-cust-extra ${extra?'':'free'}">${priceText}</span>`:'')+
+            `<input type="${multi?'checkbox':'radio'}" name="u99-cust-g${gi}" data-extra="${extra}"${checked}>`+
+          `</label>`;
+      });
+      html+='</section>';
+    });
+
+    custEls.body.innerHTML=html;
+    refreshCustomize();
+    custEls.bd.classList.add('show');
+    requestAnimationFrame(()=>custEls.sh.classList.add('show'));
+    return true;
+  }
+
+  function refreshCustomize(){
+    if(!custCurrent||!custEls)return;
+
+    let extra=0;
+    let valid=true;
+
+    custEls.body.querySelectorAll('.u99-cust-group').forEach(group=>{
+      const multi=group.dataset.multi==='1';
+      const max=Number(group.dataset.max)||1;
+      const required=group.dataset.required==='1';
+      const checked=[...group.querySelectorAll('input:checked')];
+
+      checked.forEach(input=>extra+=Number(input.dataset.extra)||0);
+
+      if(multi){
+        const full=checked.length>=max;
+        group.querySelectorAll('input[type="checkbox"]').forEach(input=>{
+          if(!input.checked)input.disabled=full;
+        });
+      }
+      if(required && checked.length<1)valid=false;
+    });
+
+    const unit=Number(custCurrent.base.price)+extra;
+    custCurrent.unit=unit;
+    custEls.add.disabled=!valid;
+    custEls.add.textContent=valid
+      ? `Add item · ${custMoney(unit*custCurrent.qty)}`
+      : 'Select required options';
+  }
+
+  function confirmCustomize(){
+    if(!custCurrent||custEls.add.disabled)return;
+
+    const flat=[];
+    const labels=[];
+
+    custEls.body.querySelectorAll('.u99-cust-group').forEach(group=>{
+      const title=group.dataset.title;
+      group.querySelectorAll('input:checked').forEach(input=>{
+        const label=input.closest('.u99-cust-option').querySelector('.u99-cust-label').textContent.trim();
+        const veg=input.closest('.u99-cust-option').querySelector('.u99-cust-diet');
+        flat.push({
+          title,
+          label,
+          extraPrice:Number(input.dataset.extra)||0,
+          isVeg:veg.classList.contains('veg')
+        });
+        labels.push(label);
+      });
+    });
+
+    const base=custCurrent.base;
+    const compositeName=labels.length
+      ? `${base.name} (${labels.join(', ')})`
+      : base.name;
+    const unit=Number(custCurrent.unit)||Number(base.price);
+
+    const cart=getCart();
+    const existing=cart[compositeName];
+
+    if(existing){
+      existing.quantity=Number(existing.quantity||0)+custCurrent.qty;
+      existing.price=unit;
+      existing.customizations=flat;
+    }else{
+      cart[compositeName]={
+        quantity:custCurrent.qty,
+        price:unit,
+        originalPrice:(Number(base.originalPrice)>Number(base.price))
+          ? Number(base.originalPrice)+(unit-Number(base.price))
+          : null,
+        resId:base.resId,
+        menuItem:base.menuItemId,
+        image:base.image||'',
+        name:compositeName,
+        isVeg:Boolean(base.isVeg),
+        restaurantName:base.restaurantName||'',
+        customizations:flat
+      };
+    }
+
+    saveCart(cart);
+    document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,item:base}}));
+    if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
+
+    closeCustomize();
+    const host=document.querySelector(`[data-under99-restaurant="${CSS.escape(base.resId)}"]`);
+    if(host){
+      const rr=hostData.get(host);
+      if(rr)syncCard(host,rr);
+    }
+  }
+
+  function closeCustomize(){
+    if(!custEls)return;
+    custEls.sh.classList.remove('show');
+    custEls.bd.classList.remove('show');
+    custCurrent=null;
   }
 
   function formatCount(value){
@@ -213,7 +425,7 @@
     const delivery=String(r.deliveryTime||'').trim();
 
     return `<article class="u99-restaurant-card">
-      <button class="u99-restaurant-head" type="button" data-action="restaurant" aria-label="Open ${esc(r.name||'restaurant')}">
+      <div class="u99-restaurant-head" data-action="restaurant" role="button" tabindex="0" aria-label="Open ${esc(r.name||'restaurant')}">
         <div class="u99-card-copy">
           <div class="u99-discount-line">${restaurantOffer(r)}</div>
           <h2 class="u99-restaurant-name">${esc(r.name||'Restaurant')}</h2>
@@ -224,7 +436,7 @@
           </div>
           ${freeDeliveryMarkup(r)}
         </div>
-      </button>
+      </div>
       <div class="u99-carousel-wrap">
         <div class="u99-carousel" tabindex="0" aria-label="${esc(r.name||'Restaurant')} menu">${menu.map(i=>itemMarkup(i,r)).join('')}</div>
       </div>
@@ -245,6 +457,15 @@
     // the carousel and images are never rebuilt just to update a + / stepper.
     if(!host.__u99click){
       host.__u99click=true;
+      host.addEventListener('keydown',e=>{
+        const head=e.target.closest('.u99-restaurant-head');
+        if(head && (e.key==='Enter'||e.key===' ')){
+          e.preventDefault();
+          const rr=hostData.get(host);
+          const rid=String(rr?.id||rr?._id||'');
+          if(rid)window.location.href=`restaurant.html?id=${encodeURIComponent(rid)}`;
+        }
+      });
       host.addEventListener('click',e=>{
         const rr=hostData.get(host); if(!rr)return;
         const button=e.target.closest('[data-action]');
@@ -351,6 +572,89 @@
          Layout is intentionally independent from the benchmark
          food-tile proportions. Food tiles stay at 1.46:1.
          ========================================================= */
+
+      /* ── 99 Store customization sheet ─────────────────────────────── */
+      .u99-cust-backdrop{
+        position:fixed;inset:0;z-index:18000;background:rgba(16,24,40,.50);
+        opacity:0;pointer-events:none;transition:opacity .2s ease;
+      }
+      .u99-cust-backdrop.show{opacity:1;pointer-events:auto}
+      .u99-cust-sheet{
+        position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);
+        width:100%;max-width:520px;z-index:18001;background:#fff;
+        border-radius:22px 22px 0 0;max-height:90dvh;
+        display:flex;flex-direction:column;
+        transition:transform .28s cubic-bezier(.2,.8,.2,1);
+        box-shadow:0 -12px 40px rgba(16,24,40,.18);
+      }
+      .u99-cust-sheet.show{transform:translate(-50%,0)}
+      .u99-cust-handle{width:38px;height:4px;border-radius:99px;background:#D8DDE3;margin:10px auto 4px}
+      .u99-cust-head{
+        display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+        padding:8px 18px 12px;border-bottom:1px solid #EAECF0;
+      }
+      .u99-cust-head h3{margin:0;font-size:17px;line-height:1.2;font-weight:800;color:#101828;letter-spacing:-.02em}
+      .u99-cust-head p{margin:3px 0 0;font-size:12px;line-height:1.2;color:#667085;font-weight:600}
+      .u99-cust-close{
+        flex:none;width:32px;height:32px;border:0;border-radius:50%;
+        background:#F2F4F7;color:#475467;font-size:20px;line-height:1;cursor:pointer;
+      }
+      .u99-cust-body{overflow:auto;padding:4px 0 8px}
+      .u99-cust-group{padding:13px 18px;border-bottom:8px solid #F5F7F8}
+      .u99-cust-group:last-child{border-bottom:0}
+      .u99-cust-group-title{font-size:15px;font-weight:800;color:#101828}
+      .u99-cust-rule{font-size:12px;color:#667085;margin:2px 0 9px;font-weight:600}
+      .u99-cust-rule b{color:#B54708}
+      .u99-cust-option{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer}
+      .u99-cust-diet{
+        width:14px;height:14px;border-radius:3px;border:1.5px solid;
+        display:flex;align-items:center;justify-content:center;flex:none;
+      }
+      .u99-cust-diet::after{content:"";width:6px;height:6px;border-radius:50%}
+      .u99-cust-diet.veg{border-color:#0F7A4D}.u99-cust-diet.veg::after{background:#0F7A4D}
+      .u99-cust-diet.nonveg{border-color:#B42318}.u99-cust-diet.nonveg::after{background:#B42318}
+      .u99-cust-label{flex:1;font-size:14px;color:#101828;font-weight:600;min-width:0}
+      .u99-cust-extra{font-size:13px;color:#667085;font-weight:700;white-space:nowrap}
+      .u99-cust-extra.free{color:#159A62}
+      .u99-cust-option input{
+        appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:none;
+        border:2px solid #C6CDD5;cursor:pointer;position:relative;margin:0;
+      }
+      .u99-cust-option input[type=radio]{border-radius:50%}
+      .u99-cust-option input[type=checkbox]{border-radius:6px}
+      .u99-cust-option input:checked{border-color:#159A62;background:#159A62}
+      .u99-cust-option input:checked::after{
+        content:"";position:absolute;inset:0;margin:auto;width:8px;height:8px;background:#fff;border-radius:50%;
+      }
+      .u99-cust-option input[type=checkbox]:checked::after{
+        width:10px;height:6px;background:transparent;border:2px solid #fff;
+        border-top:0;border-right:0;transform:rotate(-45deg);top:-2px;
+      }
+      .u99-cust-option input:disabled{opacity:.4;cursor:not-allowed}
+      .u99-cust-foot{
+        display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+        border-top:1px solid #EAECF0;background:#fff;
+      }
+      .u99-cust-qty{
+        display:flex;align-items:center;gap:2px;border:1.5px solid #159A62;
+        border-radius:12px;height:48px;flex:none;
+      }
+      .u99-cust-qty button{
+        width:40px;height:100%;border:0;background:transparent;color:#159A62;
+        font-size:20px;font-weight:800;cursor:pointer;
+      }
+      .u99-cust-qty span{min-width:22px;text-align:center;font-size:14px;font-weight:800;color:#101828}
+      .u99-cust-add{
+        flex:1;height:48px;border:0;border-radius:12px;background:#159A62;color:#fff;
+        font-size:15px;font-weight:800;cursor:pointer;
+      }
+      .u99-cust-add:disabled{background:#C6CDD5;cursor:not-allowed}
+      @media(prefers-reduced-motion:reduce){
+        .u99-cust-sheet,.u99-cust-backdrop{transition:none}
+      }
+
+      /* 99 Store typography tokens — first-page pass only. */
+      .u99-restaurant-card{--u99-xs:11px;--u99-sm:13px;--u99-body:15px;--u99-card:17px;}
       .u99-card-host{
         display:block;
         min-width:0;
@@ -368,6 +672,7 @@
 
       .u99-restaurant-head{
         position:relative;
+        cursor:pointer;
         width:100%;
         padding:0;
         border:0;
@@ -390,8 +695,8 @@
       }
 
       .u99-restaurant-name{
-        margin:0 0 5px;
-        font-size:20px;
+        margin:0 0 4px;
+        font-size:17px;
         line-height:1.05;
         font-weight:800;
         letter-spacing:-.55px;
@@ -406,7 +711,7 @@
         flex-wrap:nowrap;
         gap:5px;
         color:#747B87;
-        font-size:11.5px;
+        font-size:13px;
         font-weight:600;
         line-height:1.2;
         min-width:0;
@@ -448,12 +753,12 @@
       }
 
       .u99-free-row{
-        margin-top:5px;
+        margin-top:4px;
         display:flex;
         align-items:center;
         gap:5px;
         min-width:0;
-        font-size:12px;
+        font-size:13px;
         font-weight:650;
         color:#26334A;
         line-height:1.2;
@@ -484,7 +789,7 @@
       /* Product rail: two strong visible columns.
          Additional products remain horizontally scrollable. */
       .u99-carousel-wrap{
-        margin-top:9px;
+        margin-top:8px;
         margin-left:-1px;
         margin-right:-1px;
       }
@@ -645,15 +950,15 @@
       }
 
       .u99-item-name{
-        margin:9px 1px 0;
+        margin:8px 1px 0;
         min-height:18px;
         max-height:36px;
         display:flex;
         align-items:flex-start;
         gap:5px;
         color:#101828;
-        font-size:13px;
-        line-height:1.28;
+        font-size:15px;
+        line-height:1.22;
         font-weight:650;
         overflow:hidden;
       }
@@ -699,7 +1004,7 @@
         overflow:hidden;
       }
       .u99-price-row strong{
-        font-size:16px;
+        font-size:17px;
         line-height:1;
         font-weight:800;
         color:#101828;
@@ -729,10 +1034,10 @@
           border-radius:20px;
         }
         .u99-discount-line{font-size:11px}
-        .u99-restaurant-name{font-size:20px;margin-bottom:5px}
-        .u99-meta{font-size:11.25px;gap:4px}
-        .u99-free-row{font-size:12px;margin-top:5px}
-        .u99-carousel-wrap{margin-top:9px}
+        .u99-restaurant-name{font-size:17px;margin-bottom:4px}
+        .u99-meta{font-size:13px;gap:4px}
+        .u99-free-row{font-size:13px;margin-top:4px}
+        .u99-carousel-wrap{margin-top:8px}
         .u99-carousel{gap:9px}
         .u99-item{
           flex-basis:calc((100% - 9px)/2);
@@ -742,25 +1047,25 @@
         .u99-item-image img,
         .u99-image-fallback{border-radius:12px}
         .u99-add{width:38px;height:38px;font-size:22px}
-        .u99-item-name{font-size:13px;margin-top:9px}
-        .u99-price-row{gap:4px;margin-top:6px}
-        .u99-price-row strong{font-size:16px}
+        .u99-item-name{font-size:15px;margin-top:8px}
+        .u99-price-row{gap:4px;margin-top:5px}
+        .u99-price-row strong{font-size:17px}
         .u99-old-price{font-size:9px}
         .u99-off{font-size:7.5px;padding:4.5px 6px}
       }
 
       @media(max-width:370px){
         .u99-restaurant-card{padding:12px 11px 11px}
-        .u99-restaurant-name{font-size:19px}
-        .u99-meta{font-size:10.5px}
-        .u99-free-row{font-size:11px}
+        .u99-restaurant-name{font-size:17px}
+        .u99-meta{font-size:12px}
+        .u99-free-row{font-size:12px}
         .u99-carousel{gap:8px}
         .u99-item{
           flex-basis:calc((100% - 8px)/2);
           width:calc((100% - 8px)/2);
         }
-        .u99-item-name{font-size:12px}
-        .u99-price-row strong{font-size:15px}
+        .u99-item-name{font-size:14px}
+        .u99-price-row strong{font-size:16px}
       }
     `;
     document.head.appendChild(s);
