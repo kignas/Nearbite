@@ -198,15 +198,29 @@
     if(cartBar) cartBar.style.display='none';
 
     ensureCustomizeSheet();
-    custCurrent={base:window.__ewCust[id],qty:1};
-    if(!custCurrent.base)return false;
+    const base=window.__ewCust[id];
+    if(!base)return false;
 
-    custEls.title.textContent=custCurrent.base.name;
-    custEls.base.textContent='Base price · '+custMoney(custCurrent.base.price);
-    custEls.qty.textContent='1';
+    // If this customizable item is already in the cart, open the most
+    // recently stored variant in EDIT mode. The visible quantity is the
+    // actual quantity already in the cart (e.g. 3), not a fresh quantity of 1.
+    const cart=getCart();
+    const matchingKeys=Object.keys(cart).filter(k=>{
+      const e=cart[k]||{};
+      return String(e.menuItem||'')===String(base.menuItemId||'') && Array.isArray(e.customizations);
+    });
+    const editKey=matchingKeys.length ? matchingKeys[matchingKeys.length-1] : null;
+    const editEntry=editKey ? cart[editKey] : null;
+    const startQty=editEntry ? Math.min(20,Math.max(0,Number(editEntry.quantity)||0)) : 1;
+
+    custCurrent={base,qty:startQty,editKey:editKey||null};
+
+    custEls.title.textContent=base.name;
+    custEls.base.textContent='Base price · '+custMoney(base.price);
+    custEls.qty.textContent=String(startQty);
 
     let html='';
-    (custCurrent.base.groups||[]).forEach((g,gi)=>{
+    (base.groups||[]).forEach((g,gi)=>{
       const max=Math.max(1,Number(g.maxSelect||1)||1);
       const required=Boolean(g.required);
       const multi=max>1;
@@ -223,13 +237,26 @@
             `<span class="u99-cust-diet ${o.isVeg!==false?'veg':'nonveg'}"></span>`+
             `<span class="u99-cust-label">${custEsc(o.label||'Option')}</span>`+
             (priceText?`<span class="u99-cust-extra ${extra?'':'free'}">${priceText}</span>`:'')+
-            `<input type="${multi?'checkbox':'radio'}" name="u99-cust-g${gi}" data-extra="${extra}"${checked}>`+
+            `<input type="${multi?'checkbox':'radio'}" name="u99-cust-g${gi}" data-extra="${extra}">`+
           `</label>`;
       });
       html+='</section>';
     });
 
     custEls.body.innerHTML=html;
+
+    // Restore the saved customization choices when editing an existing cart
+    // entry, so its quantity and options refer to the same variant.
+    if(editEntry && Array.isArray(editEntry.customizations)){
+      const savedLabels=new Set(editEntry.customizations.map(x=>typeof x==='string'?x:String(x?.label||'')));
+      custEls.body.querySelectorAll('.u99-cust-group').forEach(group=>{
+        group.querySelectorAll('input').forEach(input=>{
+          const label=input.closest('.u99-cust-option')?.querySelector('.u99-cust-label')?.textContent?.trim()||'';
+          input.checked=savedLabels.has(label);
+        });
+      });
+    }
+
     refreshCustomize();
     custEls.bd.classList.add('show');
     requestAnimationFrame(()=>custEls.sh.classList.add('show'));
@@ -270,7 +297,7 @@
     }else{
       custEls.add.disabled=!valid;
       custEls.add.textContent=valid
-        ? `Add item · ${custMoney(unit*custCurrent.qty)}`
+        ? `${custCurrent.editKey?'Update item':'Add item'} · ${custMoney(unit*custCurrent.qty)}`
         : 'Select required options';
     }
   }
@@ -278,22 +305,12 @@
   function confirmCustomize(){
     if(!custCurrent||custEls.add.disabled)return;
 
-    // Quantity 0 means remove the customizable item from the cart. If several
-    // variants of the same base item exist, remove the most recently stored
-    // variant rather than touching unrelated menu items.
+    // Quantity 0 means remove the currently edited customizable variant.
     if(custCurrent.qty===0){
       const base=custCurrent.base;
       const cart=getCart();
-      const keys=Object.keys(cart).filter(k=>{
-        const e=cart[k]||{};
-        return String(e.menuItem||'')===String(base.menuItemId||'') ||
-          k===base.name || k.indexOf(base.name+' (')===0;
-      });
-      if(keys.length){
-        const key=keys[keys.length-1];
-        const e=cart[key];
-        const q=Math.max(0,Number(e.quantity||0)-1);
-        if(q<=0)delete cart[key]; else e.quantity=q;
+      if(custCurrent.editKey && cart[custCurrent.editKey]){
+        delete cart[custCurrent.editKey];
         saveCart(cart);
         document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,removed:true,item:base}}));
         if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
@@ -329,7 +346,39 @@
     const cart=getCart();
     const existing=cart[compositeName];
 
-    if(existing){
+    // Existing item opened from the card is edited to the requested quantity,
+    // not added again. This is what makes 3 → 2 → 1 → 0 work predictably.
+    if(custCurrent.editKey && cart[custCurrent.editKey]){
+      const oldKey=custCurrent.editKey;
+      const oldEntry=cart[oldKey];
+      if(oldKey===compositeName){
+        oldEntry.quantity=custCurrent.qty;
+        oldEntry.price=unit;
+        oldEntry.customizations=flat;
+      }else{
+        delete cart[oldKey];
+        if(existing){
+          existing.quantity=Number(existing.quantity||0)+custCurrent.qty;
+          existing.price=unit;
+          existing.customizations=flat;
+        }else{
+          cart[compositeName]={
+            quantity:custCurrent.qty,
+            price:unit,
+            originalPrice:(Number(base.originalPrice)>Number(base.price))
+              ? Number(base.originalPrice)+(unit-Number(base.price))
+              : null,
+            resId:base.resId,
+            menuItem:base.menuItemId,
+            image:base.image||'',
+            name:compositeName,
+            isVeg:Boolean(base.isVeg),
+            restaurantName:base.restaurantName||'',
+            customizations:flat
+          };
+        }
+      }
+    }else if(existing){
       existing.quantity=Number(existing.quantity||0)+custCurrent.qty;
       existing.price=unit;
       existing.customizations=flat;
