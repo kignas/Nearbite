@@ -125,8 +125,8 @@ main{max-width:920px;margin:0 auto;padding:18px 20px 28px}
   .icon-btn svg{width:22px;height:22px}
   .header-title{font-size:20px;letter-spacing:-.65px}
   .header-sub{font-size:11.5px;margin-top:4px}
-  .filter-row{gap:8px;padding:0 16px 11px}
-  .filter-pill{height:44px;font-size:12.5px;padding:0 14px}
+  .filter-row{gap:7px;padding:7px 12px 8px}
+  .filter-pill{height:42px;font-size:12px;padding:0 12px}
   main{padding:16px 16px 26px}
   .restaurant-feed{gap:24px}
 }
@@ -200,10 +200,10 @@ body.filter-open{overflow:hidden}
 .store-header{position:relative;z-index:1000;background:#FBD5E1;border:0}
 .header-top{position:absolute;z-index:20;top:0;left:0;right:0;min-height:66px;padding:9px 16px 6px;display:flex;align-items:center;gap:10px;background:transparent}
 .header-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
-.icon-btn{width:46px;height:46px;flex:0 0 46px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#101828;display:grid;place-items:center;box-shadow:0 2px 8px rgba(89,36,55,.08)}
+.icon-btn{width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(255,255,255,.48);border-radius:50%;background:rgba(255,255,255,.54);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#101828;display:grid;place-items:center;box-shadow:0 2px 8px rgba(89,36,55,.08)}
 .icon-btn:active{transform:scale(.96)}
 .icon-btn svg{width:22px;height:22px}
-.loc-pill{display:flex;align-items:center;gap:8px;min-width:0;flex:1;max-width:214px;min-height:46px;padding:5px 11px;border:1px solid rgba(255,255,255,.55);border-radius:15px;background:rgba(255,255,255,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#101828;text-align:left;box-shadow:0 2px 8px rgba(89,36,55,.06)}
+.loc-pill{display:flex;align-items:center;gap:8px;min-width:0;flex:1;max-width:194px;min-height:44px;padding:5px 11px;border:1px solid rgba(255,255,255,.52);border-radius:999px;background:rgba(255,255,255,.52);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#101828;text-align:left;box-shadow:0 2px 8px rgba(89,36,55,.06)}
 .loc-pin{width:20px;height:20px;flex:0 0 20px;color:var(--pink)}
 .loc-text{min-width:0;display:flex;flex-direction:column;gap:1px}
 .loc-name-row{display:flex;align-items:center;gap:4px;min-width:0}
@@ -211,7 +211,7 @@ body.filter-open{overflow:hidden}
 .loc-caret{width:15px;height:15px;flex:0 0 15px;color:#747B87}
 .loc-sub{font-size:11px;font-weight:600;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .loc-pill.loc-unset .loc-name{color:var(--pink)}
-.filter-row{background:#fff;border-top:1px solid rgba(16,24,40,.04);border-bottom:1px solid #ECEEF1;padding-top:8px}
+.filter-row{background:#fff;border-top:1px solid rgba(16,24,40,.04);border-bottom:1px solid #ECEEF1;padding:7px 12px 8px;gap:7px}
 
 .u99-hero{position:relative;overflow:hidden;min-height:200px;margin:0;padding:0 16px;color:#101828;background:linear-gradient(180deg,#FBD5E1 0%,#FCE0EB 100%);border-radius:0 0 26px 26px;isolation:isolate}
 .u99-hero::before{content:"";position:absolute;width:120px;height:120px;right:-34px;top:-46px;border-radius:50%;background:rgba(245,183,210,.30)}
@@ -227,7 +227,7 @@ body.filter-open{overflow:hidden}
 @media(max-width:430px){
   .header-top{min-height:64px;padding:9px 16px 6px;gap:10px}
   .icon-btn{width:46px;height:46px;flex-basis:46px}
-  .loc-pill{max-width:none;min-height:46px;border-radius:15px}
+  .loc-pill{max-width:194px;min-height:44px;border-radius:999px}
   .u99-hero{min-height:198px;padding:0 16px;border-radius:0 0 26px 26px}
   .u99-hero-inner{min-height:198px}
   .u99-hero-copy{width:54%;padding-top:84px}
@@ -283,7 +283,7 @@ body.filter-open{overflow:hidden}
       40–60% Lower Prices
     </button>
 
-    <button class="filter-pill" id="veg-btn" onclick="toggleVegFilter()">
+    <button class="filter-pill" id="veg-btn" type="button" data-open-filter="veg">
       Veg/Non-Veg
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
     </button>
@@ -372,7 +372,7 @@ body.filter-open{overflow:hidden}
 <div id="toast" class="toast"></div>
 
 <script src="cart-bar.js"></script>
-<script src="bottom-tab-bar.js?v=99store"></script>
+<script src="bottom-tab-bar.js?v=99store-v2"></script>
 <script src="under99card.js"></script>
 <script>
 (() => {
@@ -605,20 +605,141 @@ body.filter-open{overflow:hidden}
   async function load(){
     const skeleton=$('skeleton-feed');
     const list=$('under99-list');
+
+    // The homepage already uses /api/restaurants and receives restaurant.menu[].
+    // Use that same working dataset first. The specialised /under99 endpoint
+    // remains a fallback only.
+    const HOME_API='https://eatswada.onrender.com/api/restaurants';
+    const HOME_CACHE='es_home_restaurants_v2';
+
     try{
-      const response=await fetch(API,{headers:{Accept:'application/json'},cache:'no-store'});
-      if(!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result=await response.json();
-      const raw=Array.isArray(result?.data) ? result.data : (Array.isArray(result) ? result : []);
-      allRestaurants=raw.map(normalizeRestaurant).filter(r=>r.id && r.menu.length);
-      if(!allRestaurants.length) throw new Error('No restaurant menu data returned');
+      let restaurants=null;
+
+      // Reuse the homepage dataset when it is already cached in this origin.
+      try{
+        const cached=sessionStorage.getItem(HOME_CACHE);
+        if(cached){
+          const parsed=JSON.parse(cached);
+          if(Array.isArray(parsed)&&parsed.length) restaurants=parsed;
+        }
+      }catch(_){}
+
+      if(!restaurants){
+        const response=await fetch(HOME_API,{
+          headers:{Accept:'application/json'},
+          cache:'no-store'
+        });
+        if(!response.ok) throw new Error(`Restaurant API HTTP ${response.status}`);
+
+        const result=await response.json();
+        if(result?.success&&Array.isArray(result.data)){
+          restaurants=result.data;
+        }else if(Array.isArray(result)){
+          restaurants=result;
+        }else{
+          throw new Error('Restaurant API returned no usable data');
+        }
+
+        try{sessionStorage.setItem(HOME_CACHE,JSON.stringify(restaurants));}catch(_){}
+      }
+
+      // Convert the same restaurant.menu[] objects used by the homepage
+      // into the restaurant-card component's expected shape.
+      const normalized=restaurants
+        .map(raw=>normalizeRestaurant({
+          ...raw,
+          menu:Array.isArray(raw?.menu)?raw.menu:[],
+          restaurant:raw
+        }))
+        .filter(r=>r.id&&r.menu.length);
+
+      if(normalized.length){
+        allRestaurants=normalized;
+        render();
+        return;
+      }
+
+      // Final fallback: keep compatibility with the dedicated endpoint.
+      const fallback=await fetch(
+        'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
+        {headers:{Accept:'application/json'},cache:'no-store'}
+      );
+      if(!fallback.ok) throw new Error(`99 Store API HTTP ${fallback.status}`);
+
+      const result=await fallback.json();
+      const raw=Array.isArray(result?.data)
+        ? result.data
+        : (Array.isArray(result)?result:[]);
+
+      const fallbackRestaurants=[];
+      const grouped=new Map();
+
+      raw.forEach(item=>{
+        const restaurant=item?.restaurant&&typeof item.restaurant==='object'
+          ? item.restaurant : null;
+        const restaurantId=String(
+          restaurant?._id||restaurant?.id||item.restaurant||''
+        );
+        if(!restaurantId) return;
+
+        if(!grouped.has(restaurantId)){
+          grouped.set(restaurantId,{
+            id:restaurantId,
+            name:restaurant?.name||item.restaurantName||'Restaurant',
+            image:restaurant?.image||'',
+            images:Array.isArray(restaurant?.images)?restaurant.images:[],
+            rating:num(restaurant?.rating,0),
+            ratingCount:restaurant?.ratingCount??'',
+            deliveryTime:String(restaurant?.deliveryTime||'30–40 mins'),
+            cuisine:Array.isArray(restaurant?.cuisine)
+              ? restaurant.cuisine.join(', ')
+              : String(restaurant?.cuisine||''),
+            offer:String(restaurant?.offer||''),
+            freeDeliveryAbove:restaurant?.freeDeliveryAbove==null
+              ? null : num(restaurant.freeDeliveryAbove),
+            deliveryFee:restaurant?.deliveryFee,
+            menu:[]
+          });
+        }
+
+        const price=num(item.price,0);
+        if(price<=0) return;
+
+        grouped.get(restaurantId).menu.push({
+          id:item._id||item.id||'',
+          name:item.name||'Item',
+          description:item.description||'',
+          price,
+          originalPrice:item.originalPrice==null?null:num(item.originalPrice),
+          discountPercent:item.discountPercent==null
+            ? null : num(item.discountPercent),
+          image:item.image||item.img||'',
+          isVeg:Boolean(item.isVeg),
+          category:item.category||'Recommended',
+          isUnder99:Boolean(item.isUnder99??price<=99),
+          isBestseller:Boolean(item.isBestseller),
+          isRecommended:Boolean(item.isRecommended),
+          inStock:item.inStock!==false,
+          customizations:Array.isArray(item.customizations)?item.customizations:[]
+        });
+      });
+
+      grouped.forEach(r=>{
+        r.menu=r.menu.filter(item=>item.price>0);
+        if(r.menu.length) fallbackRestaurants.push(normalizeRestaurant(r));
+      });
+
+      if(!fallbackRestaurants.length) throw new Error('No restaurant menu data returned');
+
+      allRestaurants=fallbackRestaurants;
       render();
+
     }catch(error){
       console.error('[99 Store] load failed:',error);
       if(skeleton)skeleton.style.display='none';
       if(list){
         list.style.display='flex';
-        list.innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>We could not load the restaurant menu data right now.</p><button id="u99-retry" style="margin-top:14px;border:0;border-radius:10px;padding:10px 16px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
+        list.innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>We could not load the restaurant menu data right now.</p><button id="u99-retry" style="margin-top:14px;border:0;border-radius:999px;padding:11px 20px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
         $('u99-retry')?.addEventListener('click',load);
       }
     }
@@ -635,7 +756,7 @@ body.filter-open{overflow:hidden}
 /* ===== 99 STORE — SHARED EATSWADA LOCATION ===== */
 (() => {
   const LOCATION_KEYS=[
-    'nearbite_address','nearbite_onboarding_geocode','nearbite_onboarding_location',
+    'nearbite_address','nearbite_selected_address','nearbite_onboarding_geocode','nearbite_onboarding_location',
     'eatswada_location','userLocation','deliveryLocation',
     'selectedLocation','location'
   ];
@@ -654,7 +775,8 @@ body.filter-open{overflow:hidden}
     if(typeof value==='object'){
       const preferred=[
         value.area,value.locality,value.neighborhood,value.suburb,
-        value.formattedAddress,value.formatted_address,value.addressLine,
+        value.formattedAddress,value.formatted_address,value.addressLine,value.addressLine1,
+        value.localityName,value.areaName,value.neighborhoodName,value.street,
         value.address,value.label,value.name,value.city,value.town
       ];
       for(const item of preferred)if(typeof item==='string'&&item.trim())return item.trim();
