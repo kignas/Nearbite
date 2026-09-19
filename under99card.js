@@ -142,7 +142,7 @@
       '</div>'+
       '<div class="u99-cust-body" id="u99-cust-body"></div>'+
       '<div class="u99-cust-foot">'+
-        '<div class="u99-cust-qty"><button type="button" id="u99-cust-minus" aria-label="Decrease">−</button><span id="u99-cust-qty">1</span><button type="button" id="u99-cust-plus" aria-label="Increase">+</button></div>'+
+        '<div class="u99-sheet-qty"><button type="button" id="u99-cust-minus" aria-label="Decrease">−</button><span id="u99-cust-qty">1</span><button type="button" id="u99-cust-plus" aria-label="Increase">+</button></div>'+
         '<button type="button" class="u99-cust-add" id="u99-cust-add">Add item</button>'+
       '</div>';
 
@@ -163,7 +163,7 @@
     document.getElementById('u99-cust-close').addEventListener('click',closeCustomize);
     document.getElementById('u99-cust-minus').addEventListener('click',()=>{
       if(!custCurrent)return;
-      custCurrent.qty=Math.max(1,custCurrent.qty-1);
+      custCurrent.qty=Math.max(0,custCurrent.qty-1);
       custEls.qty.textContent=custCurrent.qty;
       refreshCustomize();
     });
@@ -261,14 +261,46 @@
 
     const unit=Number(custCurrent.base.price)+extra;
     custCurrent.unit=unit;
-    custEls.add.disabled=!valid;
-    custEls.add.textContent=valid
-      ? `Add item · ${custMoney(unit*custCurrent.qty)}`
-      : 'Select required options';
+    // At quantity 0 the footer action becomes a real remove action. This
+    // lets the user decrement an already-added customizable item instead of
+    // being trapped at quantity 1.
+    if(custCurrent.qty===0){
+      custEls.add.disabled=false;
+      custEls.add.textContent='Remove item';
+    }else{
+      custEls.add.disabled=!valid;
+      custEls.add.textContent=valid
+        ? `Add item · ${custMoney(unit*custCurrent.qty)}`
+        : 'Select required options';
+    }
   }
 
   function confirmCustomize(){
     if(!custCurrent||custEls.add.disabled)return;
+
+    // Quantity 0 means remove the customizable item from the cart. If several
+    // variants of the same base item exist, remove the most recently stored
+    // variant rather than touching unrelated menu items.
+    if(custCurrent.qty===0){
+      const base=custCurrent.base;
+      const cart=getCart();
+      const keys=Object.keys(cart).filter(k=>{
+        const e=cart[k]||{};
+        return String(e.menuItem||'')===String(base.menuItemId||'') ||
+          k===base.name || k.indexOf(base.name+' (')===0;
+      });
+      if(keys.length){
+        const key=keys[keys.length-1];
+        const e=cart[key];
+        const q=Math.max(0,Number(e.quantity||0)-1);
+        if(q<=0)delete cart[key]; else e.quantity=q;
+        saveCart(cart);
+        document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,removed:true,item:base}}));
+        if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
+      }
+      closeCustomize();
+      return;
+    }
 
     const flat=[];
     const labels=[];
@@ -645,15 +677,15 @@
         display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
         border-top:1px solid #EAECF0;background:#fff;
       }
-      .u99-cust-qty{
+      .u99-sheet-qty{
         display:flex;align-items:center;gap:2px;border:1.5px solid #159A62;
         border-radius:12px;height:48px;flex:none;
       }
-      .u99-cust-qty button{
+      .u99-sheet-qty button{
         width:40px;height:100%;border:0;background:transparent;color:#159A62;
         font-size:20px;font-weight:800;cursor:pointer;
       }
-      .u99-cust-qty span{min-width:22px;text-align:center;font-size:14px;font-weight:800;color:#101828}
+      .u99-sheet-qty span{min-width:22px;text-align:center;font-size:14px;font-weight:800;color:#101828}
       .u99-cust-add{
         flex:1;height:48px;border:0;border-radius:12px;background:#159A62;color:#fff;
         font-size:15px;font-weight:800;cursor:pointer;
