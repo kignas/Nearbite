@@ -192,6 +192,11 @@
       return true;
     }
 
+    // The customization sheet owns the bottom action area.
+    // Hide the floating cart bar while it is open so the two never overlap.
+    const cartBar=document.getElementById('white-cart-root');
+    if(cartBar) cartBar.style.display='none';
+
     ensureCustomizeSheet();
     custCurrent={base:window.__ewCust[id],qty:1};
     if(!custCurrent.base)return false;
@@ -330,6 +335,11 @@
     custEls.sh.classList.remove('show');
     custEls.bd.classList.remove('show');
     custCurrent=null;
+
+    // Restore the floating cart bar after the customization sheet closes.
+    if(typeof window.updateGlobalCart==='function'){
+      window.updateGlobalCart();
+    }
   }
 
   function formatCount(value){
