@@ -88,7 +88,7 @@ main{max-width:920px;margin:0 auto;padding:10px 16px 28px}
 @media(max-width:430px){
   .header-left{gap:10px}
   .icon-btn{width:42px;height:42px;flex-basis:42px}
-  .icon-btn svg{width:22px;height:22px}
+  .icon-btn svg{width:29px;height:29px}
   .header-title{font-size:20px;letter-spacing:-.65px}
   .header-sub{font-size:11.5px;margin-top:4px}
   .filter-row{gap:7px;padding:7px 12px 8px}
@@ -166,128 +166,84 @@ body.filter-open{overflow:hidden}
 }
 
 
-/* ===== 99 STORE — BENCHMARK HERO ===== */
-.store-header{position:relative;z-index:1000;background:#FBD5E1;border:0}
-.header-top{position:absolute;z-index:20;top:0;left:0;right:0;min-height:66px;padding:calc(9px + env(safe-area-inset-top, 0px)) 16px 6px;display:flex;align-items:center;gap:10px;background:transparent}
-.header-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
-.icon-btn{width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(255,255,255,.48);border-radius:50%;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#101828;display:grid;place-items:center;box-shadow:0 2px 8px rgba(89,36,55,.08)}
-.icon-btn:active{transform:scale(.96)}
-.icon-btn svg{width:22px;height:22px}
-.loc-pill{display:flex;align-items:center;gap:9px;min-width:0;flex:0 1 auto;width:auto;max-width:210px;min-height:54px;padding:7px 15px;border:1px solid rgba(255,255,255,.52);border-radius:999px;background:rgba(255,255,255,.52);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#101828;text-align:left;box-shadow:0 2px 8px rgba(89,36,55,.06)}
-.loc-pin{width:19px;height:19px;flex:0 0 19px;color:var(--pink)}
-.loc-text{min-width:0;display:flex;flex-direction:column;gap:1px}
+/* ===== 99 STORE — BENCHMARK HERO / BENCHMARK-MATCHED HEADER ===== */
+.store-header{position:relative;z-index:1000;height:256px;background:#FBD5E1;border:0;overflow:hidden;isolation:isolate}
+.header-top{position:absolute;z-index:20;top:0;left:0;right:0;height:76px;padding:12px 28px 7px;display:flex;align-items:flex-start;gap:0;background:transparent}
+.header-left{display:flex;align-items:center;gap:20px;min-width:0;flex:1}
+.icon-btn{width:58px;height:58px;flex:0 0 58px;border:1px solid rgba(16,24,40,.08);border-radius:50%;background:rgba(255,255,255,.90);color:#101828;display:grid;place-items:center;box-shadow:0 2px 7px rgba(16,24,40,.035);-webkit-tap-highlight-color:transparent}
+.icon-btn:active{transform:scale(.97)}
+.icon-btn svg{width:29px;height:29px}
+.loc-pill{display:flex;align-items:center;gap:12px;min-width:0;flex:0 1 auto;width:177px;max-width:177px;height:58px;padding:6px 14px 6px 12px;border:1px solid rgba(16,24,40,.08);border-radius:999px;background:rgba(255,255,255,.58);color:#101828;text-align:left;box-shadow:0 2px 7px rgba(16,24,40,.025);-webkit-tap-highlight-color:transparent}
+.loc-pin{width:25px;height:25px;flex:0 0 25px;color:#D9096E}
+.loc-text{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px}
 .loc-name-row{display:flex;align-items:center;gap:4px;min-width:0}
-.loc-name{font-size:16px;font-weight:800;letter-spacing:-.25px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.loc-caret{width:15px;height:15px;flex:0 0 15px;color:#747B87}
-.loc-sub{font-size:12px;font-weight:600;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.loc-pill.loc-unset .loc-name{color:var(--pink)}
-.filter-row{background:#fff;border-top:1px solid rgba(16,24,40,.04);border-bottom:1px solid #ECEEF1;padding:7px 12px 8px;gap:7px}
+.loc-name{font-size:17px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loc-caret{width:15px;height:15px;flex:0 0 13px;color:#101828}
+.loc-sub{font-size:12px;font-weight:600;color:#505867;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loc-pill.loc-unset .loc-name{color:#D9096E}
+.header-search-btn{margin-left:auto;width:58px;height:58px;flex:0 0 58px;border:1px solid rgba(16,24,40,.08);border-radius:50%;background:rgba(255,255,255,.90);color:#101828;display:grid;place-items:center;box-shadow:0 2px 7px rgba(16,24,40,.035);-webkit-tap-highlight-color:transparent}
+.header-search-btn:active{transform:scale(.97)}
+.header-search-btn svg{width:29px;height:29px}
 
-.u99-hero{position:relative;overflow:hidden;min-height:184px;margin:0;padding:0 16px;color:#101828;background:linear-gradient(180deg,#FBD5E1 0%,#FCE0EB 100%);border-radius:0 0 26px 26px;isolation:isolate}
-.u99-hero::before{content:"";position:absolute;width:120px;height:120px;right:-34px;top:-46px;border-radius:50%;background:rgba(245,183,210,.30)}
-.u99-hero::after{content:"";position:absolute;width:170px;height:170px;left:-84px;top:120px;border-radius:50%;background:rgba(255,255,255,.14)}
-.u99-hero-inner{position:relative;min-height:184px;display:block}
-.u99-hero-copy{position:relative;z-index:4;width:58%;padding-top:96px;padding-left:16px}
-.u99-hero-kicker{display:flex;align-items:center;gap:5px;padding:0;background:none;border:0;font-size:20px;line-height:1.02;font-weight:800;letter-spacing:-.7px;color:#071532}
-.sparkle-icon{width:18px;height:18px;flex-shrink:0}
+.u99-hero{position:absolute;inset:0;overflow:hidden;margin:0;padding:0;color:#101828;background:linear-gradient(180deg,#FBD5E1 0%,#FCE0EB 100%);border-radius:0;isolation:isolate}
+.u99-hero::before{content:"";position:absolute;width:120px;height:120px;right:-34px;top:78px;border-radius:50%;background:rgba(245,183,210,.24)}
+.u99-hero::after{content:"";position:absolute;width:170px;height:150px;left:-84px;bottom:-65px;border-radius:50%;background:rgba(255,255,255,.12)}
+.u99-hero-inner{position:relative;width:100%;height:100%;min-height:0;display:block}
+.u99-hero-copy{position:absolute;z-index:4;left:51px;top:95px;width:47%;padding:0}
+.u99-hero-kicker{display:flex;align-items:center;gap:5px;padding:0;background:none;border:0;font-size:30px;line-height:1.02;font-weight:800;letter-spacing:-1.15px;color:#071532}
+.sparkle-icon{width:18px;height:18px;flex-shrink:0;stroke-width:2.8}
 .u99-hero-title{display:none}
-.u99-hero-price{margin:2px 0 0;color:#D9096E;line-height:1;white-space:nowrap}
-.currency-symbol{display:inline-block;font-size:42px;font-weight:800;vertical-align:top;line-height:1;margin-top:9px;margin-right:-2px}
-.price-number{display:inline-block;font-size:84px;line-height:.88;font-weight:800;letter-spacing:-4.1px}
-.u99-hero-sub{margin:9px 0 0;max-width:285px;font-size:13px;line-height:1.3;font-weight:650;color:#574F63;white-space:nowrap}
+.u99-hero-price{margin:1px 0 0;color:#D9096E;line-height:.9;white-space:nowrap}
+.currency-symbol{display:inline-block;font-size:48px;font-weight:800;vertical-align:top;line-height:1;margin-top:9px;margin-right:-2px}
+.price-number{display:inline-block;font-size:84px;line-height:.88;font-weight:800;letter-spacing:-4.2px}
+.u99-hero-sub{margin:9px 0 0;max-width:285px;font-size:13px;line-height:1.25;font-weight:600;color:#574F63;white-space:nowrap;letter-spacing:-.15px}
 .u99-hero-cta{display:none}
-.u99-hero-art{position:absolute;z-index:3;right:-10px;bottom:-10px;width:68%;max-width:none;max-height:184px;height:auto;object-fit:contain;object-position:right bottom;filter:drop-shadow(0 10px 13px rgba(89,36,55,.12));pointer-events:none}
+.u99-hero-art{position:absolute;z-index:3;right:-7px;bottom:-5px;width:63%;max-width:none;height:108%;max-height:none;object-fit:contain;object-position:right bottom;filter:drop-shadow(0 10px 13px rgba(89,36,55,.10));pointer-events:none}
 @media(max-width:430px){
-  .header-top{min-height:60px;padding:calc(7px + env(safe-area-inset-top, 0px)) 14px 4px;gap:8px}
-  .icon-btn{width:44px;height:44px;flex-basis:44px}
-  .loc-pill{flex:0 1 auto;width:210px;max-width:210px;min-height:54px;border-radius:999px}
-  .u99-hero{min-height:184px;padding:0 14px;border-radius:0 0 22px 22px}
-  .u99-hero-inner{min-height:184px}
-  .u99-hero-copy{width:58%;padding-top:96px;padding-left:16px}
-  .u99-hero-kicker{font-size:20px;letter-spacing:-.55px}
+  .store-header{height:256px}
+  .header-top{height:76px;padding:12px 28px 7px;gap:0}
+  .header-left{gap:20px}
+  .icon-btn{width:58px;height:58px;flex-basis:58px}
+  .icon-btn svg{width:29px;height:29px}
+  .loc-pill{width:177px;max-width:177px;height:58px;flex-basis:177px;border-radius:999px;padding-left:12px}
+  .loc-pin{width:25px;height:25px;flex-basis:25px}
+  .loc-name{font-size:17px}
+  .loc-sub{font-size:12px}
+  .header-search-btn{width:58px;height:58px;flex-basis:58px}
+  .header-search-btn svg{width:29px;height:29px}
+  .u99-hero{min-height:0;padding:0}
+  .u99-hero-inner{min-height:0;height:100%}
+  .u99-hero-copy{left:51px;top:95px;width:47%}
+  .u99-hero-kicker{font-size:30px;letter-spacing:-1.15px;gap:7px}
+  .sparkle-icon{width:18px;height:18px}
+  .currency-symbol{font-size:48px;margin-top:11px}
   .price-number{font-size:84px;letter-spacing:-4.2px}
   .u99-hero-sub{font-size:13px;max-width:285px;margin-top:9px}
-  .u99-hero-art{right:-10px;bottom:-10px;width:70%;max-width:none;max-height:182px}
-}
-
-/* ===== 99 STORE — PRODUCTION HEADER PASS ===== */
-.store-header{
-  position:relative;z-index:1000;background:linear-gradient(180deg,#FBD5E1 0%,#F9D9E4 100%);
-  border:0;padding:10px 16px 0;overflow:hidden;
-}
-.u99-header-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;}
-.u99-location{appearance:none;-webkit-appearance:none;border:0;background:transparent;padding:0;display:flex;align-items:center;gap:9px;min-width:0;flex:1;text-align:left;color:#101828;}
-.u99-location-pin{width:40px;height:40px;flex:0 0 40px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.78);color:#D20A61;box-shadow:0 3px 10px rgba(89,36,55,.07);}
-.u99-location-pin svg{width:19px;height:19px;}
-.u99-location-copy{min-width:0;display:flex;flex-direction:column;justify-content:center;line-height:1.08;}
-.u99-location-name-row{display:flex;align-items:center;gap:5px;min-width:0;}
-.u99-location-name{font-size:17px;font-weight:800;letter-spacing:-.45px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.u99-location-chevron{width:13px;height:13px;flex:0 0 13px;color:#687180;}
-.u99-location-sub{margin-top:4px;font-size:10px;font-weight:650;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
-.u99-location.loc-unset .u99-location-name{color:#D20A61;}
-.u99-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
-.u99-store-mark{width:72px;height:40px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.64);border:1px solid rgba(210,10,97,.10);box-shadow:0 3px 10px rgba(89,36,55,.05);line-height:1;}
-.u99-store-mark span{font-size:7px;font-weight:800;letter-spacing:.75px;color:#6B7280;}
-.u99-store-mark strong{margin-top:2px;font-size:16px;font-weight:800;color:#C50057;}
-.u99-profile{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;text-decoration:none;background:rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(89,36,55,.06);}
-.u99-profile span{font-size:14px;font-weight:800;color:#B80057;}
-.u99-search-row{margin-top:9px;position:relative;z-index:2;}
-.u99-search{height:48px;width:100%;display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:15px;background:#fff;border:1px solid rgba(15,23,42,.035);box-shadow:0 7px 18px rgba(89,36,55,.09);text-decoration:none;color:#687386;}
-.u99-search svg{width:18px;height:18px;flex:0 0 18px;color:#263342;}
-.u99-search span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;}
-.u99-hero{margin-top:12px;border-radius:24px 24px 0 0;}
-.u99-hero-copy{padding-top:31px;padding-left:16px;}
-.u99-hero-inner{min-height:184px;}
-.filter-row{margin:0 -16px;}
-@media(max-width:430px){
-  .store-header{padding:9px 14px 0;}
-  .u99-location-pin{width:40px;height:40px;flex-basis:40px;}
-  .u99-location-name{font-size:17px;}
-  .u99-location-sub{font-size:9.5px;max-width:165px;}
-  .u99-store-mark{width:68px;height:40px;}
-  .u99-profile{width:40px;height:40px;flex-basis:40px;}
-  .u99-search{height:50px;border-radius:16px;}
-  .u99-search span{font-size:13px;}
-  .u99-hero{margin-top:11px;border-radius:23px 23px 0 0;}
-  .u99-hero-copy{padding-top:30px;padding-left:16px;}
-}
-@media(max-width:370px){
-  .u99-store-mark{width:62px;}
-  .u99-store-mark strong{font-size:15px;}
-  .u99-location-sub{max-width:140px;}
+  .u99-hero-art{right:-10px;bottom:-10px;width:68%;height:108%;max-height:none}
 }
 </style>
 
 <body>
 <header class="store-header">
-  <div class="u99-header-row">
-    <button type="button" class="u99-location" id="loc-pill" aria-label="Change delivery location">
-      <span class="u99-location-pin" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s7-6.1 7-12A7 7 0 1 0 5 10c0 5.9 7 12 7 12Zm0-9.1A2.9 2.9 0 1 1 12 7a2.9 2.9 0 0 1 0 5.9Z"/></svg>
-      </span>
-      <span class="u99-location-copy">
-        <span class="u99-location-name-row">
-          <span id="loc-name" class="u99-location-name">Set location</span>
-          <svg class="u99-location-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
-        </span>
-        <span id="loc-sub" class="u99-location-sub">Tap to choose your area</span>
-      </span>
-    </button>
-    <div class="u99-header-actions">
-      <span class="u99-store-mark" aria-label="99 Store">
-        <span>UNDER</span><strong>₹99</strong>
-      </span>
-      <a class="u99-profile" href="profile.html" aria-label="Profile">
-        <span>S</span>
+  <div class="header-top">
+    <div class="header-left">
+      <a href="index.html" class="icon-btn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
       </a>
+      <button type="button" class="loc-pill loc-unset" id="loc-pill" aria-label="Change delivery location">
+        <svg class="loc-pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7A7.35 7.35 0 0 0 4.65 10c0 5.35 7.35 11.3 7.35 11.3S19.35 15.35 19.35 10A7.35 7.35 0 0 0 12 2.7Zm0 10.05A2.75 2.75 0 1 1 12 7.25a2.75 2.75 0 0 1 0 5.5Z"/></svg>
+        <span class="loc-text">
+          <span class="loc-name-row">
+            <span id="loc-name" class="loc-name">Set location</span>
+            <svg class="loc-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
+          </span>
+          <span id="loc-sub" class="loc-sub">Tap to choose your area</span>
+        </span>
+      </button>
     </div>
-  </div>
-
-  <div class="u99-search-row">
-    <a class="u99-search" href="search.html" aria-label="Search dishes, restaurants and cuisines">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7.2"/><path d="m16.4 16.4 4.1 4.1"/></svg>
-      <span>Search dishes, restaurants &amp; cuisines</span>
-    </a>
+    <button class="header-search-btn" type="button" onclick="window.location.href='search.html'" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.1 16.1 4.1 4.1"/></svg>
+    </button>
   </div>
 
   <section id="u99-hero" class="u99-hero" aria-label="Meals under 99">
@@ -843,6 +799,138 @@ body.filter-open{overflow:hidden}
             .filter(r=>r.id && r.menu.length);
 
           if(normalized.length){
+            allRestaurants=normalized;
+            updateFilterButtons();
+            render();
+            return;
+          }
+
+          throw new Error('99 Store returned rows, but no usable restaurant/menu data was found');
+        }
+
+        /*
+         * If the dedicated endpoint is empty, use the normal restaurant
+         * + menu endpoints as a fallback. This also helps while older
+         * restaurant documents are being migrated.
+         */
+        console.warn('[99 Store] Dedicated endpoint returned no rows; trying restaurant/menu fallback.');
+        const fallback=await loadRestaurantsWithMenus();
+
+        const normalizedFallback=fallback
+          .map(rawItem=>normalizeRestaurant(rawItem))
+          .filter(r=>r.id && r.menu.length);
+
+        if(normalizedFallback.length){
+          allRestaurants=normalizedFallback;
+          updateFilterButtons();
+          render();
+          return;
+        }
+
+        // This is a valid empty state, not a network/server error.
+        allRestaurants=[];
+        if(skeleton)skeleton.style.display='none';
+        if(list){
+          list.style.display='flex';
+          list.innerHTML='<div class="empty"><div style="font-size:35px">₹</div><h3>No ₹99 deals available</h3><p>There are no qualifying restaurant deals available right now.</p></div>';
+        }
+        return;
+
+      }catch(error){
+        lastError=error;
+        console.error(`[99 Store] load attempt ${attempt} failed:`,error);
+
+        if(attempt<MAX_ATTEMPTS){
+          await new Promise(res=>setTimeout(res, attempt*2000));
+        }
+      }
+    }
+
+    showLoadError(
+      lastError?.message
+        ? `We could not load the restaurant data. (${lastError.message})`
+        : 'We could not load the restaurant menu data right now.'
+    );
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{ loadUnder99Hero(); load(); });
+})();
+</script>
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+
+<script>
+/* ===== 99 STORE — SHARED EATSWADA LOCATION ===== */
+(() => {
+  const LOCATION_KEYS=[
+    'nearbite_address','nearbite_selected_address','nearbite_onboarding_geocode','nearbite_onboarding_location',
+    'eatswada_location','userLocation','deliveryLocation',
+    'selectedLocation','location'
+  ];
+  const CHANGE_LOCATION_URL='location-onboarding.html';
+
+  function parseValue(value){
+    if(value==null)return null;
+    if(typeof value==='string'){
+      const t=value.trim(); if(!t)return null;
+      try{return parseValue(JSON.parse(t));}catch{return t;}
+    }
+    if(Array.isArray(value)){
+      for(const item of value){const found=parseValue(item);if(found)return found;}
+      return null;
+    }
+    if(typeof value==='object'){
+      const preferred=[
+        value.area,value.locality,value.neighborhood,value.suburb,
+        value.formattedAddress,value.formatted_address,value.addressLine,value.addressLine1,
+        value.localityName,value.areaName,value.neighborhoodName,value.street,
+        value.address,value.label,value.name,value.city,value.town
+      ];
+      for(const item of preferred)if(typeof item==='string'&&item.trim())return item.trim();
+      for(const key of ['addressData','address','location','geocode','data']){
+        if(value[key]&&typeof value[key]==='object'){
+          const found=parseValue(value[key]);if(found)return found;
+        }
+      }
+    }
+    return null;
+  }
+
+  function readSavedLocation(){
+    for(const key of LOCATION_KEYS){
+      try{const found=parseValue(localStorage.getItem(key));if(found)return found;}catch{}
+    }
+    return null;
+  }
+
+  function updateLocationUI(){
+    const pill=document.getElementById('loc-pill');
+    const nameEl=document.getElementById('loc-name');
+    const subEl=document.getElementById('loc-sub');
+    if(!pill||!nameEl)return;
+    const saved=readSavedLocation();
+    if(saved){
+      nameEl.textContent=saved;
+      if(subEl)subEl.textContent='Within 10 km';
+      pill.classList.remove('loc-unset');
+    }else{
+      nameEl.textContent='Set location';
+      if(subEl)subEl.textContent='Tap to choose your area';
+      pill.classList.add('loc-unset');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    updateLocationUI();
+    const pill=document.getElementById('loc-pill');
+    if(pill)pill.addEventListener('click',()=>{window.location.href=CHANGE_LOCATION_URL;});
+    window.addEventListener('storage',updateLocationUI);
+  });
+})();
+</script>
+</body>
+</html>
             allRestaurants=normalized;
             updateFilterButtons();
             render();
