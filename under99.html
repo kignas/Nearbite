@@ -209,86 +209,31 @@ body.filter-open{overflow:hidden}
   .u99-hero-sub{font-size:13px;max-width:285px;margin-top:9px}
   .u99-hero-art{right:-10px;bottom:-10px;width:70%;max-width:none;max-height:182px}
 }
-
-/* ===== 99 STORE — PRODUCTION HEADER PASS ===== */
-.store-header{
-  position:relative;z-index:1000;background:linear-gradient(180deg,#FBD5E1 0%,#F9D9E4 100%);
-  border:0;padding:10px 16px 0;overflow:hidden;
-}
-.u99-header-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;}
-.u99-location{appearance:none;-webkit-appearance:none;border:0;background:transparent;padding:0;display:flex;align-items:center;gap:9px;min-width:0;flex:1;text-align:left;color:#101828;}
-.u99-location-pin{width:40px;height:40px;flex:0 0 40px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.78);color:#D20A61;box-shadow:0 3px 10px rgba(89,36,55,.07);}
-.u99-location-pin svg{width:19px;height:19px;}
-.u99-location-copy{min-width:0;display:flex;flex-direction:column;justify-content:center;line-height:1.08;}
-.u99-location-name-row{display:flex;align-items:center;gap:5px;min-width:0;}
-.u99-location-name{font-size:17px;font-weight:800;letter-spacing:-.45px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.u99-location-chevron{width:13px;height:13px;flex:0 0 13px;color:#687180;}
-.u99-location-sub{margin-top:4px;font-size:10px;font-weight:650;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
-.u99-location.loc-unset .u99-location-name{color:#D20A61;}
-.u99-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
-.u99-store-mark{width:72px;height:40px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.64);border:1px solid rgba(210,10,97,.10);box-shadow:0 3px 10px rgba(89,36,55,.05);line-height:1;}
-.u99-store-mark span{font-size:7px;font-weight:800;letter-spacing:.75px;color:#6B7280;}
-.u99-store-mark strong{margin-top:2px;font-size:16px;font-weight:800;color:#C50057;}
-.u99-profile{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;text-decoration:none;background:rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(89,36,55,.06);}
-.u99-profile span{font-size:14px;font-weight:800;color:#B80057;}
-.u99-search-row{margin-top:9px;position:relative;z-index:2;}
-.u99-search{height:48px;width:100%;display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:15px;background:#fff;border:1px solid rgba(15,23,42,.035);box-shadow:0 7px 18px rgba(89,36,55,.09);text-decoration:none;color:#687386;}
-.u99-search svg{width:18px;height:18px;flex:0 0 18px;color:#263342;}
-.u99-search span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;}
-.u99-hero{margin-top:12px;border-radius:24px 24px 0 0;}
-.u99-hero-copy{padding-top:31px;padding-left:16px;}
-.u99-hero-inner{min-height:184px;}
-.filter-row{margin:0 -16px;}
-@media(max-width:430px){
-  .store-header{padding:9px 14px 0;}
-  .u99-location-pin{width:40px;height:40px;flex-basis:40px;}
-  .u99-location-name{font-size:17px;}
-  .u99-location-sub{font-size:9.5px;max-width:165px;}
-  .u99-store-mark{width:68px;height:40px;}
-  .u99-profile{width:40px;height:40px;flex-basis:40px;}
-  .u99-search{height:50px;border-radius:16px;}
-  .u99-search span{font-size:13px;}
-  .u99-hero{margin-top:11px;border-radius:23px 23px 0 0;}
-  .u99-hero-copy{padding-top:30px;padding-left:16px;}
-}
-@media(max-width:370px){
-  .u99-store-mark{width:62px;}
-  .u99-store-mark strong{font-size:15px;}
-  .u99-location-sub{max-width:140px;}
-}
 </style>
 
 <body>
 <header class="store-header">
-  <div class="u99-header-row">
-    <button type="button" class="u99-location" id="loc-pill" aria-label="Change delivery location">
-      <span class="u99-location-pin" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s7-6.1 7-12A7 7 0 1 0 5 10c0 5.9 7 12 7 12Zm0-9.1A2.9 2.9 0 1 1 12 7a2.9 2.9 0 0 1 0 5.9Z"/></svg>
-      </span>
-      <span class="u99-location-copy">
-        <span class="u99-location-name-row">
-          <span id="loc-name" class="u99-location-name">Set location</span>
-          <svg class="u99-location-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
-        </span>
-        <span id="loc-sub" class="u99-location-sub">Tap to choose your area</span>
-      </span>
-    </button>
-    <div class="u99-header-actions">
-      <span class="u99-store-mark" aria-label="99 Store">
-        <span>UNDER</span><strong>₹99</strong>
-      </span>
-      <a class="u99-profile" href="profile.html" aria-label="Profile">
-        <span>S</span>
+  <div class="header-top">
+    <div class="header-left">
+      <a href="index.html" class="icon-btn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
       </a>
+      <button type="button" class="loc-pill loc-unset" id="loc-pill" aria-label="Change delivery location">
+        <svg class="loc-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.686 7-11a7 7 0 1 0-14 0c0 5.314 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        <span class="loc-text">
+          <span class="loc-name-row">
+            <span id="loc-name" class="loc-name">Set location</span>
+            <svg class="loc-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
+          </span>
+          <span id="loc-sub" class="loc-sub">Tap to choose your area</span>
+        </span>
+      </button>
     </div>
+    <button class="icon-btn" onclick="window.location.href='search.html'" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><path d="m17 17 4 4"/></svg>
+    </button>
   </div>
 
-  <div class="u99-search-row">
-    <a class="u99-search" href="search.html" aria-label="Search dishes, restaurants and cuisines">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7.2"/><path d="m16.4 16.4 4.1 4.1"/></svg>
-      <span>Search dishes, restaurants &amp; cuisines</span>
-    </a>
-  </div>
 
   <section id="u99-hero" class="u99-hero" aria-label="Meals under 99">
     <div class="u99-hero-inner">
@@ -494,7 +439,14 @@ body.filter-open{overflow:hidden}
       ratingCount:r?.ratingCount ?? '',
       deliveryTime:String(r?.deliveryTime || ''),
       cuisine:Array.isArray(r?.cuisine) ? r.cuisine.join(', ') : String(r?.cuisine || ''),
-      offer:String(r?.offer || ''),
+      offer:String(
+        r?.offer ??
+        r?.discountLabel ??
+        r?.discountText ??
+        (r?.discountPercent != null ? `${num(r.discountPercent)}%` : '') ??
+        ''
+      ),
+      discountPercent: r?.discountPercent == null ? null : num(r.discountPercent),
       freeDeliveryAbove:r?.freeDeliveryAbove == null ? null : num(r.freeDeliveryAbove),
       deliveryFee:r?.deliveryFee,
       menu
