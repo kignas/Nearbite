@@ -29,9 +29,9 @@
      ========================================================================== */
 
   :root{
-    --ct-green:      #159A62;   /* Eatswada primary action */
-    --ct-green-deep: #0E7A4C;
-    --ct-green-soft: #E9F7F0;
+    --ct-green:      #C2185B;   /* Eatswada primary action */
+    --ct-green-deep: #A1114B;
+    --ct-green-soft: #FFF1F8;
     --ct-ink:        #1C2024;
     --ct-ink-2:      #3D4349;
     --ct-muted:      #697077;
@@ -139,7 +139,7 @@
     display:inline-flex; align-items:center; gap:3px;
     font-size:11.5px; font-weight:800; letter-spacing:.3px;
     color:var(--ct-green); background:var(--ct-green-soft);
-    border:1px solid rgba(21,154,98,.18);
+    border:1px solid rgba(194,24,91,.18);
     padding:6px 10px; border-radius:999px; white-space:nowrap;
   }
 
@@ -216,7 +216,7 @@
   .ct-stepper{
     display:inline-flex; align-items:center;
     background:var(--ct-green-soft);
-    border:1px solid rgba(21,154,98,.25);
+    border:1px solid rgba(194,24,91,.25);
     border-radius:10px; overflow:hidden;
   }
   .ct-stepper button{
@@ -226,7 +226,7 @@
     display:flex; align-items:center; justify-content:center;
     transition:background .15s ease;
   }
-  .ct-stepper button:active{ background:rgba(21,154,98,.12); }
+  .ct-stepper button:active{ background:rgba(194,24,91,.12); }
   .ct-stepper button:focus-visible{ outline:2px solid var(--ct-green); outline-offset:-2px; }
   .ct-qty{
     min-width:26px; text-align:center;
@@ -239,11 +239,11 @@
     display:flex; align-items:center; gap:9px;
     margin:0 14px 12px; padding:11px 13px;
     border-radius:var(--ct-r-md);
-    background:var(--ct-green-soft);
+    background:#E9F7F0;
     border:1px solid rgba(21,154,98,.2);
     font-size:12px; font-weight:700; line-height:1.4; color:#0F5F3D;
   }
-  .ct-strip i{ font-size:14px; flex:0 0 auto; color:var(--ct-green); }
+  .ct-strip i{ font-size:14px; flex:0 0 auto; color:#159A62; }
   .ct-strip.is-error{ background:var(--ct-danger-bg); border-color:#F6C9C9; color:#9F1D1D; }
   .ct-strip.is-error i{ color:var(--ct-danger); }
   .ct-strip.is-neutral{ background:#F6F7F8; border-color:var(--ct-line); color:var(--ct-muted); }
@@ -294,7 +294,7 @@
     background:var(--ct-green); color:#fff; border:none;
     padding:14px 26px; border-radius:13px;
     font-size:14.5px; font-weight:800; letter-spacing:.2px;
-    box-shadow:0 6px 16px rgba(21,154,98,.24);
+    box-shadow:0 6px 16px rgba(194,24,91,.24);
   }
 
   /* ── Footer ───────────────────────────────────────────────────────── */
@@ -329,7 +329,7 @@
   .payment-method-option.selected{
     border-color:var(--ct-green);
     background:var(--ct-green-soft);
-    box-shadow:0 3px 12px rgba(21,154,98,.12);
+    box-shadow:0 3px 12px rgba(194,24,91,.12);
   }
   .ct-pay-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .upi-icon{
@@ -347,12 +347,12 @@
     width:100%; min-height:54px; padding:13px 18px;
     background:var(--ct-green); color:#fff; border:none;
     border-radius:var(--ct-r-md);
-    box-shadow:0 6px 18px rgba(21,154,98,.26);
+    box-shadow:0 6px 18px rgba(194,24,91,.26);
     cursor:pointer;
     transition:transform .1s var(--ct-ease), background .2s ease, box-shadow .2s ease;
   }
   .ct-cta:active{ transform:scale(.98); background:var(--ct-green-deep); }
-  .ct-cta:focus-visible{ outline:3px solid rgba(21,154,98,.4); outline-offset:2px; }
+  .ct-cta:focus-visible{ outline:3px solid rgba(194,24,91,.4); outline-offset:2px; }
   .ct-cta-text{
     font-size:14px; font-weight:800; letter-spacing:.3px;
     text-align:left; line-height:1.2;
@@ -524,7 +524,7 @@
   }
   .ct-textarea:focus, .ct-input:focus{
     outline:none; border-color:var(--ct-green); background:#fff;
-    box-shadow:0 0 0 3px rgba(21,154,98,.12);
+    box-shadow:0 0 0 3px rgba(194,24,91,.12);
   }
   .ct-field-foot{
     display:flex; align-items:flex-start; justify-content:space-between;
@@ -559,7 +559,7 @@
   .ct-btn-ghost{ background:#F4F6F7; border-color:var(--ct-line); color:var(--ct-ink-2); }
   .ct-btn-primary{
     background:var(--ct-green); color:#fff;
-    box-shadow:0 5px 14px rgba(21,154,98,.22);
+    box-shadow:0 5px 14px rgba(194,24,91,.22);
   }
   .ct-btn-primary:active{ background:var(--ct-green-deep); }
   .ct-btn-remove{
@@ -780,7 +780,7 @@
   <div class="ct-empty" id="empty-cart">
     <svg class="ct-empty-art" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M22 32h52l-5 44a8 8 0 0 1-8 7H35a8 8 0 0 1-8-7L22 32Z" fill="#EFF2F4" stroke="#CBD3DA" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M36 32v-6a12 12 0 0 1 24 0v6" stroke="#159A62" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M36 32v-6a12 12 0 0 1 24 0v6" stroke="#C2185B" stroke-width="3.5" stroke-linecap="round"/>
       <circle cx="39" cy="55" r="3" fill="#CBD3DA"/>
       <circle cx="57" cy="55" r="3" fill="#CBD3DA"/>
       <path d="M39 68c4.5-4 13.5-4 18 0" stroke="#CBD3DA" stroke-width="3" stroke-linecap="round"/>
