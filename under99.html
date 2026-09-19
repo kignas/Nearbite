@@ -439,7 +439,14 @@ body.filter-open{overflow:hidden}
       ratingCount:r?.ratingCount ?? '',
       deliveryTime:String(r?.deliveryTime || ''),
       cuisine:Array.isArray(r?.cuisine) ? r.cuisine.join(', ') : String(r?.cuisine || ''),
-      offer:String(r?.offer || ''),
+      offer:String(
+        r?.offer ??
+        r?.discountLabel ??
+        r?.discountText ??
+        (r?.discountPercent != null ? `${num(r.discountPercent)}%` : '') ??
+        ''
+      ),
+      discountPercent: r?.discountPercent == null ? null : num(r.discountPercent),
       freeDeliveryAbove:r?.freeDeliveryAbove == null ? null : num(r.freeDeliveryAbove),
       deliveryFee:r?.deliveryFee,
       menu
