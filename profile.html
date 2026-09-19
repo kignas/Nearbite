@@ -278,16 +278,14 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 }
 
 /* ══════════════════════════════════════════════════════════════
-   FINAL EATSWADA TYPOGRAPHY SYSTEM — PROFILE
-   Typography-only pass. Existing Manrope typeface is preserved.
-   Scale: 11 / 12 / 13 / 15 / 17 / 19 / 21 / 24 / 27px.
+   EATSWADA PROFILE — FINAL TYPOGRAPHY PASS
+   Typography only. Existing Manrope family is preserved.
    ══════════════════════════════════════════════════════════════ */
 :root{
   --ew-text-xs:11px;
   --ew-text-sm:12px;
   --ew-text-body-sm:13px;
   --ew-text-body:15px;
-  --ew-text-label:15px;
   --ew-text-card-title:17px;
   --ew-text-section:19px;
   --ew-text-page:21px;
@@ -299,117 +297,170 @@ body{
   line-height:1.45;
 }
 
-/* Page/header hierarchy */
+/* Page header */
 .title{
   font-size:var(--ew-text-page);
   line-height:1.2;
-  letter-spacing:-.45px;
+  font-weight:800;
+  letter-spacing:-.55px;
 }
+
 .user h1{
   font-size:var(--ew-text-page);
-  line-height:1.2;
-  letter-spacing:-.45px;
+  line-height:1.18;
+  font-weight:800;
+  letter-spacing:-.55px;
 }
+
 .user p{
   font-size:var(--ew-text-body-sm);
   line-height:1.4;
+  font-weight:500;
 }
+
 .verified{
   font-size:var(--ew-text-xs);
   line-height:1.25;
+  font-weight:800;
 }
 
 /* Quick actions */
 .quick-tile span{
-  font-size:var(--ew-text-body-sm);
+  font-size:var(--ew-text-body);
   line-height:1.2;
+  font-weight:700;
 }
 
-/* Section headings */
+/* Section hierarchy */
 .section-title{
-  font-size:var(--ew-text-xs);
-  line-height:1.25;
+  font-size:var(--ew-text-section);
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:-.35px;
+  text-transform:none;
 }
 
-/* Account/data rows */
+/* Account rows */
 .row-title{
   font-size:var(--ew-text-xs);
   line-height:1.25;
+  font-weight:700;
 }
+
 .row-sub{
   font-size:var(--ew-text-body);
   line-height:1.4;
+  font-weight:700;
 }
+
 .row.is-nav .row-title{
   font-size:var(--ew-text-body);
   line-height:1.3;
+  font-weight:700;
+  letter-spacing:-.15px;
 }
+
 .row.is-nav .row-sub{
   font-size:var(--ew-text-body-sm);
   line-height:1.4;
+  font-weight:500;
 }
+
 .edit-btn{
   font-size:var(--ew-text-sm);
   line-height:1.2;
+  font-weight:800;
 }
+
 .locked{
   font-size:var(--ew-text-xs);
   line-height:1.2;
+  font-weight:700;
 }
 
 /* Favourites */
 .fav-summary .row-title{
   font-size:var(--ew-text-body);
   line-height:1.3;
+  font-weight:800;
 }
+
 .fav-summary .row-sub{
   font-size:var(--ew-text-body-sm);
   line-height:1.4;
+  font-weight:500;
 }
+
 .fav-empty h3{
   font-size:var(--ew-text-body);
   line-height:1.3;
+  font-weight:800;
 }
-.fav-empty p,
-.fav-cta,
-.fav-note{
+
+.fav-empty p{
   font-size:var(--ew-text-body-sm);
-}
-.fav-empty p,
-.fav-note{
   line-height:1.5;
 }
 
-/* Edit sheet */
+.fav-cta{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.2;
+  font-weight:800;
+}
+
+.fav-note{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.5;
+}
+
+/* Edit profile sheet */
 .sheet h2{
   font-size:var(--ew-text-card-title);
   line-height:1.25;
+  font-weight:800;
 }
+
 .sheet p{
   font-size:var(--ew-text-body-sm);
   line-height:1.5;
 }
+
 .field label{
   font-size:var(--ew-text-xs);
   line-height:1.25;
+  font-weight:800;
 }
+
+.field input{
+  font-size:var(--ew-text-body);
+}
+
 .btn{
   font-size:var(--ew-text-body-sm);
   line-height:1.2;
+  font-weight:800;
 }
+
 .error{
   font-size:var(--ew-text-body-sm);
   line-height:1.35;
 }
 
-/* Bottom navigation + toast */
+/* Bottom navigation */
 .nav a{
   font-size:var(--ew-text-xs);
   line-height:1.2;
+  font-weight:700;
 }
+
+.nav a.active{
+  font-weight:800;
+}
+
 .toast{
   font-size:var(--ew-text-body-sm);
   line-height:1.25;
+  font-weight:600;
 }
 
 </style>
