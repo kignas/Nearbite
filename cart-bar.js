@@ -253,7 +253,7 @@
 
     /* ============================================================
        EATSWADA CART — Restaurant + 99 Store
-       White floating pill + pink View Cart action. No close button.
+       Full pink capsule. No white shell, no glow, no glass effect.
        ============================================================ */
     #white-cart-root.wc-pink {
       width: calc(100vw - 36px);
@@ -261,18 +261,18 @@
       bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.wc-pink #white-cart-container {
-      height: 70px;
-      min-height: 70px;
-      padding: 6px 8px 6px 12px;
-      border: 1px solid rgba(17,24,39,.06);
-      border-radius: 35px;
-      background: rgba(255,255,255,.97);
-      box-shadow: 0 5px 22px rgba(16,24,40,.12), 0 1px 3px rgba(16,24,40,.05);
-      -webkit-backdrop-filter: blur(16px);
-      backdrop-filter: blur(16px);
+      height: 66px;
+      min-height: 66px;
+      padding: 5px 7px 5px 12px;
+      border: 0;
+      border-radius: 33px;
+      background: #EC168C;
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
     #white-cart-root.wc-pink .wc-left {
-      color:#111827;
+      color:#fff;
       gap:8px;
       min-width:0;
       overflow:hidden;
@@ -280,28 +280,28 @@
     }
     #white-cart-root.wc-pink .wc-thumb-wrap { display:flex; }
     #white-cart-root.wc-pink .wc-image-stack {
-      width:42px !important; height:42px; min-width:42px;
+      width:40px !important; height:40px; min-width:40px;
     }
-    #white-cart-root.wc-pink .wc-img { width:42px; height:42px; border-radius:50%; }
+    #white-cart-root.wc-pink .wc-img { width:40px; height:40px; border-radius:50%; }
     #white-cart-root.wc-pink .wc-img:nth-child(1){left:0}
-    #white-cart-root.wc-pink .wc-img:nth-child(2){left:12px}
-    #white-cart-root.wc-pink .wc-img:nth-child(3){left:24px}
+    #white-cart-root.wc-pink .wc-img:nth-child(2){left:11px}
+    #white-cart-root.wc-pink .wc-img:nth-child(3){left:22px}
     #white-cart-root.wc-pink .wc-qty-badge { display:block; top:-3px; right:-3px; }
     #white-cart-root.wc-pink .wc-info {
       display:flex; min-width:0; overflow:hidden; justify-content:center;
     }
     #white-cart-root.wc-pink .wc-res-name {
-      display:block; color:#111827; font-size:14px; font-weight:800;
+      display:block; color:#fff; font-size:14px; font-weight:800;
       line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     #white-cart-root.wc-pink .wc-menu-link {
-      display:flex; color:#ef5263; font-size:11px; font-weight:700;
+      display:flex; color:rgba(255,255,255,.88); font-size:11px; font-weight:700;
       margin-top:3px;
     }
     #white-cart-root.wc-pink .wc-menu-link i { display:none; }
     #white-cart-root.wc-pink .wc-pink-total {
-      display:block; color:#111827; font-size:17px; line-height:1; font-weight:800;
-      white-space:nowrap; margin-left:10px; margin-right:12px;
+      display:block; color:#fff; font-size:15px; line-height:1; font-weight:800;
+      white-space:nowrap; margin-left:10px; margin-right:10px;
       position:static; transform:none;
     }
     #white-cart-root.wc-pink .wc-right {
@@ -311,60 +311,117 @@
       display:flex !important; gap:0; align-items:center;
     }
     #white-cart-root.wc-pink .wc-btn {
-      min-width:150px; width:150px; height:58px; padding:0 16px;
-      border-radius:29px; background:#EC168C; color:#fff; box-shadow:none;
-      flex-direction:column; gap:3px;
+      min-width:138px; width:138px; height:56px; padding:0 14px;
+      border-radius:28px; background:#D90B7D; color:#fff; box-shadow:none;
+      flex-direction:column; gap:2px;
     }
-    #white-cart-root.wc-pink .wc-btn-title { font-size:18px; line-height:1; font-weight:800; }
-    #white-cart-root.wc-pink .wc-btn-sub { display:block; font-size:11px; line-height:1; font-weight:700; opacity:.95; }
+    #white-cart-root.wc-pink .wc-btn-title { font-size:17px; line-height:1; font-weight:800; }
+    #white-cart-root.wc-pink .wc-btn-sub { display:block; font-size:10px; line-height:1; font-weight:700; opacity:.96; }
     #white-cart-root.wc-pink .wc-cart-svg { width:0; height:0; display:none; }
     #white-cart-root.wc-pink .wc-close,
     #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
 
-    /* Homepage keeps its established white bar, but the middle control is now
-       a true centered group and the price is intentionally omitted. */
+    /* ============================================================
+       HOMEPAGE CART
+       Small white capsule. Only item count + View Cart.
+       "All ↑" is a small capsule floating above the centre.
+       ============================================================ */
+    #white-cart-root:not(.wc-pink) {
+      width: calc(100vw - 36px);
+      max-width: 720px;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
     #white-cart-root:not(.wc-pink) #white-cart-container {
-      min-height: 62px; height: 62px; padding: 7px 8px; border-radius: 31px;
+      min-height: 58px; height: 58px; padding: 5px 7px 5px 16px;
+      border-radius: 29px;
+      background:#fff;
+      border:1px solid rgba(17,24,39,.08);
+      box-shadow:0 5px 18px rgba(16,24,40,.10);
+      overflow:visible;
     }
-    #white-cart-root:not(.wc-pink) .wc-right { gap: 7px; }
-    #white-cart-root:not(.wc-pink) .wc-btn {
-      height:44px; min-width:92px; padding:0 12px; border-radius:23px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:11px; }
-    #white-cart-root:not(.wc-pink) .wc-btn-sub { display:none; }
-    #white-cart-root.wc-pink .wc-pink-total { position:static; }
-    #white-cart-root:not(.wc-pink) > #white-cart-container .wc-pink-total { display:none; }
-    #white-cart-root:not(.wc-pink) .wc-pink-total {
-      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      margin:0; color:#111827; font-size:16px; font-weight:800;
-      white-space:nowrap; z-index:4; pointer-events:none;
-    }
-    #white-cart-root:not(.wc-pink) .wc-all-carts {
-      position:static; margin:0; padding:0; font-size:12px; line-height:1;
-      color:#667085; background:transparent; z-index:5;
-    }
+    #white-cart-root:not(.wc-pink) .wc-left { display:none; }
     #white-cart-root:not(.wc-pink) .wc-center-cart {
-      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      display:flex; align-items:center; gap:10px; z-index:6;
+      position:static;
+      transform:none;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      flex:1 1 auto;
+      min-width:0;
+      height:100%;
+      z-index:6;
       pointer-events:auto;
     }
     #white-cart-root:not(.wc-pink) .wc-center-cart .wc-pink-total {
-      position:static; transform:none; pointer-events:none;
+      position:static;
+      transform:none;
+      margin:0;
+      color:#111827;
+      font-size:16px;
+      font-weight:800;
+      white-space:nowrap;
+      pointer-events:none;
     }
-    #white-cart-root:not(.wc-pink) .wc-info { padding-right:4px; }
+    #white-cart-root:not(.wc-pink) .wc-all-carts {
+      position:absolute;
+      left:50%;
+      top:-17px;
+      transform:translateX(-50%);
+      margin:0;
+      padding:7px 13px;
+      min-width:58px;
+      height:34px;
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(17,24,39,.08);
+      border-radius:18px;
+      color:#667085;
+      background:#fff;
+      box-shadow:0 4px 12px rgba(16,24,40,.10);
+      font-size:12px;
+      line-height:1;
+      font-weight:800;
+      z-index:10;
+    }
+    #white-cart-root:not(.wc-pink) .wc-right {
+      gap:0;
+      flex:0 0 auto;
+      margin-left:auto;
+    }
+    #white-cart-root:not(.wc-pink) .wc-btn {
+      height:48px;
+      min-width:122px;
+      padding:0 16px;
+      border-radius:24px;
+      background:#EC168C;
+      box-shadow:none;
+      flex-direction:row;
+      gap:8px;
+    }
+    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:15px; line-height:1; font-weight:800; }
+    #white-cart-root:not(.wc-pink) .wc-btn-sub { display:none; }
+    #white-cart-root:not(.wc-pink) .wc-cart-svg { width:23px; height:23px; display:block; }
+    #white-cart-root:not(.wc-pink) .wc-close { display:none; }
+    #white-cart-root:not(.wc-pink) .wc-info { padding-right:0; }
     @media (max-width:430px) {
-      #white-cart-root:not(.wc-pink) .wc-center-cart { gap:8px; }
-      #white-cart-root:not(.wc-pink) .wc-pink-total { font-size:15px; }
-      #white-cart-root:not(.wc-pink) .wc-all-carts { font-size:11px; }
-      #white-cart-root.wc-pink #white-cart-container { height:66px; min-height:66px; padding-left:10px; padding-right:6px; }
+      #white-cart-root:not(.wc-pink) { width:calc(100vw - 36px); }
+      #white-cart-root:not(.wc-pink) #white-cart-container { height:56px; min-height:56px; }
+      #white-cart-root:not(.wc-pink) .wc-center-cart .wc-pink-total { font-size:15px; }
+      #white-cart-root:not(.wc-pink) .wc-all-carts { top:-16px; height:32px; min-width:56px; padding:6px 12px; font-size:11px; }
+      #white-cart-root:not(.wc-pink) .wc-btn { min-width:116px; width:116px; height:46px; border-radius:23px; padding:0 13px; }
+      #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:14px; }
+      #white-cart-root:not(.wc-pink) .wc-cart-svg { width:22px; height:22px; }
+      #white-cart-root.wc-pink #white-cart-container { height:64px; min-height:64px; padding-left:10px; padding-right:6px; }
       #white-cart-root.wc-pink .wc-image-stack { width:38px !important; height:38px; min-width:38px; }
       #white-cart-root.wc-pink .wc-img { width:38px; height:38px; }
       #white-cart-root.wc-pink .wc-res-name { font-size:13px; }
       #white-cart-root.wc-pink .wc-menu-link { font-size:10px; }
-      #white-cart-root.wc-pink .wc-pink-total { font-size:14px; margin-left:5px; margin-right:7px; }
-      #white-cart-root.wc-pink .wc-btn { min-width:128px; width:128px; height:54px; border-radius:27px; padding:0 10px; }
+      #white-cart-root.wc-pink .wc-pink-total { font-size:13px; margin-left:5px; margin-right:6px; }
+      #white-cart-root.wc-pink .wc-btn { min-width:124px; width:124px; height:54px; border-radius:27px; padding:0 9px; }
       #white-cart-root.wc-pink .wc-btn-title { font-size:16px; }
-      #white-cart-root.wc-pink .wc-btn-sub { font-size:10px; }
+      #white-cart-root.wc-pink .wc-btn-sub { font-size:9px; }
     }
 
     /* Multi-restaurant control is intentionally rendered inside the centered
