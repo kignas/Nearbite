@@ -1,555 +1,493 @@
-/*
- * Eatswada 99 Store — Premium Card v2
- *
- * Contract with under99.html:
- *   window.Eatswada99Card.createRestaurantCard(restaurant)
- *   window.Eatswada99Card.refreshCard(host, restaurant)
- *   window.Eatswada99Card.changeCart(item, restaurant, delta)
- *
- * Cart contract:
- *   localStorage key: nearbite_cart
- *   compatible with cart.html + the existing floating cart-bar.js.
- *
- * Design rule:
- *   The benchmark informs hierarchy, spacing, typography and icon language.
- *   Food-tile proportions are intentionally kept tall/wide (1.46:1), not
- *   copied from the shorter benchmark tiles.
- */
+/* Eatswada 99 Store — isolated restaurant card component */
 (() => {
-  'use strict';
+  const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  const num = (v, fallback=0) => { const n=Number(v); return Number.isFinite(n)?n:fallback; };
+  const CART_KEY='nearbite_cart';
 
-  const CART_KEY = 'nearbite_cart';
-  const esc = v => String(v ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-  const num = (v, fallback=0) => {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : fallback;
-  };
-  const idOf = x => String(x?.id || x?._id || '');
-
-  function getCart(){
-    try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
-    catch (_) { return {}; }
-  }
-  function saveCart(cart){
-    try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (_) {}
-  }
-
-  /* Unique normal-item key. cart.html does not require the key to be the name;
-     it renders the stored `name` field and adjusts using the same key. */
-  function cartKey(item, restaurant){
-    const iid = idOf(item);
-    const rid = idOf(restaurant);
-    return iid ? `u99:${rid}:${iid}` : `u99:${rid}:${String(item?.name || 'item').trim()}`;
-  }
-
-  function getQuantity(item, restaurant){
-    const cart = getCart();
-    const key = cartKey(item, restaurant);
-    if (cart[key]) return Math.max(0, Number(cart[key].quantity || 0));
-
-    /* Read older normal-item entries without breaking them. */
-    const legacy = cart[item?.name];
-    if (legacy && String(legacy.resId || '') === idOf(restaurant)) {
-      return Math.max(0, Number(legacy.quantity || 0));
-    }
+  function getCart(){ try{return JSON.parse(localStorage.getItem(CART_KEY))||{};}catch(_){return{};} }
+  function saveCart(c){localStorage.setItem(CART_KEY,JSON.stringify(c));}
+  function cartKey(item,r){return String(item.id||item._id||`${r.id||'restaurant'}|${item.name}`);}
+  function getQuantity(item,r){
+    const c=getCart(),k=cartKey(item,r);
+    if(c[k]) return Number(c[k].quantity||0);
+    if(c[item.name] && !c[item.name].resId) return Number(c[item.name].quantity||0);
     return 0;
   }
-
-  function dispatchCartUpdated(item, restaurant){
-    document.dispatchEvent(new CustomEvent('eatswada:cart-updated', {
-      detail:{ item, restaurant }
-    }));
-    if (typeof window.updateGlobalCart === 'function') {
-      try { window.updateGlobalCart(); } catch (_) {}
-    }
+  function changeCart(item,r,delta){
+    if(item?.inStock===false && delta>0)return;
+    const c=getCart(),k=cartKey(item,r);
+    const existing=c[k]||{quantity:0,price:num(item.price),originalPrice:item.originalPrice??null,resId:String(r.id||''),menuItem:String(item.id||item._id||''),image:item.image||'',name:item.name||'Item',isVeg:Boolean(item.isVeg)};
+    existing.quantity=Number(existing.quantity||0)+delta;
+    if(existing.quantity<=0) delete c[k]; else c[k]=existing;
+    saveCart(c);
+    document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{item,restaurant:r}}));
+    if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
+    const host=document.querySelector(`[data-under99-restaurant="${CSS.escape(String(r.id||r._id||''))}"]`);
+    if(host)syncCard(host,r);
   }
 
-  function changeCart(item, restaurant, delta){
-    if (!item || !restaurant || !delta) return;
-    if (item.inStock === false && delta > 0) return;
-
-    const cart = getCart();
-    const key = cartKey(item, restaurant);
-    const existing = cart[key] || {
-      quantity: 0,
-      price: num(item.price),
-      originalPrice: item.originalPrice != null ? num(item.originalPrice) : null,
-      resId: idOf(restaurant),
-      menuItem: idOf(item),
-      image: item.image || item.img || item.imageUrl || '',
-      name: item.name || 'Item',
-      isVeg: item.isVeg === true,
-      restaurantName: restaurant.name || ''
-    };
-
-    existing.quantity = Number(existing.quantity || 0) + delta;
-    if (existing.quantity <= 0) delete cart[key];
-    else cart[key] = existing;
-
-    saveCart(cart);
-    dispatchCartUpdated(item, restaurant);
-    syncCard(document.querySelector(`[data-under99-restaurant="${cssEscape(idOf(restaurant))}"]`), restaurant);
-  }
-
-  function cssEscape(v){
-    try { return CSS.escape(String(v)); }
-    catch (_) { return String(v).replace(/[^a-zA-Z0-9_-]/g,'\\$&'); }
-  }
-
-  const ICON = {
-    star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.7 2.55 5.17 5.71.83-4.13 4.03.98 5.69L12 16.74l-5.11 2.68.98-5.69-4.13-4.03 5.71-.83L12 3.7Z" fill="currentColor"/></svg>',
-    clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5v4.9l3.2 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.1M12 7.55h.01" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>',
-    arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    bag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 8.2h11.6l.8 11.1H5.4L6.2 8.2Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 9V6.8a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
+  const icon={
+    // Premium rating badge: solid green circle with a clean, upright white star.
+    ratingBadge:'<svg class="u99-rating-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#159A62"/><path d="M12 5.4 13.94 9.33 18.28 9.96 15.14 13.02 15.88 17.34 12 15.3 8.12 17.34 8.86 13.02 5.72 9.96 10.06 9.33Z" fill="#fff"/></svg>',
+    // Premium free-delivery / offer badge: green scalloped seal with a white percent mark.
+    offerSeal:'<svg class="u99-seal" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0.8Q12 0.8 13.3 1.99Q14.59 3.17 16.32 2.88Q18.06 2.58 18.5 4.28Q18.95 5.98 20.57 6.66Q22.19 7.35 21.65 9.02Q21.11 10.69 22.1 12.14Q23.09 13.59 21.73 14.71Q20.37 15.82 20.42 17.58Q20.46 19.33 18.72 19.54Q16.97 19.74 16.06 21.24Q15.16 22.75 13.58 21.97Q12 21.2 10.42 21.97Q8.84 22.75 7.94 21.24Q7.03 19.74 5.28 19.54Q3.54 19.33 3.58 17.58Q3.63 15.82 2.27 14.71Q0.91 13.59 1.9 12.14Q2.89 10.69 2.35 9.02Q1.81 7.35 3.43 6.66Q5.05 5.98 5.5 4.28Q5.94 2.58 7.68 2.88Q9.41 3.17 10.7 1.99Z" fill="#159A62"/><path d="M9 15.2 15 8.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.4" cy="9.4" r="1.55" fill="#fff"/><circle cx="14.6" cy="14.6" r="1.55" fill="#fff"/></svg>',
+    clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
   };
 
-  function ratingBadge(r){
-    const rating = num(r.rating);
-    const count = r.ratingCount != null ? Number(r.ratingCount) : 0;
-    const countText = count > 0 ? ` <span class="u99v2-rating-count">(${formatCount(count)})</span>` : '';
-    return `<span class="u99v2-rating">${ICON.star}<b>${rating ? rating.toFixed(1) : '—'}</b>${countText}</span>`;
-  }
-
-  function formatCount(n){
-    n = Number(n) || 0;
-    if (n >= 1000000) return `${(n/1000000).toFixed(1).replace(/\.0$/,'')}m`;
-    if (n >= 1000) return `${(n/1000).toFixed(1).replace(/\.0$/,'')}k`;
-    return String(Math.round(n));
-  }
-
+  /* ── Customization bridge — reuses the EXISTING restaurant.html system ──
+     restaurant.html registers customizable items into window.__ewCust and
+     opens the shared sheet via window.ewOpenCustomize(menuItemId). We do the
+     same here so the 99 Store card drives the very same modal + cart logic;
+     we never build a second sheet or a second cart path. */
   function customGroups(item){
-    const g = item && (item.customizations || item.customizationGroups || item.customization || item.customGroups);
-    return Array.isArray(g) ? g.filter(x => x && Array.isArray(x.options) && x.options.length) : [];
+    // restaurant.html reads item.customizations; accept a few safe aliases in
+    // case under99.html's normaliser renamed the field, without assuming one.
+    const g=item&&(item.customizations||item.customizationGroups||item.customization||item.customGroups);
+    return Array.isArray(g)?g:[];
+  }
+  function hasRealCustomization(item){
+    return customGroups(item).some(g=>g&&Array.isArray(g.options)&&g.options.length>0);
   }
   function isCustomisable(item){
-    return !!item && (item.isCustomisable === true || item.customisable === true || customGroups(item).length > 0);
+    return item&&(item.isCustomisable===true||item.customisable===true||hasRealCustomization(item));
   }
-
-  /* ───────────────────────── Customization sheet ───────────────────────── */
-  let customState = null;
-  let customSheet = null;
-
-  function ensureCustomizationSheet(){
-    if (customSheet) return customSheet;
-
-    const wrap = document.createElement('div');
-    wrap.id = 'u99v2-custom-root';
-    wrap.innerHTML = `
-      <div class="u99v2-cs-backdrop" data-cs-close></div>
-      <section class="u99v2-cs-sheet" role="dialog" aria-modal="true" aria-labelledby="u99v2-cs-title">
-        <button class="u99v2-cs-close" type="button" data-cs-close aria-label="Close">×</button>
-        <div class="u99v2-cs-grab"></div>
-        <div class="u99v2-cs-head">
-          <div class="u99v2-cs-diet" id="u99v2-cs-diet"></div>
-          <div><h3 id="u99v2-cs-title">Customize item</h3><p id="u99v2-cs-sub">Choose your options</p></div>
-        </div>
-        <div class="u99v2-cs-body" id="u99v2-cs-body"></div>
-        <div class="u99v2-cs-footer">
-          <div class="u99v2-cs-qty"><button type="button" data-cs-minus>−</button><b id="u99v2-cs-qty">1</b><button type="button" data-cs-plus>+</button></div>
-          <button type="button" class="u99v2-cs-add" id="u99v2-cs-add">Add item</button>
-        </div>
-      </section>`;
-    document.body.appendChild(wrap);
-
-    const close = () => closeCustomization();
-    wrap.addEventListener('click', e => { if (e.target.closest('[data-cs-close]')) close(); });
-    wrap.querySelector('[data-cs-minus]').addEventListener('click', () => {
-      if (!customState) return;
-      customState.qty = Math.max(1, customState.qty - 1);
-      wrap.querySelector('#u99v2-cs-qty').textContent = customState.qty;
-      refreshCustomization();
-    });
-    wrap.querySelector('[data-cs-plus]').addEventListener('click', () => {
-      if (!customState) return;
-      customState.qty = Math.min(20, customState.qty + 1);
-      wrap.querySelector('#u99v2-cs-qty').textContent = customState.qty;
-      refreshCustomization();
-    });
-    wrap.querySelector('#u99v2-cs-body').addEventListener('change', refreshCustomization);
-    wrap.querySelector('#u99v2-cs-add').addEventListener('click', confirmCustomization);
-
-    customSheet = wrap;
-    return wrap;
+  function registerCustomization(item,r){
+    // Mirror the exact shape restaurant.html stores, so the shared sheet reads it.
+    if(!hasRealCustomization(item))return false;
+    const id=String(item.id||item._id||'');
+    if(!id)return false;
+    const price=num(item.price);
+    const original=item.originalPrice!=null&&num(item.originalPrice)>price?num(item.originalPrice):null;
+    window.__ewCust=window.__ewCust||{};
+    window.__ewCust[id]={
+      name:item.name||'Item',price,resId:String(r.id||r._id||''),menuItemId:id,
+      image:item.image||'',isVeg:Boolean(item.isVeg),originalPrice:original,groups:customGroups(item)
+    };
+    return true;
   }
-
-  function openCustomize(item, restaurant){
-    const groups = customGroups(item);
-    if (!groups.length) { changeCart(item, restaurant, 1); return; }
-    const root = ensureCustomizationSheet();
-    customState = { item, restaurant, groups, qty: 1, unit: num(item.price) };
-
-    root.querySelector('#u99v2-cs-title').textContent = item.name || 'Customize item';
-    root.querySelector('#u99v2-cs-sub').textContent = `Base price ₹${Math.round(num(item.price))}`;
-    root.querySelector('#u99v2-cs-qty').textContent = '1';
-    root.querySelector('#u99v2-cs-diet').className = `u99v2-cs-diet ${item.isVeg === false ? 'nonveg' : 'veg'}`;
-
-    const body = root.querySelector('#u99v2-cs-body');
-    body.innerHTML = groups.map((g, gi) => {
-      const max = Math.max(1, Number(g.maxSelect || 1));
-      const multi = max > 1;
-      const required = g.required === true;
-      const rule = multi ? `Select up to ${max}` : (required ? 'Required · Select 1' : 'Select 1');
-      const options = g.options.map((o, oi) => {
-        const extra = num(o.extraPrice);
-        const inputType = multi ? 'checkbox' : 'radio';
-        const checked = (!multi && required && oi === 0) ? 'checked' : '';
-        return `<label class="u99v2-opt">
-          <span class="u99v2-opt-dot ${o.isVeg === false ? 'nonveg' : ''}"></span>
-          <span class="u99v2-opt-name">${esc(o.label || 'Option')}</span>
-          ${extra > 0 ? `<span class="u99v2-opt-price">+₹${Math.round(extra)}</span>` : `<span class="u99v2-opt-free">${required || multi ? 'Free' : ''}</span>`}
-          <input type="${inputType}" name="u99v2-g-${gi}" value="${oi}" data-extra="${extra}" ${checked}>
-        </label>`;
-      }).join('');
-      return `<div class="u99v2-group" data-max="${max}" data-required="${required ? '1':'0'}" data-multi="${multi ? '1':'0'}">
-        <div class="u99v2-group-head"><b>${esc(g.title || 'Options')}</b><span>${rule}</span></div>${options}</div>`;
-    }).join('');
-
-    refreshCustomization();
-    root.classList.add('open');
-    document.body.classList.add('u99v2-sheet-open');
-  }
-
-  function refreshCustomization(){
-    if (!customState || !customSheet) return;
-    let extra = 0, valid = true;
-    customSheet.querySelectorAll('.u99v2-group').forEach(group => {
-      const multi = group.dataset.multi === '1';
-      const max = Number(group.dataset.max) || 1;
-      const required = group.dataset.required === '1';
-      const checked = [...group.querySelectorAll('input:checked')];
-      extra += checked.reduce((sum, el) => sum + num(el.dataset.extra), 0);
-      if (required && checked.length < 1) valid = false;
-      if (multi) {
-        const full = checked.length >= max;
-        group.querySelectorAll('input[type="checkbox"]').forEach(input => { if (!input.checked) input.disabled = full; });
-      }
-    });
-    customState.unit = num(customState.item.price) + extra;
-    const add = customSheet.querySelector('#u99v2-cs-add');
-    add.disabled = !valid;
-    add.textContent = valid ? `Add item · ₹${Math.round(customState.unit * customState.qty)}` : 'Select required options';
-  }
-
-  function confirmCustomization(){
-    if (!customState || !customSheet) return;
-    const add = customSheet.querySelector('#u99v2-cs-add');
-    if (add.disabled) return;
-
-    const selections = [];
-    const labels = [];
-    customSheet.querySelectorAll('.u99v2-group').forEach((group, gi) => {
-      const title = customState.groups[gi]?.title || 'Options';
-      group.querySelectorAll('input:checked').forEach(input => {
-        const option = customState.groups[gi]?.options?.[Number(input.value)];
-        const label = option?.label || 'Option';
-        labels.push(label);
-        selections.push({
-          title,
-          label,
-          extraPrice: num(input.dataset.extra),
-          isVeg: option?.isVeg !== false
-        });
-      });
-    });
-
-    const item = customState.item;
-    const restaurant = customState.restaurant;
-    const unit = customState.unit;
-    const baseName = item.name || 'Item';
-    const displayName = labels.length ? `${baseName} (${labels.join(', ')})` : baseName;
-    const key = `u99c:${idOf(restaurant)}:${idOf(item)}:${labels.map(x => x.toLowerCase()).join('|') || 'base'}`;
-    const cart = getCart();
-
-    if (cart[key]) {
-      cart[key].quantity = Number(cart[key].quantity || 0) + customState.qty;
-    } else {
-      cart[key] = {
-        quantity: customState.qty,
-        price: unit,
-        originalPrice: num(item.originalPrice) > num(item.price) ? num(item.originalPrice) + (unit - num(item.price)) : null,
-        resId: idOf(restaurant),
-        menuItem: idOf(item),
-        image: item.image || item.img || item.imageUrl || '',
-        name: displayName,
-        isVeg: item.isVeg !== false,
-        restaurantName: restaurant.name || '',
-        customizations: selections
-      };
-    }
-    saveCart(cart);
-    const state = customState;
-    closeCustomization();
-    dispatchCartUpdated(state.item, state.restaurant);
-    syncCard(document.querySelector(`[data-under99-restaurant="${cssEscape(idOf(state.restaurant))}"]`), state.restaurant);
-  }
-
-  function closeCustomization(){
-    if (!customSheet) return;
-    customSheet.classList.remove('open');
-    document.body.classList.remove('u99v2-sheet-open');
-    customState = null;
-  }
-
-  function customizedQuantity(item, restaurant){
-    const cart = getCart();
-    const iid = idOf(item), rid = idOf(restaurant), baseName = String(item.name || '').trim();
-    let total = 0;
-    Object.entries(cart).forEach(([key, info]) => {
-      if (!info || Number(info.quantity || 0) <= 0) return;
-      if (String(info.resId || '') !== rid) return;
-      if (iid && String(info.menuItem || '') === iid && (key.startsWith('u99c:') || String(info.name || '') === baseName || String(info.name || '').startsWith(baseName + ' ('))) {
-        total += Number(info.quantity || 0);
-      }
+  // Count customized units in the cart for an item — same rule restaurant.html
+  // uses: match on the menuItem id, or on composite keys like "Name (Large)".
+  function getCustomizedQuantity(item){
+    const c=getCart();
+    const baseName=String(item.name==null?'':item.name).trim();
+    const id=String(item.id||item._id||'');
+    let total=0;
+    Object.keys(c).forEach(k=>{
+      const e=c[k];
+      if(!e||!(Number(e.quantity)>0))return;
+      const entryMenuId=String(e.menuItem==null?'':e.menuItem);
+      const sameMenuItem=id&&entryMenuId&&entryMenuId===id;
+      const compositeForItem=k===baseName||k.indexOf(baseName+' (')===0;
+      if(sameMenuItem||compositeForItem)total+=Number(e.quantity);
     });
     return total;
   }
-
-  /* ─────────────────────────── Card rendering ──────────────────────────── */
-  function itemImage(item){
-    const src = item.image || item.img || item.imageUrl || '';
-    if (!src) return `<div class="u99v2-fallback" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 16l3.2-5 3.2 3 2.7-5 3.9 7"/></svg></div>`;
-    return `<img src="${esc(src)}" alt="${esc(item.name || 'Food')}" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="u99v2-fallback" hidden aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 16l3.2-5 3.2 3 2.7-5 3.9 7"/></svg></div>`;
-  }
-
-  function actionControl(item, restaurant){
-    if (item.inStock === false) return `<button type="button" class="u99v2-add disabled" disabled>Unavailable</button>`;
-    if (isCustomisable(item)) {
-      const qty = customizedQuantity(item, restaurant);
-      return `<button type="button" class="u99v2-add custom" data-action="customize" aria-label="Customize ${esc(item.name)}">ADD${qty > 0 ? `<span class="u99v2-qty-dot">${qty}</span>` : ''}</button>`;
+  function openCustomize(item,r){
+    registerCustomization(item,r); // guarantee data is present before opening
+    const id=String(item.id||item._id||'');
+    if(typeof window.ewOpenCustomize==='function'){
+      window.ewOpenCustomize(id);
+      return true;
     }
-    const qty = getQuantity(item, restaurant);
-    if (qty > 0) return `<div class="u99v2-stepper" role="group" aria-label="${esc(item.name)} quantity"><button type="button" data-action="minus">−</button><b>${qty}</b><button type="button" data-action="plus">+</button></div>`;
-    return `<button type="button" class="u99v2-add" data-action="add" aria-label="Add ${esc(item.name)}">ADD</button>`;
+    // Shared sheet not present on this page: never silently add the base item.
+    // Send the customer to the full restaurant page, which owns the sheet.
+    const resId=String(r.id||r._id||'');
+    if(resId)window.location.href=`restaurant.html?id=${encodeURIComponent(resId)}`;
+    return false;
   }
 
-  function itemMarkup(item, restaurant){
-    const price = num(item.price);
-    const original = num(item.originalPrice) > price ? num(item.originalPrice) : 0;
-    const discount = original ? Math.round((1 - price/original) * 100) : num(item.discountPercent);
-    const dietary = item.isVeg === true ? '<span class="u99v2-diet veg" aria-label="Veg"></span>' : item.isVeg === false ? '<span class="u99v2-diet nonveg" aria-label="Non-veg"></span>' : '';
-    const popular = item.isBestseller || item.isRecommended ? '<span class="u99v2-popular">Popular</span>' : '';
+  function formatCount(value){
+    if(value==null || value==='') return '';
+    const n=Number(String(value).replace(/,/g,''));
+    if(!Number.isFinite(n)) return String(value);
+    if(n>=1000000) return `${(n/1000000).toFixed(1).replace(/\.0$/,'')}m`;
+    if(n>=1000) return `${(n/1000).toFixed(1).replace(/\.0$/,'')}k`;
+    return String(Math.round(n));
+  }
 
-    return `<article class="u99v2-item" data-item-id="${esc(idOf(item))}">
-      <div class="u99v2-image">
-        ${itemImage(item)}
+  // Fallback mountain shows ONLY when there is no image or the image fails.
+  // The CSS pins both layers to the same box and makes the HTML `hidden`
+  // attribute authoritative, so a valid (even transparent) image never
+  // reveals the fallback beneath or beside it.
+  const FALLBACK_SVG='<svg viewBox="0 0 24 24"><path d="M4 18.5h16M6 16l3.2-5 3.2 3 2.8-5 3.8 7"/></svg>';
+  function imageMarkup(item){
+    if(!item.image){
+      return `<div class="u99-image-fallback" aria-hidden="true">${FALLBACK_SVG}</div>`;
+    }
+    const onerr="this.hidden=true;var f=this.parentNode&&this.parentNode.querySelector('.u99-image-fallback');if(f)f.hidden=false;";
+    return `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async" onerror="${onerr}"><div class="u99-image-fallback" hidden aria-hidden="true">${FALLBACK_SVG}</div>`;
+  }
+
+  function addControl(item,r){
+    if(item.inStock===false)return '<button type="button" class="u99-add u99-unavailable" disabled>Unavailable</button>';
+    // Customized items: single ADD (+) that opens the shared sheet, with a
+    // count badge for however many customized variants are already in cart.
+    if(isCustomisable(item)){
+      registerCustomization(item,r);
+      const cq=getCustomizedQuantity(item);
+      return `<button type="button" class="u99-add u99-add-cust${cq>0?' has-qty':''}" data-action="customize" aria-label="Customise ${esc(item.name)}${cq>0?', '+cq+' in cart':''}">+${cq>0?`<span class="u99-cust-qty" aria-hidden="true">${cq}</span>`:''}</button>`;
+    }
+    const q=getQuantity(item,r);
+    if(q>0)return `<div class="u99-stepper"><button type="button" data-action="minus" aria-label="Remove one">−</button><span>${q}</span><button type="button" data-action="plus" aria-label="Add one">+</button></div>`;
+    return `<button type="button" class="u99-add" data-action="add" aria-label="Add ${esc(item.name)}">+</button>`;
+  }
+
+  function itemMarkup(item,r){
+    const price=num(item.price);
+    const original=item.originalPrice!=null&&num(item.originalPrice)>price?num(item.originalPrice):null;
+    const discount=item.discountPercent!=null&&num(item.discountPercent)>0
+      ? Math.round(num(item.discountPercent))
+      : (original?Math.round((1-price/original)*100):null);
+    const dietary=item.isVeg
+      ? '<span class="u99-dietary" aria-label="Vegetarian"></span>'
+      : '<span class="u99-dietary u99-nonveg" aria-label="Non-vegetarian"></span>';
+    const popular=(item.isBestseller||item.isRecommended)?'<span class="u99-popular">Popular</span>':'';
+
+    return `<article class="u99-item" data-item-id="${esc(item.id||item._id||'')}">
+      <div class="u99-item-image">
+        ${imageMarkup(item)}
         ${popular}
-        <div class="u99v2-action">${actionControl(item, restaurant)}</div>
+        <div class="u99-item-action">${addControl(item,r)}</div>
       </div>
-      <div class="u99v2-item-name">${dietary}<span>${esc(item.name || 'Item')}</span></div>
-      <div class="u99v2-price"><b>₹${Math.round(price)}</b>${original ? `<del>₹${Math.round(original)}</del>` : ''}${discount > 0 ? `<span>${Math.round(discount)}% OFF</span>` : ''}</div>
+      <div class="u99-item-name">${dietary}<span>${esc(item.name||'Item')}</span></div>
+      <div class="u99-price-row">
+        <strong>₹${price}</strong>
+        ${original!=null?`<span class="u99-old-price">₹${original}</span>`:''}
+        ${discount?`<span class="u99-off">${discount}% OFF</span>`:''}
+      </div>
     </article>`;
   }
 
-  function offerText(r){
-    const raw = String(r.offer || '').trim();
-    const match = raw.match(/(\d+(?:\.\d+)?)\s*%/);
-    if (match) return `${Math.round(Number(match[1]))}% LOWER PRICES`;
-    if (r.discountPercent != null && num(r.discountPercent) > 0) return `${Math.round(num(r.discountPercent))}% LOWER PRICES`;
-    if (/lower|off|deal|discount/i.test(raw)) return raw.toUpperCase();
+  function restaurantOffer(r){
+    // Only use an explicit restaurant-level offer/discount.
+    // Never turn the largest individual item discount into the restaurant headline.
+    const raw=String(r.offer||'').trim();
+    if(raw){
+      const m=raw.match(/(\d+(?:\.\d+)?)\s*%/);
+      if(m)return `${Math.round(Number(m[1]))}% LOWER PRICES`;
+      if(/lower|off|deal|discount/i.test(raw))return raw.toUpperCase();
+    }
+    if(r.discountPercent!=null && num(r.discountPercent)>0){
+      return `${Math.round(num(r.discountPercent))}% LOWER PRICES`;
+    }
     return 'LOWER PRICES';
   }
 
-  function cardMarkup(r, menu){
-    const cuisine = String(r.cuisine || '').trim();
-    const delivery = String(r.deliveryTime || '').trim();
-    const free = r.freeDeliveryAbove != null ? `<div class="u99v2-free">${ICON.bag}<span>Free delivery above ₹${Math.round(num(r.freeDeliveryAbove))}</span><button type="button" data-action="info" aria-label="Free delivery information">${ICON.info}</button></div>` : '';
+  function ratingMarkup(r){
+    const rating=num(r.rating);
+    const count=formatCount(r.ratingCount);
+    return `<span class="u99-rating">${icon.ratingBadge}<b>${rating?rating.toFixed(1):'—'}</b>${count?`<span class="u99-rating-count">(${esc(count)})</span>`:''}</span>`;
+  }
 
-    return `<article class="u99v2-card">
-      <button type="button" class="u99v2-head" data-action="restaurant" aria-label="Open ${esc(r.name || 'restaurant')}">
-        <div class="u99v2-offer">${esc(offerText(r))}</div>
-        <div class="u99v2-title-row"><h2>${esc(r.name || 'Restaurant')}</h2><span class="u99v2-head-arrow">${ICON.arrow}</span></div>
-        <div class="u99v2-meta">${ratingBadge(r)}${delivery ? `<i>•</i><span class="u99v2-delivery">${ICON.clock}${esc(delivery)}</span>` : ''}${cuisine ? `<i>•</i><span class="u99v2-cuisine">${esc(cuisine)}</span>` : ''}</div>
-        ${free}
+  function freeDeliveryMarkup(r){
+    if(r.freeDeliveryAbove==null)return '';
+    return `<div class="u99-free-row"><span class="u99-free-icon" aria-hidden="true">${icon.offerSeal}</span><span class="u99-free-text">Free delivery above ₹${num(r.freeDeliveryAbove)}</span><button class="u99-info" data-action="info" aria-label="Free delivery information">${icon.info}</button></div>`;
+  }
+
+  function cardMarkup(r,menu){
+    const cuisine=String(r.cuisine||'').trim();
+    const delivery=String(r.deliveryTime||'').trim();
+
+    return `<article class="u99-restaurant-card">
+      <button class="u99-restaurant-head" type="button" data-action="restaurant" aria-label="Open ${esc(r.name||'restaurant')}">
+        <div class="u99-card-copy">
+          <div class="u99-discount-line">${restaurantOffer(r)}</div>
+          <h2 class="u99-restaurant-name">${esc(r.name||'Restaurant')}</h2>
+          <div class="u99-meta">
+            ${ratingMarkup(r)}
+            ${delivery?`<span class="u99-sep">•</span><span class="u99-delivery">${icon.clock}${esc(delivery)}</span>`:''}
+            ${cuisine?`<span class="u99-sep">•</span><span class="u99-cuisine">${esc(cuisine)}</span>`:''}
+          </div>
+          ${freeDeliveryMarkup(r)}
+        </div>
       </button>
-      <div class="u99v2-rule"></div>
-      <div class="u99v2-carousel" tabindex="0" aria-label="${esc(r.name || 'Restaurant')} menu">${menu.map(item => itemMarkup(item, r)).join('')}</div>
+      <div class="u99-carousel-wrap">
+        <div class="u99-carousel" tabindex="0" aria-label="${esc(r.name||'Restaurant')} menu">${menu.map(i=>itemMarkup(i,r)).join('')}</div>
+      </div>
     </article>`;
   }
 
-  function sortedMenu(r){
-    return Array.isArray(r.menu)
-      ? [...r.menu].filter(x => x && num(x.price) > 0).sort((a,b) => num(a.price)-num(b.price) || String(a.name||'').localeCompare(String(b.name||'')))
-      : [];
+  // host -> restaurant object, so a rebuilt card (new inner DOM) still resolves
+  // its data and a delegated listener bound once keeps working.
+  const hostData=new WeakMap();
+
+  function findItem(r,itemId){
+    return (r.menu||[]).find(x=>String(x.id||x._id||'')===String(itemId));
   }
 
-  const data = new WeakMap();
-
-  function findItem(r, id){
-    return (r.menu || []).find(x => idOf(x) === String(id));
+  function bindCard(host,r){
+    hostData.set(host,r);
+    // Delegated click — survives partial re-renders of the action buttons, so
+    // the carousel and images are never rebuilt just to update a + / stepper.
+    if(!host.__u99click){
+      host.__u99click=true;
+      host.addEventListener('click',e=>{
+        const rr=hostData.get(host); if(!rr)return;
+        const button=e.target.closest('[data-action]');
+        if(!button||!host.contains(button))return;
+        const action=button.dataset.action;
+        const id=String(rr.id||rr._id||'');
+        if(action==='add'||action==='plus'||action==='minus'){
+          e.stopPropagation();
+          const item=findItem(rr,button.closest('.u99-item')?.dataset.itemId);
+          if(item)changeCart(item,rr,action==='minus'?-1:1);
+        } else if(action==='customize'){
+          e.stopPropagation();
+          const item=findItem(rr,button.closest('.u99-item')?.dataset.itemId);
+          if(item)openCustomize(item,rr);
+        } else if(action==='restaurant'||action==='full-menu'){
+          e.stopPropagation();
+          if(id)window.location.href=`restaurant.html?id=${encodeURIComponent(id)}`;
+        } else if(action==='info'){
+          e.stopPropagation();
+          if(typeof window.showToast==='function')window.showToast(`Free delivery above ₹${num(rr.freeDeliveryAbove)}`);
+        }
+      });
+    }
+    bindWheel(host);
   }
 
-  function bindHost(host, restaurant){
-    if (!host || host.__u99v2Bound) return;
-    host.__u99v2Bound = true;
-    data.set(host, restaurant);
-    host.addEventListener('click', e => {
-      const actionEl = e.target.closest('[data-action]');
-      if (!actionEl || !host.contains(actionEl)) return;
-      const action = actionEl.dataset.action;
-      const r = data.get(host);
-      if (!r) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if (action === 'restaurant') {
-        const rid = idOf(r);
-        if (rid) window.location.href = `restaurant.html?id=${encodeURIComponent(rid)}`;
-        return;
-      }
-      if (action === 'info') {
-        const msg = `Free delivery above ₹${Math.round(num(r.freeDeliveryAbove))}`;
-        if (typeof window.showToast === 'function') window.showToast(msg);
-        else if (typeof window.toast === 'function') window.toast(msg);
-        return;
-      }
-      const item = findItem(r, actionEl.closest('.u99v2-item')?.dataset.itemId);
-      if (!item) return;
-      if (action === 'customize') openCustomize(item, r);
-      else if (action === 'add' || action === 'plus') changeCart(item, r, 1);
-      else if (action === 'minus') changeCart(item, r, -1);
-    });
-
-    const carousel = host.querySelector('.u99v2-carousel');
-    if (carousel) {
-      carousel.addEventListener('wheel', e => {
-        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) carousel.scrollLeft += e.deltaY;
-      }, {passive:true});
+  function bindWheel(host){
+    const carousel=host.querySelector('.u99-carousel');
+    if(carousel && !carousel.__u99wheel){
+      carousel.__u99wheel=true;
+      carousel.addEventListener('wheel',e=>{
+        if(Math.abs(e.deltaY)>Math.abs(e.deltaX))carousel.scrollLeft+=e.deltaY;
+      },{passive:true});
     }
   }
 
-  function syncCard(host, restaurant){
-    if (!host || !restaurant) return;
-    const menu = sortedMenu(restaurant);
-    host.querySelectorAll('.u99v2-item').forEach(itemEl => {
-      const item = findItem(restaurant, itemEl.dataset.itemId);
-      if (!item) return;
-      const action = itemEl.querySelector('.u99v2-action');
-      if (action) action.innerHTML = actionControl(item, restaurant);
+  function sortedMenu(r){
+    // Always lowest price -> highest, then name; API order never wins.
+    return Array.isArray(r.menu)
+      ? [...r.menu].filter(i=>i && num(i.price)>0).sort((a,b)=>num(a.price)-num(b.price)||String(a.name).localeCompare(String(b.name)))
+      : [];
+  }
+
+  // Lightweight update: refresh ONLY the +/stepper/customize controls in place.
+  // Keeps carousel scroll position and loaded images untouched.
+  function syncCard(host,r){
+    const menu=sortedMenu(r);
+    host.querySelectorAll('.u99-item').forEach(el=>{
+      const itemId=el.dataset.itemId;
+      const item=menu.find(x=>String(x.id||x._id||'')===String(itemId))||findItem(r,itemId);
+      if(!item)return;
+      const action=el.querySelector('.u99-item-action');
+      if(action)action.innerHTML=addControl(item,r);
     });
   }
 
-  function refreshCard(host, restaurant){
-    if (!host || !restaurant) return;
-    const menu = sortedMenu(restaurant);
-    host.innerHTML = cardMarkup(restaurant, menu);
-    bindHost(host, restaurant);
+  function syncAllCards(){
+    document.querySelectorAll('[data-under99-restaurant]').forEach(host=>{
+      const r=hostData.get(host);
+      if(r)syncCard(host,r);
+    });
   }
 
-  function createRestaurantCard(restaurant){
-    ensureStyles();
-    const host = document.createElement('div');
-    host.className = 'u99v2-host';
-    host.dataset.under99Restaurant = idOf(restaurant);
-    refreshCard(host, restaurant);
+  // The shared customization sheet (restaurant.html) writes to the cart and
+  // calls window.updateGlobalCart() but doesn't know about our cards. Wrap it
+  // once so any confirmed customized add re-syncs our + badges.
+  function hookGlobalCart(){
+    if(window.__u99CartHooked)return;
+    window.__u99CartHooked=true;
+    const prev=window.updateGlobalCart;
+    window.updateGlobalCart=function(){
+      const ret=(typeof prev==='function')?prev.apply(this,arguments):undefined;
+      try{syncAllCards();}catch(_){}
+      return ret;
+    };
+  }
+
+  function refreshCard(host,r){
+    const menu=sortedMenu(r);
+    host.innerHTML=cardMarkup(r,menu);
+    menu.forEach(i=>{ if(isCustomisable(i))registerCustomization(i,r); });
+    bindCard(host,r);
+  }
+
+  function createRestaurantCard(r){
+    hookGlobalCart();
+    const host=document.createElement('div');
+    host.className='u99-card-host';
+    host.dataset.under99Restaurant=String(r.id||r._id||'');
+    const menu=sortedMenu(r);
+    host.innerHTML=cardMarkup(r,menu);
+    menu.forEach(i=>{ if(isCustomisable(i))registerCustomization(i,r); });
+    bindCard(host,r);
     return host;
   }
 
-  /* Repaint only controls after an external cart mutation (cart restore,
-     checkout return, another component, etc.). */
-  document.addEventListener('eatswada:cart-updated', () => {
-    document.querySelectorAll('[data-under99-restaurant]').forEach(host => {
-      const r = data.get(host);
-      if (r) syncCard(host, r);
-    });
-  });
+  function injectStyles(){
+    if(document.getElementById('under99-card-styles'))return;
+    const s=document.createElement('style');
+    s.id='under99-card-styles';
+    s.textContent=`
+      .u99-card-host{display:block;min-width:0}
+      .u99-restaurant-card{
+        background:#fff;
+        border:1px solid #E3E6EA;
+        border-radius:24px;
+        padding:17px 16px 16px;
+        box-shadow:0 2px 10px rgba(16,24,40,.045);
+        overflow:hidden;
+      }
+      .u99-restaurant-head{
+        position:relative;width:100%;padding:0;border:0;background:transparent;
+        text-align:left;color:#101828;display:block;
+      }
+      .u99-card-copy{min-width:0}
+      .u99-discount-line{
+        color:#EC168C;font-size:14px;line-height:1.05;font-weight:800;
+        letter-spacing:-.2px;margin:0 0 5px;text-transform:uppercase;
+      }
+      .u99-restaurant-name{
+        margin:0 0 8px;font-size:21px;line-height:1.08;font-weight:800;
+        letter-spacing:-.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      }
+      .u99-meta{
+        display:flex;align-items:center;flex-wrap:nowrap;gap:5px;color:#747B87;
+        font-size:11.5px;font-weight:600;line-height:1.25;min-width:0;overflow:hidden;
+      }
+      .u99-rating{display:inline-flex;align-items:center;gap:5px;color:#344054;white-space:nowrap;flex:0 0 auto}
+      .u99-rating .u99-rating-badge{width:17px;height:17px;flex:0 0 17px;display:block}
+      .u99-rating b{font-weight:750}
+      .u99-rating-count{color:#747B87;font-weight:500}
+      .u99-sep{color:#C9CED6;flex:0 0 auto}
+      .u99-delivery{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex:0 0 auto}
+      .u99-delivery svg{width:16px;height:16px;flex:0 0 16px;color:#747B87}
+      .u99-cuisine{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+      .u99-free-row{
+        margin-top:7px;display:flex;align-items:center;gap:6px;min-width:0;
+        font-size:11.5px;font-weight:650;color:#26334A;line-height:1.2;white-space:nowrap;
+      }
+      .u99-free-icon{
+        width:22px;height:22px;flex:0 0 22px;display:grid;place-items:center;
+      }
+      .u99-free-icon .u99-seal{width:22px;height:22px;display:block}
+      .u99-free-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
+      .u99-info{
+        width:18px;height:18px;padding:0;border:0;background:transparent;color:#8791A1;
+        display:grid;place-items:center;flex:0 0 18px;
+      }
+      .u99-info svg{width:16px;height:16px}
 
-  /* ───────────────────────────────── CSS ───────────────────────────────── */
-  function ensureStyles(){
-    if (document.getElementById('u99v2-card-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'u99v2-card-styles';
-    style.textContent = `
-      .u99v2-host{display:block;min-width:0}
-      .u99v2-card{background:#fff;border:1px solid #E7E9ED;border-radius:22px;padding:16px 15px 15px;box-shadow:0 5px 20px rgba(20,24,35,.055);overflow:hidden}
-      .u99v2-head{display:block;width:100%;border:0;background:transparent;padding:0;text-align:left;color:#15171B;cursor:pointer}
-      .u99v2-offer{font-size:12px;line-height:1;font-weight:850;letter-spacing:.15px;color:#E51488;text-transform:uppercase;margin-bottom:6px}
-      .u99v2-title-row{display:flex;align-items:center;gap:7px;min-width:0}
-      .u99v2-title-row h2{margin:0;font-size:20px;line-height:1.1;font-weight:820;letter-spacing:-.48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .u99v2-head-arrow{margin-left:auto;width:22px;height:22px;display:grid;place-items:center;color:#8B929C;flex:0 0 22px}
-      .u99v2-head-arrow svg{width:18px;height:18px}
-      .u99v2-meta{display:flex;align-items:center;gap:5px;margin-top:8px;min-width:0;color:#727984;font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden}
-      .u99v2-meta i{font-style:normal;color:#C8CCD2}
-      .u99v2-rating{display:inline-flex;align-items:center;gap:4px;color:#30353C;flex:0 0 auto}
-      .u99v2-rating svg{width:16px;height:16px;color:#159A62}
-      .u99v2-rating b{font-weight:800}
-      .u99v2-rating-count{font-weight:500;color:#858B94}
-      .u99v2-delivery{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto}
-      .u99v2-delivery svg{width:15px;height:15px}
-      .u99v2-cuisine{overflow:hidden;text-overflow:ellipsis;min-width:0}
-      .u99v2-free{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:11.5px;font-weight:650;color:#354052;white-space:nowrap}
-      .u99v2-free>svg:first-child{width:17px;height:17px;color:#159A62;flex:0 0 17px}
-      .u99v2-free span{overflow:hidden;text-overflow:ellipsis}
-      .u99v2-free button{margin-left:0;padding:0;border:0;background:transparent;color:#969DA7;display:grid;place-items:center;cursor:pointer}
-      .u99v2-free button svg{width:15px;height:15px}
-      .u99v2-rule{height:1px;background:#EEF0F3;margin:13px 0 12px}
-      .u99v2-carousel{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 20px)/3);gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:0 1px 2px}
-      .u99v2-carousel::-webkit-scrollbar{display:none}
-      .u99v2-item{min-width:0;scroll-snap-align:start}
-      .u99v2-image{position:relative;width:100%;aspect-ratio:1.46/1;border-radius:16px;overflow:hidden;background:#F1F2F4}
-      .u99v2-image>img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;background:#F1F2F4}
-      .u99v2-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#B7BDC6;background:#F1F2F4}
-      .u99v2-fallback svg{width:27%;height:27%;fill:none;stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}
-      .u99v2-popular{position:absolute;top:7px;left:7px;padding:4px 7px;border-radius:7px;background:rgba(20,24,31,.78);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.15px}
-      .u99v2-action{position:absolute;right:7px;bottom:7px;z-index:2}
-      .u99v2-add,.u99v2-stepper{height:31px;border-radius:10px;background:#fff;border:1px solid #E1E4E8;box-shadow:0 4px 12px rgba(0,0,0,.11);font-size:10px;font-weight:850;color:#E51488}
-      .u99v2-add{min-width:52px;padding:0 10px;cursor:pointer}
-      .u99v2-add:hover{background:#FFF8FC}
-      .u99v2-add.custom{position:relative}
-      .u99v2-add.disabled{color:#A0A6AF;background:#F7F7F8;cursor:not-allowed;box-shadow:none}
-      .u99v2-qty-dot{position:absolute;right:-5px;top:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:#E51488;color:#fff;border:2px solid #fff;font-size:9px;line-height:14px}
-      .u99v2-stepper{display:flex;align-items:center;overflow:hidden}
-      .u99v2-stepper button{width:27px;height:30px;border:0;background:#fff;color:#E51488;font-size:17px;font-weight:750;cursor:pointer}
-      .u99v2-stepper b{min-width:18px;text-align:center;font-size:10px;color:#252A31}
-      .u99v2-item-name{display:flex;align-items:flex-start;gap:4px;margin-top:8px;min-height:30px;font-size:11.5px;line-height:1.28;font-weight:700;color:#252932}
-      .u99v2-item-name>span:last-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-      .u99v2-diet{width:10px;height:10px;margin-top:2px;border:1.5px solid #159A62;border-radius:2px;position:relative;flex:0 0 10px}
-      .u99v2-diet:after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:#159A62;left:1.5px;top:1.5px}
-      .u99v2-diet.nonveg{border-color:#C43B43}
-      .u99v2-diet.nonveg:after{background:#C43B43}
-      .u99v2-price{display:flex;align-items:center;gap:5px;margin-top:4px;min-width:0;white-space:nowrap}
-      .u99v2-price b{font-size:12.5px;color:#15181D;font-weight:850}
-      .u99v2-price del{font-size:9.5px;color:#9AA0A8}
-      .u99v2-price span{font-size:8px;font-weight:850;color:#159A62;overflow:hidden;text-overflow:ellipsis}
+      .u99-carousel-wrap{margin-top:13px}
+      .u99-carousel{
+        display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;
+        padding:0 0 3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+      }
+      .u99-carousel::-webkit-scrollbar{display:none}
 
-      /* Customization sheet — same cart data model as restaurant/cart pages. */
-      body.u99v2-sheet-open{overflow:hidden}
-      #u99v2-custom-root{position:fixed;inset:0;z-index:100000;pointer-events:none}
-      #u99v2-custom-root.open{pointer-events:auto}
-      .u99v2-cs-backdrop{position:absolute;inset:0;background:rgba(15,18,24,.42);opacity:0;transition:opacity .22s ease}
-      #u99v2-custom-root.open .u99v2-cs-backdrop{opacity:1}
-      .u99v2-cs-sheet{position:absolute;left:50%;bottom:0;width:min(560px,100%);max-height:min(82vh,720px);transform:translate(-50%,105%);background:#fff;border-radius:24px 24px 0 0;box-shadow:0 -12px 45px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;overflow:hidden}
-      #u99v2-custom-root.open .u99v2-cs-sheet{transform:translate(-50%,0)}
-      .u99v2-cs-grab{width:42px;height:4px;border-radius:99px;background:#D9DCE1;margin:9px auto 4px}
-      .u99v2-cs-close{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;background:#F1F2F4;color:#59606A;font-size:21px;line-height:1;cursor:pointer}
-      .u99v2-cs-head{display:flex;align-items:center;gap:10px;padding:12px 18px 13px;border-bottom:1px solid #EEF0F3}
-      .u99v2-cs-diet{width:13px;height:13px;border:1.7px solid #159A62;border-radius:3px;position:relative;flex:0 0 13px}
-      .u99v2-cs-diet:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:#159A62;left:2.2px;top:2.2px}
-      .u99v2-cs-diet.nonveg{border-color:#C43B43}.u99v2-cs-diet.nonveg:after{background:#C43B43}
-      .u99v2-cs-head h3{margin:0;font-size:17px;font-weight:820;color:#171A1F}
-      .u99v2-cs-head p{margin:3px 0 0;font-size:11px;color:#818792}
-      .u99v2-cs-body{overflow:auto;padding:4px 18px 18px}
-      .u99v2-group{padding:15px 0;border-bottom:1px solid #EEF0F3}
-      .u99v2-group-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}
-      .u99v2-group-head b{font-size:13px;color:#20242A}.u99v2-group-head span{font-size:10px;color:#8B919A}
-      .u99v2-opt{display:flex;align-items:center;gap:9px;min-height:44px;cursor:pointer}
-      .u99v2-opt-dot{width:11px;height:11px;border:1.5px solid #159A62;border-radius:3px;position:relative;flex:0 0 11px}.u99v2-opt-dot:after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:#159A62;left:2px;top:2px}.u99v2-opt-dot.nonveg{border-color:#C43B43}.u99v2-opt-dot.nonveg:after{background:#C43B43}
-      .u99v2-opt-name{font-size:12px;color:#2B3037;flex:1}.u99v2-opt-price,.u99v2-opt-free{font-size:11px;color:#777E88}.u99v2-opt-price{font-weight:700}
-      .u99v2-opt input{width:17px;height:17px;accent-color:#E51488;margin-left:4px}
-      .u99v2-cs-footer{display:flex;gap:10px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #E9EBEF;background:#fff}
-      .u99v2-cs-qty{height:48px;border:1px solid #E1E4E8;border-radius:13px;display:flex;align-items:center;overflow:hidden}.u99v2-cs-qty button{width:40px;height:48px;border:0;background:#fff;color:#E51488;font-size:19px}.u99v2-cs-qty b{min-width:28px;text-align:center;font-size:13px}
-      .u99v2-cs-add{flex:1;height:48px;border:0;border-radius:13px;background:#E51488;color:#fff;font-size:13px;font-weight:800}.u99v2-cs-add:disabled{background:#D9DCE1;color:#878D96}
+      /* Keep Eatswada's own wider/taller tile proportion. The benchmark's tile dimensions are NOT copied. */
+      .u99-item{
+        flex:0 0 calc((100% - 20px)/3);
+        width:calc((100% - 20px)/3);
+        min-width:0;scroll-snap-align:start;
+      }
+      /* Same tile proportion (aspect-ratio 1.46/1) and object-fit as before —
+         only the layer stacking is fixed. Image and fallback are pinned to the
+         SAME box so a valid/transparent image never leaves a grey strip. */
+      .u99-item-image{
+        position:relative;width:100%;aspect-ratio:1.46/1;border-radius:12px;
+        overflow:visible;background:#F1F3F6;
+      }
+      .u99-item-image img,.u99-image-fallback{
+        position:absolute;inset:0;width:100%;height:100%;border-radius:12px;
+        object-fit:cover;display:block;
+      }
+      /* Make the HTML hidden attribute authoritative — never let the display
+         rules below override it. This is the actual grey-mountain fix. */
+      .u99-item-image img[hidden],.u99-image-fallback[hidden]{display:none!important}
+      .u99-image-fallback{display:grid;place-items:center;color:#C1C7D0;background:#F1F3F6}
+      .u99-image-fallback svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+      .u99-popular{
+        position:absolute;left:6px;top:6px;z-index:2;background:#fff;color:#16865A;
+        border-radius:999px;padding:4px 7px;font-size:9px;line-height:1;font-weight:800;
+        box-shadow:0 2px 6px rgba(16,24,40,.08);white-space:nowrap;
+      }
+      .u99-item-action{position:absolute;right:3px;bottom:-9px;z-index:4}
+      .u99-add{
+        width:38px;height:38px;border-radius:50%;border:2px solid #EC168C;
+        background:#fff;color:#EC168C;display:grid;place-items:center;
+        box-shadow:0 2px 7px rgba(16,24,40,.10);font-size:24px;line-height:1;
+        font-weight:500;padding:0;
+      }
+      .u99-add:active{transform:scale(.94)}
+      .u99-add-cust{position:relative}
+      .u99-cust-qty{
+        position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;
+        border-radius:999px;background:#159A62;color:#fff;font-size:9px;font-weight:800;
+        line-height:1;display:grid;place-items:center;box-shadow:0 1px 3px rgba(16,24,40,.22);
+      }
+      .u99-unavailable{font-size:7px;width:54px;height:30px;border-color:#DFE3E9;color:#8D96A5}
+      .u99-stepper{
+        height:32px;min-width:72px;border:2px solid #EC168C;border-radius:10px;background:#fff;
+        display:flex;align-items:center;justify-content:space-between;
+        box-shadow:0 2px 7px rgba(16,24,40,.10);padding:0 2px;
+      }
+      .u99-stepper button{
+        width:23px;height:27px;border:0;background:transparent;color:#EC168C;font-size:16px;
+        font-weight:800;display:grid;place-items:center;padding:0;
+      }
+      .u99-stepper span{font-size:10px;font-weight:800;color:#101828}
 
-      @media(max-width:560px){
-        .u99v2-card{border-radius:20px;padding:15px 13px 14px}
-        .u99v2-carousel{grid-auto-columns:calc((100% - 18px)/3);gap:9px}
-        .u99v2-title-row h2{font-size:18px}
+      .u99-item-name{
+        margin:8px 1px 0;min-height:30px;max-height:30px;display:flex;align-items:flex-start;gap:4px;
+        color:#101828;font-size:10.5px;line-height:1.35;font-weight:650;overflow:hidden;
+      }
+      .u99-item-name>span:last-child{
+        min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+      }
+      .u99-dietary{
+        width:15px;height:15px;flex:0 0 15px;margin-top:0;border:1.5px solid #16885D;
+        border-radius:4px;display:grid;place-items:center;
+      }
+      .u99-dietary:after{content:"";width:5px;height:5px;border-radius:50%;background:#16885D}
+      .u99-dietary.u99-nonveg{border-color:#E5264F}
+      .u99-dietary.u99-nonveg:after{
+        width:0;height:0;border-radius:0;background:transparent;
+        border-left:3px solid transparent;border-right:3px solid transparent;border-bottom:5px solid #E5264F;
+      }
+      .u99-price-row{
+        display:flex;align-items:center;flex-wrap:nowrap;gap:4px;margin:7px 1px 0;min-height:21px;overflow:hidden;
+      }
+      .u99-price-row strong{font-size:15px;line-height:1;font-weight:800;color:#101828;flex:0 0 auto}
+      .u99-old-price{font-size:9px;color:#8992A0;text-decoration:line-through;flex:0 0 auto}
+      .u99-off{
+        background:#FFF0F8;color:#EC168C;padding:5px 6px;border-radius:999px;
+        font-size:7.5px;line-height:1;font-weight:800;white-space:nowrap;flex:0 0 auto;
+      }
+
+      @media(max-width:430px){
+        .u99-restaurant-card{padding:15px 14px 14px;border-radius:23px}
+        .u99-discount-line{font-size:13px}
+        .u99-restaurant-name{font-size:20px;margin-bottom:6px}
+        .u99-meta{font-size:10.8px;gap:4px}
+        .u99-carousel-wrap{margin-top:11px}
+        .u99-carousel{gap:8px}
+        .u99-item{flex-basis:calc((100% - 16px)/3);width:calc((100% - 16px)/3)}
+        .u99-item-image{border-radius:11px}
+        .u99-item-image img,.u99-image-fallback{border-radius:11px}
+        .u99-add{width:36px;height:36px;font-size:23px}
+        .u99-item-name{font-size:10px;min-height:29px;max-height:29px}
+        .u99-price-row{gap:3px}
+        .u99-price-row strong{font-size:14px}
+        .u99-old-price{font-size:8.5px}
+        .u99-off{font-size:7px;padding:4.5px 5px}
+      }
+      @media(max-width:370px){
+        .u99-restaurant-card{padding:14px 12px 13px}
+        .u99-restaurant-name{font-size:19px}
+        .u99-meta{font-size:10px}
+        .u99-free-row{font-size:10.5px}
+        .u99-item-name{font-size:9.5px}
+        .u99-price-row strong{font-size:13px}
       }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(s);
   }
 
-  ensureStyles();
-  window.Eatswada99Card = { createRestaurantCard, refreshCard, changeCart };
+  injectStyles();
+  window.Eatswada99Card={createRestaurantCard,refreshCard,changeCart};
 })();
