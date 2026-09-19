@@ -462,6 +462,81 @@
     color:var(--ct-green-deep);
   }
 
+  /* ── Savings hero (real MRP-vs-price savings — stays GREEN) ───────── */
+  .ct-savings-hero{
+    display:none; align-items:center; gap:12px;
+    margin:12px 14px; padding:13px 14px;
+    background:#ECFDF3; border:1px solid #BBF3D0;
+    border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow);
+  }
+  .ct-savings-hero.show{ display:flex; }
+  .ct-savings-ic{
+    width:38px; height:38px; flex:0 0 38px; border-radius:11px;
+    background:#D8F7E4; color:var(--ct-save);
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .ct-savings-copy{ flex:1; min-width:0; }
+  .ct-savings-title{ font-size:14.5px; font-weight:800; color:#0F5F3D; letter-spacing:-.2px; line-height:1.2; }
+  .ct-savings-sub{ margin-top:3px; font-size:11.5px; font-weight:600; color:#3C7A5C; line-height:1.35; }
+  .ct-savings-sub s{ color:#8FB3A2; font-weight:600; }
+  .ct-savings-badge{
+    flex:0 0 auto; text-align:center;
+    font-size:8.5px; font-weight:800; letter-spacing:.4px; line-height:1.2;
+    color:var(--ct-save); background:#fff; border:1px dashed #9FE3BC;
+    border-radius:10px; padding:6px 8px; text-transform:uppercase;
+  }
+
+  /* ── Add more items (action → magenta) ───────────────────────────── */
+  .ct-addmore{
+    display:inline-flex; align-items:center; gap:8px;
+    margin:12px 14px 0; padding:10px 15px;
+    background:var(--ct-green-soft); color:var(--ct-green);
+    border:1px solid rgba(194,24,91,.18); border-radius:11px;
+    font-size:12.5px; font-weight:800; letter-spacing:.2px;
+    text-decoration:none;
+  }
+  .ct-addmore i{ font-size:12px; }
+
+  /* ── Delivery instruction quick chips ─────────────────────────────── */
+  .ct-di-wrap{ margin:12px 14px 0; }
+  .ct-di-label{
+    font-size:12px; font-weight:800; letter-spacing:.4px; text-transform:uppercase;
+    color:var(--ct-muted); margin-bottom:9px;
+  }
+  .ct-di-row{
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:2px;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  }
+  .ct-di-row::-webkit-scrollbar{ display:none; }
+  .ct-di-chip{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:7px;
+    font:inherit; font-size:12px; font-weight:700; color:var(--ct-ink-2);
+    background:var(--ct-surface); border:1.5px solid var(--ct-line);
+    border-radius:999px; padding:9px 14px; min-height:40px; white-space:nowrap;
+    transition:border-color .16s ease, background .16s ease, color .16s ease;
+  }
+  .ct-di-chip i{ font-size:12px; color:var(--ct-muted); }
+  .ct-di-chip[aria-pressed="true"]{
+    border-color:var(--ct-green); background:var(--ct-green-soft); color:var(--ct-green-deep);
+  }
+  .ct-di-chip[aria-pressed="true"] i{ color:var(--ct-green); }
+
+  /* ── Footer savings line (green) ──────────────────────────────────── */
+  .ct-footer-save{
+    display:none; align-items:center; justify-content:center; gap:7px;
+    margin:-2px 2px 0; font-size:12px; font-weight:800; color:var(--ct-save);
+    letter-spacing:.2px;
+  }
+  .ct-footer-save.show{ display:flex; }
+  .ct-footer-save i{ font-size:11px; }
+
+  /* ── Honest no-fees reassurance (true for Eatswada; green) ────────── */
+  .ct-nofees{
+    margin:12px 0 2px; padding:10px 12px; border-radius:11px;
+    background:#ECFDF3; color:#0F5F3D;
+    font-size:11.5px; font-weight:800; letter-spacing:.1px; text-align:center;
+  }
+
   /* ── Bottom sheets ────────────────────────────────────────────────── */
   body.ct-sheet-open{ overflow:hidden; }
 
@@ -711,6 +786,17 @@
 
     <div class="ct-card" id="cart-items-list"></div>
 
+    <a class="ct-addmore tap" id="ct-addmore" href="index.html"><i class="fa-solid fa-plus"></i> Add more items</a>
+
+    <div class="ct-savings-hero" id="ct-savings-hero" role="status" aria-live="polite">
+      <div class="ct-savings-ic" aria-hidden="true"><i class="fa-solid fa-tags"></i></div>
+      <div class="ct-savings-copy">
+        <div class="ct-savings-title" id="ct-savings-title">You saved ₹0</div>
+        <div class="ct-savings-sub" id="ct-savings-sub"></div>
+      </div>
+      <div class="ct-savings-badge">EVERYDAY<br>LOW PRICES</div>
+    </div>
+
     <div class="ct-strip" id="free-delivery-nudge" style="display:none;" role="status" aria-live="polite">
       <i class="fa-solid fa-motorcycle" id="nudge-icon" aria-hidden="true"></i>
       <span class="ct-strip-copy">
@@ -736,6 +822,10 @@
     <div id="restaurant-notes-list" class="ct-restaurant-notes" aria-label="Restaurant notes"></div>
 
     <!-- ── Delivery instructions (separate field, separate sheet) ─────── -->
+    <div class="ct-di-wrap">
+      <div class="ct-di-label">Quick delivery instructions</div>
+      <div class="ct-di-row" id="ct-di-row" role="group" aria-label="Quick delivery instructions"></div>
+    </div>
     <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
       <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-motorcycle"></i></span>
       <span class="ct-line-copy">
@@ -810,8 +900,10 @@
       </div>
     </div>
 
+    <div class="ct-footer-save" id="ct-footer-save"><i class="fa-solid fa-tags"></i> <span id="ct-footer-save-text"></span></div>
+
     <button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
-      <span class="ct-cta-text" id="checkout-label">Place order</span>
+      <span class="ct-cta-text" id="checkout-label">Proceed to Pay</span>
       <span class="ct-cta-val" id="checkout-total">₹0</span>
     </button>
   </div>
@@ -901,6 +993,8 @@
           <span class="ct-total-label">To pay</span>
           <span class="ct-total-val" id="bill-total">₹0</span>
         </div>
+
+        <div class="ct-nofees">No packaging or platform fees. Ever.</div>
 
       </div>
 
@@ -1418,7 +1512,9 @@ const ctState = {
   deliveryInstructions: '',
   tipAmount: 0,
   couponCode: '',
-  couponDiscount: 0
+  couponDiscount: 0,
+  itemSavings: 0,
+  originalCartTotal: 0
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1639,6 +1735,14 @@ function paintBill(savedCart) {
     savingsVal.textContent = '₹' + savings.toFixed(0);
   }
 
+  ctState.itemSavings = savings;
+  ctState.originalCartTotal = originalCartTotal;
+  const ctAddMore = document.getElementById('ct-addmore');
+  if (ctAddMore) {
+    const rid = getCartRestaurantId(savedCart);
+    ctAddMore.setAttribute('href', rid ? ('restaurant.html?id=' + encodeURIComponent(rid)) : 'index.html');
+  }
+
   const legacySavings = document.getElementById('bill-savings');
   if (legacySavings) {
     legacySavings.textContent = '';
@@ -1688,6 +1792,8 @@ function applyTotals() {
   document.getElementById('bill-total').innerText = '₹' + total;
   document.getElementById('checkout-total').innerText = '₹' + total;
   updateBillCompact(total);
+  paintSavingsHero();
+  paintFooterSavings();
 }
 
 /* Collapsed summary of the same figures shown in the sheet. */
@@ -1900,7 +2006,7 @@ function updateCheckoutCta() {
   }
   btn.classList.remove('locked');
   btn.setAttribute('aria-disabled', 'false');
-  label.innerHTML = `Place order<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
+  label.innerHTML = `Proceed to Pay<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
 }
 
 /* ── Render ─────────────────────────────────────────────────────────────── */
@@ -2539,6 +2645,77 @@ function paintNoteCards() {
   if (act) act.hidden = !value;
   if (chev) chev.hidden = !!value;
   card.setAttribute('aria-label', value ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.' : cfg.idleTitle);
+  paintDeliveryChips();
+}
+
+/* ── Delivery-instruction quick chips ───────────────────────────────────────
+   These write into the SAME ctState.deliveryInstructions string the sheet uses
+   (merged with any custom text), so they persist and are sent to POST /orders
+   exactly like a typed instruction. No new storage, no new order field. */
+const CT_DI_PRESETS = [
+  { label: 'Leave at the door',   icon: 'fa-door-closed' },
+  { label: 'Call on arrival',     icon: 'fa-phone' },
+  { label: 'Avoid calling',       icon: 'fa-phone-slash' },
+  { label: "Don't ring the bell", icon: 'fa-bell-slash' },
+  { label: 'Leave at the gate',   icon: 'fa-warehouse' }
+];
+function ctInstructionTokens(){
+  return String(ctState.deliveryInstructions || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+function paintDeliveryChips(){
+  const row = document.getElementById('ct-di-row');
+  if (!row) return;
+  const selected = ctInstructionTokens().map(t => t.toLowerCase());
+  row.innerHTML = CT_DI_PRESETS.map(p =>
+    '<button type="button" class="ct-di-chip" data-di="' + esc(p.label) + '" aria-pressed="' +
+    (selected.includes(p.label.toLowerCase()) ? 'true' : 'false') + '">' +
+    '<i class="fa-solid ' + p.icon + '" aria-hidden="true"></i>' + esc(p.label) + '</button>'
+  ).join('');
+}
+function toggleDeliveryChip(label){
+  const presetLower = CT_DI_PRESETS.map(p => p.label.toLowerCase());
+  const tokens = ctInstructionTokens();
+  const custom = tokens.filter(t => !presetLower.includes(t.toLowerCase()));
+  let presets = tokens.filter(t => presetLower.includes(t.toLowerCase()));
+  const has = presets.some(t => t.toLowerCase() === label.toLowerCase());
+  presets = has ? presets.filter(t => t.toLowerCase() !== label.toLowerCase()) : presets.concat([label]);
+  ctState.deliveryInstructions = ctCleanNote(presets.concat(custom).join(', '));
+  saveCartExtras();
+  paintNoteCards();
+}
+
+/* ── Savings hero + footer savings — display only, from the SAME real
+   MRP-vs-price figures already computed in paintBill(). Nothing invented. */
+function paintSavingsHero(){
+  const hero = document.getElementById('ct-savings-hero');
+  if (!hero) return;
+  const saved = Number(ctState.itemSavings || 0);
+  const orig  = Number(ctState.originalCartTotal || 0);
+  const now   = Number(ctState.subtotal || 0);
+  const freeDelivery = ctState.deliveryReady && ctState.deliveryFee === 0 && !ctState.unavailable && ctState.units > 0;
+  if (saved <= 0 && !freeDelivery){ hero.classList.remove('show'); return; }
+  hero.classList.add('show');
+  const title = document.getElementById('ct-savings-title');
+  const sub   = document.getElementById('ct-savings-sub');
+  if (title) title.textContent = saved > 0 ? ('You saved ₹' + saved.toFixed(0) + ' on this order') : 'Free delivery on this order';
+  if (sub){
+    let html = '';
+    if (saved > 0) html += 'MRP <s>₹' + orig.toFixed(0) + '</s> · You pay ₹' + now.toFixed(0);
+    if (freeDelivery) html += (html ? ' · ' : '') + 'Free delivery';
+    sub.innerHTML = html;
+  }
+}
+function paintFooterSavings(){
+  const el  = document.getElementById('ct-footer-save');
+  const txt = document.getElementById('ct-footer-save-text');
+  if (!el || !txt) return;
+  const saved = Number(ctState.itemSavings || 0);
+  if (saved > 0 && ctState.units > 0){
+    txt.textContent = '₹' + saved.toFixed(0) + ' saved on this order';
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
 }
 
 function updateNoteCount() {
@@ -2854,6 +3031,12 @@ document.addEventListener('click', (event) => {
     if (value === ctCleanTip(ctState.tipAmount)) return;    // already selected
     setTip(value);
     showToast(value > 0 ? '₹' + value + ' tip added for your delivery partner' : 'Tip removed');
+    return;
+  }
+
+  const diChip = target.closest('#ct-di-row .ct-di-chip[data-di]');
+  if (diChip) {
+    toggleDeliveryChip(diChip.dataset.di);
     return;
   }
 });
