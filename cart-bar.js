@@ -611,6 +611,7 @@
     const savedCart = safeGetCart();
     if(CART_BAR_MODE==='pink' && document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
     const itemNames = Object.keys(savedCart);
+    const groups = restaurantGroups(savedCart);
     const root = document.getElementById('white-cart-root');
     const countEl = document.getElementById('wc-item-count');
     const homeCountEl = document.getElementById('wc-home-count');
