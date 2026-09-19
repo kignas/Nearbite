@@ -346,167 +346,421 @@
     const s=document.createElement('style');
     s.id='under99-card-styles';
     s.textContent=`
-      .u99-card-host{display:block;min-width:0}
+      /* =========================================================
+         Eatswada 99 Store — production card system
+         Layout is intentionally independent from the benchmark
+         food-tile proportions. Food tiles stay at 1.46:1.
+         ========================================================= */
+      .u99-card-host{
+        display:block;
+        min-width:0;
+      }
+
       .u99-restaurant-card{
+        position:relative;
         background:#fff;
-        border:1px solid #E7E9ED;
-        border-radius:24px;
-        padding:16px 16px 15px;
-        box-shadow:0 2px 10px rgba(16,24,40,.04);
+        border:1px solid #E5E7EB;
+        border-radius:20px;
+        padding:13px 13px 12px;
+        box-shadow:0 2px 12px rgba(16,24,40,.045);
         overflow:hidden;
       }
+
       .u99-restaurant-head{
-        position:relative;width:100%;padding:0;border:0;background:transparent;
-        text-align:left;color:#101828;display:block;
+        position:relative;
+        width:100%;
+        padding:0;
+        border:0;
+        background:transparent;
+        text-align:left;
+        color:#101828;
+        display:block;
       }
+
       .u99-card-copy{min-width:0}
+
       .u99-discount-line{
-        color:#EC168C;font-size:12px;line-height:1.05;font-weight:700;
-        letter-spacing:.3px;margin:0 0 4px;text-transform:uppercase;
+        color:#D81B78;
+        font-size:11px;
+        line-height:1.1;
+        font-weight:800;
+        letter-spacing:.15px;
+        margin:0 0 3px;
+        text-transform:uppercase;
       }
+
       .u99-restaurant-name{
-        margin:0 0 5px;font-size:21px;line-height:1.08;font-weight:800;
-        letter-spacing:-.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        margin:0 0 5px;
+        font-size:20px;
+        line-height:1.05;
+        font-weight:800;
+        letter-spacing:-.55px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
       }
+
       .u99-meta{
-        display:flex;align-items:center;flex-wrap:nowrap;gap:5px;color:#747B87;
-        font-size:12px;font-weight:600;line-height:1.25;min-width:0;overflow:hidden;
+        display:flex;
+        align-items:center;
+        flex-wrap:nowrap;
+        gap:5px;
+        color:#747B87;
+        font-size:11.5px;
+        font-weight:600;
+        line-height:1.2;
+        min-width:0;
+        overflow:hidden;
       }
-      .u99-rating{display:inline-flex;align-items:center;gap:5px;color:#344054;white-space:nowrap;flex:0 0 auto}
-      .u99-rating .u99-rating-badge{width:16px;height:16px;flex:0 0 16px;display:block}
-      .u99-rating b{font-weight:750}
+
+      .u99-rating{
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        color:#344054;
+        white-space:nowrap;
+        flex:0 0 auto;
+      }
+      .u99-rating .u99-rating-badge{
+        width:16px;height:16px;flex:0 0 16px;display:block;
+      }
+      .u99-rating b{font-weight:800}
       .u99-rating-count{color:#747B87;font-weight:500}
-      .u99-sep{color:#C9CED6;flex:0 0 auto}
-      .u99-delivery{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex:0 0 auto}
-      .u99-delivery svg{width:16px;height:16px;flex:0 0 16px;color:#747B87}
-      .u99-cuisine{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+
+      .u99-sep{color:#D0D5DD;flex:0 0 auto}
+
+      .u99-delivery{
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        white-space:nowrap;
+        flex:0 0 auto;
+      }
+      .u99-delivery svg{
+        width:15px;height:15px;flex:0 0 15px;color:#7A8494;
+      }
+
+      .u99-cuisine{
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+        min-width:0;
+      }
+
       .u99-free-row{
-        margin-top:6px;display:flex;align-items:center;gap:6px;min-width:0;
-        font-size:12.5px;font-weight:650;color:#26334A;line-height:1.2;white-space:nowrap;
+        margin-top:5px;
+        display:flex;
+        align-items:center;
+        gap:5px;
+        min-width:0;
+        font-size:12px;
+        font-weight:650;
+        color:#26334A;
+        line-height:1.2;
+        white-space:nowrap;
       }
       .u99-free-icon{
         width:18px;height:18px;flex:0 0 18px;display:grid;place-items:center;
       }
       .u99-free-icon .u99-seal{width:18px;height:18px;display:block}
-      .u99-free-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
+      .u99-free-text{
+        min-width:0;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
       .u99-info{
-        width:18px;height:18px;margin-left:1px;padding:0;border:0;background:transparent;color:#8791A1;
-        display:grid;place-items:center;flex:0 0 18px;
+        width:18px;height:18px;
+        margin-left:0;
+        padding:0;
+        border:0;
+        background:transparent;
+        color:#8791A1;
+        display:grid;
+        place-items:center;
+        flex:0 0 18px;
       }
       .u99-info svg{width:15px;height:15px}
 
-      .u99-carousel-wrap{margin-top:10px}
+      /* Product rail: two strong visible columns.
+         Additional products remain horizontally scrollable. */
+      .u99-carousel-wrap{
+        margin-top:9px;
+        margin-left:-1px;
+        margin-right:-1px;
+      }
+
       .u99-carousel{
-        display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;
-        padding:0 0 3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+        display:flex;
+        gap:10px;
+        overflow-x:auto;
+        scroll-snap-type:x proximity;
+        padding:0 1px 2px;
+        scrollbar-width:none;
+        -webkit-overflow-scrolling:touch;
+        overscroll-behavior-x:contain;
       }
       .u99-carousel::-webkit-scrollbar{display:none}
 
-      /* Keep Eatswada's own wider/taller tile proportion. The benchmark's tile dimensions are NOT copied. */
       .u99-item{
-        flex:0 0 calc((100% - 20px)/3);
-        width:calc((100% - 20px)/3);
-        min-width:0;scroll-snap-align:start;
+        flex:0 0 calc((100% - 10px)/2);
+        width:calc((100% - 10px)/2);
+        min-width:0;
+        scroll-snap-align:start;
       }
-      /* Same tile proportion (aspect-ratio 1.46/1) and object-fit as before —
-         only the layer stacking is fixed. Image and fallback are pinned to the
-         SAME box so a valid/transparent image never leaves a grey strip. */
+
+      /* Eatswada food proportion — deliberately NOT copied from benchmark. */
       .u99-item-image{
-        position:relative;width:100%;aspect-ratio:1.46/1;border-radius:12px;
-        overflow:visible;background:#F1F3F6;
+        position:relative;
+        width:100%;
+        aspect-ratio:1.46/1;
+        border-radius:13px;
+        overflow:visible;
+        background:#F1F3F6;
       }
-      .u99-item-image img,.u99-image-fallback{
-        position:absolute;inset:0;width:100%;height:100%;border-radius:12px;
-        object-fit:cover;display:block;
+
+      .u99-item-image img,
+      .u99-image-fallback{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        border-radius:13px;
+        object-fit:cover;
+        display:block;
       }
-      /* Make the HTML hidden attribute authoritative — never let the display
-         rules below override it. This is the actual grey-mountain fix. */
-      .u99-item-image img[hidden],.u99-image-fallback[hidden]{display:none!important}
-      .u99-image-fallback{display:grid;place-items:center;color:#C1C7D0;background:#F1F3F6}
-      .u99-image-fallback svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+      .u99-item-image img[hidden],
+      .u99-image-fallback[hidden]{display:none!important}
+
+      .u99-image-fallback{
+        display:grid;
+        place-items:center;
+        color:#C1C7D0;
+        background:#F1F3F6;
+      }
+      .u99-image-fallback svg{
+        width:25px;height:25px;
+        fill:none;
+        stroke:currentColor;
+        stroke-width:1.5;
+        stroke-linecap:round;
+        stroke-linejoin:round;
+      }
+
       .u99-popular{
-        position:absolute;left:6px;top:6px;z-index:2;background:#fff;color:#16865A;
-        border-radius:999px;padding:4px 7px;font-size:9px;line-height:1;font-weight:800;
-        box-shadow:0 2px 6px rgba(16,24,40,.08);white-space:nowrap;
+        position:absolute;
+        left:6px;
+        top:6px;
+        z-index:2;
+        background:rgba(255,255,255,.96);
+        color:#16865A;
+        border-radius:999px;
+        padding:4px 7px;
+        font-size:9px;
+        line-height:1;
+        font-weight:800;
+        box-shadow:0 2px 6px rgba(16,24,40,.08);
+        white-space:nowrap;
       }
-      .u99-item-action{position:absolute;right:3px;bottom:-9px;z-index:4}
+
+      .u99-item-action{
+        position:absolute;
+        right:5px;
+        bottom:-9px;
+        z-index:4;
+      }
+
       .u99-add{
-        width:36px;height:36px;border-radius:50%;border:2px solid #EC168C;
-        background:#fff;color:#EC168C;display:grid;place-items:center;
-        box-shadow:0 2px 6px rgba(16,24,40,.09);font-size:22px;line-height:1;
-        font-weight:500;padding:0;
+        width:38px;
+        height:38px;
+        border-radius:50%;
+        border:1.8px solid #E01B83;
+        background:#fff;
+        color:#D91478;
+        display:grid;
+        place-items:center;
+        box-shadow:0 3px 9px rgba(16,24,40,.14);
+        font-size:22px;
+        line-height:1;
+        font-weight:500;
+        padding:0;
       }
       .u99-add:active{transform:scale(.94)}
+
       .u99-add-cust{position:relative}
       .u99-cust-qty{
-        position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;
-        border-radius:999px;background:#159A62;color:#fff;font-size:9px;font-weight:800;
-        line-height:1;display:grid;place-items:center;box-shadow:0 1px 3px rgba(16,24,40,.22);
+        position:absolute;
+        top:-6px;
+        right:-6px;
+        min-width:17px;
+        height:17px;
+        padding:0 4px;
+        border-radius:999px;
+        background:#159A62;
+        color:#fff;
+        font-size:9px;
+        font-weight:800;
+        line-height:1;
+        display:grid;
+        place-items:center;
+        box-shadow:0 1px 3px rgba(16,24,40,.22);
       }
-      .u99-unavailable{font-size:7px;width:54px;height:30px;border-color:#DFE3E9;color:#8D96A5}
+
+      .u99-unavailable{
+        font-size:7px;
+        width:54px;
+        height:30px;
+        border-color:#DFE3E9;
+        color:#8D96A5;
+      }
+
       .u99-stepper{
-        height:32px;min-width:72px;border:2px solid #EC168C;border-radius:10px;background:#fff;
-        display:flex;align-items:center;justify-content:space-between;
-        box-shadow:0 2px 7px rgba(16,24,40,.10);padding:0 2px;
+        height:34px;
+        min-width:78px;
+        border:1.8px solid #E01B83;
+        border-radius:11px;
+        background:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        box-shadow:0 3px 9px rgba(16,24,40,.12);
+        padding:0 2px;
       }
       .u99-stepper button{
-        width:23px;height:27px;border:0;background:transparent;color:#EC168C;font-size:16px;
-        font-weight:800;display:grid;place-items:center;padding:0;
+        width:25px;
+        height:29px;
+        border:0;
+        background:transparent;
+        color:#D91478;
+        font-size:17px;
+        font-weight:800;
+        display:grid;
+        place-items:center;
+        padding:0;
       }
-      .u99-stepper span{font-size:10px;font-weight:800;color:#101828}
+      .u99-stepper span{
+        font-size:11px;
+        font-weight:800;
+        color:#101828;
+      }
 
       .u99-item-name{
-        margin:8px 1px 0;min-height:31px;max-height:31px;display:flex;align-items:flex-start;gap:4px;
-        color:#101828;font-size:11.5px;line-height:1.32;font-weight:650;overflow:hidden;
+        margin:9px 1px 0;
+        min-height:18px;
+        max-height:36px;
+        display:flex;
+        align-items:flex-start;
+        gap:5px;
+        color:#101828;
+        font-size:13px;
+        line-height:1.28;
+        font-weight:650;
+        overflow:hidden;
       }
       .u99-item-name>span:last-child{
-        min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+        min-width:0;
+        display:-webkit-box;
+        -webkit-line-clamp:2;
+        -webkit-box-orient:vertical;
+        overflow:hidden;
       }
+
       .u99-dietary{
-        width:15px;height:15px;flex:0 0 15px;margin-top:0;border:1.5px solid #16885D;
-        border-radius:4px;display:grid;place-items:center;
+        width:15px;
+        height:15px;
+        flex:0 0 15px;
+        margin-top:1px;
+        border:1.5px solid #16885D;
+        border-radius:4px;
+        display:grid;
+        place-items:center;
       }
-      .u99-dietary:after{content:"";width:5px;height:5px;border-radius:50%;background:#16885D}
+      .u99-dietary:after{
+        content:"";
+        width:5px;height:5px;
+        border-radius:50%;
+        background:#16885D;
+      }
       .u99-dietary.u99-nonveg{border-color:#E5264F}
       .u99-dietary.u99-nonveg:after{
         width:0;height:0;border-radius:0;background:transparent;
-        border-left:3px solid transparent;border-right:3px solid transparent;border-bottom:5px solid #E5264F;
+        border-left:3px solid transparent;
+        border-right:3px solid transparent;
+        border-bottom:5px solid #E5264F;
       }
+
       .u99-price-row{
-        display:flex;align-items:center;flex-wrap:nowrap;gap:4px;margin:7px 1px 0;min-height:21px;overflow:hidden;
+        display:flex;
+        align-items:center;
+        flex-wrap:nowrap;
+        gap:5px;
+        margin:7px 1px 0;
+        min-height:20px;
+        overflow:hidden;
       }
-      .u99-price-row strong{font-size:16px;line-height:1;font-weight:800;color:#101828;flex:0 0 auto}
-      .u99-old-price{font-size:9px;color:#8992A0;text-decoration:line-through;flex:0 0 auto}
+      .u99-price-row strong{
+        font-size:16px;
+        line-height:1;
+        font-weight:800;
+        color:#101828;
+        flex:0 0 auto;
+      }
+      .u99-old-price{
+        font-size:10px;
+        color:#8992A0;
+        text-decoration:line-through;
+        flex:0 0 auto;
+      }
       .u99-off{
-        background:#FFF0F8;color:#EC168C;padding:5px 6px;border-radius:999px;
-        font-size:7.5px;line-height:1;font-weight:800;white-space:nowrap;flex:0 0 auto;
+        background:#FFF0F8;
+        color:#E21880;
+        padding:5px 7px;
+        border-radius:999px;
+        font-size:8px;
+        line-height:1;
+        font-weight:800;
+        white-space:nowrap;
+        flex:0 0 auto;
       }
 
       @media(max-width:430px){
-        .u99-restaurant-card{padding:15px 14px 14px;border-radius:23px}
-        .u99-discount-line{font-size:12px}
+        .u99-restaurant-card{
+          padding:13px 12px 12px;
+          border-radius:20px;
+        }
+        .u99-discount-line{font-size:11px}
         .u99-restaurant-name{font-size:20px;margin-bottom:5px}
-        .u99-meta{font-size:11.5px;gap:4px}
-        .u99-free-row{font-size:12px}
+        .u99-meta{font-size:11.25px;gap:4px}
+        .u99-free-row{font-size:12px;margin-top:5px}
         .u99-carousel-wrap{margin-top:9px}
-        .u99-carousel{gap:8px}
-        .u99-item{flex-basis:calc((100% - 16px)/3);width:calc((100% - 16px)/3)}
-        .u99-item-image{border-radius:11px}
-        .u99-item-image img,.u99-image-fallback{border-radius:11px}
-        .u99-add{width:36px;height:36px;font-size:22px}
-        .u99-item-name{font-size:11px;min-height:30px;max-height:30px}
-        .u99-price-row{gap:3px}
-        .u99-price-row strong{font-size:15px}
-        .u99-old-price{font-size:8.5px}
-        .u99-off{font-size:7px;padding:4.5px 5px}
+        .u99-carousel{gap:9px}
+        .u99-item{
+          flex-basis:calc((100% - 9px)/2);
+          width:calc((100% - 9px)/2);
+        }
+        .u99-item-image,
+        .u99-item-image img,
+        .u99-image-fallback{border-radius:12px}
+        .u99-add{width:38px;height:38px;font-size:22px}
+        .u99-item-name{font-size:13px;margin-top:9px}
+        .u99-price-row{gap:4px;margin-top:6px}
+        .u99-price-row strong{font-size:16px}
+        .u99-old-price{font-size:9px}
+        .u99-off{font-size:7.5px;padding:4.5px 6px}
       }
+
       @media(max-width:370px){
-        .u99-restaurant-card{padding:14px 12px 13px}
+        .u99-restaurant-card{padding:12px 11px 11px}
         .u99-restaurant-name{font-size:19px}
         .u99-meta{font-size:10.5px}
         .u99-free-row{font-size:11px}
-        .u99-item-name{font-size:10.5px}
-        .u99-price-row strong{font-size:14px}
+        .u99-carousel{gap:8px}
+        .u99-item{
+          flex-basis:calc((100% - 8px)/2);
+          width:calc((100% - 8px)/2);
+        }
+        .u99-item-name{font-size:12px}
+        .u99-price-row strong{font-size:15px}
       }
     `;
     document.head.appendChild(s);
