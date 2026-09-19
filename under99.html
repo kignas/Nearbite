@@ -697,7 +697,10 @@ body.filter-open{overflow:hidden}
   }
 
   async function loadRestaurantsWithMenus(){
-    const result=await fetchJson('https://eatswada.onrender.com/api/restaurants?limit=50&sort=rating',30000);
+    const result=await fetchJson(
+      'https://eatswada.onrender.com/api/restaurants?limit=50&sort=rating',
+      30000
+    );
     const restaurants=extractArray(result,['restaurants','data']);
     if(!restaurants.length) throw new Error('Restaurant list returned no usable data');
 
@@ -707,8 +710,12 @@ body.filter-open{overflow:hidden}
 
       const id=String(r?._id||r?.id||r?.restaurantId||'');
       if(!id) return null;
+
       try{
-        const menuPayload=await fetchJson(`https://eatswada.onrender.com/api/restaurants/${encodeURIComponent(id)}/menu`,15000);
+        const menuPayload=await fetchJson(
+          `https://eatswada.onrender.com/api/restaurants/${encodeURIComponent(id)}/menu`,
+          15000
+        );
         const menu=flattenMenuPayload(menuPayload);
         return {...r,menu};
       }catch(error){
@@ -716,48 +723,122 @@ body.filter-open{overflow:hidden}
         return null;
       }
     }));
+
     return enriched.filter(r=>r && Array.isArray(r.menu) && r.menu.length);
+  }
+
+  function showLoadError(message){
+    const skeleton=$('skeleton-feed');
+    const list=$('under99-list');
+    if(skeleton)skeleton.style.display='none';
+    if(!list)return;
+
+    list.style.display='flex';
+    list.innerHTML=`
+      <div class="empty">
+        <div style="font-size:35px">!</div>
+        <h3>Couldn’t load deals</h3>
+        <p>${esc(message || 'We could not load the restaurant menu data right now.')}</p>
+        <button id="u99-retry" style="margin-top:14px;border:0;border-radius:999px;padding:11px 20px;background:#e11d8d;color:#fff;font-weight:800">Retry</button>
+      </div>`;
+    $('u99-retry')?.addEventListener('click',load);
   }
 
   async function load(){
     const skeleton=$('skeleton-feed');
     const list=$('under99-list');
-    const MAX_ATTEMPTS=2;
+    const MAX_ATTEMPTS=3;
+
+    if(skeleton)skeleton.style.display='flex';
+    if(list)list.style.display='none';
+
+    let lastError=null;
 
     for(let attempt=1; attempt<=MAX_ATTEMPTS; attempt++){
       try{
-        let restaurants=await loadRestaurantsWithMenus();
+        /*
+         * PRIMARY SOURCE:
+         * The current backend returns:
+         * { success, count, data: [{ restaurant: {...}, menu: [...] }] }
+         * from GET /api/restaurants/under99.
+         */
+        const result=await fetchJson(
+          'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
+          30000
+        );
 
-        if(!restaurants.length){
-          const result=await fetchJson(
-            'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),30000
-          );
-          const raw=extractArray(result,['items','menu','data']);
-          restaurants=groupUnder99Items(raw);
+        if(result?.success===false){
+          throw new Error(result.message || '99 Store API returned success:false');
         }
 
-        const normalized=restaurants
-          .map(raw=>normalizeRestaurant(raw))
+        const raw=Array.isArray(result?.data)
+          ? result.data
+          : (Array.isArray(result) ? result : []);
+
+        console.info('[99 Store] API response:', {
+          success: result?.success,
+          count: result?.count,
+          rows: raw.length
+        });
+
+        if(raw.length){
+          const normalized=raw
+            .map(rawItem=>normalizeRestaurant(rawItem))
+            .filter(r=>r.id && r.menu.length);
+
+          if(normalized.length){
+            allRestaurants=normalized;
+            updateFilterButtons();
+            render();
+            return;
+          }
+
+          throw new Error('99 Store returned rows, but no usable restaurant/menu data was found');
+        }
+
+        /*
+         * If the dedicated endpoint is empty, use the normal restaurant
+         * + menu endpoints as a fallback. This also helps while older
+         * restaurant documents are being migrated.
+         */
+        console.warn('[99 Store] Dedicated endpoint returned no rows; trying restaurant/menu fallback.');
+        const fallback=await loadRestaurantsWithMenus();
+
+        const normalizedFallback=fallback
+          .map(rawItem=>normalizeRestaurant(rawItem))
           .filter(r=>r.id && r.menu.length);
 
-        if(!normalized.length) throw new Error('No restaurant menu data returned');
+        if(normalizedFallback.length){
+          allRestaurants=normalizedFallback;
+          updateFilterButtons();
+          render();
+          return;
+        }
 
-        allRestaurants=normalized;
-        updateFilterButtons();
-        render();
+        // This is a valid empty state, not a network/server error.
+        allRestaurants=[];
+        if(skeleton)skeleton.style.display='none';
+        if(list){
+          list.style.display='flex';
+          list.innerHTML='<div class="empty"><div style="font-size:35px">₹</div><h3>No ₹99 deals available</h3><p>There are no qualifying restaurant deals available right now.</p></div>';
+        }
         return;
+
       }catch(error){
-        console.error('[99 Store] load attempt '+attempt+' failed:',error);
-        if(attempt<MAX_ATTEMPTS) await new Promise(res=>setTimeout(res,2000));
+        lastError=error;
+        console.error(`[99 Store] load attempt ${attempt} failed:`,error);
+
+        if(attempt<MAX_ATTEMPTS){
+          await new Promise(res=>setTimeout(res, attempt*2000));
+        }
       }
     }
 
-    if(skeleton)skeleton.style.display='none';
-    if(list){
-      list.style.display='flex';
-      list.innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>We could not load the restaurant menu data right now.</p><button id="u99-retry" style="margin-top:14px;border:0;border-radius:999px;padding:11px 20px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
-      $('u99-retry')?.addEventListener('click',load);
-    }
+    showLoadError(
+      lastError?.message
+        ? `We could not load the restaurant data. (${lastError.message})`
+        : 'We could not load the restaurant menu data right now.'
+    );
   }
 
   document.addEventListener('DOMContentLoaded',()=>{ loadUnder99Hero(); load(); });
