@@ -582,6 +582,169 @@
   }
 
 
+
+  /* ══════════════════════════════════════════════════════════════
+     FINAL EATSWADA TYPOGRAPHY SYSTEM — HOME
+     Typography-only pass. Manrope remains the existing typeface.
+     Scale: 11 / 12 / 13 / 15 / 17 / 19 / 21 / 24 / 27.
+     ══════════════════════════════════════════════════════════════ */
+  :root{
+    --ew-text-xs:11px;
+    --ew-text-sm:12px;
+    --ew-text-body-sm:13px;
+    --ew-text-body:15px;
+    --ew-text-label:15px;
+    --ew-text-card-title:17px;
+    --ew-text-section:19px;
+    --ew-text-page:21px;
+    --ew-text-display:27px;
+  }
+
+  body{
+    font-size:var(--ew-text-body);
+    line-height:1.45;
+  }
+
+  /* Header */
+  .loc-name{
+    font-size:var(--ew-text-card-title);
+    line-height:1.15;
+    letter-spacing:-.35px;
+  }
+  .loc-sub{
+    font-size:var(--ew-text-xs);
+    line-height:1.35;
+  }
+  .store-top{
+    font-size:var(--ew-text-xs);
+  }
+  .store-bot{
+    font-size:var(--ew-text-card-title);
+  }
+  .profile-initial{
+    font-size:var(--ew-text-label);
+  }
+  .search-text{
+    font-size:var(--ew-text-body);
+    line-height:1.3;
+  }
+  .veg-label-txt{
+    font-size:var(--ew-text-xs);
+  }
+
+  /* Hero banner */
+  .banner-badge{
+    font-size:var(--ew-text-xs);
+  }
+  .banner-title{
+    font-size:var(--ew-text-display);
+    line-height:1.02;
+  }
+  .banner-subtitle{
+    font-size:var(--ew-text-body-sm);
+    line-height:1.4;
+  }
+  .banner-subtitle--default{
+    font-size:21px;
+    line-height:1.12;
+  }
+  .banner-offer{
+    font-size:var(--ew-text-body);
+    line-height:1.25;
+  }
+  .banner-cta{
+    font-size:var(--ew-text-body);
+    line-height:1;
+  }
+
+  /* Section / category typography */
+  .sec-title{
+    font-size:var(--ew-text-section);
+    line-height:1.2;
+    letter-spacing:-.35px;
+    text-transform:none;
+  }
+  .cat-name{
+    font-size:var(--ew-text-body);
+    line-height:1.25;
+    font-weight:700;
+  }
+
+  /* Filters */
+  .filter-pill{
+    font-size:var(--ew-text-body);
+    line-height:1.2;
+  }
+  .filter-count{
+    font-size:var(--ew-text-xs);
+  }
+
+  /* Status / empty states */
+  #home-notice,
+  .notice-retry{
+    font-size:var(--ew-text-body-sm);
+  }
+  .state-title{
+    font-size:var(--ew-text-card-title);
+    line-height:1.25;
+  }
+  .state-sub{
+    font-size:var(--ew-text-body-sm);
+    line-height:1.5;
+  }
+  .state-btn{
+    font-size:var(--ew-text-body);
+  }
+
+  /* Bottom sheets */
+  .sheet-title{
+    font-size:var(--ew-text-card-title);
+    line-height:1.25;
+  }
+  .sheet-clear,
+  .sheet-group-title{
+    font-size:var(--ew-text-sm);
+  }
+  .sheet-option{
+    font-size:var(--ew-text-body);
+    line-height:1.35;
+  }
+  .sheet-done{
+    font-size:var(--ew-text-body);
+  }
+
+  /* Location sheet */
+  .loc-sheet-title{
+    font-size:var(--ew-text-card-title);
+    line-height:1.25;
+  }
+  .loc-sheet-text{
+    font-size:var(--ew-text-body-sm);
+    line-height:1.5;
+  }
+  .loc-btn{
+    font-size:var(--ew-text-body);
+  }
+  .loc-btn-quiet{
+    font-size:var(--ew-text-body-sm);
+  }
+  .lb-text,
+  .lb-btn{
+    font-size:var(--ew-text-body-sm);
+  }
+
+  /* Keep the existing compact breakpoint hierarchy, using the same scale. */
+  @media (max-width:380px){
+    .loc-name{font-size:var(--ew-text-card-title);}
+    .banner-title{font-size:24px;}
+    .banner-subtitle--default{font-size:19px;}
+  }
+
+  @media (min-width:600px){
+    .banner-title{font-size:32px;}
+    .banner-subtitle{font-size:var(--ew-text-body);}
+  }
+
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
 </head>
