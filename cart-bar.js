@@ -11,6 +11,7 @@
   // currency symbol is ever not ₹ (Indian Rupee). Nothing else in this
   // file needs to change.
   const CURRENCY_SYMBOL = '₹';
+  const IS_99_PAGE = /(^|\/)under99(?:\.html)?$/i.test(window.location.pathname);
 
   // 🛡️ CRASH-PROOF STORAGE PARSER
   // This prevents your cart bar from becoming invisible if corrupted data exists
@@ -260,6 +261,122 @@
       .wc-close { width: 28px; height: 28px; }
     }
 
+    /* ============================================================
+       99 STORE CART BAR — DESIGN ONLY
+       This block is scoped to #white-cart-root.u99-cart-bar so the
+       existing cart-bar appearance on restaurant/cart pages is untouched.
+       ============================================================ */
+    #white-cart-root.u99-cart-bar {
+      width: min(390px, calc(100vw - 24px));
+      max-width: calc(100vw - 24px);
+      bottom: var(--nb-cart-bottom, calc(14px + env(safe-area-inset-bottom, 0px)));
+    }
+    #white-cart-root.u99-cart-bar #white-cart-container {
+      height: 72px;
+      padding: 7px;
+      gap: 8px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(236,22,140,.10);
+      box-shadow: 0 8px 24px rgba(17,24,39,.10), 0 20px 48px rgba(17,24,39,.12);
+    }
+    #white-cart-root.u99-cart-bar .wc-left {
+      gap: 9px;
+      padding-left: 3px;
+    }
+    #white-cart-root.u99-cart-bar .wc-thumb-wrap {
+      width: 50px;
+      height: 50px;
+    }
+    #white-cart-root.u99-cart-bar .wc-image-stack {
+      width: 50px !important;
+      min-width: 50px;
+      height: 50px;
+    }
+    #white-cart-root.u99-cart-bar .wc-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(16,24,40,.14);
+    }
+    #white-cart-root.u99-cart-bar .wc-img:nth-child(1) { left: 0; }
+    #white-cart-root.u99-cart-bar .wc-img:nth-child(2) { left: 9px; }
+    #white-cart-root.u99-cart-bar .wc-img:nth-child(3) { left: 18px; }
+    #white-cart-root.u99-cart-bar .wc-qty-badge {
+      top: -3px; right: -3px;
+      min-width: 19px; height: 19px; line-height: 20px;
+      border-radius: 10px;
+      background: #EC168C;
+      font-size: 10px;
+      border-width: 2px;
+      box-shadow: 0 2px 6px rgba(236,22,140,.24);
+    }
+    #white-cart-root.u99-cart-bar .wc-info {
+      gap: 2px;
+    }
+    #white-cart-root.u99-cart-bar .wc-res-name {
+      font-size: 13px;
+      line-height: 1.15;
+      font-weight: 800;
+      color: #101828;
+    }
+    #white-cart-root.u99-cart-bar .wc-menu-link {
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #6B7280;
+      margin-top: 1px;
+    }
+    #white-cart-root.u99-cart-bar .wc-menu-link svg {
+      width: 12px; height: 12px;
+    }
+    #white-cart-root.u99-cart-bar .wc-right {
+      gap: 5px;
+    }
+    #white-cart-root.u99-cart-bar .wc-btn {
+      height: 52px;
+      min-width: 112px;
+      padding: 0 14px;
+      border-radius: 18px;
+      background: #EC168C;
+      box-shadow: 0 5px 14px rgba(236,22,140,.22);
+    }
+    #white-cart-root.u99-cart-bar .wc-btn-title {
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    #white-cart-root.u99-cart-bar .wc-btn-sub {
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-top: 2px;
+    }
+    #white-cart-root.u99-cart-bar .wc-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #F7F7F8;
+      color: #667085;
+      border: 1px solid #EAECF0;
+      font-size: 13px;
+    }
+    #white-cart-root.u99-cart-bar .wc-close:active { background: #F0F1F3; }
+
+    @media (max-width: 390px) {
+      #white-cart-root.u99-cart-bar {
+        width: calc(100vw - 20px);
+        max-width: calc(100vw - 20px);
+      }
+      #white-cart-root.u99-cart-bar #white-cart-container { height: 68px; border-radius: 22px; }
+      #white-cart-root.u99-cart-bar .wc-thumb-wrap,
+      #white-cart-root.u99-cart-bar .wc-image-stack { width: 46px !important; min-width: 46px; height: 46px; }
+      #white-cart-root.u99-cart-bar .wc-img { width: 46px; height: 46px; border-radius: 15px; }
+      #white-cart-root.u99-cart-bar .wc-btn { min-width: 104px; height: 50px; padding: 0 12px; }
+      #white-cart-root.u99-cart-bar .wc-res-name { font-size: 12px; }
+      #white-cart-root.u99-cart-bar .wc-menu-link { font-size: 10px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       #white-cart-root, #white-cart-root * {
         animation-duration: 0.001ms !important;
@@ -281,6 +398,7 @@
   function makeDOM() {
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
+    if (IS_99_PAGE) wrap.classList.add('u99-cart-bar');
     wrap.innerHTML = `
       <div id="white-cart-container">
         <button type="button" class="wc-left" aria-label="View cart" onclick="window.location.href='cart.html'">
@@ -290,13 +408,13 @@
           </div>
           <div class="wc-info">
             <div class="wc-res-name" id="wc-dynamic-res">EatSwada Order</div>
-            <div class="wc-menu-link">Added to cart <i class="fa-solid fa-check" aria-hidden="true" style="font-size:10px;"></i></div>
+            <div class="wc-menu-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Added to cart</div>
           </div>
         </button>
         <div class="wc-right">
           <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
             <button type="button" class="wc-btn" onclick="window.location.href='cart.html'">
-              <span class="wc-btn-title">View Cart →</span>
+              <span class="wc-btn-title">View Cart <span aria-hidden="true">→</span></span>
               <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
             </button>
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
