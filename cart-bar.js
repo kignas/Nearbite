@@ -235,7 +235,7 @@
     .wc-btn-sub { font-size: 9px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
     .wc-close {
       width: 30px; height: 30px; border-radius: 50%; background: #F1F1F1; border: none;
-      display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 15px;
+      display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 14px;
       cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
     }
     .wc-close:active { background: #e5e7eb; }
@@ -272,7 +272,7 @@
       bottom: calc(82px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.u99-cart-bar #white-cart-container {
-      height: 118px;
+      height: 90px;
       padding: 0;
       display: flex;
       flex-direction: column;
@@ -280,22 +280,22 @@
       justify-content: flex-start;
       gap: 0;
       overflow: hidden;
-      border-radius: 28px;
+      border-radius: 22px;
       background: #E31B23;
       border: 1px solid rgba(255,255,255,.16);
       box-shadow: 0 8px 20px rgba(227,27,35,.22), 0 18px 38px rgba(17,24,39,.16);
       color: #fff;
     }
     #white-cart-root.u99-cart-bar .u99-free-row {
-      height: 50px;
-      min-height: 50px;
+      height: 36px;
+      min-height: 36px;
       display: flex;
       align-items: center;
-      padding: 0 24px;
+      padding: 0 20px;
       box-sizing: border-box;
       background: rgba(0,0,0,.08);
       color: #fff;
-      font-size: 16px;
+      font-size: 14px;
       line-height: 1;
       font-weight: 800;
       letter-spacing: -.15px;
@@ -307,14 +307,14 @@
       justify-content: space-between;
       gap: 16px;
       min-width: 0;
-      padding: 0 24px;
+      padding: 0 20px;
       box-sizing: border-box;
       background: #E31B23;
     }
     #white-cart-root.u99-cart-bar .u99-total {
       min-width: 0;
       color: #fff;
-      font-size: 17px;
+      font-size: 14px;
       line-height: 1.1;
       font-weight: 800;
       white-space: nowrap;
@@ -326,19 +326,19 @@
       display: inline-flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 7px;
       flex: 0 0 auto;
       color: #fff;
       font: inherit;
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 800;
       line-height: 1;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
     #white-cart-root.u99-cart-bar .u99-view-cart svg {
-      width: 30px;
-      height: 30px;
+      width: 25px;
+      height: 25px;
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
@@ -356,34 +356,34 @@
     }
     @media (max-width: 480px) {
       #white-cart-root.u99-cart-bar {
-        width: calc(100vw - 20px);
-        max-width: calc(100vw - 20px);
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
         bottom: calc(78px + env(safe-area-inset-bottom, 0px));
       }
       #white-cart-root.u99-cart-bar #white-cart-container {
-        height: 112px;
-        border-radius: 24px;
+        height: 88px;
+        border-radius: 20px;
       }
       #white-cart-root.u99-cart-bar .u99-free-row {
-        height: 48px;
-        min-height: 48px;
-        padding: 0 18px;
-        font-size: 14px;
+        height: 35px;
+        min-height: 35px;
+        padding: 0 16px;
+        font-size: 13px;
       }
       #white-cart-root.u99-cart-bar .u99-cart-row {
-        padding: 0 18px;
-        gap: 10px;
+        padding: 0 16px;
+        gap: 8px;
       }
       #white-cart-root.u99-cart-bar .u99-total,
       #white-cart-root.u99-cart-bar .u99-view-cart {
         font-size: 15px;
       }
       #white-cart-root.u99-cart-bar .u99-view-cart {
-        gap: 7px;
+        gap: 6px;
       }
       #white-cart-root.u99-cart-bar .u99-view-cart svg {
-        width: 27px;
-        height: 27px;
+        width: 24px;
+        height: 24px;
       }
     }
 
