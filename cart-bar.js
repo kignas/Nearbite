@@ -251,19 +251,23 @@
       outline: 2px solid #FF4D4F; outline-offset: 2px;
     }
 
-    /* Shared pink cart used by Restaurant + 99 Store. */
+    /* ============================================================
+       EATSWADA PINK CART — Restaurant + 99 Store
+       Compact, fixed, no close button. Matches the supplied reference.
+       ============================================================ */
     #white-cart-root.wc-pink {
       width: calc(100vw - 36px);
       max-width: 720px;
-      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.wc-pink #white-cart-container {
-      height: 82px;
+      height: 64px;
+      min-height: 64px;
       padding: 0 18px 0 22px;
       border: 0;
-      border-radius: 28px;
+      border-radius: 24px;
       background: #EC168C;
-      box-shadow: none;
+      box-shadow: 0 8px 24px rgba(236,22,140,.18);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
@@ -271,39 +275,112 @@
       color: #fff;
       gap: 0;
       min-width: 0;
+      overflow: visible;
     }
     #white-cart-root.wc-pink .wc-pink-total {
-      display:block; color:#fff; font-size:16px; font-weight:800; white-space:nowrap;
+      display:block;
+      color:#fff;
+      font-size:17px;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:-.2px;
+      white-space:nowrap;
     }
     #white-cart-root.wc-pink .wc-thumb-wrap,
     #white-cart-root.wc-pink .wc-info,
     #white-cart-root.wc-pink .wc-qty-badge { display: none; }
-    #white-cart-root.wc-pink .wc-menu-link {
-      display: none;
-    }
-    #white-cart-root.wc-pink .wc-res-name {
-      display: none;
-    }
+    #white-cart-root.wc-pink .wc-menu-link,
+    #white-cart-root.wc-pink .wc-res-name { display: none; }
     #white-cart-root.wc-pink .wc-right { margin-left: auto; }
-    #white-cart-root.wc-pink #wc-standard-actions { display:flex !important; gap:0; }
+    #white-cart-root.wc-pink #wc-standard-actions {
+      display:flex !important;
+      gap:0;
+      align-items:center;
+    }
     #white-cart-root.wc-pink .wc-btn {
       min-width: 0;
       width: auto;
-      height: auto;
+      height: 42px;
       padding: 0;
-      border-radius: 0;
+      border-radius: 21px;
       background: transparent;
       color: #fff;
       box-shadow: none;
       flex-direction: row;
       gap: 9px;
+      -webkit-tap-highlight-color: transparent;
     }
-    #white-cart-root.wc-pink .wc-btn-title { font-size: 16px; font-weight: 800; }
-    .wc-cart-svg { width:24px; height:24px; flex:0 0 auto; display:block; }
+    #white-cart-root.wc-pink .wc-btn-title {
+      font-size:17px;
+      line-height:1;
+      font-weight:800;
+    }
     #white-cart-root.wc-pink .wc-btn-sub { display:none; }
-    #white-cart-root.wc-pink #wc-standard-actions { position: static; }
-    #white-cart-root.wc-pink .wc-close { display:none !important; }
+    #white-cart-root.wc-pink .wc-cart-svg {
+      width:25px;
+      height:25px;
+      flex:0 0 auto;
+    }
+    #white-cart-root.wc-pink .wc-close,
     #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
+
+    /* Keep the homepage's established white bar compact and stable. */
+    #white-cart-root:not(.wc-pink) #white-cart-container {
+      min-height: 62px;
+      height: 62px;
+      padding: 7px 8px;
+      border-radius: 31px;
+    }
+    #white-cart-root:not(.wc-pink) .wc-right {
+      gap: 7px;
+    }
+    #white-cart-root:not(.wc-pink) .wc-btn {
+      height: 44px;
+      min-width: 92px;
+      padding: 0 12px;
+      border-radius: 23px;
+    }
+    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size: 11px; }
+    #white-cart-root:not(.wc-pink) .wc-btn-sub { font-size: 9px; }
+
+    /* Homepage multi-restaurant control sits beside the total, in the middle.
+       It never affects the pink Restaurant/99 layout. */
+    #white-cart-root:not(.wc-pink) .wc-all-carts {
+      position: absolute;
+      left: 50%;
+      transform: translateX(42px);
+      top: 50%;
+      margin: 0;
+      padding: 6px 5px;
+      font-size: 11px;
+      line-height: 1;
+      color: #667085;
+      background: transparent;
+      z-index: 5;
+    }
+    #white-cart-root:not(.wc-pink) .wc-pink-total {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      margin: 0;
+      color: #111827;
+      font-size: 16px;
+      font-weight: 700;
+      white-space: nowrap;
+      z-index: 4;
+      pointer-events: none;
+    }
+    #white-cart-root:not(.wc-pink) .wc-info {
+      padding-right: 4px;
+    }
+    @media (max-width: 430px) {
+      #white-cart-root:not(.wc-pink) .wc-pink-total { font-size: 15px; }
+      #white-cart-root:not(.wc-pink) .wc-all-carts { transform: translateX(48px); font-size: 10px; }
+      #white-cart-root.wc-pink #white-cart-container { height: 62px; min-height:62px; padding-left:20px; padding-right:16px; }
+      #white-cart-root.wc-pink .wc-btn-title { font-size:16px; }
+      #white-cart-root.wc-pink .wc-cart-svg { width:23px; height:23px; }
+    }
 
     /* Homepage multi-restaurant switcher: small, neutral, only appears when
        more than one restaurant exists. It opens the same cart drawer. */
@@ -493,21 +570,17 @@
     if(CART_BAR_MODE==='pink' && document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
     const itemNames = Object.keys(savedCart);
     const groups = restaurantGroups(savedCart);
+    const allCartsEl = document.getElementById('wc-all-carts');
+    if (allCartsEl) {
+      allCartsEl.style.display = (CART_BAR_MODE === 'home' && groups.length > 1) ? 'block' : 'none';
+      allCartsEl.textContent = groups.length > 1 ? `All ↑` : 'All ↑';
+    }
     const root = document.getElementById('white-cart-root');
     const countEl = document.getElementById('wc-item-count');
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
     const resEl = document.getElementById('wc-dynamic-res');
     const badgeEl = document.getElementById('wc-qty-badge');
     const pinkTotalEl = document.getElementById('wc-pink-total');
-    const allCartsEl = document.getElementById('wc-all-carts');
-
-    // IMPORTANT: this element must be resolved before it is used.
-    // The previous version referenced allCartsEl above its const declaration,
-    // which throws a Temporal Dead Zone ReferenceError on every page load.
-    if (allCartsEl) {
-      allCartsEl.style.display = (CART_BAR_MODE === 'home' && groups.length > 1) ? 'block' : 'none';
-      allCartsEl.textContent = 'All ↑';
-    }
 
     if (!root || !countEl || !imgStackEl) return;
 
