@@ -6,23 +6,46 @@
 
   function getCart(){ try{return JSON.parse(localStorage.getItem(CART_KEY))||{};}catch(_){return{};} }
   function saveCart(c){localStorage.setItem(CART_KEY,JSON.stringify(c));}
-  function cartKey(item,r){return String(item.id||item._id||`${r.id||'restaurant'}|${item.name}`);}
+  function normalizeId(value){return String(value==null?'':value).trim();}
+  function normalizeName(value){return String(value==null?'':value).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').replace(/[–—-]/g,'-').trim();}
+  function itemId(item){return normalizeId(item?.id||item?._id||item?.menuItemId||item?.menuItem);}
+  function restaurantId(r){return normalizeId(r?.id||r?._id||r?.restaurantId);}
+  function cartKey(item,r){return String(itemId(item)||`${restaurantId(r)||'restaurant'}|${normalizeName(item?.name)}`);}
+  function findMatchingCartKey(c,item,r){
+    const rid=restaurantId(r);
+    const mid=itemId(item);
+    const name=normalizeName(item?.name);
+    const canonical=cartKey(item,r);
+    if(c[canonical]) return canonical;
+    for(const key of Object.keys(c)){
+      const e=c[key];
+      if(!e || Number(e.quantity||0)<=0) continue;
+      const erid=normalizeId(e.resId||e.restaurantId);
+      const emid=normalizeId(e.menuItem||e.menuItemId);
+      if(rid && erid===rid && mid && emid===mid) return key;
+      if(rid && erid===rid && name && normalizeName(e.name||key)===name) return key;
+    }
+    return null;
+  }
   function getQuantity(item,r){
-    const c=getCart(),k=cartKey(item,r);
-    if(c[k]) return Number(c[k].quantity||0);
-    if(c[item.name] && !c[item.name].resId) return Number(c[item.name].quantity||0);
+    const c=getCart();
+    const key=findMatchingCartKey(c,item,r);
+    if(key && c[key]) return Number(c[key].quantity||0);
     return 0;
   }
   function changeCart(item,r,delta){
     if(item?.inStock===false && delta>0)return;
-    const c=getCart(),k=cartKey(item,r);
-    const existing=c[k]||{quantity:0,price:num(item.price),originalPrice:item.originalPrice??null,resId:String(r.id||''),menuItem:String(item.id||item._id||''),image:item.image||'',name:item.name||'Item',isVeg:Boolean(item.isVeg)};
+    const c=getCart();
+    const existingKey=findMatchingCartKey(c,item,r);
+    const k=existingKey||cartKey(item,r);
+    const existing=c[k]||{quantity:0,price:num(item.price),originalPrice:item.originalPrice??null,resId:restaurantId(r),menuItem:itemId(item),image:item.image||'',name:item.name||'Item',isVeg:Boolean(item.isVeg),restaurantName:String(r.name||'')};
+    if(!existing.restaurantName && r?.name) existing.restaurantName=String(r.name);
     existing.quantity=Number(existing.quantity||0)+delta;
     if(existing.quantity<=0) delete c[k]; else c[k]=existing;
     saveCart(c);
     document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{item,restaurant:r}}));
     if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
-    const host=document.querySelector(`[data-under99-restaurant="${CSS.escape(String(r.id||r._id||''))}"]`);
+    const host=document.querySelector(`[data-under99-restaurant="${CSS.escape(restaurantId(r))}"]`);
     if(host)syncCard(host,r);
   }
 
@@ -55,13 +78,13 @@
   function registerCustomization(item,r){
     // Mirror the exact shape restaurant.html stores, so the shared sheet reads it.
     if(!hasRealCustomization(item))return false;
-    const id=String(item.id||item._id||'');
+    const id=itemId(item);
     if(!id)return false;
     const price=num(item.price);
     const original=item.originalPrice!=null&&num(item.originalPrice)>price?num(item.originalPrice):null;
     window.__ewCust=window.__ewCust||{};
     window.__ewCust[id]={
-      name:item.name||'Item',price,resId:String(r.id||r._id||''),menuItemId:id,
+      name:item.name||'Item',price,resId:restaurantId(r),menuItemId:id,
       image:item.image||'',isVeg:Boolean(item.isVeg),originalPrice:original,groups:customGroups(item)
     };
     return true;
@@ -71,7 +94,7 @@
   function getCustomizedQuantity(item){
     const c=getCart();
     const baseName=String(item.name==null?'':item.name).trim();
-    const id=String(item.id||item._id||'');
+    const id=itemId(item);
     let total=0;
     Object.keys(c).forEach(k=>{
       const e=c[k];
@@ -85,14 +108,14 @@
   }
   function openCustomize(item,r){
     registerCustomization(item,r); // guarantee data is present before opening
-    const id=String(item.id||item._id||'');
+    const id=itemId(item);
     if(typeof window.ewOpenCustomize==='function'){
       window.ewOpenCustomize(id);
       return true;
     }
     // Shared sheet not present on this page: never silently add the base item.
     // Send the customer to the full restaurant page, which owns the sheet.
-    const resId=String(r.id||r._id||'');
+    const resId=restaurantId(r);
     if(resId)window.location.href=`restaurant.html?id=${encodeURIComponent(resId)}`;
     return false;
   }
@@ -310,7 +333,7 @@
     hookGlobalCart();
     const host=document.createElement('div');
     host.className='u99-card-host';
-    host.dataset.under99Restaurant=String(r.id||r._id||'');
+    host.dataset.under99Restaurant=restaurantId(r);
     const menu=sortedMenu(r);
     host.innerHTML=cardMarkup(r,menu);
     menu.forEach(i=>{ if(isCustomisable(i))registerCustomization(i,r); });

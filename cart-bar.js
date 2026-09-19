@@ -32,6 +32,39 @@
   }
 
   /* ── 1. THE MATH ENGINE (Unified Master Version) ── */
+  function normalizeId(value){
+    return String(value == null ? '' : value).trim();
+  }
+  function normalizeName(value){
+    return String(value == null ? '' : value)
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/\s+/g,' ')
+      .replace(/[–—-]/g,'-')
+      .trim();
+  }
+  function findMatchingCartKey(cart,itemName,rId,menuItemId){
+    const rid=normalizeId(rId);
+    const mid=normalizeId(menuItemId);
+    const wantedName=normalizeName(itemName);
+    if(cart[itemName]){
+      const e=cart[itemName];
+      const erid=normalizeId(e?.resId||e?.restaurantId);
+      const emid=normalizeId(e?.menuItem||e?.menuItemId);
+      if((rid && erid===rid && (!mid || !emid || emid===mid)) || (mid && emid===mid && (!rid || !erid || erid===rid))) return itemName;
+    }
+    for(const key of Object.keys(cart)){
+      const e=cart[key];
+      if(!e || Number(e.quantity||0)<=0) continue;
+      const erid=normalizeId(e.resId||e.restaurantId);
+      const emid=normalizeId(e.menuItem||e.menuItemId);
+      const entryName=normalizeName(e.name||key);
+      if(rid && erid===rid && mid && emid===mid) return key;
+      if(rid && erid===rid && wantedName && entryName===wantedName) return key;
+    }
+    return null;
+  }
+
   window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     let itemName = arg1;
     let change = arg2;
@@ -96,29 +129,31 @@
         }
     }
 
-    // Update the Payload
-    if (!cartMemory[itemName]) {
-        cartMemory[itemName] = {
+    // Shared identity: restaurant + menu item. This merges an item added
+    // from the restaurant page with the same item added from 99 Store.
+    const matchedKey = findMatchingCartKey(cartMemory,itemName,rId,menuItemId);
+    const storageKey = matchedKey || itemName;
+    if (!cartMemory[storageKey]) {
+        cartMemory[storageKey] = {
             quantity: 0, price: parseFloat(price), originalPrice: (Number(originalPrice) > Number(price) ? Number(originalPrice) : null), resId: rId,
             menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg, restaurantName: restaurantName
         };
     } else {
-        if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
-        if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
-        if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
-        if (!cartMemory[itemName].restaurantName && restaurantName) cartMemory[itemName].restaurantName = restaurantName;
-        if (!cartMemory[itemName].originalPrice && Number(originalPrice) > Number(price)) cartMemory[itemName].originalPrice = Number(originalPrice);
+        if (!cartMemory[storageKey].menuItem && menuItemId) cartMemory[storageKey].menuItem = menuItemId;
+        if (!cartMemory[storageKey].image && image) cartMemory[storageKey].image = image;
+        if (!cartMemory[storageKey].name) cartMemory[storageKey].name = itemName;
+        if (!cartMemory[storageKey].restaurantName && restaurantName) cartMemory[storageKey].restaurantName = restaurantName;
+        if (!cartMemory[storageKey].originalPrice && Number(originalPrice) > Number(price)) cartMemory[storageKey].originalPrice = Number(originalPrice);
     }
-    
-    cartMemory[itemName].quantity += change;
-    if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
+    cartMemory[storageKey].quantity += change;
+    if (cartMemory[storageKey].quantity <= 0) delete cartMemory[storageKey];
 
     // 🎯 VISUALLY UPDATE THE CORRECT BUTTON TYPE
     const key = itemName.replace(/\s+/g, '');
     const container = document.getElementById('btn-container-' + key);
     
     if (container) {
-        const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
+        const qty = cartMemory[storageKey] ? cartMemory[storageKey].quantity : 0;
         
         if (isUnder99Payload) {
             if (qty > 0) {
@@ -163,7 +198,7 @@
     #white-cart-root {
       position: fixed; left: 50%; transform: translateX(-50%);
       bottom: var(--nb-cart-bottom, calc(20px + env(safe-area-inset-bottom, 0px)));
-      width: min(250px, calc(100vw - 32px)); max-width: calc(100vw - 32px);
+      width: min(430px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
       will-change: bottom, transform;
@@ -181,7 +216,7 @@
       border: 1px solid rgba(17,24,39,0.06);
       border-radius: 32px; padding: 8px;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 1px 1px rgba(16,24,40,0.04), 0 4px 12px rgba(16,24,40,0.08), 0 16px 32px -8px rgba(16,24,40,0.16);
+      box-shadow: 0 2px 10px rgba(16,24,40,0.10);
       font-family: 'Manrope', system-ui, -apple-system, sans-serif; height: 62px;
       box-sizing: border-box;
     }
@@ -209,13 +244,13 @@
     }
     .wc-bump { animation: wcBump 0.32s ease; }
 
-    .wc-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; justify-content: center; }
+    .wc-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; justify-content: center; overflow: hidden; }
     .wc-res-name { font-size: 12px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .wc-menu-link { font-size: 10px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+    .wc-menu-link { font-size: 10px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .wc-right { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; flex-shrink: 0; }
+    .wc-right { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; flex-shrink: 0; margin-left: 6px; }
     .wc-btn {
-      position: relative; overflow: hidden;
+      position: relative; overflow: hidden; min-width: 92px;
       background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
       border: none; border-radius: 22px; height: 44px; min-height: 40px; padding: 0 10px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -223,14 +258,7 @@
       transition: transform 0.1s ease; font-family: inherit;
     }
     .wc-btn:active { transform: scale(0.96); }
-    .wc-btn::after {
-      content: ''; position: absolute; top: 0; left: 0; width: 45%; height: 100%;
-      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
-      transform: translateX(-120%) skewX(-20deg); pointer-events: none;
-    }
-    #white-cart-root.wc-enter #wc-standard-actions .wc-btn::after {
-      animation: wcShine 1s ease 0.45s 1 both;
-    }
+    .wc-btn::after { display:none; }
     .wc-btn-title { font-size: 11px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
     .wc-btn-sub { font-size: 9px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
     .wc-close {
@@ -293,7 +321,7 @@
       border: 0;
       border-radius: 17px;
       background: #EC168C;
-      box-shadow: none;
+      box-shadow: none !important;
       color: #fff;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
