@@ -276,6 +276,142 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   .fav-cta:active,.btn:active{transform:none}
   .fav-note::before{animation:none;background:#F0F0F2}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   FINAL EATSWADA TYPOGRAPHY SYSTEM — PROFILE
+   Typography-only pass. Existing Manrope typeface is preserved.
+   Scale: 11 / 12 / 13 / 15 / 17 / 19 / 21 / 24 / 27px.
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --ew-text-xs:11px;
+  --ew-text-sm:12px;
+  --ew-text-body-sm:13px;
+  --ew-text-body:15px;
+  --ew-text-label:15px;
+  --ew-text-card-title:17px;
+  --ew-text-section:19px;
+  --ew-text-page:21px;
+  --ew-text-display:27px;
+}
+
+body{
+  font-size:var(--ew-text-body);
+  line-height:1.45;
+}
+
+/* Page/header hierarchy */
+.title{
+  font-size:var(--ew-text-page);
+  line-height:1.2;
+  letter-spacing:-.45px;
+}
+.user h1{
+  font-size:var(--ew-text-page);
+  line-height:1.2;
+  letter-spacing:-.45px;
+}
+.user p{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.4;
+}
+.verified{
+  font-size:var(--ew-text-xs);
+  line-height:1.25;
+}
+
+/* Quick actions */
+.quick-tile span{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.2;
+}
+
+/* Section headings */
+.section-title{
+  font-size:var(--ew-text-xs);
+  line-height:1.25;
+}
+
+/* Account/data rows */
+.row-title{
+  font-size:var(--ew-text-xs);
+  line-height:1.25;
+}
+.row-sub{
+  font-size:var(--ew-text-body);
+  line-height:1.4;
+}
+.row.is-nav .row-title{
+  font-size:var(--ew-text-body);
+  line-height:1.3;
+}
+.row.is-nav .row-sub{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.4;
+}
+.edit-btn{
+  font-size:var(--ew-text-sm);
+  line-height:1.2;
+}
+.locked{
+  font-size:var(--ew-text-xs);
+  line-height:1.2;
+}
+
+/* Favourites */
+.fav-summary .row-title{
+  font-size:var(--ew-text-body);
+  line-height:1.3;
+}
+.fav-summary .row-sub{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.4;
+}
+.fav-empty h3{
+  font-size:var(--ew-text-body);
+  line-height:1.3;
+}
+.fav-empty p,
+.fav-cta,
+.fav-note{
+  font-size:var(--ew-text-body-sm);
+}
+.fav-empty p,
+.fav-note{
+  line-height:1.5;
+}
+
+/* Edit sheet */
+.sheet h2{
+  font-size:var(--ew-text-card-title);
+  line-height:1.25;
+}
+.sheet p{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.5;
+}
+.field label{
+  font-size:var(--ew-text-xs);
+  line-height:1.25;
+}
+.btn{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.2;
+}
+.error{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.35;
+}
+
+/* Bottom navigation + toast */
+.nav a{
+  font-size:var(--ew-text-xs);
+  line-height:1.2;
+}
+.toast{
+  font-size:var(--ew-text-body-sm);
+  line-height:1.25;
+}
+
 </style>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="restaurant-card.css">
