@@ -262,119 +262,129 @@
     }
 
     /* ============================================================
-       99 STORE CART BAR — DESIGN ONLY
-       This block is scoped to #white-cart-root.u99-cart-bar so the
-       existing cart-bar appearance on restaurant/cart pages is untouched.
+       99 STORE CART BAR — RED TWO-TIER DESIGN
+       Scoped only to the 99 Store. Restaurant/cart pages keep the
+       original cart-bar design below this block.
        ============================================================ */
     #white-cart-root.u99-cart-bar {
-      width: min(390px, calc(100vw - 24px));
-      max-width: calc(100vw - 24px);
-      bottom: var(--nb-cart-bottom, calc(14px + env(safe-area-inset-bottom, 0px)));
+      width: min(700px, calc(100vw - 28px));
+      max-width: calc(100vw - 28px);
+      bottom: calc(82px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.u99-cart-bar #white-cart-container {
-      height: 72px;
-      padding: 7px;
-      gap: 8px;
-      border-radius: 24px;
-      background: rgba(255,255,255,.96);
-      border: 1px solid rgba(236,22,140,.10);
-      box-shadow: 0 8px 24px rgba(17,24,39,.10), 0 20px 48px rgba(17,24,39,.12);
+      height: 118px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      overflow: hidden;
+      border-radius: 28px;
+      background: #E31B23;
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 8px 20px rgba(227,27,35,.22), 0 18px 38px rgba(17,24,39,.16);
+      color: #fff;
     }
-    #white-cart-root.u99-cart-bar .wc-left {
-      gap: 9px;
-      padding-left: 3px;
-    }
-    #white-cart-root.u99-cart-bar .wc-thumb-wrap {
-      width: 50px;
+    #white-cart-root.u99-cart-bar .u99-free-row {
       height: 50px;
-    }
-    #white-cart-root.u99-cart-bar .wc-image-stack {
-      width: 50px !important;
-      min-width: 50px;
-      height: 50px;
-    }
-    #white-cart-root.u99-cart-bar .wc-img {
-      width: 50px;
-      height: 50px;
-      border-radius: 16px;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 8px rgba(16,24,40,.14);
-    }
-    #white-cart-root.u99-cart-bar .wc-img:nth-child(1) { left: 0; }
-    #white-cart-root.u99-cart-bar .wc-img:nth-child(2) { left: 9px; }
-    #white-cart-root.u99-cart-bar .wc-img:nth-child(3) { left: 18px; }
-    #white-cart-root.u99-cart-bar .wc-qty-badge {
-      top: -3px; right: -3px;
-      min-width: 19px; height: 19px; line-height: 20px;
-      border-radius: 10px;
-      background: #EC168C;
-      font-size: 10px;
-      border-width: 2px;
-      box-shadow: 0 2px 6px rgba(236,22,140,.24);
-    }
-    #white-cart-root.u99-cart-bar .wc-info {
-      gap: 2px;
-    }
-    #white-cart-root.u99-cart-bar .wc-res-name {
-      font-size: 13px;
-      line-height: 1.15;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      box-sizing: border-box;
+      background: rgba(0,0,0,.08);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
       font-weight: 800;
-      color: #101828;
+      letter-spacing: -.15px;
     }
-    #white-cart-root.u99-cart-bar .wc-menu-link {
-      font-size: 11px;
-      line-height: 1.2;
-      font-weight: 700;
-      color: #6B7280;
-      margin-top: 1px;
+    #white-cart-root.u99-cart-bar .u99-cart-row {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-width: 0;
+      padding: 0 24px;
+      box-sizing: border-box;
+      background: #E31B23;
     }
-    #white-cart-root.u99-cart-bar .wc-menu-link svg {
-      width: 12px; height: 12px;
+    #white-cart-root.u99-cart-bar .u99-total {
+      min-width: 0;
+      color: #fff;
+      font-size: 17px;
+      line-height: 1.1;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    #white-cart-root.u99-cart-bar .u99-view-cart {
+      all: unset;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex: 0 0 auto;
+      color: #fff;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #white-cart-root.u99-cart-bar .u99-view-cart svg {
+      width: 30px;
+      height: 30px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+    #white-cart-root.u99-cart-bar .u99-view-cart:active {
+      transform: scale(.98);
+    }
+    #white-cart-root.u99-cart-bar .u99-hidden-actions,
+    #white-cart-root.u99-cart-bar .wc-left,
     #white-cart-root.u99-cart-bar .wc-right {
-      gap: 5px;
+      display: none !important;
     }
-    #white-cart-root.u99-cart-bar .wc-btn {
-      height: 52px;
-      min-width: 112px;
-      padding: 0 14px;
-      border-radius: 18px;
-      background: #EC168C;
-      box-shadow: 0 5px 14px rgba(236,22,140,.22);
-    }
-    #white-cart-root.u99-cart-bar .wc-btn-title {
-      font-size: 12px;
-      font-weight: 800;
-      line-height: 1.15;
-    }
-    #white-cart-root.u99-cart-bar .wc-btn-sub {
-      font-size: 10px;
-      font-weight: 700;
-      line-height: 1.15;
-      margin-top: 2px;
-    }
-    #white-cart-root.u99-cart-bar .wc-close {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: #F7F7F8;
-      color: #667085;
-      border: 1px solid #EAECF0;
-      font-size: 13px;
-    }
-    #white-cart-root.u99-cart-bar .wc-close:active { background: #F0F1F3; }
-
-    @media (max-width: 390px) {
+    @media (max-width: 480px) {
       #white-cart-root.u99-cart-bar {
         width: calc(100vw - 20px);
         max-width: calc(100vw - 20px);
+        bottom: calc(78px + env(safe-area-inset-bottom, 0px));
       }
-      #white-cart-root.u99-cart-bar #white-cart-container { height: 68px; border-radius: 22px; }
-      #white-cart-root.u99-cart-bar .wc-thumb-wrap,
-      #white-cart-root.u99-cart-bar .wc-image-stack { width: 46px !important; min-width: 46px; height: 46px; }
-      #white-cart-root.u99-cart-bar .wc-img { width: 46px; height: 46px; border-radius: 15px; }
-      #white-cart-root.u99-cart-bar .wc-btn { min-width: 104px; height: 50px; padding: 0 12px; }
-      #white-cart-root.u99-cart-bar .wc-res-name { font-size: 12px; }
-      #white-cart-root.u99-cart-bar .wc-menu-link { font-size: 10px; }
+      #white-cart-root.u99-cart-bar #white-cart-container {
+        height: 112px;
+        border-radius: 24px;
+      }
+      #white-cart-root.u99-cart-bar .u99-free-row {
+        height: 48px;
+        min-height: 48px;
+        padding: 0 18px;
+        font-size: 14px;
+      }
+      #white-cart-root.u99-cart-bar .u99-cart-row {
+        padding: 0 18px;
+        gap: 10px;
+      }
+      #white-cart-root.u99-cart-bar .u99-total,
+      #white-cart-root.u99-cart-bar .u99-view-cart {
+        font-size: 15px;
+      }
+      #white-cart-root.u99-cart-bar .u99-view-cart {
+        gap: 7px;
+      }
+      #white-cart-root.u99-cart-bar .u99-view-cart svg {
+        width: 27px;
+        height: 27px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -398,7 +408,28 @@
   function makeDOM() {
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
-    if (IS_99_PAGE) wrap.classList.add('u99-cart-bar');
+
+    if (IS_99_PAGE) {
+      wrap.classList.add('u99-cart-bar');
+      wrap.innerHTML = `
+        <div id="white-cart-container">
+          <div class="u99-free-row" id="u99-free-message">Yay! You’ve unlocked Free Delivery</div>
+          <div class="u99-cart-row">
+            <div class="u99-total" id="u99-total" aria-live="polite">1 Item | ₹0</div>
+            <button type="button" class="u99-view-cart" aria-label="View cart" onclick="window.location.href='cart.html'">
+              <span>View Cart</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6"/>
+                <circle cx="10" cy="20" r="1.4"/>
+                <circle cx="18" cy="20" r="1.4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      return wrap;
+    }
+
     wrap.innerHTML = `
       <div id="white-cart-container">
         <button type="button" class="wc-left" aria-label="View cart" onclick="window.location.href='cart.html'">
@@ -431,7 +462,6 @@
     `;
     return wrap;
   }
-
   /* ── 4. UI BEHAVIOR LOGIC ── */
   let isDismissed = false;
   let lastTotalQty = null;
@@ -500,6 +530,46 @@
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
     const resEl = document.getElementById('wc-dynamic-res');
     const badgeEl = document.getElementById('wc-qty-badge');
+
+    if (IS_99_PAGE) {
+      if (!root) return;
+      const savedNames = Object.keys(savedCart);
+      if (!savedNames.length) {
+        hideCartBar(root);
+        lastTotalQty = null;
+        return;
+      }
+
+      let totalQty = 0;
+      let totalPrice = 0;
+      savedNames.forEach(key => {
+        const item = savedCart[key] || {};
+        const q = Number(item.quantity);
+        const p = Number(item.price);
+        if (Number.isFinite(q) && q > 0) totalQty += q;
+        if (Number.isFinite(q) && q > 0 && Number.isFinite(p) && p >= 0) totalPrice += p * q;
+      });
+
+      const totalEl = document.getElementById('u99-total');
+      const freeEl = document.getElementById('u99-free-message');
+      if (totalEl) totalEl.textContent = `${totalQty} ${totalQty === 1 ? 'Item' : 'Items'} | ${formatCurrency(totalPrice)}`;
+      if (freeEl) {
+        const FREE_DELIVERY_THRESHOLD = 200;
+        if (totalPrice >= FREE_DELIVERY_THRESHOLD) {
+          freeEl.textContent = 'Yay! You’ve unlocked Free Delivery';
+        } else {
+          const remaining = FREE_DELIVERY_THRESHOLD - totalPrice;
+          freeEl.textContent = `Add ${formatCurrency(remaining)} more for Free Delivery`;
+        }
+      }
+
+      if (lastTotalQty !== null && lastTotalQty !== totalQty) {
+        bump(totalEl);
+      }
+      lastTotalQty = totalQty;
+      showCartBar(root);
+      return;
+    }
 
     if (!root || !countEl || !imgStackEl) return;
 
@@ -641,7 +711,8 @@
       });
     }
 
-    document.getElementById('wc-close-btn').addEventListener('click', (e) => {
+    if (!IS_99_PAGE) {
+      document.getElementById('wc-close-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       document.getElementById('wc-standard-actions').style.display = 'none';
       document.getElementById('wc-clear-actions').style.display = 'flex';
@@ -653,12 +724,13 @@
       document.getElementById('wc-standard-actions').style.display = 'flex';
     });
 
-    document.getElementById('wc-confirm-clear').addEventListener('click', (e) => {
-      e.stopPropagation();
-      localStorage.removeItem('nearbite_cart'); 
-      document.getElementById('white-cart-root').style.display = 'none'; 
-      window.location.reload(); 
-    });
+      document.getElementById('wc-confirm-clear').addEventListener('click', (e) => {
+        e.stopPropagation();
+        localStorage.removeItem('nearbite_cart'); 
+        document.getElementById('white-cart-root').style.display = 'none'; 
+        window.location.reload(); 
+      });
+    }
 
     window.updateGlobalCart();
   }
