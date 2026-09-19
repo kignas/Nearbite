@@ -23,14 +23,79 @@
     document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{item,restaurant:r}}));
     if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
     const host=document.querySelector(`[data-under99-restaurant="${CSS.escape(String(r.id||r._id||''))}"]`);
-    if(host)refreshCard(host,r);
+    if(host)syncCard(host,r);
   }
 
   const icon={
-    star:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.75 5.58 6.16.9-4.46 4.34 1.05 6.13L12 17.06 6.5 19.95l1.05-6.13-4.46-4.34 6.16-.9L12 3Z" fill="currentColor"/></svg>',
+    // Premium rating badge: solid green circle with a clean, upright white star.
+    ratingBadge:'<svg class="u99-rating-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#159A62"/><path d="M12 5.4 13.94 9.33 18.28 9.96 15.14 13.02 15.88 17.34 12 15.3 8.12 17.34 8.86 13.02 5.72 9.96 10.06 9.33Z" fill="#fff"/></svg>',
+    // Premium free-delivery / offer badge: green scalloped seal with a white percent mark.
+    offerSeal:'<svg class="u99-seal" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0.8Q12 0.8 13.3 1.99Q14.59 3.17 16.32 2.88Q18.06 2.58 18.5 4.28Q18.95 5.98 20.57 6.66Q22.19 7.35 21.65 9.02Q21.11 10.69 22.1 12.14Q23.09 13.59 21.73 14.71Q20.37 15.82 20.42 17.58Q20.46 19.33 18.72 19.54Q16.97 19.74 16.06 21.24Q15.16 22.75 13.58 21.97Q12 21.2 10.42 21.97Q8.84 22.75 7.94 21.24Q7.03 19.74 5.28 19.54Q3.54 19.33 3.58 17.58Q3.63 15.82 2.27 14.71Q0.91 13.59 1.9 12.14Q2.89 10.69 2.35 9.02Q1.81 7.35 3.43 6.66Q5.05 5.98 5.5 4.28Q5.94 2.58 7.68 2.88Q9.41 3.17 10.7 1.99Z" fill="#159A62"/><path d="M9 15.2 15 8.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.4" cy="9.4" r="1.55" fill="#fff"/><circle cx="14.6" cy="14.6" r="1.55" fill="#fff"/></svg>',
     clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
   };
+
+  /* ── Customization bridge — reuses the EXISTING restaurant.html system ──
+     restaurant.html registers customizable items into window.__ewCust and
+     opens the shared sheet via window.ewOpenCustomize(menuItemId). We do the
+     same here so the 99 Store card drives the very same modal + cart logic;
+     we never build a second sheet or a second cart path. */
+  function customGroups(item){
+    // restaurant.html reads item.customizations; accept a few safe aliases in
+    // case under99.html's normaliser renamed the field, without assuming one.
+    const g=item&&(item.customizations||item.customizationGroups||item.customization||item.customGroups);
+    return Array.isArray(g)?g:[];
+  }
+  function hasRealCustomization(item){
+    return customGroups(item).some(g=>g&&Array.isArray(g.options)&&g.options.length>0);
+  }
+  function isCustomisable(item){
+    return item&&(item.isCustomisable===true||item.customisable===true||hasRealCustomization(item));
+  }
+  function registerCustomization(item,r){
+    // Mirror the exact shape restaurant.html stores, so the shared sheet reads it.
+    if(!hasRealCustomization(item))return false;
+    const id=String(item.id||item._id||'');
+    if(!id)return false;
+    const price=num(item.price);
+    const original=item.originalPrice!=null&&num(item.originalPrice)>price?num(item.originalPrice):null;
+    window.__ewCust=window.__ewCust||{};
+    window.__ewCust[id]={
+      name:item.name||'Item',price,resId:String(r.id||r._id||''),menuItemId:id,
+      image:item.image||'',isVeg:Boolean(item.isVeg),originalPrice:original,groups:customGroups(item)
+    };
+    return true;
+  }
+  // Count customized units in the cart for an item — same rule restaurant.html
+  // uses: match on the menuItem id, or on composite keys like "Name (Large)".
+  function getCustomizedQuantity(item){
+    const c=getCart();
+    const baseName=String(item.name==null?'':item.name).trim();
+    const id=String(item.id||item._id||'');
+    let total=0;
+    Object.keys(c).forEach(k=>{
+      const e=c[k];
+      if(!e||!(Number(e.quantity)>0))return;
+      const entryMenuId=String(e.menuItem==null?'':e.menuItem);
+      const sameMenuItem=id&&entryMenuId&&entryMenuId===id;
+      const compositeForItem=k===baseName||k.indexOf(baseName+' (')===0;
+      if(sameMenuItem||compositeForItem)total+=Number(e.quantity);
+    });
+    return total;
+  }
+  function openCustomize(item,r){
+    registerCustomization(item,r); // guarantee data is present before opening
+    const id=String(item.id||item._id||'');
+    if(typeof window.ewOpenCustomize==='function'){
+      window.ewOpenCustomize(id);
+      return true;
+    }
+    // Shared sheet not present on this page: never silently add the base item.
+    // Send the customer to the full restaurant page, which owns the sheet.
+    const resId=String(r.id||r._id||'');
+    if(resId)window.location.href=`restaurant.html?id=${encodeURIComponent(resId)}`;
+    return false;
+  }
 
   function formatCount(value){
     if(value==null || value==='') return '';
@@ -41,16 +106,30 @@
     return String(Math.round(n));
   }
 
+  // Fallback mountain shows ONLY when there is no image or the image fails.
+  // The CSS pins both layers to the same box and makes the HTML `hidden`
+  // attribute authoritative, so a valid (even transparent) image never
+  // reveals the fallback beneath or beside it.
+  const FALLBACK_SVG='<svg viewBox="0 0 24 24"><path d="M4 18.5h16M6 16l3.2-5 3.2 3 2.8-5 3.8 7"/></svg>';
   function imageMarkup(item){
-    const fallback='<div class="u99-image-fallback" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18.5h16M6 16l3.2-5 3.2 3 2.8-5 3.8 7"/></svg></div>';
-    if(!item.image)return fallback;
-    return `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false">${fallback.replace('aria-hidden="true"','hidden aria-hidden="true"')}`;
+    if(!item.image){
+      return `<div class="u99-image-fallback" aria-hidden="true">${FALLBACK_SVG}</div>`;
+    }
+    const onerr="this.hidden=true;var f=this.parentNode&&this.parentNode.querySelector('.u99-image-fallback');if(f)f.hidden=false;";
+    return `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async" onerror="${onerr}"><div class="u99-image-fallback" hidden aria-hidden="true">${FALLBACK_SVG}</div>`;
   }
 
   function addControl(item,r){
+    if(item.inStock===false)return '<button type="button" class="u99-add u99-unavailable" disabled>Unavailable</button>';
+    // Customized items: single ADD (+) that opens the shared sheet, with a
+    // count badge for however many customized variants are already in cart.
+    if(isCustomisable(item)){
+      registerCustomization(item,r);
+      const cq=getCustomizedQuantity(item);
+      return `<button type="button" class="u99-add u99-add-cust${cq>0?' has-qty':''}" data-action="customize" aria-label="Customise ${esc(item.name)}${cq>0?', '+cq+' in cart':''}">+${cq>0?`<span class="u99-cust-qty" aria-hidden="true">${cq}</span>`:''}</button>`;
+    }
     const q=getQuantity(item,r);
     if(q>0)return `<div class="u99-stepper"><button type="button" data-action="minus" aria-label="Remove one">−</button><span>${q}</span><button type="button" data-action="plus" aria-label="Add one">+</button></div>`;
-    if(item.inStock===false)return '<button type="button" class="u99-add u99-unavailable" disabled>Unavailable</button>';
     return `<button type="button" class="u99-add" data-action="add" aria-label="Add ${esc(item.name)}">+</button>`;
   }
 
@@ -98,12 +177,12 @@
   function ratingMarkup(r){
     const rating=num(r.rating);
     const count=formatCount(r.ratingCount);
-    return `<span class="u99-rating">${icon.star}<b>${rating?rating.toFixed(1):'—'}</b>${count?`<span class="u99-rating-count">(${esc(count)})</span>`:''}</span>`;
+    return `<span class="u99-rating">${icon.ratingBadge}<b>${rating?rating.toFixed(1):'—'}</b>${count?`<span class="u99-rating-count">(${esc(count)})</span>`:''}</span>`;
   }
 
   function freeDeliveryMarkup(r){
     if(r.freeDeliveryAbove==null)return '';
-    return `<div class="u99-free-row"><span class="u99-free-icon">%</span><span class="u99-free-text">Free delivery above ₹${num(r.freeDeliveryAbove)}</span><button class="u99-info" data-action="info" aria-label="Free delivery information">${icon.info}</button></div>`;
+    return `<div class="u99-free-row"><span class="u99-free-icon" aria-hidden="true">${icon.offerSeal}</span><span class="u99-free-text">Free delivery above ₹${num(r.freeDeliveryAbove)}</span><button class="u99-info" data-action="info" aria-label="Free delivery information">${icon.info}</button></div>`;
   }
 
   function cardMarkup(r,menu){
@@ -129,27 +208,50 @@
     </article>`;
   }
 
-  function bindCard(host,r){
-    const id=String(r.id||r._id||'');
-    host.querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',e=>{
-      const action=button.dataset.action;
-      if(['add','plus','minus'].includes(action)){
-        e.stopPropagation();
-        const itemEl=button.closest('.u99-item');
-        const itemId=itemEl?.dataset.itemId;
-        const item=(r.menu||[]).find(x=>String(x.id||x._id||'')===String(itemId));
-        if(item)changeCart(item,r,action==='minus'?-1:1);
-      } else if(action==='restaurant'||action==='full-menu'){
-        e.stopPropagation();
-        if(id)window.location.href=`restaurant.html?id=${encodeURIComponent(id)}`;
-      } else if(action==='info'){
-        e.stopPropagation();
-        if(typeof window.showToast==='function')window.showToast(`Free delivery above ₹${num(r.freeDeliveryAbove)}`);
-      }
-    }));
+  // host -> restaurant object, so a rebuilt card (new inner DOM) still resolves
+  // its data and a delegated listener bound once keeps working.
+  const hostData=new WeakMap();
 
+  function findItem(r,itemId){
+    return (r.menu||[]).find(x=>String(x.id||x._id||'')===String(itemId));
+  }
+
+  function bindCard(host,r){
+    hostData.set(host,r);
+    // Delegated click — survives partial re-renders of the action buttons, so
+    // the carousel and images are never rebuilt just to update a + / stepper.
+    if(!host.__u99click){
+      host.__u99click=true;
+      host.addEventListener('click',e=>{
+        const rr=hostData.get(host); if(!rr)return;
+        const button=e.target.closest('[data-action]');
+        if(!button||!host.contains(button))return;
+        const action=button.dataset.action;
+        const id=String(rr.id||rr._id||'');
+        if(action==='add'||action==='plus'||action==='minus'){
+          e.stopPropagation();
+          const item=findItem(rr,button.closest('.u99-item')?.dataset.itemId);
+          if(item)changeCart(item,rr,action==='minus'?-1:1);
+        } else if(action==='customize'){
+          e.stopPropagation();
+          const item=findItem(rr,button.closest('.u99-item')?.dataset.itemId);
+          if(item)openCustomize(item,rr);
+        } else if(action==='restaurant'||action==='full-menu'){
+          e.stopPropagation();
+          if(id)window.location.href=`restaurant.html?id=${encodeURIComponent(id)}`;
+        } else if(action==='info'){
+          e.stopPropagation();
+          if(typeof window.showToast==='function')window.showToast(`Free delivery above ₹${num(rr.freeDeliveryAbove)}`);
+        }
+      });
+    }
+    bindWheel(host);
+  }
+
+  function bindWheel(host){
     const carousel=host.querySelector('.u99-carousel');
-    if(carousel){
+    if(carousel && !carousel.__u99wheel){
+      carousel.__u99wheel=true;
       carousel.addEventListener('wheel',e=>{
         if(Math.abs(e.deltaY)>Math.abs(e.deltaX))carousel.scrollLeft+=e.deltaY;
       },{passive:true});
@@ -157,23 +259,61 @@
   }
 
   function sortedMenu(r){
+    // Always lowest price -> highest, then name; API order never wins.
     return Array.isArray(r.menu)
       ? [...r.menu].filter(i=>i && num(i.price)>0).sort((a,b)=>num(a.price)-num(b.price)||String(a.name).localeCompare(String(b.name)))
       : [];
   }
 
+  // Lightweight update: refresh ONLY the +/stepper/customize controls in place.
+  // Keeps carousel scroll position and loaded images untouched.
+  function syncCard(host,r){
+    const menu=sortedMenu(r);
+    host.querySelectorAll('.u99-item').forEach(el=>{
+      const itemId=el.dataset.itemId;
+      const item=menu.find(x=>String(x.id||x._id||'')===String(itemId))||findItem(r,itemId);
+      if(!item)return;
+      const action=el.querySelector('.u99-item-action');
+      if(action)action.innerHTML=addControl(item,r);
+    });
+  }
+
+  function syncAllCards(){
+    document.querySelectorAll('[data-under99-restaurant]').forEach(host=>{
+      const r=hostData.get(host);
+      if(r)syncCard(host,r);
+    });
+  }
+
+  // The shared customization sheet (restaurant.html) writes to the cart and
+  // calls window.updateGlobalCart() but doesn't know about our cards. Wrap it
+  // once so any confirmed customized add re-syncs our + badges.
+  function hookGlobalCart(){
+    if(window.__u99CartHooked)return;
+    window.__u99CartHooked=true;
+    const prev=window.updateGlobalCart;
+    window.updateGlobalCart=function(){
+      const ret=(typeof prev==='function')?prev.apply(this,arguments):undefined;
+      try{syncAllCards();}catch(_){}
+      return ret;
+    };
+  }
+
   function refreshCard(host,r){
     const menu=sortedMenu(r);
     host.innerHTML=cardMarkup(r,menu);
+    menu.forEach(i=>{ if(isCustomisable(i))registerCustomization(i,r); });
     bindCard(host,r);
   }
 
   function createRestaurantCard(r){
+    hookGlobalCart();
     const host=document.createElement('div');
     host.className='u99-card-host';
     host.dataset.under99Restaurant=String(r.id||r._id||'');
     const menu=sortedMenu(r);
     host.innerHTML=cardMarkup(r,menu);
+    menu.forEach(i=>{ if(isCustomisable(i))registerCustomization(i,r); });
     bindCard(host,r);
     return host;
   }
@@ -209,8 +349,8 @@
         display:flex;align-items:center;flex-wrap:nowrap;gap:5px;color:#747B87;
         font-size:11.5px;font-weight:600;line-height:1.25;min-width:0;overflow:hidden;
       }
-      .u99-rating{display:inline-flex;align-items:center;gap:4px;color:#344054;white-space:nowrap;flex:0 0 auto}
-      .u99-rating svg{width:16px;height:16px;color:#F5B51B;flex:0 0 16px}
+      .u99-rating{display:inline-flex;align-items:center;gap:5px;color:#344054;white-space:nowrap;flex:0 0 auto}
+      .u99-rating .u99-rating-badge{width:17px;height:17px;flex:0 0 17px;display:block}
       .u99-rating b{font-weight:750}
       .u99-rating-count{color:#747B87;font-weight:500}
       .u99-sep{color:#C9CED6;flex:0 0 auto}
@@ -222,9 +362,9 @@
         font-size:11.5px;font-weight:650;color:#26334A;line-height:1.2;white-space:nowrap;
       }
       .u99-free-icon{
-        width:21px;height:21px;border-radius:6px;background:#159A62;color:#fff;
-        display:grid;place-items:center;font-size:12px;font-weight:800;flex:0 0 21px;
+        width:22px;height:22px;flex:0 0 22px;display:grid;place-items:center;
       }
+      .u99-free-icon .u99-seal{width:22px;height:22px;display:block}
       .u99-free-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
       .u99-info{
         width:18px;height:18px;padding:0;border:0;background:transparent;color:#8791A1;
@@ -245,13 +385,20 @@
         width:calc((100% - 20px)/3);
         min-width:0;scroll-snap-align:start;
       }
+      /* Same tile proportion (aspect-ratio 1.46/1) and object-fit as before —
+         only the layer stacking is fixed. Image and fallback are pinned to the
+         SAME box so a valid/transparent image never leaves a grey strip. */
       .u99-item-image{
         position:relative;width:100%;aspect-ratio:1.46/1;border-radius:12px;
         overflow:visible;background:#F1F3F6;
       }
       .u99-item-image img,.u99-image-fallback{
-        width:100%;height:100%;border-radius:12px;object-fit:cover;display:block;overflow:hidden;
+        position:absolute;inset:0;width:100%;height:100%;border-radius:12px;
+        object-fit:cover;display:block;
       }
+      /* Make the HTML hidden attribute authoritative — never let the display
+         rules below override it. This is the actual grey-mountain fix. */
+      .u99-item-image img[hidden],.u99-image-fallback[hidden]{display:none!important}
       .u99-image-fallback{display:grid;place-items:center;color:#C1C7D0;background:#F1F3F6}
       .u99-image-fallback svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
       .u99-popular{
@@ -267,6 +414,12 @@
         font-weight:500;padding:0;
       }
       .u99-add:active{transform:scale(.94)}
+      .u99-add-cust{position:relative}
+      .u99-cust-qty{
+        position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;
+        border-radius:999px;background:#159A62;color:#fff;font-size:9px;font-weight:800;
+        line-height:1;display:grid;place-items:center;box-shadow:0 1px 3px rgba(16,24,40,.22);
+      }
       .u99-unavailable{font-size:7px;width:54px;height:30px;border-color:#DFE3E9;color:#8D96A5}
       .u99-stepper{
         height:32px;min-width:72px;border:2px solid #EC168C;border-radius:10px;background:#fff;
