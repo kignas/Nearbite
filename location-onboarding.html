@@ -17,7 +17,7 @@
 :root{
   /* ===== Eatswada onboarding design system — identical in login.html,
      complete-profile.html, location-onboarding.html and address.html ===== */
-  --brand:#FC8019;--brand-dark:#E96F0A;--brand-tint:#FFF4EC;--brand-ink:#C85E0D;
+  --brand:#C2185B;--brand-dark:#A1114B;--brand-tint:#FFF1F8;--brand-ink:#A5164C;
   --ink:#1A1D21;--ink-2:#4B5563;--muted:#6B7280;--label:#8E959F;
   --line:#E6E9ED;--soft:#F1F5F9;--field:#FBFCFD;--ok:#16A34A;
   /* Two-layer shadows: a tight contact edge plus a wide soft lift, so a
@@ -32,55 +32,50 @@
 html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--ink);overflow:hidden}
 #map{position:absolute;inset:0;background:#e9eef2}
 
-/* ── Floating header ── */
-.top{position:absolute;z-index:1000;display:flex;align-items:center;gap:10px;
+/* ── Top: back button + pill search on one row ── */
+.top-bar{position:absolute;z-index:1100;display:flex;flex-direction:column;gap:8px;
  top:calc(12px + var(--safe-t));left:calc(12px + var(--safe-l));right:calc(12px + var(--safe-r))}
-.back,.locate{flex:none;width:44px;height:44px;border:0;border-radius:14px;background:#fff;color:var(--ink);
- font-size:15px;display:grid;place-items:center;box-shadow:var(--shadow-float);cursor:pointer}
-.back:active,.locate:active{background:var(--soft)}
-.locate:disabled{color:var(--muted)}
-.title{flex:1;min-width:0;background:#fff;border-radius:14px;padding:10px 13px;box-shadow:var(--shadow-float)}
-.title b{display:block;font-size:15px;font-weight:800;letter-spacing:-.35px;line-height:1.25;color:var(--ink)}
-.title span{display:block;font-size:12px;font-weight:500;color:var(--muted);line-height:1.4;margin-top:2px}
+.top-row{display:flex;align-items:flex-start;gap:10px}
+.back{flex:none;width:50px;height:50px;border:0;border-radius:50%;background:#fff;color:var(--ink);
+ font-size:16px;display:grid;place-items:center;box-shadow:var(--shadow-float);cursor:pointer}
+.back:active{background:var(--soft)}
+.locate{display:none}
 
-
-/* ── Search location ── */
-.location-search{
- position:absolute;z-index:1100;top:calc(66px + var(--safe-t));left:calc(12px + var(--safe-l));
- right:calc(12px + var(--safe-r));display:flex;flex-direction:column;gap:7px;
-}
+/* ── Search field ── */
+.location-search{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
 .location-search-row{
- display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
- border-radius:15px;padding:0 11px;min-height:48px;box-shadow:var(--shadow-float);
+ display:flex;align-items:center;gap:6px;background:#fff;
+ border-radius:999px;padding:0 8px 0 18px;min-height:50px;box-shadow:var(--shadow-float);
 }
-.location-search-row i{color:var(--muted);font-size:14px;flex:none}
+.location-search-row .search-ico{color:var(--muted);font-size:15px;flex:none;padding:0 6px}
 #locationSearch{
  flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);
- font:600 14px/1.3 inherit;padding:13px 0;
+ font:600 14.5px/1.3 inherit;padding:14px 0;
 }
 #locationSearch::placeholder{color:#AEB4BC;font-weight:500}
+#locationSearch::-webkit-search-cancel-button{display:none}
 .location-search-clear{
- display:none;width:30px;height:30px;border:0;border-radius:9px;background:#F1F3F6;
+ display:none;width:32px;height:32px;border:0;border-radius:50%;background:#F1F3F6;
  color:var(--muted);place-items:center;cursor:pointer;flex:none;
 }
 .location-search-clear.show{display:grid}
 .location-results{
- display:none;background:#fff;border:1px solid var(--line);border-radius:15px;
- box-shadow:var(--shadow-float);overflow:hidden;max-height:220px;overflow-y:auto;
+ display:none;background:#fff;border:1px solid var(--line);border-radius:16px;
+ box-shadow:var(--shadow-float);overflow:hidden;max-height:230px;overflow-y:auto;
 }
 .location-results.show{display:block}
 .location-result{
- width:100%;display:flex;gap:10px;align-items:flex-start;text-align:left;
- border:0;border-bottom:1px solid #F1F3F6;background:#fff;padding:12px;cursor:pointer;
- color:var(--ink);font:600 13px/1.4 inherit;
+ width:100%;display:flex;gap:11px;align-items:flex-start;text-align:left;
+ border:0;border-bottom:1px solid #F1F3F6;background:#fff;padding:13px 14px;cursor:pointer;
+ color:var(--ink);font:700 13.5px/1.4 inherit;
 }
 .location-result:last-child{border-bottom:0}
 .location-result i{color:var(--brand);margin-top:2px;flex:none}
-.location-result small{display:block;color:var(--muted);font-size:11px;font-weight:500;margin-top:2px}
+.location-result small{display:block;color:var(--muted);font-size:11.5px;font-weight:500;margin-top:2px}
 .location-result:active{background:#F8FAFC}
 .location-search-status{
  display:none;background:#fff;border:1px solid var(--line);border-radius:13px;
- padding:10px 12px;box-shadow:var(--shadow-float);font-size:12px;font-weight:600;color:var(--muted);
+ padding:10px 13px;box-shadow:var(--shadow-float);font-size:12px;font-weight:600;color:var(--muted);
 }
 .location-search-status.show{display:block}
 
@@ -94,19 +89,30 @@ html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--in
 @keyframes pulse{0%{transform:scale(.7);opacity:.75}100%{transform:scale(1.8);opacity:0}}
 .leaflet-control-attribution{font-size:8px}
 
-/* ── Confirmation sheet ── */
-.sheet{position:absolute;z-index:1000;background:#fff;border-radius:24px;box-shadow:var(--shadow-sheet);
- left:calc(10px + var(--safe-l));right:calc(10px + var(--safe-r));bottom:calc(10px + var(--safe-b));
- padding:16px 14px 14px}
-.sheet-title{margin:0 0 11px;font-size:16px;font-weight:800;letter-spacing:-.35px;line-height:1.2;color:var(--ink)}
-.address{display:flex;gap:11px;align-items:flex-start;background:var(--field);border:1px solid var(--line);
- border-radius:14px;padding:12px 13px;margin-bottom:12px;min-height:64px}
-.addr-icon{flex:none;width:38px;height:38px;border-radius:12px;background:var(--brand-tint);color:var(--brand);
- display:grid;place-items:center;font-size:14px}
+/* ── Bottom dock: current-location pill + sheet ── */
+.dock{position:absolute;z-index:1000;left:0;right:0;bottom:0;display:flex;flex-direction:column;
+ pointer-events:none;padding:0 calc(10px + var(--safe-r)) calc(10px + var(--safe-b)) calc(10px + var(--safe-l))}
+.current-pill{align-self:center;pointer-events:auto;display:inline-flex;align-items:center;gap:9px;
+ height:46px;padding:0 20px;margin-bottom:12px;border:1px solid var(--line);border-radius:999px;background:#fff;
+ color:var(--ink);font-family:inherit;font-size:14px;font-weight:800;letter-spacing:-.2px;
+ box-shadow:var(--shadow-float);cursor:pointer}
+.current-pill i{color:var(--brand);font-size:15px}
+.current-pill:active{background:var(--soft)}
+.current-pill:disabled{opacity:.6;cursor:default}
+
+.sheet{pointer-events:auto;background:#fff;border-radius:26px;box-shadow:var(--shadow-sheet);
+ padding:18px 16px 16px}
+.sheet-head{margin-bottom:13px}
+.sheet-title{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.3px;line-height:1.3;color:var(--ink)}
+.sheet-sub{margin:3px 0 0;font-size:12.5px;font-weight:500;line-height:1.4;color:var(--muted)}
+
+.address{display:flex;gap:10px;align-items:flex-start;background:transparent;border:0;padding:0;margin-bottom:14px}
+.addr-icon{flex:none;width:auto;height:auto;border-radius:0;background:transparent;color:var(--brand);
+ display:grid;place-items:center;font-size:19px;margin-top:2px}
 .addr-body{flex:1;min-width:0}
-.addr-primary{display:block;font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.3;color:var(--ink);
+.addr-primary{display:block;font-size:17px;font-weight:800;letter-spacing:-.35px;line-height:1.3;color:var(--ink);
  overflow-wrap:anywhere}
-.addr-secondary{font-size:12px;font-weight:500;line-height:1.45;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.addr-secondary{font-size:12.5px;font-weight:500;line-height:1.5;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
 .addr-meta{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;line-height:1.4;
  color:var(--label);margin-top:7px}
 .addr-meta.is-gps{color:var(--ok)}
@@ -114,16 +120,16 @@ html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--in
 .warn{display:none;background:#FFF8F3;border:1px solid #FFD9C4;color:#8A4517;padding:11px 12px;border-radius:14px;
  font-size:12px;font-weight:600;line-height:1.45;margin-bottom:12px}
 .actions{display:grid;gap:9px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border-radius:14px;
- border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:15px;font-weight:800;
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;border-radius:16px;
+ border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:16px;font-weight:800;
  letter-spacing:-.2px;color:var(--ink);cursor:pointer;transition:background .15s ease}
 .btn:active{transform:scale(.99)}
 .primary{background:var(--brand);border-color:var(--brand);color:#fff}
 .primary:not(:disabled):active{background:var(--brand-dark);border-color:var(--brand-dark)}
 .btn:disabled{opacity:.45;cursor:default;transform:none}
-.loc-progress{display:none;align-items:center;gap:10px;background:#F8FAFC;border:1px solid var(--line);padding:10px 12px;border-radius:14px;margin-bottom:10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.loc-progress{display:none;align-items:center;gap:10px;background:#F6FAF8;border:1px solid var(--line);padding:10px 12px;border-radius:14px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--ink-2)}
 .loc-progress.show{display:flex}.loc-spinner{width:18px;height:18px;border:2px solid #DDE3E8;border-top-color:var(--brand);border-radius:50%;animation:locSpin .75s linear infinite;flex:none}@keyframes locSpin{to{transform:rotate(360deg)}}
-.back:focus-visible,.locate:focus-visible,.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.back:focus-visible,.current-pill:focus-visible,.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
 </style>
 <link rel="stylesheet" href="style.css">
@@ -163,35 +169,43 @@ button,input,textarea,select{font-family:inherit}
 <body>
 <div id="map"></div>
 <div class="pin"><i class="fa-solid fa-location-dot"></i></div><div class="pin-dot"></div>
-<div class="location-search" aria-label="Search delivery location">
-  <div class="location-search-row">
-    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-    <input id="locationSearch" type="search" inputmode="search" autocomplete="off"
-      placeholder="Search area, landmark or address" aria-label="Search area, landmark or address">
-    <button type="button" id="locationSearchClear" class="location-search-clear" aria-label="Clear search">
-      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-    </button>
+
+<div class="top-bar" aria-label="Search delivery location">
+  <div class="top-row">
+    <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+    <div class="location-search">
+      <div class="location-search-row">
+        <input id="locationSearch" type="search" inputmode="search" autocomplete="off"
+          placeholder="Search an area or address" aria-label="Search an area or address">
+        <button type="button" id="locationSearchClear" class="location-search-clear" aria-label="Clear search">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <i class="fa-solid fa-magnifying-glass search-ico" aria-hidden="true"></i>
+      </div>
+      <div id="locationResults" class="location-results" role="listbox" aria-label="Location search results"></div>
+      <div id="locationSearchStatus" class="location-search-status" role="status" aria-live="polite"></div>
+    </div>
   </div>
-  <div id="locationResults" class="location-results" role="listbox" aria-label="Location search results"></div>
-  <div id="locationSearchStatus" class="location-search-status" role="status" aria-live="polite"></div>
 </div>
 
-<div class="top">
-  <button class="back" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
-  <div class="title">
-    <b>Set delivery location</b>
-    <span>Approximate location is enough — adjust the pin if needed</span>
-  </div>
-  <button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i></button>
-</div>
-<div class="sheet">
-  <h1 class="sheet-title">Deliver here?</h1>
-  <div class="warn" id="warn"></div>
-  <div class="loc-progress" id="locProgress" role="status" aria-live="polite"><span class="loc-spinner"></span><span id="locProgressText">Finding your location…</span></div>
-  <div class="address" id="address" role="status" aria-live="polite">Waiting for your location…</div>
-  <div class="actions">
-    <button class="btn" id="currentBtn" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Use current location</button>
-    <button class="btn primary" id="confirm" onclick="confirmLocation()" disabled>Confirm location</button>
+<!-- Hidden control kept only so the locate flow can toggle its disabled state; the visible locate control is the pill below. -->
+<button class="locate" id="locateBtn" onclick="locateMe()" aria-label="Use current location" tabindex="-1"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i></button>
+
+<div class="dock">
+  <button class="current-pill" id="currentBtn" onclick="locateMe()">
+    <i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Current location
+  </button>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h1 class="sheet-title">Place the pin at exact delivery location</h1>
+      <p class="sheet-sub">Order will be delivered here</p>
+    </div>
+    <div class="warn" id="warn"></div>
+    <div class="loc-progress" id="locProgress" role="status" aria-live="polite"><span class="loc-spinner"></span><span id="locProgressText">Finding your location…</span></div>
+    <div class="address" id="address" role="status" aria-live="polite">Waiting for your location…</div>
+    <div class="actions">
+      <button class="btn primary" id="confirm" onclick="confirmLocation()" disabled>Confirm &amp; proceed</button>
+    </div>
   </div>
 </div>
 <!-- Location gate. GPS is preferred, but search is a safe manual fallback.
@@ -574,7 +588,7 @@ async function confirmLocation(){
    window.location.href='complete-profile.html?location=done'+(next?'':'&new=1');
  }catch(e){
    warn('We could not save the location. Please try again.');
-   btn.disabled=false; btn.textContent='Confirm location';
+   btn.disabled=false; btn.textContent='Confirm & proceed';
  }
 }
 function init(){
