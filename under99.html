@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FBD5E1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Eatswada">
   <meta name="view-transition" content="same-origin">
   <title>99 Store – Eatswada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,50 +29,8 @@ html,body{
 button,a{font:inherit} button{cursor:pointer} svg{display:block}
 body{padding-bottom:0}
 
-.store-header{
-  position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.98);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border-bottom:1px solid #ECEEF1;
-}
-.header-top{
-  min-height:66px;padding:8px 16px 5px;display:flex;align-items:center;gap:9px;
-}
-.header-left{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
-.icon-btn{
-  width:44px;height:44px;flex:0 0 44px;border:1px solid #E4E7EB;border-radius:50%;
-  background:#fff;color:#101828;display:grid;place-items:center;
-  box-shadow:0 1px 2px rgba(16,24,40,.03);-webkit-tap-highlight-color:transparent;
-}
-.icon-btn:active{transform:scale(.96);background:#F8F9FA}
-.icon-btn svg{width:23px;height:23px}
-.header-copy{display:none}
-.header-sub{display:none}
-.header-top>.icon-btn{margin-left:auto}
-
-.loc-pill{
-  display:flex;align-items:center;gap:9px;min-width:0;flex:1;
-  padding:5px 10px;border:1px solid rgba(255,255,255,.52);border-radius:999px;
-  background:#fff;color:#101828;text-align:left;
-  box-shadow:0 1px 2px rgba(16,24,40,.03);-webkit-tap-highlight-color:transparent;
-}
-.loc-pill:active{transform:scale(.99);background:#F8F9FA}
-.loc-pin{width:20px;height:20px;flex:0 0 20px;color:var(--pink)}
-.loc-text{min-width:0;display:flex;flex-direction:column;gap:1px}
-.loc-name-row{display:flex;align-items:center;gap:4px;min-width:0}
-.loc-name{
-  font-size:15px;font-weight:800;letter-spacing:-.3px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.loc-caret{width:16px;height:16px;flex:0 0 16px;color:#747B87}
-.loc-sub{
-  font-size:11.5px;font-weight:600;color:#747B87;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.loc-pill.loc-unset .loc-name{color:var(--pink)}
-@media(max-width:430px){
-  .loc-name{font-size:14.5px}
-  .loc-sub{font-size:11px}
-}
+/* Header, location pill and hero are defined in the "BENCHMARK HERO" block below. */
+.loc-pill:active{transform:scale(.99)}
 
 .filter-row{
   display:flex;gap:7px;overflow-x:auto;padding:5px 16px 8px;
@@ -208,10 +171,10 @@ body.filter-open{overflow:hidden}
 .store-header{position:relative;z-index:1000;background:#FBD5E1;border:0}
 .header-top{position:absolute;z-index:20;top:0;left:0;right:0;min-height:66px;padding:9px 16px 6px;display:flex;align-items:center;gap:10px;background:transparent}
 .header-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
-.icon-btn{width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(255,255,255,.48);border-radius:50%;background:rgba(255,255,255,.54);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#101828;display:grid;place-items:center;box-shadow:0 2px 8px rgba(89,36,55,.08)}
+.icon-btn{width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(255,255,255,.48);border-radius:50%;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#101828;display:grid;place-items:center;box-shadow:0 2px 8px rgba(89,36,55,.08)}
 .icon-btn:active{transform:scale(.96)}
 .icon-btn svg{width:22px;height:22px}
-.loc-pill{display:flex;align-items:center;gap:9px;min-width:0;flex:0 1 200px;width:200px;max-width:200px;min-height:44px;padding:5px 13px;border:1px solid rgba(255,255,255,.52);border-radius:999px;background:rgba(255,255,255,.52);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#101828;text-align:left;box-shadow:0 2px 8px rgba(89,36,55,.06)}
+.loc-pill{display:flex;align-items:center;gap:9px;min-width:0;flex:0 1 auto;width:auto;max-width:220px;min-height:44px;padding:5px 13px;border:1px solid rgba(255,255,255,.52);border-radius:999px;background:rgba(255,255,255,.52);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#101828;text-align:left;box-shadow:0 2px 8px rgba(89,36,55,.06)}
 .loc-pin{width:20px;height:20px;flex:0 0 20px;color:var(--pink)}
 .loc-text{min-width:0;display:flex;flex-direction:column;gap:1px}
 .loc-name-row{display:flex;align-items:center;gap:4px;min-width:0}
@@ -225,24 +188,24 @@ body.filter-open{overflow:hidden}
 .u99-hero::before{content:"";position:absolute;width:120px;height:120px;right:-34px;top:-46px;border-radius:50%;background:rgba(245,183,210,.30)}
 .u99-hero::after{content:"";position:absolute;width:170px;height:170px;left:-84px;top:120px;border-radius:50%;background:rgba(255,255,255,.14)}
 .u99-hero-inner{position:relative;min-height:184px;display:block}
-.u99-hero-copy{position:relative;z-index:4;width:61%;padding-top:96px;padding-left:38px}
+.u99-hero-copy{position:relative;z-index:4;width:61%;padding-top:96px;padding-left:16px}
 .u99-hero-kicker{display:block;padding:0;background:none;border:0;font-size:22px;line-height:1.02;font-weight:800;letter-spacing:-.7px;color:#071532}
 .u99-hero-title{display:none}
-.u99-hero-price{margin:4px 0 0;font-size:78px;line-height:.80;font-weight:950;letter-spacing:-4.1px;color:#D9096E}
+.u99-hero-price{margin:4px 0 0;font-size:78px;line-height:.88;font-weight:800;letter-spacing:-4.1px;color:#D9096E}
 .u99-hero-sub{margin:10px 0 0;max-width:290px;font-size:13.5px;line-height:1.35;font-weight:600;color:#574F63}
 .u99-hero-cta{display:none}
-.u99-hero-art{position:absolute;z-index:3;right:-18px;bottom:-10px;width:70%;max-width:none;max-height:190px;height:auto;object-fit:contain;object-position:right bottom;transform:scale(1.16);transform-origin:right bottom;filter:drop-shadow(0 10px 13px rgba(89,36,55,.12));pointer-events:none}
+.u99-hero-art{position:absolute;z-index:3;right:-6px;bottom:0;width:70%;max-width:none;max-height:184px;height:auto;object-fit:contain;object-position:right bottom;filter:drop-shadow(0 10px 13px rgba(89,36,55,.12));pointer-events:none}
 @media(max-width:430px){
   .header-top{min-height:60px;padding:7px 14px 4px;gap:8px}
   .icon-btn{width:44px;height:44px;flex-basis:44px}
-  .loc-pill{flex:0 1 200px;width:200px;max-width:200px;min-height:42px;border-radius:999px}
+  .loc-pill{flex:0 1 auto;width:auto;max-width:200px;min-height:42px;border-radius:999px}
   .u99-hero{min-height:184px;padding:0 14px;border-radius:0 0 22px 22px}
   .u99-hero-inner{min-height:184px}
-  .u99-hero-copy{width:61%;padding-top:96px;padding-left:38px}
+  .u99-hero-copy{width:61%;padding-top:96px;padding-left:16px}
   .u99-hero-kicker{font-size:22px;letter-spacing:-.65px}
   .u99-hero-price{font-size:78px;letter-spacing:-4px}
   .u99-hero-sub{font-size:13px;max-width:250px;margin-top:10px}
-  .u99-hero-art{right:-18px;bottom:-10px;width:70%;max-width:none;max-height:190px;transform:scale(1.10);transform-origin:right bottom}
+  .u99-hero-art{right:-6px;bottom:0;width:72%;max-width:none;max-height:182px}
 }
 </style>
 
@@ -801,41 +764,51 @@ body.filter-open{overflow:hidden}
   async function load(){
     const skeleton=$('skeleton-feed');
     const list=$('under99-list');
+    // Render free tier cold-starts can take 30s+, so keep the skeleton up and
+    // retry a few times before giving up rather than erroring on the first miss.
+    const MAX_ATTEMPTS=3;
 
-    try{
-      // PRIMARY SOURCE: the dedicated 99 Store endpoint returns MENU ITEMS,
-      // not restaurant objects. Group those items by their populated restaurant.
-      const result=await fetchJson(
-        'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
-        12000
-      );
-      const raw=Array.isArray(result?.data)
-        ? result.data
-        : (Array.isArray(result)?result:[]);
+    for(let attempt=1; attempt<=MAX_ATTEMPTS; attempt++){
+      try{
+        // PRIMARY SOURCE: the dedicated 99 Store endpoint returns MENU ITEMS,
+        // not restaurant objects. Group those items by their populated restaurant.
+        const result=await fetchJson(
+          'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
+          30000
+        );
+        const raw=Array.isArray(result?.data)
+          ? result.data
+          : (Array.isArray(result)?result:[]);
 
-      let restaurants=groupUnder99Items(raw);
+        let restaurants=groupUnder99Items(raw);
 
-      // FALLBACK: use the normal restaurant list + grouped menu endpoint.
-      if(!restaurants.length){
-        restaurants=await loadRestaurantsWithMenus();
-      }
+        // FALLBACK: use the normal restaurant list + grouped menu endpoint.
+        if(!restaurants.length){
+          restaurants=await loadRestaurantsWithMenus();
+        }
 
-      const normalized=restaurants
-        .map(raw=>normalizeRestaurant(raw))
-        .filter(r=>r.id && r.menu.length);
+        const normalized=restaurants
+          .map(raw=>normalizeRestaurant(raw))
+          .filter(r=>r.id && r.menu.length);
 
-      if(!normalized.length) throw new Error('No restaurant menu data returned');
+        if(!normalized.length) throw new Error('No restaurant menu data returned');
 
-      allRestaurants=normalized;
-      updateFilterButtons();
-      render();
-    }catch(error){
-      console.error('[99 Store] load failed:',error);
-      if(skeleton)skeleton.style.display='none';
-      if(list){
-        list.style.display='flex';
-        list.innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>We could not load the restaurant menu data right now.</p><button id="u99-retry" style="margin-top:14px;border:0;border-radius:999px;padding:11px 20px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
-        $('u99-retry')?.addEventListener('click',load);
+        allRestaurants=normalized;
+        updateFilterButtons();
+        render();
+        return;
+      }catch(error){
+        console.error('[99 Store] load attempt '+attempt+' failed:',error);
+        if(attempt<MAX_ATTEMPTS){
+          await new Promise(res=>setTimeout(res, attempt*2500));
+          continue;
+        }
+        if(skeleton)skeleton.style.display='none';
+        if(list){
+          list.style.display='flex';
+          list.innerHTML='<div class="empty"><div style="font-size:35px">!</div><h3>Couldn’t load deals</h3><p>We could not load the restaurant menu data right now.</p><button id="u99-retry" style="margin-top:14px;border:0;border-radius:999px;padding:11px 20px;background:#e11d8d;color:#fff;font-weight:800">Retry</button></div>';
+          $('u99-retry')?.addEventListener('click',load);
+        }
       }
     }
   }
