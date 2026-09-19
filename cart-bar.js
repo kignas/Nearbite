@@ -506,31 +506,74 @@
     '.app-bottom-nav', '.mobile-bottom-nav', 'nav.bottom', 'footer.bottom-nav'
   ];
   function findBottomNav() {
+    // Known Eatswada bottom-navigation selectors first.
     for (const s of NAV_SELECTORS) {
       const el = document.querySelector(s);
       if (!el) continue;
       const cs = getComputedStyle(el);
-      if ((cs.position === 'fixed' || cs.position === 'sticky') && cs.display !== 'none' && cs.visibility !== 'hidden') {
+      if ((cs.position === 'fixed' || cs.position === 'sticky') &&
+          cs.display !== 'none' && cs.visibility !== 'hidden') {
         const r = el.getBoundingClientRect();
-        // Anchored to the bottom of the viewport and reasonably short (a nav, not a panel).
-        if (r.height > 0 && r.height < 160 && r.bottom >= window.innerHeight - 4) return el;
+        if (r.height > 0 && r.height < 180 && r.bottom >= window.innerHeight - 12) {
+          return el;
+        }
       }
     }
-    return null;
+
+    // Fallback for custom/renamed homepage nav containers.
+    const candidates = Array.from(document.querySelectorAll('body *')).filter(el => {
+      const cs = getComputedStyle(el);
+      if (!(cs.position === 'fixed' || cs.position === 'sticky')) return false;
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+
+      const r = el.getBoundingClientRect();
+      if (r.height <= 0 || r.height > 180) return false;
+      if (r.bottom < window.innerHeight - 12) return false;
+      if (r.width < Math.min(280, window.innerWidth * 0.65)) return false;
+
+      const t = (el.innerText || '').replace(/\s+/g, ' ').toLowerCase();
+      return /home/.test(t) && /99\s*store/.test(t) && /orders?/.test(t);
+    });
+
+    return candidates.sort((a, b) =>
+      a.getBoundingClientRect().height - b.getBoundingClientRect().height
+    )[0] || null;
   }
+
   function positionCartAboveNav(root) {
     root = root || document.getElementById('white-cart-root');
     if (!root) return;
+
     const nav = findBottomNav();
+
+    // HOME: the cart must always sit clearly ABOVE the bottom navigation.
+    // 104px is the safe fallback when the homepage nav uses a custom selector.
+    if (CART_BAR_MODE === 'home') {
+      const minimumBottom = 104;
+
+      if (nav) {
+        const r = nav.getBoundingClientRect();
+        const navClearance = Math.max(0, window.innerHeight - r.top);
+        root.style.setProperty(
+          '--nb-cart-bottom',
+          Math.max(minimumBottom, Math.round(navClearance) + 14) + 'px'
+        );
+      } else {
+        root.style.setProperty('--nb-cart-bottom', minimumBottom + 'px');
+      }
+      return;
+    }
+
+    // 99 Store / Restaurant Menu: keep their existing lower placement.
     if (nav) {
       const r = nav.getBoundingClientRect();
-      // Space the nav currently occupies at the bottom (already includes any safe-area).
       const clearance = Math.max(0, window.innerHeight - r.top);
       root.style.setProperty('--nb-cart-bottom', (Math.round(clearance) + 12) + 'px');
     } else {
       root.style.setProperty('--nb-cart-bottom', 'calc(16px + env(safe-area-inset-bottom, 0px))');
     }
   }
+
   let posRAF = null;
   function schedulePos() {
     if (posRAF) return;
