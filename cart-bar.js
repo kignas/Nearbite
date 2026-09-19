@@ -252,145 +252,129 @@
     }
 
     /* ============================================================
-       EATSWADA PINK CART — Restaurant + 99 Store
-       Compact, fixed, no close button. Matches the supplied reference.
+       EATSWADA CART — Restaurant + 99 Store
+       White floating pill + pink View Cart action. No close button.
        ============================================================ */
     #white-cart-root.wc-pink {
       width: calc(100vw - 36px);
       max-width: 720px;
-      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.wc-pink #white-cart-container {
-      height: 64px;
-      min-height: 64px;
-      padding: 0 18px 0 22px;
-      border: 0;
-      border-radius: 24px;
-      background: #EC168C;
-      box-shadow: 0 8px 24px rgba(236,22,140,.18);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+      height: 70px;
+      min-height: 70px;
+      padding: 6px 8px 6px 12px;
+      border: 1px solid rgba(17,24,39,.06);
+      border-radius: 35px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 5px 22px rgba(16,24,40,.12), 0 1px 3px rgba(16,24,40,.05);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
     }
     #white-cart-root.wc-pink .wc-left {
-      color: #fff;
-      gap: 0;
-      min-width: 0;
-      overflow: visible;
+      color:#111827;
+      gap:8px;
+      min-width:0;
+      overflow:hidden;
+      flex: 1 1 auto;
     }
+    #white-cart-root.wc-pink .wc-thumb-wrap { display:flex; }
+    #white-cart-root.wc-pink .wc-image-stack {
+      width:42px !important; height:42px; min-width:42px;
+    }
+    #white-cart-root.wc-pink .wc-img { width:42px; height:42px; border-radius:50%; }
+    #white-cart-root.wc-pink .wc-img:nth-child(1){left:0}
+    #white-cart-root.wc-pink .wc-img:nth-child(2){left:12px}
+    #white-cart-root.wc-pink .wc-img:nth-child(3){left:24px}
+    #white-cart-root.wc-pink .wc-qty-badge { display:block; top:-3px; right:-3px; }
+    #white-cart-root.wc-pink .wc-info {
+      display:flex; min-width:0; overflow:hidden; justify-content:center;
+    }
+    #white-cart-root.wc-pink .wc-res-name {
+      display:block; color:#111827; font-size:14px; font-weight:800;
+      line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    #white-cart-root.wc-pink .wc-menu-link {
+      display:flex; color:#ef5263; font-size:11px; font-weight:700;
+      margin-top:3px;
+    }
+    #white-cart-root.wc-pink .wc-menu-link i { display:none; }
     #white-cart-root.wc-pink .wc-pink-total {
-      display:block;
-      color:#fff;
-      font-size:17px;
-      line-height:1;
-      font-weight:800;
-      letter-spacing:-.2px;
-      white-space:nowrap;
+      display:block; color:#111827; font-size:17px; line-height:1; font-weight:800;
+      white-space:nowrap; margin-left:10px; margin-right:12px;
+      position:static; transform:none;
     }
-    #white-cart-root.wc-pink .wc-thumb-wrap,
-    #white-cart-root.wc-pink .wc-info,
-    #white-cart-root.wc-pink .wc-qty-badge { display: none; }
-    #white-cart-root.wc-pink .wc-menu-link,
-    #white-cart-root.wc-pink .wc-res-name { display: none; }
-    #white-cart-root.wc-pink .wc-right { margin-left: auto; }
+    #white-cart-root.wc-pink .wc-right {
+      margin-left:auto; gap:0; flex:0 0 auto;
+    }
     #white-cart-root.wc-pink #wc-standard-actions {
-      display:flex !important;
-      gap:0;
-      align-items:center;
+      display:flex !important; gap:0; align-items:center;
     }
     #white-cart-root.wc-pink .wc-btn {
-      min-width: 0;
-      width: auto;
-      height: 42px;
-      padding: 0;
-      border-radius: 21px;
-      background: transparent;
-      color: #fff;
-      box-shadow: none;
-      flex-direction: row;
-      gap: 9px;
-      -webkit-tap-highlight-color: transparent;
+      min-width:150px; width:150px; height:58px; padding:0 16px;
+      border-radius:29px; background:#EC168C; color:#fff; box-shadow:none;
+      flex-direction:column; gap:3px;
     }
-    #white-cart-root.wc-pink .wc-btn-title {
-      font-size:17px;
-      line-height:1;
-      font-weight:800;
-    }
-    #white-cart-root.wc-pink .wc-btn-sub { display:none; }
-    #white-cart-root.wc-pink .wc-cart-svg {
-      width:25px;
-      height:25px;
-      flex:0 0 auto;
-    }
+    #white-cart-root.wc-pink .wc-btn-title { font-size:18px; line-height:1; font-weight:800; }
+    #white-cart-root.wc-pink .wc-btn-sub { display:block; font-size:11px; line-height:1; font-weight:700; opacity:.95; }
+    #white-cart-root.wc-pink .wc-cart-svg { width:0; height:0; display:none; }
     #white-cart-root.wc-pink .wc-close,
     #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
 
-    /* Keep the homepage's established white bar compact and stable. */
+    /* Homepage keeps its established white bar, but the middle control is now
+       a true centered group and the price is intentionally omitted. */
     #white-cart-root:not(.wc-pink) #white-cart-container {
-      min-height: 62px;
-      height: 62px;
-      padding: 7px 8px;
-      border-radius: 31px;
+      min-height: 62px; height: 62px; padding: 7px 8px; border-radius: 31px;
     }
-    #white-cart-root:not(.wc-pink) .wc-right {
-      gap: 7px;
-    }
+    #white-cart-root:not(.wc-pink) .wc-right { gap: 7px; }
     #white-cart-root:not(.wc-pink) .wc-btn {
-      height: 44px;
-      min-width: 92px;
-      padding: 0 12px;
-      border-radius: 23px;
+      height:44px; min-width:92px; padding:0 12px; border-radius:23px;
     }
-    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size: 11px; }
-    #white-cart-root:not(.wc-pink) .wc-btn-sub { font-size: 9px; }
-
-    /* Homepage multi-restaurant control sits beside the total, in the middle.
-       It never affects the pink Restaurant/99 layout. */
-    #white-cart-root:not(.wc-pink) .wc-all-carts {
-      position: absolute;
-      left: 50%;
-      transform: translateX(42px);
-      top: 50%;
-      margin: 0;
-      padding: 6px 5px;
-      font-size: 11px;
-      line-height: 1;
-      color: #667085;
-      background: transparent;
-      z-index: 5;
-    }
+    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:11px; }
+    #white-cart-root:not(.wc-pink) .wc-btn-sub { display:none; }
+    #white-cart-root.wc-pink .wc-pink-total { position:static; }
+    #white-cart-root:not(.wc-pink) > #white-cart-container .wc-pink-total { display:none; }
     #white-cart-root:not(.wc-pink) .wc-pink-total {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%,-50%);
-      margin: 0;
-      color: #111827;
-      font-size: 16px;
-      font-weight: 700;
-      white-space: nowrap;
-      z-index: 4;
-      pointer-events: none;
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      margin:0; color:#111827; font-size:16px; font-weight:800;
+      white-space:nowrap; z-index:4; pointer-events:none;
     }
-    #white-cart-root:not(.wc-pink) .wc-info {
-      padding-right: 4px;
+    #white-cart-root:not(.wc-pink) .wc-all-carts {
+      position:static; margin:0; padding:0; font-size:12px; line-height:1;
+      color:#667085; background:transparent; z-index:5;
     }
-    @media (max-width: 430px) {
-      #white-cart-root:not(.wc-pink) .wc-pink-total { font-size: 15px; }
-      #white-cart-root:not(.wc-pink) .wc-all-carts { transform: translateX(48px); font-size: 10px; }
-      #white-cart-root.wc-pink #white-cart-container { height: 62px; min-height:62px; padding-left:20px; padding-right:16px; }
+    #white-cart-root:not(.wc-pink) .wc-center-cart {
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      display:flex; align-items:center; gap:10px; z-index:6;
+      pointer-events:auto;
+    }
+    #white-cart-root:not(.wc-pink) .wc-center-cart .wc-pink-total {
+      position:static; transform:none; pointer-events:none;
+    }
+    #white-cart-root:not(.wc-pink) .wc-info { padding-right:4px; }
+    @media (max-width:430px) {
+      #white-cart-root:not(.wc-pink) .wc-center-cart { gap:8px; }
+      #white-cart-root:not(.wc-pink) .wc-pink-total { font-size:15px; }
+      #white-cart-root:not(.wc-pink) .wc-all-carts { font-size:11px; }
+      #white-cart-root.wc-pink #white-cart-container { height:66px; min-height:66px; padding-left:10px; padding-right:6px; }
+      #white-cart-root.wc-pink .wc-image-stack { width:38px !important; height:38px; min-width:38px; }
+      #white-cart-root.wc-pink .wc-img { width:38px; height:38px; }
+      #white-cart-root.wc-pink .wc-res-name { font-size:13px; }
+      #white-cart-root.wc-pink .wc-menu-link { font-size:10px; }
+      #white-cart-root.wc-pink .wc-pink-total { font-size:14px; margin-left:5px; margin-right:7px; }
+      #white-cart-root.wc-pink .wc-btn { min-width:128px; width:128px; height:54px; border-radius:27px; padding:0 10px; }
       #white-cart-root.wc-pink .wc-btn-title { font-size:16px; }
-      #white-cart-root.wc-pink .wc-cart-svg { width:23px; height:23px; }
+      #white-cart-root.wc-pink .wc-btn-sub { font-size:10px; }
     }
 
-    /* Homepage multi-restaurant switcher: small, neutral, only appears when
-       more than one restaurant exists. It opens the same cart drawer. */
+    /* Multi-restaurant control is intentionally rendered inside the centered
+       homepage group. It never appears on Restaurant / 99 Store bars. */
     .wc-all-carts {
-      border: 0; background: transparent; color: #667085; font: inherit;
-      font-size: 11px; font-weight: 800; padding: 7px 6px; margin-right: 2px;
-      white-space: nowrap; cursor: pointer; border-radius: 12px;
+      border:0; background:transparent; color:#667085; font:inherit;
+      font-size:12px; font-weight:800; padding:2px 0; white-space:nowrap;
+      cursor:pointer; border-radius:10px;
     }
     .wc-all-carts:active { background:#f2f4f7; }
-
 
     /* Multi-restaurant cart drawer — Restaurant + 99 Store */
     #ew-cart-drawer-backdrop{position:fixed;inset:0;z-index:100001;display:none;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
@@ -454,8 +438,11 @@
           </div>
           <div class="wc-pink-total" id="wc-pink-total" aria-live="polite"></div>
         </button>
-        <div class="wc-right">
+        <div class="wc-center-cart" id="wc-center-cart">
+          <div class="wc-pink-total" id="wc-home-total" aria-live="polite"></div>
           <button type="button" class="wc-all-carts" id="wc-all-carts" aria-label="View all restaurant carts" style="display:none">All ↑</button>
+        </div>
+        <div class="wc-right">
           <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
             <button type="button" class="wc-btn" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
               <span class="wc-btn-title">View Cart</span>
@@ -581,6 +568,7 @@
     const resEl = document.getElementById('wc-dynamic-res');
     const badgeEl = document.getElementById('wc-qty-badge');
     const pinkTotalEl = document.getElementById('wc-pink-total');
+    const homeTotalEl = document.getElementById('wc-home-total');
 
     if (!root || !countEl || !imgStackEl) return;
 
@@ -613,11 +601,12 @@
 
       const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
       if (pinkTotalEl) pinkTotalEl.textContent = `${baseCountText} | ${formatCurrency(totalPrice)}`;
-      countEl.innerText = (priceKnown && totalPrice > 0)
-        ? `${baseCountText} · ${formatCurrency(totalPrice)}`
-        : baseCountText;
+      if (homeTotalEl) homeTotalEl.textContent = baseCountText;
+      // Homepage intentionally shows item count only; price is omitted for a cleaner bar.
+      countEl.innerText = baseCountText;
 
       if (badgeEl) badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
+      if (homeTotalEl) homeTotalEl.textContent = baseCountText;
 
       if (lastTotalQty !== null && lastTotalQty !== totalQty) {
         bump(countEl);
@@ -661,6 +650,8 @@
     } else {
       hideCartBar(root);
       lastTotalQty = null;
+      const homeTotal = document.getElementById('wc-home-total');
+      if (homeTotal) homeTotal.textContent = '';
     }
   };
 
@@ -761,6 +752,8 @@
         root.style.display = 'none';
       }
       lastTotalQty = null;
+      const homeTotal = document.getElementById('wc-home-total');
+      if (homeTotal) homeTotal.textContent = '';
     });
 
     window.updateGlobalCart();
