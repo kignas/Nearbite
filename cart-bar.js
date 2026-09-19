@@ -11,7 +11,6 @@
   // currency symbol is ever not ₹ (Indian Rupee). Nothing else in this
   // file needs to change.
   const CURRENCY_SYMBOL = '₹';
-  const IS_99_PAGE = /(^|\/)under99(?:\.html)?$/i.test(window.location.pathname);
 
   // 🛡️ CRASH-PROOF STORAGE PARSER
   // This prevents your cart bar from becoming invisible if corrupted data exists
@@ -32,39 +31,6 @@
   }
 
   /* ── 1. THE MATH ENGINE (Unified Master Version) ── */
-  function normalizeId(value){
-    return String(value == null ? '' : value).trim();
-  }
-  function normalizeName(value){
-    return String(value == null ? '' : value)
-      .normalize('NFKC')
-      .toLowerCase()
-      .replace(/\s+/g,' ')
-      .replace(/[–—-]/g,'-')
-      .trim();
-  }
-  function findMatchingCartKey(cart,itemName,rId,menuItemId){
-    const rid=normalizeId(rId);
-    const mid=normalizeId(menuItemId);
-    const wantedName=normalizeName(itemName);
-    if(cart[itemName]){
-      const e=cart[itemName];
-      const erid=normalizeId(e?.resId||e?.restaurantId);
-      const emid=normalizeId(e?.menuItem||e?.menuItemId);
-      if((rid && erid===rid && (!mid || !emid || emid===mid)) || (mid && emid===mid && (!rid || !erid || erid===rid))) return itemName;
-    }
-    for(const key of Object.keys(cart)){
-      const e=cart[key];
-      if(!e || Number(e.quantity||0)<=0) continue;
-      const erid=normalizeId(e.resId||e.restaurantId);
-      const emid=normalizeId(e.menuItem||e.menuItemId);
-      const entryName=normalizeName(e.name||key);
-      if(rid && erid===rid && mid && emid===mid) return key;
-      if(rid && erid===rid && wantedName && entryName===wantedName) return key;
-    }
-    return null;
-  }
-
   window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     let itemName = arg1;
     let change = arg2;
@@ -112,48 +78,40 @@
         return;
     }
 
-    // Phase 3.5A — multi-restaurant carts are supported.
-    // The backend resolves each Menu.restaurantId authoritatively at checkout,
-    // so the frontend must never block a second restaurant from being added.
+    // Cross-Restaurant Protection
     let cartMemory = safeGetCart();
-    let restaurantName = '';
-    try {
-        if (typeof currentRestaurant !== 'undefined' && currentRestaurant && currentRestaurant.name) {
-            restaurantName = String(currentRestaurant.name);
-        }
-    } catch (_) {}
-    if (!restaurantName) {
-        const headerName = document.getElementById('res-name');
-        if (headerName && headerName.textContent && headerName.textContent.trim() && headerName.textContent.trim() !== 'Loading…') {
-            restaurantName = headerName.textContent.trim();
+    const existingItems = Object.keys(cartMemory);
+    
+    if (existingItems.length > 0) {
+        const firstItemResId = cartMemory[existingItems[0]].resId;
+        if (firstItemResId && firstItemResId !== rId && change > 0) {
+            alert("You can only order from one restaurant at a time. Please clear your cart to start a new order.");
+            return;
         }
     }
 
-    // Shared identity: restaurant + menu item. This merges an item added
-    // from the restaurant page with the same item added from 99 Store.
-    const matchedKey = findMatchingCartKey(cartMemory,itemName,rId,menuItemId);
-    const storageKey = matchedKey || itemName;
-    if (!cartMemory[storageKey]) {
-        cartMemory[storageKey] = {
+    // Update the Payload
+    if (!cartMemory[itemName]) {
+        cartMemory[itemName] = {
             quantity: 0, price: parseFloat(price), originalPrice: (Number(originalPrice) > Number(price) ? Number(originalPrice) : null), resId: rId,
-            menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg, restaurantName: restaurantName
+            menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg
         };
     } else {
-        if (!cartMemory[storageKey].menuItem && menuItemId) cartMemory[storageKey].menuItem = menuItemId;
-        if (!cartMemory[storageKey].image && image) cartMemory[storageKey].image = image;
-        if (!cartMemory[storageKey].name) cartMemory[storageKey].name = itemName;
-        if (!cartMemory[storageKey].restaurantName && restaurantName) cartMemory[storageKey].restaurantName = restaurantName;
-        if (!cartMemory[storageKey].originalPrice && Number(originalPrice) > Number(price)) cartMemory[storageKey].originalPrice = Number(originalPrice);
+        if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
+        if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
+        if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
+        if (!cartMemory[itemName].originalPrice && Number(originalPrice) > Number(price)) cartMemory[itemName].originalPrice = Number(originalPrice);
     }
-    cartMemory[storageKey].quantity += change;
-    if (cartMemory[storageKey].quantity <= 0) delete cartMemory[storageKey];
+    
+    cartMemory[itemName].quantity += change;
+    if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
 
     // 🎯 VISUALLY UPDATE THE CORRECT BUTTON TYPE
     const key = itemName.replace(/\s+/g, '');
     const container = document.getElementById('btn-container-' + key);
     
     if (container) {
-        const qty = cartMemory[storageKey] ? cartMemory[storageKey].quantity : 0;
+        const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
         
         if (isUnder99Payload) {
             if (qty > 0) {
@@ -198,7 +156,7 @@
     #white-cart-root {
       position: fixed; left: 50%; transform: translateX(-50%);
       bottom: var(--nb-cart-bottom, calc(20px + env(safe-area-inset-bottom, 0px)));
-      width: min(430px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
+      width: min(250px, calc(100vw - 32px)); max-width: calc(100vw - 32px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
       will-change: bottom, transform;
@@ -216,7 +174,7 @@
       border: 1px solid rgba(17,24,39,0.06);
       border-radius: 32px; padding: 8px;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 10px rgba(16,24,40,0.10);
+      box-shadow: 0 1px 1px rgba(16,24,40,0.04), 0 4px 12px rgba(16,24,40,0.08), 0 16px 32px -8px rgba(16,24,40,0.16);
       font-family: 'Manrope', system-ui, -apple-system, sans-serif; height: 62px;
       box-sizing: border-box;
     }
@@ -226,7 +184,7 @@
 
     .wc-left {
       all: unset;
-      display: flex; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0;
+      display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; overflow: hidden;
       cursor: pointer; box-sizing: border-box;
     }
     .wc-thumb-wrap { position: relative; display: flex; align-items: center; flex-shrink: 0; }
@@ -246,11 +204,14 @@
 
     .wc-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; justify-content: center; overflow: hidden; }
     .wc-res-name { font-size: 12px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .wc-menu-link { font-size: 10px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wc-menu-link { font-size: 10px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .wc-right { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; flex-shrink: 0; margin-left: 6px; }
+    .wc-right { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; flex-shrink: 0; }
+    #wc-standard-actions { flex: 0 0 auto; }
+    .wc-btn { min-width: 86px; }
+
     .wc-btn {
-      position: relative; overflow: hidden; min-width: 92px;
+      position: relative; overflow: hidden;
       background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
       border: none; border-radius: 22px; height: 44px; min-height: 40px; padding: 0 10px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -258,7 +219,14 @@
       transition: transform 0.1s ease; font-family: inherit;
     }
     .wc-btn:active { transform: scale(0.96); }
-    .wc-btn::after { display:none; }
+    .wc-btn::after {
+      content: ''; position: absolute; top: 0; left: 0; width: 45%; height: 100%;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+      transform: translateX(-120%) skewX(-20deg); pointer-events: none;
+    }
+    #white-cart-root.wc-enter #wc-standard-actions .wc-btn::after {
+      animation: wcShine 1s ease 0.45s 1 both;
+    }
     .wc-btn-title { font-size: 11px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
     .wc-btn-sub { font-size: 9px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
     .wc-close {
@@ -279,7 +247,7 @@
     }
 
     @media (max-width: 340px) {
-      #white-cart-root { width: calc(100vw - 24px); }
+      #white-cart-root { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
       #white-cart-container { padding: 7px; height: 58px; }
       .wc-img { width: 34px; height: 34px; }
       .wc-image-stack { height: 34px; min-width: 34px; }
@@ -287,200 +255,6 @@
       .wc-res-name { font-size: 11px; }
       .wc-menu-link { font-size: 9px; }
       .wc-close { width: 28px; height: 28px; }
-    }
-
-    /* ============================================================
-       99 STORE CART BAR — COMPACT BOTTOM ACTION
-       99 Store only. Global restaurant/cart bar remains unchanged.
-       ============================================================ */
-    #white-cart-root.u99-cart-bar {
-      left: 12px;
-      right: 12px;
-      width: auto;
-      max-width: none;
-      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-      transform: none;
-    }
-    #white-cart-root.u99-cart-bar.wc-enter {
-      animation: u99CartIn .28s cubic-bezier(.22,1,.36,1) forwards;
-    }
-    #white-cart-root.u99-cart-bar.wc-exiting {
-      animation: u99CartOut .20s ease forwards;
-    }
-    @keyframes u99CartIn {
-      from { transform: translateY(22px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    @keyframes u99CartOut {
-      from { transform: translateY(0); opacity: 1; }
-      to { transform: translateY(22px); opacity: 0; }
-    }
-    #white-cart-root.u99-cart-bar #white-cart-container {
-      height: 60px;
-      padding: 0 14px 0 16px;
-      border: 0;
-      border-radius: 17px;
-      background: #EC168C;
-      box-shadow: none !important;
-      color: #fff;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-    #white-cart-root.u99-cart-bar .wc-left,
-    #white-cart-root.u99-cart-bar .wc-thumb-wrap,
-    #white-cart-root.u99-cart-bar .wc-info,
-    #white-cart-root.u99-cart-bar .wc-close,
-    #white-cart-root.u99-cart-bar #wc-clear-actions {
-      display: none !important;
-    }
-    #white-cart-root.u99-cart-bar .wc-right {
-      width: 100%;
-      display: flex;
-      align-items: center;
-    }
-    #white-cart-root.u99-cart-bar #wc-standard-actions {
-      width: 100%;
-      display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    #white-cart-root.u99-cart-bar .wc-cart-total {
-      order: 1;
-      position: static;
-      transform: none;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 800;
-      line-height: 1;
-      white-space: nowrap;
-      margin: 0;
-      letter-spacing: -.1px;
-    }
-    #white-cart-root.u99-cart-bar .wc-btn {
-      order: 2;
-      height: auto;
-      min-width: 0;
-      min-height: 0;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-      color: #fff;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 9px;
-      font-family: inherit;
-    }
-    #white-cart-root.u99-cart-bar .wc-btn::after { display: none; }
-    #white-cart-root.u99-cart-bar .wc-btn-title {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 800;
-      line-height: 1;
-      white-space: nowrap;
-    }
-    #white-cart-root.u99-cart-bar .wc-btn-title span[aria-hidden="true"] {
-      display: none;
-    }
-    #white-cart-root.u99-cart-bar .u99-cart-icon {
-      width: 21px;
-      height: 21px;
-      flex: 0 0 21px;
-    }
-    #white-cart-root.u99-cart-bar .wc-btn-sub {
-      display: none;
-    }
-    #white-cart-root.u99-cart-bar #white-cart-container button:focus-visible {
-      outline: 2px solid rgba(255,255,255,.95);
-      outline-offset: 3px;
-    }
-    @media (max-width: 380px) {
-      #white-cart-root.u99-cart-bar {
-        left: 10px;
-        right: 10px;
-        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-      }
-      #white-cart-root.u99-cart-bar #white-cart-container {
-        height: 58px;
-        padding-left: 15px;
-        padding-right: 13px;
-        border-radius: 16px;
-      }
-      #white-cart-root.u99-cart-bar .wc-cart-total,
-      #white-cart-root.u99-cart-bar .wc-btn-title { font-size: 15px; }
-      #white-cart-root.u99-cart-bar .u99-cart-icon { width: 20px; height: 20px; flex-basis: 20px; }
-    }
-
-    /* ============================================================
-       MULTI-RESTAURANT CART HUB
-       Opens only when the cart contains items from 2+ restaurants.
-       Neutral shadow only — no colored glow.
-       ============================================================ */
-    #es-cart-hub-backdrop {
-      position: fixed; inset: 0; z-index: 100010;
-      background: rgba(16,24,40,.28);
-      display: none; align-items: flex-end; justify-content: center;
-      padding: 0 10px calc(10px + env(safe-area-inset-bottom,0px));
-      box-sizing: border-box;
-    }
-    #es-cart-hub-backdrop.show { display: flex; }
-    #es-cart-hub {
-      width: min(100%, 560px); max-height: min(78vh, 680px);
-      overflow: auto; background: #F7F8FC; color: #101828;
-      border-radius: 28px 28px 20px 20px;
-      border: 1px solid #E7EAF0;
-      box-shadow: 0 18px 42px rgba(16,24,40,.18);
-      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-      padding: 18px 14px 14px; box-sizing: border-box;
-    }
-    .es-hub-head {
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding:2px 4px 14px;
-    }
-    .es-hub-title { font-size:22px; font-weight:800; letter-spacing:-.4px; }
-    .es-hub-close {
-      width:38px; height:38px; border:0; border-radius:50%;
-      background:#EEF1F5; color:#667085; display:grid; place-items:center;
-      font-size:22px; cursor:pointer;
-    }
-    .es-hub-card {
-      display:flex; align-items:center; gap:12px; background:#fff;
-      border:1px solid #E8EAF0; border-radius:22px; padding:12px;
-      margin-bottom:10px; box-shadow:0 4px 12px rgba(16,24,40,.05);
-    }
-    .es-hub-thumb {
-      width:58px; height:58px; border-radius:18px; object-fit:cover;
-      background:#EEF1F5; flex:0 0 58px;
-    }
-    .es-hub-main { min-width:0; flex:1; }
-    .es-hub-name { font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .es-hub-meta { margin-top:4px; color:#747B87; font-size:12px; font-weight:650; line-height:1.35; }
-    .es-hub-total { margin-top:3px; font-size:13px; font-weight:800; color:#101828; }
-    .es-hub-view {
-      flex:0 0 auto; border:0; border-radius:14px; padding:10px 12px;
-      background:#FDEAF5; color:#D9096E; font:800 12px/1 'Manrope',system-ui,sans-serif;
-      cursor:pointer; white-space:nowrap;
-    }
-    .es-hub-checkout {
-      width:100%; height:52px; border:0; border-radius:16px;
-      background:#EC168C; color:#fff; font:800 15px/1 'Manrope',system-ui,sans-serif;
-      cursor:pointer; margin-top:4px;
-    }
-    .es-hub-note { text-align:center; color:#8A93A0; font-size:11px; font-weight:650; padding:2px 8px 10px; }
-    @media(max-width:380px){
-      #es-cart-hub-backdrop { padding-left:8px; padding-right:8px; }
-      #es-cart-hub { border-radius:24px 24px 16px 16px; padding:15px 10px 10px; }
-      .es-hub-title { font-size:20px; }
-      .es-hub-card { padding:10px; gap:10px; }
-      .es-hub-thumb { width:52px; height:52px; flex-basis:52px; border-radius:16px; }
-      .es-hub-view { padding:9px 10px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -504,24 +278,23 @@
   function makeDOM() {
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
-    if (IS_99_PAGE) wrap.classList.add('u99-cart-bar');
     wrap.innerHTML = `
       <div id="white-cart-container">
-        <button type="button" class="wc-left" aria-label="View cart" onclick="window.__esHandleCartClick()">
+        <button type="button" class="wc-left" aria-label="View cart" onclick="window.location.href='cart.html'">
           <div class="wc-thumb-wrap">
             <div class="wc-image-stack" id="wc-dynamic-img-stack"></div>
             <span class="wc-qty-badge" id="wc-qty-badge" aria-hidden="true">0</span>
           </div>
           <div class="wc-info">
             <div class="wc-res-name" id="wc-dynamic-res">EatSwada Order</div>
-            <div class="wc-menu-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Added to cart</div>
+            <div class="wc-menu-link">Added to cart <i class="fa-solid fa-check" aria-hidden="true" style="font-size:10px;"></i></div>
           </div>
         </button>
         <div class="wc-right">
           <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
-            <span id="wc-item-count" class="wc-cart-total" aria-live="polite">1 item · ₹0</span>
-            <button type="button" class="wc-btn" onclick="window.__esHandleCartClick()">
-              <span class="wc-btn-title">View Cart <svg class="u99-cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="19" cy="20" r="1.5"></circle><path d="M3 4h2l2.2 10.4a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 2-1.6L21 8H7"></path></svg></span>
+            <button type="button" class="wc-btn" onclick="window.location.href='cart.html'">
+              <span class="wc-btn-title">View Cart →</span>
+              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
             </button>
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
@@ -535,21 +308,6 @@
         </div>
       </div>
     `;
-
-    const hub = document.createElement('div');
-    hub.id = 'es-cart-hub-backdrop';
-    hub.innerHTML = `
-      <section id="es-cart-hub" role="dialog" aria-modal="true" aria-labelledby="es-cart-hub-title">
-        <div class="es-hub-head">
-          <div id="es-cart-hub-title" class="es-hub-title">Your Carts</div>
-          <button type="button" class="es-hub-close" id="es-hub-close" aria-label="Close carts">×</button>
-        </div>
-        <div id="es-hub-list"></div>
-        <div class="es-hub-note">Items from different restaurants stay in the same cart.</div>
-        <button type="button" class="es-hub-checkout" id="es-hub-checkout">Checkout all →</button>
-      </section>
-    `;
-    document.body.appendChild(hub);
     return wrap;
   }
 
@@ -610,58 +368,6 @@
       exitTimer = null;
     }, EXIT_MS);
   }
-
-  function cartGroups(cart) {
-    const groups = new Map();
-    Object.entries(cart || {}).forEach(([key, item]) => {
-      const q = Number(item?.quantity || 0);
-      if (!Number.isFinite(q) || q <= 0) return;
-      const rid = String(item?.resId || item?.restaurantId || 'unknown');
-      if (!groups.has(rid)) groups.set(rid, { id: rid, name: item?.restaurantName || item?.resName || 'Restaurant', qty: 0, subtotal: 0, items: [], image: item?.image || '' });
-      const g = groups.get(rid);
-      g.qty += q;
-      g.subtotal += Number(item?.price || 0) * q;
-      if (g.items.length < 3) g.items.push(item?.name || key);
-      if (!g.image && item?.image) g.image = item.image;
-    });
-    return [...groups.values()];
-  }
-
-  function openCartHub() {
-    const cart = safeGetCart();
-    const groups = cartGroups(cart);
-    const backdrop = document.getElementById('es-cart-hub-backdrop');
-    const list = document.getElementById('es-cart-hub-list');
-    const title = document.getElementById('es-cart-hub-title');
-    if (!backdrop || !list) return;
-    if (groups.length < 2) { window.location.href = 'cart.html'; return; }
-
-    title.textContent = `Your Carts (${groups.length})`;
-    list.innerHTML = groups.map((g, i) => {
-      const items = g.items.join(', ') + (g.qty > g.items.length ? '…' : '');
-      const img = g.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=120&q=80';
-      return `<div class="es-hub-card">
-        <img class="es-hub-thumb" src="${img.replace(/"/g,'&quot;')}" alt="">
-        <div class="es-hub-main">
-          <div class="es-hub-name">${String(g.name).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}</div>
-          <div class="es-hub-meta">${g.qty} ${g.qty === 1 ? 'item' : 'items'} · ${items.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}</div>
-          <div class="es-hub-total">₹${Math.round(g.subtotal).toLocaleString('en-IN')}</div>
-        </div>
-        <button type="button" class="es-hub-view" data-hub-view="${i}">View Cart</button>
-      </div>`;
-    }).join('');
-    backdrop.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeCartHub() {
-    const backdrop = document.getElementById('es-cart-hub-backdrop');
-    if (backdrop) backdrop.classList.remove('show');
-    document.body.style.overflow = '';
-  }
-
-  window.__esHandleCartClick = openCartHub;
-  window.__esOpenCartHub = openCartHub;
 
   window.updateGlobalCart = function () {
     if (isDismissed) return;
@@ -737,7 +443,8 @@
       } catch(e) {}
 
       latestThreeNames.forEach((name) => {
-         const imgSrc = imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
+         const itemData = savedCart[name] || {};
+         const imgSrc = itemData.image || imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
          const img = document.createElement('img');
          img.src = imgSrc;
          img.alt = '';
@@ -831,20 +538,6 @@
       localStorage.removeItem('nearbite_cart'); 
       document.getElementById('white-cart-root').style.display = 'none'; 
       window.location.reload(); 
-    });
-
-    const hubBackdrop = document.getElementById('es-cart-hub-backdrop');
-    const hubClose = document.getElementById('es-hub-close');
-    const hubCheckout = document.getElementById('es-hub-checkout');
-    hubClose?.addEventListener('click', closeCartHub);
-    hubCheckout?.addEventListener('click', () => { window.location.href = 'cart.html'; });
-    hubBackdrop?.addEventListener('click', (e) => {
-      if (e.target === hubBackdrop) closeCartHub();
-      const view = e.target.closest('[data-hub-view]');
-      if (view) { closeCartHub(); window.location.href = 'cart.html'; }
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeCartHub();
     });
 
     window.updateGlobalCart();
