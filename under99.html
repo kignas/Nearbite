@@ -30,11 +30,11 @@ body{padding-bottom:0}
   border-bottom:1px solid #ECEEF1;
 }
 .header-top{
-  min-height:78px;padding:10px 20px 8px;display:flex;align-items:center;gap:12px;
+  min-height:66px;padding:8px 16px 5px;display:flex;align-items:center;gap:9px;
 }
 .header-left{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
 .icon-btn{
-  width:48px;height:48px;flex:0 0 48px;border:1px solid #E4E7EB;border-radius:50%;
+  width:44px;height:44px;flex:0 0 44px;border:1px solid #E4E7EB;border-radius:50%;
   background:#fff;color:#101828;display:grid;place-items:center;
   box-shadow:0 1px 2px rgba(16,24,40,.03);-webkit-tap-highlight-color:transparent;
 }
@@ -46,7 +46,7 @@ body{padding-bottom:0}
 
 .loc-pill{
   display:flex;align-items:center;gap:9px;min-width:0;flex:1;
-  padding:6px 11px;border:1px solid #E4E7EB;border-radius:14px;
+  padding:5px 10px;border:1px solid rgba(255,255,255,.52);border-radius:999px;
   background:#fff;color:#101828;text-align:left;
   box-shadow:0 1px 2px rgba(16,24,40,.03);-webkit-tap-highlight-color:transparent;
 }
@@ -70,29 +70,33 @@ body{padding-bottom:0}
 }
 
 .filter-row{
-  display:flex;gap:9px;overflow-x:auto;padding:0 20px 12px;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  display:flex;gap:7px;overflow-x:auto;padding:5px 16px 8px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;background:#fff;
+  border-top:1px solid rgba(16,24,40,.035);
 }
 .filter-row::-webkit-scrollbar{display:none}
 .filter-pill{
-  height:44px;flex:0 0 auto;padding:0 15px;border:1px solid #DCE1E8;border-radius:999px;
-  background:#fff;color:#202936;font-size:13px;font-weight:600;white-space:nowrap;
-  display:flex;align-items:center;gap:8px;box-shadow:none;
+  height:40px;min-height:40px;flex:0 0 auto;padding:0 13px;border:1px solid #DCE1E8;border-radius:999px;
+  background:#fff;color:#202936;font-size:12.5px;font-weight:650;white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:none;
+  -webkit-tap-highlight-color:transparent;
 }
 .filter-pill.active{
-  color:var(--pink);border-color:#F1B4D5;background:var(--pink-soft);font-weight:700;
+  color:var(--pink);border-color:#F1B4D5;background:var(--pink-soft);font-weight:750;
 }
-.filter-pill svg{width:18px;height:18px;flex:none}
+.filter-pill svg{width:17px;height:17px;flex:none}
 .filter-pill.active svg{stroke:var(--pink)}
+.filter-icon-pill{width:40px;padding:0;border-radius:50%;flex-basis:40px}
+.filter-icon-pill svg{width:18px;height:18px}
 .pill-pct{
-  width:21px;height:21px;flex:0 0 21px;border-radius:50%;
-  background:var(--pink);color:#fff;font-size:12.5px;font-weight:800;
+  width:20px;height:20px;flex:0 0 20px;border-radius:50%;
+  background:var(--pink);color:#fff;font-size:12px;font-weight:800;
   display:grid;place-items:center;line-height:1;letter-spacing:0;
 }
 
-main{max-width:920px;margin:0 auto;padding:18px 20px 28px}
+main{max-width:920px;margin:0 auto;padding:10px 16px 28px}
 .items-found-label{display:none}
-.restaurant-feed{display:flex;flex-direction:column;gap:24px}
+.restaurant-feed{display:flex;flex-direction:column;gap:18px}
 .skeleton-feed{display:flex;flex-direction:column;gap:24px}
 .skeleton-card{
   background:#fff;border:1px solid var(--line);border-radius:26px;padding:18px;
@@ -121,7 +125,7 @@ main{max-width:920px;margin:0 auto;padding:18px 20px 28px}
 @media(max-width:430px){
   .header-top{min-height:76px;padding:9px 16px 8px;gap:10px}
   .header-left{gap:10px}
-  .icon-btn{width:46px;height:46px;flex-basis:46px}
+  .icon-btn{width:42px;height:42px;flex-basis:42px}
   .icon-btn svg{width:22px;height:22px}
   .header-title{font-size:20px;letter-spacing:-.65px}
   .header-sub{font-size:11.5px;margin-top:4px}
@@ -146,10 +150,10 @@ main{max-width:920px;margin:0 auto;padding:18px 20px 28px}
 .filter-sheet-backdrop.open{opacity:1;visibility:visible}
 .filter-sheet{
   position:absolute;left:0;right:0;bottom:0;background:#fff;
-  border-radius:28px 28px 0 0;padding:26px 24px 22px;
+  border-radius:24px 24px 0 0;padding:22px 20px 18px;
   padding-bottom:calc(22px + env(safe-area-inset-bottom));
   transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);
-  max-height:min(72vh,620px);overflow:auto;
+  max-height:min(76vh,640px);overflow:auto;
 }
 .filter-sheet-backdrop.open .filter-sheet{transform:translateY(0)}
 .filter-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
@@ -158,6 +162,10 @@ main{max-width:920px;margin:0 auto;padding:18px 20px 28px}
   width:34px;height:34px;border:0;background:transparent;color:#6B7280;
   display:grid;place-items:center;border-radius:50%;font-size:28px;line-height:1;padding:0;
 }
+.filter-group{margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid #F0F1F3}
+.filter-group:last-of-type{border-bottom:0;margin-bottom:0}
+.filter-group-title{font-size:12px;font-weight:800;letter-spacing:.2px;color:#8A909A;text-transform:uppercase;margin:0 0 4px}
+.filter-toggle-option{min-height:48px}
 .filter-options{display:flex;flex-direction:column;gap:5px}
 .filter-option{
   min-height:66px;display:flex;align-items:center;gap:16px;border:0;background:#fff;
@@ -213,28 +221,28 @@ body.filter-open{overflow:hidden}
 .loc-pill.loc-unset .loc-name{color:var(--pink)}
 .filter-row{background:#fff;border-top:1px solid rgba(16,24,40,.04);border-bottom:1px solid #ECEEF1;padding:7px 12px 8px;gap:7px}
 
-.u99-hero{position:relative;overflow:hidden;min-height:200px;margin:0;padding:0 16px;color:#101828;background:linear-gradient(180deg,#FBD5E1 0%,#FCE0EB 100%);border-radius:0 0 26px 26px;isolation:isolate}
+.u99-hero{position:relative;overflow:hidden;min-height:184px;margin:0;padding:0 16px;color:#101828;background:linear-gradient(180deg,#FBD5E1 0%,#FCE0EB 100%);border-radius:0 0 26px 26px;isolation:isolate}
 .u99-hero::before{content:"";position:absolute;width:120px;height:120px;right:-34px;top:-46px;border-radius:50%;background:rgba(245,183,210,.30)}
 .u99-hero::after{content:"";position:absolute;width:170px;height:170px;left:-84px;top:120px;border-radius:50%;background:rgba(255,255,255,.14)}
-.u99-hero-inner{position:relative;min-height:200px;display:block}
-.u99-hero-copy{position:relative;z-index:4;width:55%;padding-top:84px}
-.u99-hero-kicker{display:block;padding:0;background:none;border:0;font-size:27px;line-height:1;font-weight:900;letter-spacing:-1.1px;color:#071532}
+.u99-hero-inner{position:relative;min-height:184px;display:block}
+.u99-hero-copy{position:relative;z-index:4;width:55%;padding-top:70px}
+.u99-hero-kicker{display:block;padding:0;background:none;border:0;font-size:25px;line-height:1;font-weight:900;letter-spacing:-1.1px;color:#071532}
 .u99-hero-title{display:none}
-.u99-hero-price{margin:2px 0 0;font-size:74px;line-height:.86;font-weight:900;letter-spacing:-3.5px;color:#D9096E}
+.u99-hero-price{margin:2px 0 0;font-size:68px;line-height:.86;font-weight:900;letter-spacing:-3.5px;color:#D9096E}
 .u99-hero-sub{margin:8px 0 0;max-width:250px;font-size:13.5px;line-height:1.35;font-weight:600;color:#574F63}
 .u99-hero-cta{display:none}
-.u99-hero-art{position:absolute;z-index:3;right:-4px;bottom:0;width:63%;max-width:none;max-height:200px;height:auto;object-fit:contain;object-position:right bottom;filter:drop-shadow(0 10px 13px rgba(89,36,55,.12));pointer-events:none}
+.u99-hero-art{position:absolute;z-index:3;right:-4px;bottom:0;width:63%;max-width:none;max-height:184px;height:auto;object-fit:contain;object-position:right bottom;filter:drop-shadow(0 10px 13px rgba(89,36,55,.12));pointer-events:none}
 @media(max-width:430px){
-  .header-top{min-height:64px;padding:9px 16px 6px;gap:10px}
+  .header-top{min-height:60px;padding:7px 14px 4px;gap:8px}
   .icon-btn{width:46px;height:46px;flex-basis:46px}
-  .loc-pill{max-width:194px;min-height:44px;border-radius:999px}
-  .u99-hero{min-height:198px;padding:0 16px;border-radius:0 0 26px 26px}
-  .u99-hero-inner{min-height:198px}
-  .u99-hero-copy{width:54%;padding-top:84px}
-  .u99-hero-kicker{font-size:26px;letter-spacing:-1px}
-  .u99-hero-price{font-size:72px;letter-spacing:-3.5px}
+  .loc-pill{max-width:190px;min-height:42px;border-radius:999px}
+  .u99-hero{min-height:184px;padding:0 14px;border-radius:0 0 22px 22px}
+  .u99-hero-inner{min-height:184px}
+  .u99-hero-copy{width:54%;padding-top:70px}
+  .u99-hero-kicker{font-size:24px;letter-spacing:-.8px}
+  .u99-hero-price{font-size:66px;letter-spacing:-3.1px}
   .u99-hero-sub{font-size:13px;max-width:232px;margin-top:8px}
-  .u99-hero-art{right:-4px;bottom:0;width:65%;max-width:none;max-height:196px}
+  .u99-hero-art{right:-4px;bottom:0;width:65%;max-width:none;max-height:182px}
 }
 </style>
 
@@ -273,24 +281,27 @@ body.filter-open{overflow:hidden}
     </div>
   </section>
 
-  <div class="filter-row">
-    <button class="filter-pill" id="sort-btn" type="button" data-open-filter="delivery" aria-label="Filters">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 16h16"/><circle cx="15" cy="9" r="2.4" fill="currentColor" stroke="none"/><circle cx="9" cy="16" r="2.4" fill="currentColor" stroke="none"/></svg>
+  <div class="filter-row" aria-label="99 Store filters">
+    <button class="filter-pill filter-icon-pill" id="sort-btn" type="button" data-open-filter="all" aria-label="All filters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7h16"/><circle cx="9" cy="7" r="2.2" fill="white"/>
+        <path d="M4 17h16"/><circle cx="15" cy="17" r="2.2" fill="white"/>
+      </svg>
     </button>
-
-    <button class="filter-pill active" id="discount-btn" onclick="toggleDiscount()">
-      <span class="pill-pct" aria-hidden="true">%</span>
-      40–60% Lower Prices
+    <button class="filter-pill active" id="discount-btn" type="button" onclick="toggleDiscount()">
+      <span class="pill-pct" aria-hidden="true">%</span>40–60% Lower Prices
     </button>
-
     <button class="filter-pill" id="veg-btn" type="button" data-open-filter="veg">
       Veg/Non-Veg
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
     </button>
-
     <button class="filter-pill" id="price-btn" type="button" data-open-filter="price">
       ₹99 &amp; under
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
+    </button>
+    <button class="filter-pill" id="delivery-btn" type="button" data-open-filter="delivery">
+      Delivery time
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg>
     </button>
   </div>
 </header>
@@ -323,6 +334,33 @@ body.filter-open{overflow:hidden}
 
 <!-- Working filter sheets -->
 <div id="filter-backdrop" class="filter-sheet-backdrop" aria-hidden="true">
+  <section id="all-sheet" class="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="all-title" hidden>
+    <div class="filter-sheet-head">
+      <h2 id="all-title" class="filter-sheet-title">Filters</h2>
+      <button class="filter-sheet-close" data-close-filter aria-label="Close">×</button>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-title">Deals</div>
+      <label class="filter-option filter-toggle-option"><input id="all-discount" type="checkbox"><span>40–60% Lower Prices</span></label>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-title">Food preference</div>
+      <label class="filter-option"><input type="radio" name="all-food-type" value="all"><span>All</span></label>
+      <label class="filter-option"><input type="radio" name="all-food-type" value="veg"><span>Veg</span></label>
+      <label class="filter-option"><input type="radio" name="all-food-type" value="nonveg"><span>Non Veg</span></label>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-title">Price</div>
+      <label class="filter-option"><input type="checkbox" name="all-price-range" value="0-49"><span>₹0 - ₹49</span></label>
+      <label class="filter-option"><input type="checkbox" name="all-price-range" value="49-99"><span>₹49 - ₹99</span></label>
+    </div>
+    <div class="filter-actions">
+      <button class="filter-apply" data-apply-filter>Apply filters</button>
+      <button class="filter-clear" data-clear-filter>Clear all</button>
+    </div>
+  </section>
+
+  
   <section id="delivery-sheet" class="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="delivery-title">
     <div class="filter-sheet-head">
       <h2 id="delivery-title" class="filter-sheet-title">Delivery time</h2>
@@ -372,7 +410,7 @@ body.filter-open{overflow:hidden}
 <div id="toast" class="toast"></div>
 
 <script src="cart-bar.js"></script>
-<script src="bottom-tab-bar.js"></script>
+<script src="bottom-tab-bar.js?v=home-island-v3"></script>
 <script src="under99card.js"></script>
 <script>
 (() => {
@@ -437,6 +475,9 @@ body.filter-open{overflow:hidden}
   }
 
   function passesFilters(r){
+    if(deliveryLimit !== null && deliveryMaxMinutes(r.deliveryTime) > deliveryLimit){
+      return { visible:[], qualifies:false };
+    }
     const visible = r.menu.filter(item => {
       if(item.price > 99) return false;
       if(foodType==='veg' && !item.isVeg) return false;
@@ -488,7 +529,7 @@ body.filter-open{overflow:hidden}
 
   window.toggleDiscount=()=>{
     discountOnly=!discountOnly;
-    $('discount-btn').classList.toggle('active',discountOnly);
+    updateFilterButtons();
     render();
   };
 
@@ -498,8 +539,12 @@ body.filter-open{overflow:hidden}
   let priceRanges = [];
 
   function getSheet(name){
-    return name==='delivery' ? $('delivery-sheet') : name==='veg' ? $('veg-sheet') : $('price-sheet');
+    if(name==='all') return $('all-sheet');
+    if(name==='delivery') return $('delivery-sheet');
+    if(name==='veg') return $('veg-sheet');
+    return $('price-sheet');
   }
+
   function openFilter(name){
     const backdrop=$('filter-backdrop');
     if(!backdrop)return;
@@ -512,6 +557,7 @@ body.filter-open{overflow:hidden}
     document.body.classList.add('filter-open');
     syncSheetInputs(name);
   }
+
   function closeFilter(){
     const backdrop=$('filter-backdrop');
     if(!backdrop)return;
@@ -521,8 +567,14 @@ body.filter-open{overflow:hidden}
     setTimeout(()=>document.querySelectorAll('.filter-sheet').forEach(s=>s.hidden=true),240);
     activeSheet=null;
   }
+
   function syncSheetInputs(name){
-    if(name==='delivery'){
+    if(name==='all'){
+      const d=$('all-discount');
+      if(d)d.checked=discountOnly;
+      document.querySelectorAll('input[name="all-food-type"]').forEach(i=>i.checked=i.value===foodType);
+      document.querySelectorAll('input[name="all-price-range"]').forEach(i=>i.checked=priceRanges.includes(i.value));
+    }else if(name==='delivery'){
       document.querySelectorAll('input[name="delivery-time"]').forEach(i=>i.checked=Number(i.value)===deliveryLimit);
     }else if(name==='veg'){
       document.querySelectorAll('input[name="food-type"]').forEach(i=>i.checked=i.value===foodType);
@@ -530,36 +582,50 @@ body.filter-open{overflow:hidden}
       document.querySelectorAll('input[name="price-range"]').forEach(i=>i.checked=priceRanges.includes(i.value));
     }
   }
+
+  function updateFilterButtons(){
+    $('discount-btn')?.classList.toggle('active',discountOnly);
+    $('veg-btn')?.classList.toggle('active',foodType!=='all');
+    $('price-btn')?.classList.toggle('active',priceRanges.length>0);
+    $('delivery-btn')?.classList.toggle('active',deliveryLimit!==null);
+    $('sort-btn')?.classList.toggle('has-filter',
+      foodType!=='all'||priceRanges.length>0||deliveryLimit!==null||!discountOnly);
+  }
+
   function applyFilter(){
-    if(activeSheet==='delivery'){
+    if(activeSheet==='all'){
+      discountOnly=Boolean($('all-discount')?.checked);
+      const food=document.querySelector('input[name="all-food-type"]:checked');
+      foodType=food ? food.value : 'all';
+      priceRanges=[...document.querySelectorAll('input[name="all-price-range"]:checked')].map(i=>i.value);
+    }else if(activeSheet==='delivery'){
       const checked=document.querySelector('input[name="delivery-time"]:checked');
       deliveryLimit=checked ? Number(checked.value) : null;
-      $('sort-btn').classList.toggle('has-filter',deliveryLimit!==null);
     }else if(activeSheet==='veg'){
       const checked=document.querySelector('input[name="food-type"]:checked');
       foodType=checked ? checked.value : 'all';
-      $('veg-btn').classList.toggle('active',foodType!=='all');
     }else if(activeSheet==='price'){
       priceRanges=[...document.querySelectorAll('input[name="price-range"]:checked')].map(i=>i.value);
-      $('price-btn').classList.toggle('active',priceRanges.length>0);
     }
+    updateFilterButtons();
     closeFilter();
     render();
   }
+
   function clearFilter(){
-    if(activeSheet==='delivery'){
+    if(activeSheet==='all'){
+      discountOnly=true;
+      foodType='all';
+      priceRanges=[];
       deliveryLimit=null;
-      document.querySelectorAll('input[name="delivery-time"]').forEach(i=>i.checked=false);
-      $('sort-btn').classList.remove('has-filter');
+    }else if(activeSheet==='delivery'){
+      deliveryLimit=null;
     }else if(activeSheet==='veg'){
       foodType='all';
-      document.querySelectorAll('input[name="food-type"]').forEach(i=>i.checked=false);
-      $('veg-btn').classList.remove('active');
     }else if(activeSheet==='price'){
       priceRanges=[];
-      document.querySelectorAll('input[name="price-range"]').forEach(i=>i.checked=false);
-      $('price-btn').classList.remove('active');
     }
+    updateFilterButtons();
     closeFilter();
     render();
   }
@@ -602,138 +668,84 @@ body.filter-open{overflow:hidden}
     }
   }
 
+  async function fetchJson(url, timeoutMs=12000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const response=await fetch(url,{
+        headers:{Accept:'application/json'},
+        cache:'no-store',
+        signal:controller.signal
+      });
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  function flattenMenuPayload(payload){
+    const data=payload?.data ?? payload;
+    if(Array.isArray(data)) return data;
+    if(data && typeof data==='object'){
+      return Object.values(data).flatMap(group => Array.isArray(group) ? group : []);
+    }
+    return [];
+  }
+
+  async function loadRestaurantsWithMenus(){
+    const result=await fetchJson('https://eatswada.onrender.com/api/restaurants?limit=20&sort=rating');
+    const restaurants=Array.isArray(result?.data)
+      ? result.data
+      : (Array.isArray(result) ? result : []);
+    if(!restaurants.length) throw new Error('Restaurant list returned no data');
+
+    const enriched=await Promise.all(restaurants.slice(0,20).map(async r=>{
+      const id=String(r?._id||r?.id||'');
+      if(!id) return null;
+      try{
+        const menuPayload=await fetchJson(`https://eatswada.onrender.com/api/restaurants/${encodeURIComponent(id)}/menu`,10000);
+        return {...r,menu:flattenMenuPayload(menuPayload)};
+      }catch(error){
+        console.warn('[99 Store] menu load failed for',id,error);
+        return null;
+      }
+    }));
+    return enriched.filter(r=>r && Array.isArray(r.menu) && r.menu.length);
+  }
+
   async function load(){
     const skeleton=$('skeleton-feed');
     const list=$('under99-list');
-
-    // The homepage already uses /api/restaurants and receives restaurant.menu[].
-    // Use that same working dataset first. The specialised /under99 endpoint
-    // remains a fallback only.
-    const HOME_API='https://eatswada.onrender.com/api/restaurants';
-    const HOME_CACHE='es_home_restaurants_v2';
-
     try{
-      let restaurants=null;
+      let restaurants=await loadRestaurantsWithMenus();
 
-      // Reuse the homepage dataset when it is already cached in this origin.
-      try{
-        const cached=sessionStorage.getItem(HOME_CACHE);
-        if(cached){
-          const parsed=JSON.parse(cached);
-          if(Array.isArray(parsed)&&parsed.length) restaurants=parsed;
-        }
-      }catch(_){}
+      if(!restaurants.length){
+        const result=await fetchJson('https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),12000);
+        const raw=Array.isArray(result?.data)
+          ? result.data
+          : (Array.isArray(result)?result:[]);
+        const grouped=new Map();
 
-      if(!restaurants){
-        const response=await fetch(HOME_API,{
-          headers:{Accept:'application/json'},
-          cache:'no-store'
+        raw.forEach(item=>{
+          const restaurant=item?.restaurant&&typeof item.restaurant==='object' ? item.restaurant : null;
+          const restaurantId=String(restaurant?._id||restaurant?.id||item.restaurant||'');
+          if(!restaurantId)return;
+          if(!grouped.has(restaurantId)){
+            grouped.set(restaurantId,{...(restaurant||{}),id:restaurantId,name:restaurant?.name||item.restaurantName||'Restaurant',menu:[]});
+          }
+          const price=num(item.price,0);
+          if(price>0)grouped.get(restaurantId).menu.push({...item,price});
         });
-        if(!response.ok) throw new Error(`Restaurant API HTTP ${response.status}`);
-
-        const result=await response.json();
-        if(result?.success&&Array.isArray(result.data)){
-          restaurants=result.data;
-        }else if(Array.isArray(result)){
-          restaurants=result;
-        }else{
-          throw new Error('Restaurant API returned no usable data');
-        }
-
-        try{sessionStorage.setItem(HOME_CACHE,JSON.stringify(restaurants));}catch(_){}
+        restaurants=[...grouped.values()];
       }
 
-      // Convert the same restaurant.menu[] objects used by the homepage
-      // into the restaurant-card component's expected shape.
-      const normalized=restaurants
-        .map(raw=>normalizeRestaurant({
-          ...raw,
-          menu:Array.isArray(raw?.menu)?raw.menu:[],
-          restaurant:raw
-        }))
-        .filter(r=>r.id&&r.menu.length);
+      const normalized=restaurants.map(raw=>normalizeRestaurant(raw)).filter(r=>r.id&&r.menu.length);
+      if(!normalized.length)throw new Error('No restaurant menu data returned');
 
-      if(normalized.length){
-        allRestaurants=normalized;
-        render();
-        return;
-      }
-
-      // Final fallback: keep compatibility with the dedicated endpoint.
-      const fallback=await fetch(
-        'https://eatswada.onrender.com/api/restaurants/under99?cb='+Date.now(),
-        {headers:{Accept:'application/json'},cache:'no-store'}
-      );
-      if(!fallback.ok) throw new Error(`99 Store API HTTP ${fallback.status}`);
-
-      const result=await fallback.json();
-      const raw=Array.isArray(result?.data)
-        ? result.data
-        : (Array.isArray(result)?result:[]);
-
-      const fallbackRestaurants=[];
-      const grouped=new Map();
-
-      raw.forEach(item=>{
-        const restaurant=item?.restaurant&&typeof item.restaurant==='object'
-          ? item.restaurant : null;
-        const restaurantId=String(
-          restaurant?._id||restaurant?.id||item.restaurant||''
-        );
-        if(!restaurantId) return;
-
-        if(!grouped.has(restaurantId)){
-          grouped.set(restaurantId,{
-            id:restaurantId,
-            name:restaurant?.name||item.restaurantName||'Restaurant',
-            image:restaurant?.image||'',
-            images:Array.isArray(restaurant?.images)?restaurant.images:[],
-            rating:num(restaurant?.rating,0),
-            ratingCount:restaurant?.ratingCount??'',
-            deliveryTime:String(restaurant?.deliveryTime||'30–40 mins'),
-            cuisine:Array.isArray(restaurant?.cuisine)
-              ? restaurant.cuisine.join(', ')
-              : String(restaurant?.cuisine||''),
-            offer:String(restaurant?.offer||''),
-            freeDeliveryAbove:restaurant?.freeDeliveryAbove==null
-              ? null : num(restaurant.freeDeliveryAbove),
-            deliveryFee:restaurant?.deliveryFee,
-            menu:[]
-          });
-        }
-
-        const price=num(item.price,0);
-        if(price<=0) return;
-
-        grouped.get(restaurantId).menu.push({
-          id:item._id||item.id||'',
-          name:item.name||'Item',
-          description:item.description||'',
-          price,
-          originalPrice:item.originalPrice==null?null:num(item.originalPrice),
-          discountPercent:item.discountPercent==null
-            ? null : num(item.discountPercent),
-          image:item.image||item.img||'',
-          isVeg:Boolean(item.isVeg),
-          category:item.category||'Recommended',
-          isUnder99:Boolean(item.isUnder99??price<=99),
-          isBestseller:Boolean(item.isBestseller),
-          isRecommended:Boolean(item.isRecommended),
-          inStock:item.inStock!==false,
-          customizations:Array.isArray(item.customizations)?item.customizations:[]
-        });
-      });
-
-      grouped.forEach(r=>{
-        r.menu=r.menu.filter(item=>item.price>0);
-        if(r.menu.length) fallbackRestaurants.push(normalizeRestaurant(r));
-      });
-
-      if(!fallbackRestaurants.length) throw new Error('No restaurant menu data returned');
-
-      allRestaurants=fallbackRestaurants;
+      allRestaurants=normalized;
+      updateFilterButtons();
       render();
-
     }catch(error){
       console.error('[99 Store] load failed:',error);
       if(skeleton)skeleton.style.display='none';
