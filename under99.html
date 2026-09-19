@@ -84,6 +84,11 @@ body{padding-bottom:82px}
 }
 .filter-pill svg{width:18px;height:18px;flex:none}
 .filter-pill.active svg{stroke:var(--pink)}
+.pill-pct{
+  width:21px;height:21px;flex:0 0 21px;border-radius:50%;
+  background:var(--pink);color:#fff;font-size:12.5px;font-weight:800;
+  display:grid;place-items:center;line-height:1;letter-spacing:0;
+}
 
 main{max-width:920px;margin:0 auto;padding:18px 20px 28px}
 .items-found-label{display:none}
@@ -287,7 +292,7 @@ body.filter-open{overflow:hidden}
     </button>
 
     <button class="filter-pill active" id="discount-btn" onclick="toggleDiscount()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/><path d="M19 5 5 19"/></svg>
+      <span class="pill-pct" aria-hidden="true">%</span>
       40–60% Lower Prices
     </button>
 
