@@ -253,7 +253,7 @@
 
     /* ============================================================
        EATSWADA CART — Restaurant + 99 Store
-       Full pink capsule. No white shell, no glow, no glass effect.
+       Solid pink rectangular bar. NO nested capsule and NO glow.
        ============================================================ */
     #white-cart-root.wc-pink {
       width: calc(100vw - 36px);
@@ -261,65 +261,64 @@
       bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.wc-pink #white-cart-container {
-      height: 66px;
-      min-height: 66px;
-      padding: 5px 7px 5px 12px;
+      height: 64px;
+      min-height: 64px;
+      padding: 0 20px 0 20px;
       border: 0;
-      border-radius: 33px;
+      border-radius: 24px;
       background: #EC168C;
       box-shadow: none;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+      overflow: hidden;
     }
-    #white-cart-root.wc-pink .wc-left {
-      display:none;
-    }
-    #white-cart-root.wc-pink .wc-thumb-wrap { display:flex; }
-    #white-cart-root.wc-pink .wc-image-stack {
-      width:40px !important; height:40px; min-width:40px;
-    }
-    #white-cart-root.wc-pink .wc-img { width:40px; height:40px; border-radius:50%; }
-    #white-cart-root.wc-pink .wc-img:nth-child(1){left:0}
-    #white-cart-root.wc-pink .wc-img:nth-child(2){left:11px}
-    #white-cart-root.wc-pink .wc-img:nth-child(3){left:22px}
-    #white-cart-root.wc-pink .wc-qty-badge { display:block; top:-3px; right:-3px; }
-    #white-cart-root.wc-pink .wc-info {
-      display:flex; min-width:0; overflow:hidden; justify-content:center;
-    }
-    #white-cart-root.wc-pink .wc-res-name {
-      display:block; color:#fff; font-size:14px; font-weight:800;
-      line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    #white-cart-root.wc-pink .wc-menu-link {
-      display:flex; color:rgba(255,255,255,.88); font-size:11px; font-weight:700;
-      margin-top:3px;
-    }
-    #white-cart-root.wc-pink .wc-menu-link i { display:none; }
-    #white-cart-root.wc-pink .wc-pink-total {
-      display:block; color:#fff; font-size:17px; line-height:1; font-weight:800;
-      white-space:nowrap; margin:0; position:static; transform:none;
-    }
+    #white-cart-root.wc-pink .wc-left { display:none; }
+    #white-cart-root.wc-pink .wc-thumb-wrap,
+    #white-cart-root.wc-pink .wc-info,
+    #white-cart-root.wc-pink .wc-qty-badge,
+    #white-cart-root.wc-pink .wc-menu-link,
+    #white-cart-root.wc-pink .wc-res-name { display:none; }
     #white-cart-root.wc-pink .wc-center-cart {
-      position:static; transform:none; display:flex; align-items:center;
-      flex:1 1 auto; min-width:0; z-index:6; pointer-events:none;
+      display:block;
+      flex:0 0 auto;
+      min-width:0;
+      pointer-events:none;
     }
     #white-cart-root.wc-pink .wc-center-cart .wc-pink-total {
-      display:block; position:static; transform:none; margin:0;
+      display:block;
+      position:static;
+      transform:none;
+      color:#fff;
+      font-size:17px;
+      line-height:1;
+      font-weight:800;
+      white-space:nowrap;
     }
     #white-cart-root.wc-pink .wc-right {
-      margin-left:auto; gap:0; flex:0 0 auto;
+      margin-left:auto;
+      gap:0;
+      flex:0 0 auto;
     }
     #white-cart-root.wc-pink #wc-standard-actions {
-      display:flex !important; gap:0; align-items:center;
+      display:flex !important;
+      gap:0;
+      align-items:center;
     }
     #white-cart-root.wc-pink .wc-btn {
-      min-width:138px; width:138px; height:56px; padding:0 14px;
-      border-radius:18px; background:#D90B7D; color:#fff; box-shadow:none;
-      flex-direction:row; gap:8px;
+      min-width:0;
+      width:auto;
+      height:auto;
+      padding:0;
+      border-radius:0;
+      background:transparent;
+      color:#fff;
+      box-shadow:none;
+      flex-direction:row;
+      gap:10px;
     }
     #white-cart-root.wc-pink .wc-btn-title { font-size:17px; line-height:1; font-weight:800; }
     #white-cart-root.wc-pink .wc-btn-sub { display:none; }
-    #white-cart-root.wc-pink .wc-cart-svg { width:23px; height:23px; display:block; }
+    #white-cart-root.wc-pink .wc-cart-svg { width:25px; height:25px; display:block; }
     #white-cart-root.wc-pink .wc-close,
     #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
 
@@ -332,7 +331,7 @@
     #white-cart-root:not(.wc-pink) {
       width: calc(100vw - 36px);
       max-width: 720px;
-      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root:not(.wc-pink) #white-cart-container {
       min-height: 58px; height: 58px; padding: 5px 7px 5px 12px;
@@ -383,7 +382,12 @@
       pointer-events:auto;
     }
     #white-cart-root:not(.wc-pink) .wc-center-cart .wc-pink-total {
-      display:none !important;
+      display:block !important;
+      color:#20242B;
+      font-size:16px;
+      line-height:1;
+      font-weight:700;
+      white-space:nowrap;
     }
     #white-cart-root:not(.wc-pink) .wc-all-carts {
       position:static;
@@ -739,6 +743,24 @@
     }
   };
 
+  /* Keep the homepage cart above the actual bottom navigation.
+     The nav can be a floating island or a full-width fixed bar, so measure
+     its real top edge instead of guessing a bottom value. */
+  function syncHomeCartPosition() {
+    if (CART_BAR_MODE !== 'home') return;
+    const root = document.getElementById('white-cart-root');
+    if (!root) return;
+    const nav = document.getElementById('nearbite-bottom-tabbar') || document.getElementById('eatswada-bottom-tabbar');
+    if (!nav || nav.classList.contains('is-hidden') || nav.classList.contains('nb-hidden')) {
+      root.style.bottom = 'calc(86px + env(safe-area-inset-bottom, 0px))';
+      return;
+    }
+    const rect = nav.getBoundingClientRect();
+    const gap = 10;
+    const bottom = Math.max(76, Math.round(window.innerHeight - rect.top + gap));
+    root.style.bottom = bottom + 'px';
+  }
+
   /* ── 5. INITIALIZATION ── */
   function init() {
     injectCSS();
@@ -752,6 +774,15 @@
     }
     document.body.appendChild(root);
     window.__ewOpenCartDrawer=openCartDrawer;
+    syncHomeCartPosition();
+    window.addEventListener('resize', syncHomeCartPosition, { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(syncHomeCartPosition, 80), { passive: true });
+    setTimeout(syncHomeCartPosition, 80);
+    setTimeout(syncHomeCartPosition, 350);
+    const navForObserver = document.getElementById('nearbite-bottom-tabbar') || document.getElementById('eatswada-bottom-tabbar');
+    if (navForObserver && window.MutationObserver) {
+      new MutationObserver(syncHomeCartPosition).observe(navForObserver, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
     if(CART_BAR_MODE==='pink')ensureCartDrawer();
 
     document.addEventListener('click', (e) => {
