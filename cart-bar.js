@@ -165,39 +165,12 @@
 
     #white-cart-root {
       position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: var(--ew-cart-bottom, calc(14px + env(safe-area-inset-bottom, 0px)));
+      bottom: var(--nb-cart-bottom, calc(20px + env(safe-area-inset-bottom, 0px)));
       width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
-      transition: bottom .28s cubic-bezier(.22,1,.36,1);
+      transition: bottom .32s cubic-bezier(.22,1,.36,1);
       will-change: bottom, transform;
-      box-sizing: border-box;
     }
-
-    /* HOME: keep the cart above the fixed bottom navigation. */
-    #white-cart-root.wc-home {
-      bottom: var(--ew-home-cart-bottom, calc(88px + env(safe-area-inset-bottom, 0px)));
-    }
-
-    /* The All ↑ control belongs to the HOME cart only. */
-    .ew-home-all {
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% - 2px);
-      transform: translateX(-50%);
-      z-index: 4;
-      min-width: 64px;
-      height: 38px;
-      padding: 0 14px;
-      border: 0;
-      border-radius: 20px;
-      background: #fff;
-      color: #667085;
-      font: 800 14px/1 'Manrope', system-ui, sans-serif;
-      box-shadow: 0 4px 16px rgba(16,24,40,.12);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .ew-home-all:active { transform: translateX(-50%) scale(.97); }
     #white-cart-root.wc-enter {
       animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
@@ -261,7 +234,7 @@
       background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
       transform: translateX(-120%) skewX(-20deg); pointer-events: none;
     }
-    #white-cart-root.wc-home.wc-enter #wc-standard-actions .wc-btn::after {
+    #white-cart-root.wc-enter #wc-standard-actions .wc-btn::after {
       animation: wcShine 1s ease 0.45s 1 both;
     }
     .wc-btn-title { font-size: 11px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
@@ -278,94 +251,149 @@
       outline: 2px solid #FF4D4F; outline-offset: 2px;
     }
 
-    /* RESTAURANT + 99 STORE:
-       This is deliberately NOT a pill/capsule. It is a compact rounded
-       rectangle with the pink surface running edge-to-edge. */
+    /* ============================================================
+       RESTAURANT + 99 STORE CART — exact compact pink bar
+       No inner white capsule, no glow, no shadow.
+       ============================================================ */
     #white-cart-root.wc-pink {
-      width: min(720px, calc(100vw - 24px));
-      max-width: calc(100vw - 24px);
+      width: calc(100vw - 40px);
+      max-width: 720px;
       bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     }
     #white-cart-root.wc-pink #white-cart-container {
-      height: 56px;
-      padding: 0 16px 0 20px;
+      height: 64px;
+      min-height: 64px;
+      padding: 0 20px;
+      box-sizing: border-box;
       border: 0;
-      border-radius: 24px;
+      border-radius: 28px;
       background: #EC168C;
-      box-shadow: 0 7px 20px rgba(236,22,140,.22), 0 2px 8px rgba(0,0,0,.10);
+      box-shadow: none;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-    #white-cart-root.wc-pink .wc-left {
-      display: none;
-    }
+    #white-cart-root.wc-pink .wc-left,
+    #white-cart-root.wc-pink .wc-thumb-wrap,
+    #white-cart-root.wc-pink .wc-info,
+    #white-cart-root.wc-pink .wc-qty-badge,
+    #white-cart-root.wc-pink .wc-menu-link,
+    #white-cart-root.wc-pink .wc-res-name,
+    #white-cart-root.wc-pink .wc-close,
+    #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
     #white-cart-root.wc-pink .wc-right {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
+      width:100%; height:100%; margin:0;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px;
     }
     #white-cart-root.wc-pink #wc-standard-actions {
-      width: 100%;
-      height: 100%;
-      display: flex !important;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
+      width:100%; height:100%; margin:0;
+      display:flex !important; align-items:center; justify-content:space-between;
+      gap:16px;
     }
-    #white-cart-root.wc-pink .ew-pink-summary {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-      color: #fff;
-      font: 800 15px/1 'Manrope', system-ui, sans-serif;
-      white-space: nowrap;
+    #white-cart-root.wc-pink .wc-pink-summary {
+      display:block; min-width:0;
+      color:#fff; font-size:18px; line-height:1; font-weight:800;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     #white-cart-root.wc-pink .wc-btn {
-      min-width: 0;
-      height: auto;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      color: #fff;
-      box-shadow: none;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
-      font-family: inherit;
-      overflow: visible;
+      min-width:0; width:auto; height:auto; min-height:0;
+      padding:0; border:0; border-radius:0;
+      background:transparent; color:#fff; box-shadow:none;
+      display:flex; flex-direction:row; align-items:center; justify-content:flex-end;
+      gap:9px; flex:0 0 auto;
     }
     #white-cart-root.wc-pink .wc-btn-title {
-      font-size: 15px;
-      font-weight: 800;
-      line-height: 1;
+      font-size:17px; line-height:1; font-weight:800; white-space:nowrap;
     }
-    #white-cart-root.wc-pink .wc-btn-sub { display: none; }
-    #white-cart-root.wc-pink .wc-cart-icon {
-      width: 25px;
-      height: 25px;
-      display: block;
-      flex: 0 0 auto;
-    }
-    #white-cart-root.wc-pink .wc-close,
-    #white-cart-root.wc-pink #wc-clear-actions {
-      display: none !important;
-    }
-    #white-cart-root.wc-pink #wc-standard-actions::after { display:none; }
+    #white-cart-root.wc-pink .wc-btn-sub { display:none !important; }
+    #white-cart-root.wc-pink .wc-cart-svg { width:24px; height:24px; display:block; }
 
-    @media (max-width: 380px) {
-      #white-cart-root.wc-pink #white-cart-container { padding-left: 16px; padding-right: 14px; }
-      #white-cart-root.wc-pink .wc-btn-title,
-      #white-cart-root.wc-pink .ew-pink-summary { font-size: 14px; }
-      #white-cart-root.wc-pink .wc-btn { gap: 8px; }
-      #white-cart-root.wc-pink .wc-cart-icon { width: 23px; height: 23px; }
+    /* ============================================================
+       HOMEPAGE CART — white compact island above bottom navigation
+       Only: restaurant preview + item count + View Cart.
+       The All ↑ capsule floats above the center and appears ONLY when
+       the cart contains more than one restaurant.
+       ============================================================ */
+    #white-cart-root:not(.wc-pink) {
+      width:calc(100vw - 36px);
+      max-width:720px;
+      bottom:calc(14px + env(safe-area-inset-bottom,0px));
     }
+    #white-cart-root:not(.wc-pink) #white-cart-container {
+      height:58px;
+      min-height:58px;
+      padding:5px 7px 5px 12px;
+      box-sizing:border-box;
+      border:1px solid rgba(17,24,39,.08);
+      border-radius:29px;
+      background:#fff;
+      box-shadow:0 5px 18px rgba(16,24,40,.10);
+      -webkit-backdrop-filter:none;
+      backdrop-filter:none;
+      overflow:visible;
+    }
+    #white-cart-root:not(.wc-pink) .wc-left {
+      display:flex; align-items:center; gap:8px;
+      flex:1 1 auto; min-width:0; overflow:hidden;
+      cursor:pointer; box-sizing:border-box;
+    }
+    #white-cart-root:not(.wc-pink) .wc-image-stack {
+      width:40px !important; height:40px; min-width:40px;
+    }
+    #white-cart-root:not(.wc-pink) .wc-img {
+      width:40px; height:40px; border-radius:50%;
+    }
+    #white-cart-root:not(.wc-pink) .wc-img:nth-child(1){left:0}
+    #white-cart-root:not(.wc-pink) .wc-img:nth-child(2){left:11px}
+    #white-cart-root:not(.wc-pink) .wc-img:nth-child(3){left:22px}
+    #white-cart-root:not(.wc-pink) .wc-qty-badge { display:block; top:-3px; right:-3px; }
+    #white-cart-root:not(.wc-pink) .wc-info {
+      display:flex; min-width:0; overflow:hidden; justify-content:center;
+      padding-right:0;
+    }
+    #white-cart-root:not(.wc-pink) .wc-res-name { font-size:14px; font-weight:800; line-height:1.1; }
+    #white-cart-root:not(.wc-pink) .wc-menu-link { font-size:11px; margin-top:3px; }
+    #white-cart-root:not(.wc-pink) .wc-right {
+      margin-left:auto; flex:0 0 auto; display:flex; align-items:center; gap:0;
+    }
+    #white-cart-root:not(.wc-pink) #wc-standard-actions {
+      display:flex !important; align-items:center; gap:0;
+    }
+    #white-cart-root:not(.wc-pink) .wc-btn {
+      min-width:0; width:auto; height:46px; padding:0 12px;
+      border-radius:23px; background:#EC168C; color:#fff; box-shadow:none;
+      display:flex; flex-direction:row; align-items:center; justify-content:center;
+      gap:8px; flex:0 0 auto;
+    }
+    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:15px; font-weight:800; line-height:1; }
+    #white-cart-root:not(.wc-pink) .wc-btn-sub { display:none !important; }
+    #white-cart-root:not(.wc-pink) .wc-cart-svg { width:23px; height:23px; display:block; }
+    #white-cart-root:not(.wc-pink) #wc-close-btn { display:none !important; }
+    #white-cart-root:not(.wc-pink) .wc-home-count {
+      display:block; position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%); z-index:10;
+      color:#20242B; font-size:15px; line-height:1; font-weight:800;
+      white-space:nowrap; pointer-events:none;
+    }
+    #white-cart-root:not(.wc-pink) .wc-all-carts {
+      position:absolute; left:50%; top:-17px; transform:translateX(-50%);
+      z-index:20; display:none; align-items:center; justify-content:center;
+      height:34px; min-width:68px; padding:0 14px;
+      border:1px solid rgba(17,24,39,.08); border-radius:18px;
+      background:#fff; color:#667085; font:inherit;
+      font-size:12px; font-weight:800; line-height:1; white-space:nowrap;
+      box-shadow:0 4px 12px rgba(16,24,40,.10); cursor:pointer;
+    }
+    #white-cart-root:not(.wc-pink) .wc-all-carts.show { display:flex !important; }
 
+    @media(max-width:420px){
+      #white-cart-root.wc-pink { width:calc(100vw - 36px); }
+      #white-cart-root.wc-pink #white-cart-container { height:64px; min-height:64px; border-radius:28px; }
+      #white-cart-root.wc-pink .wc-pink-summary { font-size:17px; }
+      #white-cart-root.wc-pink .wc-btn-title { font-size:16px; }
+      #white-cart-root:not(.wc-pink) .wc-home-count { font-size:14px; }
+      #white-cart-root:not(.wc-pink) .wc-btn { height:46px; padding:0 11px; }
+    }
 
     /* Multi-restaurant cart drawer — Restaurant + 99 Store */
     #ew-cart-drawer-backdrop{position:fixed;inset:0;z-index:100001;display:none;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
@@ -417,43 +445,35 @@
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
     wrap.innerHTML = `
-      <button type="button" class="ew-home-all" aria-label="View all restaurants in cart">All ↑</button>
       <div id="white-cart-container">
-        <button type="button" class="wc-left" aria-label="View cart"
-          onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
+          <button type="button" class="wc-left" aria-label="View cart" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
           <div class="wc-thumb-wrap">
             <div class="wc-image-stack" id="wc-dynamic-img-stack"></div>
             <span class="wc-qty-badge" id="wc-qty-badge" aria-hidden="true">0</span>
           </div>
           <div class="wc-info">
             <div class="wc-res-name" id="wc-dynamic-res">EatSwada Order</div>
-            <div class="wc-menu-link">Added to cart</div>
+            <div class="wc-menu-link">Added to cart <i class="fa-solid fa-check" aria-hidden="true" style="font-size:10px;"></i></div>
           </div>
         </button>
-
+        <div class="wc-home-count" id="wc-home-count" aria-live="polite"></div>
+        <button type="button" class="wc-all-carts" id="wc-all-carts" aria-label="View all restaurant carts">All ↑</button>
         <div class="wc-right">
-          <div id="wc-standard-actions">
-            <span class="ew-pink-summary" id="ew-pink-summary" aria-live="polite">1 item · ₹0</span>
-            <button type="button" class="wc-btn" aria-label="View cart"
-              onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
+          <div id="wc-standard-actions" style="display:flex; gap:0; align-items:center;">
+            <span class="wc-pink-summary" id="wc-pink-summary" aria-live="polite"></span>
+            <button type="button" class="wc-btn" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
               <span class="wc-btn-title">View Cart</span>
-              <svg class="wc-cart-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3.5 4.5h2l1.7 10.1a1.7 1.7 0 0 0 1.68 1.42h7.93a1.7 1.7 0 0 0 1.64-1.26L20.1 8H7"
-                  stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="9.3" cy="19.2" r="1.2" fill="currentColor"/>
-                <circle cx="17.3" cy="19.2" r="1.2" fill="currentColor"/>
-              </svg>
-              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
+              <svg class="wc-cart-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L21 8H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4" fill="currentColor"/><circle cx="18" cy="20" r="1.4" fill="currentColor"/></svg>
+              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite"></span>
             </button>
-            <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart">×</button>
+            <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
-
-          <div id="wc-clear-actions" style="display:none;">
-            <button type="button" class="wc-btn" id="wc-confirm-clear">
+          <div id="wc-clear-actions" style="display: none; gap: 8px; align-items: center;">
+            <button type="button" class="wc-btn" id="wc-confirm-clear" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
               <span class="wc-btn-title">Clear Cart</span>
               <span class="wc-btn-sub">Remove all items</span>
             </button>
-            <button type="button" class="wc-close" id="wc-cancel-clear" aria-label="Cancel">→</button>
+            <button type="button" class="wc-close" id="wc-cancel-clear" aria-label="Cancel, keep cart items"><i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i></button>
           </div>
         </div>
       </div>
@@ -546,14 +566,43 @@
     list.querySelectorAll('[data-cd-view]').forEach(btn=>btn.addEventListener('click',()=>window.location.href='cart.html'));
   }
   function openCartDrawer(){
-    if(CART_BAR_MODE==='hidden'){window.location.href='cart.html';return;}
+    const groups=restaurantGroups(safeGetCart());
+    // Homepage: the All ↑ capsule is only meaningful when there are 2+ restaurants.
+    // With one restaurant, View Cart goes directly to the cart page.
+    if(CART_BAR_MODE==='home' && groups.length<=1){ window.location.href='cart.html'; return; }
+    if(CART_BAR_MODE==='hidden'){ window.location.href='cart.html'; return; }
     ensureCartDrawer();
     renderCartDrawer();
-    const b=document.getElementById('ew-cart-drawer-backdrop');
-    const d=document.getElementById('ew-cart-drawer');
+    const b=document.getElementById('ew-cart-drawer-backdrop'),d=document.getElementById('ew-cart-drawer');
     b.classList.add('show');
     requestAnimationFrame(()=>d.classList.add('show'));
     document.body.style.overflow='hidden';
+  }
+
+  function syncHomeCartPosition(){
+    const root=document.getElementById('white-cart-root');
+    if(!root || CART_BAR_MODE!=='home') return;
+    const nav=document.getElementById('nearbite-bottom-tabbar');
+    const safe=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
+    if(nav){
+      const rect=nav.getBoundingClientRect();
+      const visible=rect.bottom>0 && rect.top<window.innerHeight && getComputedStyle(nav).display!=='none' && getComputedStyle(nav).visibility!=='hidden';
+      if(visible){
+        const gap=10;
+        const bottom=Math.max(10, Math.round(window.innerHeight-rect.top+gap));
+        root.style.bottom=bottom+'px';
+        return;
+      }
+    }
+    root.style.bottom='calc(14px + env(safe-area-inset-bottom,0px))';
+  }
+
+  function syncHomeAllButton(groups){
+    const all=document.getElementById('wc-all-carts');
+    if(!all || CART_BAR_MODE!=='home') return;
+    const show=groups.length>1;
+    all.classList.toggle('show',show);
+    all.style.display=show?'flex':'none';
   }
 
   window.updateGlobalCart = function () {
@@ -564,12 +613,15 @@
     const itemNames = Object.keys(savedCart);
     const root = document.getElementById('white-cart-root');
     const countEl = document.getElementById('wc-item-count');
+    const homeCountEl = document.getElementById('wc-home-count');
+    const pinkSummaryEl = document.getElementById('wc-pink-summary');
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
     const resEl = document.getElementById('wc-dynamic-res');
     const badgeEl = document.getElementById('wc-qty-badge');
-    const pinkSummaryEl = document.getElementById('ew-pink-summary');
 
     if (!root || !countEl || !imgStackEl) return;
+    syncHomeAllButton(groups);
+    syncHomeCartPosition();
 
     const stdActions = document.getElementById('wc-standard-actions');
     const clearActions = document.getElementById('wc-clear-actions');
@@ -599,11 +651,12 @@
       });
 
       const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
-      const totalText = (priceKnown && totalPrice > 0)
+      const pinkText = priceKnown && totalPrice > 0
         ? `${baseCountText} · ${formatCurrency(totalPrice)}`
         : baseCountText;
-      countEl.innerText = totalText;
-      if (pinkSummaryEl) pinkSummaryEl.textContent = totalText;
+      countEl.innerText = pinkText;
+      if(homeCountEl) homeCountEl.textContent = baseCountText;
+      if(pinkSummaryEl) pinkSummaryEl.textContent = pinkText;
 
       if (badgeEl) badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
 
@@ -649,27 +702,11 @@
     } else {
       hideCartBar(root);
       lastTotalQty = null;
+      if(homeCountEl) homeCountEl.textContent='';
+      if(pinkSummaryEl) pinkSummaryEl.textContent='';
+      syncHomeAllButton([]);
     }
   };
-
-  /* ── HOME NAVIGATION POSITIONING ── */
-  function syncHomeCartBottom() {
-    if (CART_BAR_MODE !== 'home') return;
-    let offset = 88;
-    const els = Array.from(document.querySelectorAll('body *'));
-    for (const el of els) {
-      if (!el || el.id === 'white-cart-root' || el.closest('#white-cart-root')) continue;
-      const cs = getComputedStyle(el);
-      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden') continue;
-      const r = el.getBoundingClientRect();
-      if (r.width < window.innerWidth * .45 || r.height < 48 || r.height > 130) continue;
-      if (Math.abs(window.innerHeight - r.bottom) > 8) continue;
-      const text = (el.innerText || '').toLowerCase();
-      const navLike = /home|99\s*store|orders|account|profile/.test(text);
-      if (navLike) offset = Math.max(offset, Math.ceil(window.innerHeight - r.top + 10));
-    }
-    document.documentElement.style.setProperty('--ew-home-cart-bottom', offset + 'px');
-  }
 
   /* ── 5. INITIALIZATION ── */
   function init() {
@@ -679,29 +716,20 @@
       root.style.display = 'none';
     } else if (CART_BAR_MODE === 'pink') {
       root.classList.add('wc-pink');
-      root.querySelector('.ew-home-all').style.display = 'none';
-    } else {
-      root.classList.add('wc-home');
-      root.querySelector('.ew-home-all').addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html');
-      });
-      syncHomeCartBottom();
-      window.addEventListener('resize', syncHomeCartBottom, {passive:true});
-      window.addEventListener('orientationchange', () => setTimeout(syncHomeCartBottom, 50), {passive:true});
-      setTimeout(syncHomeCartBottom, 250);
+      root.querySelector('.wc-btn-title').textContent = 'View Cart';
+      root.querySelector('.wc-btn-sub').textContent = '';
+      root.querySelector('#wc-pink-summary').textContent = '';
     }
     document.body.appendChild(root);
-    window.__ewOpenCartDrawer=openCartDrawer;
-    if(CART_BAR_MODE!=='hidden') ensureCartDrawer();
-    if(CART_BAR_MODE==='home') {
-      setTimeout(syncHomeCartBottom, 800);
-      if (window.ResizeObserver) {
-        const ro = new ResizeObserver(() => syncHomeCartBottom());
-        ro.observe(document.body);
-      }
+    syncHomeCartPosition();
+    window.addEventListener('resize', syncHomeCartPosition, {passive:true});
+    window.addEventListener('scroll', syncHomeCartPosition, {passive:true});
+    if(window.ResizeObserver){
+      const nav=document.getElementById('nearbite-bottom-tabbar');
+      if(nav) new ResizeObserver(syncHomeCartPosition).observe(nav);
     }
+    window.__ewOpenCartDrawer=openCartDrawer;
+    if(CART_BAR_MODE==='pink')ensureCartDrawer();
 
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button, .counter-btn, [onclick*="updateCart"]');
@@ -747,6 +775,9 @@
         localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
     }, true); 
+
+    const allCartsBtn=document.getElementById('wc-all-carts');
+    if(allCartsBtn) allCartsBtn.addEventListener('click',(e)=>{ e.stopPropagation(); openCartDrawer(); });
 
     const wcLeft = document.querySelector('#white-cart-root .wc-left');
     if (wcLeft) {
