@@ -92,7 +92,6 @@
           <div class="u99-meta">${ratingMarkup(r)}${delivery?`<span class="u99-sep">•</span><span class="u99-delivery">${icon.clock}${esc(delivery)}</span>`:''}${cuisine?`<span class="u99-sep">•</span><span class="u99-cuisine">${esc(cuisine)}</span>`:''}</div>
           ${freeDeliveryMarkup(r)}
         </div>
-        <span class="u99-stamp">${stamp()}</span>
       </button>
       <div class="u99-carousel-wrap">
         <div class="u99-carousel" tabindex="0" aria-label="${esc(r.name||'Restaurant')} complete menu">${menu.map(i=>itemMarkup(i,r)).join('')}</div>
@@ -128,7 +127,7 @@
         overflow:hidden
       }
       .u99-restaurant-head{
-        position:relative;width:100%;padding:0 78px 0 0;border:0;background:transparent;
+        position:relative;width:100%;padding:0;border:0;background:transparent;
         text-align:left;color:#101828;display:block
       }
       .u99-card-copy{min-width:0}
@@ -200,7 +199,7 @@
       .u99-image-fallback svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
       .u99-popular{
         position:absolute;left:7px;top:7px;z-index:2;background:#fff;color:#16865A;
-        border-radius:999px;padding:5px 8px;font-size:9px;line-height:1;font-weight:800;
+        border-radius:999px;padding:5px 10px;font-size:10px;line-height:1;font-weight:800;
         box-shadow:0 2px 7px rgba(16,24,40,.08)
       }
       .u99-item-action{
@@ -252,7 +251,7 @@
 
       @media(max-width:430px){
         .u99-restaurant-card{padding:18px;border-radius:26px}
-        .u99-restaurant-head{padding-right:74px}
+        .u99-restaurant-head{padding-right:0}
         .u99-discount-line{font-size:14px}
         .u99-restaurant-name{font-size:21px}
         .u99-meta{font-size:11px;gap:5px}
