@@ -349,10 +349,10 @@
       .u99-card-host{display:block;min-width:0}
       .u99-restaurant-card{
         background:#fff;
-        border:1px solid #E3E6EA;
+        border:1px solid #E7E9ED;
         border-radius:24px;
-        padding:17px 16px 16px;
-        box-shadow:0 2px 10px rgba(16,24,40,.045);
+        padding:16px 16px 15px;
+        box-shadow:0 2px 10px rgba(16,24,40,.04);
         overflow:hidden;
       }
       .u99-restaurant-head{
@@ -361,19 +361,19 @@
       }
       .u99-card-copy{min-width:0}
       .u99-discount-line{
-        color:#EC168C;font-size:14px;line-height:1.05;font-weight:800;
-        letter-spacing:-.2px;margin:0 0 5px;text-transform:uppercase;
+        color:#EC168C;font-size:12px;line-height:1.05;font-weight:700;
+        letter-spacing:.3px;margin:0 0 4px;text-transform:uppercase;
       }
       .u99-restaurant-name{
-        margin:0 0 8px;font-size:21px;line-height:1.08;font-weight:800;
+        margin:0 0 5px;font-size:21px;line-height:1.08;font-weight:800;
         letter-spacing:-.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
       }
       .u99-meta{
         display:flex;align-items:center;flex-wrap:nowrap;gap:5px;color:#747B87;
-        font-size:11.5px;font-weight:600;line-height:1.25;min-width:0;overflow:hidden;
+        font-size:12px;font-weight:600;line-height:1.25;min-width:0;overflow:hidden;
       }
       .u99-rating{display:inline-flex;align-items:center;gap:5px;color:#344054;white-space:nowrap;flex:0 0 auto}
-      .u99-rating .u99-rating-badge{width:17px;height:17px;flex:0 0 17px;display:block}
+      .u99-rating .u99-rating-badge{width:16px;height:16px;flex:0 0 16px;display:block}
       .u99-rating b{font-weight:750}
       .u99-rating-count{color:#747B87;font-weight:500}
       .u99-sep{color:#C9CED6;flex:0 0 auto}
@@ -381,21 +381,21 @@
       .u99-delivery svg{width:16px;height:16px;flex:0 0 16px;color:#747B87}
       .u99-cuisine{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
       .u99-free-row{
-        margin-top:7px;display:flex;align-items:center;gap:6px;min-width:0;
-        font-size:11.5px;font-weight:650;color:#26334A;line-height:1.2;white-space:nowrap;
+        margin-top:6px;display:flex;align-items:center;gap:6px;min-width:0;
+        font-size:12.5px;font-weight:650;color:#26334A;line-height:1.2;white-space:nowrap;
       }
       .u99-free-icon{
-        width:22px;height:22px;flex:0 0 22px;display:grid;place-items:center;
+        width:18px;height:18px;flex:0 0 18px;display:grid;place-items:center;
       }
-      .u99-free-icon .u99-seal{width:22px;height:22px;display:block}
+      .u99-free-icon .u99-seal{width:18px;height:18px;display:block}
       .u99-free-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
       .u99-info{
-        width:18px;height:18px;padding:0;border:0;background:transparent;color:#8791A1;
+        width:18px;height:18px;margin-left:1px;padding:0;border:0;background:transparent;color:#8791A1;
         display:grid;place-items:center;flex:0 0 18px;
       }
-      .u99-info svg{width:16px;height:16px}
+      .u99-info svg{width:15px;height:15px}
 
-      .u99-carousel-wrap{margin-top:13px}
+      .u99-carousel-wrap{margin-top:10px}
       .u99-carousel{
         display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;
         padding:0 0 3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
@@ -431,9 +431,9 @@
       }
       .u99-item-action{position:absolute;right:3px;bottom:-9px;z-index:4}
       .u99-add{
-        width:38px;height:38px;border-radius:50%;border:2px solid #EC168C;
+        width:36px;height:36px;border-radius:50%;border:2px solid #EC168C;
         background:#fff;color:#EC168C;display:grid;place-items:center;
-        box-shadow:0 2px 7px rgba(16,24,40,.10);font-size:24px;line-height:1;
+        box-shadow:0 2px 6px rgba(16,24,40,.09);font-size:22px;line-height:1;
         font-weight:500;padding:0;
       }
       .u99-add:active{transform:scale(.94)}
@@ -456,8 +456,8 @@
       .u99-stepper span{font-size:10px;font-weight:800;color:#101828}
 
       .u99-item-name{
-        margin:8px 1px 0;min-height:30px;max-height:30px;display:flex;align-items:flex-start;gap:4px;
-        color:#101828;font-size:10.5px;line-height:1.35;font-weight:650;overflow:hidden;
+        margin:8px 1px 0;min-height:31px;max-height:31px;display:flex;align-items:flex-start;gap:4px;
+        color:#101828;font-size:11.5px;line-height:1.32;font-weight:650;overflow:hidden;
       }
       .u99-item-name>span:last-child{
         min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
@@ -475,7 +475,7 @@
       .u99-price-row{
         display:flex;align-items:center;flex-wrap:nowrap;gap:4px;margin:7px 1px 0;min-height:21px;overflow:hidden;
       }
-      .u99-price-row strong{font-size:15px;line-height:1;font-weight:800;color:#101828;flex:0 0 auto}
+      .u99-price-row strong{font-size:16px;line-height:1;font-weight:800;color:#101828;flex:0 0 auto}
       .u99-old-price{font-size:9px;color:#8992A0;text-decoration:line-through;flex:0 0 auto}
       .u99-off{
         background:#FFF0F8;color:#EC168C;padding:5px 6px;border-radius:999px;
@@ -484,28 +484,29 @@
 
       @media(max-width:430px){
         .u99-restaurant-card{padding:15px 14px 14px;border-radius:23px}
-        .u99-discount-line{font-size:13px}
-        .u99-restaurant-name{font-size:20px;margin-bottom:6px}
-        .u99-meta{font-size:10.8px;gap:4px}
-        .u99-carousel-wrap{margin-top:11px}
+        .u99-discount-line{font-size:12px}
+        .u99-restaurant-name{font-size:20px;margin-bottom:5px}
+        .u99-meta{font-size:11.5px;gap:4px}
+        .u99-free-row{font-size:12px}
+        .u99-carousel-wrap{margin-top:9px}
         .u99-carousel{gap:8px}
         .u99-item{flex-basis:calc((100% - 16px)/3);width:calc((100% - 16px)/3)}
         .u99-item-image{border-radius:11px}
         .u99-item-image img,.u99-image-fallback{border-radius:11px}
-        .u99-add{width:36px;height:36px;font-size:23px}
-        .u99-item-name{font-size:10px;min-height:29px;max-height:29px}
+        .u99-add{width:36px;height:36px;font-size:22px}
+        .u99-item-name{font-size:11px;min-height:30px;max-height:30px}
         .u99-price-row{gap:3px}
-        .u99-price-row strong{font-size:14px}
+        .u99-price-row strong{font-size:15px}
         .u99-old-price{font-size:8.5px}
         .u99-off{font-size:7px;padding:4.5px 5px}
       }
       @media(max-width:370px){
         .u99-restaurant-card{padding:14px 12px 13px}
         .u99-restaurant-name{font-size:19px}
-        .u99-meta{font-size:10px}
-        .u99-free-row{font-size:10.5px}
-        .u99-item-name{font-size:9.5px}
-        .u99-price-row strong{font-size:13px}
+        .u99-meta{font-size:10.5px}
+        .u99-free-row{font-size:11px}
+        .u99-item-name{font-size:10.5px}
+        .u99-price-row strong{font-size:14px}
       }
     `;
     document.head.appendChild(s);
