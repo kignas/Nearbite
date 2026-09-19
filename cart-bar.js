@@ -141,7 +141,11 @@
 
   /* ── 2. THE CSS ── */
   const CSS = `
-    /* Font is inherited from the global Eatswada typography system (Manrope). */
+    /* ================================================================
+       CART BAR PRESENTATION
+       Home: white floating bar + small "All ↑" capsule above it.
+       Restaurant / 99 Store: solid Eatswada-pink full-width cart bar.
+       ================================================================ */
 
     @keyframes slideUpWhiteCart {
       0% { transform: translate(-50%, 150%); opacity: 0; }
@@ -153,316 +157,310 @@
     }
     @keyframes wcBump {
       0% { transform: scale(1); }
-      35% { transform: scale(1.22); }
+      35% { transform: scale(1.16); }
       100% { transform: scale(1); }
-    }
-    @keyframes wcShine {
-      0% { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
-      15% { opacity: 0.45; }
-      55% { opacity: 0.45; }
-      100% { transform: translateX(220%) skewX(-20deg); opacity: 0; }
     }
 
     #white-cart-root {
-      position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: var(--nb-cart-bottom, calc(20px + env(safe-area-inset-bottom, 0px)));
-      width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
-      z-index: 100000; display: none;
-      transition: bottom .32s cubic-bezier(.22,1,.36,1);
+      position: fixed;
+      left: 50%;
+      bottom: var(--nb-cart-bottom, calc(18px + env(safe-area-inset-bottom, 0px)));
+      width: min(720px, calc(100vw - 24px));
+      max-width: calc(100vw - 24px);
+      z-index: 100000;
+      display: none;
+      transition: bottom .24s cubic-bezier(.22,1,.36,1);
       will-change: bottom, transform;
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
     }
+
     #white-cart-root.wc-enter {
-      animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      animation: slideUpWhiteCart .32s cubic-bezier(.22,1,.36,1) forwards;
     }
     #white-cart-root.wc-exiting {
-      animation: slideDownWhiteCart 0.26s ease forwards;
+      animation: slideDownWhiteCart .24s ease forwards;
     }
-    #white-cart-container {
-      background: rgba(255,255,255,0.88);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      backdrop-filter: blur(20px) saturate(160%);
-      border: 1px solid rgba(17,24,39,0.06);
-      border-radius: 32px; padding: 8px;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 1px 1px rgba(16,24,40,0.04), 0 4px 12px rgba(16,24,40,0.08), 0 16px 32px -8px rgba(16,24,40,0.16);
-      font-family: 'Manrope', system-ui, -apple-system, sans-serif; height: 62px;
+
+    /* ---------- HOME ---------- */
+    #white-cart-root.wc-home {
+      transform: translateX(-50%);
+    }
+
+    #white-cart-root.wc-home #white-cart-container {
+      position: relative;
+      height: 70px;
+      padding: 8px 10px 8px 12px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.97);
+      border: 1px solid rgba(17,24,39,.06);
+      border-radius: 36px;
+      box-shadow: 0 5px 18px rgba(16,24,40,.12);
+    }
+
+    .wc-home-left {
+      all: unset;
+      min-width: 0;
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
       box-sizing: border-box;
     }
-    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      #white-cart-container { background: rgba(255,255,255,0.98); }
+
+    .wc-thumb-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto;
     }
 
-    .wc-left {
-      all: unset;
-      display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; overflow: hidden;
-      cursor: pointer; box-sizing: border-box;
+    .wc-image-stack {
+      display: flex;
+      position: relative;
+      height: 44px;
+      min-width: 44px;
+      align-items: center;
     }
-    .wc-thumb-wrap { position: relative; display: flex; align-items: center; flex-shrink: 0; }
-    .wc-image-stack { display: flex; position: relative; height: 36px; min-width: 36px; align-items: center; transition: width 0.3s ease; }
-    .wc-img { width: 36px; height: 36px; border-radius: 18px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; position: absolute; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; }
-    .wc-img:nth-child(1) { left: 0px; z-index: 3; }
-    .wc-img:nth-child(2) { left: 12px; z-index: 2; transform: scale(0.95); opacity: 0.95; }
-    .wc-img:nth-child(3) { left: 24px; z-index: 1; transform: scale(0.9); opacity: 0.85; }
+
+    .wc-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #f3f4f6;
+      position: absolute;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,.13);
+    }
+    .wc-img:nth-child(1) { left: 0; z-index: 3; }
+    .wc-img:nth-child(2) { left: 12px; z-index: 2; transform: scale(.94); }
+    .wc-img:nth-child(3) { left: 24px; z-index: 1; transform: scale(.88); }
+
     .wc-qty-badge {
-      position: absolute; top: -4px; right: -4px; min-width: 17px; height: 17px;
-      padding: 0 3px; border-radius: 9px;
-      background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
-      color: #fff; font-size: 10px; font-weight: 800; line-height: 18px; text-align: center;
-      border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.18); z-index: 4;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 3px;
+      box-sizing: border-box;
+      border-radius: 10px;
+      background: #f34f62;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 18px;
+      text-align: center;
+      border: 2px solid #fff;
+      z-index: 4;
     }
-    .wc-bump { animation: wcBump 0.32s ease; }
 
-    .wc-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; justify-content: center; overflow: hidden; }
-    .wc-res-name { font-size: 12px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .wc-menu-link { font-size: 10px; font-weight: 700; color: #FF4D4F; margin-top: 1px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wc-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+    .wc-res-name {
+      font-size: 15px;
+      line-height: 1.1;
+      font-weight: 800;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wc-menu-link {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 700;
+      color: #ef5263;
+      white-space: nowrap;
+    }
 
-    .wc-right { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; flex-shrink: 0; }
-    #wc-standard-actions { flex: 0 0 auto; }
-    .wc-btn { min-width: 86px; }
+    .wc-home-count {
+      flex: 0 0 auto;
+      color: #1f2937;
+      font-size: 15px;
+      font-weight: 750;
+      white-space: nowrap;
+      padding: 0 2px;
+    }
+
+    /* The small capsule floats ABOVE the cart, never inside it. */
+    .wc-all-capsule {
+      position: absolute;
+      left: 50%;
+      top: -22px;
+      transform: translateX(-50%);
+      height: 38px;
+      min-width: 76px;
+      padding: 0 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      background: #fff;
+      color: #6b7280;
+      box-shadow: 0 4px 14px rgba(16,24,40,.10);
+      font: 800 13px/38px 'Manrope',system-ui,sans-serif;
+      cursor: pointer;
+      z-index: 5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wc-all-capsule:active { transform: translateX(-50%) scale(.97); }
+
+    .wc-right {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+    }
 
     .wc-btn {
-      position: relative; overflow: hidden;
-      background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
-      border: none; border-radius: 22px; height: 44px; min-height: 40px; padding: 0 10px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #ffffff; cursor: pointer; -webkit-tap-highlight-color: transparent;
-      transition: transform 0.1s ease; font-family: inherit;
+      height: 52px;
+      min-width: 142px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 27px;
+      background: #ec168c;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      font: 800 16px/1 'Manrope',system-ui,sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    .wc-btn:active { transform: scale(0.96); }
-    .wc-btn::after {
-      content: ''; position: absolute; top: 0; left: 0; width: 45%; height: 100%;
-      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
-      transform: translateX(-120%) skewX(-20deg); pointer-events: none;
+    .wc-btn:active { transform: scale(.97); }
+    .wc-cart-icon {
+      width: 24px;
+      height: 24px;
+      display: block;
+      flex: 0 0 auto;
     }
-    #white-cart-root.wc-enter #wc-standard-actions .wc-btn::after {
-      animation: wcShine 1s ease 0.45s 1 both;
-    }
-    .wc-btn-title { font-size: 11px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
-    .wc-btn-sub { font-size: 9px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
-    .wc-close {
-      width: 30px; height: 30px; border-radius: 50%; background: #F1F1F1; border: none;
-      display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 15px;
-      cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
-    }
-    .wc-close:active { background: #e5e7eb; }
+    .wc-btn-sub { display:none; }
 
-    #white-cart-root button:focus-visible,
-    #white-cart-root .wc-left:focus-visible {
-      outline: 2px solid #FF4D4F; outline-offset: 2px;
-    }
-
-    /* ============================================================
-       EATSWADA CART — Restaurant + 99 Store
-       Solid pink rectangular bar. NO nested capsule and NO glow.
-       ============================================================ */
+    /* ---------- RESTAURANT + 99 STORE ---------- */
     #white-cart-root.wc-pink {
-      width: calc(100vw - 36px);
-      max-width: 720px;
-      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      width: min(720px, calc(100vw - 24px));
+      max-width: calc(100vw - 24px);
+      transform: translateX(-50%);
+      bottom: var(--nb-cart-bottom, calc(14px + env(safe-area-inset-bottom, 0px)));
     }
+
     #white-cart-root.wc-pink #white-cart-container {
       height: 64px;
-      min-height: 64px;
-      padding: 0 20px 0 20px;
+      padding: 0 18px 0 24px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       border: 0;
       border-radius: 24px;
-      background: #EC168C;
+      background: #ec168c;
       box-shadow: none;
-      -webkit-backdrop-filter: none;
       backdrop-filter: none;
-      overflow: hidden;
+      -webkit-backdrop-filter: none;
     }
-    #white-cart-root.wc-pink .wc-left { display:none; }
-    #white-cart-root.wc-pink .wc-thumb-wrap,
-    #white-cart-root.wc-pink .wc-info,
-    #white-cart-root.wc-pink .wc-qty-badge,
-    #white-cart-root.wc-pink .wc-menu-link,
-    #white-cart-root.wc-pink .wc-res-name { display:none; }
-    #white-cart-root.wc-pink .wc-center-cart {
-      display:block;
-      flex:0 0 auto;
-      min-width:0;
-      pointer-events:none;
+
+    #white-cart-root.wc-pink .wc-pink-summary {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
     }
-    #white-cart-root.wc-pink .wc-center-cart .wc-pink-total {
-      display:block;
-      position:static;
-      transform:none;
-      color:#fff;
-      font-size:17px;
-      line-height:1;
-      font-weight:800;
-      white-space:nowrap;
-    }
+
     #white-cart-root.wc-pink .wc-right {
-      margin-left:auto;
-      gap:0;
-      flex:0 0 auto;
+      margin-left: auto;
     }
-    #white-cart-root.wc-pink #wc-standard-actions {
-      display:flex !important;
-      gap:0;
-      align-items:center;
-    }
+
     #white-cart-root.wc-pink .wc-btn {
-      min-width:0;
-      width:auto;
-      height:auto;
-      padding:0;
-      border-radius:0;
-      background:transparent;
-      color:#fff;
-      box-shadow:none;
-      flex-direction:row;
-      gap:10px;
-    }
-    #white-cart-root.wc-pink .wc-btn-title { font-size:17px; line-height:1; font-weight:800; }
-    #white-cart-root.wc-pink .wc-btn-sub { display:none; }
-    #white-cart-root.wc-pink .wc-cart-svg { width:25px; height:25px; display:block; }
-    #white-cart-root.wc-pink .wc-close,
-    #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
-
-    /* ============================================================
-       HOMEPAGE CART — recovered compact production capsule
-       Left: item image + restaurant / Added to cart
-       Centre: small All ↑ capsule floating above the bar
-       Right: View Cart only (no price)
-       ============================================================ */
-    #white-cart-root:not(.wc-pink) {
-      width: calc(100vw - 36px);
-      max-width: 720px;
-      bottom: calc(86px + env(safe-area-inset-bottom, 0px));
-    }
-    #white-cart-root:not(.wc-pink) #white-cart-container {
-      min-height: 58px; height: 58px; padding: 5px 7px 5px 12px;
-      border-radius: 29px;
-      background:#fff;
-      border:1px solid rgba(17,24,39,.08);
-      box-shadow:0 5px 18px rgba(16,24,40,.10);
-      overflow:visible;
-    }
-    #white-cart-root:not(.wc-pink) .wc-left {
-      display:flex;
-      flex:1 1 auto;
-      min-width:0;
-      overflow:hidden;
-      gap:8px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-image-stack {
-      width:40px !important; height:40px; min-width:40px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-img {
-      width:40px; height:40px; border-radius:50%;
-    }
-    #white-cart-root:not(.wc-pink) .wc-img:nth-child(1){left:0}
-    #white-cart-root:not(.wc-pink) .wc-img:nth-child(2){left:11px}
-    #white-cart-root:not(.wc-pink) .wc-img:nth-child(3){left:22px}
-    #white-cart-root:not(.wc-pink) .wc-qty-badge {
-      display:block; top:-3px; right:-3px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-info {
-      display:flex; min-width:0; overflow:hidden; justify-content:center;
-      padding-right:0;
-    }
-    #white-cart-root:not(.wc-pink) .wc-res-name {
-      font-size:14px; font-weight:800; line-height:1.1;
-    }
-    #white-cart-root:not(.wc-pink) .wc-menu-link {
-      font-size:11px; margin-top:3px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-center-cart {
-      position:absolute;
-      left:50%;
-      top:-16px;
-      transform:translateX(-50%);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:20;
-      pointer-events:auto;
-    }
-    #white-cart-root:not(.wc-pink) .wc-center-cart .wc-pink-total {
-      display:block !important;
-      color:#20242B;
-      font-size:16px;
-      line-height:1;
-      font-weight:700;
-      white-space:nowrap;
-    }
-    #white-cart-root:not(.wc-pink) .wc-all-carts {
-      position:static;
-      margin:0;
-      padding:6px 12px;
-      min-width:56px;
-      height:32px;
-      box-sizing:border-box;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid rgba(17,24,39,.08);
-      border-radius:17px;
-      color:#667085;
-      background:#fff;
-      box-shadow:0 4px 12px rgba(16,24,40,.10);
-      font-size:11px;
-      line-height:1;
-      font-weight:800;
-      z-index:20;
-    }
-    #white-cart-root:not(.wc-pink) .wc-right {
-      gap:0;
-      flex:0 0 auto;
-      margin-left:auto;
-    }
-    #white-cart-root:not(.wc-pink) .wc-btn {
-      height:48px;
-      min-width:116px;
-      width:116px;
-      padding:0 13px;
-      border-radius:24px;
-      background:#EC168C;
-      box-shadow:none;
-      flex-direction:row;
-      gap:8px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-btn-title {
-      font-size:14px; line-height:1; font-weight:800;
-    }
-    #white-cart-root:not(.wc-pink) .wc-btn-sub { display:none; }
-    #white-cart-root:not(.wc-pink) .wc-cart-svg {
-      width:22px; height:22px; display:block;
-    }
-    #white-cart-root:not(.wc-pink) .wc-close { display:none; }
-
-    @media (max-width:430px) {
-      #white-cart-root:not(.wc-pink) { width:calc(100vw - 36px); }
-      #white-cart-root:not(.wc-pink) #white-cart-container {
-        height:56px; min-height:56px; padding-left:10px;
-      }
-      #white-cart-root:not(.wc-pink) .wc-image-stack {
-        width:38px !important; height:38px; min-width:38px;
-      }
-      #white-cart-root:not(.wc-pink) .wc-img { width:38px; height:38px; }
-      #white-cart-root:not(.wc-pink) .wc-res-name { font-size:13px; }
-      #white-cart-root:not(.wc-pink) .wc-menu-link { font-size:10px; }
-      #white-cart-root:not(.wc-pink) .wc-all-carts {
-        top:auto; height:30px; min-width:54px; padding:6px 11px; font-size:11px;
-      }
-      #white-cart-root:not(.wc-pink) .wc-btn {
-        min-width:112px; width:112px; height:46px; border-radius:23px; padding:0 12px;
-      }
-      #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:14px; }
-      #white-cart-root:not(.wc-pink) .wc-cart-svg { width:21px; height:21px; }
+      min-width: 0;
+      height: auto;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #fff;
+      box-shadow: none;
+      font-size: 18px;
+      gap: 9px;
     }
 
-    /* Multi-restaurant control is intentionally rendered inside the centered
-       homepage group. It never appears on Restaurant / 99 Store bars. */
-    .wc-all-carts {
-      border:0; background:transparent; color:#667085; font:inherit;
-      font-size:12px; font-weight:800; padding:2px 0; white-space:nowrap;
-      cursor:pointer; border-radius:10px;
+    #white-cart-root.wc-pink .wc-cart-icon {
+      width: 25px;
+      height: 25px;
     }
-    .wc-all-carts:active { background:#f2f4f7; }
+
+    #white-cart-root.wc-pink .wc-home-left,
+    #white-cart-root.wc-pink .wc-all-capsule,
+    #white-cart-root.wc-pink .wc-home-count,
+    #white-cart-root.wc-pink .wc-qty-badge {
+      display: none !important;
+    }
+
+    /* Pink mode uses no glow and no inner capsule. */
+    @media (max-width: 520px) {
+      #white-cart-root,
+      #white-cart-root.wc-pink {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+      }
+
+      #white-cart-root.wc-home #white-cart-container {
+        height: 68px;
+        border-radius: 34px;
+        padding-left: 10px;
+      }
+
+      .wc-res-name { font-size: 14px; }
+      .wc-menu-link { font-size: 11px; }
+      .wc-home-count { font-size: 14px; }
+
+      .wc-btn {
+        min-width: 126px;
+        height: 50px;
+        padding: 0 16px;
+        font-size: 15px;
+      }
+
+      #white-cart-root.wc-pink #white-cart-container {
+        height: 64px;
+        padding: 0 18px 0 22px;
+        border-radius: 23px;
+      }
+      #white-cart-root.wc-pink .wc-pink-summary,
+      #white-cart-root.wc-pink .wc-btn {
+        font-size: 17px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #white-cart-root.wc-home #white-cart-container {
+        gap: 5px;
+        padding-right: 7px;
+      }
+      .wc-home-left { gap: 6px; }
+      .wc-image-stack { height: 38px; min-width: 38px; }
+      .wc-img { width: 38px; height: 38px; }
+      .wc-img:nth-child(2) { left: 10px; }
+      .wc-img:nth-child(3) { left: 20px; }
+      .wc-home-count { font-size: 12px; }
+      .wc-btn { min-width: 112px; padding: 0 12px; font-size: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #white-cart-root, #white-cart-root * {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
+    }
 
     /* Multi-restaurant cart drawer — Restaurant + 99 Store */
     #ew-cart-drawer-backdrop{position:fixed;inset:0;z-index:100001;display:none;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
@@ -514,43 +512,38 @@
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
     wrap.innerHTML = `
+      <button type="button" class="wc-all-capsule" id="wc-all-capsule" aria-label="View all restaurant carts">All ↑</button>
+
       <div id="white-cart-container">
-          <button type="button" class="wc-left" aria-label="View cart" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
+        <button type="button" class="wc-home-left" id="wc-home-left" aria-label="View cart details">
           <div class="wc-thumb-wrap">
             <div class="wc-image-stack" id="wc-dynamic-img-stack"></div>
             <span class="wc-qty-badge" id="wc-qty-badge" aria-hidden="true">0</span>
           </div>
           <div class="wc-info">
             <div class="wc-res-name" id="wc-dynamic-res">EatSwada Order</div>
-            <div class="wc-menu-link">Added to cart <i class="fa-solid fa-check" aria-hidden="true" style="font-size:10px;"></i></div>
+            <div class="wc-menu-link">Added to cart ✓</div>
           </div>
-          <div class="wc-pink-total" id="wc-pink-total" aria-live="polite"></div>
         </button>
-        <div class="wc-center-cart" id="wc-center-cart">
-          <div class="wc-pink-total" id="wc-home-total" aria-live="polite"></div>
-          <button type="button" class="wc-all-carts" id="wc-all-carts" aria-label="View all restaurant carts" style="display:none">All ↑</button>
-        </div>
+
+        <div class="wc-home-count" id="wc-home-count" aria-live="polite">0 items · ₹0</div>
+        <div class="wc-pink-summary" id="wc-pink-summary" aria-live="polite">0 items · ₹0</div>
+
         <div class="wc-right">
-          <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
-            <button type="button" class="wc-btn" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
-              <span class="wc-btn-title">View Cart</span>
-              <svg class="wc-cart-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L21 8H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4" fill="currentColor"/><circle cx="18" cy="20" r="1.4" fill="currentColor"/></svg>
-              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
-            </button>
-            <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-          </div>
-          <div id="wc-clear-actions" style="display: none; gap: 8px; align-items: center;">
-            <button type="button" class="wc-btn" id="wc-confirm-clear" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-              <span class="wc-btn-title">Clear Cart</span>
-              <span class="wc-btn-sub">Remove all items</span>
-            </button>
-            <button type="button" class="wc-close" id="wc-cancel-clear" aria-label="Cancel, keep cart items"><i class="fa-solid fa-arrow-right-long" aria-hidden="true"></i></button>
-          </div>
+          <button type="button" class="wc-btn" id="wc-view-cart" aria-label="View Cart">
+            <span>View Cart</span>
+            <svg class="wc-cart-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3.5 5.5h2l1.7 9.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L20.5 9H7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="10" cy="19" r="1.4" fill="currentColor"/>
+              <circle cx="18" cy="19" r="1.4" fill="currentColor"/>
+            </svg>
+          </button>
         </div>
       </div>
     `;
     return wrap;
   }
+
 
   /* ── 4. UI BEHAVIOR LOGIC ── */
   let isDismissed = false;
@@ -636,43 +629,31 @@
     list.innerHTML=groups.length?groups.map(g=>{const u=Math.round(g.units),img=g.image||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80';return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u===1?'item':'items'}</span></button></div>`}).join(''):'<div class="ew-cd-empty">Your cart is empty.</div>';
     list.querySelectorAll('[data-cd-view]').forEach(btn=>btn.addEventListener('click',()=>window.location.href='cart.html'));
   }
-  function openCartDrawer(){const groups=restaurantGroups(safeGetCart()); if(CART_BAR_MODE!=='pink' && !(CART_BAR_MODE==='home' && groups.length>1)){window.location.href='cart.html';return;}ensureCartDrawer();renderCartDrawer();const b=document.getElementById('ew-cart-drawer-backdrop'),d=document.getElementById('ew-cart-drawer');b.classList.add('show');requestAnimationFrame(()=>d.classList.add('show'));document.body.style.overflow='hidden';}
+  function openCartDrawer(){ensureCartDrawer();renderCartDrawer();const b=document.getElementById('ew-cart-drawer-backdrop'),d=document.getElementById('ew-cart-drawer');b.classList.add('show');requestAnimationFrame(()=>d.classList.add('show'));document.body.style.overflow='hidden';}
 
   window.updateGlobalCart = function () {
     if (isDismissed || CART_BAR_MODE === 'hidden') return;
 
     const savedCart = safeGetCart();
-    if(CART_BAR_MODE==='pink' && document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
-    const itemNames = Object.keys(savedCart);
-    const groups = restaurantGroups(savedCart);
-    const allCartsEl = document.getElementById('wc-all-carts');
-    if (allCartsEl) {
-      allCartsEl.style.display = (CART_BAR_MODE === 'home' && groups.length > 1) ? 'block' : 'none';
-      allCartsEl.textContent = groups.length > 1 ? `All ↑` : 'All ↑';
+    if (CART_BAR_MODE === 'pink' && document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) {
+      renderCartDrawer();
     }
+
+    const itemNames = Object.keys(savedCart);
     const root = document.getElementById('white-cart-root');
-    const countEl = document.getElementById('wc-item-count');
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
     const resEl = document.getElementById('wc-dynamic-res');
     const badgeEl = document.getElementById('wc-qty-badge');
-    const pinkTotalEl = document.getElementById('wc-pink-total');
-    const homeTotalEl = document.getElementById('wc-home-total');
+    const homeCountEl = document.getElementById('wc-home-count');
+    const pinkSummaryEl = document.getElementById('wc-pink-summary');
 
-    if (!root || !countEl || !imgStackEl) return;
-
-    const stdActions = document.getElementById('wc-standard-actions');
-    const clearActions = document.getElementById('wc-clear-actions');
-    if (stdActions && clearActions) {
-        stdActions.style.display = 'flex';
-        clearActions.style.display = 'none';
-    }
+    if (!root || !imgStackEl) return;
 
     if (itemNames.length > 0) {
-      // Totals — cast defensively in case old/malformed cart entries are
-      // missing quantity or price fields.
       let totalQty = 0;
       let totalPrice = 0;
       let priceKnown = true;
+
       itemNames.forEach(key => {
         const item = savedCart[key] || {};
         const q = Number(item.quantity);
@@ -688,131 +669,190 @@
       });
 
       const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
-      if (pinkTotalEl) pinkTotalEl.textContent = `${baseCountText} | ${formatCurrency(totalPrice)}`;
-      if (homeTotalEl) homeTotalEl.textContent = baseCountText;
-      // Homepage intentionally shows item count only; price is omitted for a cleaner bar.
-      countEl.innerText = baseCountText;
+      const countText = (priceKnown && totalPrice > 0)
+        ? `${baseCountText} · ${formatCurrency(totalPrice)}`
+        : baseCountText;
 
+      if (homeCountEl) homeCountEl.textContent = countText;
+      if (pinkSummaryEl) pinkSummaryEl.textContent = countText;
       if (badgeEl) badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
-      if (homeTotalEl) homeTotalEl.textContent = baseCountText;
 
       if (lastTotalQty !== null && lastTotalQty !== totalQty) {
-        bump(countEl);
+        bump(homeCountEl);
+        bump(pinkSummaryEl);
         bump(badgeEl);
       }
       lastTotalQty = totalQty;
 
-      // Restaurant / item label. The cart data only ever stores a resId
-      // (not a friendly restaurant name), so this preserves the original
-      // behavior of showing the most recently added item — while checking
-      // for an optional resName/restaurantName field first, in case a
-      // future update to the cart payload starts including one.
       const lastItemName = itemNames[itemNames.length - 1];
       const lastItem = savedCart[lastItemName] || {};
       if (resEl) resEl.innerText = lastItem.resName || lastItem.restaurantName || lastItemName;
 
-      // Safe image parsing
-      imgStackEl.innerHTML = ''; 
-      const latestThreeNames = itemNames.slice(-3).reverse(); 
+      imgStackEl.innerHTML = '';
+      const latestThreeNames = itemNames.slice(-3).reverse();
       let imageDict = {};
       try {
-          const dictData = localStorage.getItem('es_image_dict');
-          if (dictData && dictData !== "undefined" && dictData !== "null") {
-              imageDict = JSON.parse(dictData);
-          }
+        const dictData = localStorage.getItem('es_image_dict');
+        if (dictData && dictData !== 'undefined' && dictData !== 'null') imageDict = JSON.parse(dictData);
       } catch(e) {}
 
       latestThreeNames.forEach((name) => {
-         const itemData = savedCart[name] || {};
-         const imgSrc = itemData.image || imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
-         const img = document.createElement('img');
-         img.src = imgSrc;
-         img.alt = '';
-         img.classList.add('wc-img');
-         imgStackEl.appendChild(img);
+        const itemData = savedCart[name] || {};
+        const imgSrc = itemData.image || imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = '';
+        img.classList.add('wc-img');
+        imgStackEl.appendChild(img);
       });
 
-      imgStackEl.style.width = latestThreeNames.length === 1 ? '36px' : latestThreeNames.length === 2 ? '48px' : '60px';
+      imgStackEl.style.width = latestThreeNames.length === 1 ? '44px' : latestThreeNames.length === 2 ? '56px' : '68px';
 
       showCartBar(root);
     } else {
       hideCartBar(root);
       lastTotalQty = null;
-      const homeTotal = document.getElementById('wc-home-total');
-      if (homeTotal) homeTotal.textContent = '';
     }
   };
 
-  /* Keep the homepage cart above the actual bottom navigation.
-     The nav can be a floating island or a full-width fixed bar, so measure
-     its real top edge instead of guessing a bottom value. */
-  function syncHomeCartPosition() {
-    if (CART_BAR_MODE !== 'home') return;
-    const root = document.getElementById('white-cart-root');
-    if (!root) return;
-    const nav = document.getElementById('nearbite-bottom-tabbar') || document.getElementById('eatswada-bottom-tabbar');
-    if (!nav || nav.classList.contains('is-hidden') || nav.classList.contains('nb-hidden')) {
-      root.style.bottom = 'calc(86px + env(safe-area-inset-bottom, 0px))';
-      return;
-    }
-    const rect = nav.getBoundingClientRect();
-    const gap = 10;
-    const bottom = Math.max(76, Math.round(window.innerHeight - rect.top + gap));
-    root.style.bottom = bottom + 'px';
-  }
 
   /* ── 5. INITIALIZATION ── */
+  function findHomeBottomNav() {
+    const selectors = [
+      '#bottomNav', '#bottom-nav', '#bottomNavigation', '#bottom-navigation',
+      '.bottom-nav', '.bottom-navigation', '.bottom-nav-bar', '.bottom-bar',
+      '[class*="bottom-nav"]', '[id*="bottom-nav"]',
+      '[class*="bottom-navigation"]', '[id*="bottom-navigation"]'
+    ];
+
+    for (const selector of selectors) {
+      const el = document.querySelector(selector);
+      if (!el || el.id === 'white-cart-root' || el.closest('#white-cart-root')) continue;
+      const cs = getComputedStyle(el);
+      if (cs.position === 'fixed' || cs.position === 'sticky') return el;
+    }
+
+    /* Fallback: identify a wide fixed element sitting at the bottom.
+       This avoids depending on one specific homepage nav class. */
+    const candidates = Array.from(document.body.querySelectorAll('*'));
+    let best = null;
+    let bestScore = -Infinity;
+
+    for (const el of candidates) {
+      if (el.id === 'white-cart-root' || el.closest('#white-cart-root')) continue;
+      const cs = getComputedStyle(el);
+      if (cs.position !== 'fixed') continue;
+
+      const r = el.getBoundingClientRect();
+      if (r.width < window.innerWidth * .65) continue;
+      if (r.height < 48 || r.height > 130) continue;
+      if (r.bottom < window.innerHeight - 16) continue;
+
+      const z = Number.parseInt(cs.zIndex, 10);
+      const score = (Number.isFinite(z) ? z : 0) + (r.width / window.innerWidth) * 100;
+      if (score > bestScore) {
+        best = el;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+
+  function syncHomeCartPosition() {
+    if (CART_BAR_MODE !== 'home') return;
+
+    const nav = findHomeBottomNav();
+    if (nav) {
+      const r = nav.getBoundingClientRect();
+      const gap = 12;
+      const bottomPx = Math.max(18, Math.round(window.innerHeight - r.top + gap));
+      document.documentElement.style.setProperty('--nb-cart-bottom', `${bottomPx}px`);
+    } else {
+      document.documentElement.style.setProperty('--nb-cart-bottom', '18px');
+    }
+  }
+
+  function wireCartActions() {
+    const allBtn = document.getElementById('wc-all-capsule');
+    const viewBtn = document.getElementById('wc-view-cart');
+    const homeLeft = document.getElementById('wc-home-left');
+
+    if (allBtn) {
+      allBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openCartDrawer();
+      });
+    }
+
+    if (viewBtn) {
+      viewBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = 'cart.html';
+      });
+    }
+
+    if (homeLeft) {
+      homeLeft.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = 'cart.html';
+      });
+    }
+  }
+
   function init() {
     injectCSS();
+
     const root = makeDOM();
+
     if (CART_BAR_MODE === 'hidden') {
       root.style.display = 'none';
     } else if (CART_BAR_MODE === 'pink') {
       root.classList.add('wc-pink');
-      root.querySelector('.wc-btn-title').textContent = 'View Cart';
-      root.querySelector('.wc-btn-sub').textContent = '0 items';
+    } else {
+      root.classList.add('wc-home');
     }
-    document.body.appendChild(root);
-    window.__ewOpenCartDrawer=openCartDrawer;
-    syncHomeCartPosition();
-    window.addEventListener('resize', syncHomeCartPosition, { passive: true });
-    window.addEventListener('orientationchange', () => setTimeout(syncHomeCartPosition, 80), { passive: true });
-    setTimeout(syncHomeCartPosition, 80);
-    setTimeout(syncHomeCartPosition, 350);
-    const navForObserver = document.getElementById('nearbite-bottom-tabbar') || document.getElementById('eatswada-bottom-tabbar');
-    if (navForObserver && window.MutationObserver) {
-      new MutationObserver(syncHomeCartPosition).observe(navForObserver, { attributes: true, attributeFilter: ['class', 'style'] });
-    }
-    if(CART_BAR_MODE==='pink')ensureCartDrawer();
 
+    document.body.appendChild(root);
+
+    window.__ewOpenCartDrawer = openCartDrawer;
+    if (CART_BAR_MODE === 'pink') ensureCartDrawer();
+
+    wireCartActions();
+
+    /* Preserve the existing image-capture behavior used by the cart engine. */
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button, .counter-btn, [onclick*="updateCart"]');
       if (!btn) return;
-      
+
       let foodName = "";
       const clickCode = btn.getAttribute('onclick');
+
       if (clickCode) {
-        // Handle encoded payloads for images
         if (clickCode.includes('%7B')) {
-            try {
-                const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
-                if (match) {
-                    const payload = JSON.parse(decodeURIComponent(match[1]));
-                    foodName = payload.name;
-                }
-            } catch(err) {}
-        } else {
+          try {
             const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
-            if (match) foodName = match[1];
+            if (match) {
+              const payload = JSON.parse(decodeURIComponent(match[1]));
+              foodName = payload.name;
+            }
+          } catch(err) {}
+        } else {
+          const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
+          if (match) foodName = match[1];
         }
       }
 
       let wrapper = btn;
       let capturedImg = "";
+
       while (wrapper && wrapper !== document.body) {
         const img = wrapper.querySelector('img');
         if (img && img.src && !img.id.includes('wc-dynamic') && !img.src.includes('.svg')) {
-           capturedImg = img.src; break; 
+          capturedImg = img.src;
+          break;
         }
         wrapper = wrapper.parentElement;
       }
@@ -820,56 +860,28 @@
       if (foodName && capturedImg) {
         let dict = {};
         try {
-            const dictData = localStorage.getItem('es_image_dict');
-            if (dictData && dictData !== "undefined" && dictData !== "null") {
-                dict = JSON.parse(dictData);
-            }
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") {
+            dict = JSON.parse(dictData);
+          }
         } catch(e) {}
+
         dict[foodName] = capturedImg;
         localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
-    }, true); 
+    }, true);
 
-    const allCartsBtn = document.getElementById('wc-all-carts');
-    if (allCartsBtn) allCartsBtn.addEventListener('click', (e) => { e.stopPropagation(); openCartDrawer(); });
+    if (CART_BAR_MODE === 'home') {
+      syncHomeCartPosition();
+      window.addEventListener('resize', syncHomeCartPosition, {passive:true});
+      window.addEventListener('orientationchange', syncHomeCartPosition, {passive:true});
 
-    const wcLeft = document.querySelector('#white-cart-root .wc-left');
-    if (wcLeft) {
-      wcLeft.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          window.location.href = 'cart.html';
-        }
-      });
-    }
-
-    document.getElementById('wc-close-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (CART_BAR_MODE === 'pink') return;
-      document.getElementById('wc-standard-actions').style.display = 'none';
-      document.getElementById('wc-clear-actions').style.display = 'flex';
-    });
-
-    document.getElementById('wc-cancel-clear').addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.getElementById('wc-clear-actions').style.display = 'none';
-      document.getElementById('wc-standard-actions').style.display = 'flex';
-    });
-
-    document.getElementById('wc-confirm-clear').addEventListener('click', (e) => {
-      e.stopPropagation();
-      localStorage.removeItem('nearbite_cart');
-      localStorage.removeItem('nearbite_checkout_key');
-      isDismissed = false;
-      const root = document.getElementById('white-cart-root');
-      if (root) {
-        root.classList.remove('wc-enter','wc-exiting');
-        root.style.display = 'none';
+      if (window.ResizeObserver) {
+        const observer = new ResizeObserver(() => syncHomeCartPosition());
+        const nav = findHomeBottomNav();
+        if (nav) observer.observe(nav);
       }
-      lastTotalQty = null;
-      const homeTotal = document.getElementById('wc-home-total');
-      if (homeTotal) homeTotal.textContent = '';
-    });
+    }
 
     window.updateGlobalCart();
   }
