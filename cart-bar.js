@@ -1,6 +1,16 @@
 /* ================================================================
-   PRODUCTION CART ENGINE & MULTI-IMAGE UI  (v2 — polished floating bar)
-   Handles Math, LocalStorage, and the Floating Cart Bar
+   EATSWADA CART ENGINE & FLOATING CART BAR  (v3 — single owner)
+   Handles Math, LocalStorage, and the Floating Cart Bar.
+
+   ONE owner for every page's cart bar:
+     • Home  ......... white floating capsule  (restaurant info + "X items",
+                       NO price, "All ↑" capsule when 2+ restaurants)
+     • 99 Store  ..... solid pink rectangular bar ("X items · ₹TOTAL" | View Cart)
+     • Restaurant  ... same solid pink bar as 99 Store
+     • Cart/Checkout . hidden
+
+   The cart DATA layer (nearbite_cart, updateCart, validation, image dict,
+   multi-restaurant drawer) is UNCHANGED. Only the PRESENTATION changed.
    ================================================================ */
 
 (function () {
@@ -8,32 +18,29 @@
   window.__esWhiteCartBar = true;
 
   // Display-only setting: change this one line if the storefront's
-  // currency symbol is ever not ₹ (Indian Rupee). Nothing else in this
-  // file needs to change.
+  // currency symbol is ever not ₹ (Indian Rupee).
   const CURRENCY_SYMBOL = '₹';
 
-  // Cart-bar presentation is page-specific:
-  // Home keeps the original white floating cart; Restaurant + 99 Store share
-  // the same Eatswada pink cart bar. Cart/checkout pages do not show it.
+  const FALLBACK_IMG =
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
+
+  // Cart-bar presentation is page-specific.
   function getCartBarMode() {
     const path = String(window.location.pathname || '').toLowerCase();
     if (path === '/' || path.endsWith('/index.html') || path.endsWith('/home.html')) return 'home';
-    if (path.includes('under99')) return 'pink';
+    if (path.includes('cart') || path.includes('checkout') || path.includes('payment')) return 'hidden';
+    if (path.includes('under99') || path.includes('99store') || path.includes('99-store') || path.includes('deals')) return 'pink';
     if (path.includes('restaurant')) return 'pink';
-    if (path.includes('cart')) return 'hidden';
     return 'home';
   }
   const CART_BAR_MODE = getCartBarMode();
 
   // 🛡️ CRASH-PROOF STORAGE PARSER
-  // This prevents your cart bar from becoming invisible if corrupted data exists
   function safeGetCart() {
     try {
         const data = localStorage.getItem('nearbite_cart');
         if (!data || data === "undefined" || data === "null") return {};
         const parsed = JSON.parse(data);
-        // Guard against old/corrupted data that parses successfully but
-        // isn't a plain object (e.g. an array, a number, a bare string).
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
         return parsed;
     } catch (e) {
@@ -43,7 +50,7 @@
     }
   }
 
-  /* ── 1. THE MATH ENGINE (Unified Master Version) ── */
+  /* ── 1. THE MATH ENGINE (Unified Master Version — UNCHANGED) ── */
   window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     let itemName = arg1;
     let change = arg2;
@@ -64,7 +71,7 @@
             image = payload.image;
             isVeg = payload.isVeg;
             originalPrice = payload.originalPrice || null;
-            inStock = true; 
+            inStock = true;
         } catch(e) {
             console.error("Payload decode error", e);
             return;
@@ -83,16 +90,11 @@
         return;
     }
 
-    // 🛡️ Same protection for the menu item id — the backend rejects any cart
-    // item that isn't a real Menu _id, so catch it here instead of letting a
-    // half-built cart entry reach checkout.
     if (change > 0 && (!menuItemId || menuItemId === 'undefined' || menuItemId === 'null')) {
         alert("CRITICAL ERROR: Missing Menu Item ID. Please refresh and try again.");
         return;
     }
 
-    // Multi-restaurant cart: keep items from different restaurants together.
-    // The pink cart drawer groups them by restaurant for the user.
     let cartMemory = safeGetCart();
 
     // Update the Payload
@@ -112,17 +114,17 @@
         }
         if (!cartMemory[itemName].originalPrice && Number(originalPrice) > Number(price)) cartMemory[itemName].originalPrice = Number(originalPrice);
     }
-    
+
     cartMemory[itemName].quantity += change;
     if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
 
     // 🎯 VISUALLY UPDATE THE CORRECT BUTTON TYPE
     const key = itemName.replace(/\s+/g, '');
     const container = document.getElementById('btn-container-' + key);
-    
+
     if (container) {
         const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
-        
+
         if (isUnder99Payload) {
             if (qty > 0) {
                 container.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #FC8019;border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(252,128,25,0.15);"><button onclick="updateCart('${originalPayload}', -1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:800;font-size:16px;cursor:pointer;">−</button><span style="font-size:13px;font-weight:800;color:#FC8019;">${qty}</span><button onclick="updateCart('${originalPayload}', 1)" style="width:24px;height:100%;border:none;background:transparent;color:#FC8019;font-weight:800;font-size:14px;cursor:pointer;">+</button></div>`;
@@ -133,11 +135,15 @@
             container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice);
         }
     }
-    
+
     // Save and Trigger Floating Cart Bar
     localStorage.setItem('nearbite_cart', JSON.stringify(cartMemory));
     if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
   };
+
+  /* ── Inline icons (no external font dependency) ── */
+  const CART_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 11.2a1.5 1.5 0 0 0 1.5 1.2h8.1a1.5 1.5 0 0 0 1.5-1.16L21 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20" r="1.4" fill="currentColor"/><circle cx="17.5" cy="20" r="1.4" fill="currentColor"/></svg>';
+  const UP_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V6M6 12l6-6 6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   /* ── 2. THE CSS ── */
   const CSS = `
@@ -165,7 +171,7 @@
 
     #white-cart-root {
       position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: var(--nb-cart-bottom, calc(20px + env(safe-area-inset-bottom, 0px)));
+      bottom: var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px)));
       width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
@@ -177,6 +183,8 @@
     #white-cart-root.wc-exiting {
       animation: slideDownWhiteCart 0.26s ease forwards;
     }
+
+    /* ─────────────  HOME (white) cart bar  ───────────── */
     #white-cart-container {
       background: rgba(255,255,255,0.88);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -223,7 +231,7 @@
     .wc-btn {
       position: relative; overflow: hidden;
       background: linear-gradient(135deg, #FF5A5F 0%, #FF2E44 100%);
-      border: none; border-radius: 22px; height: 44px; min-height: 40px; padding: 0 10px;
+      border: none; border-radius: 22px; height: 44px; min-height: 40px; padding: 0 12px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       color: #ffffff; cursor: pointer; -webkit-tap-highlight-color: transparent;
       transition: transform 0.1s ease; font-family: inherit;
@@ -237,7 +245,8 @@
     #white-cart-root.wc-enter #wc-standard-actions .wc-btn::after {
       animation: wcShine 1s ease 0.45s 1 both;
     }
-    .wc-btn-title { font-size: 11px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+    .wc-btn-title { font-size: 11px; font-weight: 800; line-height: 1.1; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+    .wc-btn-title svg { width: 13px; height: 13px; }
     .wc-btn-sub { font-size: 9px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
     .wc-close {
       width: 30px; height: 30px; border-radius: 50%; background: #F1F1F1; border: none;
@@ -251,151 +260,55 @@
       outline: 2px solid #FF4D4F; outline-offset: 2px;
     }
 
-    /* ============================================================
-       RESTAURANT + 99 STORE CART — exact compact pink bar
-       No inner white capsule, no glow, no shadow.
-       ============================================================ */
+    /* ── "All ↑" capsule — HOME ONLY, centered ABOVE the cart bar ── */
+    #wc-allup {
+      all: unset;
+      position: absolute; left: 50%; transform: translateX(-50%);
+      bottom: calc(100% + 8px);
+      display: none; align-items: center; gap: 5px;
+      background: #ffffff; color: #111827;
+      border: 1px solid rgba(17,24,39,0.08);
+      border-radius: 16px; height: 32px; padding: 0 14px;
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      font-size: 12px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 6px 16px rgba(16,24,40,0.16);
+      -webkit-tap-highlight-color: transparent; box-sizing: border-box; z-index: 2;
+    }
+    #wc-allup.show { display: inline-flex; }
+    #wc-allup:active { transform: translateX(-50%) scale(0.96); }
+    #wc-allup svg { width: 12px; height: 12px; }
+
+    /* ─────────────  99 STORE + RESTAURANT (solid pink) cart bar  ───────────── */
     #white-cart-root.wc-pink {
-      width: calc(100vw - 40px);
-      max-width: 720px;
-      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      width: min(720px, calc(100vw - 40px));   /* ~20px side margins */
+      max-width: calc(100vw - 40px);
     }
-    #white-cart-root.wc-pink #white-cart-container {
-      height: 64px;
-      min-height: 64px;
-      padding: 0 20px;
-      box-sizing: border-box;
-      border: 0;
-      border-radius: 28px;
-      background: #EC168C;
-      box-shadow: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+    #es-pink-inner {
+      all: unset;
+      box-sizing: border-box; width: 100%;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 0 18px;
+      background: #EC168C;                       /* solid pink, no gradient/glow */
+      color: #ffffff;
+      border-radius: 16px;                       /* rounded rectangle, NOT a capsule */
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);   /* subtle only */
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s ease;
     }
-    #white-cart-root.wc-pink .wc-left,
-    #white-cart-root.wc-pink .wc-thumb-wrap,
-    #white-cart-root.wc-pink .wc-info,
-    #white-cart-root.wc-pink .wc-qty-badge,
-    #white-cart-root.wc-pink .wc-menu-link,
-    #white-cart-root.wc-pink .wc-res-name,
-    #white-cart-root.wc-pink .wc-close,
-    #white-cart-root.wc-pink .wc-all-carts { display:none !important; }
-    #white-cart-root.wc-pink .wc-right {
-      width:100%; height:100%; margin:0;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:16px;
+    #es-pink-inner:active { transform: scale(0.99); }
+    .wc-pink-left {
+      font-size: 15px; font-weight: 800; color: #ffffff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
     }
-    #white-cart-root.wc-pink #wc-standard-actions {
-      width:100%; height:100%; margin:0;
-      display:flex !important; align-items:center; justify-content:space-between;
-      gap:16px;
+    .wc-pink-cta {
+      display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto;
+      font-size: 15px; font-weight: 800; color: #ffffff;
     }
-    #white-cart-root.wc-pink .wc-pink-summary {
-      display:block; min-width:0;
-      color:#fff; font-size:18px; line-height:1; font-weight:800;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    #white-cart-root.wc-pink .wc-btn {
-      min-width:0; width:auto; height:auto; min-height:0;
-      padding:0; border:0; border-radius:0;
-      background:transparent; color:#fff; box-shadow:none;
-      display:flex; flex-direction:row; align-items:center; justify-content:flex-end;
-      gap:9px; flex:0 0 auto;
-    }
-    #white-cart-root.wc-pink .wc-btn-title {
-      font-size:17px; line-height:1; font-weight:800; white-space:nowrap;
-    }
-    #white-cart-root.wc-pink .wc-btn-sub { display:none !important; }
-    #white-cart-root.wc-pink .wc-cart-svg { width:24px; height:24px; display:block; }
+    .wc-pink-cta svg { width: 18px; height: 18px; }
 
-    /* ============================================================
-       HOMEPAGE CART — white compact island above bottom navigation
-       Only: restaurant preview + item count + View Cart.
-       The All ↑ capsule floats above the center and appears ONLY when
-       the cart contains more than one restaurant.
-       ============================================================ */
-    #white-cart-root:not(.wc-pink) {
-      width:calc(100vw - 36px);
-      max-width:720px;
-      bottom:calc(14px + env(safe-area-inset-bottom,0px));
-    }
-    #white-cart-root:not(.wc-pink) #white-cart-container {
-      height:58px;
-      min-height:58px;
-      padding:5px 7px 5px 12px;
-      box-sizing:border-box;
-      border:1px solid rgba(17,24,39,.08);
-      border-radius:29px;
-      background:#fff;
-      box-shadow:0 5px 18px rgba(16,24,40,.10);
-      -webkit-backdrop-filter:none;
-      backdrop-filter:none;
-      overflow:visible;
-    }
-    #white-cart-root:not(.wc-pink) .wc-left {
-      display:flex; align-items:center; gap:8px;
-      flex:1 1 auto; min-width:0; overflow:hidden;
-      cursor:pointer; box-sizing:border-box;
-    }
-    #white-cart-root:not(.wc-pink) .wc-image-stack {
-      width:40px !important; height:40px; min-width:40px;
-    }
-    #white-cart-root:not(.wc-pink) .wc-img {
-      width:40px; height:40px; border-radius:50%;
-    }
-    #white-cart-root:not(.wc-pink) .wc-img:nth-child(1){left:0}
-    #white-cart-root:not(.wc-pink) .wc-img:nth-child(2){left:11px}
-    #white-cart-root:not(.wc-pink) .wc-img:nth-child(3){left:22px}
-    #white-cart-root:not(.wc-pink) .wc-qty-badge { display:block; top:-3px; right:-3px; }
-    #white-cart-root:not(.wc-pink) .wc-info {
-      display:flex; min-width:0; overflow:hidden; justify-content:center;
-      padding-right:0;
-    }
-    #white-cart-root:not(.wc-pink) .wc-res-name { font-size:14px; font-weight:800; line-height:1.1; }
-    #white-cart-root:not(.wc-pink) .wc-menu-link { font-size:11px; margin-top:3px; }
-    #white-cart-root:not(.wc-pink) .wc-right {
-      margin-left:auto; flex:0 0 auto; display:flex; align-items:center; gap:0;
-    }
-    #white-cart-root:not(.wc-pink) #wc-standard-actions {
-      display:flex !important; align-items:center; gap:0;
-    }
-    #white-cart-root:not(.wc-pink) .wc-btn {
-      min-width:0; width:auto; height:46px; padding:0 12px;
-      border-radius:23px; background:#EC168C; color:#fff; box-shadow:none;
-      display:flex; flex-direction:row; align-items:center; justify-content:center;
-      gap:8px; flex:0 0 auto;
-    }
-    #white-cart-root:not(.wc-pink) .wc-btn-title { font-size:15px; font-weight:800; line-height:1; }
-    #white-cart-root:not(.wc-pink) .wc-btn-sub { display:none !important; }
-    #white-cart-root:not(.wc-pink) .wc-cart-svg { width:23px; height:23px; display:block; }
-    #white-cart-root:not(.wc-pink) #wc-close-btn { display:none !important; }
-    #white-cart-root:not(.wc-pink) .wc-home-count {
-      display:block; position:absolute; left:50%; top:50%;
-      transform:translate(-50%,-50%); z-index:10;
-      color:#20242B; font-size:15px; line-height:1; font-weight:800;
-      white-space:nowrap; pointer-events:none;
-    }
-    #white-cart-root:not(.wc-pink) .wc-all-carts {
-      position:absolute; left:50%; top:-17px; transform:translateX(-50%);
-      z-index:20; display:none; align-items:center; justify-content:center;
-      height:34px; min-width:68px; padding:0 14px;
-      border:1px solid rgba(17,24,39,.08); border-radius:18px;
-      background:#fff; color:#667085; font:inherit;
-      font-size:12px; font-weight:800; line-height:1; white-space:nowrap;
-      box-shadow:0 4px 12px rgba(16,24,40,.10); cursor:pointer;
-    }
-    #white-cart-root:not(.wc-pink) .wc-all-carts.show { display:flex !important; }
-
-    @media(max-width:420px){
-      #white-cart-root.wc-pink { width:calc(100vw - 36px); }
-      #white-cart-root.wc-pink #white-cart-container { height:64px; min-height:64px; border-radius:28px; }
-      #white-cart-root.wc-pink .wc-pink-summary { font-size:17px; }
-      #white-cart-root.wc-pink .wc-btn-title { font-size:16px; }
-      #white-cart-root:not(.wc-pink) .wc-home-count { font-size:14px; }
-      #white-cart-root:not(.wc-pink) .wc-btn { height:46px; padding:0 11px; }
-    }
-
-    /* Multi-restaurant cart drawer — Restaurant + 99 Store */
+    /* Multi-restaurant cart drawer — used by pink bar and home "All ↑" */
     #ew-cart-drawer-backdrop{position:fixed;inset:0;z-index:100001;display:none;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
     #ew-cart-drawer-backdrop.show{display:block}
     #ew-cart-drawer{position:fixed;left:50%;bottom:0;transform:translate(-50%,110%);width:min(720px,100vw);max-height:min(78vh,760px);background:#f7f8fc;border-radius:30px 30px 0 0;z-index:100002;box-shadow:0 -10px 40px rgba(15,23,42,.2);overflow:hidden;transition:transform .28s cubic-bezier(.22,1,.36,1);font-family:'Manrope',system-ui,-apple-system,sans-serif}
@@ -407,17 +320,23 @@
     .ew-cd-view{min-width:145px;height:64px;border:0;border-radius:32px;background:#ef5263;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;font-weight:800;box-shadow:0 5px 12px rgba(239,82,99,.18)}.ew-cd-view strong{font-size:20px}.ew-cd-view span{margin-top:5px;font-size:14px;font-weight:650;opacity:.92}
     .ew-cd-footer{padding:8px 22px calc(20px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;background:#f7f8fc}.ew-cd-checkout{min-width:210px;height:56px;padding:0 28px;border-radius:30px;border:1px solid #e5e7eb;background:#fff;color:#d65364;font:inherit;font-size:18px;font-weight:800;box-shadow:0 2px 7px rgba(16,24,40,.08)}.ew-cd-empty{padding:36px 20px 48px;text-align:center;color:#667085;font-weight:700}
     @media(max-width:520px){#ew-cart-drawer{border-radius:26px 26px 0 0}.ew-cd-head{padding:16px 18px 10px}.ew-cd-title{font-size:23px}.ew-cd-list{padding:6px 14px 12px}.ew-cd-row{min-height:94px;padding:10px;gap:10px;border-radius:30px}.ew-cd-logo{width:66px;height:66px}.ew-cd-name{font-size:17px}.ew-cd-menu{font-size:14px}.ew-cd-view{min-width:112px;height:58px;border-radius:29px}.ew-cd-view strong{font-size:17px}.ew-cd-view span{font-size:12px}}
+
     @media (hover: hover) {
       .wc-btn:hover { filter: brightness(1.04); }
       .wc-close:hover { background: #e9e9e9; }
+      #es-pink-inner:hover { filter: brightness(1.03); }
     }
 
-    @media (max-width: 340px) {
-      #white-cart-root, #white-cart-root.wc-pink { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
+    /* Narrow phones (≈360px and below) */
+    @media (max-width: 360px) {
+      #white-cart-root { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
+      #white-cart-root.wc-pink { width: calc(100vw - 32px); max-width: calc(100vw - 32px); }
       #white-cart-container { padding: 7px; height: 58px; }
+      #es-pink-inner { height: 54px; padding: 0 14px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 14px; }
       .wc-img { width: 34px; height: 34px; }
       .wc-image-stack { height: 34px; min-width: 34px; }
-      .wc-btn { padding: 0 8px; height: 42px; }
+      .wc-btn { padding: 0 10px; height: 42px; }
       .wc-res-name { font-size: 11px; }
       .wc-menu-link { font-size: 9px; }
       .wc-close { width: 28px; height: 28px; }
@@ -441,10 +360,11 @@
   }
 
   /* ── 3. THE DOM ── */
-  function makeDOM() {
+  function makeHomeDOM() {
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
     wrap.innerHTML = `
+      <button type="button" id="wc-allup" aria-label="View all restaurant carts">All ${UP_SVG}</button>
       <div id="white-cart-container">
           <button type="button" class="wc-left" aria-label="View cart" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
           <div class="wc-thumb-wrap">
@@ -456,15 +376,11 @@
             <div class="wc-menu-link">Added to cart <i class="fa-solid fa-check" aria-hidden="true" style="font-size:10px;"></i></div>
           </div>
         </button>
-        <div class="wc-home-count" id="wc-home-count" aria-live="polite"></div>
-        <button type="button" class="wc-all-carts" id="wc-all-carts" aria-label="View all restaurant carts">All ↑</button>
         <div class="wc-right">
-          <div id="wc-standard-actions" style="display:flex; gap:0; align-items:center;">
-            <span class="wc-pink-summary" id="wc-pink-summary" aria-live="polite"></span>
+          <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
             <button type="button" class="wc-btn" onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
-              <span class="wc-btn-title">View Cart</span>
-              <svg class="wc-cart-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L21 8H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4" fill="currentColor"/><circle cx="18" cy="20" r="1.4" fill="currentColor"/></svg>
-              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite"></span>
+              <span class="wc-btn-title">View Cart ${CART_SVG}</span>
+              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
             </button>
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
@@ -479,6 +395,50 @@
       </div>
     `;
     return wrap;
+  }
+
+  function makePinkDOM() {
+    const wrap = document.createElement('div');
+    wrap.id = 'white-cart-root';
+    wrap.classList.add('wc-pink');
+    wrap.innerHTML = `
+      <button type="button" id="es-pink-inner" aria-label="View cart"
+        onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
+        <span class="wc-pink-left" id="wc-item-count" aria-live="polite">0 items</span>
+        <span class="wc-pink-cta">View Cart ${CART_SVG}</span>
+      </button>
+    `;
+    return wrap;
+  }
+
+  function makeDOM() {
+    return CART_BAR_MODE === 'pink' ? makePinkDOM() : makeHomeDOM();
+  }
+
+  /* ── Remove any obsolete/legacy cart bars so exactly ONE remains ── */
+  function isBottomNav(el) {
+    if (!el) return false;
+    const cls = (el.className || '').toString().toLowerCase();
+    const id = (el.id || '').toLowerCase();
+    return /nav|tabbar|tab-bar|footer/.test(cls + ' ' + id);
+  }
+  function removeLegacyCartBars() {
+    const LEGACY = [
+      '#floating-cart', '#floating-cart-bar', '#floatingCartBar', '#cart-bar', '#cartBar',
+      '#global-cart', '#globalCart', '#global-cart-bar', '#mini-cart', '#miniCart',
+      '#cart-float', '#cartFloat', '#sticky-cart', '#stickyCart',
+      '.floating-cart-bar', '.floating-cart', '.global-cart-bar', '.mini-cart-bar',
+      '.sticky-cart-bar', '[data-cart-bar]'
+    ];
+    LEGACY.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        if (el.id === 'white-cart-root' || el.closest('#white-cart-root')) return;
+        if (el.id === 'ew-cart-drawer' || el.closest('#ew-cart-drawer-backdrop')) return;
+        if (isBottomNav(el)) return;
+        el.remove();
+        console.info('[Eatswada cart] removed obsolete cart bar:', sel);
+      });
+    });
   }
 
   /* ── 4. UI BEHAVIOR LOGIC ── */
@@ -503,7 +463,7 @@
   function bump(el) {
     if (!el || prefersReducedMotion()) return;
     el.classList.remove('wc-bump');
-    void el.offsetWidth; // force reflow so the animation can replay
+    void el.offsetWidth;
     el.classList.add('wc-bump');
   }
 
@@ -515,7 +475,7 @@
       root.style.display = 'block';
       root.classList.remove('wc-enter');
       if (!prefersReducedMotion()) {
-        void root.offsetWidth; // force reflow so the enter animation replays
+        void root.offsetWidth;
         root.classList.add('wc-enter');
       }
     }
@@ -539,218 +499,220 @@
     }, EXIT_MS);
   }
 
-
-  function restaurantGroups(savedCart){
-    const groups=new Map();
-    Object.entries(savedCart||{}).forEach(([key,item])=>{
-      if(!item||Number(item.quantity)<=0)return;
-      const rid=String(item.resId||item.restaurantId||'unknown');
-      if(!groups.has(rid))groups.set(rid,{id:rid,name:item.restaurantName||item.resName||'Restaurant',items:[],units:0,image:item.image||''});
-      const g=groups.get(rid),q=Math.max(0,Number(item.quantity)||0); g.items.push({key,item}); g.units+=q; if(!g.image&&item.image)g.image=item.image;
-      if((!g.name||g.name==='Restaurant')&&(item.restaurantName||item.resName))g.name=item.restaurantName||item.resName;
-    }); return [...groups.values()];
-  }
-  function escDrawer(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-  function ensureCartDrawer(){
-    if(document.getElementById('ew-cart-drawer-backdrop'))return;
-    const b=document.createElement('div'); b.id='ew-cart-drawer-backdrop';
-    b.innerHTML='<section id="ew-cart-drawer" role="dialog" aria-modal="true" aria-label="Your carts"><div class="ew-cd-head"><div class="ew-cd-title" id="ew-cd-title">Your Carts</div><button class="ew-cd-close" type="button" aria-label="Close">×</button></div><div class="ew-cd-list" id="ew-cd-list"></div><div class="ew-cd-footer"><button class="ew-cd-checkout" type="button" id="ew-cd-checkout">Checkout all <span>›</span></button></div></section>';
-    document.body.appendChild(b); const d=b.querySelector('#ew-cart-drawer');
-    const close=()=>{b.classList.remove('show');d.classList.remove('show');document.body.style.overflow='';};
-    b.addEventListener('click',e=>{if(e.target===b)close()}); b.querySelector('.ew-cd-close').addEventListener('click',close); b.querySelector('#ew-cd-checkout').addEventListener('click',()=>window.location.href='cart.html'); window.__ewCloseCartDrawer=close;
-  }
-  function renderCartDrawer(){
-    ensureCartDrawer(); const b=document.getElementById('ew-cart-drawer-backdrop'),d=document.getElementById('ew-cart-drawer'),list=document.getElementById('ew-cd-list'); const groups=restaurantGroups(safeGetCart());
-    document.getElementById('ew-cd-title').textContent=`Your Carts (${groups.length})`;
-    list.innerHTML=groups.length?groups.map(g=>{const u=Math.round(g.units),img=g.image||'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80';return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u===1?'item':'items'}</span></button></div>`}).join(''):'<div class="ew-cd-empty">Your cart is empty.</div>';
-    list.querySelectorAll('[data-cd-view]').forEach(btn=>btn.addEventListener('click',()=>window.location.href='cart.html'));
-  }
-  function openCartDrawer(){
-    const groups=restaurantGroups(safeGetCart());
-    // Homepage: the All ↑ capsule is only meaningful when there are 2+ restaurants.
-    // With one restaurant, View Cart goes directly to the cart page.
-    if(CART_BAR_MODE==='home' && groups.length<=1){ window.location.href='cart.html'; return; }
-    if(CART_BAR_MODE==='hidden'){ window.location.href='cart.html'; return; }
-    ensureCartDrawer();
-    renderCartDrawer();
-    const b=document.getElementById('ew-cart-drawer-backdrop'),d=document.getElementById('ew-cart-drawer');
-    b.classList.add('show');
-    requestAnimationFrame(()=>d.classList.add('show'));
-    document.body.style.overflow='hidden';
-  }
-
-  function syncHomeCartPosition(){
-    const root=document.getElementById('white-cart-root');
-    if(!root || CART_BAR_MODE!=='home') return;
-    const nav=document.getElementById('nearbite-bottom-tabbar');
-    const safe=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
-    if(nav){
-      const rect=nav.getBoundingClientRect();
-      const visible=rect.bottom>0 && rect.top<window.innerHeight && getComputedStyle(nav).display!=='none' && getComputedStyle(nav).visibility!=='hidden';
-      if(visible){
-        const gap=10;
-        const bottom=Math.max(10, Math.round(window.innerHeight-rect.top+gap));
-        root.style.bottom=bottom+'px';
-        return;
+  /* ── Positioning: keep the cart bar clear ABOVE any bottom navigation ── */
+  const NAV_SELECTORS = [
+    '.bottom-nav', '#bottom-nav', '.bottomnav', '#bottomnav', '[data-bottom-nav]',
+    '.tab-bar', '.tabbar', '.nav-bottom', '.bottom-navigation', '.es-bottom-nav',
+    '.app-bottom-nav', '.mobile-bottom-nav', 'nav.bottom', 'footer.bottom-nav'
+  ];
+  function findBottomNav() {
+    for (const s of NAV_SELECTORS) {
+      const el = document.querySelector(s);
+      if (!el) continue;
+      const cs = getComputedStyle(el);
+      if ((cs.position === 'fixed' || cs.position === 'sticky') && cs.display !== 'none' && cs.visibility !== 'hidden') {
+        const r = el.getBoundingClientRect();
+        // Anchored to the bottom of the viewport and reasonably short (a nav, not a panel).
+        if (r.height > 0 && r.height < 160 && r.bottom >= window.innerHeight - 4) return el;
       }
     }
-    root.style.bottom='calc(14px + env(safe-area-inset-bottom,0px))';
+    return null;
+  }
+  function positionCartAboveNav(root) {
+    root = root || document.getElementById('white-cart-root');
+    if (!root) return;
+    const nav = findBottomNav();
+    if (nav) {
+      const r = nav.getBoundingClientRect();
+      // Space the nav currently occupies at the bottom (already includes any safe-area).
+      const clearance = Math.max(0, window.innerHeight - r.top);
+      root.style.setProperty('--nb-cart-bottom', (Math.round(clearance) + 12) + 'px');
+    } else {
+      root.style.setProperty('--nb-cart-bottom', 'calc(16px + env(safe-area-inset-bottom, 0px))');
+    }
+  }
+  let posRAF = null;
+  function schedulePos() {
+    if (posRAF) return;
+    posRAF = requestAnimationFrame(() => { posRAF = null; positionCartAboveNav(); });
   }
 
-  function syncHomeAllButton(groups){
-    const all=document.getElementById('wc-all-carts');
-    if(!all || CART_BAR_MODE!=='home') return;
-    const show=groups.length>1;
-    all.classList.toggle('show',show);
-    all.style.display=show?'flex':'none';
+  /* ── Multi-restaurant cart drawer (data logic UNCHANGED) ── */
+  function restaurantGroups(savedCart){
+    const groups = new Map();
+    Object.entries(savedCart || {}).forEach(([key, item]) => {
+      if (!item || Number(item.quantity) <= 0) return;
+      const rid = String(item.resId || item.restaurantId || 'unknown');
+      if (!groups.has(rid)) groups.set(rid, { id: rid, name: item.restaurantName || item.resName || 'Restaurant', items: [], units: 0, image: item.image || '' });
+      const g = groups.get(rid), q = Math.max(0, Number(item.quantity) || 0);
+      g.items.push({ key, item }); g.units += q; if (!g.image && item.image) g.image = item.image;
+      if ((!g.name || g.name === 'Restaurant') && (item.restaurantName || item.resName)) g.name = item.restaurantName || item.resName;
+    });
+    return [...groups.values()];
+  }
+  function escDrawer(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function ensureCartDrawer(){
+    if (document.getElementById('ew-cart-drawer-backdrop')) return;
+    const b = document.createElement('div'); b.id = 'ew-cart-drawer-backdrop';
+    b.innerHTML = '<section id="ew-cart-drawer" role="dialog" aria-modal="true" aria-label="Your carts"><div class="ew-cd-head"><div class="ew-cd-title" id="ew-cd-title">Your Carts</div><button class="ew-cd-close" type="button" aria-label="Close">×</button></div><div class="ew-cd-list" id="ew-cd-list"></div><div class="ew-cd-footer"><button class="ew-cd-checkout" type="button" id="ew-cd-checkout">Checkout all <span>›</span></button></div></section>';
+    document.body.appendChild(b); const d = b.querySelector('#ew-cart-drawer');
+    const close = () => { b.classList.remove('show'); d.classList.remove('show'); document.body.style.overflow = ''; };
+    b.addEventListener('click', e => { if (e.target === b) close(); });
+    b.querySelector('.ew-cd-close').addEventListener('click', close);
+    b.querySelector('#ew-cd-checkout').addEventListener('click', () => window.location.href = 'cart.html');
+    window.__ewCloseCartDrawer = close;
+  }
+  function renderCartDrawer(){
+    ensureCartDrawer();
+    const list = document.getElementById('ew-cd-list');
+    const groups = restaurantGroups(safeGetCart());
+    document.getElementById('ew-cd-title').textContent = `Your Carts (${groups.length})`;
+    list.innerHTML = groups.length
+      ? groups.map(g => {
+          const u = Math.round(g.units);
+          const img = g.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80';
+          return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u === 1 ? 'item' : 'items'}</span></button></div>`;
+        }).join('')
+      : '<div class="ew-cd-empty">Your cart is empty.</div>';
+    list.querySelectorAll('[data-cd-view]').forEach(btn => btn.addEventListener('click', () => window.location.href = 'cart.html'));
+  }
+  function openRestaurantCarts(){
+    ensureCartDrawer(); renderCartDrawer();
+    const b = document.getElementById('ew-cart-drawer-backdrop'), d = document.getElementById('ew-cart-drawer');
+    if (!b || !d) return;
+    b.classList.add('show'); requestAnimationFrame(() => d.classList.add('show'));
+    document.body.style.overflow = 'hidden';
+  }
+  function openCartDrawer(){
+    // Home "View Cart" keeps its original behavior (go to the cart page);
+    // the pink bar opens the multi-restaurant drawer.
+    if (CART_BAR_MODE !== 'pink') { window.location.href = 'cart.html'; return; }
+    openRestaurantCarts();
   }
 
+  /* ── The single cart-bar renderer ── */
   window.updateGlobalCart = function () {
     if (isDismissed || CART_BAR_MODE === 'hidden') return;
 
     const savedCart = safeGetCart();
-    if(CART_BAR_MODE==='pink' && document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
     const itemNames = Object.keys(savedCart);
-    const groups = restaurantGroups(savedCart);
     const root = document.getElementById('white-cart-root');
+    if (!root) return;
+
     const countEl = document.getElementById('wc-item-count');
-    const homeCountEl = document.getElementById('wc-home-count');
-    const pinkSummaryEl = document.getElementById('wc-pink-summary');
-    const imgStackEl = document.getElementById('wc-dynamic-img-stack');
-    const resEl = document.getElementById('wc-dynamic-res');
-    const badgeEl = document.getElementById('wc-qty-badge');
 
-    if (!root || !countEl || !imgStackEl) return;
-    syncHomeAllButton(groups);
-    syncHomeCartPosition();
-
+    // Reset the clear-confirm UI (home only).
     const stdActions = document.getElementById('wc-standard-actions');
     const clearActions = document.getElementById('wc-clear-actions');
-    if (stdActions && clearActions) {
-        stdActions.style.display = 'flex';
-        clearActions.style.display = 'none';
+    if (stdActions && clearActions) { stdActions.style.display = 'flex'; clearActions.style.display = 'none'; }
+
+    // Keep the drawer live if it happens to be open.
+    if (document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
+
+    if (itemNames.length === 0) {
+      hideCartBar(root);
+      lastTotalQty = null;
+      const allup = document.getElementById('wc-allup');
+      if (allup) allup.classList.remove('show');
+      return;
     }
 
-    if (itemNames.length > 0) {
-      // Totals — cast defensively in case old/malformed cart entries are
-      // missing quantity or price fields.
-      let totalQty = 0;
-      let totalPrice = 0;
-      let priceKnown = true;
-      itemNames.forEach(key => {
-        const item = savedCart[key] || {};
-        const q = Number(item.quantity);
-        const safeQty = Number.isFinite(q) ? Math.max(0, q) : 0;
-        totalQty += safeQty;
+    // Totals — cast defensively in case old/malformed cart entries exist.
+    let totalQty = 0, totalPrice = 0, priceKnown = true;
+    itemNames.forEach(key => {
+      const item = savedCart[key] || {};
+      const q = Number(item.quantity);
+      const safeQty = Number.isFinite(q) ? Math.max(0, q) : 0;
+      totalQty += safeQty;
+      const p = Number(item.price);
+      if (Number.isFinite(p) && p >= 0) { totalPrice += p * safeQty; } else { priceKnown = false; }
+    });
 
-        const p = Number(item.price);
-        if (Number.isFinite(p) && p >= 0) {
-          totalPrice += p * safeQty;
-        } else {
-          priceKnown = false;
-        }
-      });
+    const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
+    // Price shows ONLY on the pink (99 Store / Restaurant) bar. Home = count only.
+    const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
+    if (countEl) countEl.innerText = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
 
-      const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
-      const pinkText = priceKnown && totalPrice > 0
-        ? `${baseCountText} · ${formatCurrency(totalPrice)}`
-        : baseCountText;
-      countEl.innerText = pinkText;
-      if(homeCountEl) homeCountEl.textContent = baseCountText;
-      if(pinkSummaryEl) pinkSummaryEl.textContent = pinkText;
+    if (lastTotalQty !== null && lastTotalQty !== totalQty) bump(countEl);
 
-      if (badgeEl) badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
-
-      if (lastTotalQty !== null && lastTotalQty !== totalQty) {
-        bump(countEl);
-        bump(badgeEl);
+    // Home-only visuals: image stack, badge, restaurant label, "All ↑".
+    if (CART_BAR_MODE !== 'pink') {
+      const badgeEl = document.getElementById('wc-qty-badge');
+      if (badgeEl) {
+        badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
+        if (lastTotalQty !== null && lastTotalQty !== totalQty) bump(badgeEl);
       }
-      lastTotalQty = totalQty;
 
-      // Restaurant / item label. The cart data only ever stores a resId
-      // (not a friendly restaurant name), so this preserves the original
-      // behavior of showing the most recently added item — while checking
-      // for an optional resName/restaurantName field first, in case a
-      // future update to the cart payload starts including one.
+      const resEl = document.getElementById('wc-dynamic-res');
       const lastItemName = itemNames[itemNames.length - 1];
       const lastItem = savedCart[lastItemName] || {};
       if (resEl) resEl.innerText = lastItem.resName || lastItem.restaurantName || lastItemName;
 
-      // Safe image parsing
-      imgStackEl.innerHTML = ''; 
-      const latestThreeNames = itemNames.slice(-3).reverse(); 
-      let imageDict = {};
-      try {
+      const imgStackEl = document.getElementById('wc-dynamic-img-stack');
+      if (imgStackEl) {
+        imgStackEl.innerHTML = '';
+        const latestThreeNames = itemNames.slice(-3).reverse();
+        let imageDict = {};
+        try {
           const dictData = localStorage.getItem('es_image_dict');
-          if (dictData && dictData !== "undefined" && dictData !== "null") {
-              imageDict = JSON.parse(dictData);
-          }
-      } catch(e) {}
+          if (dictData && dictData !== "undefined" && dictData !== "null") imageDict = JSON.parse(dictData);
+        } catch (e) {}
+        latestThreeNames.forEach((name) => {
+          const itemData = savedCart[name] || {};
+          const imgSrc = itemData.image || imageDict[name] || FALLBACK_IMG;
+          const img = document.createElement('img');
+          img.src = imgSrc; img.alt = ''; img.classList.add('wc-img');
+          imgStackEl.appendChild(img);
+        });
+        imgStackEl.style.width = latestThreeNames.length === 1 ? '36px' : latestThreeNames.length === 2 ? '48px' : '60px';
+      }
 
-      latestThreeNames.forEach((name) => {
-         const itemData = savedCart[name] || {};
-         const imgSrc = itemData.image || imageDict[name] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
-         const img = document.createElement('img');
-         img.src = imgSrc;
-         img.alt = '';
-         img.classList.add('wc-img');
-         imgStackEl.appendChild(img);
-      });
-
-      imgStackEl.style.width = latestThreeNames.length === 1 ? '36px' : latestThreeNames.length === 2 ? '48px' : '60px';
-
-      showCartBar(root);
-    } else {
-      hideCartBar(root);
-      lastTotalQty = null;
-      if(homeCountEl) homeCountEl.textContent='';
-      if(pinkSummaryEl) pinkSummaryEl.textContent='';
-      syncHomeAllButton([]);
+      // "All ↑" appears only when the cart holds items from 2+ restaurants.
+      const allup = document.getElementById('wc-allup');
+      if (allup) {
+        const groups = restaurantGroups(savedCart);
+        if (groups.length >= 2) allup.classList.add('show'); else allup.classList.remove('show');
+      }
     }
+
+    lastTotalQty = totalQty;
+    positionCartAboveNav(root);
+    showCartBar(root);
   };
 
   /* ── 5. INITIALIZATION ── */
   function init() {
     injectCSS();
-    const root = makeDOM();
-    if (CART_BAR_MODE === 'hidden') {
-      root.style.display = 'none';
-    } else if (CART_BAR_MODE === 'pink') {
-      root.classList.add('wc-pink');
-      root.querySelector('.wc-btn-title').textContent = 'View Cart';
-      root.querySelector('.wc-btn-sub').textContent = '';
-      root.querySelector('#wc-pink-summary').textContent = '';
-    }
-    document.body.appendChild(root);
-    syncHomeCartPosition();
-    window.addEventListener('resize', syncHomeCartPosition, {passive:true});
-    window.addEventListener('scroll', syncHomeCartPosition, {passive:true});
-    if(window.ResizeObserver){
-      const nav=document.getElementById('nearbite-bottom-tabbar');
-      if(nav) new ResizeObserver(syncHomeCartPosition).observe(nav);
-    }
-    window.__ewOpenCartDrawer=openCartDrawer;
-    if(CART_BAR_MODE==='pink')ensureCartDrawer();
+    removeLegacyCartBars();
 
+    const root = makeDOM();
+    if (CART_BAR_MODE === 'hidden') root.style.display = 'none';
+    document.body.appendChild(root);
+
+    window.__ewOpenCartDrawer = openCartDrawer;
+    window.__ewOpenRestaurantCarts = openRestaurantCarts;
+    ensureCartDrawer(); // drawer exists in every mode so the home "All ↑" can open it
+
+    // "All ↑" → open the restaurant-level cart details.
+    const allup = document.getElementById('wc-allup');
+    if (allup) allup.addEventListener('click', (e) => { e.stopPropagation(); openRestaurantCarts(); });
+
+    // Capture the food image that was tapped, for the cart-bar thumbnail stack.
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button, .counter-btn, [onclick*="updateCart"]');
       if (!btn) return;
-      
+
       let foodName = "";
       const clickCode = btn.getAttribute('onclick');
       if (clickCode) {
-        // Handle encoded payloads for images
         if (clickCode.includes('%7B')) {
-            try {
-                const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
-                if (match) {
-                    const payload = JSON.parse(decodeURIComponent(match[1]));
-                    foodName = payload.name;
-                }
-            } catch(err) {}
-        } else {
+          try {
             const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
-            if (match) foodName = match[1];
+            if (match) { const payload = JSON.parse(decodeURIComponent(match[1])); foodName = payload.name; }
+          } catch (err) {}
+        } else {
+          const match = clickCode.match(/updateCart\(\s*[`'"]([^`'"]+)[`'"]/);
+          if (match) foodName = match[1];
         }
       }
 
@@ -758,62 +720,58 @@
       let capturedImg = "";
       while (wrapper && wrapper !== document.body) {
         const img = wrapper.querySelector('img');
-        if (img && img.src && !img.id.includes('wc-dynamic') && !img.src.includes('.svg')) {
-           capturedImg = img.src; break; 
-        }
+        if (img && img.src && !img.id.includes('wc-dynamic') && !img.src.includes('.svg')) { capturedImg = img.src; break; }
         wrapper = wrapper.parentElement;
       }
 
       if (foodName && capturedImg) {
         let dict = {};
         try {
-            const dictData = localStorage.getItem('es_image_dict');
-            if (dictData && dictData !== "undefined" && dictData !== "null") {
-                dict = JSON.parse(dictData);
-            }
-        } catch(e) {}
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") dict = JSON.parse(dictData);
+        } catch (e) {}
         dict[foodName] = capturedImg;
         localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
-    }, true); 
-
-    const allCartsBtn=document.getElementById('wc-all-carts');
-    if(allCartsBtn) allCartsBtn.addEventListener('click',(e)=>{ e.stopPropagation(); openCartDrawer(); });
+    }, true);
 
     const wcLeft = document.querySelector('#white-cart-root .wc-left');
     if (wcLeft) {
       wcLeft.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          window.location.href = 'cart.html';
-        }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = 'cart.html'; }
       });
     }
 
-    document.getElementById('wc-close-btn').addEventListener('click', (e) => {
+    // Clear-cart flow (home only — guarded so pink mode never throws).
+    const closeBtn = document.getElementById('wc-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      document.getElementById('wc-standard-actions').style.display = 'none';
-      document.getElementById('wc-clear-actions').style.display = 'flex';
+      const s = document.getElementById('wc-standard-actions'); const c = document.getElementById('wc-clear-actions');
+      if (s) s.style.display = 'none'; if (c) c.style.display = 'flex';
     });
 
-    document.getElementById('wc-cancel-clear').addEventListener('click', (e) => {
+    const cancelClear = document.getElementById('wc-cancel-clear');
+    if (cancelClear) cancelClear.addEventListener('click', (e) => {
       e.stopPropagation();
-      document.getElementById('wc-clear-actions').style.display = 'none';
-      document.getElementById('wc-standard-actions').style.display = 'flex';
+      const s = document.getElementById('wc-standard-actions'); const c = document.getElementById('wc-clear-actions');
+      if (c) c.style.display = 'none'; if (s) s.style.display = 'flex';
     });
 
-    document.getElementById('wc-confirm-clear').addEventListener('click', (e) => {
+    const confirmClear = document.getElementById('wc-confirm-clear');
+    if (confirmClear) confirmClear.addEventListener('click', (e) => {
       e.stopPropagation();
       localStorage.removeItem('nearbite_cart');
       localStorage.removeItem('nearbite_checkout_key');
       isDismissed = false;
-      const root = document.getElementById('white-cart-root');
-      if (root) {
-        root.classList.remove('wc-enter','wc-exiting');
-        root.style.display = 'none';
-      }
+      const r = document.getElementById('white-cart-root');
+      if (r) { r.classList.remove('wc-enter', 'wc-exiting'); r.style.display = 'none'; }
       lastTotalQty = null;
     });
+
+    positionCartAboveNav(root);
+    window.addEventListener('resize', schedulePos, { passive: true });
+    window.addEventListener('orientationchange', schedulePos, { passive: true });
+    window.addEventListener('scroll', schedulePos, { passive: true }); // hide-on-scroll nav
 
     window.updateGlobalCart();
   }
@@ -825,8 +783,10 @@
   }
 
   window.addEventListener('pageshow', () => {
-    isDismissed = false; 
+    isDismissed = false;
+    removeLegacyCartBars();
     if (window.updateGlobalCart) window.updateGlobalCart();
+    positionCartAboveNav();
   });
 
 })();
