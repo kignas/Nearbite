@@ -235,7 +235,7 @@
     .wc-btn-sub { font-size: 9px; font-weight: 600; opacity: 0.95; white-space: nowrap; }
     .wc-close {
       width: 30px; height: 30px; border-radius: 50%; background: #F1F1F1; border: none;
-      display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 15px;
       cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
     }
     .wc-close:active { background: #e5e7eb; }
@@ -262,129 +262,131 @@
     }
 
     /* ============================================================
-       99 STORE CART BAR — RED TWO-TIER DESIGN
-       Scoped only to the 99 Store. Restaurant/cart pages keep the
-       original cart-bar design below this block.
+       99 STORE CART BAR — COMPACT BOTTOM ACTION
+       99 Store only. Global restaurant/cart bar remains unchanged.
        ============================================================ */
     #white-cart-root.u99-cart-bar {
-      width: min(700px, calc(100vw - 28px));
-      max-width: calc(100vw - 28px);
-      bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+      left: 12px;
+      right: 12px;
+      width: auto;
+      max-width: none;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      transform: none;
+    }
+    #white-cart-root.u99-cart-bar.wc-enter {
+      animation: u99CartIn .28s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    #white-cart-root.u99-cart-bar.wc-exiting {
+      animation: u99CartOut .20s ease forwards;
+    }
+    @keyframes u99CartIn {
+      from { transform: translateY(22px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes u99CartOut {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(22px); opacity: 0; }
     }
     #white-cart-root.u99-cart-bar #white-cart-container {
-      height: 90px;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      justify-content: flex-start;
-      gap: 0;
-      overflow: hidden;
-      border-radius: 22px;
-      background: #E31B23;
-      border: 1px solid rgba(255,255,255,.16);
-      box-shadow: 0 8px 20px rgba(227,27,35,.22), 0 18px 38px rgba(17,24,39,.16);
+      height: 60px;
+      padding: 0 14px 0 16px;
+      border: 0;
+      border-radius: 17px;
+      background: #EC168C;
+      box-shadow: 0 8px 22px rgba(236,22,140,.26);
       color: #fff;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
-    #white-cart-root.u99-cart-bar .u99-free-row {
-      height: 36px;
-      min-height: 36px;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      box-sizing: border-box;
-      background: rgba(0,0,0,.08);
-      color: #fff;
-      font-size: 14px;
-      line-height: 1;
-      font-weight: 800;
-      letter-spacing: -.15px;
-    }
-    #white-cart-root.u99-cart-bar .u99-cart-row {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      min-width: 0;
-      padding: 0 20px;
-      box-sizing: border-box;
-      background: #E31B23;
-    }
-    #white-cart-root.u99-cart-bar .u99-total {
-      min-width: 0;
-      color: #fff;
-      font-size: 14px;
-      line-height: 1.1;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    #white-cart-root.u99-cart-bar .u99-view-cart {
-      all: unset;
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 7px;
-      flex: 0 0 auto;
-      color: #fff;
-      font: inherit;
-      font-size: 15px;
-      font-weight: 800;
-      line-height: 1;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #white-cart-root.u99-cart-bar .u99-view-cart svg {
-      width: 25px;
-      height: 25px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      flex: 0 0 auto;
-    }
-    #white-cart-root.u99-cart-bar .u99-view-cart:active {
-      transform: scale(.98);
-    }
-    #white-cart-root.u99-cart-bar .u99-hidden-actions,
     #white-cart-root.u99-cart-bar .wc-left,
-    #white-cart-root.u99-cart-bar .wc-right {
+    #white-cart-root.u99-cart-bar .wc-thumb-wrap,
+    #white-cart-root.u99-cart-bar .wc-info,
+    #white-cart-root.u99-cart-bar .wc-close,
+    #white-cart-root.u99-cart-bar #wc-clear-actions {
       display: none !important;
     }
-    @media (max-width: 480px) {
+    #white-cart-root.u99-cart-bar .wc-right {
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+    #white-cart-root.u99-cart-bar #wc-standard-actions {
+      width: 100%;
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    #white-cart-root.u99-cart-bar #wc-item-count {
+      order: 1;
+      position: static;
+      transform: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+      margin: 0;
+    }
+    #white-cart-root.u99-cart-bar .wc-btn {
+      order: 2;
+      height: auto;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #fff;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 9px;
+      font-family: inherit;
+    }
+    #white-cart-root.u99-cart-bar .wc-btn::after { display: none; }
+    #white-cart-root.u99-cart-bar .wc-btn-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    #white-cart-root.u99-cart-bar .wc-btn-title span[aria-hidden="true"] {
+      display: none;
+    }
+    #white-cart-root.u99-cart-bar .u99-cart-icon {
+      width: 21px;
+      height: 21px;
+      flex: 0 0 21px;
+    }
+    #white-cart-root.u99-cart-bar .wc-btn-sub {
+      display: none;
+    }
+    #white-cart-root.u99-cart-bar #white-cart-container button:focus-visible {
+      outline: 2px solid rgba(255,255,255,.95);
+      outline-offset: 3px;
+    }
+    @media (max-width: 380px) {
       #white-cart-root.u99-cart-bar {
-        width: calc(100vw - 32px);
-        max-width: calc(100vw - 32px);
-        bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+        left: 10px;
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
       }
       #white-cart-root.u99-cart-bar #white-cart-container {
-        height: 88px;
-        border-radius: 20px;
+        height: 58px;
+        padding-left: 15px;
+        padding-right: 13px;
+        border-radius: 16px;
       }
-      #white-cart-root.u99-cart-bar .u99-free-row {
-        height: 35px;
-        min-height: 35px;
-        padding: 0 16px;
-        font-size: 13px;
-      }
-      #white-cart-root.u99-cart-bar .u99-cart-row {
-        padding: 0 16px;
-        gap: 8px;
-      }
-      #white-cart-root.u99-cart-bar .u99-total,
-      #white-cart-root.u99-cart-bar .u99-view-cart {
-        font-size: 15px;
-      }
-      #white-cart-root.u99-cart-bar .u99-view-cart {
-        gap: 6px;
-      }
-      #white-cart-root.u99-cart-bar .u99-view-cart svg {
-        width: 24px;
-        height: 24px;
-      }
+      #white-cart-root.u99-cart-bar #wc-item-count,
+      #white-cart-root.u99-cart-bar .wc-btn-title { font-size: 15px; }
+      #white-cart-root.u99-cart-bar .u99-cart-icon { width: 20px; height: 20px; flex-basis: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -408,28 +410,7 @@
   function makeDOM() {
     const wrap = document.createElement('div');
     wrap.id = 'white-cart-root';
-
-    if (IS_99_PAGE) {
-      wrap.classList.add('u99-cart-bar');
-      wrap.innerHTML = `
-        <div id="white-cart-container">
-          <div class="u99-free-row" id="u99-free-message">Yay! You’ve unlocked Free Delivery</div>
-          <div class="u99-cart-row">
-            <div class="u99-total" id="u99-total" aria-live="polite">1 Item | ₹0</div>
-            <button type="button" class="u99-view-cart" aria-label="View cart" onclick="window.location.href='cart.html'">
-              <span>View Cart</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6"/>
-                <circle cx="10" cy="20" r="1.4"/>
-                <circle cx="18" cy="20" r="1.4"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      `;
-      return wrap;
-    }
-
+    if (IS_99_PAGE) wrap.classList.add('u99-cart-bar');
     wrap.innerHTML = `
       <div id="white-cart-container">
         <button type="button" class="wc-left" aria-label="View cart" onclick="window.location.href='cart.html'">
@@ -445,7 +426,7 @@
         <div class="wc-right">
           <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
             <button type="button" class="wc-btn" onclick="window.location.href='cart.html'">
-              <span class="wc-btn-title">View Cart <span aria-hidden="true">→</span></span>
+              <span class="wc-btn-title">View Cart <svg class="u99-cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="19" cy="20" r="1.5"></circle><path d="M3 4h2l2.2 10.4a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 2-1.6L21 8H7"></path></svg></span>
               <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
             </button>
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
@@ -462,6 +443,7 @@
     `;
     return wrap;
   }
+
   /* ── 4. UI BEHAVIOR LOGIC ── */
   let isDismissed = false;
   let lastTotalQty = null;
@@ -530,46 +512,6 @@
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
     const resEl = document.getElementById('wc-dynamic-res');
     const badgeEl = document.getElementById('wc-qty-badge');
-
-    if (IS_99_PAGE) {
-      if (!root) return;
-      const savedNames = Object.keys(savedCart);
-      if (!savedNames.length) {
-        hideCartBar(root);
-        lastTotalQty = null;
-        return;
-      }
-
-      let totalQty = 0;
-      let totalPrice = 0;
-      savedNames.forEach(key => {
-        const item = savedCart[key] || {};
-        const q = Number(item.quantity);
-        const p = Number(item.price);
-        if (Number.isFinite(q) && q > 0) totalQty += q;
-        if (Number.isFinite(q) && q > 0 && Number.isFinite(p) && p >= 0) totalPrice += p * q;
-      });
-
-      const totalEl = document.getElementById('u99-total');
-      const freeEl = document.getElementById('u99-free-message');
-      if (totalEl) totalEl.textContent = `${totalQty} ${totalQty === 1 ? 'Item' : 'Items'} | ${formatCurrency(totalPrice)}`;
-      if (freeEl) {
-        const FREE_DELIVERY_THRESHOLD = 200;
-        if (totalPrice >= FREE_DELIVERY_THRESHOLD) {
-          freeEl.textContent = 'Yay! You’ve unlocked Free Delivery';
-        } else {
-          const remaining = FREE_DELIVERY_THRESHOLD - totalPrice;
-          freeEl.textContent = `Add ${formatCurrency(remaining)} more for Free Delivery`;
-        }
-      }
-
-      if (lastTotalQty !== null && lastTotalQty !== totalQty) {
-        bump(totalEl);
-      }
-      lastTotalQty = totalQty;
-      showCartBar(root);
-      return;
-    }
 
     if (!root || !countEl || !imgStackEl) return;
 
@@ -711,8 +653,7 @@
       });
     }
 
-    if (!IS_99_PAGE) {
-      document.getElementById('wc-close-btn').addEventListener('click', (e) => {
+    document.getElementById('wc-close-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       document.getElementById('wc-standard-actions').style.display = 'none';
       document.getElementById('wc-clear-actions').style.display = 'flex';
@@ -724,13 +665,12 @@
       document.getElementById('wc-standard-actions').style.display = 'flex';
     });
 
-      document.getElementById('wc-confirm-clear').addEventListener('click', (e) => {
-        e.stopPropagation();
-        localStorage.removeItem('nearbite_cart'); 
-        document.getElementById('white-cart-root').style.display = 'none'; 
-        window.location.reload(); 
-      });
-    }
+    document.getElementById('wc-confirm-clear').addEventListener('click', (e) => {
+      e.stopPropagation();
+      localStorage.removeItem('nearbite_cart'); 
+      document.getElementById('white-cart-root').style.display = 'none'; 
+      window.location.reload(); 
+    });
 
     window.updateGlobalCart();
   }
