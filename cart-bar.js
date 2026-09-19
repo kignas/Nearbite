@@ -493,10 +493,6 @@
     if(CART_BAR_MODE==='pink' && document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
     const itemNames = Object.keys(savedCart);
     const groups = restaurantGroups(savedCart);
-    if (allCartsEl) {
-      allCartsEl.style.display = (CART_BAR_MODE === 'home' && groups.length > 1) ? 'block' : 'none';
-      allCartsEl.textContent = groups.length > 1 ? `All ↑` : 'All ↑';
-    }
     const root = document.getElementById('white-cart-root');
     const countEl = document.getElementById('wc-item-count');
     const imgStackEl = document.getElementById('wc-dynamic-img-stack');
@@ -504,6 +500,14 @@
     const badgeEl = document.getElementById('wc-qty-badge');
     const pinkTotalEl = document.getElementById('wc-pink-total');
     const allCartsEl = document.getElementById('wc-all-carts');
+
+    // IMPORTANT: this element must be resolved before it is used.
+    // The previous version referenced allCartsEl above its const declaration,
+    // which throws a Temporal Dead Zone ReferenceError on every page load.
+    if (allCartsEl) {
+      allCartsEl.style.display = (CART_BAR_MODE === 'home' && groups.length > 1) ? 'block' : 'none';
+      allCartsEl.textContent = 'All ↑';
+    }
 
     if (!root || !countEl || !imgStackEl) return;
 
