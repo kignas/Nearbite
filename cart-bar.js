@@ -170,8 +170,10 @@
     }
 
     #white-cart-root {
-      position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px)));
+      position: fixed !important; left: 50% !important; transform: translateX(-50%) !important;
+      /* IMPORTANT: inherit the bottom-nav component's shared variable.
+         Do not create an inline --nb-cart-bottom on this element. */
+      bottom: var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px))) !important;
       width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
@@ -544,27 +546,34 @@
     root = root || document.getElementById('white-cart-root');
     if (!root) return;
 
-    const nav = findBottomNav();
-
-    // HOME: the cart must always sit clearly ABOVE the bottom navigation.
-    // 104px is the safe fallback when the homepage nav uses a custom selector.
+    /*
+     * The universal bottom navigation owns --nb-cart-bottom.
+     * cart-bar.js must NOT override that variable on #white-cart-root,
+     * otherwise the cart cannot follow the nav when the nav hides/reveals.
+     *
+     * Home:
+     *   visible nav  -> bottom nav itself publishes the exact offset
+     *   hidden nav   -> bottom nav publishes the small bottom offset
+     *
+     * Pink 99/menu:
+     *   keep the independent bottom placement used by those pages.
+     */
     if (CART_BAR_MODE === 'home') {
-      const minimumBottom = 104;
-
+      const nav = document.getElementById('nearbite-bottom-tabbar');
       if (nav) {
-        const r = nav.getBoundingClientRect();
-        const navClearance = Math.max(0, window.innerHeight - r.top);
-        root.style.setProperty(
-          '--nb-cart-bottom',
-          Math.max(minimumBottom, Math.round(navClearance) + 14) + 'px'
-        );
+        // Let bottom-tab-bar.js remain the single source of truth.
+        root.style.removeProperty('--nb-cart-bottom');
+        root.style.bottom = 'var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px)))';
       } else {
-        root.style.setProperty('--nb-cart-bottom', minimumBottom + 'px');
+        // Before the nav is created, keep a safe temporary position.
+        root.style.removeProperty('--nb-cart-bottom');
+        root.style.bottom = '104px';
       }
       return;
     }
 
-    // 99 Store / Restaurant Menu: keep their existing lower placement.
+    // 99 Store / Restaurant Menu: keep their lower placement.
+    const nav = document.getElementById('nearbite-bottom-tabbar');
     if (nav) {
       const r = nav.getBoundingClientRect();
       const clearance = Math.max(0, window.innerHeight - r.top);
@@ -577,7 +586,34 @@
   let posRAF = null;
   function schedulePos() {
     if (posRAF) return;
-    posRAF = requestAnimationFrame(() => { posRAF = null; positionCartAboveNav(); });
+    posRAF = requestAnimationFrame(() => {
+      posRAF = null;
+      positionCartAboveNav();
+    });
+  }
+
+  // The bottom navigation is created by a separate script and changes its
+  // hidden/revealed state by updating --nb-cart-bottom on <html>. Watch both
+  // DOM creation and the shared CSS variable so the homepage cart follows it.
+  function watchBottomNavigation() {
+    if (CART_BAR_MODE !== 'home') return;
+
+    const sync = () => schedulePos();
+    window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('scroll', sync, { passive: true });
+
+    const observer = new MutationObserver(() => {
+      if (document.getElementById('nearbite-bottom-tabbar')) schedulePos();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const rootStyleObserver = new MutationObserver(() => schedulePos());
+    rootStyleObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+
+    // Re-check after all page scripts have had a chance to create the nav.
+    setTimeout(sync, 0);
+    setTimeout(sync, 100);
+    setTimeout(sync, 400);
   }
 
   /* ── Multi-restaurant cart drawer (data logic UNCHANGED) ── */
@@ -731,6 +767,7 @@
     const root = makeDOM();
     if (CART_BAR_MODE === 'hidden') root.style.display = 'none';
     document.body.appendChild(root);
+    watchBottomNavigation();
 
     window.__ewOpenCartDrawer = openCartDrawer;
     window.__ewOpenRestaurantCarts = openRestaurantCarts;
