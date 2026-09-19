@@ -390,6 +390,71 @@
       #white-cart-root.u99-cart-bar .u99-cart-icon { width: 20px; height: 20px; flex-basis: 20px; }
     }
 
+    /* ============================================================
+       MULTI-RESTAURANT CART HUB
+       Opens only when the cart contains items from 2+ restaurants.
+       Neutral shadow only — no colored glow.
+       ============================================================ */
+    #es-cart-hub-backdrop {
+      position: fixed; inset: 0; z-index: 100010;
+      background: rgba(16,24,40,.28);
+      display: none; align-items: flex-end; justify-content: center;
+      padding: 0 10px calc(10px + env(safe-area-inset-bottom,0px));
+      box-sizing: border-box;
+    }
+    #es-cart-hub-backdrop.show { display: flex; }
+    #es-cart-hub {
+      width: min(100%, 560px); max-height: min(78vh, 680px);
+      overflow: auto; background: #F7F8FC; color: #101828;
+      border-radius: 28px 28px 20px 20px;
+      border: 1px solid #E7EAF0;
+      box-shadow: 0 18px 42px rgba(16,24,40,.18);
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      padding: 18px 14px 14px; box-sizing: border-box;
+    }
+    .es-hub-head {
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:2px 4px 14px;
+    }
+    .es-hub-title { font-size:22px; font-weight:800; letter-spacing:-.4px; }
+    .es-hub-close {
+      width:38px; height:38px; border:0; border-radius:50%;
+      background:#EEF1F5; color:#667085; display:grid; place-items:center;
+      font-size:22px; cursor:pointer;
+    }
+    .es-hub-card {
+      display:flex; align-items:center; gap:12px; background:#fff;
+      border:1px solid #E8EAF0; border-radius:22px; padding:12px;
+      margin-bottom:10px; box-shadow:0 4px 12px rgba(16,24,40,.05);
+    }
+    .es-hub-thumb {
+      width:58px; height:58px; border-radius:18px; object-fit:cover;
+      background:#EEF1F5; flex:0 0 58px;
+    }
+    .es-hub-main { min-width:0; flex:1; }
+    .es-hub-name { font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .es-hub-meta { margin-top:4px; color:#747B87; font-size:12px; font-weight:650; line-height:1.35; }
+    .es-hub-total { margin-top:3px; font-size:13px; font-weight:800; color:#101828; }
+    .es-hub-view {
+      flex:0 0 auto; border:0; border-radius:14px; padding:10px 12px;
+      background:#FDEAF5; color:#D9096E; font:800 12px/1 'Manrope',system-ui,sans-serif;
+      cursor:pointer; white-space:nowrap;
+    }
+    .es-hub-checkout {
+      width:100%; height:52px; border:0; border-radius:16px;
+      background:#EC168C; color:#fff; font:800 15px/1 'Manrope',system-ui,sans-serif;
+      cursor:pointer; margin-top:4px;
+    }
+    .es-hub-note { text-align:center; color:#8A93A0; font-size:11px; font-weight:650; padding:2px 8px 10px; }
+    @media(max-width:380px){
+      #es-cart-hub-backdrop { padding-left:8px; padding-right:8px; }
+      #es-cart-hub { border-radius:24px 24px 16px 16px; padding:15px 10px 10px; }
+      .es-hub-title { font-size:20px; }
+      .es-hub-card { padding:10px; gap:10px; }
+      .es-hub-thumb { width:52px; height:52px; flex-basis:52px; border-radius:16px; }
+      .es-hub-view { padding:9px 10px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       #white-cart-root, #white-cart-root * {
         animation-duration: 0.001ms !important;
@@ -414,7 +479,7 @@
     if (IS_99_PAGE) wrap.classList.add('u99-cart-bar');
     wrap.innerHTML = `
       <div id="white-cart-container">
-        <button type="button" class="wc-left" aria-label="View cart" onclick="window.location.href='cart.html'">
+        <button type="button" class="wc-left" aria-label="View cart" onclick="window.__esHandleCartClick()">
           <div class="wc-thumb-wrap">
             <div class="wc-image-stack" id="wc-dynamic-img-stack"></div>
             <span class="wc-qty-badge" id="wc-qty-badge" aria-hidden="true">0</span>
@@ -427,7 +492,7 @@
         <div class="wc-right">
           <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
             <span id="wc-item-count" class="wc-cart-total" aria-live="polite">1 item · ₹0</span>
-            <button type="button" class="wc-btn" onclick="window.location.href='cart.html'">
+            <button type="button" class="wc-btn" onclick="window.__esHandleCartClick()">
               <span class="wc-btn-title">View Cart <svg class="u99-cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="19" cy="20" r="1.5"></circle><path d="M3 4h2l2.2 10.4a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 2-1.6L21 8H7"></path></svg></span>
             </button>
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
@@ -442,6 +507,21 @@
         </div>
       </div>
     `;
+
+    const hub = document.createElement('div');
+    hub.id = 'es-cart-hub-backdrop';
+    hub.innerHTML = `
+      <section id="es-cart-hub" role="dialog" aria-modal="true" aria-labelledby="es-cart-hub-title">
+        <div class="es-hub-head">
+          <div id="es-cart-hub-title" class="es-hub-title">Your Carts</div>
+          <button type="button" class="es-hub-close" id="es-hub-close" aria-label="Close carts">×</button>
+        </div>
+        <div id="es-hub-list"></div>
+        <div class="es-hub-note">Items from different restaurants stay in the same cart.</div>
+        <button type="button" class="es-hub-checkout" id="es-hub-checkout">Checkout all →</button>
+      </section>
+    `;
+    document.body.appendChild(hub);
     return wrap;
   }
 
@@ -502,6 +582,58 @@
       exitTimer = null;
     }, EXIT_MS);
   }
+
+  function cartGroups(cart) {
+    const groups = new Map();
+    Object.entries(cart || {}).forEach(([key, item]) => {
+      const q = Number(item?.quantity || 0);
+      if (!Number.isFinite(q) || q <= 0) return;
+      const rid = String(item?.resId || item?.restaurantId || 'unknown');
+      if (!groups.has(rid)) groups.set(rid, { id: rid, name: item?.restaurantName || item?.resName || 'Restaurant', qty: 0, subtotal: 0, items: [], image: item?.image || '' });
+      const g = groups.get(rid);
+      g.qty += q;
+      g.subtotal += Number(item?.price || 0) * q;
+      if (g.items.length < 3) g.items.push(item?.name || key);
+      if (!g.image && item?.image) g.image = item.image;
+    });
+    return [...groups.values()];
+  }
+
+  function openCartHub() {
+    const cart = safeGetCart();
+    const groups = cartGroups(cart);
+    const backdrop = document.getElementById('es-cart-hub-backdrop');
+    const list = document.getElementById('es-cart-hub-list');
+    const title = document.getElementById('es-cart-hub-title');
+    if (!backdrop || !list) return;
+    if (groups.length < 2) { window.location.href = 'cart.html'; return; }
+
+    title.textContent = `Your Carts (${groups.length})`;
+    list.innerHTML = groups.map((g, i) => {
+      const items = g.items.join(', ') + (g.qty > g.items.length ? '…' : '');
+      const img = g.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=120&q=80';
+      return `<div class="es-hub-card">
+        <img class="es-hub-thumb" src="${img.replace(/"/g,'&quot;')}" alt="">
+        <div class="es-hub-main">
+          <div class="es-hub-name">${String(g.name).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}</div>
+          <div class="es-hub-meta">${g.qty} ${g.qty === 1 ? 'item' : 'items'} · ${items.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}</div>
+          <div class="es-hub-total">₹${Math.round(g.subtotal).toLocaleString('en-IN')}</div>
+        </div>
+        <button type="button" class="es-hub-view" data-hub-view="${i}">View Cart</button>
+      </div>`;
+    }).join('');
+    backdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCartHub() {
+    const backdrop = document.getElementById('es-cart-hub-backdrop');
+    if (backdrop) backdrop.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  window.__esHandleCartClick = openCartHub;
+  window.__esOpenCartHub = openCartHub;
 
   window.updateGlobalCart = function () {
     if (isDismissed) return;
@@ -671,6 +803,20 @@
       localStorage.removeItem('nearbite_cart'); 
       document.getElementById('white-cart-root').style.display = 'none'; 
       window.location.reload(); 
+    });
+
+    const hubBackdrop = document.getElementById('es-cart-hub-backdrop');
+    const hubClose = document.getElementById('es-hub-close');
+    const hubCheckout = document.getElementById('es-hub-checkout');
+    hubClose?.addEventListener('click', closeCartHub);
+    hubCheckout?.addEventListener('click', () => { window.location.href = 'cart.html'; });
+    hubBackdrop?.addEventListener('click', (e) => {
+      if (e.target === hubBackdrop) closeCartHub();
+      const view = e.target.closest('[data-hub-view]');
+      if (view) { closeCartHub(); window.location.href = 'cart.html'; }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCartHub();
     });
 
     window.updateGlobalCart();
