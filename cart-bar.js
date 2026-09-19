@@ -293,7 +293,7 @@
       border: 0;
       border-radius: 17px;
       background: #EC168C;
-      box-shadow: 0 8px 22px rgba(236,22,140,.26);
+      box-shadow: none;
       color: #fff;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -317,7 +317,7 @@
       justify-content: space-between;
       gap: 10px;
     }
-    #white-cart-root.u99-cart-bar #wc-item-count {
+    #white-cart-root.u99-cart-bar .wc-cart-total {
       order: 1;
       position: static;
       transform: none;
@@ -327,6 +327,7 @@
       line-height: 1;
       white-space: nowrap;
       margin: 0;
+      letter-spacing: -.1px;
     }
     #white-cart-root.u99-cart-bar .wc-btn {
       order: 2;
@@ -384,7 +385,7 @@
         padding-right: 13px;
         border-radius: 16px;
       }
-      #white-cart-root.u99-cart-bar #wc-item-count,
+      #white-cart-root.u99-cart-bar .wc-cart-total,
       #white-cart-root.u99-cart-bar .wc-btn-title { font-size: 15px; }
       #white-cart-root.u99-cart-bar .u99-cart-icon { width: 20px; height: 20px; flex-basis: 20px; }
     }
@@ -425,9 +426,9 @@
         </button>
         <div class="wc-right">
           <div id="wc-standard-actions" style="display: flex; gap: 8px; align-items: center;">
+            <span id="wc-item-count" class="wc-cart-total" aria-live="polite">1 item · ₹0</span>
             <button type="button" class="wc-btn" onclick="window.location.href='cart.html'">
               <span class="wc-btn-title">View Cart <svg class="u99-cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="19" cy="20" r="1.5"></circle><path d="M3 4h2l2.2 10.4a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 2-1.6L21 8H7"></path></svg></span>
-              <span class="wc-btn-sub" id="wc-item-count" aria-live="polite">1 item</span>
             </button>
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
