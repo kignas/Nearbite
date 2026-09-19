@@ -314,7 +314,7 @@
     }
     #white-cart-root.wc-pink .wc-btn {
       min-width:138px; width:138px; height:56px; padding:0 14px;
-      border-radius:28px; background:#D90B7D; color:#fff; box-shadow:none;
+      border-radius:18px; background:#D90B7D; color:#fff; box-shadow:none;
       flex-direction:row; gap:8px;
     }
     #white-cart-root.wc-pink .wc-btn-title { font-size:17px; line-height:1; font-weight:800; }
