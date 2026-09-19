@@ -185,8 +185,10 @@
     s.textContent=`
       .u99-card-host{display:block;min-width:0}
       .u99-restaurant-card{
-        background:#fff;border:1px solid #E6E8EC;border-radius:24px;
-        padding:16px 16px 15px;
+        background:#fff;
+        border:1px solid #E3E6EA;
+        border-radius:24px;
+        padding:17px 16px 16px;
         box-shadow:0 2px 10px rgba(16,24,40,.045);
         overflow:hidden;
       }
@@ -196,11 +198,11 @@
       }
       .u99-card-copy{min-width:0}
       .u99-discount-line{
-        color:#EC168C;font-size:14px;line-height:1;font-weight:800;
+        color:#EC168C;font-size:14px;line-height:1.05;font-weight:800;
         letter-spacing:-.2px;margin:0 0 5px;text-transform:uppercase;
       }
       .u99-restaurant-name{
-        margin:0 0 7px;font-size:20px;line-height:1.08;font-weight:800;
+        margin:0 0 8px;font-size:21px;line-height:1.08;font-weight:800;
         letter-spacing:-.55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
       }
       .u99-meta{
@@ -217,7 +219,7 @@
       .u99-cuisine{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
       .u99-free-row{
         margin-top:7px;display:flex;align-items:center;gap:6px;min-width:0;
-        font-size:11.5px;font-weight:600;color:#26334A;line-height:1.2;white-space:nowrap;
+        font-size:11.5px;font-weight:650;color:#26334A;line-height:1.2;white-space:nowrap;
       }
       .u99-free-icon{
         width:21px;height:21px;border-radius:6px;background:#159A62;color:#fff;
@@ -230,16 +232,17 @@
       }
       .u99-info svg{width:16px;height:16px}
 
-      .u99-carousel-wrap{margin-top:12px}
+      .u99-carousel-wrap{margin-top:13px}
       .u99-carousel{
         display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;
-        padding:0 0 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+        padding:0 0 3px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
       }
       .u99-carousel::-webkit-scrollbar{display:none}
 
-      /* Three compact benchmark-style tiles are visible in the card width. */
+      /* Keep Eatswada's own wider/taller tile proportion. The benchmark's tile dimensions are NOT copied. */
       .u99-item{
-        flex:0 0 calc((100% - 20px)/3);width:calc((100% - 20px)/3);
+        flex:0 0 calc((100% - 20px)/3);
+        width:calc((100% - 20px)/3);
         min-width:0;scroll-snap-align:start;
       }
       .u99-item-image{
