@@ -679,7 +679,8 @@
     line-height:1.1; font-variant-numeric:tabular-nums;
   }
   .ct-paybar-link{ display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; color:var(--ct-green); letter-spacing:.2px; }
-  .ct-paybar .ct-cta{ flex:1; min-height:52px; border-radius:999px; justify-content:center; }
+  .ct-paybar .ct-cta{ flex:1; min-height:54px; border-radius:999px; justify-content:center; background:#0B8F3C; box-shadow:0 5px 14px rgba(11,143,60,.20); }
+  .ct-paybar .ct-cta:active{ background:#087631; }
   .ct-pay-note{
     display:flex; align-items:center; justify-content:center; gap:6px;
     margin-top:1px; font-size:10.5px; font-weight:600; color:var(--ct-muted);
@@ -997,8 +998,8 @@
   .ct-strip-sub{font-size:10.5px;}
 
   /* Complete-your-meal. */
-  .ct-meal{margin:10px 14px 7px;padding:0 2px;}
-  .ct-meal-head{margin:0 0 8px;}
+  .ct-meal{margin:12px 14px 9px;padding:14px 12px 13px;background:#fff;border:1px solid #ECEDEF;border-radius:17px;box-shadow:0 1px 2px rgba(20,24,28,.035);}
+  .ct-meal-head{margin:0 0 10px;}
   .ct-meal-title{
     font-size:11px;
     font-weight:800;
@@ -1020,19 +1021,19 @@
 
   /* Payment offers: shorter, cleaner, closer to the benchmark. */
   #coupon-card.ct-line-card{
-    min-height:56px;
-    margin:7px 14px;
-    padding:9px 12px;
-    gap:10px;
-    border-radius:15px;
+    min-height:74px;
+    margin:10px 14px;
+    padding:13px 14px;
+    gap:12px;
+    border-radius:17px;
     box-shadow:0 1px 2px rgba(20,24,28,.035);
   }
   #coupon-card .ct-line-ic{
-    width:30px;height:30px;flex-basis:30px;border-radius:9px;
+    width:36px;height:36px;flex-basis:36px;border-radius:11px;
   }
-  #coupon-card .ct-line-title{font-size:12.5px;font-weight:750;}
-  #coupon-card .ct-line-sub{margin-top:1px;font-size:10px;line-height:1.25;}
-  #coupon-card .ct-line-chev{font-size:10px;}
+  #coupon-card .ct-line-title{font-size:14px;font-weight:800;}
+  #coupon-card .ct-line-sub{margin-top:3px;font-size:11.5px;line-height:1.35;}
+  #coupon-card .ct-line-chev{font-size:11px;}
 
   /* Premium line-icon treatment. */
   .ct-line-ic{
@@ -1122,8 +1123,8 @@
   .ct-paybar{gap:10px;}
   .ct-paybar-amt{font-size:17px;}
   .ct-paybar-link{font-size:10.5px;}
-  .ct-paybar .ct-cta{min-height:50px;padding:11px 16px;border-radius:999px;}
-  .ct-cta-text{font-size:13.5px;}
+  .ct-paybar .ct-cta{min-height:54px;padding:12px 18px;border-radius:999px;background:#0B8F3C;box-shadow:0 5px 14px rgba(11,143,60,.20);}
+  .ct-cta-text{font-size:14px;font-weight:800;}
   .ct-cta-sub{font-size:9.5px;}
   .ct-pay-note{font-size:9.5px;color:#7B8187;gap:5px;}
   .ct-pay-note svg{flex:0 0 auto;}
@@ -1151,7 +1152,7 @@
       </button>
       <button type="button" class="ct-dh-main tap" id="address-block" onclick="window.location.href='address.html?return=cart'" aria-label="Change delivery address">
         <span class="ct-dh-copy">
-          <span class="ct-dh-restaurant" id="ct-dh-restaurant">Restaurant</span>
+          <span class="ct-dh-restaurant" id="ct-dh-restaurant">Eatswada Restaurant</span>
           <span class="ct-dh-meta">
             <svg class="ct-dh-meta-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 7.5h14v10.25A1.25 1.25 0 0 1 17.75 19h-11A1.25 1.25 0 0 1 5.5 17.75V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
@@ -3103,6 +3104,15 @@ function toggleDIPill(label){
   paintDIPills();
 }
 
+/* Retry once after the initial restaurant/cart hydration so recommendations
+   do not disappear simply because the restaurant response arrived late. */
+function ctRetryCompleteMeal(){
+  setTimeout(() => {
+    const section = document.getElementById('ct-meal');
+    if (section && section.hidden) paintCompleteMeal();
+  }, 900);
+}
+
 /* ── Complete your meal — real same-restaurant menu, real cart-add ───────────
    Reads the restaurant's own menu from the backend restaurant record. If none
    is present, the whole section stays hidden (no invented items). The + button
@@ -3183,6 +3193,8 @@ async function paintCompleteMeal(){
   }).join('');
   section.hidden = false;
 }
+ctRetryCompleteMeal();
+
 function ctAddMealItem(idx){
   const it = ctMealItems[idx];
   if (!it) return;
@@ -3447,12 +3459,12 @@ function paintCheckoutDeliverySummary() {
     const eta = cached ? ctEtaText(cached) : '';
     // Never let "unavailable" become the headline — the line reads "{eta} to {tag}",
     // so a missing ETA falls back to a calm "Delivery to {tag}".
-    etaEl.textContent = eta || 'Delivery';
+    etaEl.textContent = eta || '30–40 mins';
     if (!eta && rid) {
       getRestaurantLocation(rid).then(r => {
         const t = r ? ctEtaText(r) : '';
         const el = document.getElementById('checkout-eta');
-        if (el) el.textContent = t || 'Delivery';
+        if (el) el.textContent = t || '30–40 mins';
       }).catch(() => {});
     }
   }
