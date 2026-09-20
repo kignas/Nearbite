@@ -376,157 +376,6 @@
 </style>
 <style id="eatswada-step2-compact-spacing">
 
-/* STEP 2 — COMPACT BENCHMARK SPACING / TYPOGRAPHY
-   Visual-only. Do not alter API, cart, filters, menu data or interactions. */
-.res-card-body{
-  padding-top:14px!important;
-  padding-bottom:7px!important;
-}
-.res-name{
-  font-size:23px!important;
-  line-height:1.08!important;
-  letter-spacing:-.6px!important;
-}
-.res-cuisine{
-  margin-top:3px!important;
-  font-size:12px!important;
-  line-height:1.2!important;
-}
-.res-meta-row{
-  margin-top:7px!important;
-  gap:6px!important;
-}
-.rating-pill{
-  height:28px!important;
-  padding:0 8px!important;
-  border-radius:6px!important;
-}
-.rating-star{font-size:10px!important}
-.rating-num{font-size:12px!important}
-.rating-count{font-size:10px!important}
-.meta-chip{
-  font-size:12px!important;
-  gap:4px!important;
-}
-.meta-chip i{font-size:11px!important}
-.meta-dot{height:12px!important}
-
-/* Smaller, tighter delivery banner. */
-.delivery-strip{
-  height:48px!important;
-  min-height:48px!important;
-  margin:7px 14px 0!important;
-  border-radius:13px!important;
-}
-.delivery-copy{
-  left:20px!important;
-  right:98px!important;
-}
-.delivery-strip .del-chip{
-  font-size:12px!important;
-  line-height:1!important;
-}
-.delivery-banner-line{
-  left:14px!important;
-}
-.delivery-rider{
-  right:5px!important;
-  width:88px!important;
-  height:48px!important;
-}
-
-/* Bring Menu / Reviews / Info directly up against the banner. */
-.menu-tabs{
-  height:48px!important;
-  margin-top:0!important;
-  padding:0 14px!important;
-}
-.menu-tab{
-  font-size:13px!important;
-}
-.menu-tab:not(:last-child)::after{
-  top:14px!important;
-  height:19px!important;
-}
-.menu-tab.active::before{
-  height:3px!important;
-}
-
-/* Slightly smaller typography below the tabs without changing structure. */
-.filter-bar{
-  padding-top:9px!important;
-  padding-bottom:6px!important;
-  gap:7px!important;
-}
-.advanced-filter-btn,.veg-chip{
-  height:38px!important;
-  min-height:38px!important;
-  font-size:12px!important;
-  border-radius:9px!important;
-}
-.menu-cat-header{
-  height:52px!important;
-}
-.menu-cat-title{
-  font-size:19px!important;
-}
-.menu-cat-count{
-  font-size:12px!important;
-}
-.menu-cat-chevron{
-  width:30px!important;
-  height:30px!important;
-}
-.nb-item-title{
-  font-size:16px!important;
-}
-.nb-item-desc{
-  font-size:12px!important;
-  line-height:1.3!important;
-}
-.nb-item-current-price{
-  font-size:15px!important;
-}
-.nb-item-original-price{
-  font-size:11px!important;
-}
-.nb-item-discount,
-.nb-item-badge{
-  font-size:9px!important;
-}
-.nb-customisable{
-  font-size:10px!important;
-}
-
-@media(max-width:380px){
-  .res-card-body{
-    padding-top:13px!important;
-    padding-bottom:6px!important;
-  }
-  .delivery-strip{
-    margin-left:12px!important;
-    margin-right:12px!important;
-    height:46px!important;
-    min-height:46px!important;
-  }
-  .delivery-copy{
-    left:18px!important;
-    right:92px!important;
-  }
-  .delivery-strip .del-chip{
-    font-size:11.5px!important;
-  }
-  .delivery-rider{
-    right:4px!important;
-    width:84px!important;
-    height:46px!important;
-  }
-  .menu-tabs{
-    height:46px!important;
-    padding-left:14px!important;
-    padding-right:14px!important;
-  }
-}
 
 </style>
 <link rel="stylesheet" href="eatswada-typography.css">
@@ -2037,6 +1886,193 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   border-radius:10px!important;
   font-size:13px!important;
   line-height:1!important;
+}
+</style>
+
+
+<style id="eatswada-top-benchmark-authoritative">
+/* FINAL AUTHORITATIVE TOP-SECTION MATCH
+   This layer intentionally comes LAST so earlier CSS cannot override it.
+   No API, menu, cart, filter or interaction logic is changed. */
+
+.res-card-body{
+  padding-top:13px!important;
+  padding-bottom:6px!important;
+}
+
+.res-name{
+  font-size:22px!important;
+  line-height:1.08!important;
+  letter-spacing:-.45px!important;
+}
+
+.res-cuisine{
+  margin-top:3px!important;
+  font-size:12px!important;
+  line-height:1.18!important;
+}
+
+.res-meta-row{
+  margin-top:6px!important;
+  gap:6px!important;
+}
+
+.rating-pill{
+  height:27px!important;
+  min-height:27px!important;
+  padding:0 8px!important;
+  border-radius:6px!important;
+}
+
+.rating-star{font-size:10px!important}
+.rating-num{font-size:12px!important}
+.rating-count{font-size:10px!important}
+
+.meta-chip{
+  font-size:12px!important;
+  gap:4px!important;
+}
+
+.meta-chip i{font-size:11px!important}
+.meta-dot{height:11px!important}
+
+/* Benchmark banner: short, compact, with rider contained at the bottom. */
+.delivery-strip{
+  height:46px!important;
+  min-height:46px!important;
+  margin:6px 14px 0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+}
+
+.delivery-copy{
+  left:20px!important;
+  right:98px!important;
+}
+
+.delivery-strip .del-chip{
+  font-size:12px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+.delivery-banner-line{
+  left:14px!important;
+}
+
+.delivery-rider{
+  right:5px!important;
+  bottom:-1px!important;
+  width:86px!important;
+  height:47px!important;
+}
+
+.delivery-rider img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+}
+
+/* Banner → tabs: intentionally tight. */
+.menu-tabs{
+  height:47px!important;
+  min-height:47px!important;
+  margin-top:0!important;
+  padding:0 14px!important;
+}
+
+.menu-tab{
+  font-size:13px!important;
+  line-height:1!important;
+}
+
+.menu-tab:not(:last-child)::after{
+  top:13px!important;
+  height:20px!important;
+}
+
+.menu-tab.active::before{
+  height:3px!important;
+}
+
+/* Compact filter row matching benchmark density. */
+.filter-bar{
+  padding-top:8px!important;
+  padding-bottom:5px!important;
+  gap:7px!important;
+}
+
+.advanced-filter-btn,
+.veg-chip{
+  height:37px!important;
+  min-height:37px!important;
+  font-size:12px!important;
+  border-radius:9px!important;
+}
+
+/* Keep menu section typography slightly tighter, without changing layout logic. */
+.menu-cat-header{
+  height:51px!important;
+}
+
+.menu-cat-title{
+  font-size:19px!important;
+}
+
+.menu-cat-count{
+  font-size:12px!important;
+}
+
+.menu-cat-chevron{
+  width:30px!important;
+  height:30px!important;
+}
+
+.nb-item-title{font-size:16px!important}
+.nb-item-desc{
+  font-size:12px!important;
+  line-height:1.3!important;
+}
+.nb-item-current-price{font-size:15px!important}
+.nb-item-original-price{font-size:11px!important}
+.nb-item-discount,
+.nb-item-badge{font-size:9px!important}
+.nb-customisable{font-size:10px!important}
+
+@media (max-width:380px){
+  .res-card-body{
+    padding-top:12px!important;
+    padding-bottom:5px!important;
+  }
+
+  .delivery-strip{
+    height:44px!important;
+    min-height:44px!important;
+    margin-left:12px!important;
+    margin-right:12px!important;
+  }
+
+  .delivery-copy{
+    left:18px!important;
+    right:90px!important;
+  }
+
+  .delivery-strip .del-chip{
+    font-size:11.5px!important;
+  }
+
+  .delivery-rider{
+    right:4px!important;
+    width:82px!important;
+    height:45px!important;
+  }
+
+  .menu-tabs{
+    height:45px!important;
+    min-height:45px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
 }
 </style>
 
