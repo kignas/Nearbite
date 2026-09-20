@@ -1037,6 +1037,14 @@
     color:#777D83;
   }
   .ct-meal-sub{display:none;}
+  /* Vertical stack of per-restaurant strips (keeps recommendations from
+     one restaurant from ever mixing with another's). */
+  .ct-meal-stack{display:flex;flex-direction:column;gap:12px;}
+  .ct-meal-group-label{
+    font-size:11px;font-weight:700;color:var(--ct-muted);
+    letter-spacing:.1px;margin:2px 2px 2px 0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
   .ct-meal-row{gap:9px;}
   .ct-meal-card{flex-basis:94px;width:94px;}
   .ct-meal-media{width:94px;height:94px;border-radius:11px;}
@@ -1048,21 +1056,9 @@
   .ct-meal-name{font-size:11px;min-height:29px;margin-top:6px;}
   .ct-meal-price{font-size:12px;}
 
-  /* Payment offers: shorter, cleaner, closer to the benchmark. */
-  #coupon-card.ct-line-card{
-    min-height:74px;
-    margin:10px 14px;
-    padding:13px 14px;
-    gap:12px;
-    border-radius:17px;
-    box-shadow:0 1px 2px rgba(20,24,28,.035);
-  }
-  #coupon-card .ct-line-ic{
-    width:36px;height:36px;flex-basis:36px;border-radius:11px;
-  }
-  #coupon-card .ct-line-title{font-size:14px;font-weight:800;}
-  #coupon-card .ct-line-sub{margin-top:3px;font-size:11.5px;line-height:1.35;}
-  #coupon-card .ct-line-chev{font-size:11px;}
+  /* Payment offers now reuses the .ct-group shell (see the unified
+     #ct-payment-group / #ct-di-group rules below), so it needs no dedicated
+     sizing here — both offer cards stay pixel-for-pixel identical. */
 
   /* Premium line-icon treatment. */
   .ct-line-ic{
@@ -1161,7 +1157,6 @@
   @media (max-width:380px){
     .ct-dh-meta,.ct-dh-eta,.ct-dh-addr{font-size:11.5px;}
     .ct-dh-restaurant{font-size:12px;}
-    #coupon-card.ct-line-card{margin-left:12px;margin-right:12px;}
     .ct-group,.ct-bill{margin-left:12px;margin-right:12px;}
   }
 
@@ -1169,28 +1164,25 @@
   /* ── Final user-requested checkout adjustments ─────────────────────── */
   /* Header: restaurant name removed; delivery ETA/address remain. */
 
-  /* Payment offers and Delivery instructions use the same card height. */
-  #coupon-card.ct-line-card,
+  /* Payment offers & Delivery instructions are ONE component system:
+     the same .ct-group shell, the same margins, the same collapsed height.
+     The collapsed-height match lives on the HEAD, never on the group — a
+     fixed height on #ct-di-group plus .ct-group{overflow:hidden} was clipping
+     the delivery-instructions body so tapping it appeared to do nothing.
+     With no fixed group height the group grows freely when it expands. */
+  #ct-payment-group,
   #ct-di-group{
-    min-height:74px;
     box-sizing:border-box;
+    margin:8px 14px;
   }
-
-  #coupon-card.ct-line-card{
-    margin-top:10px;
-    margin-bottom:7px;
-  }
-
-  #ct-di-group{
-    margin-top:7px;
-    margin-bottom:7px;
-  }
-
+  #ct-payment-group .ct-group-head,
   #ct-di-group .ct-group-head{
-    min-height:74px;
+    min-height:62px;
     box-sizing:border-box;
-    padding:13px 12px;
+    padding:13px 14px;
   }
+  /* Payment offers opens a sheet, so its chevron points forward and never rotates. */
+  .ct-group-chev--nav{ transform:none; }
 
   /* Requested red accent: free-delivery strip + Proceed to Pay. */
   .ct-strip:not(.is-error):not(.is-neutral){
@@ -1210,21 +1202,6 @@
   .ct-paybar .ct-cta:active{
     background:#A1114B;
   }
-
-
-  /* ── Checkout benchmark final adjustments ─────────────────────────── */
-  /* Payment offers and delivery instructions are one visual component system. */
-  #coupon-card.ct-line-card,
-  #ct-di-group{
-    min-height:74px;
-    height:74px;
-    box-sizing:border-box;
-    margin-left:14px;
-    margin-right:14px;
-  }
-  #coupon-card.ct-line-card{margin-top:10px;margin-bottom:7px;padding:13px 14px;}
-  #ct-di-group{margin-top:7px;margin-bottom:7px;}
-  #ct-di-group .ct-group-head{height:72px;min-height:72px;padding:11px 12px;box-sizing:border-box;}
 
   /* Real Eatswada accent: no green CTA on checkout. */
   .ct-paybar .ct-cta{
@@ -1310,26 +1287,28 @@
         <div class="ct-meal-title">Complete your meal</div>
         <div class="ct-meal-sub">More from this restaurant</div>
       </div>
-      <div class="ct-meal-row" id="ct-meal-row"></div>
+      <div class="ct-meal-stack" id="ct-meal-row"></div>
     </section>
 
-    <!-- ═══ 4. PAYMENT OFFERS & MORE — compact premium card ═══ -->
-    <button type="button" class="ct-line-card" id="coupon-card" aria-label="Payment offers and more">
-      <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M4.5 8.25a2 2 0 0 1 2-2h8.8l4.2 4.2v5.3a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8.25Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/>
-          <path d="m15.2 6.4 3.9 3.9" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/>
-          <circle cx="8.5" cy="10" r="1.05" fill="currentColor"/>
+    <!-- ═══ 4. PAYMENT OFFERS & MORE — same .ct-group shell as Delivery instructions ═══ -->
+    <div class="ct-group ct-group--nav" id="ct-payment-group">
+      <button type="button" class="ct-group-head" id="coupon-card" aria-haspopup="dialog" aria-label="Payment offers and more">
+        <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4.5 8.25a2 2 0 0 1 2-2h8.8l4.2 4.2v5.3a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8.25Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/>
+            <path d="m15.2 6.4 3.9 3.9" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/>
+            <circle cx="8.5" cy="10" r="1.05" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="ct-group-copy">
+          <span class="ct-group-title">Payment offers &amp; more</span>
+          <span class="ct-group-sub" id="coupon-card-sub">Apply coupon code if any</span>
+        </span>
+        <svg class="ct-group-chev ct-group-chev--nav" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </span>
-      <span class="ct-line-copy">
-        <span class="ct-line-title">Payment offers &amp; more</span>
-        <span class="ct-line-sub">Apply coupon code if any</span>
-      </span>
-      <svg class="ct-line-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+      </button>
+    </div>
 
     <!-- ═══ 5+6. DELIVERY INSTRUCTIONS + RIDER TIP — inline expansion ═══ -->
     <div class="ct-group" id="ct-di-group">
@@ -3310,51 +3289,79 @@ function ctExtractMenu(rest){
    /restaurants/{id}/menu. We read the embedded copy first and fall back to the
    dedicated endpoint. Both go through the same extractor, so ONLY real menu
    data is ever shown — any failure leaves the section hidden, never faked. */
-let ctMenuCache = { id: null, items: null };
+const ctMenuCache = {};   // rid -> extracted menu items (per restaurant, so a
+                          // multi-restaurant cart never evicts one restaurant's
+                          // menu by fetching another's)
 async function ctFetchMenu(rid){
   if (!rid) return [];
-  if (ctMenuCache.id === rid && ctMenuCache.items) return ctMenuCache.items;
+  if (ctMenuCache[rid]) return ctMenuCache[rid];
   try {
     const res = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}/menu`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
     const data = (json && (json.data != null ? json.data : json)) || [];
     const items = ctExtractMenu(Array.isArray(data) ? { menu: data } : data);
-    ctMenuCache = { id: rid, items };
+    ctMenuCache[rid] = items;
     return items;
   } catch (_) { return []; }
 }
 
-async function paintCompleteMeal(){
-  const section = document.getElementById('ct-meal');
-  const row = document.getElementById('ct-meal-row');
-  if (!section || !row) return;
-  const cart = readCart() || {};
-  const rid = getCartRestaurantId(cart);
-  if (!rid){ section.hidden = true; return; }
+/* Pull a restaurant's own menu, preferring the copy embedded in the restaurant
+   document (already cached from the delivery calc) and falling back to the
+   dedicated /menu endpoint. Returns only real, in-stock, priced items. */
+async function ctMenuForRestaurant(rid){
+  if (!rid) return [];
   let rest = (ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
   if (!rest){ try { rest = await getRestaurantLocation(rid); } catch (_) {} }
+  let items = ctExtractMenu(rest);
+  if (!items.length) items = await ctFetchMenu(rid);
+  return items;
+}
+
+function ctMealCardHtml(it, idx){
+  const media = it.image
+    ? '<img src="' + esc(it.image) + '" alt="" loading="lazy" onerror="this.remove()">'
+    : '<span class="ct-meal-ph"><i class="fa-solid fa-utensils"></i></span>';
+  return '<div class="ct-meal-card">' +
+    '<div class="ct-meal-media">' + media +
+      '<button type="button" class="ct-meal-add" data-meal-add="' + idx + '" aria-label="Add ' + esc(it.name) + '">+</button>' +
+    '</div>' +
+    '<div class="ct-meal-name">' + esc(it.name) + '</div>' +
+    '<div class="ct-meal-price">₹' + it.price + '</div>' +
+  '</div>';
+}
+
+async function paintCompleteMeal(){
+  const section = document.getElementById('ct-meal');
+  const stack = document.getElementById('ct-meal-row');
+  if (!section || !stack) return;
+  const cart = readCart() || {};
+  const groups = ctCartGroups();                       // one entry per restaurant in the cart
+  if (!groups.length){ section.hidden = true; return; }
   const inCart = new Set(Object.keys(cart).map(n => n.toLowerCase()));
-  const resName = (Object.values(cart)[0] || {}).resName || '';
-  let items = ctExtractMenu(rest).filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
-  if (!items.length){
-    const fetched = await ctFetchMenu(rid);
-    items = fetched.filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  const multi = groups.length > 1;
+
+  // Rebuild the flat index the + button reads, spanning every restaurant strip.
+  ctMealItems = [];
+  const blocks = [];
+  for (const g of groups){
+    const rid = g.resId;
+    const menu = await ctMenuForRestaurant(rid);
+    const picks = menu.filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+    if (!picks.length) continue;                       // this restaurant has nothing to suggest
+    const cards = picks.map(it => {
+      const idx = ctMealItems.length;
+      ctMealItems.push(Object.assign({}, it, { resId: rid, resName: g.name }));
+      return ctMealCardHtml(it, idx);
+    }).join('');
+    blocks.push(
+      (multi ? '<div class="ct-meal-group-label">More from ' + esc(g.name) + '</div>' : '') +
+      '<div class="ct-meal-row">' + cards + '</div>'
+    );
   }
-  if (!items.length){ section.hidden = true; return; }
-  ctMealItems = items.map(it => Object.assign({}, it, { resId: rid, resName: resName }));
-  row.innerHTML = ctMealItems.map((it, idx) => {
-    const media = it.image
-      ? '<img src="' + esc(it.image) + '" alt="" loading="lazy" onerror="this.remove()">'
-      : '<span class="ct-meal-ph"><i class="fa-solid fa-utensils"></i></span>';
-    return '<div class="ct-meal-card">' +
-      '<div class="ct-meal-media">' + media +
-        '<button type="button" class="ct-meal-add" data-meal-add="' + idx + '" aria-label="Add ' + esc(it.name) + '">+</button>' +
-      '</div>' +
-      '<div class="ct-meal-name">' + esc(it.name) + '</div>' +
-      '<div class="ct-meal-price">₹' + it.price + '</div>' +
-    '</div>';
-  }).join('');
+
+  if (!blocks.length){ section.hidden = true; return; }  // no real menu data anywhere → stay hidden
+  stack.innerHTML = blocks.join('');
   section.hidden = false;
 }
 ctRetryCompleteMeal();
@@ -3705,7 +3712,7 @@ async function applyCouponFromSheet() {
       const r=await fetch(`${CONFIG.API_BASE_URL}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({code,subtotal,restaurantId:getCartRestaurantId(readCart() || {}) || undefined})});
       const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
       ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
-      const card=document.getElementById('coupon-card'); if(card){const sub=card.querySelector('.ct-line-sub');if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;}
+      const sub=document.getElementById('coupon-card-sub'); if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;
       closeSheet?.('ct-coupon-sheet'); if(typeof renderCart==='function') renderCart();
     } catch(e){if(err){err.hidden=false;err.textContent=e.message||'Coupon could not be applied.';}}
  }
@@ -3730,24 +3737,10 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  const noteCard = target.closest('.ct-line-card[data-note-field]');
-  if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
+  const noteBtn = target.closest('[data-note-field]');
+  if (noteBtn) { openNoteSheet(noteBtn.dataset.noteField); return; }
 
   if (target.closest('#ct-view-bill')) { document.getElementById('ct-bill')?.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
-
-  document.getElementById('coupon-apply')?.addEventListener('click', async () => {
-    const input=document.getElementById('coupon-input'); const err=document.getElementById('coupon-error'); const code=String(input?.value||'').trim().toUpperCase();
-    if(err){err.hidden=true;err.textContent='';} if(!code){if(err){err.hidden=false;err.textContent='Enter a coupon code.';}return;}
-    try {
-      const subtotal = Array.isArray(ctState.items) ? ctState.items.reduce((sum,it)=>sum + Number(it.price||0)*Number(it.quantity||1),0) : 0;
-      const token=localStorage.getItem('nearbite_token') || localStorage.getItem('eatswada_token') || '';
-      const r=await fetch(`${CONFIG.API_BASE_URL}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({code,subtotal,restaurantId:ctState.restaurantId||undefined})});
-      const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
-      ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
-      const card=document.getElementById('coupon-card'); if(card){const sub=card.querySelector('.ct-line-sub');if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;}
-      closeSheet?.('ct-coupon-sheet'); if(typeof renderCart==='function') renderCart();
-    } catch(e){if(err){err.hidden=false;err.textContent=e.message||'Coupon could not be applied.';}}
-  });
 
   if (target.closest('#coupon-card')) { openSheet('ct-coupon-sheet'); return; }
 
