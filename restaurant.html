@@ -1785,6 +1785,261 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .res-name,.res-cuisine{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 
+
+<style id="eatswada-top-99-pass">
+/* ============================================================
+   EATSWADA — TOP SECTION 99% BENCHMARK PASS
+   Only visual tuning for the header → filters boundary.
+   No menu/API/cart/filter logic changed.
+   ============================================================ */
+
+/* Header: compact, benchmark-sized controls */
+.top-bar{
+  height:58px!important;
+  min-height:58px!important;
+  padding:7px 16px!important;
+  background:#fff!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+.top-bar>.icon-btn,
+.top-actions .icon-btn{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  border:1px solid #ECEEF1!important;
+  box-shadow:0 2px 8px rgba(20,24,32,.06)!important;
+}
+.top-bar>.icon-btn i,
+.top-actions .icon-btn i{
+  font-size:17px!important;
+  color:#151A23!important;
+}
+
+/* Keep only the controls already present in the uploaded file.
+   Search is not visible in the benchmark header. */
+#menu-search-btn{display:none!important}
+
+/* Restaurant information: remove excess vertical breathing room */
+.res-card{
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+.res-card-body{
+  padding:9px 16px 9px!important;
+}
+.res-name{
+  font-size:25px!important;
+  line-height:28px!important;
+  letter-spacing:-.65px!important;
+  font-weight:800!important;
+}
+.res-cuisine{
+  margin-top:3px!important;
+  font-size:13px!important;
+  line-height:18px!important;
+  font-weight:500!important;
+}
+.res-meta-row{
+  margin-top:8px!important;
+  gap:7px!important;
+  height:28px!important;
+  min-height:28px!important;
+  flex-wrap:nowrap!important;
+}
+
+/* Benchmark rating: soft green pill + vector star */
+.rating-pill{
+  height:28px!important;
+  min-height:28px!important;
+  padding:0 9px!important;
+  gap:5px!important;
+  border-radius:8px!important;
+  background:#E7F6EE!important;
+  border:1px solid #CDEBDB!important;
+  box-shadow:none!important;
+}
+.rating-star{
+  width:14px!important;
+  height:14px!important;
+  font-size:0!important;
+  color:#0E8A54!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.rating-star svg{
+  width:14px!important;
+  height:14px!important;
+  display:block!important;
+}
+.rating-num{
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  color:#0E7C4C!important;
+}
+.rating-count{
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:700!important;
+  color:#2A8765!important;
+}
+.rating-divider{display:none!important}
+.meta-dot{
+  width:1px!important;
+  height:14px!important;
+  margin:0 2px!important;
+  background:#DCDFE4!important;
+  color:transparent!important;
+  font-size:0!important;
+}
+.meta-chip{
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:600!important;
+  gap:5px!important;
+  color:#4E5662!important;
+}
+.meta-chip i{
+  font-size:12px!important;
+  color:#7E8792!important;
+}
+
+/* Delivery banner: shorter and tighter */
+.delivery-strip{
+  height:54px!important;
+  min-height:54px!important;
+  max-height:54px!important;
+  margin:7px 14px 7px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:15px!important;
+  background:#FDEEF6!important;
+  overflow:hidden!important;
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.delivery-copy{
+  position:absolute!important;
+  left:18px!important;
+  right:104px!important;
+  top:0!important;
+  bottom:0!important;
+  width:auto!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:2!important;
+}
+.delivery-strip .del-chip{
+  max-width:100%!important;
+  white-space:nowrap!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:700!important;
+  gap:0!important;
+  color:#20242D!important;
+}
+.delivery-strip .del-chip i{display:none!important}
+.delivery-strip .del-chip span{color:#20242D!important}
+.delivery-strip .del-chip span strong{
+  color:#E40073!important;
+  font-weight:800!important;
+}
+.delivery-banner-line{
+  left:15px!important;
+  width:46px!important;
+  z-index:1!important;
+}
+.delivery-banner-line span{
+  background:#D9539E!important;
+  height:2px!important;
+  border-radius:2px!important;
+  margin:5px 0!important;
+}
+.delivery-banner-line span:first-child{width:34px!important}
+.delivery-banner-line span:last-child{
+  width:20px!important;
+  margin-left:14px!important;
+}
+.delivery-rider{
+  right:6px!important;
+  bottom:0!important;
+  width:96px!important;
+  height:54px!important;
+  z-index:3!important;
+}
+.delivery-rider svg,
+.delivery-rider-image{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+}
+.delivery-rider-image{
+  object-fit:contain!important;
+  object-position:center bottom!important;
+}
+
+/* Tabs: directly follow the banner */
+.menu-tabs{
+  height:50px!important;
+  min-height:50px!important;
+  margin-top:0!important;
+  padding:0 16px!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  align-items:stretch!important;
+  background:#fff!important;
+  border-bottom:1px solid #ECEEF1!important;
+}
+.menu-tab{
+  font-size:14px!important;
+  line-height:1!important;
+  font-weight:600!important;
+  color:#7C838E!important;
+}
+.menu-tab.active{
+  font-weight:800!important;
+  color:#1C2028!important;
+}
+.menu-tab.active::before{
+  height:3px!important;
+  background:#E40073!important;
+}
+.menu-tab:not(:last-child)::after{
+  top:15px!important;
+  height:20px!important;
+  background:#E6E8EC!important;
+}
+
+/* Filters: compact and immediately below tabs */
+.filter-bar{
+  margin:0!important;
+  padding:9px 16px 7px!important;
+  gap:8px!important;
+  background:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.advanced-filter-btn,
+.veg-chip{
+  height:38px!important;
+  min-height:38px!important;
+  border-radius:10px!important;
+  font-size:13px!important;
+  line-height:1!important;
+}
+</style>
+
 </head>
 <body>
 
