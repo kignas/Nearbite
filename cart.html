@@ -896,7 +896,7 @@
     font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   }
 
-  /* Benchmark-style header: restaurant name on line one, delivery context on line two. */
+  /* Delivery-first checkout header: ETA + destination only. */
   .ct-delivery-head{
     min-height:62px;
     padding:8px 13px 8px 10px;
@@ -996,6 +996,35 @@
   .ct-strip.is-error .ct-strip-icon{color:#DC2626;}
   .ct-strip.is-neutral .ct-strip-icon{color:#697077;}
   .ct-strip-sub{font-size:10.5px;}
+
+  /* ── Production restaurant grouping ───────────────────────────────── */
+  .ct-restaurant-group{
+    padding:0;
+    border-bottom:1px solid #ECEDEF;
+  }
+  .ct-restaurant-group:last-child{border-bottom:0;}
+  .ct-restaurant-head{
+    display:flex;align-items:center;gap:10px;
+    padding:13px 0 8px;
+  }
+  .ct-restaurant-copy{min-width:0;}
+  .ct-restaurant-name{
+    font-size:14px;font-weight:800;color:var(--ct-ink);
+    line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .ct-restaurant-meta{
+    margin-top:3px;font-size:10.5px;font-weight:600;color:var(--ct-muted);
+  }
+  .ct-restaurant-items .ct-row:first-child{padding-top:8px;}
+  .ct-restaurant-items .ct-row:last-child{padding-bottom:10px;}
+  .ct-group-actions{padding-top:10px;margin-top:0;}
+  .ct-restaurant-note-btn.is-set{background:var(--ct-green);border-color:var(--ct-green);color:#fff;}
+  .ct-restaurant-note-btn.is-set svg{color:#fff;}
+  .ct-restaurant-note-preview{
+    margin:8px 0 0;padding:9px 11px;border-radius:10px;
+    background:#FAF1F6;color:#6B334F;font-size:10.5px;font-weight:600;line-height:1.4;
+    overflow-wrap:anywhere;
+  }
 
   /* Complete-your-meal. */
   .ct-meal{margin:12px 14px 9px;padding:14px 12px 13px;background:#fff;border:1px solid #ECEDEF;border-radius:17px;box-shadow:0 1px 2px rgba(20,24,28,.035);}
@@ -1184,39 +1213,34 @@
 
 
   /* ── Checkout benchmark final adjustments ─────────────────────────── */
-  /* Payment offers + Delivery instructions: identical compact height. */
+  /* Payment offers and delivery instructions are one visual component system. */
   #coupon-card.ct-line-card,
   #ct-di-group{
     min-height:74px;
     height:74px;
     box-sizing:border-box;
+    margin-left:14px;
+    margin-right:14px;
   }
+  #coupon-card.ct-line-card{margin-top:10px;margin-bottom:7px;padding:13px 14px;}
+  #ct-di-group{margin-top:7px;margin-bottom:7px;}
+  #ct-di-group .ct-group-head{height:72px;min-height:72px;padding:11px 12px;box-sizing:border-box;}
 
-  #coupon-card.ct-line-card{
-    margin-top:10px;
-    margin-bottom:7px;
-  }
-
-  #ct-di-group{
-    margin-top:7px;
-    margin-bottom:7px;
-  }
-
-  #ct-di-group .ct-group-head{
-    min-height:72px;
-    height:72px;
-    box-sizing:border-box;
-    padding:11px 12px;
-  }
-
-  /* Eatswada red/pink action capsule. */
+  /* Real Eatswada accent: no green CTA on checkout. */
   .ct-paybar .ct-cta{
     background:#C2185B;
     box-shadow:0 5px 14px rgba(194,24,91,.22);
+    border-radius:999px;
   }
-  .ct-paybar .ct-cta:active{
-    background:#A1114B;
+  .ct-paybar .ct-cta:active{background:#A1114B;}
+
+  /* Delivery status uses the same restrained pink accent. */
+  .ct-strip:not(.is-error):not(.is-neutral){
+    background:#FFF1F8;
+    border-color:rgba(194,24,91,.18);
+    color:#A1114B;
   }
+  .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{color:#C2185B;}
 
   /* Do not show the normal free-delivery nudge strip. */
   #free-delivery-nudge{
@@ -1264,15 +1288,7 @@
 
 <!-- ═══ 2. CART ITEM + inline actions (Add Items · Restaurant note) ═══ -->
     <div class="ct-card ct-item-card">
-      <div id="cart-items-list"></div>
-      <div class="ct-item-actions">
-        <a class="ct-pill-btn tap" id="ct-addmore" href="index.html">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Add Items
-        </a>
-        <button type="button" class="ct-pill-btn tap" id="ct-note-pill" aria-haspopup="dialog">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19h14M7 15l9-9 2 2-9 9H7v-2z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="ct-note-pill-text">Restaurant note</span>
-        </button>
-      </div>
+      <div id="cart-items-list" aria-live="polite"></div>
     </div>
 
     <div class="ct-strip" id="free-delivery-nudge" style="display:none;" role="status" aria-live="polite">
@@ -1317,7 +1333,7 @@
 
     <!-- ═══ 5+6. DELIVERY INSTRUCTIONS + RIDER TIP — inline expansion ═══ -->
     <div class="ct-group" id="ct-di-group">
-      <button type="button" class="ct-group-head" id="ct-di-toggle" aria-expanded="false" aria-controls="ct-di-body">
+      <button type="button" class="ct-group-head" id="ct-di-toggle" aria-expanded="false" aria-controls="ct-di-body" onclick="toggleDeliveryInstructions()">
         <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M5 6.75h9.5l3 3.5H20a1 1 0 0 1 1 1v4.5H5V6.75Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/>
@@ -2139,10 +2155,26 @@ function customLine(value) {
 /* ── Item painting: synchronous, never waits on the network ─────────────── */
 function paintItems(savedCart) {
   const listEl = document.getElementById('cart-items-list');
-  const items = Object.entries(savedCart);
-  const anyMedia = items.some(([, info]) => itemImage(info));
+  if (!listEl) return;
 
-  listEl.innerHTML = items.map(([name, info]) => {
+  const entries = Object.entries(savedCart || {});
+  const groups = [];
+  const byRid = new Map();
+  for (const [name, info] of entries) {
+    const rid = String((info && info.resId) || 'legacy');
+    if (!byRid.has(rid)) {
+      const group = {
+        resId: rid,
+        name: String((info && (info.resName || info.restaurantName)) || 'Restaurant'),
+        items: []
+      };
+      byRid.set(rid, group);
+      groups.push(group);
+    }
+    byRid.get(rid).items.push([name, info || {}]);
+  }
+
+  const renderRow = (name, info, anyMedia) => {
     const price = Number(info.price || 0);
     const original = Number(info.originalPrice || 0);
     const hasDiscount = original > price;
@@ -2150,24 +2182,18 @@ function paintItems(savedCart) {
     const quantity = Number(info.quantity || 0);
     const itemTotal = quantity * price;
     const itemSavings = hasDiscount ? quantity * (original - price) : 0;
-
     const img = itemImage(info);
     const media = anyMedia ? `
         <div class="ct-media">
           <div class="ct-media-fallback"><i class="fa-solid fa-utensils"></i></div>
           ${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
         </div>` : '';
-
     const custom = customLine(info.customizations);
-
     return `
       <div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
         ${media}
         <div class="ct-info">
-          <div class="ct-name-row">
-            ${vegMark(info)}
-            <span class="ct-name">${esc(name)}</span>
-          </div>
+          <div class="ct-name-row">${vegMark(info)}<span class="ct-name">${esc(name)}</span></div>
           ${custom ? `<div class="ct-custom">${esc(custom)}</div>` : ''}
           <div class="ct-price-line">
             <span class="ct-unit-price ct-num">₹${price}</span>
@@ -2186,13 +2212,43 @@ function paintItems(savedCart) {
           </div>
         </div>
       </div>`;
+  };
+
+  listEl.innerHTML = groups.map((group, groupIndex) => {
+    const anyMedia = group.items.some(([, info]) => itemImage(info));
+    const subtotal = group.items.reduce((sum, [, info]) => sum + Number(info.price || 0) * Number(info.quantity || 0), 0);
+    const units = group.items.reduce((sum, [, info]) => sum + Number(info.quantity || 0), 0);
+    const note = group.resId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(group.resId);
+    const noteTitle = note ? 'Restaurant note added' : 'Restaurant note';
+    const noteSub = note ? note : 'Add a note for this restaurant';
+    const href = group.resId !== 'legacy' ? 'restaurant.html?id=' + encodeURIComponent(group.resId) : 'index.html';
+    return `
+      <section class="ct-restaurant-group" data-restaurant-id="${esc(group.resId)}">
+        <div class="ct-restaurant-head">
+          <div class="ct-restaurant-copy">
+            <div class="ct-restaurant-name">${esc(group.name)}</div>
+            <div class="ct-restaurant-meta">${units} ${units === 1 ? 'item' : 'items'} · ₹${subtotal}</div>
+          </div>
+        </div>
+        <div class="ct-restaurant-items">${group.items.map(([name, info]) => renderRow(name, info, anyMedia)).join('')}</div>
+        <div class="ct-item-actions ct-group-actions">
+          <a class="ct-pill-btn tap" href="${href}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Add Items
+          </a>
+          <button type="button" class="ct-pill-btn tap ct-restaurant-note-btn${note ? ' is-set' : ''}" data-note-field="${esc(restaurantNoteField(group.resId))}" data-restaurant-id="${esc(group.resId)}" aria-haspopup="dialog">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19h14M7 15l9-9 2 2-9 9H7v-2z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="ct-note-btn-text">${esc(note ? 'Note added' : 'Restaurant note')}</span>
+          </button>
+        </div>
+        ${note ? `<div class="ct-restaurant-note-preview" data-note-preview="${esc(group.resId)}">${esc(note)}</div>` : ''}
+      </section>`;
   }).join('');
 
-  let resName = 'Eatswada Restaurant';
-  if (items.length > 0 && items[0][1].resName) resName = items[0][1].resName;
-  document.getElementById('cart-restaurant-name').innerText = resName;
-  const visibleRestaurant = document.getElementById('ct-dh-restaurant');
-  if (visibleRestaurant) visibleRestaurant.textContent = resName;
+  // Keep hidden machine-readable values in sync; the brand name is never shown here.
+  const first = entries[0]?.[1] || {};
+  const resName = first.resName || first.restaurantName || 'Restaurant';
+  const hiddenName = document.getElementById('cart-restaurant-name');
+  if (hiddenName) hiddenName.innerText = resName;
 }
 
 /* ── Bill painting: money math identical to the previous build ───────────── */
@@ -2723,6 +2779,14 @@ async function placeOrder() {
     return;
   }
 
+  if (ctState.multiBelowMin && ctState.multiBelowMin.length) {
+    const r = ctState.multiBelowMin[0];
+    const remaining = Math.ceil(r.minOrder - r.subtotal);
+    showToast(`${r.name}: add ₹${remaining.toLocaleString('en-IN')} to continue.`);
+    shakeCheckout();
+    return;
+  }
+
   if (ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
     const remaining = Math.ceil(ctState.minOrder - ctState.subtotal);
     showToast('Add ₹' + remaining.toLocaleString('en-IN') + ' more to reach the minimum order.');
@@ -2804,14 +2868,30 @@ async function placeOrder() {
 
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     // The backend is the final authority, but the checkout preview must use
-    // the SAME restaurant GPS + customer GPS pricing so the customer sees
-    // the amount that will actually be charged. force:true keeps this path
-    // on live data, exactly as before.
-    const delivery = await calculateCurrentDelivery({ force: true });
-    if (delivery.outsideRadius) {
-      throw new Error(`This restaurant does not deliver to your selected address (${delivery.distance.toFixed(1)} km away; limit ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km).`);
+    // the SAME restaurant GPS + customer GPS pricing shown in the bill.
+    // Multi-restaurant carts are priced independently per restaurant.
+    const cartGroupsForOrder = ctCartGroups();
+    let deliveryFee = 0;
+    if (cartGroupsForOrder.length > 1) {
+      await calculateCurrentDelivery({ force: true });
+      const deliveryRows = await ctComputeBreakdown(cartGroupsForOrder, true);
+      const unavailableRow = deliveryRows.find(r => r.outsideRadius);
+      if (unavailableRow) {
+        throw new Error(`${unavailableRow.name} does not deliver to your selected address (${unavailableRow.distance.toFixed(1)} km away; limit ${unavailableRow.radius.toFixed(1).replace(/\.0$/, '')} km).`);
+      }
+      const belowMinimum = deliveryRows.find(r => r.minOrder > 0 && r.subtotal < r.minOrder);
+      if (belowMinimum) {
+        const add = Math.ceil(belowMinimum.minOrder - belowMinimum.subtotal);
+        throw new Error(`${belowMinimum.name}: add ₹${add.toLocaleString('en-IN')} to reach the minimum order.`);
+      }
+      deliveryFee = deliveryRows.reduce((sum, row) => sum + Number(row.fee || 0), 0);
+    } else {
+      const delivery = await calculateCurrentDelivery({ force: true });
+      if (delivery.outsideRadius) {
+        throw new Error(`This restaurant does not deliver to your selected address (${delivery.distance.toFixed(1)} km away; limit ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km).`);
+      }
+      deliveryFee = delivery.fee == null ? 30 : delivery.fee;
     }
-    const deliveryFee = delivery.fee == null ? 30 : delivery.fee;
 
     // Read the selected address AFTER calculateCurrentDelivery() — it
     // re-hydrates nearbite_address from the server-authoritative selection.
@@ -3103,34 +3183,30 @@ function getNoteRestaurantGroups() {
 
 function paintNoteCards() {
   const list = document.getElementById('restaurant-notes-list');
-  if (list) {
-    const groups = getNoteRestaurantGroups();
-    const multi = groups.length > 1;
-    const heading = multi
-      ? '<div class="ct-restaurant-note-label">Add notes for each restaurant</div>'
-      : '<div class="ct-restaurant-note-label">Restaurant note</div>';
+  if (list) list.innerHTML = '';
 
-    // IMPORTANT: one independent note card is rendered for EVERY restaurant
-    // represented in the current cart. The restaurant id is part of the
-    // data-note-field key, so opening/saving one card can never overwrite
-    // another restaurant's note.
-    list.innerHTML = heading + groups.map(g => {
-      const rid = String(g.resId);
-      const restaurantName = String(g.name || 'Restaurant');
-      const value = rid === 'legacy' ? ctState.restaurantNote : getRestaurantNote(rid);
-      const title = value ? restaurantName + ' — Note added' : 'Add a note for ' + restaurantName;
-      const sub = value || 'Spice level, allergies, packaging — anything this kitchen should know';
-      const field = restaurantNoteField(rid);
-      return '<button type="button" class="ct-line-card tap' + (value ? ' is-set' : '') + '" data-note-field="' + esc(field) + '" data-restaurant-id="' + esc(rid) + '" aria-haspopup="dialog" aria-label="' + esc(value ? ('Note for ' + restaurantName + ': ' + value + '. Tap to edit or remove.') : title) + '">' +
-        '<span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>' +
-        '<span class="ct-line-copy"><span class="ct-line-title">' + esc(title) + '</span><span class="ct-line-sub">' + esc(sub) + '</span></span>' +
-        '<span class="ct-line-act"' + (value ? '' : ' hidden') + '>Edit</span>' +
-        '<i class="fa-solid fa-chevron-right ct-line-chev"' + (value ? ' hidden' : '') + ' aria-hidden="true"></i>' +
-        '</button>';
-    }).join('');
-  }
+  document.querySelectorAll('.ct-restaurant-group').forEach(group => {
+    const rid = String(group.getAttribute('data-restaurant-id') || 'legacy');
+    const note = rid === 'legacy' ? ctState.restaurantNote : getRestaurantNote(rid);
+    const btn = group.querySelector('.ct-restaurant-note-btn');
+    const text = group.querySelector('.ct-note-btn-text');
+    if (btn) btn.classList.toggle('is-set', !!note);
+    if (text) text.textContent = note ? 'Note added' : 'Restaurant note';
 
-  paintNotePill();
+    let preview = group.querySelector('.ct-restaurant-note-preview');
+    if (note) {
+      if (!preview) {
+        preview = document.createElement('div');
+        preview.className = 'ct-restaurant-note-preview';
+        preview.setAttribute('data-note-preview', rid);
+        group.appendChild(preview);
+      }
+      preview.textContent = note;
+    } else if (preview) {
+      preview.remove();
+    }
+  });
+
   paintDIPills();
 }
 
@@ -3608,6 +3684,32 @@ async function ctEnsureProfile() {
   paintCheckoutDeliverySummary();
 }
 
+function toggleDeliveryInstructions() {
+  const body = document.getElementById('ct-di-body');
+  const group = document.getElementById('ct-di-group');
+  const button = document.getElementById('ct-di-toggle');
+  if (!body || !group || !button) return;
+  const expanded = button.getAttribute('aria-expanded') === 'true';
+  button.setAttribute('aria-expanded', String(!expanded));
+  body.hidden = expanded;
+  group.classList.toggle('is-open', !expanded);
+  syncFooterOffset();
+}
+
+async function applyCouponFromSheet() {
+    const input=document.getElementById('coupon-input'); const err=document.getElementById('coupon-error'); const code=String(input?.value||'').trim().toUpperCase();
+    if(err){err.hidden=true;err.textContent='';} if(!code){if(err){err.hidden=false;err.textContent='Enter a coupon code.';}return;}
+    try {
+      const subtotal = Array.isArray(ctState.items) ? ctState.items.reduce((sum,it)=>sum + Number(it.price||0)*Number(it.quantity||1),0) : 0;
+      const token=localStorage.getItem('nearbite_token') || localStorage.getItem('eatswada_token') || '';
+      const r=await fetch(`${CONFIG.API_BASE_URL}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({code,subtotal,restaurantId:getCartRestaurantId(readCart() || {}) || undefined})});
+      const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
+      ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
+      const card=document.getElementById('coupon-card'); if(card){const sub=card.querySelector('.ct-line-sub');if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;}
+      closeSheet?.('ct-coupon-sheet'); if(typeof renderCart==='function') renderCart();
+    } catch(e){if(err){err.hidden=false;err.textContent=e.message||'Coupon could not be applied.';}}
+ }
+
 /* ══════════════════════════════════════════════════════════════════════════
    WIRING — one delegated listener for every new control.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -3671,23 +3773,6 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  if (target.closest('#ct-note-pill')) {
-    const rid = ctCartSingleRid() || getCartRestaurantId(readCart() || {}) || 'legacy';
-    openNoteSheet(restaurantNoteField(rid));
-    return;
-  }
-
-  const diToggle = target.closest('#ct-di-toggle');
-  if (diToggle) {
-    const body = document.getElementById('ct-di-body');
-    const group = document.getElementById('ct-di-group');
-    const expanded = diToggle.getAttribute('aria-expanded') === 'true';
-    diToggle.setAttribute('aria-expanded', String(!expanded));
-    if (body) body.hidden = expanded;
-    if (group) group.classList.toggle('is-open', !expanded);
-    syncFooterOffset();
-    return;
-  }
 });
 
 document.getElementById('note-input').addEventListener('input', updateNoteCount);
@@ -3695,6 +3780,7 @@ document.getElementById('note-save').addEventListener('click', saveNoteSheet);
 document.getElementById('note-remove').addEventListener('click', removeNoteSheet);
 document.getElementById('tip-save').addEventListener('click', saveTipSheet);
 document.getElementById('tip-remove').addEventListener('click', removeTipSheet);
+document.getElementById('coupon-apply')?.addEventListener('click', applyCouponFromSheet);
 document.getElementById('tip-input').addEventListener('input', () => setTipError(''));
 document.getElementById('tip-input').addEventListener('keydown', (event) => {
   if (event.key === 'Enter') { event.preventDefault(); saveTipSheet(); }
