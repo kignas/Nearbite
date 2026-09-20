@@ -1572,6 +1572,64 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 }
 </style>
 
+
+<style id="eatswada-benchmark-pixel-final">
+/* FINAL MOBILE BENCHMARK PASS — visual/layout only */
+:root{--ew-gutter:14px;--ew-item-img-w:112px;--ew-item-img-h:78px}
+.top-bar{height:58px!important;min-height:58px!important;padding:0 14px!important}
+.top-bar>.icon-btn,.top-actions .icon-btn{width:40px!important;height:40px!important}
+.top-actions{gap:8px!important}
+.res-card-body{padding:18px 14px 12px!important}
+.res-name{font-size:25px!important;line-height:1.10!important;letter-spacing:-.75px!important}
+.res-cuisine{margin-top:4px!important;font-size:13px!important}
+.res-meta-row{margin-top:10px!important;gap:7px!important}
+.delivery-strip{height:58px!important;min-height:58px!important;padding:0 14px!important;border:0!important;border-radius:0!important}
+.delivery-copy{width:100%!important;padding:0 54px!important}
+.delivery-strip .del-chip{font-size:14px!important;font-weight:700!important;line-height:1!important;text-align:center!important}
+.delivery-strip .del-chip span strong{color:#E40073!important;font-weight:800!important}
+.delivery-rider{right:14px!important;bottom:-1px!important;width:100px!important;height:56px!important}
+.delivery-rider-image{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important}
+.delivery-banner-line{left:14px!important;width:54px!important}
+.menu-tabs{height:55px!important;padding:0 14px!important}
+.menu-tab{font-size:14px!important}
+.menu-tab:not(:last-child)::after{top:17px!important;height:21px!important}
+.filter-bar{padding:13px 14px 9px!important;gap:8px!important}
+.advanced-filter-btn,.veg-chip{height:40px!important;min-height:40px!important;border-radius:10px!important;font-size:13px!important}
+.advanced-filter-btn{padding:8px 13px!important}.veg-chip{padding:8px 13px!important}
+.menu-section{padding:0 14px!important;margin-top:0!important}
+.menu-cat-header{height:56px!important;padding:0!important}
+.menu-cat-title{font-size:20px!important;line-height:1!important}
+.menu-cat-count{font-size:13px!important}
+.nb-menu-item{min-height:144px!important;height:144px!important;padding:10px 0!important;gap:12px!important;border-bottom:1px solid #E9EBEF!important}
+.nb-item-tag-row{height:20px!important;min-height:20px!important;margin:0 0 3px!important;gap:5px!important}
+.nb-item-title{font-size:17px!important;line-height:1.22!important;font-weight:800!important;letter-spacing:-.25px!important}
+.nb-item-desc{margin-top:3px!important;font-size:12.5px!important;line-height:1.35!important}
+.nb-item-price-row{margin-top:6px!important;gap:8px!important}
+.nb-item-current-price{font-size:16px!important}.nb-item-original-price{font-size:12px!important}
+.nb-item-discount{padding:4px 9px!important;font-size:10px!important}
+.nb-item-media{width:112px!important;flex:0 0 112px!important;margin-top:1px!important}
+.nb-item-image-wrap{width:112px!important;height:78px!important;aspect-ratio:auto!important;border-radius:12px!important;box-shadow:none!important}
+.nb-item-image-wrap img{width:100%!important;height:100%!important;object-fit:cover!important}
+.nb-item-cta{margin-top:-27px!important}
+.nb-add-btn,.nb-qty{width:92px!important;min-width:92px!important;height:38px!important;min-height:38px!important;border-radius:11px!important}
+.nb-add-btn{font-size:13px!important}.nb-customisable{font-size:11px!important;margin-top:7px!important}
+#ew-cart-bar,.ew-cart-bar,.cart-bar{border-radius:24px 24px 0 0!important}
+@media(max-width:360px){
+  :root{--ew-gutter:14px;--ew-item-img-w:106px;--ew-item-img-h:75px}
+  .res-card-body{padding-left:14px!important;padding-right:14px!important}
+  .delivery-strip{padding-left:14px!important;padding-right:14px!important}
+  .delivery-copy{padding-left:48px!important;padding-right:48px!important}
+  .delivery-rider{right:8px!important;width:96px!important;height:54px!important}
+  .delivery-banner-line{left:14px!important}
+  .menu-tabs,.filter-bar{padding-left:14px!important;padding-right:14px!important}
+  .menu-section{padding-left:14px!important;padding-right:14px!important}
+  .nb-menu-item{gap:10px!important}
+  .nb-item-media,.nb-item-image-wrap{width:106px!important}
+  .nb-item-media{flex-basis:106px!important}.nb-item-image-wrap{height:75px!important}
+}
+.res-name,.res-cuisine{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+
 </head>
 <body>
 
@@ -2181,11 +2239,12 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
     const freeDeliveryEl = document.getElementById('res-free-delivery');
     if (freeDeliveryEl) {
       freeDeliveryEl.innerHTML = restaurant.freeDeliveryEnabled === false
-        ? '<i class="fa-solid fa-motorcycle orange"></i> Delivery available'
-        : '<i class="fa-solid fa-motorcycle orange"></i> FREE delivery' +
+        ? '<span>Delivery available</span>'
+        : '<span>Free delivery on orders above <strong>₹' +
           (Number(restaurant.freeDeliveryAbove) > 0
-            ? ' above ₹' + Number(restaurant.freeDeliveryAbove).toLocaleString('en-IN')
-            : '');
+            ? Number(restaurant.freeDeliveryAbove).toLocaleString('en-IN')
+            : '—') +
+          '</strong></span>';
     }
 
     // Admin-controlled restaurant delivery artwork.
