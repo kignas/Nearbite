@@ -462,30 +462,6 @@
     color:var(--ct-green-deep);
   }
 
-  /* ── Savings hero (real MRP-vs-price savings — stays GREEN) ───────── */
-  .ct-savings-hero{
-    display:none; align-items:center; gap:12px;
-    margin:12px 14px; padding:13px 14px;
-    background:#ECFDF3; border:1px solid #BBF3D0;
-    border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow);
-  }
-  .ct-savings-hero.show{ display:flex; }
-  .ct-savings-ic{
-    width:38px; height:38px; flex:0 0 38px; border-radius:11px;
-    background:#D8F7E4; color:var(--ct-save);
-    display:flex; align-items:center; justify-content:center; font-size:16px;
-  }
-  .ct-savings-copy{ flex:1; min-width:0; }
-  .ct-savings-title{ font-size:14.5px; font-weight:800; color:#0F5F3D; letter-spacing:-.2px; line-height:1.2; }
-  .ct-savings-sub{ margin-top:3px; font-size:11.5px; font-weight:600; color:#3C7A5C; line-height:1.35; }
-  .ct-savings-sub s{ color:#8FB3A2; font-weight:600; }
-  .ct-savings-badge{
-    flex:0 0 auto; text-align:center;
-    font-size:8.5px; font-weight:800; letter-spacing:.4px; line-height:1.2;
-    color:var(--ct-save); background:#fff; border:1px dashed #9FE3BC;
-    border-radius:10px; padding:6px 8px; text-transform:uppercase;
-  }
-
   /* ── Add more items (action → magenta) ───────────────────────────── */
   .ct-addmore{
     display:inline-flex; align-items:center; gap:8px;
@@ -510,16 +486,6 @@
     margin:6px 14px 0; padding:11px 14px; min-height:0; border-radius:var(--ct-r-md);
   }
   .ct-notes-compact .ct-line-ic{ width:30px; height:30px; flex-basis:30px; font-size:13px; }
-  .ct-cook-pills{ display:flex; flex-wrap:wrap; gap:7px; margin:8px 14px 0; }
-  .ct-cook-pills:empty{ display:none; }
-  .ct-cook-pill{
-    font:inherit; font-size:11.5px; font-weight:700; color:var(--ct-ink-2);
-    background:var(--ct-surface); border:1.5px solid var(--ct-line);
-    border-radius:999px; padding:7px 13px; min-height:34px;
-    display:inline-flex; align-items:center;
-    transition:border-color .16s ease, background .16s ease, color .16s ease;
-  }
-  .ct-cook-pill[aria-pressed="true"]{ border-color:var(--ct-green); background:var(--ct-green-soft); color:var(--ct-green-deep); }
 
   /* ── Complete your meal (same-restaurant recommendations) ─────────── */
   .ct-meal{ margin:12px 14px; }
@@ -550,6 +516,76 @@
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:31px;
   }
   .ct-meal-price{ margin-top:2px; font-size:13px; font-weight:800; color:var(--ct-ink); font-variant-numeric:tabular-nums; }
+
+  /* ── Delivery header (top of page, replaces old title bar) ────────── */
+  .ct-delivery-head{
+    display:flex; align-items:stretch; gap:8px;
+    padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
+    background:var(--ct-surface); border-bottom:1px solid var(--ct-line);
+    position:sticky; top:0; z-index:50;
+  }
+  .ct-dh-back{ flex:0 0 40px; width:40px; border:0; background:transparent; color:var(--ct-ink); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .ct-dh-main{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:transparent; border:0; text-align:left; font:inherit; color:inherit; cursor:pointer; padding:0; }
+  .ct-dh-ic{ flex:0 0 34px; width:34px; height:34px; border-radius:10px; background:var(--ct-green-soft); color:var(--ct-green); display:flex; align-items:center; justify-content:center; }
+  .ct-dh-copy{ flex:1; min-width:0; display:block; }
+  .ct-dh-eta{ display:block; font-size:14px; font-weight:800; color:var(--ct-ink); letter-spacing:-.2px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-dh-tag{ font-weight:700; color:var(--ct-ink-2); }
+  .ct-dh-addr{ display:block; margin-top:1px; font-size:12px; font-weight:500; color:var(--ct-muted); line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-dh-addr.ct-prompt{ color:var(--ct-green); font-weight:700; }
+  .ct-dh-change{ flex:0 0 auto; align-self:center; display:inline-flex; align-items:center; gap:2px; font-size:11px; font-weight:800; letter-spacing:.3px; color:var(--ct-green); }
+  .ct-dh-hidden{ display:none; }
+
+  /* ── Item card + inline action pills ──────────────────────────────── */
+  .ct-item-card{ padding-bottom:10px; }
+  .ct-item-actions{ display:flex; gap:8px; flex-wrap:wrap; padding-top:12px; margin-top:2px; border-top:1px solid var(--ct-line-soft); }
+  .ct-pill-btn{
+    display:inline-flex; align-items:center; gap:7px; text-decoration:none;
+    font:inherit; font-size:12px; font-weight:700; color:var(--ct-green);
+    background:var(--ct-green-soft); border:1px solid rgba(194,24,91,.16);
+    border-radius:999px; padding:8px 14px; cursor:pointer;
+  }
+  .ct-pill-btn svg{ color:var(--ct-green); }
+  .ct-pill-btn.is-set{ background:var(--ct-green); border-color:var(--ct-green); color:#fff; }
+  .ct-pill-btn.is-set svg{ color:#fff; }
+
+  /* ── Grouped expandable section (delivery instructions + rider tip) ── */
+  .ct-group{ background:var(--ct-surface); margin:10px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
+  .ct-group-head{ display:flex; align-items:center; gap:12px; width:100%; padding:14px; background:transparent; border:0; font:inherit; text-align:left; color:inherit; cursor:pointer; }
+  .ct-group-title{ flex:1; min-width:0; font-size:13.5px; font-weight:800; color:var(--ct-ink); letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-group-chev{ flex:0 0 auto; color:#98A0A8; transition:transform .2s var(--ct-ease); }
+  .ct-group.is-open .ct-group-chev{ transform:rotate(180deg); }
+  .ct-group-body{ padding:0 14px 14px; }
+  .ct-di-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ct-di-pill{
+    display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:12px; font-weight:700;
+    color:var(--ct-ink-2); background:var(--ct-surface); border:1.5px solid var(--ct-line);
+    border-radius:999px; padding:9px 13px; min-height:38px; cursor:pointer;
+    transition:border-color .16s ease, background .16s ease, color .16s ease;
+  }
+  .ct-di-pill svg{ color:var(--ct-muted); }
+  .ct-di-pill[aria-pressed="true"]{ border-color:var(--ct-green); background:var(--ct-green-soft); color:var(--ct-green-deep); }
+  .ct-di-pill[aria-pressed="true"] svg{ color:var(--ct-green); }
+  .ct-tip-block{ margin-top:16px; padding-top:14px; border-top:1px solid var(--ct-line-soft); }
+  .ct-tip-title{ font-size:12px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ct-muted); }
+
+  /* ── Always-visible bill summary ──────────────────────────────────── */
+  .ct-bill{ background:var(--ct-surface); margin:10px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
+  .ct-bill-hero{ display:flex; align-items:center; gap:11px; padding:14px; border-bottom:1px solid var(--ct-line-soft); }
+  .ct-bill-hero-ic{ flex:0 0 32px; width:32px; height:32px; border-radius:9px; background:var(--ct-green-soft); color:var(--ct-green); display:flex; align-items:center; justify-content:center; }
+  .ct-bill-hero-copy{ flex:1; min-width:0; }
+  .ct-bill-hero-top{ font-size:15px; font-weight:800; color:var(--ct-ink); letter-spacing:-.2px; }
+  .ct-bill-hero-top s{ color:var(--ct-muted); font-weight:600; margin:0 2px; }
+  .ct-bill-hero-saved{ margin-top:2px; font-size:12px; font-weight:800; color:var(--ct-save); }
+  .ct-bill-hero-badge{ flex:0 0 auto; text-align:center; font-size:8px; font-weight:800; letter-spacing:.4px; line-height:1.2; color:var(--ct-green); background:var(--ct-green-soft); border-radius:9px; padding:6px 8px; text-transform:uppercase; }
+  .ct-bill-rows{ padding:10px 14px 2px; }
+  .ct-bill .ct-bill-row{ margin-top:0; padding:6px 0; }
+  .ct-bill-nofees{ margin:6px 14px 0; padding:9px 12px; border-radius:10px; background:#ECFDF3; color:#0F5F3D; font-size:11.5px; font-weight:800; text-align:center; }
+  .ct-bill .ct-bill-total{ margin:10px 14px 14px; padding-top:12px; }
+
+  /* ── Cancellation policy ──────────────────────────────────────────── */
+  .ct-cancel{ margin:14px 18px 6px; }
+  .ct-cancel-title{ font-size:12.5px; font-weight:800; color:var(--ct-ink-2); }
+  .ct-cancel p{ margin:4px 0 0; font-size:11.5px; font-weight:500; line-height:1.55; color:var(--ct-muted); }
 
   /* ── Footer savings line (green) ──────────────────────────────────── */
   .ct-footer-save{
@@ -825,54 +861,37 @@
 
 <body class="ct-page">
 
-  <div class="ct-header">
-    <div class="ct-header-left">
-      <button class="ct-back tap" onclick="window.nearbiteSafeBack()" aria-label="Go back"><i class="fa-solid fa-arrow-left"></i></button>
-      <div class="ct-head-copy">
-        <div class="ct-head-title">Checkout</div>
-        <div class="ct-head-sub" id="cart-restaurant-name">Loading…</div>
-      </div>
-    </div>
-    <button class="ct-clear tap" id="btn-clear-cart" onclick="clearCart()">Clear</button>
-  </div>
-
   <div id="cart-has-items">
 
-    <!-- ── Delivery summary (ETA + address + contact, combined & compact) ── -->
-    <div class="ct-summary" id="delivery-eta-card" aria-live="polite">
-      <button type="button" class="ct-summary-row ct-summary-main tap" id="address-block"
-        onclick="window.location.href='address.html?return=cart'" aria-label="Change delivery address">
-        <span class="ct-summary-ic" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
-        <span class="ct-summary-copy">
-          <span class="ct-summary-title"><span id="checkout-eta">Checking delivery time…</span> · <span id="address-tag-label">Add address</span></span>
-          <span class="ct-summary-sub ct-prompt" id="address-display-text">Tap to add your delivery address</span>
-        </span>
-        <span class="ct-summary-change">CHANGE</span>
+    <!-- ═══ 1. DELIVERY HEADER (ETA + address) — replaces the old title bar ═══ -->
+    <div class="ct-delivery-head" id="delivery-eta-card" aria-live="polite">
+      <button class="ct-dh-back tap" onclick="window.nearbiteSafeBack()" aria-label="Go back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="ct-summary-row ct-summary-contact" id="customer-contact-card">
-        <span class="ct-summary-ic" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
-        <span class="ct-summary-copy">
-          <span class="ct-summary-name" id="checkout-customer-name">Customer</span>
-          <span class="ct-summary-phone" id="checkout-customer-phone">Phone number</span>
+      <button type="button" class="ct-dh-main tap" id="address-block" onclick="window.location.href='address.html?return=cart'" aria-label="Change delivery address">
+        <span class="ct-dh-ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
-      </div>
+        <span class="ct-dh-copy">
+          <span class="ct-dh-eta"><span id="checkout-eta">Checking delivery time…</span> <span class="ct-dh-tag">to <span id="address-tag-label">Add address</span></span></span>
+          <span class="ct-dh-addr ct-prompt" id="address-display-text">Tap to add your delivery address</span>
+        </span>
+        <span class="ct-dh-change">CHANGE<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+      <span class="ct-dh-hidden" aria-hidden="true"><span id="cart-restaurant-name"></span><span id="checkout-customer-name"></span><span id="checkout-customer-phone"></span></span>
     </div>
 
-    <!-- ═══ 2. CART ═══ -->
-    <div class="ct-card" id="cart-items-list"></div>
-
-    <a class="ct-addmore tap" id="ct-addmore" href="index.html"><i class="fa-solid fa-plus"></i> Add more items</a>
-
-    <div id="restaurant-notes-list" class="ct-restaurant-notes ct-notes-compact" aria-label="Cooking request or note"></div>
-    <div class="ct-cook-pills" id="ct-cook-pills" role="group" aria-label="Quick cooking requests"></div>
-
-    <div class="ct-savings-hero" id="ct-savings-hero" role="status" aria-live="polite">
-      <div class="ct-savings-ic" aria-hidden="true"><i class="fa-solid fa-tags"></i></div>
-      <div class="ct-savings-copy">
-        <div class="ct-savings-title" id="ct-savings-title">You saved ₹0</div>
-        <div class="ct-savings-sub" id="ct-savings-sub"></div>
+    <!-- ═══ 2. CART ITEM + inline actions (Add Items · Restaurant note) ═══ -->
+    <div class="ct-card ct-item-card">
+      <div id="cart-items-list"></div>
+      <div class="ct-item-actions">
+        <a class="ct-pill-btn tap" id="ct-addmore" href="index.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Add Items
+        </a>
+        <button type="button" class="ct-pill-btn tap" id="ct-note-pill" aria-haspopup="dialog">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19h14M7 15l9-9 2 2-9 9H7v-2z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="ct-note-pill-text">Restaurant note</span>
+        </button>
       </div>
-      <div class="ct-savings-badge">EVERYDAY<br>LOW PRICES</div>
     </div>
 
     <div class="ct-strip" id="free-delivery-nudge" style="display:none;" role="status" aria-live="polite">
@@ -894,7 +913,9 @@
 
     <!-- ═══ 4. PAYMENT OFFERS & MORE — existing coupon system ═══ -->
     <button type="button" class="ct-line-card tap" id="coupon-card" aria-haspopup="dialog">
-      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-tag"></i></span>
+      <span class="ct-line-ic" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h9l5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.4" fill="currentColor"/></svg>
+      </span>
       <span class="ct-line-copy">
         <span class="ct-line-title">Payment offers &amp; more</span>
         <span class="ct-line-sub">Apply coupon code if any</span>
@@ -902,47 +923,95 @@
       <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
     </button>
 
-    <!-- ═══ 5. DELIVERY INSTRUCTIONS — single card opens existing sheet ═══ -->
-    <div class="ct-section-label">Add delivery instructions</div>
-    <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
-      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-motorcycle"></i></span>
-      <span class="ct-line-copy">
-        <span class="ct-line-title" data-role="title">Delivery instructions</span>
-        <span class="ct-line-sub" data-role="sub">Tap to choose instructions</span>
-      </span>
-      <span class="ct-line-act" data-role="act" hidden>Edit</span>
-      <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
-    </button>
-
-    <!-- ═══ 6. RIDER TIP ═══ -->
-    <div class="ct-card ct-tip-card">
-      <div class="ct-card-head" id="tip-heading"><i class="fa-solid fa-hand-holding-heart"></i> Tip your delivery partner</div>
-      <p class="ct-tip-note">100% goes to your delivery partner.</p>
-      <div class="ct-chip-row" id="tip-options" role="group" aria-labelledby="tip-heading">
-        <button type="button" class="ct-chip" data-tip="0" aria-pressed="true">No tip</button>
-        <button type="button" class="ct-chip" data-tip="10" aria-pressed="false">&#8377;10</button>
-        <button type="button" class="ct-chip" data-tip="20" aria-pressed="false">&#8377;20</button>
-        <button type="button" class="ct-chip" data-tip="30" aria-pressed="false">&#8377;30</button>
-        <button type="button" class="ct-chip" data-tip="50" aria-pressed="false">&#8377;50</button>
-        <button type="button" class="ct-chip" data-tip="custom" id="tip-custom-chip" aria-pressed="false" aria-haspopup="dialog">Custom</button>
+    <!-- ═══ 5+6. DELIVERY INSTRUCTIONS (inline expand) + RIDER TIP ═══ -->
+    <div class="ct-group" id="ct-di-group">
+      <button type="button" class="ct-group-head tap" id="ct-di-toggle" aria-expanded="false" aria-controls="ct-di-body">
+        <span class="ct-line-ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 16V9a1 1 0 0 1 1-1h7l3 4h3a1 1 0 0 1 1 1v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="17" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="16.5" cy="17" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>
+        </span>
+        <span class="ct-group-title" id="ct-di-summary">Delivery instructions</span>
+        <svg class="ct-group-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="ct-group-body" id="ct-di-body" hidden>
+        <div class="ct-di-pills" id="ct-di-pills" role="group" aria-label="Delivery instructions"></div>
+        <div class="ct-tip-block">
+          <div class="ct-tip-title" id="tip-heading">Rider tip</div>
+          <p class="ct-tip-note">100% goes to your delivery partner.</p>
+          <div class="ct-chip-row" id="tip-options" role="group" aria-labelledby="tip-heading">
+            <button type="button" class="ct-chip" data-tip="0" aria-pressed="true">No tip</button>
+            <button type="button" class="ct-chip" data-tip="10" aria-pressed="false">&#8377;10</button>
+            <button type="button" class="ct-chip" data-tip="20" aria-pressed="false">&#8377;20</button>
+            <button type="button" class="ct-chip" data-tip="30" aria-pressed="false">&#8377;30</button>
+            <button type="button" class="ct-chip" data-tip="50" aria-pressed="false">&#8377;50</button>
+            <button type="button" class="ct-chip" data-tip="custom" id="tip-custom-chip" aria-pressed="false" aria-haspopup="dialog">Custom</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ── Bill details (compact) ─────────────────────────────────────
-         The full breakdown moved into #ct-bill-sheet. Every bill element id
-         is unchanged and simply lives inside the sheet now, so paintBill(),
-         applyTotals() and applyDelivery() keep writing to the same nodes. -->
-    <button type="button" class="ct-line-card tap" id="bill-card" aria-haspopup="dialog">
-      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-receipt"></i></span>
-      <span class="ct-line-copy">
-        <span class="ct-line-title">Bill details</span>
-        <span class="ct-line-sub" id="bill-compact-line">Item total &middot; Delivery fee</span>
-      </span>
-      <span class="ct-bill-peek">
-        <span class="ct-bill-peek-val" id="bill-peek-total">&#8377;0</span>
-        <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
-      </span>
-    </button>
+    <!-- ═══ 7. FULL BILL SUMMARY — always visible (ids moved out of the sheet) ═══ -->
+    <div class="ct-bill" id="ct-bill">
+      <div class="ct-bill-hero">
+        <span class="ct-bill-hero-ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8h6M9 12h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <div class="ct-bill-hero-copy">
+          <div class="ct-bill-hero-top">To Pay <s id="bill-hero-orig" hidden></s> <strong id="bill-hero-total">₹0</strong></div>
+          <div class="ct-bill-hero-saved" id="bill-hero-saved" hidden></div>
+        </div>
+        <div class="ct-bill-hero-badge" id="bill-hero-badge" hidden>LOWEST<br>PRICES</div>
+      </div>
+
+      <div class="ct-bill-rows">
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Item total</span>
+          <span class="ct-bill-val" id="bill-subtotal">₹0</span>
+        </div>
+        <div class="ct-bill-row" id="bill-mrp-row" style="display:none;">
+          <span class="ct-bill-label">Item MRP</span>
+          <span class="ct-bill-val" id="bill-mrp">₹0</span>
+        </div>
+        <div class="ct-bill-row is-saving" id="bill-savings-row" style="display:none;">
+          <span class="ct-bill-label">You save</span>
+          <span class="ct-bill-val" id="bill-savings-val">₹0</span>
+        </div>
+        <div id="bill-per-restaurant" style="display:none;"></div>
+        <div class="ct-bill-row">
+          <span class="ct-bill-label" id="bill-delivery-label">Delivery fee</span>
+          <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
+        </div>
+        <div class="ct-bill-row" id="bill-free-delivery-row" style="display:none;">
+          <span class="ct-bill-label">Free delivery</span>
+          <span class="ct-bill-val" id="bill-free-delivery-val"></span>
+        </div>
+        <div class="ct-bill-row" id="bill-tip-row" style="display:none;">
+          <span class="ct-bill-label">Delivery partner tip</span>
+          <span class="ct-bill-val" id="bill-tip-val">&#8377;0</span>
+        </div>
+        <div id="bill-savings" style="display:none;"></div>
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Platform fee</span>
+          <span class="ct-bill-val is-free">FREE</span>
+        </div>
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Packaging charges</span>
+          <span class="ct-bill-val is-free">FREE</span>
+        </div>
+      </div>
+
+      <div class="ct-bill-nofees">No unnecessary fees. Ever.</div>
+
+      <div class="ct-bill-total">
+        <span class="ct-total-label">To Pay</span>
+        <span class="ct-total-val" id="bill-total">₹0</span>
+      </div>
+    </div>
+
+    <!-- ═══ 8. CANCELLATION POLICY ═══ -->
+    <div class="ct-cancel">
+      <div class="ct-cancel-title">Cancellation policy</div>
+      <p>Please double-check your order and address details. Orders are non-refundable once placed.</p>
+    </div>
   </div>
 
   <div class="ct-empty" id="empty-cart">
@@ -966,7 +1035,7 @@
     <div class="ct-footer-save" id="ct-footer-save"><i class="fa-solid fa-tags"></i> <span id="ct-footer-save-text"></span></div>
 
     <div class="ct-paybar">
-      <button type="button" class="ct-paybar-left tap" id="ct-view-bill" aria-haspopup="dialog" aria-label="View detailed bill">
+      <button type="button" class="ct-paybar-left tap" id="ct-view-bill" aria-label="View detailed bill">
         <span class="ct-paybar-amt" id="checkout-total">₹0</span>
         <span class="ct-paybar-link">View detailed bill <i class="fa-solid fa-chevron-up" style="font-size:9px;" aria-hidden="true"></i></span>
       </button>
@@ -1011,78 +1080,6 @@
     </div>
   </div>
 
-  <div class="ct-sheet-root" id="ct-bill-sheet" hidden>
-    <div class="ct-scrim" data-sheet-close></div>
-    <div class="ct-sheet" role="dialog" aria-modal="true" aria-labelledby="bill-sheet-title">
-      <div class="ct-sheet-grab" aria-hidden="true"></div>
-      <div class="ct-sheet-head">
-        <h2 class="ct-sheet-title" id="bill-sheet-title">Bill details</h2>
-        <button type="button" class="ct-sheet-x" data-sheet-close data-autofocus aria-label="Close bill details"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-      </div>
-
-      <div class="ct-sheet-body">
-        <div class="ct-bill-row">
-          <span class="ct-bill-label">Item total</span>
-          <span class="ct-bill-val" id="bill-subtotal">₹0</span>
-        </div>
-
-        <div class="ct-bill-row" id="bill-mrp-row" style="display:none;">
-          <span class="ct-bill-label">Item MRP</span>
-          <span class="ct-bill-val" id="bill-mrp">₹0</span>
-        </div>
-
-        <div class="ct-bill-row is-saving" id="bill-savings-row" style="display:none;">
-          <span class="ct-bill-label">You save</span>
-          <span class="ct-bill-val" id="bill-savings-val">₹0</span>
-        </div>
-
-        <!-- #8 — per-restaurant breakdown (multi-restaurant carts only) -->
-        <div id="bill-per-restaurant" style="display:none;"></div>
-
-        <div class="ct-bill-row">
-          <span class="ct-bill-label" id="bill-delivery-label">Delivery fee</span>
-          <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
-        </div>
-
-        <div class="ct-bill-row" id="bill-free-delivery-row" style="display:none;">
-          <span class="ct-bill-label">Free delivery</span>
-          <span class="ct-bill-val" id="bill-free-delivery-val"></span>
-        </div>
-
-        <!-- Tip is the only new bill line. It appears only when the customer
-             actually selects one. There is deliberately no GST / packaging /
-             platform-fee row: the backend exposes no such value, and a real
-             coupon row can be added here when the coupon system has data. -->
-        <div class="ct-bill-row" id="bill-tip-row" style="display:none;">
-          <span class="ct-bill-label">Delivery partner tip</span>
-          <span class="ct-bill-val" id="bill-tip-val">&#8377;0</span>
-        </div>
-
-        <div id="bill-savings" style="display:none;"></div>
-
-        <div class="ct-bill-row">
-          <span class="ct-bill-label">Platform fee</span>
-          <span class="ct-bill-val is-free">FREE</span>
-        </div>
-        <div class="ct-bill-row">
-          <span class="ct-bill-label">Packaging charges</span>
-          <span class="ct-bill-val is-free">FREE</span>
-        </div>
-
-        <div class="ct-bill-total">
-          <span class="ct-total-label">To pay</span>
-          <span class="ct-total-val" id="bill-total">₹0</span>
-        </div>
-
-        <div class="ct-nofees">No packaging or platform fees. Ever.</div>
-
-      </div>
-
-      <div class="ct-sheet-foot is-single">
-        <button type="button" class="ct-btn ct-btn-ghost" data-sheet-close>Close</button>
-      </div>
-    </div>
-  </div>
 
   <div class="ct-sheet-root" id="ct-tip-sheet" hidden>
     <div class="ct-scrim" data-sheet-close></div>
@@ -2710,29 +2707,11 @@ function paintNoteCards() {
     }).join('');
   }
 
-  // Delivery instructions remains a single checkout-wide field.
-  const field = 'deliveryInstructions';
-  const card = document.querySelector('.ct-line-card[data-note-field="' + field + '"]');
-  if (!card) return;
-  const cfg = CT_NOTE_CFG[field];
-  const value = ctState[field];
-  const title = card.querySelector('[data-role="title"]');
-  const sub   = card.querySelector('[data-role="sub"]');
-  const act   = card.querySelector('[data-role="act"]');
-  const chev  = card.querySelector('[data-role="chev"]');
-  card.classList.toggle('is-set', !!value);
-  if (title) title.textContent = value ? cfg.setTitle : cfg.idleTitle;
-  if (sub) sub.textContent = value || cfg.idleSub;
-  if (act) act.hidden = !value;
-  if (chev) chev.hidden = !!value;
-  card.setAttribute('aria-label', value ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.' : cfg.idleTitle);
-  paintCookPills();
+  paintNotePill();
+  paintDIPills();
 }
 
-/* ── Cooking-request quick pills (single-restaurant carts) ───────────────────
-   Toggle common requests into the SAME per-restaurant note the sheet edits, so
-   they persist and are sent to POST /orders as restaurantNote — no new field. */
-const CT_COOK_PRESETS = ['Less spicy', 'No onion', 'Extra napkins'];
+/* ── Restaurant-note pill state (single-restaurant helper kept) ─────────────── */
 function ctCartSingleRid(){
   const cart = readCart() || {};
   const rids = new Set(Object.values(cart).map(i => i && i.resId).filter(Boolean));
@@ -2742,32 +2721,52 @@ function ctNoteForRid(rid){
   if (!rid) return '';
   return /^[a-fA-F0-9]{24}$/.test(rid) ? (getRestaurantNote(rid) || '') : (ctState.restaurantNote || '');
 }
-function ctSetNoteForRid(rid, val){
-  const clean = ctCleanNote(val);
-  if (/^[a-fA-F0-9]{24}$/.test(rid)) setRestaurantNote(rid, clean);
-  else ctState.restaurantNote = clean;
+function paintNotePill(){
+  const pill = document.getElementById('ct-note-pill');
+  const txt  = document.getElementById('ct-note-pill-text');
+  if (!pill || !txt) return;
+  const rid = ctCartSingleRid();
+  const note = rid ? ctNoteForRid(rid) : (ctState.restaurantNote || '');
+  if (note){ txt.textContent = 'Note added'; pill.classList.add('is-set'); }
+  else { txt.textContent = 'Restaurant note'; pill.classList.remove('is-set'); }
+}
+
+/* ── Delivery-instruction inline pills (no sheet, no modal) — write to the SAME
+   ctState.deliveryInstructions string sent to POST /orders. Multi-select. */
+const CT_DI_PRESETS = [
+  { label:'Directions to reach', svg:'<path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/>' },
+  { label:'Leave at the door', svg:'<path d="M7 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16" stroke="currentColor" stroke-width="1.7"/><path d="M4 21h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="14" cy="13" r="1" fill="currentColor"/>' },
+  { label:'Avoid calling', svg:'<path d="M4 6c0 8 6 14 14 14l-1-3.5-3.5-1-1.5 1.5c-2.6-1.3-4.7-3.4-6-6L11 9.5 10 6H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>' },
+  { label:'Avoid ringing', svg:'<path d="M6.5 16V11a5.5 5.5 0 0 1 11 0v5l1.5 2H5l1.5-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.5"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>' },
+  { label:'Leave at gate', svg:'<path d="M3 21V10l9-6 9 6v11" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.5"/>' }
+];
+function ctInstructionTokens(){
+  return String(ctState.deliveryInstructions || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+function paintDIPills(){
+  const row = document.getElementById('ct-di-pills');
+  const tokens = ctInstructionTokens();
+  const lower = tokens.map(t => t.toLowerCase());
+  if (row){
+    row.innerHTML = CT_DI_PRESETS.map(p =>
+      '<button type="button" class="ct-di-pill" data-di="' + esc(p.label) + '" aria-pressed="' +
+      (lower.includes(p.label.toLowerCase()) ? 'true' : 'false') + '">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">' + p.svg + '</svg>' + esc(p.label) + '</button>'
+    ).join('');
+  }
+  const summary = document.getElementById('ct-di-summary');
+  if (summary) summary.textContent = tokens.length ? ('Delivery instructions · ' + tokens.length + ' added') : 'Delivery instructions';
+}
+function toggleDIPill(label){
+  const presetLower = CT_DI_PRESETS.map(p => p.label.toLowerCase());
+  const tokens = ctInstructionTokens();
+  const custom = tokens.filter(t => !presetLower.includes(t.toLowerCase()));
+  let presets = tokens.filter(t => presetLower.includes(t.toLowerCase()));
+  const has = presets.some(t => t.toLowerCase() === label.toLowerCase());
+  presets = has ? presets.filter(t => t.toLowerCase() !== label.toLowerCase()) : presets.concat([label]);
+  ctState.deliveryInstructions = ctCleanNote(presets.concat(custom).join(', '));
   saveCartExtras();
-  paintNoteCards();
-}
-function paintCookPills(){
-  const row = document.getElementById('ct-cook-pills');
-  if (!row) return;
-  const rid = ctCartSingleRid();
-  if (!rid){ row.innerHTML = ''; return; }
-  const note = ctNoteForRid(rid).toLowerCase();
-  row.innerHTML = CT_COOK_PRESETS.map(p =>
-    '<button type="button" class="ct-cook-pill" data-cook="' + esc(p) + '" aria-pressed="' +
-    (note.includes(p.toLowerCase()) ? 'true' : 'false') + '">' + esc(p) + '</button>'
-  ).join('');
-}
-function toggleCookPill(label){
-  const rid = ctCartSingleRid();
-  if (!rid) return;
-  const tokens = String(ctNoteForRid(rid)).split(',').map(s => s.trim()).filter(Boolean);
-  const has = tokens.some(t => t.toLowerCase() === label.toLowerCase());
-  const next = has ? tokens.filter(t => t.toLowerCase() !== label.toLowerCase()) : tokens.concat([label]);
-  ctSetNoteForRid(rid, next.join(', '));
-  paintCookPills();
+  paintDIPills();
 }
 
 /* ── Complete your meal — real same-restaurant menu, real cart-add ───────────
@@ -2849,23 +2848,22 @@ function ctAddMealItem(idx){
 /* ── Savings hero + footer savings — display only, from the SAME real
    MRP-vs-price figures already computed in paintBill(). Nothing invented. */
 function paintSavingsHero(){
-  const hero = document.getElementById('ct-savings-hero');
-  if (!hero) return;
+  const total = ctState.subtotal + ctState.deliveryFee + ctCleanTip(ctState.tipAmount);
   const saved = Number(ctState.itemSavings || 0);
-  const orig  = Number(ctState.originalCartTotal || 0);
-  const now   = Number(ctState.subtotal || 0);
-  const freeDelivery = ctState.deliveryReady && ctState.deliveryFee === 0 && !ctState.unavailable && ctState.units > 0;
-  if (saved <= 0 && !freeDelivery){ hero.classList.remove('show'); return; }
-  hero.classList.add('show');
-  const title = document.getElementById('ct-savings-title');
-  const sub   = document.getElementById('ct-savings-sub');
-  if (title) title.textContent = saved > 0 ? ('You saved ₹' + saved.toFixed(0) + ' on this order') : 'Free delivery on this order';
-  if (sub){
-    let html = '';
-    if (saved > 0) html += 'MRP <s>₹' + orig.toFixed(0) + '</s> · You pay ₹' + now.toFixed(0);
-    if (freeDelivery) html += (html ? ' · ' : '') + 'Free delivery';
-    sub.innerHTML = html;
+  const totalEl = document.getElementById('bill-hero-total');
+  const origEl  = document.getElementById('bill-hero-orig');
+  const savedEl = document.getElementById('bill-hero-saved');
+  const badgeEl = document.getElementById('bill-hero-badge');
+  if (totalEl) totalEl.textContent = '₹' + total;
+  if (origEl){
+    if (saved > 0){ origEl.textContent = '₹' + (total + saved); origEl.hidden = false; }
+    else origEl.hidden = true;
   }
+  if (savedEl){
+    if (saved > 0){ savedEl.textContent = '₹' + saved.toFixed(0) + ' saved on the total!'; savedEl.hidden = false; }
+    else savedEl.hidden = true;
+  }
+  if (badgeEl) badgeEl.hidden = !(saved > 0);
 }
 function paintFooterSavings(){
   const el  = document.getElementById('ct-footer-save');
@@ -3151,12 +3149,6 @@ async function ctEnsureProfile() {
   paintCheckoutDeliverySummary();
 }
 
-function openBillSheet() {
-  /* IMPORTANT: Bill details opens ONLY the bill breakdown. */
-  openSheet('ct-bill-sheet');
-  applyTotals();
-}
-
 /* ══════════════════════════════════════════════════════════════════════════
    WIRING — one delegated listener for every new control.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -3180,8 +3172,7 @@ document.addEventListener('click', (event) => {
   const noteCard = target.closest('.ct-line-card[data-note-field]');
   if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
 
-  if (target.closest('#bill-card')) { openBillSheet(); return; }
-  if (target.closest('#ct-view-bill')) { openBillSheet(); return; }
+  if (target.closest('#ct-view-bill')) { document.getElementById('ct-bill')?.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
 
   document.getElementById('coupon-apply')?.addEventListener('click', async () => {
     const input=document.getElementById('coupon-input'); const err=document.getElementById('coupon-error'); const code=String(input?.value||'').trim().toUpperCase();
@@ -3215,9 +3206,27 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  const cookPill = target.closest('#ct-cook-pills .ct-cook-pill[data-cook]');
-  if (cookPill) {
-    toggleCookPill(cookPill.dataset.cook);
+  const diPill = target.closest('#ct-di-pills .ct-di-pill[data-di]');
+  if (diPill) {
+    toggleDIPill(diPill.dataset.di);
+    return;
+  }
+
+  if (target.closest('#ct-note-pill')) {
+    const rid = ctCartSingleRid() || getCartRestaurantId(readCart() || {}) || 'legacy';
+    openNoteSheet(restaurantNoteField(rid));
+    return;
+  }
+
+  const diToggle = target.closest('#ct-di-toggle');
+  if (diToggle) {
+    const body = document.getElementById('ct-di-body');
+    const group = document.getElementById('ct-di-group');
+    const expanded = diToggle.getAttribute('aria-expanded') === 'true';
+    diToggle.setAttribute('aria-expanded', String(!expanded));
+    if (body) body.hidden = expanded;
+    if (group) group.classList.toggle('is-open', !expanded);
+    syncFooterOffset();
     return;
   }
 });
