@@ -1316,7 +1316,10 @@ body{padding-bottom:118px!important}
   position:absolute!important;right:20px!important;bottom:-1px!important;
   width:100px!important;height:56px!important;z-index:3!important;
 }
-.delivery-rider svg{width:100%!important;height:100%!important;display:block!important}
+.delivery-rider svg,
+.delivery-rider-image{width:100%!important;height:100%!important;display:block!important}
+.delivery-rider-image{object-fit:contain!important;object-position:center bottom!important}
+.delivery-rider-image[hidden]{display:none!important}
 .delivery-banner-line{
   position:absolute!important;left:18px!important;top:50%!important;
   width:58px!important;height:18px!important;transform:translateY(-50%)!important;
@@ -1646,7 +1649,15 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
         </span>
       </div>
       <div class="delivery-rider" aria-hidden="true">
-        <svg viewBox="0 0 110 58" role="presentation">
+        <img
+          id="delivery-rider-image"
+          class="delivery-rider-image"
+          alt=""
+          hidden
+          referrerpolicy="no-referrer"
+          decoding="async"
+        />
+        <svg id="delivery-rider-fallback" viewBox="0 0 110 58" role="presentation">
           <g fill="none" stroke="none">
             <circle cx="80" cy="43" r="9" fill="#222936"/>
             <circle cx="32" cy="43" r="9" fill="#222936"/>
@@ -2174,6 +2185,34 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
           (Number(restaurant.freeDeliveryAbove) > 0
             ? ' above ₹' + Number(restaurant.freeDeliveryAbove).toLocaleString('en-IN')
             : '');
+    }
+
+    // Admin-controlled restaurant delivery artwork.
+    // The backend returns `deliveryBannerImage` from GET /api/restaurants/:id.
+    // Keep the existing SVG as a safe visual fallback when no artwork is configured.
+    const riderImage = document.getElementById('delivery-rider-image');
+    const riderFallback = document.getElementById('delivery-rider-fallback');
+    const deliveryBannerImage = typeof restaurant.deliveryBannerImage === 'string'
+      ? restaurant.deliveryBannerImage.trim()
+      : '';
+
+    if (riderImage && riderFallback) {
+      const isHttpsImage = /^https:\/\/.+/i.test(deliveryBannerImage);
+      if (isHttpsImage) {
+        riderImage.src = deliveryBannerImage;
+        riderImage.hidden = false;
+        riderFallback.style.display = 'none';
+        riderImage.onerror = function () {
+          riderImage.hidden = true;
+          riderImage.removeAttribute('src');
+          riderFallback.style.display = '';
+        };
+      } else {
+        riderImage.hidden = true;
+        riderImage.removeAttribute('src');
+        riderFallback.style.display = '';
+        riderImage.onerror = null;
+      }
     }
 
     const offer = restaurant.offer || restaurant.offerText || '';
@@ -3148,3 +3187,218 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 </script>
 </body>
 </html>
+
+<style id="eatswada-benchmark-v2">
+/* ============================================================
+   EATSWADA RESTAURANT — BENCHMARK V2
+   Final visual layer. Functional JS/API markup is untouched.
+   ============================================================ */
+:root{
+  --ew-gutter:28px !important;
+  --ew-pink:#e40073 !important;
+  --ew-pink-soft:#fff0f7 !important;
+  --ew-ink:#171b24 !important;
+  --ew-muted:#7f8792 !important;
+  --ew-line:#eceef1 !important;
+}
+
+body{background:#fff!important;color:var(--ew-ink)!important}
+
+/* Header: benchmark has almost no dead space */
+.top-bar{
+  height:60px!important;
+  min-height:60px!important;
+  padding:8px 28px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.top-bar>.icon-btn,.top-actions .icon-btn{
+  width:44px!important;height:44px!important;
+  border-radius:50%!important;
+  border:1px solid #edf0f2!important;
+  box-shadow:0 2px 10px rgba(20,24,32,.06)!important;
+}
+.top-actions{gap:8px!important}
+
+.res-card-body{
+  padding:10px 28px 11px!important;
+}
+.res-name{
+  font-size:26px!important;
+  line-height:30px!important;
+  letter-spacing:-.7px!important;
+}
+.res-cuisine{
+  margin-top:3px!important;
+  font-size:14px!important;
+  line-height:20px!important;
+}
+.res-meta-row{
+  margin-top:7px!important;
+  gap:8px!important;
+  height:30px!important;
+}
+.rating-pill{
+  height:30px!important;
+  padding:0 9px!important;
+  border-radius:7px!important;
+}
+.rating-star{font-size:11px!important}
+.rating-num{font-size:13px!important}
+.rating-count{font-size:10px!important}
+.meta-chip{font-size:13px!important}
+
+/* The benchmark uses one short promotional strip, not a large card. */
+.offer-strip{display:none!important}
+.delivery-strip{
+  height:58px!important;
+  min-height:58px!important;
+  padding:0 28px!important;
+  background:#fff0f7!important;
+}
+.delivery-copy{justify-content:center!important}
+.delivery-strip .del-chip{
+  font-size:14px!important;
+  font-weight:700!important;
+}
+.delivery-rider{
+  right:28px!important;
+  bottom:0!important;
+  width:104px!important;
+  height:58px!important;
+}
+.delivery-rider svg{width:100%!important;height:100%!important}
+.delivery-banner-line{left:28px!important}
+
+/* Tabs */
+.menu-tabs{
+  height:50px!important;
+  padding:0 28px!important;
+}
+.menu-tab{font-size:14px!important;font-weight:600!important}
+.menu-tab.active{font-weight:800!important}
+.menu-tab.active::before{height:3px!important}
+
+/* Filters sit immediately below tabs */
+.filter-bar{
+  padding:12px 28px 10px!important;
+  margin:0!important;
+  gap:9px!important;
+}
+.advanced-filter-btn,.veg-chip{
+  height:40px!important;
+  min-height:40px!important;
+  border-radius:10px!important;
+  font-size:14px!important;
+}
+
+/* Menu category */
+.menu-section{
+  padding:0 28px!important;
+}
+.menu-cat-header{
+  height:55px!important;
+  min-height:55px!important;
+}
+.menu-cat-title{
+  font-size:21px!important;
+  font-weight:800!important;
+}
+.menu-cat-chevron{width:32px!important;height:32px!important}
+
+/* ITEM ROW — compact, benchmark rhythm */
+.nb-menu-item{
+  min-height:0!important;
+  height:118px!important;
+  padding:10px 0!important;
+  gap:12px!important;
+  align-items:flex-start!important;
+  overflow:visible!important;
+}
+.nb-item-main{
+  min-width:0!important;
+  padding-top:0!important;
+}
+.nb-item-tag-row{
+  height:20px!important;
+  min-height:20px!important;
+  margin:0 0 2px!important;
+}
+.nb-item-title{
+  font-size:17px!important;
+  line-height:21px!important;
+  font-weight:750!important;
+  letter-spacing:-.25px!important;
+}
+.nb-item-desc{
+  margin-top:2px!important;
+  font-size:12.5px!important;
+  line-height:16px!important;
+  max-width:100%!important;
+  -webkit-line-clamp:2!important;
+}
+.nb-item-price-row{
+  margin-top:5px!important;
+  gap:7px!important;
+}
+.nb-item-current-price{font-size:16px!important}
+.nb-item-original-price{font-size:12px!important}
+.nb-item-discount{font-size:10px!important;padding:4px 9px!important}
+.nb-item-badge{font-size:10px!important;padding:4px 7px!important}
+
+/* Food image: benchmark proportion, aligned to right edge */
+.nb-item-media{
+  width:104px!important;
+  min-width:104px!important;
+  flex:0 0 104px!important;
+  margin-top:0!important;
+}
+.nb-item-image-wrap{
+  width:104px!important;
+  height:72px!important;
+  border-radius:12px!important;
+}
+.nb-item-image-wrap img{object-fit:cover!important}
+.nb-item-cta{
+  margin-top:-27px!important;
+  position:relative!important;
+  z-index:4!important;
+  display:flex!important;
+  justify-content:center!important;
+}
+.nb-add-btn,.nb-qty{
+  width:92px!important;
+  min-width:92px!important;
+  height:38px!important;
+  min-height:38px!important;
+  border-radius:11px!important;
+  font-size:13px!important;
+  box-shadow:0 2px 7px rgba(20,24,32,.10)!important;
+}
+.nb-customisable{
+  margin-top:5px!important;
+  font-size:10.5px!important;
+}
+
+/* Remove empty vertical area created by hidden category rail */
+.cat-nav,.cat-nav-sentinel{display:none!important}
+
+/* Cart: benchmark is always visible once there is an item */
+#ew-cart-bar,.ew-cart-bar,.cart-bar{
+  border-radius:24px 24px 0 0!important;
+  min-height:76px!important;
+  background:linear-gradient(90deg,#e40073,#ed087d)!important;
+  box-shadow:0 -4px 20px rgba(16,24,40,.10)!important;
+}
+
+@media(max-width:380px){
+  :root{--ew-gutter:22px!important}
+  .top-bar{padding-left:22px!important;padding-right:22px!important}
+  .res-card-body{padding-left:22px!important;padding-right:22px!important}
+  .delivery-strip{padding-left:22px!important;padding-right:22px!important}
+  .delivery-rider{right:12px!important}
+  .menu-tabs,.filter-bar,.menu-section{padding-left:22px!important;padding-right:22px!important}
+  .nb-item-media{width:100px!important;min-width:100px!important;flex-basis:100px!important}
+  .nb-item-image-wrap{width:100px!important}
+}
+</style>
