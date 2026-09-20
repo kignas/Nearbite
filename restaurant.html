@@ -1646,14 +1646,8 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
       <i class="fa-solid fa-arrow-left"></i>
     </button>
     <div class="top-actions">
-      <button class="icon-btn" type="button" id="menu-search-btn" onclick="toggleMenuSearch()" aria-label="Search this menu" aria-expanded="false">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
       <button class="icon-btn" type="button" onclick="toggleRestaurantFavorite()" aria-label="Save restaurant">
         <i id="restaurant-heart-icon" class="fa-regular fa-heart"></i>
-      </button>
-      <button class="icon-btn" type="button" onclick="openRestaurantDetails()" aria-label="More restaurant options">
-        <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
     </div>
   </div>
@@ -1682,7 +1676,11 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
       </div>
       <div class="res-meta-row">
         <div class="rating-pill" aria-label="Restaurant rating">
-          <span class="rating-star" aria-hidden="true">★</span>
+          <span class="rating-star" aria-hidden="true">
+             <svg viewBox="0 0 24 24" width="14" height="14" focusable="false" aria-hidden="true">
+               <path d="M12 3.6l2.48 5.02 5.54.81-4.01 3.91.95 5.52L12 16.25l-4.96 2.61.95-5.52-4.01-3.91 5.54-.81L12 3.6z" fill="currentColor"></path>
+             </svg>
+           </span>
           <span id="res-rating-num" class="rating-num">–</span>
           <div class="rating-divider"></div>
           <span id="res-rating-count" class="rating-count">— ratings</span>
@@ -3245,6 +3243,19 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   }
 })();
 </script>
+
+<style id="eatswada-three-final-fixes">
+/* ONLY requested fixes: rating pill/icon, compact delivery banner, header controls. */
+.rating-pill{height:28px!important;min-height:28px!important;padding:0 9px!important;border-radius:8px!important;background:#E7F6EE!important;border:1px solid #CDEBDB!important;box-shadow:none!important;gap:5px!important}
+.rating-star{width:14px!important;height:14px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;color:#0E8A54!important;font-size:0!important;flex:none!important}
+.rating-star svg{display:block!important;width:14px!important;height:14px!important}
+.rating-num{color:#0E7C4C!important;font-size:13px!important;font-weight:800!important;line-height:1!important}
+.rating-count{color:#2A8765!important;font-size:11px!important;font-weight:700!important;line-height:1!important}
+.delivery-strip{height:58px!important;min-height:58px!important;max-height:58px!important;margin:12px 14px 14px!important;padding:0!important;border:0!important;border-radius:16px!important;overflow:hidden!important}
+.delivery-rider{right:8px!important;bottom:0!important;width:100px!important;height:56px!important;z-index:3!important}
+.delivery-rider-image,.delivery-rider svg{width:100%!important;height:100%!important;display:block!important}
+.top-actions{gap:0!important}
+</style>
 </body>
 </html>
 
@@ -3516,3 +3527,117 @@ body{background:#fff!important;color:var(--ew-ink)!important}
 
 </style>
 
+
+<style id="eatswada-step1-top-benchmark">
+/* ============================================================
+   STEP 1 — TOP SECTION PIXEL MATCH (header → tabs only)
+   Appended last so it wins over the earlier benchmark passes.
+   Scope: header buttons, restaurant info, rating row, delivery
+   banner, tabs. No HTML/JS/API/menu-item/filter/cart changes.
+   ============================================================ */
+
+/* 1 · HEADER — compact, ~16px side gutter, round buttons -------- */
+.top-bar{
+  height:auto!important;min-height:60px!important;
+  padding:11px 16px!important;
+}
+.top-bar>.icon-btn,.top-actions .icon-btn{
+  width:40px!important;height:40px!important;border-radius:50%!important;
+  border:1px solid #EAECEF!important;background:#fff!important;
+  box-shadow:0 2px 8px rgba(20,24,32,.07)!important;
+}
+.top-bar>.icon-btn i,.top-actions .icon-btn i{font-size:17px!important;color:#151A23!important}
+.top-actions{gap:10px!important}
+/* Benchmark has no search control in the header. Hidden visually while the
+   markup + toggleMenuSearch() hook stay in the DOM (nothing removed). */
+#menu-search-btn{display:none!important}
+
+/* 2 · RESTAURANT INFO ------------------------------------------- */
+.res-card-body{padding:12px 16px 12px!important}
+.res-name{font-size:25px!important;line-height:1.12!important;letter-spacing:-.7px!important;font-weight:800!important;color:#171B24!important}
+.res-cuisine{margin-top:4px!important;font-size:13.5px!important;line-height:1.35!important;font-weight:500!important;color:#7C838E!important}
+.res-meta-row{margin-top:11px!important;gap:8px!important;align-items:center!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+
+/* 3 · RATING / TIME / DISTANCE ---------------------------------- */
+/* Benchmark pill is soft-green with dark-green content (not solid green). */
+.rating-pill{
+  height:28px!important;padding:0 9px!important;border-radius:8px!important;
+  background:#E7F6EE!important;border:1px solid #CDEBDB!important;
+  box-shadow:none!important;gap:5px!important;
+}
+.rating-star{font-size:11px!important;color:#0E8A54!important}
+.rating-num{font-size:13px!important;font-weight:800!important;color:#0E7C4C!important;line-height:1!important}
+.rating-count{font-size:11px!important;font-weight:700!important;color:#2A8765!important;line-height:1!important}
+.rating-divider{display:none!important}
+/* Separators between rating / time / distance are thin vertical rules. */
+.meta-dot{
+  display:inline-block!important;width:1px!important;height:14px!important;
+  margin:0 2px!important;background:#DCDFE4!important;border-radius:1px!important;
+  font-size:0!important;color:transparent!important;align-self:center!important;
+}
+.meta-chip{font-size:13px!important;font-weight:600!important;color:#4E5662!important;gap:5px!important}
+.meta-chip i{font-size:12px!important;color:#7E8792!important}
+
+/* 4 · DELIVERY BANNER ------------------------------------------- */
+/* Compact soft-pink strip. The rider occupies a fixed right-hand zone and
+   the copy is centred in the remaining width, so the FULL text is always
+   visible (fixes the "…₹20C" clipping). Backend deliveryBannerImage +
+   SVG fallback logic are untouched. */
+.delivery-strip{
+  height:60px!important;min-height:60px!important;
+  margin:12px 14px 14px!important;padding:0!important;
+  background:#FDEEF6!important;border:0!important;border-radius:16px!important;
+  overflow:hidden!important;position:relative!important;
+  display:flex!important;align-items:center!important;
+}
+.delivery-copy{
+  position:absolute!important;left:22px!important;right:110px!important;
+  top:0!important;bottom:0!important;width:auto!important;padding:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  z-index:2!important;
+}
+.delivery-strip .del-chip{
+  display:inline-flex!important;align-items:center!important;gap:0!important;
+  max-width:100%!important;white-space:nowrap!important;
+  font-size:13px!important;font-weight:700!important;line-height:1!important;color:#20242D!important;
+}
+.delivery-strip .del-chip i{display:none!important}
+.delivery-strip .del-chip span{color:#20242D!important}
+.delivery-strip .del-chip span strong{color:#E40073!important;font-weight:800!important}
+/* Left decorative dashes (existing element). */
+.delivery-banner-line{left:16px!important;width:46px!important;z-index:1!important}
+.delivery-banner-line span{background:#D9539E!important;height:2px!important;border-radius:2px!important;margin:5px 0!important}
+.delivery-banner-line span:first-child{width:34px!important}
+.delivery-banner-line span:last-child{width:20px!important;margin-left:14px!important}
+/* Rider pinned to its right-hand zone. */
+.delivery-rider{right:8px!important;bottom:0!important;width:100px!important;height:56px!important;z-index:3!important;opacity:1!important}
+.delivery-rider svg,.delivery-rider-image{width:100%!important;height:100%!important;display:block!important}
+.delivery-rider-image{object-fit:contain!important;object-position:center bottom!important}
+
+/* 5 · TABS ------------------------------------------------------ */
+.menu-tabs{
+  height:52px!important;padding:0 16px!important;
+  display:grid!important;grid-template-columns:repeat(3,1fr)!important;
+  align-items:stretch!important;background:#fff!important;
+  border-bottom:1px solid #ECEEF1!important;
+}
+.menu-tab{font-size:14px!important;font-weight:600!important;color:#7C838E!important}
+.menu-tab.active{font-weight:800!important;color:#1C2028!important}
+.menu-tab.active::before{height:3px!important;background:#E40073!important;border-radius:3px 3px 0 0!important}
+.menu-tab:not(:last-child)::after{top:16px!important;height:20px!important;background:#E6E8EC!important}
+
+/* Narrow screens: keep the banner copy clear of the rider. */
+@media(max-width:380px){
+  .top-bar{padding-left:14px!important;padding-right:14px!important}
+  .res-card-body{padding-left:14px!important;padding-right:14px!important}
+  .delivery-strip{margin-left:12px!important;margin-right:12px!important}
+  .delivery-copy{left:20px!important;right:104px!important}
+  .delivery-strip .del-chip{font-size:12px!important}
+  .delivery-rider{right:6px!important;width:96px!important}
+  .menu-tabs{padding-left:14px!important;padding-right:14px!important}
+}
+@media(max-width:340px){
+  .delivery-copy{right:96px!important}
+  .delivery-strip .del-chip{font-size:11px!important}
+}
+</style>
