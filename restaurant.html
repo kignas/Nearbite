@@ -953,6 +953,8 @@ body.menu-search-open .cat-nav{top:118px!important}
 @media(prefers-reduced-motion:reduce){
   .menu-search-field,.veg-chip,.order-hint{transition:none!important}
 }
+</style>
+
 <style id="eatswada-benchmark-menu-pass">
 /* ============================================================
    EATSWADA — BENCHMARK MENU PASS
@@ -1229,7 +1231,6 @@ body{padding-bottom:120px!important}
   .nb-menu-item{gap:12px!important;padding:17px 0!important}
   .nb-item-title{font-size:16px!important}
 }
-</style>
 </style>
 
 
@@ -3250,11 +3251,18 @@ body{background:#fff!important;color:var(--ew-ink)!important}
 
 /* The benchmark uses one short promotional strip, not a large card. */
 .offer-strip{display:none!important}
+/* Benchmark: the promo strip is an inset, rounded soft-pink card,
+   not an edge-to-edge band. Sits on the white restaurant surface with
+   clear side gaps and a small gap above the tabs. */
 .delivery-strip{
-  height:58px!important;
-  min-height:58px!important;
-  padding:0 28px!important;
-  background:#fff0f7!important;
+  height:60px!important;
+  min-height:60px!important;
+  margin:12px 14px 14px!important;
+  padding:0 14px!important;
+  background:#fdeef6!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+  position:relative!important;
 }
 .delivery-copy{justify-content:center!important}
 .delivery-strip .del-chip{
@@ -3262,13 +3270,13 @@ body{background:#fff!important;color:var(--ew-ink)!important}
   font-weight:700!important;
 }
 .delivery-rider{
-  right:28px!important;
+  right:6px!important;
   bottom:0!important;
   width:104px!important;
   height:58px!important;
 }
 .delivery-rider svg{width:100%!important;height:100%!important}
-.delivery-banner-line{left:28px!important}
+.delivery-banner-line{left:12px!important}
 
 /* Tabs */
 .menu-tabs{
@@ -3383,20 +3391,27 @@ body{background:#fff!important;color:var(--ew-ink)!important}
 /* Remove empty vertical area created by hidden category rail */
 .cat-nav,.cat-nav-sentinel{display:none!important}
 
-/* Cart: benchmark is always visible once there is an item */
+/* Cart: benchmark is an inset floating pink pill above the home indicator,
+   rounded on all corners — not an edge-to-edge bar. Positioning uses
+   left/right/bottom (the standard fixed-bar pattern); cart-bar.js owns the
+   internal layout and toggling, which are left untouched. */
 #ew-cart-bar,.ew-cart-bar,.cart-bar{
-  border-radius:24px 24px 0 0!important;
-  min-height:76px!important;
+  left:12px!important;
+  right:12px!important;
+  bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;
+  width:auto!important;
+  border-radius:22px!important;
+  min-height:66px!important;
   background:linear-gradient(90deg,#e40073,#ed087d)!important;
-  box-shadow:0 -4px 20px rgba(16,24,40,.10)!important;
+  box-shadow:0 10px 26px rgba(228,0,115,.28)!important;
 }
 
 @media(max-width:380px){
   :root{--ew-gutter:22px!important}
   .top-bar{padding-left:22px!important;padding-right:22px!important}
   .res-card-body{padding-left:22px!important;padding-right:22px!important}
-  .delivery-strip{padding-left:22px!important;padding-right:22px!important}
-  .delivery-rider{right:12px!important}
+  .delivery-strip{margin-left:12px!important;margin-right:12px!important;padding-left:12px!important;padding-right:12px!important}
+  .delivery-rider{right:4px!important}
   .menu-tabs,.filter-bar,.menu-section{padding-left:22px!important;padding-right:22px!important}
   .nb-item-media{width:100px!important;min-width:100px!important;flex-basis:100px!important}
   .nb-item-image-wrap{width:100px!important}
