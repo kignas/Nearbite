@@ -1136,6 +1136,52 @@
     .ct-group,.ct-bill{margin-left:12px;margin-right:12px;}
   }
 
+
+  /* ── Final user-requested checkout adjustments ─────────────────────── */
+  /* Header: restaurant name removed; delivery ETA/address remain. */
+
+  /* Payment offers and Delivery instructions use the same card height. */
+  #coupon-card.ct-line-card,
+  #ct-di-group{
+    min-height:74px;
+    box-sizing:border-box;
+  }
+
+  #coupon-card.ct-line-card{
+    margin-top:10px;
+    margin-bottom:7px;
+  }
+
+  #ct-di-group{
+    margin-top:7px;
+    margin-bottom:7px;
+  }
+
+  #ct-di-group .ct-group-head{
+    min-height:74px;
+    box-sizing:border-box;
+    padding:13px 12px;
+  }
+
+  /* Requested red accent: free-delivery strip + Proceed to Pay. */
+  .ct-strip:not(.is-error):not(.is-neutral){
+    background:#FFF1F4;
+    border-color:rgba(194,24,91,.18);
+    color:#A1114B;
+  }
+  .ct-strip:not(.is-error):not(.is-neutral) i,
+  .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{
+    color:#C2185B;
+  }
+
+  .ct-paybar .ct-cta{
+    background:#C2185B;
+    box-shadow:0 5px 14px rgba(194,24,91,.22);
+  }
+  .ct-paybar .ct-cta:active{
+    background:#A1114B;
+  }
+
 </style>
 </head>
 
@@ -1152,7 +1198,6 @@
       </button>
       <button type="button" class="ct-dh-main tap" id="address-block" onclick="window.location.href='address.html?return=cart'" aria-label="Change delivery address">
         <span class="ct-dh-copy">
-          <span class="ct-dh-restaurant" id="ct-dh-restaurant">Eatswada Restaurant</span>
           <span class="ct-dh-meta">
             <svg class="ct-dh-meta-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 7.5h14v10.25A1.25 1.25 0 0 1 17.75 19h-11A1.25 1.25 0 0 1 5.5 17.75V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
