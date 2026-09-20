@@ -44,9 +44,9 @@
     --ct-danger:     #DC2626;
     --ct-danger-bg:  #FEF2F2;
     --ct-r-sm: 10px;
-    --ct-r-md: 14px;
-    --ct-r-lg: 18px;
-    --ct-shadow: 0 2px 12px rgba(28,32,36,.06);
+    --ct-r-md: 13px;
+    --ct-r-lg: 16px;
+    --ct-shadow: 0 1px 2px rgba(28,32,36,.045);
     --ct-ease: cubic-bezier(.25,1,.5,1);
 
     --ct-footer-h: 176px;       /* measured at runtime, see syncFooterOffset */
@@ -106,7 +106,7 @@
   /* ── Card shell (NOT .card — that carries !important in style.css) ── */
   .ct-card{
     background: var(--ct-surface);
-    margin: 10px 14px;
+    margin: 8px 14px;
     border: 1px solid var(--ct-line);
     border-radius: var(--ct-r-lg);
     padding: 14px;
@@ -236,14 +236,14 @@
 
   /* ── Delivery status strip ────────────────────────────────────────── */
   .ct-strip{
-    display:flex; align-items:center; gap:9px;
-    margin:0 14px 12px; padding:11px 13px;
-    border-radius:var(--ct-r-md);
-    background:#E9F7F0;
-    border:1px solid rgba(21,154,98,.2);
-    font-size:12px; font-weight:700; line-height:1.4; color:#0F5F3D;
+    display:flex; align-items:center; gap:8px;
+    margin:0 14px 8px; padding:8px 11px;
+    border-radius:10px;
+    background:#EAF7F0;
+    border:1px solid rgba(21,154,98,.16);
+    font-size:11.5px; font-weight:700; line-height:1.35; color:#0F5F3D;
   }
-  .ct-strip i{ font-size:14px; flex:0 0 auto; color:#159A62; }
+  .ct-strip i{ font-size:13px; flex:0 0 auto; color:#159A62; }
   .ct-strip.is-error{ background:var(--ct-danger-bg); border-color:#F6C9C9; color:#9F1D1D; }
   .ct-strip.is-error i{ color:var(--ct-danger); }
   .ct-strip.is-neutral{ background:#F6F7F8; border-color:var(--ct-line); color:var(--ct-muted); }
@@ -406,7 +406,7 @@
   .ct-line-card{
     display:flex; align-items:center; gap:12px;
     width:auto; box-sizing:border-box;
-    margin:10px 14px; padding:14px;
+    margin:8px 14px; padding:14px;
     font:inherit; text-align:left; color:inherit;
     background:var(--ct-surface);
     border:1px solid var(--ct-line);
@@ -488,7 +488,7 @@
   .ct-notes-compact .ct-line-ic{ width:30px; height:30px; flex-basis:30px; font-size:13px; }
 
   /* ── Complete your meal (same-restaurant recommendations) ─────────── */
-  .ct-meal{ margin:12px 14px; }
+  .ct-meal{ margin:10px 14px 8px; }
   .ct-meal-head{ margin:0 2px 10px; }
   .ct-meal-title{ font-size:14px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink); }
   .ct-meal-sub{ margin-top:1px; font-size:11.5px; font-weight:500; color:var(--ct-muted); }
@@ -506,9 +506,9 @@
   .ct-meal-ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#C2C8CE; font-size:22px; }
   .ct-meal-add{
     position:absolute; right:6px; bottom:6px; width:30px; height:30px; border-radius:50%;
-    border:1.5px solid var(--ct-green); background:#fff; color:var(--ct-green);
-    font-size:18px; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 2px 8px rgba(16,20,24,.14); cursor:pointer;
+    border:2px solid #fff; background:var(--ct-green); color:#fff;
+    font-size:17px; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(194,24,91,.30); cursor:pointer;
   }
   .ct-meal-add:active{ transform:scale(.92); }
   .ct-meal-name{
@@ -549,9 +549,11 @@
   .ct-pill-btn.is-set svg{ color:#fff; }
 
   /* ── Grouped expandable section (delivery instructions + rider tip) ── */
-  .ct-group{ background:var(--ct-surface); margin:10px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
+  .ct-group{ background:var(--ct-surface); margin:8px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
   .ct-group-head{ display:flex; align-items:center; gap:12px; width:100%; padding:14px; background:transparent; border:0; font:inherit; text-align:left; color:inherit; cursor:pointer; }
-  .ct-group-title{ flex:1; min-width:0; font-size:13.5px; font-weight:800; color:var(--ct-ink); letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-group-copy{ flex:1; min-width:0; }
+  .ct-group-title{ display:block; min-width:0; font-size:13.5px; font-weight:800; color:var(--ct-ink); letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-group-sub{ display:block; margin-top:2px; font-size:11.5px; font-weight:500; color:var(--ct-muted); line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ct-group-chev{ flex:0 0 auto; color:#98A0A8; transition:transform .2s var(--ct-ease); }
   .ct-group.is-open .ct-group-chev{ transform:rotate(180deg); }
   .ct-group-body{ padding:0 14px 14px; }
@@ -569,18 +571,42 @@
   .ct-tip-title{ font-size:12px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ct-muted); }
 
   /* ── Always-visible bill summary ──────────────────────────────────── */
-  .ct-bill{ background:var(--ct-surface); margin:10px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
-  .ct-bill-hero{ display:flex; align-items:center; gap:11px; padding:14px; border-bottom:1px solid var(--ct-line-soft); }
-  .ct-bill-hero-ic{ flex:0 0 32px; width:32px; height:32px; border-radius:9px; background:var(--ct-green-soft); color:var(--ct-green); display:flex; align-items:center; justify-content:center; }
+  .ct-bill{ background:var(--ct-surface); margin:8px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
+  .ct-bill-hero{ display:flex; align-items:flex-start; gap:11px; padding:15px 14px; border-bottom:1px solid var(--ct-line-soft); }
+  .ct-bill-hero-ic{ flex:0 0 30px; width:30px; height:30px; border-radius:8px; background:var(--ct-save-bg); color:var(--ct-save); display:flex; align-items:center; justify-content:center; margin-top:1px; }
   .ct-bill-hero-copy{ flex:1; min-width:0; }
-  .ct-bill-hero-top{ font-size:15px; font-weight:800; color:var(--ct-ink); letter-spacing:-.2px; }
-  .ct-bill-hero-top s{ color:var(--ct-muted); font-weight:600; margin:0 2px; }
-  .ct-bill-hero-saved{ margin-top:2px; font-size:12px; font-weight:800; color:var(--ct-save); }
-  .ct-bill-hero-badge{ flex:0 0 auto; text-align:center; font-size:8px; font-weight:800; letter-spacing:.4px; line-height:1.2; color:var(--ct-green); background:var(--ct-green-soft); border-radius:9px; padding:6px 8px; text-transform:uppercase; }
-  .ct-bill-rows{ padding:10px 14px 2px; }
-  .ct-bill .ct-bill-row{ margin-top:0; padding:6px 0; }
-  .ct-bill-nofees{ margin:6px 14px 0; padding:9px 12px; border-radius:10px; background:#ECFDF3; color:#0F5F3D; font-size:11.5px; font-weight:800; text-align:center; }
-  .ct-bill .ct-bill-total{ margin:10px 14px 14px; padding-top:12px; }
+  .ct-bill-hero-top{ font-size:16px; font-weight:800; color:var(--ct-ink); letter-spacing:-.3px; }
+  .ct-bill-hero-top s{ color:var(--ct-muted); font-weight:600; margin:0 3px 0 4px; }
+  .ct-bill-hero-top strong{ font-weight:800; }
+  .ct-bill-hero-saved{ margin-top:3px; font-size:12.5px; font-weight:800; color:var(--ct-save); letter-spacing:-.1px; }
+  /* Pink "lowest prices" ribbon (Eatswada accent) */
+  .ct-bill-hero-badge{
+    flex:0 0 auto; align-self:flex-start; text-align:center; transform:rotate(3deg);
+    font-size:8.5px; font-weight:900; letter-spacing:.5px; line-height:1.25;
+    color:#fff; background:linear-gradient(135deg,#EC168C,#C2185B);
+    border-radius:5px; padding:6px 10px; text-transform:uppercase;
+    box-shadow:0 3px 8px rgba(194,24,91,.28);
+  }
+  .ct-bill-hero-badge span{ display:block; font-size:7px; font-weight:800; letter-spacing:1px; opacity:.9; }
+
+  .ct-bill-rows{ padding:6px 14px 4px; }
+  .ct-bill .ct-bill-row{ margin-top:0; padding:9px 0; font-size:13.5px; }
+  .ct-bill-label{ color:var(--ct-ink-2); font-weight:600; }
+  .ct-bill-label.is-dashed{ border-bottom:1px dashed #C4CBD1; padding-bottom:2px; }
+  .ct-bill-val s{ color:var(--ct-muted); font-weight:600; margin-right:5px; }
+  .ct-now.is-save{ color:var(--ct-save); font-weight:800; }
+  .ct-bill-sep{ height:1px; border-top:1px dashed var(--ct-line); margin:2px 0; }
+  .ct-bill-cap{ padding:0 0 6px; font-size:11.5px; font-weight:500; color:var(--ct-muted); }
+  .ct-bill-val.is-save{ color:var(--ct-save); font-weight:800; }
+
+  /* "THAT'S IT" pink reassurance band — full-bleed, Eatswada accent */
+  .ct-bill-band{
+    margin:2px 0 0; padding:11px 14px;
+    background:linear-gradient(90deg,#FDE9F2,#FDF3F8);
+    color:var(--ct-green); font-size:13px; font-weight:800; letter-spacing:-.1px;
+  }
+  .ct-bill .ct-bill-total{ margin:0 14px; padding:13px 0 15px; border-top:0; }
+  .ct-bill .ct-total-val{ font-size:17px; }
 
   /* ── Cancellation policy ──────────────────────────────────────────── */
   .ct-cancel{ margin:14px 18px 6px; }
@@ -873,7 +899,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
         <span class="ct-dh-copy">
-          <span class="ct-dh-eta"><span id="checkout-eta">Checking delivery time…</span> <span class="ct-dh-tag">to <span id="address-tag-label">Add address</span></span></span>
+          <span class="ct-dh-eta"><span id="checkout-eta">Delivery</span> <span class="ct-dh-tag">to <span id="address-tag-label">your address</span></span></span>
           <span class="ct-dh-addr ct-prompt" id="address-display-text">Tap to add your delivery address</span>
         </span>
         <span class="ct-dh-change">CHANGE<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -929,7 +955,10 @@
         <span class="ct-line-ic" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 16V9a1 1 0 0 1 1-1h7l3 4h3a1 1 0 0 1 1 1v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="17" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="16.5" cy="17" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>
         </span>
-        <span class="ct-group-title" id="ct-di-summary">Delivery instructions</span>
+        <span class="ct-group-copy">
+          <span class="ct-group-title" id="ct-di-summary">Delivery instructions</span>
+          <span class="ct-group-sub">Tell your delivery partner how to reach you</span>
+        </span>
         <svg class="ct-group-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="ct-group-body" id="ct-di-body" hidden>
@@ -953,53 +982,51 @@
     <div class="ct-bill" id="ct-bill">
       <div class="ct-bill-hero">
         <span class="ct-bill-hero-ic" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8h6M9 12h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8h6M9 12h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         </span>
         <div class="ct-bill-hero-copy">
           <div class="ct-bill-hero-top">To Pay <s id="bill-hero-orig" hidden></s> <strong id="bill-hero-total">₹0</strong></div>
           <div class="ct-bill-hero-saved" id="bill-hero-saved" hidden></div>
         </div>
-        <div class="ct-bill-hero-badge" id="bill-hero-badge" hidden>LOWEST<br>PRICES</div>
+        <div class="ct-bill-hero-badge" id="bill-hero-badge" hidden><span>Everyday</span>Lowest Prices</div>
       </div>
 
       <div class="ct-bill-rows">
         <div class="ct-bill-row">
-          <span class="ct-bill-label">Item total</span>
-          <span class="ct-bill-val" id="bill-subtotal">₹0</span>
+          <span class="ct-bill-label">Item Total</span>
+          <span class="ct-bill-val"><s id="bill-mrp" hidden>₹0</s><span class="ct-now" id="bill-subtotal">₹0</span></span>
         </div>
-        <div class="ct-bill-row" id="bill-mrp-row" style="display:none;">
-          <span class="ct-bill-label">Item MRP</span>
-          <span class="ct-bill-val" id="bill-mrp">₹0</span>
-        </div>
-        <div class="ct-bill-row is-saving" id="bill-savings-row" style="display:none;">
-          <span class="ct-bill-label">You save</span>
-          <span class="ct-bill-val" id="bill-savings-val">₹0</span>
-        </div>
-        <div id="bill-per-restaurant" style="display:none;"></div>
+
+        <div class="ct-bill-sep"></div>
+
         <div class="ct-bill-row">
-          <span class="ct-bill-label" id="bill-delivery-label">Delivery fee</span>
+          <span class="ct-bill-label is-dashed" id="bill-delivery-label">Delivery Fee</span>
           <span class="ct-bill-val" id="bill-delivery-val"><span class="ct-skel skeleton"></span></span>
         </div>
-        <div class="ct-bill-row" id="bill-free-delivery-row" style="display:none;">
-          <span class="ct-bill-label">Free delivery</span>
-          <span class="ct-bill-val" id="bill-free-delivery-val"></span>
+        <div class="ct-bill-cap" id="bill-free-delivery-row" style="display:none;"><span id="bill-free-delivery-val">FREE Delivery on your order!</span></div>
+
+        <div id="bill-per-restaurant" style="display:none;"></div>
+
+        <!-- Real backend discount, if any is ever applied. Hidden while ₹0 — never faked. -->
+        <div class="ct-bill-row" id="bill-discount-row" style="display:none;">
+          <span class="ct-bill-label">Extra discount for you</span>
+          <span class="ct-bill-val is-save" id="bill-discount-val">-₹0</span>
         </div>
+
+        <!-- Real backend taxes, if any are ever charged. Hidden while ₹0 — never faked. -->
+        <div class="ct-bill-row" id="bill-tax-row" style="display:none;">
+          <span class="ct-bill-label is-dashed">Government Taxes</span>
+          <span class="ct-bill-val" id="bill-tax-val">₹0</span>
+        </div>
+
         <div class="ct-bill-row" id="bill-tip-row" style="display:none;">
           <span class="ct-bill-label">Delivery partner tip</span>
           <span class="ct-bill-val" id="bill-tip-val">&#8377;0</span>
         </div>
         <div id="bill-savings" style="display:none;"></div>
-        <div class="ct-bill-row">
-          <span class="ct-bill-label">Platform fee</span>
-          <span class="ct-bill-val is-free">FREE</span>
-        </div>
-        <div class="ct-bill-row">
-          <span class="ct-bill-label">Packaging charges</span>
-          <span class="ct-bill-val is-free">FREE</span>
-        </div>
       </div>
 
-      <div class="ct-bill-nofees">No unnecessary fees. Ever.</div>
+      <div class="ct-bill-band">THAT&rsquo;S IT. No unnecessary fees. Ever!</div>
 
       <div class="ct-bill-total">
         <span class="ct-total-label">To Pay</span>
@@ -1792,24 +1819,20 @@ function paintBill(savedCart) {
   ctState.subtotal = subtotal;
   ctState.units = items.reduce((s, [, v]) => s + Number(v.quantity || 0), 0);
 
-  document.getElementById('bill-subtotal').innerText = '₹' + subtotal;
+  const subEl = document.getElementById('bill-subtotal');
+  if (subEl) subEl.innerText = '₹' + subtotal;
 
   const originalCartTotal = items.reduce((sum, [, v]) => sum + Number(v.quantity || 0) * (Number(v.originalPrice) > Number(v.price) ? Number(v.originalPrice) : Number(v.price)), 0);
   const savings = Math.max(0, originalCartTotal - subtotal);
 
-  const mrpRow = document.getElementById('bill-mrp-row');
+  // Inline MRP strike on the Item Total line (reference layout: "₹1067  ₹977").
+  // The aggregate saved amount is surfaced in the bill hero, not a separate row.
   const mrpEl = document.getElementById('bill-mrp');
-  const savingsRow = document.getElementById('bill-savings-row');
-  const savingsVal = document.getElementById('bill-savings-val');
-
-  if (mrpRow && mrpEl) {
-    mrpRow.style.display = savings > 0 ? 'flex' : 'none';
-    mrpEl.textContent = '₹' + originalCartTotal.toFixed(0);
+  if (mrpEl) {
+    if (savings > 0) { mrpEl.textContent = '₹' + originalCartTotal.toFixed(0); mrpEl.hidden = false; }
+    else mrpEl.hidden = true;
   }
-  if (savingsRow && savingsVal) {
-    savingsRow.style.display = savings > 0 ? 'flex' : 'none';
-    savingsVal.textContent = '₹' + savings.toFixed(0);
-  }
+  if (subEl) subEl.classList.toggle('is-save', savings > 0);
 
   ctState.itemSavings = savings;
   ctState.originalCartTotal = originalCartTotal;
@@ -1846,21 +1869,33 @@ function applyTotals() {
     tipVal.textContent = '₹' + tip;
   }
 
+  // Caption directly under the delivery line — only when delivery is actually free.
   const freeRow = document.getElementById('bill-free-delivery-row');
   const freeVal = document.getElementById('bill-free-delivery-val');
   if (freeRow && freeVal) {
-    const threshold = Number(ctState.freeDeliveryAbove || 0);
-    if (ctState.deliveryReady && threshold > 0) {
-      if (ctState.deliveryFee === 0) {
-        freeRow.style.display = 'flex';
-        freeVal.textContent = 'Unlocked';
-      } else {
-        freeRow.style.display = 'flex';
-        freeVal.textContent = 'Above ₹' + threshold.toLocaleString('en-IN');
-      }
+    if (ctState.deliveryReady && ctState.deliveryFee === 0 && !ctState.unavailable) {
+      freeVal.textContent = 'FREE Delivery on your order!';
+      freeRow.style.display = 'block';
     } else {
       freeRow.style.display = 'none';
     }
+  }
+
+  // Real backend discount / taxes, surfaced only when the backend actually
+  // sends them. Both stay hidden at ₹0 — never invented to match a mock.
+  const discRow = document.getElementById('bill-discount-row');
+  const discVal = document.getElementById('bill-discount-val');
+  const discount = Number(ctState.discount || 0);
+  if (discRow && discVal) {
+    if (discount > 0) { discVal.textContent = '-₹' + discount.toFixed(0); discRow.style.display = 'flex'; }
+    else discRow.style.display = 'none';
+  }
+  const taxRow = document.getElementById('bill-tax-row');
+  const taxVal = document.getElementById('bill-tax-val');
+  const tax = Number(ctState.tax || 0);
+  if (taxRow && taxVal) {
+    if (tax > 0) { taxVal.textContent = '₹' + tax.toFixed(2); taxRow.style.display = 'flex'; }
+    else taxRow.style.display = 'none';
   }
 
   // One number, written everywhere it appears: the sheet's "To pay", the
@@ -1935,7 +1970,10 @@ function applyDelivery(delivery) {
   ctState.deliveryFee = deliveryFee;
   ctState.multiBelowMin = [];
   const _bpr = document.getElementById('bill-per-restaurant'); if (_bpr) { _bpr.style.display = 'none'; _bpr.innerHTML = ''; }
-  const _dl = document.getElementById('bill-delivery-label'); if (_dl) _dl.textContent = 'Delivery fee';
+  const _dl = document.getElementById('bill-delivery-label');
+  if (_dl) _dl.textContent = (delivery.distance != null)
+    ? ('Delivery Fee | ' + delivery.distance.toFixed(1) + ' kms')
+    : 'Delivery Fee';
   ctState.minOrder = Number(delivery.minOrder || ctState.minOrder || 0);
   ctState.freeDeliveryAbove = Number(delivery.freeDeliveryAbove || ctState.freeDeliveryAbove || 0);
   ctState.freeDeliveryEnabled = Number(delivery.freeDeliveryAbove || 0) > 0;
@@ -2798,6 +2836,25 @@ function ctExtractMenu(rest){
     return { name, price, originalPrice: (Number.isFinite(original) && original > price) ? original : 0, image, menuItem, isVeg };
   }).filter(Boolean);
 }
+/* Some backends embed the menu in /restaurants/{id}; others expose it only at
+   /restaurants/{id}/menu. We read the embedded copy first and fall back to the
+   dedicated endpoint. Both go through the same extractor, so ONLY real menu
+   data is ever shown — any failure leaves the section hidden, never faked. */
+let ctMenuCache = { id: null, items: null };
+async function ctFetchMenu(rid){
+  if (!rid) return [];
+  if (ctMenuCache.id === rid && ctMenuCache.items) return ctMenuCache.items;
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}/menu`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const data = (json && (json.data != null ? json.data : json)) || [];
+    const items = ctExtractMenu(Array.isArray(data) ? { menu: data } : data);
+    ctMenuCache = { id: rid, items };
+    return items;
+  } catch (_) { return []; }
+}
+
 async function paintCompleteMeal(){
   const section = document.getElementById('ct-meal');
   const row = document.getElementById('ct-meal-row');
@@ -2809,7 +2866,11 @@ async function paintCompleteMeal(){
   if (!rest){ try { rest = await getRestaurantLocation(rid); } catch (_) {} }
   const inCart = new Set(Object.keys(cart).map(n => n.toLowerCase()));
   const resName = (Object.values(cart)[0] || {}).resName || '';
-  const items = ctExtractMenu(rest).filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  let items = ctExtractMenu(rest).filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  if (!items.length){
+    const fetched = await ctFetchMenu(rid);
+    items = fetched.filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  }
   if (!items.length){ section.hidden = true; return; }
   ctMealItems = items.map(it => Object.assign({}, it, { resId: rid, resName: resName }));
   row.innerHTML = ctMealItems.map((it, idx) => {
@@ -3088,12 +3149,14 @@ function paintCheckoutDeliverySummary() {
     const rid = getCartRestaurantId(readCart() || {});
     const cached = (rid && ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
     const eta = cached ? ctEtaText(cached) : '';
-    etaEl.textContent = eta ? ('Delivery in ' + eta) : 'Delivery time unavailable';
+    // Never let "unavailable" become the headline — the line reads "{eta} to {tag}",
+    // so a missing ETA falls back to a calm "Delivery to {tag}".
+    etaEl.textContent = eta || 'Delivery';
     if (!eta && rid) {
       getRestaurantLocation(rid).then(r => {
         const t = r ? ctEtaText(r) : '';
         const el = document.getElementById('checkout-eta');
-        if (el) el.textContent = t ? ('Delivery in ' + t) : 'Delivery time unavailable';
+        if (el) el.textContent = t || 'Delivery';
       }).catch(() => {});
     }
   }
