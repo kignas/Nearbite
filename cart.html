@@ -1210,25 +1210,28 @@
       <div class="ct-meal-row" id="ct-meal-row"></div>
     </section>
 
-    <!-- ═══ 4. PAYMENT OFFERS & MORE — existing coupon system ═══ -->
-    <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
+    <!-- ═══ 4. PAYMENT OFFERS & MORE — compact premium card ═══ -->
+    <button type="button" class="ct-line-card" id="coupon-card" aria-label="Payment offers and more">
+      <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M4.5 8.25a2 2 0 0 1 2-2h8.8l4.2 4.2v5.3a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8.25Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/>
           <path d="m15.2 6.4 3.9 3.9" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/>
           <circle cx="8.5" cy="10" r="1.05" fill="currentColor"/>
         </svg>
       </span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h9l5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.4" fill="currentColor"/></svg>
-      </span>
       <span class="ct-line-copy">
         <span class="ct-line-title">Payment offers &amp; more</span>
         <span class="ct-line-sub">Apply coupon code if any</span>
       </span>
-      <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
+      <svg class="ct-line-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </button>
 
-    <!-- ═══ 5+6. DELIVERY INSTRUCTIONS (inline expand) + RIDER TIP ═══ -->
-    <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
+    <!-- ═══ 5+6. DELIVERY INSTRUCTIONS + RIDER TIP — inline expansion ═══ -->
+    <div class="ct-group" id="ct-di-group">
+      <button type="button" class="ct-group-head" id="ct-di-toggle" aria-expanded="false" aria-controls="ct-di-body">
+        <span class="ct-line-ic ct-line-ic-accent" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M5 6.75h9.5l3 3.5H20a1 1 0 0 1 1 1v4.5H5V6.75Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/>
             <circle cx="8" cy="16.25" r="1.75" stroke="currentColor" stroke-width="1.65"/>
@@ -1236,16 +1239,18 @@
             <path d="M3.5 11.5h3" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/>
           </svg>
         </span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 16V9a1 1 0 0 1 1-1h7l3 4h3a1 1 0 0 1 1 1v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="17" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="16.5" cy="17" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>
-        </span>
         <span class="ct-group-copy">
           <span class="ct-group-title" id="ct-di-summary">Delivery instructions</span>
           <span class="ct-group-sub">Tell your delivery partner how to reach you</span>
         </span>
-        <svg class="ct-group-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="ct-group-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </button>
+
       <div class="ct-group-body" id="ct-di-body" hidden>
         <div class="ct-di-pills" id="ct-di-pills" role="group" aria-label="Delivery instructions"></div>
+
         <div class="ct-tip-block">
           <div class="ct-tip-title" id="tip-heading">Rider tip</div>
           <p class="ct-tip-note">100% goes to your delivery partner.</p>
