@@ -1182,6 +1182,47 @@
     background:#A1114B;
   }
 
+
+  /* ── Checkout benchmark final adjustments ─────────────────────────── */
+  /* Payment offers + Delivery instructions: identical compact height. */
+  #coupon-card.ct-line-card,
+  #ct-di-group{
+    min-height:74px;
+    height:74px;
+    box-sizing:border-box;
+  }
+
+  #coupon-card.ct-line-card{
+    margin-top:10px;
+    margin-bottom:7px;
+  }
+
+  #ct-di-group{
+    margin-top:7px;
+    margin-bottom:7px;
+  }
+
+  #ct-di-group .ct-group-head{
+    min-height:72px;
+    height:72px;
+    box-sizing:border-box;
+    padding:11px 12px;
+  }
+
+  /* Eatswada red/pink action capsule. */
+  .ct-paybar .ct-cta{
+    background:#C2185B;
+    box-shadow:0 5px 14px rgba(194,24,91,.22);
+  }
+  .ct-paybar .ct-cta:active{
+    background:#A1114B;
+  }
+
+  /* Do not show the normal free-delivery nudge strip. */
+  #free-delivery-nudge{
+    display:none;
+  }
+
 </style>
 </head>
 
@@ -2330,7 +2371,9 @@ function applyDelivery(delivery) {
 
   const setStrip = (tone, icon, title, sub) => {
     strip.className = 'ct-strip' + (tone ? ' ' + tone : '') + (sub ? ' has-sub' : '');
-    strip.style.display = 'flex';
+    // Keep normal delivery nudges out of the checkout layout.
+    // Error states remain visible so serviceability problems are still clear.
+    strip.style.display = tone === 'is-error' ? 'flex' : 'none';
     if (stripIcon) stripIcon.className = icon;
     stripText.textContent = title;
     if (stripSub) {
