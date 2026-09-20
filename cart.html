@@ -2887,5 +2887,769 @@ function ctSetBackgroundHidden(hidden) {
   });
 }
 
-/* iOS does not resize the layout viewport for 
-Preview truncated for large file
+/* iOS does not resize the layout viewport for the keyboard, so the sheet is
+   lifted by the measured visual-viewport inset instead. */
+function ctSyncKeyboardInset() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const inset = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+  document.documentElement.style.setProperty('--ct-kb', inset + 'px');
+}
+function ctAttachViewportSync() {
+  if (!window.visualViewport) return;
+  window.visualViewport.addEventListener('resize', ctSyncKeyboardInset);
+  window.visualViewport.addEventListener('scroll', ctSyncKeyboardInset);
+  ctSyncKeyboardInset();
+}
+function ctDetachViewportSync() {
+  if (window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', ctSyncKeyboardInset);
+    window.visualViewport.removeEventListener('scroll', ctSyncKeyboardInset);
+  }
+  document.documentElement.style.setProperty('--ct-kb', '0px');
+}
+
+function ctFocusables(root) {
+  const sel = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  return Array.from(root.querySelectorAll(sel))
+    .filter(el => !el.hasAttribute('hidden') && el.offsetParent !== null);
+}
+
+function openSheet(id, prepare) {
+  const root = document.getElementById(id);
+  if (!root) return;
+  if (ctSheet.openId) closeSheet(true);
+  if (typeof prepare === 'function') prepare(root);
+
+  ctSheet.lastFocus = document.activeElement;
+  if (ctSheet.lastFocus && typeof ctSheet.lastFocus.blur === 'function') ctSheet.lastFocus.blur();
+  ctSheet.openId = id;
+  root.hidden = false;
+  document.body.classList.add('ct-sheet-open');
+  ctSetBackgroundHidden(true);
+  ctAttachViewportSync();
+  requestAnimationFrame(() => root.classList.add('is-open'));
+
+  const target = root.querySelector('[data-autofocus]') || root.querySelector('.ct-sheet-x');
+  if (target) setTimeout(() => { try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }, 80);
+}
+
+function closeSheet(immediate) {
+  const id = ctSheet.openId;
+  if (!id) return;
+  const root = document.getElementById(id);
+  ctSheet.openId = null;
+
+  document.body.classList.remove('ct-sheet-open');
+  ctSetBackgroundHidden(false);
+  ctDetachViewportSync();
+
+  if (root) {
+    root.classList.remove('is-open');
+    if (immediate || ctReducedMotion()) root.hidden = true;
+    else setTimeout(() => { if (!ctSheet.openId) root.hidden = true; }, 240);
+  }
+
+  const back = ctSheet.lastFocus;
+  ctSheet.lastFocus = null;
+  if (!immediate && back && document.contains(back)) {
+    setTimeout(() => { try { back.focus({ preventScroll: true }); } catch (e) { back.focus(); } }, 0);
+  }
+}
+
+/* Escape closes; Tab is trapped inside the open sheet. */
+document.addEventListener('keydown', (event) => {
+  if (!ctSheet.openId) return;
+
+  if (event.key === 'Escape') { event.preventDefault(); closeSheet(); return; }
+  if (event.key !== 'Tab') return;
+
+  const root = document.getElementById(ctSheet.openId);
+  if (!root) return;
+  const items = ctFocusables(root);
+  if (!items.length) return;
+
+  const first = items[0];
+  const last = items[items.length - 1];
+  const active = document.activeElement;
+
+  if (!root.contains(active)) { event.preventDefault(); first.focus(); return; }
+  if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
+});
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESTAURANT NOTE + DELIVERY INSTRUCTIONS
+   Two independent fields sharing one sheet. Which field is being edited is
+   held in ctNoteField, and the value is written back to ctState[field] —
+   never read out of the DOM at checkout time.
+   ═══════════════════════════════════════════════════════════════════════ */
+let ctNoteField = null;
+
+function restaurantNoteField(rid) {
+  return 'restaurantNote:' + String(rid);
+}
+
+function getRestaurantNote(rid) {
+  return ctCleanNote(ctState.restaurantNotes && ctState.restaurantNotes[String(rid)]);
+}
+
+function setRestaurantNote(rid, value) {
+  const key = String(rid);
+  if (!ctState.restaurantNotes || typeof ctState.restaurantNotes !== 'object') ctState.restaurantNotes = {};
+  const clean = ctCleanNote(value);
+  if (clean) ctState.restaurantNotes[key] = clean;
+  else delete ctState.restaurantNotes[key];
+}
+
+function getNoteRestaurantGroups() {
+  const groups = ctCartGroups();
+  return groups.length ? groups : [{ resId: 'legacy', name: 'Eatswada Restaurant' }];
+}
+
+function paintNoteCards() {
+  const list = document.getElementById('restaurant-notes-list');
+  if (list) {
+    const groups = getNoteRestaurantGroups();
+    const multi = groups.length > 1;
+    const heading = multi
+      ? '<div class="ct-restaurant-note-label">Add notes for each restaurant</div>'
+      : '<div class="ct-restaurant-note-label">Restaurant note</div>';
+
+    // IMPORTANT: one independent note card is rendered for EVERY restaurant
+    // represented in the current cart. The restaurant id is part of the
+    // data-note-field key, so opening/saving one card can never overwrite
+    // another restaurant's note.
+    list.innerHTML = heading + groups.map(g => {
+      const rid = String(g.resId);
+      const restaurantName = String(g.name || 'Restaurant');
+      const value = rid === 'legacy' ? ctState.restaurantNote : getRestaurantNote(rid);
+      const title = value ? restaurantName + ' — Note added' : 'Add a note for ' + restaurantName;
+      const sub = value || 'Spice level, allergies, packaging — anything this kitchen should know';
+      const field = restaurantNoteField(rid);
+      return '<button type="button" class="ct-line-card tap' + (value ? ' is-set' : '') + '" data-note-field="' + esc(field) + '" data-restaurant-id="' + esc(rid) + '" aria-haspopup="dialog" aria-label="' + esc(value ? ('Note for ' + restaurantName + ': ' + value + '. Tap to edit or remove.') : title) + '">' +
+        '<span class="ct-line-ic" aria-hidden="true"><i class="fa-regular fa-note-sticky"></i></span>' +
+        '<span class="ct-line-copy"><span class="ct-line-title">' + esc(title) + '</span><span class="ct-line-sub">' + esc(sub) + '</span></span>' +
+        '<span class="ct-line-act"' + (value ? '' : ' hidden') + '>Edit</span>' +
+        '<i class="fa-solid fa-chevron-right ct-line-chev"' + (value ? ' hidden' : '') + ' aria-hidden="true"></i>' +
+        '</button>';
+    }).join('');
+  }
+
+  paintNotePill();
+  paintDIPills();
+}
+
+/* ── Restaurant-note pill state (single-restaurant helper kept) ─────────────── */
+function ctCartSingleRid(){
+  const cart = readCart() || {};
+  const rids = new Set(Object.values(cart).map(i => i && i.resId).filter(Boolean));
+  return rids.size === 1 ? String([...rids][0]) : null;
+}
+function ctNoteForRid(rid){
+  if (!rid) return '';
+  return /^[a-fA-F0-9]{24}$/.test(rid) ? (getRestaurantNote(rid) || '') : (ctState.restaurantNote || '');
+}
+function paintNotePill(){
+  const pill = document.getElementById('ct-note-pill');
+  const txt  = document.getElementById('ct-note-pill-text');
+  if (!pill || !txt) return;
+  const rid = ctCartSingleRid();
+  const note = rid ? ctNoteForRid(rid) : (ctState.restaurantNote || '');
+  if (note){ txt.textContent = 'Note added'; pill.classList.add('is-set'); }
+  else { txt.textContent = 'Restaurant note'; pill.classList.remove('is-set'); }
+}
+
+/* ── Delivery-instruction inline pills (no sheet, no modal) — write to the SAME
+   ctState.deliveryInstructions string sent to POST /orders. Multi-select. */
+const CT_DI_PRESETS = [
+  { label:'Directions to reach', svg:'<path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/>' },
+  { label:'Leave at the door', svg:'<path d="M7 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16" stroke="currentColor" stroke-width="1.7"/><path d="M4 21h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="14" cy="13" r="1" fill="currentColor"/>' },
+  { label:'Avoid calling', svg:'<path d="M4 6c0 8 6 14 14 14l-1-3.5-3.5-1-1.5 1.5c-2.6-1.3-4.7-3.4-6-6L11 9.5 10 6H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>' },
+  { label:'Avoid ringing', svg:'<path d="M6.5 16V11a5.5 5.5 0 0 1 11 0v5l1.5 2H5l1.5-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.5"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>' },
+  { label:'Leave at gate', svg:'<path d="M3 21V10l9-6 9 6v11" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="1.5"/>' }
+];
+function ctInstructionTokens(){
+  return String(ctState.deliveryInstructions || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+function paintDIPills(){
+  const row = document.getElementById('ct-di-pills');
+  const tokens = ctInstructionTokens();
+  const lower = tokens.map(t => t.toLowerCase());
+  if (row){
+    row.innerHTML = CT_DI_PRESETS.map(p =>
+      '<button type="button" class="ct-di-pill" data-di="' + esc(p.label) + '" aria-pressed="' +
+      (lower.includes(p.label.toLowerCase()) ? 'true' : 'false') + '">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">' + p.svg + '</svg>' + esc(p.label) + '</button>'
+    ).join('');
+  }
+  const summary = document.getElementById('ct-di-summary');
+  if (summary) summary.textContent = tokens.length ? ('Delivery instructions · ' + tokens.length + ' added') : 'Delivery instructions';
+}
+function toggleDIPill(label){
+  const presetLower = CT_DI_PRESETS.map(p => p.label.toLowerCase());
+  const tokens = ctInstructionTokens();
+  const custom = tokens.filter(t => !presetLower.includes(t.toLowerCase()));
+  let presets = tokens.filter(t => presetLower.includes(t.toLowerCase()));
+  const has = presets.some(t => t.toLowerCase() === label.toLowerCase());
+  presets = has ? presets.filter(t => t.toLowerCase() !== label.toLowerCase()) : presets.concat([label]);
+  ctState.deliveryInstructions = ctCleanNote(presets.concat(custom).join(', '));
+  saveCartExtras();
+  paintDIPills();
+}
+
+/* ── Complete your meal — real same-restaurant menu, real cart-add ───────────
+   Reads the restaurant's own menu from the backend restaurant record. If none
+   is present, the whole section stays hidden (no invented items). The + button
+   writes to nearbite_cart in the exact schema the rest of the app uses, then
+   re-renders through the existing repaintCart()/scheduleDelivery() path. */
+let ctMealItems = [];
+function ctExtractMenu(rest){
+  if (!rest || typeof rest !== 'object') return [];
+  let raw = [];
+  if (Array.isArray(rest.menu)) raw = rest.menu;
+  else if (Array.isArray(rest.menuItems)) raw = rest.menuItems;
+  else if (Array.isArray(rest.items)) raw = rest.items;
+  else if (Array.isArray(rest.categories)) rest.categories.forEach(c => {
+    if (c && Array.isArray(c.items)) raw = raw.concat(c.items);
+    else if (c && Array.isArray(c.menu)) raw = raw.concat(c.menu);
+  });
+  const flat = [];
+  raw.forEach(x => { if (x && Array.isArray(x.items)) flat.push.apply(flat, x.items); else if (x && typeof x === 'object') flat.push(x); });
+  return flat.map(it => {
+    const name = String(it.name || it.title || it.itemName || '').trim();
+    const price = Number(it.price != null ? it.price : (it.sellingPrice != null ? it.sellingPrice : (it.finalPrice != null ? it.finalPrice : it.amount)));
+    if (!name || !Number.isFinite(price) || price <= 0) return null;
+    const original = Number(it.originalPrice != null ? it.originalPrice : (it.mrp != null ? it.mrp : it.actualPrice));
+    const image = String(it.image || it.imageUrl || it.photo || it.img || '').trim();
+    const menuItem = it._id || it.id || it.menuItem || null;
+    let isVeg; if (it.isVeg === true || it.veg === true) isVeg = true; else if (it.isVeg === false || it.veg === false) isVeg = false;
+    return { name, price, originalPrice: (Number.isFinite(original) && original > price) ? original : 0, image, menuItem, isVeg };
+  }).filter(Boolean);
+}
+/* Some backends embed the menu in /restaurants/{id}; others expose it only at
+   /restaurants/{id}/menu. We read the embedded copy first and fall back to the
+   dedicated endpoint. Both go through the same extractor, so ONLY real menu
+   data is ever shown — any failure leaves the section hidden, never faked. */
+let ctMenuCache = { id: null, items: null };
+async function ctFetchMenu(rid){
+  if (!rid) return [];
+  if (ctMenuCache.id === rid && ctMenuCache.items) return ctMenuCache.items;
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}/menu`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const data = (json && (json.data != null ? json.data : json)) || [];
+    const items = ctExtractMenu(Array.isArray(data) ? { menu: data } : data);
+    ctMenuCache = { id: rid, items };
+    return items;
+  } catch (_) { return []; }
+}
+
+async function paintCompleteMeal(){
+  const section = document.getElementById('ct-meal');
+  const row = document.getElementById('ct-meal-row');
+  if (!section || !row) return;
+  const cart = readCart() || {};
+  const rid = getCartRestaurantId(cart);
+  if (!rid){ section.hidden = true; return; }
+  let rest = (ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
+  if (!rest){ try { rest = await getRestaurantLocation(rid); } catch (_) {} }
+  const inCart = new Set(Object.keys(cart).map(n => n.toLowerCase()));
+  const resName = (Object.values(cart)[0] || {}).resName || '';
+  let items = ctExtractMenu(rest).filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  if (!items.length){
+    const fetched = await ctFetchMenu(rid);
+    items = fetched.filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  }
+  if (!items.length){ section.hidden = true; return; }
+  ctMealItems = items.map(it => Object.assign({}, it, { resId: rid, resName: resName }));
+  row.innerHTML = ctMealItems.map((it, idx) => {
+    const media = it.image
+      ? '<img src="' + esc(it.image) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : '<span class="ct-meal-ph"><i class="fa-solid fa-utensils"></i></span>';
+    return '<div class="ct-meal-card">' +
+      '<div class="ct-meal-media">' + media +
+        '<button type="button" class="ct-meal-add" data-meal-add="' + idx + '" aria-label="Add ' + esc(it.name) + '">+</button>' +
+      '</div>' +
+      '<div class="ct-meal-name">' + esc(it.name) + '</div>' +
+      '<div class="ct-meal-price">₹' + it.price + '</div>' +
+    '</div>';
+  }).join('');
+  section.hidden = false;
+}
+function ctAddMealItem(idx){
+  const it = ctMealItems[idx];
+  if (!it) return;
+  let cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+  if (cart[it.name]){
+    cart[it.name].quantity = Number(cart[it.name].quantity || 0) + 1;
+  } else {
+    cart[it.name] = { price: it.price, originalPrice: it.originalPrice || 0, quantity: 1,
+      resId: it.resId, resName: it.resName, menuItem: it.menuItem || null,
+      image: it.image || '', customizations: {} };
+    if (typeof it.isVeg === 'boolean') cart[it.name].isVeg = it.isVeg;
+  }
+  localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+  localStorage.removeItem('nearbite_checkout_key');
+  repaintCart();
+  scheduleDelivery();
+  showToast(it.name + ' added to cart');
+}
+
+/* ── Savings hero + footer savings — display only, from the SAME real
+   MRP-vs-price figures already computed in paintBill(). Nothing invented. */
+function paintSavingsHero(){
+  const total = ctState.subtotal + ctState.deliveryFee + ctCleanTip(ctState.tipAmount);
+  const saved = Number(ctState.itemSavings || 0);
+  const totalEl = document.getElementById('bill-hero-total');
+  const origEl  = document.getElementById('bill-hero-orig');
+  const savedEl = document.getElementById('bill-hero-saved');
+  const badgeEl = document.getElementById('bill-hero-badge');
+  if (totalEl) totalEl.textContent = '₹' + total;
+  if (origEl){
+    if (saved > 0){ origEl.textContent = '₹' + (total + saved); origEl.hidden = false; }
+    else origEl.hidden = true;
+  }
+  if (savedEl){
+    if (saved > 0){ savedEl.textContent = '₹' + saved.toFixed(0) + ' saved on the total!'; savedEl.hidden = false; }
+    else savedEl.hidden = true;
+  }
+  if (badgeEl) badgeEl.hidden = !(saved > 0);
+}
+function paintFooterSavings(){
+  const el  = document.getElementById('ct-footer-save');
+  const txt = document.getElementById('ct-footer-save-text');
+  if (!el || !txt) return;
+  const saved = Number(ctState.itemSavings || 0);
+  if (saved > 0 && ctState.units > 0){
+    txt.textContent = '₹' + saved.toFixed(0) + ' saved on this order';
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+function updateNoteCount() {
+  const input = document.getElementById('note-input');
+  const count = document.getElementById('note-count');
+  if (!input || !count) return;
+  const length = input.value.length;
+  count.textContent = length + '/' + CT_NOTE_MAX;
+  count.classList.toggle('is-max', length >= CT_NOTE_MAX);
+}
+
+function openNoteSheet(field) {
+  const isRestaurantNote = String(field).indexOf('restaurantNote:') === 0;
+  const restaurantId = isRestaurantNote ? String(field).slice('restaurantNote:'.length) : null;
+  const cfg = isRestaurantNote ? CT_NOTE_CFG.restaurantNote : CT_NOTE_CFG[field];
+  if (!cfg) return;
+  ctNoteField = field;
+
+  openSheet('ct-note-sheet', () => {
+    document.getElementById('note-sheet-title').textContent = cfg.sheetTitle;
+    document.getElementById('note-field-label').textContent = cfg.fieldLabel;
+    document.getElementById('note-help').textContent = cfg.help;
+    document.getElementById('note-save').textContent = cfg.saveLabel;
+
+    const input = document.getElementById('note-input');
+    input.value = isRestaurantNote ? (restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId)) : (ctState[field] || '');
+    input.setAttribute('maxlength', String(CT_NOTE_MAX));
+    updateNoteCount();
+
+    const removeBtn = document.getElementById('note-remove');
+    removeBtn.textContent = cfg.removeLabel;
+    removeBtn.hidden = !(isRestaurantNote ? (restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId)) : ctState[field]);
+
+    const suggestions = document.getElementById('note-suggestions');
+    suggestions.innerHTML = cfg.suggestions
+      .map(text => '<button type="button" class="ct-sug" data-suggest="' + esc(text) + '">' + esc(text) + '</button>')
+      .join('');
+  });
+}
+
+function saveNoteSheet() {
+  const field = ctNoteField;
+  const isRestaurantNote = String(field).indexOf('restaurantNote:') === 0;
+  const restaurantId = isRestaurantNote ? String(field).slice('restaurantNote:'.length) : null;
+  const cfg = isRestaurantNote ? CT_NOTE_CFG.restaurantNote : CT_NOTE_CFG[field];
+  if (!cfg) { closeSheet(); return; }
+
+  const input = document.getElementById('note-input');
+  const value = ctCleanNote(input ? input.value : '');
+  const had = isRestaurantNote
+    ? !!(restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId))
+    : !!ctState[field];
+
+  if (String(field).indexOf('restaurantNote:') === 0) {
+    const restaurantId = String(field).slice('restaurantNote:'.length);
+    if (restaurantId === 'legacy') ctState.restaurantNote = value;
+    else setRestaurantNote(restaurantId, value);
+  } else {
+    ctState[field] = value;
+  }
+  saveCartExtras();
+  paintNoteCards();
+  closeSheet();
+
+  if (value) showToast(cfg.savedToast);
+  else if (had) showToast(cfg.removedToast);
+}
+
+function removeNoteSheet() {
+  const field = ctNoteField;
+  const isRestaurantNote = String(field).indexOf('restaurantNote:') === 0;
+  const restaurantId = isRestaurantNote ? String(field).slice('restaurantNote:'.length) : null;
+  const cfg = isRestaurantNote ? CT_NOTE_CFG.restaurantNote : CT_NOTE_CFG[field];
+  if (!cfg) { closeSheet(); return; }
+  if (String(field).indexOf('restaurantNote:') === 0) {
+    const restaurantId = String(field).slice('restaurantNote:'.length);
+    if (restaurantId === 'legacy') ctState.restaurantNote = '';
+    else setRestaurantNote(restaurantId, '');
+  } else {
+    ctState[field] = '';
+  }
+  saveCartExtras();
+  paintNoteCards();
+  closeSheet();
+  showToast(cfg.removedToast);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TIP
+   The amount is state, not markup. Nothing here claims the tip is paid —
+   that only becomes true when the existing order flow succeeds.
+   ═══════════════════════════════════════════════════════════════════════ */
+function setTip(amount) {
+  ctState.tipAmount = ctCleanTip(amount);
+  saveCartExtras();
+  paintTipChips();
+  applyTotals();
+}
+
+function paintTipChips() {
+  const row = document.getElementById('tip-options');
+  if (!row) return;
+
+  const tip = ctCleanTip(ctState.tipAmount);
+  const isPreset = CT_TIP_PRESETS.indexOf(tip) !== -1;
+  const isCustom = tip > 0 && !isPreset;
+
+  const customChip = document.getElementById('tip-custom-chip');
+  if (customChip) {
+    customChip.textContent = isCustom ? ('₹' + tip) : 'Custom';
+    customChip.setAttribute('aria-label', isCustom
+      ? 'Custom tip of ₹' + tip + '. Tap to change.'
+      : 'Enter a custom tip amount');
+  }
+
+  row.querySelectorAll('.ct-chip').forEach(chip => {
+    const raw = chip.dataset.tip;
+    const active = raw === 'custom' ? isCustom : (Number(raw) === tip);
+    chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function setTipError(message) {
+  const el = document.getElementById('tip-error');
+  if (!el) return;
+  el.textContent = message || '';
+  el.hidden = !message;
+}
+
+function openTipSheet() {
+  openSheet('ct-tip-sheet', () => {
+    const tip = ctCleanTip(ctState.tipAmount);
+    const isCustom = tip > 0 && CT_TIP_PRESETS.indexOf(tip) === -1;
+    const input = document.getElementById('tip-input');
+    input.value = isCustom ? String(tip) : '';
+    setTipError('');
+    document.getElementById('tip-remove').hidden = tip <= 0;
+  });
+}
+
+function saveTipSheet() {
+  const input = document.getElementById('tip-input');
+  const raw = (input ? input.value : '').trim();
+  const refocus = () => { if (input) input.focus(); };
+
+  if (!raw) { setTipError('Enter a tip amount, or choose Remove tip.'); refocus(); return; }
+  const value = Number(raw);
+  if (!Number.isFinite(value))  { setTipError('Enter a valid amount in rupees.'); refocus(); return; }
+  if (!Number.isInteger(value)) { setTipError('Enter a whole rupee amount, with no paise.'); refocus(); return; }
+  if (value < CT_TIP_MIN) { setTipError('The smallest tip is ₹' + CT_TIP_MIN + '. Choose Remove tip if you would rather not tip.'); refocus(); return; }
+  if (value > CT_TIP_MAX) { setTipError('The largest tip you can add here is ₹' + CT_TIP_MAX + '.'); refocus(); return; }
+
+  setTip(value);
+  closeSheet();
+  showToast('₹' + value + ' tip added for your delivery partner');
+}
+
+function removeTipSheet() {
+  setTip(0);
+  closeSheet();
+  showToast('Tip removed');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BILL DETAILS SHEET
+   The bill rows themselves are painted by the existing paintBill() /
+   applyTotals() / applyDelivery() — this only fills the delivery-details
+   block, from data the cart already has. Nothing here is fabricated: a
+   missing value renders as "Not available".
+   ═══════════════════════════════════════════════════════════════════════ */
+const CT_UNAVAILABLE = 'Not available';
+
+function ctSetDetail(id, value, emptyText) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = (value == null ? '' : String(value)).trim();
+  el.textContent = text || (emptyText || CT_UNAVAILABLE);
+  el.classList.toggle('is-empty', !text);
+}
+
+/* The receiver on the selected address is who the rider actually calls, so
+   it wins over the account holder; the profile is the fallback. */
+function ctSelectedAddress() {
+  try { return JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) { return null; }
+}
+
+function ctCustomerContact() {
+  const address = ctSelectedAddress();
+  return {
+    name: (address && (address.receiverName || address.name || address.contactName)) || ctProfile.name || '',
+    phone: (address && (address.receiverPhone || address.phone || address.mobile || address.contactPhone)) || ctProfile.phone || ''
+  };
+}
+
+function ctAddressTag() {
+  const address = ctSelectedAddress();
+  return address ? (address.tag || address.label || 'Home') : '';
+}
+
+function ctAddressLine() {
+  const address = ctSelectedAddress();
+  if (!hasAddress() || !address) return '';
+  return [address.house, address.area, address.landmark, address.city, address.pincode]
+    .filter(Boolean).join(', ');
+}
+
+function paintCheckoutDeliverySummary() {
+  const etaEl = document.getElementById('checkout-eta');
+  if (etaEl) {
+    const rid = getCartRestaurantId(readCart() || {});
+    const cached = (rid && ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
+    const eta = cached ? ctEtaText(cached) : '';
+    // Never let "unavailable" become the headline — the line reads "{eta} to {tag}",
+    // so a missing ETA falls back to a calm "Delivery to {tag}".
+    etaEl.textContent = eta || 'Delivery';
+    if (!eta && rid) {
+      getRestaurantLocation(rid).then(r => {
+        const t = r ? ctEtaText(r) : '';
+        const el = document.getElementById('checkout-eta');
+        if (el) el.textContent = t || 'Delivery';
+      }).catch(() => {});
+    }
+  }
+
+  const address = ctSelectedAddress();
+  const tag = address ? (address.tag || address.label || 'Home') : '';
+  const addressText = ctAddressLine();
+
+  const tagLabel = document.getElementById('address-tag-label');
+  const addressDisplay = document.getElementById('address-display-text');
+  if (tagLabel && tag) tagLabel.textContent = tag;
+  if (addressDisplay && addressText) {
+    addressDisplay.textContent = addressText.replace(/,\s*[^,]+$/, '');
+  }
+
+  const contact = ctCustomerContact();
+  const nameEl = document.getElementById('checkout-customer-name');
+  const phoneEl = document.getElementById('checkout-customer-phone');
+
+  if (nameEl) nameEl.textContent = contact.name || 'Customer name not available';
+  if (phoneEl) phoneEl.textContent = contact.phone || 'Phone number not available';
+}
+
+/* Profile is only needed for the visible customer contact card when the
+   selected address does not already contain receiver details. */
+async function ctEnsureProfile() {
+  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  // A cached login profile is enough to paint immediately, but when a token is
+  // present always refresh from the authenticated backend so edited profile
+  // data is reflected on Cart.
+  if (!token) {
+    paintCheckoutDeliverySummary();
+    return;
+  }
+  // The delivery calculation earlier in this same renderCart() pass may already
+  // have refreshed /profile (address hydration). If so, the display data is
+  // current — skip the duplicate GET /profile and just repaint.
+  if (ctProfileRefreshedThisPass) {
+    ctProfileRefreshedThisPass = false;
+    paintCheckoutDeliverySummary();
+    return;
+  }
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store'
+    });
+    const result = await response.json();
+    if (response.ok && result.success) ctCaptureProfile(result.data);
+  } catch (e) {
+    console.warn('Could not load customer details:', e);
+  }
+  paintCheckoutDeliverySummary();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   WIRING — one delegated listener for every new control.
+   ═══════════════════════════════════════════════════════════════════════ */
+document.addEventListener('click', (event) => {
+  const target = event.target;
+  if (!target || typeof target.closest !== 'function') return;
+
+  if (target.closest('[data-sheet-close]')) { closeSheet(); return; }
+
+  const suggestion = target.closest('.ct-sug[data-suggest]');
+  if (suggestion) {
+    const input = document.getElementById('note-input');
+    if (input) {
+      input.value = ctCleanNote(suggestion.dataset.suggest);
+      updateNoteCount();
+      input.focus();
+    }
+    return;
+  }
+
+  const noteCard = target.closest('.ct-line-card[data-note-field]');
+  if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
+
+  if (target.closest('#ct-view-bill')) { document.getElementById('ct-bill')?.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+
+  document.getElementById('coupon-apply')?.addEventListener('click', async () => {
+    const input=document.getElementById('coupon-input'); const err=document.getElementById('coupon-error'); const code=String(input?.value||'').trim().toUpperCase();
+    if(err){err.hidden=true;err.textContent='';} if(!code){if(err){err.hidden=false;err.textContent='Enter a coupon code.';}return;}
+    try {
+      const subtotal = Array.isArray(ctState.items) ? ctState.items.reduce((sum,it)=>sum + Number(it.price||0)*Number(it.quantity||1),0) : 0;
+      const token=localStorage.getItem('nearbite_token') || localStorage.getItem('eatswada_token') || '';
+      const r=await fetch(`${CONFIG.API_BASE_URL}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({code,subtotal,restaurantId:ctState.restaurantId||undefined})});
+      const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
+      ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
+      const card=document.getElementById('coupon-card'); if(card){const sub=card.querySelector('.ct-line-sub');if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;}
+      closeSheet?.('ct-coupon-sheet'); if(typeof renderCart==='function') renderCart();
+    } catch(e){if(err){err.hidden=false;err.textContent=e.message||'Coupon could not be applied.';}}
+  });
+
+  if (target.closest('#coupon-card')) { openSheet('ct-coupon-sheet'); return; }
+
+  const chip = target.closest('#tip-options .ct-chip');
+  if (chip) {
+    if (chip.dataset.tip === 'custom') { openTipSheet(); return; }
+    const value = ctCleanTip(chip.dataset.tip);
+    if (value === ctCleanTip(ctState.tipAmount)) return;    // already selected
+    setTip(value);
+    showToast(value > 0 ? '₹' + value + ' tip added for your delivery partner' : 'Tip removed');
+    return;
+  }
+
+  const mealAdd = target.closest('[data-meal-add]');
+  if (mealAdd) {
+    ctAddMealItem(Number(mealAdd.getAttribute('data-meal-add')));
+    return;
+  }
+
+  const diPill = target.closest('#ct-di-pills .ct-di-pill[data-di]');
+  if (diPill) {
+    toggleDIPill(diPill.dataset.di);
+    return;
+  }
+
+  if (target.closest('#ct-note-pill')) {
+    const rid = ctCartSingleRid() || getCartRestaurantId(readCart() || {}) || 'legacy';
+    openNoteSheet(restaurantNoteField(rid));
+    return;
+  }
+
+  const diToggle = target.closest('#ct-di-toggle');
+  if (diToggle) {
+    const body = document.getElementById('ct-di-body');
+    const group = document.getElementById('ct-di-group');
+    const expanded = diToggle.getAttribute('aria-expanded') === 'true';
+    diToggle.setAttribute('aria-expanded', String(!expanded));
+    if (body) body.hidden = expanded;
+    if (group) group.classList.toggle('is-open', !expanded);
+    syncFooterOffset();
+    return;
+  }
+});
+
+document.getElementById('note-input').addEventListener('input', updateNoteCount);
+document.getElementById('note-save').addEventListener('click', saveNoteSheet);
+document.getElementById('note-remove').addEventListener('click', removeNoteSheet);
+document.getElementById('tip-save').addEventListener('click', saveTipSheet);
+document.getElementById('tip-remove').addEventListener('click', removeTipSheet);
+document.getElementById('tip-input').addEventListener('input', () => setTipError(''));
+document.getElementById('tip-input').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') { event.preventDefault(); saveTipSheet(); }
+});
+
+/* ── Lifecycle (listeners preserved) ────────────────────────────────────── */
+window.addEventListener('pageshow',(e)=>{
+  // On a fresh load or a full navigation the DOMContentLoaded handler below
+  // already runs the complete init (a strict superset of the work here), so
+  // re-running it on the initial pageshow just duplicates the address fetch,
+  // the delivery calc and the cart render. Only a back/forward bfcache restore
+  // skips DOMContentLoaded — that is the one case that must re-hydrate here.
+  if(!e.persisted) return;
+  // Rehydrate what a bfcache freeze could have missed: extras (storage events
+  // don't fire while frozen) and the selected address, then render exactly once.
+  // renderCart() runs the delivery pipeline and paints the summary itself, so no
+  // separate paintCheckoutDeliverySummary() is needed here.
+  loadCartExtras();
+  loadAddress().then(renderCart);
+});
+window.addEventListener('storage',(e)=>{
+  if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
+    localStorage.removeItem('nearbite_checkout_key');
+    ctAddrHydratedFor = null;
+    // Load the changed address, then render once — renderCart() recalculates
+    // delivery and repaints the summary through its own pipeline.
+    loadAddress().then(renderCart);
+  }
+  if(e.key === CT_EXTRAS_KEY){
+    loadCartExtras();
+    paintNoteCards(); paintTipChips(); applyTotals();
+  }
+});
+// address.html dispatches this when the selected address changes; refresh
+// address text + recalculate distance/fee/total using the existing pipeline.
+window.addEventListener('nearbite:address-changed',()=>{
+  localStorage.removeItem('nearbite_checkout_key');
+  ctAddrHydratedFor = null;
+  // renderCart() recalculates distance/fee/total and repaints the summary via
+  // its own pipeline, so load the new address first and then render exactly once.
+  loadAddress().then(renderCart);
+});
+window.addEventListener('resize', syncFooterOffset);
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Cart extras were already primed once at script-parse time (the loadCartExtras()
+  // call beside their definition), and nothing mutates that localStorage before
+  // this point — so re-reading here would just duplicate the same work.
+  syncFooterOffset();
+  if (window.ResizeObserver) {
+    const footer = document.getElementById('checkout-footer');
+    if (footer) new ResizeObserver(syncFooterOffset).observe(footer);
+  }
+  await loadAddress();
+  // renderCart() paints the checkout summary as part of its pipeline, so a
+  // separate paintCheckoutDeliverySummary() here would just repaint the same state.
+  await renderCart();
+});
+</script>
+
+<script src="navigation.js"></script>
+</body>
+</html>
