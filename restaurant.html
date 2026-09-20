@@ -7,7 +7,7 @@
   <title>Menu – EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
@@ -374,6 +374,7 @@
       .heart-btn:active, .menu-state-btn:active { transform: none; }
     }
 </style>
+<link rel="stylesheet" href="eatswada-typography.css">
 <link rel="stylesheet" href="style.css">
 
 <style id="eatswada-restaurant-polish-v2">
@@ -1459,6 +1460,111 @@ body{padding-bottom:118px!important}
 @media(max-width:350px){
   .delivery-rider{opacity:.72!important;right:-2px!important}
   .delivery-strip .del-chip{font-size:12.5px!important;padding-right:34px!important}
+}
+</style>
+
+
+<style id="eatswada-restaurant-benchmark-v5">
+/* EATSWADA — BENCHMARK V5 / 390px MOBILE FIRST */
+:root{
+  --ew-pink:#e40073;
+  --ew-pink-2:#d9006d;
+  --ew-pink-soft:#fff0f7;
+  --ew-ink:#171b24;
+  --ew-muted:#7b838f;
+  --ew-muted-2:#9aa1ab;
+  --ew-line:#e9ebef;
+  --ew-green:#159a62;
+  --ew-green-soft:#e8f6ef;
+  --ew-red:#d73545;
+  --ew-gutter:28px;
+  --ew-item-img-w:110px;
+  --ew-item-img-h:78px;
+}
+
+/* Global typography system: consistent hierarchy, no random weights. */
+html,body,button,input,select,textarea{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+/* Remove entrance animations: benchmark is calm and immediate. */
+.res-card,.delivery-strip,.filter-bar,.menu-section{animation:none!important;opacity:1!important;transform:none!important}
+
+/* TOP */
+.top-bar{height:72px!important;padding:10px 28px!important;background:#fff!important;border:0!important;box-shadow:none!important;position:relative!important;backdrop-filter:none!important}
+.top-bar>.icon-btn,.top-actions .icon-btn{width:44px!important;height:44px!important;border:1px solid #eceef1!important;background:#fff!important;box-shadow:0 2px 8px rgba(16,24,40,.06)!important}
+.top-bar>.icon-btn i,.top-actions .icon-btn i{font-size:17px!important;color:#151a23!important}
+.top-actions{gap:10px!important}
+
+/* RESTAURANT SUMMARY */
+.res-card{margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
+.res-card-body{padding:18px var(--ew-gutter) 13px!important}
+.res-name{font-size:27px!important;line-height:1.08!important;font-weight:800!important;letter-spacing:-.85px!important;color:var(--ew-ink)!important}
+.res-cuisine{margin-top:5px!important;font-size:14px!important;line-height:1.25!important;font-weight:500!important;color:var(--ew-muted)!important}
+.res-meta-row{margin-top:11px!important;gap:8px!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+.rating-pill{height:31px!important;padding:0 10px!important;border-radius:7px!important;background:var(--ew-green)!important;gap:5px!important}
+.rating-star{font-size:11px!important}.rating-num{font-size:14px!important;font-weight:800!important}.rating-count{font-size:11px!important}.rating-divider{height:13px!important}
+.meta-chip{font-size:13px!important;font-weight:600!important;color:#4e5662!important;gap:5px!important}
+.meta-chip i{font-size:12px!important;color:#7e8792!important}.meta-dot{font-size:13px!important;color:#d5d9df!important}
+
+/* DELIVERY STRIP — thin, integrated banner */
+.delivery-strip{height:58px!important;min-height:58px!important;margin:0!important;padding:0 28px!important;background:var(--ew-pink-soft)!important;border:0!important;overflow:hidden!important;position:relative!important;display:flex!important;align-items:center!important}
+.delivery-copy{justify-content:center!important;width:100%!important;position:relative!important;z-index:2!important}
+.delivery-strip .del-chip{font-size:14px!important;font-weight:700!important;color:#1f2430!important}
+.delivery-strip .del-chip span{color:#1f2430!important}.delivery-strip .del-chip span strong{color:var(--ew-pink)!important}
+.delivery-rider{right:31px!important;bottom:-1px!important;width:100px!important;height:54px!important;opacity:1!important}
+.delivery-rider svg{filter:none!important}
+.delivery-banner-line{left:28px!important;width:54px!important}.delivery-banner-line span{background:#cf4c9a!important;height:2px!important}.delivery-banner-line span:last-child{width:28px!important;margin-left:14px!important}
+
+/* TABS */
+.menu-tabs{height:55px!important;padding:0 28px!important;border-bottom:1px solid var(--ew-line)!important;grid-template-columns:repeat(3,1fr)!important}
+.menu-tab{font-size:14px!important;font-weight:600!important;color:#7c838e!important}
+.menu-tab.active{font-weight:800!important;color:#1c2028!important}.menu-tab.active::before{height:3px!important;background:var(--ew-pink)!important}
+.menu-tab:not(:last-child)::after{top:17px!important;height:21px!important;background:#e6e8ec!important}
+
+/* FILTERS */
+.filter-bar{margin:0!important;padding:14px 28px 12px!important;gap:9px!important;justify-content:flex-start!important}
+.advanced-filter-btn,.veg-chip{height:42px!important;min-height:42px!important;border-radius:10px!important;background:#fff!important;box-shadow:none!important;border:1px solid #dfe3e8!important;font-size:14px!important;font-weight:700!important}
+.advanced-filter-btn{padding:8px 14px!important}.veg-chip{padding:8px 15px!important}
+.veg-chip.veg-type{color:#2a8765!important;border-color:#cfe5da!important;background:#fff!important}.veg-chip.nonveg-type{color:#b84a55!important;border-color:#ead5d8!important;background:#fff!important}
+.filter-count-badge{background:var(--ew-pink)!important;color:#fff!important}
+
+/* MENU */
+.menu-section{padding:0 var(--ew-gutter)!important;margin-top:0!important}
+.menu-cat-header{height:58px!important;padding:0!important;border-bottom:1px solid var(--ew-line)!important;display:flex!important;align-items:center!important}
+.menu-cat-title{font-size:21px!important;line-height:1!important;font-weight:800!important;letter-spacing:-.55px!important;color:var(--ew-ink)!important}
+.menu-cat-count{font-size:13px!important;font-weight:500!important;color:#8c939d!important}
+.menu-cat-chevron{width:32px!important;height:32px!important;background:#f6f7f8!important;border-radius:50%!important;color:#313741!important}
+
+/* COMPACT ITEM ROWS */
+.nb-menu-item{min-height:142px!important;height:142px!important;padding:10px 0!important;display:flex!important;align-items:flex-start!important;gap:12px!important;border:0!important;border-bottom:1px solid var(--ew-line)!important;background:#fff!important;box-shadow:none!important;border-radius:0!important}
+.nb-item-main{min-width:0!important;flex:1 1 auto!important;padding-top:1px!important}
+.nb-item-tag-row{height:20px!important;min-height:20px!important;margin:0 0 3px!important;gap:5px!important}
+.nb-item-title{font-size:17px!important;line-height:1.22!important;font-weight:750!important;letter-spacing:-.28px!important;color:#171b24!important}
+.nb-item-desc{margin-top:3px!important;font-size:12.5px!important;line-height:1.35!important;font-weight:500!important;color:#7f8792!important;-webkit-line-clamp:2!important}
+.nb-item-price-row{margin-top:6px!important;gap:8px!important;align-items:center!important}
+.nb-item-current-price{font-size:16px!important;font-weight:800!important;color:#171b24!important}.nb-item-original-price{font-size:12px!important;color:#9ba1aa!important}
+.nb-item-discount{padding:4px 9px!important;border-radius:999px!important;background:#fff0f7!important;color:var(--ew-pink)!important;font-size:10px!important;font-weight:800!important}
+.nb-item-badge{padding:4px 7px!important;border-radius:5px!important;background:#fff7e8!important;color:#a36a18!important;font-size:10px!important;font-weight:800!important}
+
+/* LANDSCAPE FOOD IMAGE */
+.nb-item-media{width:var(--ew-item-img-w)!important;flex:0 0 var(--ew-item-img-w)!important;margin-top:1px!important}
+.nb-item-image-wrap{width:var(--ew-item-img-w)!important;height:var(--ew-item-img-h)!important;aspect-ratio:auto!important;border-radius:12px!important;overflow:hidden!important;background:#f3f4f6!important;box-shadow:none!important}
+.nb-item-image-wrap img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.nb-item-cta{margin-top:-27px!important;position:relative!important;z-index:3!important}
+.nb-add-btn,.nb-qty{width:92px!important;min-width:92px!important;height:38px!important;min-height:38px!important;border-radius:11px!important;background:#fff!important;box-shadow:0 2px 7px rgba(16,24,40,.12)!important;border:1.5px solid var(--ew-pink)!important}
+.nb-add-btn{color:var(--ew-pink)!important;font-size:13px!important;font-weight:800!important}.nb-qty{border-color:var(--ew-green)!important}.nb-qty-btn{color:var(--ew-green)!important}
+
+/* CUSTOMISABLE LABEL under CTA */
+.nb-customisable{font-size:11px!important;line-height:1.2!important;color:#8e949d!important;margin-top:7px!important;text-align:center!important}
+
+/* Sticky cart supplied by cart-bar.js */
+#ew-cart-bar,.ew-cart-bar,.cart-bar{border-radius:24px 24px 0 0!important;background:linear-gradient(90deg,#e40073,#ed087d)!important;box-shadow:0 -4px 20px rgba(16,24,40,.10)!important}
+
+@media(max-width:380px){
+  :root{--ew-gutter:22px;--ew-item-img-w:104px;--ew-item-img-h:75px}
+  .top-bar{padding-left:22px!important;padding-right:22px!important}.res-card-body{padding-left:22px!important;padding-right:22px!important}
+  .delivery-strip{padding-left:22px!important;padding-right:22px!important}.delivery-banner-line{left:22px!important}.delivery-rider{right:16px!important}
+  .menu-tabs,.filter-bar{padding-left:22px!important;padding-right:22px!important}
 }
 </style>
 
