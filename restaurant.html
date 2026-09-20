@@ -2076,6 +2076,263 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 }
 </style>
 
+
+<style id="eatswada-pixel-lock-final">
+/* ============================================================
+   EATSWADA — PIXEL LOCK / TOP SECTION
+   Final top-section correction based on the supplied benchmark.
+   IMPORTANT: menu item HTML/JS/API/cart/filter logic is untouched.
+   ============================================================ */
+
+/* HEADER — benchmark uses Back + Heart only. */
+.top-bar{
+  height:60px!important;
+  min-height:60px!important;
+  padding:10px 16px!important;
+  background:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.top-bar>.icon-btn,
+.top-actions .icon-btn{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  border:1px solid #E8EBEF!important;
+  box-shadow:0 2px 8px rgba(16,24,40,.06)!important;
+}
+.top-bar>.icon-btn i,
+.top-actions .icon-btn i{
+  font-size:17px!important;
+  color:#151A23!important;
+}
+.top-actions{gap:0!important}
+
+/* Never show a header search / overflow control. */
+#menu-search-btn,
+#restaurant-search-btn,
+#restaurant-more-btn,
+.top-bar .fa-magnifying-glass,
+.top-bar .fa-ellipsis,
+.top-bar .fa-ellipsis-vertical{
+  display:none!important;
+}
+
+/* RESTAURANT INFO — tighter vertical rhythm + benchmark gutter. */
+.res-card{
+  margin:0!important;
+  background:#fff!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.res-card-body{
+  padding:2px 28px 4px!important;
+}
+.res-name{
+  font-size:25px!important;
+  line-height:1.08!important;
+  letter-spacing:-.7px!important;
+  font-weight:800!important;
+  color:#171B24!important;
+}
+.res-cuisine{
+  margin-top:3px!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+  font-weight:500!important;
+  color:#7C838E!important;
+}
+.res-meta-row{
+  margin-top:6px!important;
+  gap:7px!important;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
+  white-space:nowrap!important;
+}
+
+/* RATING — benchmark is a soft-green pill with a green SVG star. */
+.rating-pill{
+  height:28px!important;
+  min-height:28px!important;
+  padding:0 8px!important;
+  border-radius:8px!important;
+  background:#E7F6EE!important;
+  border:1px solid #CDEBDB!important;
+  box-shadow:none!important;
+  gap:5px!important;
+}
+.rating-star{
+  width:16px!important;
+  height:16px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:none!important;
+  color:#0E8A54!important;
+  font-size:0!important;
+}
+.rating-star svg{
+  width:16px!important;
+  height:16px!important;
+  display:block!important;
+  color:#0E8A54!important;
+}
+.rating-num{
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  color:#0E7C4C!important;
+}
+.rating-count{
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:700!important;
+  color:#2A8765!important;
+}
+.rating-divider{display:none!important}
+.meta-dot{
+  display:inline-block!important;
+  width:1px!important;
+  height:14px!important;
+  margin:0 2px!important;
+  background:#DCDFE4!important;
+  border-radius:1px!important;
+  font-size:0!important;
+  color:transparent!important;
+}
+.meta-chip{
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+  color:#4E5662!important;
+  gap:5px!important;
+}
+.meta-chip i{
+  font-size:12px!important;
+  color:#7E8792!important;
+}
+
+/* DELIVERY BANNER — deliberately short and tightly integrated. */
+.delivery-strip{
+  height:40px!important;
+  min-height:40px!important;
+  max-height:40px!important;
+  margin:7px 16px 7px!important;
+  padding:0!important;
+  background:#FDEEF6!important;
+  border:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.delivery-copy{
+  position:absolute!important;
+  left:20px!important;
+  right:92px!important;
+  top:0!important;
+  bottom:0!important;
+  width:auto!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:2!important;
+}
+.delivery-strip .del-chip{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:0!important;
+  max-width:100%!important;
+  white-space:nowrap!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:700!important;
+  color:#20242D!important;
+}
+.delivery-strip .del-chip i{display:none!important}
+.delivery-strip .del-chip span{color:#20242D!important}
+.delivery-strip .del-chip span strong{
+  color:#E40073!important;
+  font-weight:800!important;
+}
+.delivery-banner-line{
+  left:14px!important;
+  width:42px!important;
+  z-index:1!important;
+}
+.delivery-banner-line span{
+  background:#D9539E!important;
+  height:2px!important;
+  border-radius:2px!important;
+  margin:4px 0!important;
+}
+.delivery-banner-line span:first-child{width:32px!important}
+.delivery-banner-line span:last-child{
+  width:20px!important;
+  margin-left:12px!important;
+}
+.delivery-rider{
+  right:5px!important;
+  bottom:0!important;
+  width:76px!important;
+  height:40px!important;
+  z-index:3!important;
+  opacity:1!important;
+}
+.delivery-rider svg,
+.delivery-rider-image{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+}
+.delivery-rider-image{
+  object-fit:contain!important;
+  object-position:center bottom!important;
+}
+
+/* BANNER → TABS — no large blank gap. */
+.menu-tabs{
+  height:48px!important;
+  min-height:48px!important;
+  margin-top:0!important;
+  padding:0 16px!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  align-items:stretch!important;
+  background:#fff!important;
+  border-bottom:1px solid #ECEEF1!important;
+}
+.menu-tab{
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:600!important;
+  color:#7C838E!important;
+}
+.menu-tab.active{
+  font-weight:800!important;
+  color:#1C2028!important;
+}
+.menu-tab.active::before{
+  height:3px!important;
+  background:#E40073!important;
+  border-radius:3px 3px 0 0!important;
+}
+.menu-tab:not(:last-child)::after{
+  top:14px!important;
+  height:20px!important;
+  background:#E6E8EC!important;
+}
+
+/* Keep the filter/menu below this section untouched. */
+</style>
+
 </head>
 <body>
 
@@ -2653,7 +2910,7 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
       const count = Number(restaurant.ratingCount);
       const countEl = document.getElementById('res-rating-count');
       if (Number.isFinite(count) && count > 0) {
-        countEl.innerText = count.toLocaleString('en-IN') + ' ratings';
+        countEl.innerText = '(' + count.toLocaleString('en-IN') + ')';
         countEl.style.display = '';
       } else {
         countEl.style.display = 'none';
