@@ -106,7 +106,7 @@
   /* ── Card shell (NOT .card — that carries !important in style.css) ── */
   .ct-card{
     background: var(--ct-surface);
-    margin: 12px 14px;
+    margin: 10px 14px;
     border: 1px solid var(--ct-line);
     border-radius: var(--ct-r-lg);
     padding: 14px;
@@ -406,7 +406,7 @@
   .ct-line-card{
     display:flex; align-items:center; gap:12px;
     width:auto; box-sizing:border-box;
-    margin:12px 14px; padding:14px;
+    margin:10px 14px; padding:14px;
     font:inherit; text-align:left; color:inherit;
     background:var(--ct-surface);
     border:1px solid var(--ct-line);
@@ -443,10 +443,10 @@
 
   /* ── Tip ──────────────────────────────────────────────────────────── */
   .ct-tip-note{
-    margin:11px 0 0; font-size:11.5px; font-weight:500;
+    margin:5px 0 0; font-size:11.5px; font-weight:500;
     line-height:1.5; color:var(--ct-muted);
   }
-  .ct-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .ct-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
   .ct-chip{
     font:inherit; font-size:12.5px; font-weight:800;
     color:var(--ct-ink-2); background:var(--ct-surface);
@@ -497,29 +497,59 @@
   }
   .ct-addmore i{ font-size:12px; }
 
-  /* ── Delivery instruction quick chips ─────────────────────────────── */
-  .ct-di-wrap{ margin:12px 14px 0; }
-  .ct-di-label{
-    font-size:12px; font-weight:800; letter-spacing:.4px; text-transform:uppercase;
-    color:var(--ct-muted); margin-bottom:9px;
+  /* ── Section label (small heading between compact rows) ───────────── */
+  .ct-section-label{
+    margin:14px 16px 0; font-size:11px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--ct-muted);
   }
-  .ct-di-row{
-    display:flex; gap:8px; overflow-x:auto; padding-bottom:2px;
-    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+
+  /* ── Compact restaurant note / cooking request (in cart area) ─────── */
+  .ct-notes-compact{ margin-top:2px; }
+  .ct-notes-compact .ct-restaurant-note-label{ margin:12px 16px 0; }
+  .ct-notes-compact .ct-line-card{
+    margin:6px 14px 0; padding:11px 14px; min-height:0; border-radius:var(--ct-r-md);
   }
-  .ct-di-row::-webkit-scrollbar{ display:none; }
-  .ct-di-chip{
-    flex:0 0 auto; display:inline-flex; align-items:center; gap:7px;
-    font:inherit; font-size:12px; font-weight:700; color:var(--ct-ink-2);
+  .ct-notes-compact .ct-line-ic{ width:30px; height:30px; flex-basis:30px; font-size:13px; }
+  .ct-cook-pills{ display:flex; flex-wrap:wrap; gap:7px; margin:8px 14px 0; }
+  .ct-cook-pills:empty{ display:none; }
+  .ct-cook-pill{
+    font:inherit; font-size:11.5px; font-weight:700; color:var(--ct-ink-2);
     background:var(--ct-surface); border:1.5px solid var(--ct-line);
-    border-radius:999px; padding:9px 14px; min-height:40px; white-space:nowrap;
+    border-radius:999px; padding:7px 13px; min-height:34px;
+    display:inline-flex; align-items:center;
     transition:border-color .16s ease, background .16s ease, color .16s ease;
   }
-  .ct-di-chip i{ font-size:12px; color:var(--ct-muted); }
-  .ct-di-chip[aria-pressed="true"]{
-    border-color:var(--ct-green); background:var(--ct-green-soft); color:var(--ct-green-deep);
+  .ct-cook-pill[aria-pressed="true"]{ border-color:var(--ct-green); background:var(--ct-green-soft); color:var(--ct-green-deep); }
+
+  /* ── Complete your meal (same-restaurant recommendations) ─────────── */
+  .ct-meal{ margin:12px 14px; }
+  .ct-meal-head{ margin:0 2px 10px; }
+  .ct-meal-title{ font-size:14px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink); }
+  .ct-meal-sub{ margin-top:1px; font-size:11.5px; font-weight:500; color:var(--ct-muted); }
+  .ct-meal-row{
+    display:flex; gap:11px; overflow-x:auto; padding-bottom:4px;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
-  .ct-di-chip[aria-pressed="true"] i{ color:var(--ct-green); }
+  .ct-meal-row::-webkit-scrollbar{ display:none; }
+  .ct-meal-card{ flex:0 0 108px; width:108px; }
+  .ct-meal-media{
+    position:relative; width:108px; height:108px; border-radius:var(--ct-r-md);
+    overflow:hidden; background:#F2F4F6; border:1px solid var(--ct-line);
+  }
+  .ct-meal-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ct-meal-ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#C2C8CE; font-size:22px; }
+  .ct-meal-add{
+    position:absolute; right:6px; bottom:6px; width:30px; height:30px; border-radius:50%;
+    border:1.5px solid var(--ct-green); background:#fff; color:var(--ct-green);
+    font-size:18px; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(16,20,24,.14); cursor:pointer;
+  }
+  .ct-meal-add:active{ transform:scale(.92); }
+  .ct-meal-name{
+    margin-top:7px; font-size:12px; font-weight:700; color:var(--ct-ink); line-height:1.3;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:31px;
+  }
+  .ct-meal-price{ margin-top:2px; font-size:13px; font-weight:800; color:var(--ct-ink); font-variant-numeric:tabular-nums; }
 
   /* ── Footer savings line (green) ──────────────────────────────────── */
   .ct-footer-save{
@@ -536,6 +566,63 @@
     background:#ECFDF3; color:#0F5F3D;
     font-size:11.5px; font-weight:800; letter-spacing:.1px; text-align:center;
   }
+
+  /* ── Compact delivery summary (ETA + address + contact in one card) ─── */
+  .ct-summary{
+    background:var(--ct-surface); margin:10px 14px;
+    border:1px solid var(--ct-line); border-radius:var(--ct-r-lg);
+    box-shadow:var(--ct-shadow); overflow:hidden;
+  }
+  .ct-summary-row{
+    display:flex; align-items:center; gap:11px; width:100%;
+    padding:12px 14px; background:transparent; border:0; text-align:left;
+    font:inherit; color:inherit;
+  }
+  .ct-summary-main{ cursor:pointer; }
+  .ct-summary-contact{ border-top:1px solid var(--ct-line-soft); }
+  .ct-summary-ic{
+    width:32px; height:32px; flex:0 0 32px; border-radius:9px;
+    background:var(--ct-green-soft); color:var(--ct-green);
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .ct-summary-copy{ flex:1; min-width:0; display:block; }
+  .ct-summary-title{
+    display:block; font-size:13.5px; font-weight:800; color:var(--ct-ink);
+    letter-spacing:-.2px; line-height:1.3;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-summary-sub{
+    display:block; margin-top:2px; font-size:12px; font-weight:500; color:var(--ct-muted);
+    line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-summary-sub.ct-prompt{ color:var(--ct-green); font-weight:700; }
+  .ct-summary-change{
+    flex:0 0 auto; font-size:11px; font-weight:800; letter-spacing:.3px;
+    color:var(--ct-green); background:var(--ct-green-soft); border-radius:999px; padding:6px 11px;
+  }
+  .ct-summary-name{
+    display:block; font-size:13px; font-weight:700; color:var(--ct-ink); line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-summary-phone{ display:block; margin-top:1px; font-size:11.5px; font-weight:500; color:var(--ct-muted); }
+
+  /* ── Bottom pay bar (amount + view detailed bill | Proceed to Pay) ──── */
+  .ct-paybar{ display:flex; align-items:stretch; gap:12px; }
+  .ct-paybar-left{
+    flex:0 0 auto; display:flex; flex-direction:column; justify-content:center; gap:1px;
+    background:transparent; border:0; padding:0 2px; text-align:left; font:inherit; color:inherit; cursor:pointer;
+  }
+  .ct-paybar-amt{
+    font-size:19px; font-weight:800; color:var(--ct-ink); letter-spacing:-.4px;
+    line-height:1.1; font-variant-numeric:tabular-nums;
+  }
+  .ct-paybar-link{ display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; color:var(--ct-green); letter-spacing:.2px; }
+  .ct-paybar .ct-cta{ flex:1; min-height:52px; border-radius:999px; justify-content:center; }
+  .ct-pay-note{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin-top:1px; font-size:10.5px; font-weight:600; color:var(--ct-muted);
+  }
+  .ct-pay-note i{ font-size:10px; }
 
   /* ── Bottom sheets ────────────────────────────────────────────────── */
   body.ct-sheet-open{ overflow:hidden; }
@@ -751,42 +838,33 @@
 
   <div id="cart-has-items">
 
-    <!-- ── Delivery ETA ─────────────────────────────────────────────────── -->
-    <div class="ct-card ct-delivery-eta-card" id="delivery-eta-card" aria-live="polite">
-      <div class="ct-delivery-eta-icon" aria-hidden="true">
-        <i class="fa-regular fa-clock"></i>
-      </div>
-      <div class="ct-delivery-eta-copy">
-        <div class="ct-delivery-eta-title">Delivery in <strong id="checkout-eta">35–40 mins</strong></div>
-        <div class="ct-delivery-eta-sub">Estimated delivery time</div>
-      </div>
-    </div>
-
-    <div class="ct-card tap" id="address-block" onclick="window.location.href='address.html?return=cart'">
-      <div class="ct-addr">
-        <div class="ct-addr-pin"><i class="fa-solid fa-location-dot"></i></div>
-        <div>
-          <div class="ct-addr-eyebrow">Deliver to</div>
-          <span class="ct-addr-tag" id="address-tag-label">Add delivery address</span>
-        </div>
-        <span class="ct-change">CHANGE <i class="fa-solid fa-chevron-right" style="font-size:9px;"></i></span>
-        <div class="ct-addr-text ct-prompt" id="address-display-text">Tap to add your delivery address</div>
+    <!-- ── Delivery summary (ETA + address + contact, combined & compact) ── -->
+    <div class="ct-summary" id="delivery-eta-card" aria-live="polite">
+      <button type="button" class="ct-summary-row ct-summary-main tap" id="address-block"
+        onclick="window.location.href='address.html?return=cart'" aria-label="Change delivery address">
+        <span class="ct-summary-ic" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+        <span class="ct-summary-copy">
+          <span class="ct-summary-title"><span id="checkout-eta">Checking delivery time…</span> · <span id="address-tag-label">Add address</span></span>
+          <span class="ct-summary-sub ct-prompt" id="address-display-text">Tap to add your delivery address</span>
+        </span>
+        <span class="ct-summary-change">CHANGE</span>
+      </button>
+      <div class="ct-summary-row ct-summary-contact" id="customer-contact-card">
+        <span class="ct-summary-ic" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
+        <span class="ct-summary-copy">
+          <span class="ct-summary-name" id="checkout-customer-name">Customer</span>
+          <span class="ct-summary-phone" id="checkout-customer-phone">Phone number</span>
+        </span>
       </div>
     </div>
 
-    <!-- ── Customer contact ─────────────────────────────────────────────── -->
-    <div class="ct-card ct-customer-card" id="customer-contact-card">
-      <div class="ct-customer-icon" aria-hidden="true"><i class="fa-regular fa-user"></i></div>
-      <div class="ct-customer-copy">
-        <div class="ct-customer-name" id="checkout-customer-name">Customer</div>
-        <div class="ct-customer-phone" id="checkout-customer-phone">Phone number</div>
-      </div>
-      <i class="fa-solid fa-chevron-right ct-customer-chevron" aria-hidden="true"></i>
-    </div>
-
+    <!-- ═══ 2. CART ═══ -->
     <div class="ct-card" id="cart-items-list"></div>
 
     <a class="ct-addmore tap" id="ct-addmore" href="index.html"><i class="fa-solid fa-plus"></i> Add more items</a>
+
+    <div id="restaurant-notes-list" class="ct-restaurant-notes ct-notes-compact" aria-label="Cooking request or note"></div>
+    <div class="ct-cook-pills" id="ct-cook-pills" role="group" aria-label="Quick cooking requests"></div>
 
     <div class="ct-savings-hero" id="ct-savings-hero" role="status" aria-live="polite">
       <div class="ct-savings-ic" aria-hidden="true"><i class="fa-solid fa-tags"></i></div>
@@ -805,41 +883,41 @@
       </span>
     </div>
 
-    <!-- ── Apply coupon ──────────────────────────────────────────────────
-         Real control, honest content: it opens a real sheet that reports the
-         real state of the coupon system (currently: none active). No fake
-         code field, no fake APPLY button, nothing added to the order. -->
+    <!-- ═══ 3. COMPLETE YOUR MEAL — same-restaurant menu, real data only ═══ -->
+    <section class="ct-meal" id="ct-meal" hidden aria-label="Complete your meal">
+      <div class="ct-meal-head">
+        <div class="ct-meal-title">Complete your meal</div>
+        <div class="ct-meal-sub">More from this restaurant</div>
+      </div>
+      <div class="ct-meal-row" id="ct-meal-row"></div>
+    </section>
+
+    <!-- ═══ 4. PAYMENT OFFERS & MORE — existing coupon system ═══ -->
     <button type="button" class="ct-line-card tap" id="coupon-card" aria-haspopup="dialog">
-      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-ticket"></i></span>
+      <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-tag"></i></span>
       <span class="ct-line-copy">
-        <span class="ct-line-title">Apply coupon</span>
-        <span class="ct-line-sub">No coupons are active for this order right now</span>
+        <span class="ct-line-title">Payment offers &amp; more</span>
+        <span class="ct-line-sub">Apply coupon code if any</span>
       </span>
       <i class="fa-solid fa-chevron-right ct-line-chev" aria-hidden="true"></i>
     </button>
 
-    <!-- ── Note for the restaurant(s) ───────────────────────────────── -->
-    <div id="restaurant-notes-list" class="ct-restaurant-notes" aria-label="Restaurant notes"></div>
-
-    <!-- ── Delivery instructions (separate field, separate sheet) ─────── -->
-    <div class="ct-di-wrap">
-      <div class="ct-di-label">Quick delivery instructions</div>
-      <div class="ct-di-row" id="ct-di-row" role="group" aria-label="Quick delivery instructions"></div>
-    </div>
+    <!-- ═══ 5. DELIVERY INSTRUCTIONS — single card opens existing sheet ═══ -->
+    <div class="ct-section-label">Add delivery instructions</div>
     <button type="button" class="ct-line-card tap" data-note-field="deliveryInstructions" aria-haspopup="dialog">
       <span class="ct-line-ic" aria-hidden="true"><i class="fa-solid fa-motorcycle"></i></span>
       <span class="ct-line-copy">
-        <span class="ct-line-title" data-role="title">Add delivery instructions</span>
-        <span class="ct-line-sub" data-role="sub">Tell your delivery partner how to reach you</span>
+        <span class="ct-line-title" data-role="title">Delivery instructions</span>
+        <span class="ct-line-sub" data-role="sub">Tap to choose instructions</span>
       </span>
       <span class="ct-line-act" data-role="act" hidden>Edit</span>
       <i class="fa-solid fa-chevron-right ct-line-chev" data-role="chev" aria-hidden="true"></i>
     </button>
 
-    <!-- ── Tip ───────────────────────────────────────────────────────── -->
-    <div class="ct-card">
+    <!-- ═══ 6. RIDER TIP ═══ -->
+    <div class="ct-card ct-tip-card">
       <div class="ct-card-head" id="tip-heading"><i class="fa-solid fa-hand-holding-heart"></i> Tip your delivery partner</div>
-      <p class="ct-tip-note">A tip is added to your order total and goes to the partner who delivers this order.</p>
+      <p class="ct-tip-note">100% goes to your delivery partner.</p>
       <div class="ct-chip-row" id="tip-options" role="group" aria-labelledby="tip-heading">
         <button type="button" class="ct-chip" data-tip="0" aria-pressed="true">No tip</button>
         <button type="button" class="ct-chip" data-tip="10" aria-pressed="false">&#8377;10</button>
@@ -885,27 +963,20 @@
   </div>
 
   <div class="ct-footer" id="checkout-footer">
-    <div id="payment-options" class="ct-pay">
-      <div class="ct-pay-label">Payment method</div>
-
-      <div class="payment-method-option selected" data-method="upi" onclick="selectPaymentMethod('upi')">
-        <div class="ct-pay-head">
-          <div class="upi-icon"><i class="fa-solid fa-qrcode"></i></div>
-          <i class="fa-solid fa-circle-check payment-check"></i>
-        </div>
-        <div>
-          <div class="payment-title">Online</div>
-          <div class="payment-sub">UPI only · GPay · PhonePe</div>
-        </div>
-      </div>
-    </div>
-
     <div class="ct-footer-save" id="ct-footer-save"><i class="fa-solid fa-tags"></i> <span id="ct-footer-save-text"></span></div>
 
-    <button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
-      <span class="ct-cta-text" id="checkout-label">Proceed to Pay</span>
-      <span class="ct-cta-val" id="checkout-total">₹0</span>
-    </button>
+    <div class="ct-paybar">
+      <button type="button" class="ct-paybar-left tap" id="ct-view-bill" aria-haspopup="dialog" aria-label="View detailed bill">
+        <span class="ct-paybar-amt" id="checkout-total">₹0</span>
+        <span class="ct-paybar-link">View detailed bill <i class="fa-solid fa-chevron-up" style="font-size:9px;" aria-hidden="true"></i></span>
+      </button>
+
+      <button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
+        <span class="ct-cta-text" id="checkout-label">Proceed to Pay</span>
+      </button>
+    </div>
+
+    <div class="ct-pay-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Secure UPI payment · GPay, PhonePe &amp; more</div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════
@@ -988,6 +1059,15 @@
         </div>
 
         <div id="bill-savings" style="display:none;"></div>
+
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Platform fee</span>
+          <span class="ct-bill-val is-free">FREE</span>
+        </div>
+        <div class="ct-bill-row">
+          <span class="ct-bill-label">Packaging charges</span>
+          <span class="ct-bill-val is-free">FREE</span>
+        </div>
 
         <div class="ct-bill-total">
           <span class="ct-total-label">To pay</span>
@@ -1252,7 +1332,6 @@ async function getRestaurantLocation(restaurantId, force) {
       freeDeliveryAbove: Number(restaurant.freeDeliveryAbove || 0),
       deliveryRadiusKm: Number(restaurant.deliveryRadiusKm || 10),
       codEnabled: restaurant.codEnabled === true,
-      etaText: '35–40 mins',
     };
     ctResCache = { id: restaurantId, data: parsed };
     return parsed;
@@ -1535,21 +1614,21 @@ const CT_TIP_PRESETS = [10, 20, 30, 50];
 
 const CT_NOTE_CFG = {
   restaurantNote: {
-    idleTitle:    'Add a note for the restaurant',
+    idleTitle:    'Add cooking request or note',
     idleSub:      'Spice level, allergies, packaging — anything the kitchen should know',
-    setTitle:     'Note added',
-    sheetTitle:   'Add a note for the restaurant',
-    fieldLabel:   'Your note for the restaurant',
+    setTitle:     'Cooking request added',
+    sheetTitle:   'Cooking request / note',
+    fieldLabel:   'Your cooking request or note',
     help:         'Example: Please make it less spicy',
-    saveLabel:    'Save note',
-    removeLabel:  'Remove note',
-    savedToast:   'Note saved for the restaurant',
-    removedToast: 'Restaurant note removed',
-    suggestions:  ['Please make it less spicy', 'Extra napkins, please', 'No onion', 'Pack the sauces separately']
+    saveLabel:    'Save',
+    removeLabel:  'Remove',
+    savedToast:   'Cooking request saved',
+    removedToast: 'Cooking request removed',
+    suggestions:  ['Less spicy', 'No onion', 'Extra napkins, please', 'Pack the sauces separately', 'Make it fresh']
   },
   deliveryInstructions: {
-    idleTitle:    'Add delivery instructions',
-    idleSub:      'Tell your delivery partner how to reach you',
+    idleTitle:    'Delivery instructions',
+    idleSub:      'Tap to choose instructions',
     setTitle:     'Instructions added',
     sheetTitle:   'Delivery instructions',
     fieldLabel:   'Instructions for your delivery partner',
@@ -1558,7 +1637,7 @@ const CT_NOTE_CFG = {
     removeLabel:  'Remove instructions',
     savedToast:   'Delivery instructions saved',
     removedToast: 'Delivery instructions removed',
-    suggestions:  ['Call when you arrive', 'Leave at the gate', 'Ring the bell', "Don't call, just deliver"]
+    suggestions:  ['Leave at the door', 'Call on arrival', 'Avoid calling', 'Avoid ringing the bell', 'Leave at the gate']
   }
 };
 
@@ -2038,6 +2117,7 @@ async function renderCart() {
 
   paintItems(savedCart);   // instant
   paintBill(savedCart);    // instant
+  paintCompleteMeal();
   syncFooterOffset();
   ctProfileRefreshedThisPass = false;   // new pass: the delivery calc below may refresh /profile
   await refreshDelivery(); // network, guarded
@@ -2052,6 +2132,7 @@ function repaintCart() {
   paintItems(savedCart);
   paintBill(savedCart);
   paintCheckoutDeliverySummary();
+  paintCompleteMeal();
   syncFooterOffset();
 }
 
@@ -2645,43 +2726,124 @@ function paintNoteCards() {
   if (act) act.hidden = !value;
   if (chev) chev.hidden = !!value;
   card.setAttribute('aria-label', value ? cfg.setTitle + ': ' + value + '. Tap to edit or remove.' : cfg.idleTitle);
-  paintDeliveryChips();
+  paintCookPills();
 }
 
-/* ── Delivery-instruction quick chips ───────────────────────────────────────
-   These write into the SAME ctState.deliveryInstructions string the sheet uses
-   (merged with any custom text), so they persist and are sent to POST /orders
-   exactly like a typed instruction. No new storage, no new order field. */
-const CT_DI_PRESETS = [
-  { label: 'Leave at the door',   icon: 'fa-door-closed' },
-  { label: 'Call on arrival',     icon: 'fa-phone' },
-  { label: 'Avoid calling',       icon: 'fa-phone-slash' },
-  { label: "Don't ring the bell", icon: 'fa-bell-slash' },
-  { label: 'Leave at the gate',   icon: 'fa-warehouse' }
-];
-function ctInstructionTokens(){
-  return String(ctState.deliveryInstructions || '').split(',').map(s => s.trim()).filter(Boolean);
+/* ── Cooking-request quick pills (single-restaurant carts) ───────────────────
+   Toggle common requests into the SAME per-restaurant note the sheet edits, so
+   they persist and are sent to POST /orders as restaurantNote — no new field. */
+const CT_COOK_PRESETS = ['Less spicy', 'No onion', 'Extra napkins'];
+function ctCartSingleRid(){
+  const cart = readCart() || {};
+  const rids = new Set(Object.values(cart).map(i => i && i.resId).filter(Boolean));
+  return rids.size === 1 ? String([...rids][0]) : null;
 }
-function paintDeliveryChips(){
-  const row = document.getElementById('ct-di-row');
-  if (!row) return;
-  const selected = ctInstructionTokens().map(t => t.toLowerCase());
-  row.innerHTML = CT_DI_PRESETS.map(p =>
-    '<button type="button" class="ct-di-chip" data-di="' + esc(p.label) + '" aria-pressed="' +
-    (selected.includes(p.label.toLowerCase()) ? 'true' : 'false') + '">' +
-    '<i class="fa-solid ' + p.icon + '" aria-hidden="true"></i>' + esc(p.label) + '</button>'
-  ).join('');
+function ctNoteForRid(rid){
+  if (!rid) return '';
+  return /^[a-fA-F0-9]{24}$/.test(rid) ? (getRestaurantNote(rid) || '') : (ctState.restaurantNote || '');
 }
-function toggleDeliveryChip(label){
-  const presetLower = CT_DI_PRESETS.map(p => p.label.toLowerCase());
-  const tokens = ctInstructionTokens();
-  const custom = tokens.filter(t => !presetLower.includes(t.toLowerCase()));
-  let presets = tokens.filter(t => presetLower.includes(t.toLowerCase()));
-  const has = presets.some(t => t.toLowerCase() === label.toLowerCase());
-  presets = has ? presets.filter(t => t.toLowerCase() !== label.toLowerCase()) : presets.concat([label]);
-  ctState.deliveryInstructions = ctCleanNote(presets.concat(custom).join(', '));
+function ctSetNoteForRid(rid, val){
+  const clean = ctCleanNote(val);
+  if (/^[a-fA-F0-9]{24}$/.test(rid)) setRestaurantNote(rid, clean);
+  else ctState.restaurantNote = clean;
   saveCartExtras();
   paintNoteCards();
+}
+function paintCookPills(){
+  const row = document.getElementById('ct-cook-pills');
+  if (!row) return;
+  const rid = ctCartSingleRid();
+  if (!rid){ row.innerHTML = ''; return; }
+  const note = ctNoteForRid(rid).toLowerCase();
+  row.innerHTML = CT_COOK_PRESETS.map(p =>
+    '<button type="button" class="ct-cook-pill" data-cook="' + esc(p) + '" aria-pressed="' +
+    (note.includes(p.toLowerCase()) ? 'true' : 'false') + '">' + esc(p) + '</button>'
+  ).join('');
+}
+function toggleCookPill(label){
+  const rid = ctCartSingleRid();
+  if (!rid) return;
+  const tokens = String(ctNoteForRid(rid)).split(',').map(s => s.trim()).filter(Boolean);
+  const has = tokens.some(t => t.toLowerCase() === label.toLowerCase());
+  const next = has ? tokens.filter(t => t.toLowerCase() !== label.toLowerCase()) : tokens.concat([label]);
+  ctSetNoteForRid(rid, next.join(', '));
+  paintCookPills();
+}
+
+/* ── Complete your meal — real same-restaurant menu, real cart-add ───────────
+   Reads the restaurant's own menu from the backend restaurant record. If none
+   is present, the whole section stays hidden (no invented items). The + button
+   writes to nearbite_cart in the exact schema the rest of the app uses, then
+   re-renders through the existing repaintCart()/scheduleDelivery() path. */
+let ctMealItems = [];
+function ctExtractMenu(rest){
+  if (!rest || typeof rest !== 'object') return [];
+  let raw = [];
+  if (Array.isArray(rest.menu)) raw = rest.menu;
+  else if (Array.isArray(rest.menuItems)) raw = rest.menuItems;
+  else if (Array.isArray(rest.items)) raw = rest.items;
+  else if (Array.isArray(rest.categories)) rest.categories.forEach(c => {
+    if (c && Array.isArray(c.items)) raw = raw.concat(c.items);
+    else if (c && Array.isArray(c.menu)) raw = raw.concat(c.menu);
+  });
+  const flat = [];
+  raw.forEach(x => { if (x && Array.isArray(x.items)) flat.push.apply(flat, x.items); else if (x && typeof x === 'object') flat.push(x); });
+  return flat.map(it => {
+    const name = String(it.name || it.title || it.itemName || '').trim();
+    const price = Number(it.price != null ? it.price : (it.sellingPrice != null ? it.sellingPrice : (it.finalPrice != null ? it.finalPrice : it.amount)));
+    if (!name || !Number.isFinite(price) || price <= 0) return null;
+    const original = Number(it.originalPrice != null ? it.originalPrice : (it.mrp != null ? it.mrp : it.actualPrice));
+    const image = String(it.image || it.imageUrl || it.photo || it.img || '').trim();
+    const menuItem = it._id || it.id || it.menuItem || null;
+    let isVeg; if (it.isVeg === true || it.veg === true) isVeg = true; else if (it.isVeg === false || it.veg === false) isVeg = false;
+    return { name, price, originalPrice: (Number.isFinite(original) && original > price) ? original : 0, image, menuItem, isVeg };
+  }).filter(Boolean);
+}
+async function paintCompleteMeal(){
+  const section = document.getElementById('ct-meal');
+  const row = document.getElementById('ct-meal-row');
+  if (!section || !row) return;
+  const cart = readCart() || {};
+  const rid = getCartRestaurantId(cart);
+  if (!rid){ section.hidden = true; return; }
+  let rest = (ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
+  if (!rest){ try { rest = await getRestaurantLocation(rid); } catch (_) {} }
+  const inCart = new Set(Object.keys(cart).map(n => n.toLowerCase()));
+  const resName = (Object.values(cart)[0] || {}).resName || '';
+  const items = ctExtractMenu(rest).filter(it => !inCart.has(it.name.toLowerCase())).slice(0, 12);
+  if (!items.length){ section.hidden = true; return; }
+  ctMealItems = items.map(it => Object.assign({}, it, { resId: rid, resName: resName }));
+  row.innerHTML = ctMealItems.map((it, idx) => {
+    const media = it.image
+      ? '<img src="' + esc(it.image) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : '<span class="ct-meal-ph"><i class="fa-solid fa-utensils"></i></span>';
+    return '<div class="ct-meal-card">' +
+      '<div class="ct-meal-media">' + media +
+        '<button type="button" class="ct-meal-add" data-meal-add="' + idx + '" aria-label="Add ' + esc(it.name) + '">+</button>' +
+      '</div>' +
+      '<div class="ct-meal-name">' + esc(it.name) + '</div>' +
+      '<div class="ct-meal-price">₹' + it.price + '</div>' +
+    '</div>';
+  }).join('');
+  section.hidden = false;
+}
+function ctAddMealItem(idx){
+  const it = ctMealItems[idx];
+  if (!it) return;
+  let cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+  if (cart[it.name]){
+    cart[it.name].quantity = Number(cart[it.name].quantity || 0) + 1;
+  } else {
+    cart[it.name] = { price: it.price, originalPrice: it.originalPrice || 0, quantity: 1,
+      resId: it.resId, resName: it.resName, menuItem: it.menuItem || null,
+      image: it.image || '', customizations: {} };
+    if (typeof it.isVeg === 'boolean') cart[it.name].isVeg = it.isVeg;
+  }
+  localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+  localStorage.removeItem('nearbite_checkout_key');
+  repaintCart();
+  scheduleDelivery();
+  showToast(it.name + ' added to cart');
 }
 
 /* ── Savings hero + footer savings — display only, from the SAME real
@@ -2924,7 +3086,19 @@ function ctAddressLine() {
 
 function paintCheckoutDeliverySummary() {
   const etaEl = document.getElementById('checkout-eta');
-  if (etaEl) etaEl.textContent = '35–40 mins';
+  if (etaEl) {
+    const rid = getCartRestaurantId(readCart() || {});
+    const cached = (rid && ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
+    const eta = cached ? ctEtaText(cached) : '';
+    etaEl.textContent = eta ? ('Delivery in ' + eta) : 'Delivery time unavailable';
+    if (!eta && rid) {
+      getRestaurantLocation(rid).then(r => {
+        const t = r ? ctEtaText(r) : '';
+        const el = document.getElementById('checkout-eta');
+        if (el) el.textContent = t ? ('Delivery in ' + t) : 'Delivery time unavailable';
+      }).catch(() => {});
+    }
+  }
 
   const address = ctSelectedAddress();
   const tag = address ? (address.tag || address.label || 'Home') : '';
@@ -3007,6 +3181,7 @@ document.addEventListener('click', (event) => {
   if (noteCard) { openNoteSheet(noteCard.dataset.noteField); return; }
 
   if (target.closest('#bill-card')) { openBillSheet(); return; }
+  if (target.closest('#ct-view-bill')) { openBillSheet(); return; }
 
   document.getElementById('coupon-apply')?.addEventListener('click', async () => {
     const input=document.getElementById('coupon-input'); const err=document.getElementById('coupon-error'); const code=String(input?.value||'').trim().toUpperCase();
@@ -3034,9 +3209,15 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  const diChip = target.closest('#ct-di-row .ct-di-chip[data-di]');
-  if (diChip) {
-    toggleDeliveryChip(diChip.dataset.di);
+  const mealAdd = target.closest('[data-meal-add]');
+  if (mealAdd) {
+    ctAddMealItem(Number(mealAdd.getAttribute('data-meal-add')));
+    return;
+  }
+
+  const cookPill = target.closest('#ct-cook-pills .ct-cook-pill[data-cook]');
+  if (cookPill) {
+    toggleCookPill(cookPill.dataset.cook);
     return;
   }
 });
