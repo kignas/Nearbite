@@ -1,0 +1,168 @@
+/*
+ STEP 4 — MENU / ITEM GEOMETRY + DELIVERY-BANNER MICRO ALIGNMENT
+
+ Only geometry is changed here. Existing data, API, cart, filtering,
+ typography and item rendering remain untouched.
+*/
+
+/* ─────────────────────────────────────────────
+   DELIVERY BANNER — tiny alignment correction
+   ───────────────────────────────────────────── */
+.delivery-banner-line{
+  left:8px !important;
+  width:46px !important;
+}
+
+.delivery-copy{
+  left:14px !important;
+  right:110px !important;
+}
+
+/* ─────────────────────────────────────────────
+   MENU SECTION
+   Benchmark uses a tighter, cleaner vertical rhythm.
+   ───────────────────────────────────────────── */
+.menu-section{
+  padding-left:16px !important;
+  padding-right:16px !important;
+  margin-top:14px !important;
+}
+
+.menu-cat-group{
+  margin-bottom:0 !important;
+}
+
+.menu-cat-header{
+  padding:12px 0 8px !important;
+  min-height:46px !important;
+  box-sizing:border-box !important;
+}
+
+.menu-cat-title{
+  display:inline-flex !important;
+  align-items:baseline !important;
+}
+
+/* ─────────────────────────────────────────────
+   FOOD ITEM ROW
+   Benchmark: compact left content + landscape
+   food image on the right.
+   ───────────────────────────────────────────── */
+.nb-menu-item{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:10px !important;
+  padding:14px 0 !important;
+  min-height:96px !important;
+  box-sizing:border-box !important;
+}
+
+.nb-item-main{
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  padding-top:0 !important;
+}
+
+.nb-item-tag-row{
+  margin-bottom:5px !important;
+  min-height:15px !important;
+  height:auto !important;
+  gap:5px !important;
+}
+
+.nb-item-title{
+  margin:0 !important;
+}
+
+.nb-item-price-row{
+  margin-top:6px !important;
+  gap:7px !important;
+}
+
+/* Landscape benchmark image footprint */
+.nb-item-media{
+  width:104px !important;
+  flex:0 0 104px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+}
+
+.nb-item-image-wrap{
+  width:104px !important;
+  height:72px !important;
+  aspect-ratio:auto !important;
+  border-radius:11px !important;
+  overflow:hidden !important;
+  box-sizing:border-box !important;
+}
+
+.nb-item-image{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+}
+
+/* Button sits on the lower part of the image */
+.nb-item-cta{
+  width:100% !important;
+  margin-top:-18px !important;
+  display:flex !important;
+  justify-content:center !important;
+}
+
+.nb-add-btn,
+.nb-qty{
+  min-width:88px !important;
+  height:36px !important;
+  box-sizing:border-box !important;
+}
+
+.nb-item-customisable{
+  margin-top:6px !important;
+}
+
+/* Keep category/item spacing compact on narrow phones */
+@media(max-width:380px){
+  .menu-section{
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+
+  .nb-menu-item{
+    gap:9px !important;
+    padding:13px 0 !important;
+  }
+
+  .nb-item-media,
+  .nb-item-image-wrap{
+    width:102px !important;
+  }
+
+  .nb-item-media{
+    flex-basis:102px !important;
+  }
+
+  .nb-item-image-wrap{
+    height:70px !important;
+  }
+}
+
+@media(max-width:340px){
+  .nb-menu-item{
+    gap:8px !important;
+  }
+
+  .nb-item-media,
+  .nb-item-image-wrap{
+    width:94px !important;
+  }
+
+  .nb-item-media{
+    flex-basis:94px !important;
+  }
+
+  .nb-item-image-wrap{
+    height:66px !important;
+  }
+}
