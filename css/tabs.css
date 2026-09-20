@@ -1,7 +1,7 @@
-/* MENU / REVIEWS / INFO TABS. */
-.menu-tabs{height:52px!important;padding:0 16px!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;align-items:stretch!important;background:#fff!important;border-bottom:1px solid #ECEEF1!important}
-.menu-tab{font-size:14px!important;font-weight:600!important;color:#7C838E!important}
-.menu-tab.active{font-weight:800!important;color:#1C2028!important}
-.menu-tab.active::before{height:3px!important;background:#E40073!important;border-radius:3px 3px 0 0!important}
-.menu-tab:not(:last-child)::after{top:16px!important;height:20px!important;background:#E6E8EC!important}
-@media(max-width:380px){.menu-tabs{padding-left:14px!important;padding-right:14px!important}}
+/* STEP 2 — Restaurant navigation: Menu + Info only. */
+.menu-tabs{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+.menu-tabs .menu-tab{
+  width:100% !important;
+}
