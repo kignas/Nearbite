@@ -1,5 +1,6 @@
 /*
- STEP 4B — BENCHMARK-CALIBRATED MENU / ITEM GEOMETRY
+ STEP 4 — FINAL BENCHMARK MENU / ITEM GEOMETRY
+ Only the menu/image/CTA geometry is controlled here. Existing functionality is untouched.
 */
 .delivery-banner-line{
   left:8px !important;
@@ -15,19 +16,20 @@
   padding-right:16px !important;
   margin-top:12px !important;
 }
-.menu-cat-group{ margin-bottom:0 !important; }
+.menu-cat-group{margin-bottom:0 !important}
 .menu-cat-header{
   padding:12px 0 8px !important;
   min-height:46px !important;
   box-sizing:border-box !important;
 }
 
+/* Benchmark item row */
 .nb-menu-item{
   display:flex !important;
   align-items:flex-start !important;
-  gap:14px !important;
+  gap:12px !important;
   padding:14px 0 !important;
-  min-height:118px !important;
+  min-height:144px !important;
   box-sizing:border-box !important;
 }
 .nb-item-main{
@@ -41,22 +43,22 @@
   height:auto !important;
   gap:5px !important;
 }
-.nb-item-title{ margin:0 !important; }
-.nb-item-price-row{
-  margin-top:6px !important;
-  gap:7px !important;
-}
+.nb-item-title{margin:0 !important}
+.nb-item-price-row{margin-top:6px !important;gap:7px !important}
 
+/* Benchmark food media: image is wider than the CTA, CTA sits over its lower edge. */
 .nb-item-media{
-  width:208px !important;
-  flex:0 0 208px !important;
+  width:122px !important;
+  min-width:122px !important;
+  flex:0 0 122px !important;
   display:flex !important;
   flex-direction:column !important;
   align-items:center !important;
+  margin-top:1px !important;
 }
 .nb-item-image-wrap{
-  width:208px !important;
-  height:144px !important;
+  width:122px !important;
+  height:84px !important;
   aspect-ratio:auto !important;
   border-radius:12px !important;
   overflow:hidden !important;
@@ -67,44 +69,54 @@
   width:100% !important;
   height:100% !important;
   object-fit:cover !important;
+  display:block !important;
 }
 .nb-item-cta{
   width:100% !important;
-  margin-top:-22px !important;
+  margin-top:-20px !important;
   display:flex !important;
   justify-content:center !important;
+  position:relative !important;
+  z-index:4 !important;
 }
 .nb-add-btn,.nb-qty{
-  min-width:132px !important;
-  height:42px !important;
+  width:92px !important;
+  min-width:92px !important;
+  max-width:92px !important;
+  height:38px !important;
+  min-height:38px !important;
+  max-height:38px !important;
   box-sizing:border-box !important;
+  padding:0 10px !important;
+  border-radius:11px !important;
+  background:#fff !important;
+  border:1.5px solid #E40073 !important;
+  box-shadow:0 2px 7px rgba(20,24,32,.10) !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  letter-spacing:.01em !important;
 }
-.nb-item-customisable{ margin-top:7px !important; }
+.nb-add-btn{color:#E40073 !important}
+.nb-qty{border-color:#159A62 !important}
+.nb-qty-btn{color:#159A62 !important}
+.nb-item-customisable{
+  margin-top:6px !important;
+  font-size:10.5px !important;
+  line-height:1.2 !important;
+  color:#8E949D !important;
+  text-align:center !important;
+}
 
-@media(max-width:600px){
-  .nb-item-media{
-    width:38vw !important;
-    flex-basis:38vw !important;
-    max-width:208px !important;
-    min-width:150px !important;
-  }
-  .nb-item-image-wrap{
-    width:100% !important;
-    height:auto !important;
-    aspect-ratio:1.44 / 1 !important;
-  }
-  .nb-add-btn,.nb-qty{
-    min-width:78% !important;
-    height:40px !important;
-  }
-}
 @media(max-width:380px){
-  .menu-section{padding-left:14px !important;padding-right:14px !important;}
-  .nb-menu-item{gap:9px !important;padding:13px 0 !important;}
-  .nb-item-media{width:38vw !important;flex-basis:38vw !important;min-width:142px !important;}
-  .delivery-copy{left:76px !important;right:104px !important;}
+  .menu-section{padding-left:14px !important;padding-right:14px !important}
+  .nb-menu-item{gap:10px !important;padding:13px 0 !important}
+  .nb-item-media{width:118px !important;min-width:118px !important;flex-basis:118px !important}
+  .nb-item-image-wrap{width:118px !important;height:82px !important}
+  .delivery-copy{left:76px !important;right:104px !important}
 }
 @media(max-width:340px){
-  .nb-item-media{width:36vw !important;flex-basis:36vw !important;min-width:132px !important;}
-  .delivery-copy{left:70px !important;right:96px !important;}
+  .nb-item-media{width:110px !important;min-width:110px !important;flex-basis:110px !important}
+  .nb-item-image-wrap{width:110px !important;height:78px !important}
+  .delivery-copy{left:70px !important;right:96px !important}
 }
