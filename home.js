@@ -364,81 +364,6 @@
 
   function el(id) { return document.getElementById(id); }
 
-  /* ── Production loading experience ────────────────────────────
-     The layer is deliberately controlled here instead of by CSS alone:
-       • no overlay when valid cached restaurant data is already visible
-       • overlay while the first live request is pending
-       • overlay clears on success, empty, or error
-       • motivational copy rotates without delaying the API
-  */
-  var loadingMessageTimer = null;
-  var loadingMessageIndex = 0;
-  var LOADING_MESSAGES = [
-    'Finding something delicious for you…',
-    'Checking what’s fresh nearby…',
-    'Good food is worth the wait.',
-    'Almost there — your next bite is close.',
-    'Putting the best picks together…'
-  ];
-
-  function setHomeLoading(isLoading) {
-    var layer = el('home-loading-layer');
-    var message = el('home-loading-message');
-    if (!layer) return;
-
-    if (isLoading) {
-      layer.hidden = false;
-      if (message && !message.textContent) {
-        message.textContent = LOADING_MESSAGES[0];
-      }
-      startLoadingMessages();
-    } else {
-      layer.hidden = true;
-      stopLoadingMessages();
-    }
-  }
-
-  function startLoadingMessages() {
-    if (loadingMessageTimer || document.hidden) return;
-
-    loadingMessageTimer = setInterval(function () {
-      var message = el('home-loading-message');
-      if (!message) return;
-
-      message.classList.add('is-changing');
-
-      window.setTimeout(function () {
-        loadingMessageIndex = (loadingMessageIndex + 1) % LOADING_MESSAGES.length;
-        message.textContent = LOADING_MESSAGES[loadingMessageIndex];
-        message.classList.remove('is-changing');
-      }, 220);
-    }, 2300);
-  }
-
-  function stopLoadingMessages() {
-    if (loadingMessageTimer) {
-      clearInterval(loadingMessageTimer);
-      loadingMessageTimer = null;
-    }
-    loadingMessageIndex = 0;
-
-    var message = el('home-loading-message');
-    if (message) {
-      message.classList.remove('is-changing');
-      message.textContent = LOADING_MESSAGES[0];
-    }
-  }
-
-  function bindLoadingVisibility() {
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        stopLoadingMessages();
-      } else if (state.status === 'loading') {
-        startLoadingMessages();
-      }
-    });
-  }
-
   /* ── Rendering: restaurant list ─────────────────────────────── */
 
   function renderNotice() {
@@ -872,12 +797,9 @@
     if (state.isRefreshing) return Promise.resolve();
     state.isRefreshing = true;
 
-    if (!state.restaurants.length) {
+    if (isUserInitiated && !state.restaurants.length) {
       state.status = 'loading';
       showSkeleton();
-      setHomeLoading(true);
-    } else if (!isUserInitiated) {
-      setHomeLoading(false);
     }
 
     return window.API.getList(window.API.routes.restaurants)
@@ -898,7 +820,6 @@
         applyRestaurants(list);
         renderDeliveryEstimate();
         renderNotice();
-        setHomeLoading(false);
       })
       .catch(function (error) {
         console.error('[home] restaurant load failed:', error);
@@ -911,7 +832,6 @@
           renderRestaurants();
         }
         renderNotice();
-        setHomeLoading(false);
       })
       .then(function () {
         state.isRefreshing = false;
@@ -937,9 +857,6 @@
     if (cached) {
       applyRestaurants(cached);
       renderDeliveryEstimate();
-      setHomeLoading(false);
-    } else {
-      setHomeLoading(true);
     }
 
     return refresh(false);
@@ -1430,7 +1347,6 @@
 
     bindStaticControls();
     bindLocationSheet();
-    bindLoadingVisibility();
 
     /* One location read per page load, before any distance is shown. */
     resolveStoredLocation();
