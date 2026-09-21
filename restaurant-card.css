@@ -685,3 +685,92 @@
   .es-btn-order.is-pressed { transform: none; }
   .es-fav:active { transform: none; }
 }
+
+/* ── Final Eatswada premium card treatment ───────────────────────────
+   The restaurant card is intentionally content-first:
+   no Gold/free-delivery overlay and no orange Order CTA.
+   Existing markup/JS hooks remain intact. */
+.es-media-badge {
+  display: none !important;
+}
+
+.es-btn-order {
+  display: none !important;
+}
+
+.es-bottom-row {
+  justify-content: stretch;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.es-stats {
+  width: 100%;
+  justify-content: space-between;
+  gap: 0;
+}
+
+.es-stat + .es-stat::before {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+/* Make the metric row read like a premium information rail. */
+.es-stat {
+  min-height: 38px;
+}
+
+.es-stat-rating {
+  padding: 5px 9px;
+  border-radius: 9px;
+}
+
+/* More refined image treatment. */
+.es-card-media {
+  background: #F3F4F6;
+}
+
+.es-gallery-slide {
+  object-fit: cover;
+}
+
+/* Slightly more generous identity block to match the homepage rhythm. */
+.es-card-content {
+  padding: 15px 17px 15px;
+}
+
+.es-name {
+  font-size: var(--ew-text-card-title, 18px);
+  line-height: 1.25;
+  letter-spacing: -.4px;
+}
+
+.es-subtitle {
+  font-size: var(--ew-text-body-sm, 14px);
+  line-height: 1.4;
+}
+
+.es-stats {
+  font-size: var(--ew-text-body-sm, 14px);
+  font-weight: 650;
+}
+
+@media (max-width: 384px) {
+  .es-card-content {
+    padding: 13px 14px 14px;
+  }
+
+  .es-name {
+    font-size: 17px;
+  }
+
+  .es-subtitle,
+  .es-stats {
+    font-size: 13px;
+  }
+
+  .es-stat + .es-stat::before {
+    margin-left: 7px;
+    margin-right: 7px;
+  }
+}
