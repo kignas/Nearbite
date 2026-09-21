@@ -1399,3 +1399,78 @@
   .u99-item-name{font-size:14px}
   .u99-price-row strong{font-size:16px}
 }
+
+
+/* ===== FINAL MOBILE CARD REFINEMENT ===== */
+.u99-restaurant-card{
+  padding:11px 11px 10px;
+  border-radius:18px;
+}
+.u99-carousel-wrap{margin-top:6px}
+.u99-carousel{gap:8px;padding-bottom:1px}
+.u99-item{flex-basis:calc((100% - 8px)/2);width:calc((100% - 8px)/2)}
+.u99-item-image{aspect-ratio:1.92/1;border-radius:11px}
+.u99-item-image img,.u99-image-fallback{border-radius:11px}
+.u99-item-name{margin-top:6px;font-size:14px;line-height:1.16;min-height:17px;max-height:34px;gap:4px}
+.u99-dietary{width:14px;height:14px;flex-basis:14px}
+.u99-price-row{margin-top:4px;min-height:18px;gap:4px}
+.u99-price-row strong{font-size:16px}
+.u99-old-price{font-size:9px}
+.u99-off{font-size:7px;padding:4px 6px}
+.u99-add{width:34px;height:34px;font-size:20px}
+.u99-item-action{right:4px;bottom:-8px}
+.u99-stepper{height:32px;min-width:74px;border-radius:10px}
+.u99-stepper button{height:27px;width:23px;font-size:16px}
+.u99-stepper span{font-size:11px}
+.u99-popular{left:5px;top:5px;padding:4px 6px;font-size:8.5px}
+
+/* Homepage customization bottom sheet */
+.u99-cust-backdrop{position:fixed;inset:0;background:rgba(16,24,40,.48);opacity:0;pointer-events:none;z-index:10000;transition:opacity .22s ease}
+.u99-cust-backdrop.show{opacity:1;pointer-events:auto}
+.u99-cust-sheet{position:fixed;left:50%;bottom:0;width:min(560px,100%);max-height:min(82vh,760px);transform:translate(-50%,105%);background:#fff;border-radius:22px 22px 0 0;z-index:10001;box-shadow:0 -10px 35px rgba(16,24,40,.18);display:flex;flex-direction:column;overflow:hidden;transition:transform .24s ease}
+.u99-cust-sheet.show{transform:translate(-50%,0)}
+.u99-cust-handle{width:38px;height:4px;border-radius:99px;background:#D0D5DD;margin:8px auto 4px;flex:none}
+.u99-cust-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 16px 10px;border-bottom:1px solid #EAECF0}
+.u99-cust-head h3{margin:0;font-size:19px;line-height:1.15;font-weight:800;color:#101828}
+.u99-cust-head p{margin:4px 0 0;font-size:12px;color:#667085;font-weight:600}
+.u99-cust-close{width:34px;height:34px;border:0;border-radius:50%;background:#F2F4F7;color:#475467;font-size:24px;line-height:1;flex:none}
+.u99-cust-body{overflow:auto;padding:12px 16px 16px;overscroll-behavior:contain}
+.u99-cust-group{padding:4px 0 12px}
+.u99-cust-group+.u99-cust-group{border-top:1px solid #F0F2F5;padding-top:14px}
+.u99-cust-group-title{font-size:15px;font-weight:800;color:#101828}
+.u99-cust-rule{font-size:11px;color:#667085;margin:3px 0 6px;font-weight:600}
+.u99-cust-rule b{color:#B54708}
+.u99-cust-option{display:flex;align-items:center;gap:9px;padding:8px 0;cursor:pointer}
+.u99-cust-diet{width:14px;height:14px;border-radius:4px;border:1.5px solid;display:flex;align-items:center;justify-content:center;flex:none}
+.u99-cust-diet:after{content:"";width:6px;height:6px;border-radius:50%}
+.u99-cust-diet.veg{border-color:#0F7A4D}.u99-cust-diet.veg:after{background:#0F7A4D}
+.u99-cust-diet.nonveg{border-color:#B42318}.u99-cust-diet.nonveg:after{background:#B42318}
+.u99-cust-label{flex:1;font-size:14px;color:#101828;font-weight:600;min-width:0}
+.u99-cust-extra{font-size:13px;color:#667085;font-weight:700;white-space:nowrap}.u99-cust-extra.free{color:#159A62}
+.u99-cust-option input{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:none;border:2px solid #C6CDD5;cursor:pointer;position:relative;margin:0}
+.u99-cust-option input[type=radio]{border-radius:50%}.u99-cust-option input[type=checkbox]{border-radius:6px}
+.u99-cust-option input:checked{border-color:#159A62;background:#159A62}
+.u99-cust-option input:checked:after{content:"";position:absolute;inset:0;margin:auto;width:8px;height:8px;background:#fff;border-radius:50%}
+.u99-cust-option input[type=checkbox]:checked:after{width:10px;height:6px;background:transparent;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg);top:-2px}
+.u99-cust-option input:disabled{opacity:.4;cursor:not-allowed}
+.u99-cust-foot{display:flex;align-items:center;gap:10px;padding:11px 16px calc(11px + env(safe-area-inset-bottom));border-top:1px solid #EAECF0;background:#fff;flex:none}
+.u99-sheet-qty{display:flex;align-items:center;gap:2px;border:1.5px solid #159A62;border-radius:11px;height:46px;flex:none}
+.u99-sheet-qty button{width:38px;height:100%;border:0;background:transparent;color:#159A62;font-size:20px;font-weight:800}
+.u99-sheet-qty span{min-width:22px;text-align:center;font-size:14px;font-weight:800;color:#101828}
+.u99-cust-add{flex:1;height:46px;border:0;border-radius:11px;background:#159A62;color:#fff;font-size:14px;font-weight:800}
+.u99-cust-add:disabled{background:#C6CDD5}
+.u99-add-cust{position:relative}
+.u99-cust-qty{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#159A62;color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;box-shadow:0 1px 3px rgba(16,24,40,.22)}
+@media(max-width:430px){
+  .u99-restaurant-card{padding:11px 10px 10px;border-radius:18px}
+  .u99-discount-line{font-size:10.5px}
+  .u99-restaurant-name{font-size:16px;margin-bottom:3px}
+  .u99-meta{font-size:12px;gap:4px}
+  .u99-free-row{font-size:12px;margin-top:3px}
+  .u99-carousel-wrap{margin-top:6px}
+  .u99-carousel{gap:8px}
+  .u99-item{flex-basis:calc((100% - 8px)/2);width:calc((100% - 8px)/2)}
+  .u99-item-image,.u99-item-image img,.u99-image-fallback{border-radius:10px}
+  .u99-item-name{font-size:14px;margin-top:6px}
+  .u99-price-row strong{font-size:16px}
+}
