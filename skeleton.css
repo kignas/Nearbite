@@ -1,0 +1,251 @@
+/* ================================================================
+   EATSWADA — PRODUCTION LOADING SYSTEM
+   Dedicated skeleton + loading-message layer for the homepage.
+   ================================================================ */
+
+:root{
+  --ew-sk-base:#F1F3F5;
+  --ew-sk-mid:#FAFBFC;
+  --ew-sk-radius:12px;
+  --ew-sk-speed:1.55s;
+}
+
+/* ── Core shimmer ─────────────────────────────────────────────── */
+
+@keyframes ewSkeletonShimmer{
+  0%{
+    background-position:180% 0;
+  }
+  100%{
+    background-position:-80% 0;
+  }
+}
+
+.sk,
+.es-skeleton{
+  display:block;
+  background:
+    linear-gradient(
+      100deg,
+      var(--ew-sk-base) 0%,
+      var(--ew-sk-base) 34%,
+      var(--ew-sk-mid) 50%,
+      var(--ew-sk-base) 66%,
+      var(--ew-sk-base) 100%
+    );
+  background-size:260% 100%;
+  animation:ewSkeletonShimmer var(--ew-sk-speed) cubic-bezier(.4,0,.2,1) infinite;
+  border-radius:var(--ew-sk-radius);
+  contain:paint;
+}
+
+.sk.d1{animation-delay:.08s}
+.sk.d2{animation-delay:.16s}
+.sk.d3{animation-delay:.24s}
+.sk.d4{animation-delay:.32s}
+
+/* ── Homepage category skeleton ─────────────────────────────── */
+
+#cat-scroll .cs-item{
+  flex:0 0 auto;
+  width:68px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+
+#cat-scroll .cs-ring{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+}
+
+#cat-scroll .cs-name{
+  width:52px;
+  height:10px;
+  border-radius:6px;
+}
+
+/* ── Homepage restaurant skeleton ────────────────────────────── */
+
+#restaurant-list:has(.sk){
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+#restaurant-list .rs-card{
+  width:100%;
+  min-height:270px;
+  padding:0 0 2px;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+
+#restaurant-list .rs-img{
+  width:100%;
+  height:178px;
+  border-radius:16px;
+}
+
+#restaurant-list .rs-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:13px;
+}
+
+#restaurant-list .rs-name{
+  width:56%;
+  height:18px;
+  border-radius:7px;
+}
+
+#restaurant-list .rs-badge{
+  width:66px;
+  height:22px;
+  border-radius:8px;
+}
+
+#restaurant-list .rs-cuis{
+  width:70%;
+  height:11px;
+  margin-top:10px;
+  border-radius:6px;
+}
+
+#restaurant-list .rs-meta{
+  width:46%;
+  height:11px;
+  margin-top:10px;
+  border-radius:6px;
+}
+
+/* ── Production loading layer ───────────────────────────────── */
+
+.home-loading-layer{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:
+    calc(24px + env(safe-area-inset-top,0px))
+    24px
+    calc(32px + env(safe-area-inset-bottom,0px));
+  background:rgba(255,255,255,.88);
+  -webkit-backdrop-filter:blur(1.5px);
+  backdrop-filter:blur(1.5px);
+  pointer-events:none;
+  opacity:1;
+  visibility:visible;
+  transition:opacity .22s ease, visibility .22s ease;
+}
+
+.home-loading-layer[hidden]{
+  display:flex;
+  opacity:0;
+  visibility:hidden;
+}
+
+.home-loading-content{
+  width:min(300px,100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  transform:translateY(-2vh);
+}
+
+.home-loading-message{
+  min-height:20px;
+  margin:0 0 22px;
+  color:#A7ADB7;
+  font-size:14px;
+  line-height:1.4;
+  font-weight:700;
+  letter-spacing:-.12px;
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+.home-loading-message.is-changing{
+  opacity:0;
+  transform:translateY(3px);
+}
+
+.home-loading-spinner{
+  width:48px;
+  height:48px;
+  position:relative;
+}
+
+.home-loading-spinner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:3px solid #F0D9E3;
+  border-top-color:#D20A61;
+  border-right-color:#D20A61;
+  border-radius:50%;
+  animation:ewLoadingSpin .78s linear infinite;
+}
+
+.home-loading-spinner::after{
+  content:"";
+  position:absolute;
+  inset:9px;
+  border-radius:50%;
+  background:#fff;
+}
+
+@keyframes ewLoadingSpin{
+  to{transform:rotate(360deg)}
+}
+
+/* Avoid the old generic skeleton animation fighting with the loading layer. */
+.home-loading-layer[hidden] .home-loading-spinner::before{
+  animation-play-state:paused;
+}
+
+/* ── Accessibility / reduced motion ─────────────────────────── */
+
+@media (prefers-reduced-motion:reduce){
+  .sk,
+  .es-skeleton{
+    animation:none!important;
+  }
+
+  .home-loading-layer{
+    transition:none;
+  }
+
+  .home-loading-message{
+    transition:none;
+  }
+
+  .home-loading-spinner::before{
+    animation:none!important;
+  }
+}
+
+/* ── Small phones ────────────────────────────────────────────── */
+
+@media (max-width:380px){
+  #restaurant-list .rs-img{
+    height:170px;
+    border-radius:15px;
+  }
+
+  .home-loading-message{
+    font-size:13px;
+  }
+
+  .home-loading-spinner{
+    width:44px;
+    height:44px;
+  }
+}

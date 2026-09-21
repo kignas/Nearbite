@@ -51,25 +51,6 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     2. SKELETONS
-     ══════════════════════════════════════════════════════════════ */
-  @keyframes shimmer {
-    0%   { background-position: -600px 0; }
-    100% { background-position:  600px 0; }
-  }
-
-  .sk {
-    display: block;
-    background: linear-gradient(90deg, #E7E9ED 25%, #F3F4F7 50%, #E7E9ED 75%);
-    background-size: 1200px 100%;
-    animation: shimmer 1.5s infinite linear;
-    border-radius: 10px;
-  }
-  .sk.d1 { animation-delay: .08s; }
-  .sk.d2 { animation-delay: .16s; }
-  .sk.d3 { animation-delay: .24s; }
-  .sk.d4 { animation-delay: .32s; }
 
   /* ══════════════════════════════════════════════════════════════
      3. EATSWADA HEADER — BENCHMARK COMPOSITION
@@ -617,6 +598,7 @@
 
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
+<link rel="stylesheet" href="skeleton.css"/>
 <link rel="stylesheet" href="eatswada-end-section.css"/>
 <link rel="stylesheet" href="whats-on-your-mind.css"/>
 <link rel="stylesheet" href="filter-bar.css"/>
@@ -766,6 +748,15 @@
 </script>
 <script src="cart-bar.js"></script>
 <script src="bottom-tab-bar.js"></script>
+
+
+<!-- Production-grade loading layer: shown only while the first restaurant load has no usable data. -->
+<div class="home-loading-layer" id="home-loading-layer" role="status" aria-live="polite">
+  <div class="home-loading-content">
+    <p class="home-loading-message" id="home-loading-message">Finding something delicious for you…</p>
+    <div class="home-loading-spinner" aria-hidden="true"></div>
+  </div>
+</div>
 
 </body>
 </html>
