@@ -774,3 +774,212 @@
     margin-right: 7px;
   }
 }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   Phase 2.x — premium restaurant card: name/rating hierarchy,
+   two-line metric rail, inline-SVG icon system, dark food-label pill.
+   ------------------------------------------------------------------
+   Pairs with the matching restaurant-card.js change. Every JS hook,
+   class name and data-attribute is preserved; this only restyles.
+
+   Icons: each <i> keeps its FA class (so it still renders if this CSS
+   is absent) but its glyph is collapsed (font-size:0) and a premium
+   inline SVG is painted through mask-image + background:currentColor,
+   so every icon inherits its surrounding colour and shares one stroke
+   language — no font loaded, no icon library added.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Name + rating on one row (rating promoted from the rail) ─────── */
+.es-name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+.es-name-row .es-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;                       /* spacing now lives on the row */
+}
+.es-name-row .es-stat-rating {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* ── Rating badge — compact green pill, white star (unchanged colour) ── */
+.es-stat-rating {
+  gap: 3px;
+  min-height: 0;                    /* override the rail's inherited 38px */
+  padding: 5px 8px;
+  border-radius: 9px;
+  background: #159A62;
+  color: #FFFFFF;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: .1px;
+}
+
+/* ── Metric rail — three even, two-line columns split by hairlines ── */
+.es-bottom-row {
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid #F0F2F6;
+}
+.es-stats {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 0;
+}
+.es-stats > .es-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: normal;
+}
+.es-stats > .es-stat + .es-stat::before {
+  content: '';
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 26px;
+  margin: 0 12px;
+  background: #E9ECF1;
+}
+
+/* Two-line body: strong value over a quiet label. */
+.es-stat-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+.es-stat-value {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: #17202E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.es-stat-label {
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #8A93A0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Offer text can be long — let it use two lines rather than overflow. */
+.es-stat-offer .es-stat-value { white-space: normal; }
+
+/* ── Shared icon base: size the box, paint the SVG, kill the glyph ── */
+.es-stats > .es-stat > i,
+.es-stat-rating i,
+.es-fav i,
+.es-media-badge i {
+  display: inline-block;
+  flex: 0 0 auto;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center;  mask-position: center;
+  -webkit-mask-size: contain;     mask-size: contain;
+  font-size: 0 !important;         /* collapse the FA glyph */
+  line-height: 0;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+.es-stats > .es-stat > i::before, .es-stats > .es-stat > i::after,
+.es-stat-rating i::before, .es-stat-rating i::after,
+.es-fav i::before, .es-fav i::after,
+.es-media-badge i::before, .es-media-badge i::after { content: none !important; }
+
+/* Rail icons — 17px, slate. */
+.es-stats > .es-stat > i { width: 17px; height: 17px; color: #6B7481; }
+
+.es-stat-time > i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3.5 2'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3.5 2'/%3E%3C/svg%3E");
+}
+.es-stat-distance > i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z'/%3E%3Ccircle cx='12' cy='10' r='2.6'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z'/%3E%3Ccircle cx='12' cy='10' r='2.6'/%3E%3C/svg%3E");
+}
+.es-stat-offer > i,
+.es-stat-min > i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Cpath d='M8.5 15.5l7-7'/%3E%3Ccircle cx='9' cy='9' r='1'/%3E%3Ccircle cx='15' cy='15' r='1'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Cpath d='M8.5 15.5l7-7'/%3E%3Ccircle cx='9' cy='9' r='1'/%3E%3Ccircle cx='15' cy='15' r='1'/%3E%3C/svg%3E");
+}
+
+/* Rating star — 11px, filled, inherits the badge's white. */
+.es-stat-rating i {
+  width: 11px; height: 11px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.73.99-5.8-4.21-4.1 5.82-.85z'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.73.99-5.8-4.21-4.1 5.82-.85z'/%3E%3C/svg%3E");
+}
+
+/* ── Favourite heart — 36px circle, slate outline; red fill when active ── */
+.es-fav { width: 36px; height: 36px; color: #334155; }
+.es-fav::after { inset: -4px; }              /* ~44px touch target */
+.es-fav i {
+  width: 19px; height: 19px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20C12 20 3.5 14.5 3.5 8.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8.5 1.8C20.5 14.5 12 20 12 20Z'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20C12 20 3.5 14.5 3.5 8.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8.5 1.8C20.5 14.5 12 20 12 20Z'/%3E%3C/svg%3E");
+}
+.es-fav.is-active i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 20C12 20 3.5 14.5 3.5 8.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8.5 1.8C20.5 14.5 12 20 12 20Z'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 20C12 20 3.5 14.5 3.5 8.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8.5 1.8C20.5 14.5 12 20 12 20Z'/%3E%3C/svg%3E");
+}
+
+/* ── Food-label pill — shown, dark glass, sentence case, SVG marks ──
+   Overrides the earlier display:none. Renders the real, data-backed
+   badge (Near & Fast / Top Rated / Pure Veg / Offer). The icon inherits
+   its variant colour via currentColor. */
+.es-media-badge {
+  display: inline-flex !important;
+  gap: 5px;
+  padding: 5px 9px 5px 7px;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, .80);
+  color: #FFFFFF;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;                    /* no uppercase */
+  backdrop-filter: blur(3px);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .22);
+}
+.es-media-badge i { width: 12px; height: 12px; }
+
+.es-media-badge.es-badge-near i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E");
+}
+.es-media-badge.es-badge-top i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.73.99-5.8-4.21-4.1 5.82-.85z'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 3.6l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 17.9l-5.2 2.73.99-5.8-4.21-4.1 5.82-.85z'/%3E%3C/svg%3E");
+}
+.es-media-badge.es-badge-veg i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20C4 11 10 5 20 5c0 10-6 15-15 15'/%3E%3Cpath d='M9 15c2-2 5-3 8-3.5'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20C4 11 10 5 20 5c0 10-6 15-15 15'/%3E%3Cpath d='M9 15c2-2 5-3 8-3.5'/%3E%3C/svg%3E");
+}
+.es-media-badge.es-badge-offer i {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.5 13.5 12 22l-9-9V4h9z'/%3E%3Ccircle cx='7.5' cy='7.5' r='1.5'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.5 13.5 12 22l-9-9V4h9z'/%3E%3Ccircle cx='7.5' cy='7.5' r='1.5'/%3E%3C/svg%3E");
+}
+
+/* Order CTA removed from the visual design (kept in DOM, hidden). */
+.es-btn-order { display: none !important; }
+
+/* ── Narrow phones (≤384) ───────────────────────────────────────── */
+@media (max-width: 384px) {
+  .es-stats > .es-stat { gap: 6px; }
+  .es-stats > .es-stat + .es-stat::before { margin: 0 9px; height: 24px; }
+  .es-stats > .es-stat > i { width: 16px; height: 16px; }
+  .es-stat-value { font-size: 13.5px; }
+  .es-stat-label { font-size: 11px; }
+  .es-stat-rating { font-size: 12px; padding: 4px 7px; }
+}

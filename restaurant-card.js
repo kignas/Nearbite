@@ -419,7 +419,9 @@
     var cuisineDisplay = formatCuisineDisplay(cuisine);
     var subtitleHtml = '';
     if (cuisineDisplay) subtitleHtml += '<span class="es-cuisine">' + esc(cuisineDisplay) + '</span>';
-    if (distanceText) subtitleHtml += '<span class="es-distance">' + esc(distanceText) + '</span>';
+    /* Distance now renders in the metric rail below (premium two-line rail),
+       so it is no longer duplicated in the subtitle. distanceText is still
+       computed above and consumed by the rail — no data source changed. */
 
     /* Floating badge — priority chain, first match wins, at most one.
        Every branch is backed by a field the card already reads; nothing
@@ -459,17 +461,43 @@
     if (offer && badgeKey !== 'offer') tagsHtml += '<span class="es-tag es-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
     if (coupon) tagsHtml += '<span class="es-tag es-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
 
+    /* Rating is promoted next to the restaurant name (premium hierarchy).
+       The element, its .es-stat-rating class and the star markup are
+       unchanged — only its position in the card moves. */
+    var ratingHtml = rating != null
+      ? '<span class="es-stat es-stat-rating"><i class="fa-solid fa-star" aria-hidden="true"></i> ' + esc(rating.toFixed(1)) + '</span>'
+      : '';
+
+    /* Metric rail — premium two-line columns, real data only. Every column
+       is a value the card already reads (delivery time, distance, then
+       offer OR minimum order); nothing here is invented. Icons keep FA
+       classes so they still render correctly if the SVG-mask CSS is ever
+       absent, while the CSS paints premium inline SVGs over them. */
     var statsHtml = '';
-    if (rating != null) {
-      statsHtml += '<span class="es-stat es-stat-rating"><i class="fa-solid fa-star"></i> ' + esc(rating.toFixed(1)) + '</span>';
-    }
     if (time) {
       // Display only: 35-58 min -> 35–58 min. time.text itself is untouched.
       var timeText = String(time.text).replace(/(\d)\s*-\s*(\d)/, '$1\u2013$2');
-      statsHtml += '<span class="es-stat es-stat-time">' + esc(timeText) + '</span>';
+      statsHtml +=
+        '<span class="es-stat es-stat-time"><i class="fa-regular fa-clock" aria-hidden="true"></i>' +
+          '<span class="es-stat-body"><span class="es-stat-value">' + esc(timeText) + '</span>' +
+          '<span class="es-stat-label">Delivery time</span></span></span>';
     }
-    if (minOrder != null) {
-      statsHtml += '<span class="es-stat es-stat-min">Min ₹' + esc(minOrder) + '</span>';
+    if (distanceText) {
+      statsHtml +=
+        '<span class="es-stat es-stat-distance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>' +
+          '<span class="es-stat-body"><span class="es-stat-value">' + esc(distanceText) + '</span>' +
+          '<span class="es-stat-label">Distance</span></span></span>';
+    }
+    if (offer) {
+      statsHtml +=
+        '<span class="es-stat es-stat-offer"><i class="fa-solid fa-percent" aria-hidden="true"></i>' +
+          '<span class="es-stat-body"><span class="es-stat-value">' + esc(offer) + '</span>' +
+          '<span class="es-stat-label">Offer</span></span></span>';
+    } else if (minOrder != null) {
+      statsHtml +=
+        '<span class="es-stat es-stat-min"><i class="fa-solid fa-percent" aria-hidden="true"></i>' +
+          '<span class="es-stat-body"><span class="es-stat-value">Min ₹' + esc(minOrder) + '</span>' +
+          '<span class="es-stat-label">Min order</span></span></span>';
     }
 
 
@@ -497,7 +525,7 @@
       ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
       's; opacity:0;">' +
 
-      '<a href="restaurant.html?id=' + encodeURIComponent(id) +
+      '<a href="restaurant-details.html?id=' + encodeURIComponent(id) +
       '" class="es-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
       ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '">' +
 
@@ -511,7 +539,10 @@
       '</div>' +
 
       '<div class="es-card-content">' +
-        '<h3 class="es-name">' + esc(name) + '</h3>' +
+        '<div class="es-name-row">' +
+          '<h3 class="es-name">' + esc(name) + '</h3>' +
+          ratingHtml +
+        '</div>' +
         (subtitleHtml ? '<div class="es-subtitle">' + subtitleHtml + '</div>' : '') +
         (tagsHtml ? '<div class="es-tags-row">' + tagsHtml + '</div>' : '') +
         '<div class="es-bottom-row">' +
