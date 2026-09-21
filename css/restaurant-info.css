@@ -1,6 +1,95 @@
-/* RESTAURANT INFO — title, cuisine and metadata row. */
-.res-card-body{padding:12px 16px 12px!important}
-.res-name{font-size:25px!important;line-height:1.12!important;letter-spacing:-.7px!important;font-weight:800!important;color:#171B24!important}
-.res-cuisine{margin-top:4px!important;font-size:13.5px!important;line-height:1.35!important;font-weight:500!important;color:#7C838E!important}
-.res-meta-row{margin-top:11px!important;gap:8px!important;align-items:center!important;flex-wrap:nowrap!important;white-space:nowrap!important}
-@media(max-width:380px){.res-card-body{padding-left:14px!important;padding-right:14px!important}}
+*{box-sizing:border-box}
+:root{
+  --bg:#f5f6fb; --card:#fff; --ink:#242a35; --muted:#8b929c;
+  --line:#e5e7eb; --dash:#e2e5e9; --green:#3e956f; --accent:#e85a61;
+}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
+body{font-family:"Manrope",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:94px}
+button,a{font:inherit}
+button{cursor:pointer}
+.material-symbols-outlined{
+  font-family:"Material Symbols Outlined";font-weight:300;font-style:normal;
+  font-size:inherit;line-height:1;letter-spacing:normal;text-transform:none;
+  display:inline-block;white-space:nowrap;direction:ltr;
+  -webkit-font-feature-settings:"liga";font-feature-settings:"liga";
+  -webkit-font-smoothing:antialiased;
+}
+.topbar{
+  height:72px;padding:12px 20px 6px;display:flex;align-items:center;
+  justify-content:space-between;
+}
+.top-icon{
+  width:44px;height:44px;border:0;background:transparent;color:#252b35;
+  display:grid;place-items:center;font-size:25px;padding:0;
+}
+.page{padding:10px 20px 0;max-width:760px;margin:0 auto}
+.restaurant-card{
+  background:var(--card);border-radius:25px;padding:28px 27px 0;
+  box-shadow:0 1px 2px rgba(25,31,45,.02);
+}
+.restaurant-header h1{
+  margin:0 0 5px;font-size:27px;line-height:1.15;letter-spacing:-.55px;font-weight:700;
+}
+.restaurant-header .cuisine{
+  margin:0;color:#949aa3;font-size:15.5px;line-height:1.35;font-weight:400;
+}
+.restaurant-header .address{
+  margin:15px 0 0;color:#343a43;font-size:16px;line-height:1.35;font-weight:400;
+}
+.actions{display:flex;gap:14px;margin-top:20px}
+.action-circle{
+  width:58px;height:58px;border:1px solid #e3e5e9;border-radius:50%;
+  background:#fff;display:grid;place-items:center;color:#dc656b;font-size:23px;
+  text-decoration:none;
+}
+.section-rule{height:1px;background:#e1e3e7;margin-top:40px}
+.hours-head{
+  width:100%;height:59px;border:0;background:transparent;padding:0;
+  display:flex;align-items:center;text-align:left;gap:12px;color:var(--ink);
+}
+.hours-head .clock{font-size:25px;flex:0 0 28px}
+.hours-head .status{font-size:16px;line-height:1.2;flex:1}
+.status .open{color:var(--green);font-weight:600}
+.status .closed{color:var(--accent);font-weight:600}
+.hours-head .chevron{font-size:18px;color:#8e959d}
+.hours-list{padding:0 0 5px 40px}
+.hours-list.collapsed{display:none}
+.hour-row{
+  display:grid;grid-template-columns:120px 1fr;gap:12px;
+  min-height:39px;align-items:center;font-size:15px;line-height:1.25;
+}
+.hour-row .day{color:#949aa2;font-weight:400}
+.hour-row .time{color:#343a43;font-weight:500;white-space:nowrap}
+.hour-row.today .day,.hour-row.today .time{color:#303640;font-weight:700}
+.service-row{
+  min-height:58px;border-top:1px dashed var(--dash);display:flex;align-items:center;
+  gap:14px;font-size:16px;line-height:1.25;color:#303640;font-weight:400;
+}
+.service-row .service-icon{width:28px;flex:0 0 28px;color:#68717b;font-size:22px;text-align:center}
+.fssai{padding:17px 10px 0;color:#858c97;font-size:14px;line-height:1.35}
+.fssai strong{display:block;margin-top:3px;color:#959ca5;font-size:15px;font-weight:400}
+.bottom-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  padding:10px 20px calc(13px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(245,246,251,0),#f5f6fb 30%);
+}
+.bottom-bar button{
+  width:100%;height:60px;border:0;border-radius:18px;background:var(--accent);color:#fff;
+  font-size:18px;font-weight:600;box-shadow:0 7px 18px rgba(232,90,97,.18);
+}
+.loading-card,.error-card{
+  background:#fff;border-radius:25px;padding:28px;margin:0;
+}
+.skeleton{height:18px;border-radius:9px;background:linear-gradient(90deg,#eceef3 25%,#f6f7fb 50%,#eceef3 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;margin-bottom:15px}
+.s1{height:28px;width:65%}.s2{width:45%}.s3{width:80%}
+@keyframes shimmer{to{background-position:-200% 0}}
+.error-card{display:grid;gap:6px;color:var(--accent)}
+.error-card span{color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#252a33;color:#fff;border-radius:12px;padding:10px 15px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.toast.show{opacity:1}
+@media(max-width:380px){
+  .restaurant-card{padding-left:21px;padding-right:21px}
+  .restaurant-header h1{font-size:25px}
+  .hour-row{grid-template-columns:105px 1fr;font-size:14px}
+  .hours-list{padding-left:36px}
+}
