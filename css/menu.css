@@ -1,199 +1,205 @@
-/*
- EATSWADA — MENU GEOMETRY FIX
- Replace/use this file AFTER legacy-inline.css.
- Only menu item geometry, typography and ADD control are changed.
+/* EATSWADA STEP 4 — BENCHMARK ITEM GEOMETRY FIX
+   Replace only menu.css. No JS/API/cart changes.
 */
-
-/* Benchmark item row */
-.nb-menu-item{
-  display:flex !important;
-  align-items:flex-start !important;
-  gap:12px !important;
-  min-height:144px !important;
-  height:144px !important;
-  padding:10px 0 !important;
-  box-sizing:border-box !important;
-  border-bottom:1px solid #E9EBEF !important;
+:root{
+  --ew-item-img-w:112px;
+  --ew-item-img-h:78px;
 }
 
-/* Item text geometry */
+/* Category geometry */
+.menu-section{
+  padding:0 14px!important;
+  margin-top:0!important;
+}
+.menu-cat-header{
+  height:58px!important;
+  padding:0!important;
+  border-bottom:1px solid #E7E9ED!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.menu-cat-title{
+  font-size:21px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:-.55px!important;
+}
+.menu-cat-count{
+  font-size:13px!important;
+  font-weight:500!important;
+  color:#8C939D!important;
+}
+
+/* ITEM ROW — exact benchmark proportions */
+.nb-menu-item{
+  min-height:144px!important;
+  height:144px!important;
+  padding:10px 0!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:12px!important;
+  border:0!important;
+  border-bottom:1px solid #E9EBEF!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+
 .nb-item-main{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-  padding-top:1px !important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+  padding-top:1px!important;
 }
 
 .nb-item-tag-row{
-  height:20px !important;
-  min-height:20px !important;
-  margin:0 0 3px !important;
-  gap:5px !important;
+  height:20px!important;
+  min-height:20px!important;
+  margin:0 0 3px!important;
+  gap:5px!important;
 }
 
 .nb-item-title{
-  font-size:17px !important;
-  line-height:1.22 !important;
-  font-weight:800 !important;
-  letter-spacing:-.25px !important;
-  color:#171B24 !important;
+  font-size:17px!important;
+  line-height:1.22!important;
+  font-weight:800!important;
+  letter-spacing:-.25px!important;
+  color:#171B24!important;
 }
 
 .nb-item-desc{
-  margin-top:3px !important;
-  font-size:12.5px !important;
-  line-height:1.35 !important;
-  font-weight:500 !important;
-  color:#7F8792 !important;
+  margin-top:3px!important;
+  font-size:12.5px!important;
+  line-height:1.35!important;
+  font-weight:500!important;
+  color:#7F8792!important;
+  -webkit-line-clamp:2!important;
 }
 
 .nb-item-price-row{
-  margin-top:6px !important;
-  gap:8px !important;
-  align-items:center !important;
+  margin-top:6px!important;
+  gap:8px!important;
+  align-items:center!important;
 }
-
 .nb-item-current-price{
-  font-size:16px !important;
-  line-height:1.2 !important;
-  font-weight:800 !important;
+  font-size:16px!important;
+  font-weight:800!important;
+  color:#171B24!important;
 }
-
 .nb-item-original-price{
-  font-size:12px !important;
-  line-height:1.2 !important;
+  font-size:12px!important;
+  font-weight:600!important;
+  color:#9BA1AA!important;
 }
-
 .nb-item-discount{
-  padding:4px 9px !important;
-  border-radius:999px !important;
-  font-size:10px !important;
-  line-height:1.1 !important;
-  font-weight:800 !important;
+  padding:4px 9px!important;
+  border-radius:999px!important;
+  background:#FFF0F7!important;
+  color:#E40073!important;
+  border:0!important;
+  font-size:10px!important;
+  font-weight:800!important;
 }
 
-.nb-item-badge{
-  padding:4px 7px !important;
-  font-size:10px !important;
-  line-height:1.1 !important;
-  font-weight:800 !important;
-}
-
-/* Benchmark landscape food image */
+/* LANDSCAPE FOOD IMAGE — never square */
 .nb-item-media{
-  width:112px !important;
-  min-width:112px !important;
-  flex:0 0 112px !important;
-  margin-top:1px !important;
+  width:112px!important;
+  min-width:112px!important;
+  max-width:112px!important;
+  flex:0 0 112px!important;
+  margin-top:1px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
 }
-
 .nb-item-image-wrap{
-  width:112px !important;
-  height:78px !important;
-  aspect-ratio:auto !important;
-  border-radius:12px !important;
-  overflow:hidden !important;
-  box-shadow:none !important;
+  width:112px!important;
+  min-width:112px!important;
+  max-width:112px!important;
+  height:78px!important;
+  min-height:78px!important;
+  max-height:78px!important;
+  aspect-ratio:auto!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#F3F4F6!important;
+  box-shadow:none!important;
 }
-
 .nb-item-image-wrap img,
 .nb-item-image{
-  width:100% !important;
-  height:100% !important;
-  object-fit:cover !important;
-  display:block !important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:cover!important;
+  display:block!important;
 }
 
-/* ADD button sits across the lower image edge */
+/* ADD / quantity control — exact benchmark size */
 .nb-item-cta{
-  width:100% !important;
-  margin-top:-27px !important;
-  position:relative !important;
-  z-index:3 !important;
-  display:flex !important;
-  justify-content:center !important;
+  width:100%!important;
+  margin-top:-27px!important;
+  position:relative!important;
+  z-index:3!important;
+  display:flex!important;
+  justify-content:center!important;
 }
-
 .nb-add-btn,
 .nb-qty{
-  width:92px !important;
-  min-width:92px !important;
-  height:38px !important;
-  min-height:38px !important;
-  padding:0 !important;
-  border-radius:11px !important;
-  box-sizing:border-box !important;
+  width:92px!important;
+  min-width:92px!important;
+  max-width:92px!important;
+  height:38px!important;
+  min-height:38px!important;
+  max-height:38px!important;
+  padding:0!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  box-shadow:0 2px 7px rgba(16,24,40,.12)!important;
 }
-
 .nb-add-btn{
-  font-size:13px !important;
-  line-height:1 !important;
-  font-weight:800 !important;
-  letter-spacing:.02em !important;
+  color:#E40073!important;
+  border:1.5px solid #E40073!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:.02em!important;
 }
-
 .nb-qty{
-  font-size:13px !important;
+  border:1.5px solid #159A62!important;
 }
-
 .nb-item-customisable,
 .nb-customisable{
-  margin-top:7px !important;
-  font-size:11px !important;
-  line-height:1.2 !important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  color:#8E949D!important;
+  margin-top:7px!important;
+  text-align:center!important;
 }
 
-/* Keep the same benchmark proportions on narrow phones */
+/* Small-phone benchmark */
 @media(max-width:380px){
-  .nb-menu-item{
-    gap:10px !important;
-    min-height:144px !important;
-    height:144px !important;
+  :root{
+    --ew-item-img-w:106px;
+    --ew-item-img-h:75px;
   }
-
   .nb-item-media{
-    width:106px !important;
-    min-width:106px !important;
-    flex-basis:106px !important;
+    width:106px!important;
+    min-width:106px!important;
+    max-width:106px!important;
+    flex-basis:106px!important;
   }
-
   .nb-item-image-wrap{
-    width:106px !important;
-    height:75px !important;
+    width:106px!important;
+    min-width:106px!important;
+    max-width:106px!important;
+    height:75px!important;
+    min-height:75px!important;
+    max-height:75px!important;
   }
-
-  .nb-item-title{
-    font-size:16px !important;
-    line-height:1.22 !important;
-  }
-
   .nb-add-btn,
   .nb-qty{
-    width:92px !important;
-    min-width:92px !important;
-    height:38px !important;
-    min-height:38px !important;
-  }
-}
-
-@media(max-width:340px){
-  .nb-menu-item{
-    gap:9px !important;
-  }
-
-  .nb-item-media{
-    width:100px !important;
-    min-width:100px !important;
-    flex-basis:100px !important;
-  }
-
-  .nb-item-image-wrap{
-    width:100px !important;
-    height:72px !important;
-  }
-
-  .nb-add-btn,
-  .nb-qty{
-    width:88px !important;
-    min-width:88px !important;
+    width:92px!important;
+    min-width:92px!important;
+    max-width:92px!important;
   }
 }
