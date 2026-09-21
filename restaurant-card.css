@@ -1526,13 +1526,14 @@
    order. CSS ONLY — every JS hook, class and data-attribute is untouched.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* 1 ── Tall, full-bleed square image (matches the reference).
-   Replaces the short 1.68/1 and mobile 2.40/1 boxes, and swaps the
-   letterboxing 'contain' fit (which left grey side-bars around any
-   off-ratio photo — the broken look in the 2nd card) for 'cover',
-   so the photo fills the whole tile edge-to-edge. */
+/* 1 ── Full-bleed landscape image (4:3 — shorter than the reference's
+   near-square so the tiles don't feel massive, while keeping the same
+   edge-to-edge 'cover' fill). Replaces the short 1.68/1 and mobile
+   2.40/1 boxes, and swaps the letterboxing 'contain' fit (which left
+   grey side-bars around off-ratio photos — the broken look in the 2nd
+   card) for 'cover'. */
 .u99-item-image{
-  aspect-ratio:1/1;
+  aspect-ratio:4/3;
   border-radius:14px;
 }
 .u99-item-image img,
@@ -1542,8 +1543,8 @@
   background:#F1F3F6;
 }
 
-/* Tiles are now a fixed square, so every tile is the same height and
-   the old min-height math (built for the short wide box) is dropped. */
+/* Every tile is now a fixed ratio, so tiles share one height and the
+   old min-height math (built for the short wide box) is dropped. */
 .u99-carousel{ min-height:0; }
 .u99-carousel.u99-carousel-empty{ min-height:0; }
 
@@ -1568,16 +1569,17 @@
   box-shadow:0 3px 9px rgba(16,24,40,.18), 0 0 0 2px #fff;
 }
 
-/* 3 ── Clean single price: hide the per-item strikethrough + % OFF pill.
-   Markup/JS untouched (the data still flows) — only the visuals are
-   hidden, matching the reference, where the discount lives at card
-   level ("10% LOWER PRICES"). */
-.u99-old-price,
-.u99-off{ display:none !important; }
+/* 3 ── Real price kept: strikethrough original price + "% OFF" pill stay
+   visible (the earlier hide rule is removed). */
 
-/* Narrow phones — keep the square tile and larger button in proportion. */
+/* 4 ── Vertical breathing room between restaurant cards. */
+.u99-card-host{
+  margin-bottom:16px;
+}
+
+/* Narrow phones — keep the tile ratio and larger button in proportion. */
 @media(max-width:430px){
-  .u99-item-image{ aspect-ratio:1/1; border-radius:13px; }
+  .u99-item-image{ aspect-ratio:4/3; border-radius:13px; }
   .u99-item-image img,
   .u99-image-fallback{ border-radius:13px; }
   .u99-add{ width:38px; height:38px; font-size:23px; }
