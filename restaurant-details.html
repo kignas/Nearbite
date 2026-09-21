@@ -3,131 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#f5f6fb">
   <title>Restaurant Information – Eatswada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
-    :root{--green:#168a55;--green-dark:#0f6f45;--ink:#18212b;--muted:#77818d;--line:#e9edf0;--bg:#f6f7f8;--card:#fff;--danger:#c83f4d;--shadow:0 10px 30px rgba(18,32,45,.06)}
+    :root{
+      --green:#159A62;--ink:#232833;--ink-2:#3a4150;--muted:#8b929d;--muted-2:#9aa1ab;
+      --line:#e9ecf1;--dash:#e2e6ec;--bg:#f5f6fb;--card:#fff;--coral:#e4565c;--coral-soft:#fff4f2;
+    }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope', system-ui, -apple-system, sans-serif;padding-bottom:30px}
-    button{font:inherit}
-    .top{height:64px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:20}
-    .icon{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer}
-    .title{font-weight:800;font-size:15px}
-    .wrap{max-width:760px;margin:0 auto;padding:16px}
-    .hero{position:relative;overflow:hidden;border-radius:24px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:14px}
-    .gallery{height:230px;background:#eef1f3;position:relative}
-    .gallery img{width:100%;height:100%;object-fit:cover;display:block}
-    .gallery.empty{display:grid;place-items:center;color:#a1a9b1;font-size:40px}
-    .gallery-overlay{position:absolute;inset:auto 0 0;padding:50px 18px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
-    .hero-body{padding:18px}
-    h1{font-size:28px;line-height:1.15;margin:0 0 6px;letter-spacing:-.5px}
-    .sub{color:var(--muted);font-size:13px;margin:0;line-height:1.55}
-    .address{margin-top:11px;font-size:13px;line-height:1.55;color:#4f5a65}
-    .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-    .stat{border:1px solid var(--line);border-radius:14px;padding:11px 8px;text-align:center;background:#fff}
-    .stat i{display:block;color:var(--green);font-size:14px;margin-bottom:5px}
-    .stat b{display:block;font-size:12px}
-    .stat span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-    .status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;background:#eaf8f1;color:var(--green);margin-top:12px}
-    .status.closed{background:#fff0f1;color:var(--danger)}
-    .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
-    .section-title{font-size:18px;font-weight:800;margin:0 0 13px}
-    .description{font-size:13px;line-height:1.7;color:#56616c;margin:0}
-    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-    .info{border:1px solid var(--line);border-radius:14px;padding:12px}
-    .info-label{font-size:10px;color:var(--muted);margin-bottom:4px}
-    .info-value{font-size:12px;font-weight:700;line-height:1.4;word-break:break-word}
-    .hours{border:1px solid var(--line);border-radius:15px;overflow:hidden}
-    .hours-row{display:flex;justify-content:space-between;gap:15px;padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}
-    .hours-row:last-child{border-bottom:0}
-    .day{font-weight:700}.time{color:#59636d;text-align:right}.today{background:#f0faf5}.today .day{color:var(--green)}
-    .closed-day{color:#9aa1a9}
-    .review{padding:14px 0;border-top:1px solid var(--line)}
-    .review:first-child{border-top:0;padding-top:0}
-    .review-head{display:flex;justify-content:space-between;gap:12px}
-    .review-name{font-size:12px;font-weight:800}
-    .rating{color:var(--green);font-size:11px;font-weight:800}
-    .review-text{font-size:12px;color:#5b6670;line-height:1.6;margin:6px 0 0}
-    .review-photo{width:86px;height:86px;object-fit:cover;border-radius:12px;margin-top:9px;display:block}
-    .muted{font-size:12px;color:#9aa1a9}
-    .error{color:var(--danger)}
-    .bottom-actions{position:sticky;bottom:12px;z-index:10;margin-top:5px}
-    .menu-btn{width:100%;height:52px;border:0;border-radius:16px;background:var(--ink);color:#fff;font-size:14px;font-weight:800;box-shadow:0 12px 25px rgba(24,33,43,.18);cursor:pointer}
-    .menu-btn:active{transform:translateY(1px)}
-    .skeleton{background:linear-gradient(90deg,#eef1f3 25%,#f8f9fa 50%,#eef1f3 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px}
-    .sk-img{height:230px}.sk-line{height:14px;margin:12px 0}.sk-line.w70{width:70%}.sk-line.w45{width:45%}
+    body{
+      margin:0;background:var(--bg);color:var(--ink);
+      font-family:'Manrope', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));
+    }
+    button{font:inherit;cursor:pointer}
+    a{text-decoration:none;color:inherit}
+
+    /* ---- floating top nav ---- */
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:calc(10px + env(safe-area-inset-top,0px)) 16px 8px;
+    }
+    .nav-ic{
+      width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+      background:transparent;border:0;color:var(--ink);font-size:20px;
+    }
+    .nav-ic:active{transform:scale(.94)}
+    .nav-right{display:flex;gap:2px}
+    #save-btn.is-saved{color:var(--coral)}
+
+    .wrap{max-width:720px;margin:0 auto;padding:6px 14px 0}
+
+    /* ---- main restaurant card ---- */
+    .rcard{background:var(--card);border-radius:22px;padding:22px 18px 6px;box-shadow:0 6px 22px rgba(20,28,44,.05)}
+    h1{font-size:25px;line-height:1.15;margin:0 0 8px;font-weight:800;letter-spacing:-.6px;color:var(--ink)}
+    .cuisine{margin:0;color:var(--muted);font-size:15px;font-weight:500;line-height:1.4}
+    .address{margin:14px 0 0;font-size:16px;line-height:1.45;color:#2f3540;font-weight:500}
+
+    /* ---- action row ---- */
+    .actions{display:flex;align-items:center;gap:14px;margin:18px 0 4px;flex-wrap:wrap}
+    .act-circle{
+      width:52px;height:52px;border-radius:50%;background:#fff;border:1px solid var(--line);
+      display:grid;place-items:center;color:var(--coral);font-size:19px;
+    }
+    .act-circle:active{transform:scale(.95)}
+    .act-pill{
+      display:inline-flex;align-items:center;gap:9px;height:52px;padding:0 22px;
+      border-radius:999px;background:#fff;border:1px solid var(--line);
+      color:var(--ink);font-size:16px;font-weight:600;
+    }
+    .act-pill i{color:var(--coral);font-size:17px}
+
+    .divider{height:1px;background:var(--line);margin:20px 0 4px}
+
+    /* ---- opening hours ---- */
+    .hours-head{
+      display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;
+      padding:16px 0;text-align:left;color:var(--ink);
+    }
+    .hours-head .clock{color:var(--ink);font-size:19px;flex:0 0 auto;width:22px;text-align:center}
+    .hours-title{flex:1 1 auto;font-size:16px;font-weight:600;line-height:1.35;min-width:0}
+    .hours-title .open{color:var(--green);font-weight:700}
+    .hours-title .closed{color:var(--coral);font-weight:700}
+    .chev{flex:0 0 auto;color:var(--muted);font-size:15px;transition:transform .25s ease}
+    .hours-head[aria-expanded="false"] .chev{transform:rotate(180deg)}
+
+    .hours-list{overflow:hidden;transition:max-height .3s ease;padding-left:34px}
+    .hours-list[hidden]{display:block!important;max-height:0}
+    .hrow{display:grid;grid-template-columns:104px 1fr;align-items:baseline;gap:12px;padding:9px 0;font-size:15px}
+    .hrow .d{color:var(--muted);font-weight:500}
+    .hrow .t{color:var(--muted);font-weight:500;white-space:nowrap}
+    .hrow.is-today .d,.hrow.is-today .t{color:var(--ink);font-weight:700}
+    .hrow .t.closed{color:var(--muted-2)}
+
+    /* ---- services (dashed dividers) ---- */
+    .svc{display:flex;align-items:center;gap:15px;padding:16px 0;font-size:16px;color:var(--ink);font-weight:500;border-top:1px dashed var(--dash)}
+    .svc .si{width:22px;text-align:center;color:#5a626d;font-size:17px;flex:0 0 auto}
+    #services{margin-top:8px}
+
+    /* ---- FSSAI (on background, outside card) ---- */
+    .fssai{padding:22px 6px 4px}
+    .fssai .lbl{font-size:14px;color:var(--muted);font-weight:500}
+    .fssai .val{font-size:16px;color:var(--muted-2);margin-top:4px;letter-spacing:.2px}
+
+    /* ---- bottom CTA ---- */
+    .cta-bar{
+      position:fixed;left:0;right:0;bottom:0;z-index:30;
+      background:linear-gradient(180deg,rgba(245,246,251,0) 0%,var(--bg) 34%);
+      padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));
+    }
+    .cta-btn{
+      width:100%;height:56px;border:0;border-radius:16px;background:var(--coral);color:#fff;
+      font-size:18px;font-weight:700;letter-spacing:.2px;box-shadow:0 8px 20px rgba(228,86,92,.28);
+    }
+    .cta-btn:active{transform:translateY(1px)}
+
+    /* ---- toast ---- */
+    .toast{
+      position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(10px);
+      background:#232833;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:12px;
+      opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* ---- skeleton / states ---- */
+    .skeleton{background:linear-gradient(90deg,#eceef3 25%,#f6f7fb 50%,#eceef3 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:10px}
+    .sk-line{height:16px;margin:12px 0}.sk-line.w70{width:70%}.sk-line.w45{width:45%}.sk-line.w90{width:90%}
     @keyframes shimmer{to{background-position:-200% 0}}
-    @media(max-width:520px){.quick{grid-template-columns:repeat(3,1fr)}.gallery{height:205px}.info-grid{grid-template-columns:1fr 1fr}}
-    @media(min-width:700px){.gallery{height:290px}}
+    .state-card{background:#fff;border-radius:18px;padding:18px;margin-top:6px}
+    .error{color:var(--coral);font-weight:800;margin-bottom:6px}
+    .muted{font-size:13px;color:var(--muted)}
+
+    @media(max-width:372px){
+      h1{font-size:23px}
+      .act-pill{padding:0 18px}
+      .hrow{grid-template-columns:92px 1fr;font-size:14px}
+      .actions{gap:12px}
+    }
   </style>
 </head>
 <body>
-<header class="top">
-  <button class="icon" id="back-btn" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
-  <div class="title">Restaurant information</div>
-  <div style="width:42px"></div>
+
+<header class="topbar">
+  <button class="nav-ic" id="back-btn" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
+  <div class="nav-right">
+    <button class="nav-ic" id="save-btn" aria-label="Save restaurant" aria-pressed="false"><i class="fa-regular fa-bookmark"></i></button>
+    <button class="nav-ic" id="share-btn" aria-label="Share"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+  </div>
 </header>
 
 <main class="wrap">
   <div id="loading">
-    <section class="hero">
-      <div class="skeleton sk-img"></div>
-      <div class="hero-body"><div class="skeleton sk-line w70"></div><div class="skeleton sk-line w45"></div></div>
+    <section class="rcard">
+      <div class="skeleton sk-line w70" style="height:26px"></div>
+      <div class="skeleton sk-line w45"></div>
+      <div class="skeleton sk-line w90"></div>
+      <div class="skeleton sk-line w70" style="height:46px;border-radius:999px;margin-top:18px"></div>
     </section>
-    <section class="card"><div class="skeleton sk-line w45"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line w70"></div></section>
   </div>
 
   <div id="content" hidden>
-    <section class="hero">
-      <div class="gallery" id="gallery"></div>
-      <div class="hero-body">
-        <h1 id="name">Restaurant</h1>
-        <p class="sub" id="cuisine"></p>
-        <div class="address" id="address"></div>
-        <div id="status"></div>
-        <div class="quick" id="quick"></div>
-      </div>
+    <section class="rcard">
+      <h1 id="name">Restaurant</h1>
+      <p class="cuisine" id="cuisine"></p>
+      <p class="address" id="address"></p>
+
+      <div class="actions" id="actions"></div>
+
+      <div class="divider"></div>
+
+      <button class="hours-head" id="hours-head" aria-expanded="true" aria-controls="hours-list">
+        <span class="clock"><i class="fa-regular fa-clock"></i></span>
+        <span class="hours-title" id="hours-status">Opening hours</span>
+        <span class="chev"><i class="fa-solid fa-chevron-up"></i></span>
+      </button>
+      <div class="hours-list" id="hours-list"></div>
+
+      <div id="services"></div>
     </section>
 
-    <section class="card" id="about-card" hidden>
-      <h2 class="section-title">About this restaurant</h2>
-      <p class="description" id="description"></p>
-    </section>
-
-    <section class="card">
-      <h2 class="section-title">Restaurant details</h2>
-      <div class="info-grid" id="details"></div>
-    </section>
-
-    <section class="card">
-      <h2 class="section-title">Opening hours</h2>
-      <div class="hours" id="hours"></div>
-    </section>
-
-    <section class="card" id="reviews-card" hidden>
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-        <h2 class="section-title" style="margin:0">Customer reviews</h2>
-        <span class="muted" id="review-count"></span>
-      </div>
-      <div id="reviews" style="margin-top:14px"></div>
-    </section>
-
-    <div class="bottom-actions">
-      <button class="menu-btn" id="menu-btn"><i class="fa-solid fa-utensils"></i>&nbsp; View full menu</button>
+    <div class="fssai" id="fssai" hidden>
+      <div class="lbl">FSSAI Lic No</div>
+      <div class="val" id="fssai-val"></div>
     </div>
   </div>
 
-  <section class="card" id="error-card" hidden>
-    <div class="error" style="font-weight:800;margin-bottom:6px">Unable to load restaurant</div>
+  <section class="state-card" id="error-card" hidden>
+    <div class="error">Unable to load restaurant</div>
     <div class="muted" id="error-text">Please try again.</div>
   </section>
 </main>
+
+<div class="cta-bar">
+  <button class="cta-btn" id="menu-btn">Go back to menu</button>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
@@ -137,113 +194,195 @@
   const id = new URLSearchParams(location.search).get('id');
   const $ = s => document.querySelector(s);
   const esc = v => String(v ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
 
-  $('#back-btn').addEventListener('click',()=>history.back());
-  $('#menu-btn').addEventListener('click',()=>{
-    location.href=id ? 'restaurant.html?id='+encodeURIComponent(id) : 'index.html';
+  let currentRestaurant = null;
+
+  $('#back-btn').addEventListener('click', () => history.back());
+  $('#menu-btn').addEventListener('click', () => {
+    location.href = id ? 'restaurant.html?id=' + encodeURIComponent(id) : 'index.html';
   });
 
-  function cuisine(r){
-    if(Array.isArray(r.cuisine) && r.cuisine.length) return r.cuisine.join(' · ');
-    return r.cuisineDisplay || (Array.isArray(r.cuisines) ? r.cuisines.join(' · ') : (r.cuisine || ''));
+  function toast(msg){
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800);
   }
 
-  function renderGallery(r){
-    const gallery = Array.isArray(r.images)&&r.images.length ? r.images : (r.image ? [r.image] : []);
-    const el = $('#gallery');
-    const src = safeUrl(gallery[0]);
-    if(!gallery.length || !src){el.classList.add('empty');el.innerHTML='<i class="fa-solid fa-store"></i>';return;}
-    el.innerHTML='<img src="'+esc(src)+'" alt="'+esc(r.name||'Restaurant')+'" loading="eager">';
+  /* ---- Save (local, mirrors the app's existing save toggle; persists per-restaurant) ---- */
+  const saveKey = 'eatswada_saved_' + (id || '');
+  function initSave(){
+    const btn = $('#save-btn'), ic = btn.querySelector('i');
+    let saved = false;
+    try { saved = localStorage.getItem(saveKey) === '1'; } catch(e){}
+    const paint = () => {
+      btn.classList.toggle('is-saved', saved);
+      btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+      ic.className = saved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+    };
+    paint();
+    btn.addEventListener('click', () => {
+      saved = !saved;
+      try { saved ? localStorage.setItem(saveKey,'1') : localStorage.removeItem(saveKey); } catch(e){}
+      paint();
+      toast(saved ? 'Saved' : 'Removed from saved');
+    });
+  }
+
+  /* ---- Share (real Web Share API, clipboard fallback) ---- */
+  function initShare(){
+    $('#share-btn').addEventListener('click', async () => {
+      const name = (currentRestaurant && currentRestaurant.name) || 'this restaurant';
+      const url = location.href;
+      try {
+        if (navigator.share) { await navigator.share({ title: name, url }); return; }
+        await navigator.clipboard.writeText(url); toast('Link copied');
+      } catch(e){ /* user dismissed or unsupported */ }
+    });
+  }
+
+  function cuisineText(r){
+    if (Array.isArray(r.cuisine) && r.cuisine.length) return r.cuisine.join(' · ');
+    if (Array.isArray(r.cuisines) && r.cuisines.length) return r.cuisines.join(' · ');
+    return r.cuisineDisplay || (typeof r.cuisine === 'string' ? r.cuisine : '');
+  }
+
+  function costForOne(r){
+    return num(r.costForOne ?? r.priceForOne ?? r.averageCostForOne ?? r.avgCostForOne ?? r.costPerPerson);
+  }
+
+  function coords(r){
+    const c = r && r.location && r.location.coordinates;
+    if (Array.isArray(c) && c.length >= 2) {
+      const lng = Number(c[0]), lat = Number(c[1]);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+    }
+    return null;
+  }
+
+  function renderActions(r){
+    const el = $('#actions'); const parts = [];
+    // CALL — only when a real phone number exists
+    const phone = (r.phone || r.contactNumber || '').toString().trim();
+    if (phone) parts.push('<a class="act-circle" href="tel:'+esc(phone)+'" aria-label="Call restaurant"><i class="fa-solid fa-phone"></i></a>');
+    // DIRECTIONS — real maps deep link from coordinates, else address
+    const c = coords(r);
+    const addr = r.address || (r.location && r.location.address) || '';
+    let dest = c ? (c.lat+','+c.lng) : (addr ? addr : '');
+    if (dest) {
+      const url = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dest);
+      parts.push('<a class="act-circle" href="'+esc(url)+'" target="_blank" rel="noopener" aria-label="Directions"><i class="fa-solid fa-diamond-turn-right"></i></a>');
+    }
+    // NOTE: no "View dining page" — Eatswada has no dining-page feature.
+    if (!parts.length) { el.hidden = true; return; }
+    el.innerHTML = parts.join('');
+  }
+
+  function timeStr(h){
+    if (!h) return null;
+    const o = h.opensAt || h.open || h.from, cl = h.closesAt || h.close || h.to;
+    if (h.closed === true) return { closed:true };
+    if (o && cl) return { open:esc(o), close:esc(cl) };
+    return null;
   }
 
   function renderHours(r){
-    const source = r.openingHours || {};
-    const days=[['monday','Monday'],['tuesday','Tuesday'],['wednesday','Wednesday'],['thursday','Thursday'],['friday','Friday'],['saturday','Saturday'],['sunday','Sunday']];
-    const today=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
-    $('#hours').innerHTML=days.map(([key,label])=>{
-      const h=source[key];
-      const closed=h && h.closed===true;
-      const time=closed?'Closed':((h&&h.opensAt&&h.closesAt)?esc(h.opensAt)+' – '+esc(h.closesAt):'Hours not available');
-      return '<div class="hours-row '+(key===today?'today':'')+'"><span class="day">'+label+(key===today?' · Today':'')+'</span><span class="time '+(closed?'closed-day':'')+'">'+time+'</span></div>';
+    const src = r.openingHours || r.hours || {};
+    const days = [['monday','Monday'],['tuesday','Tuesday'],['wednesday','Wednesday'],['thursday','Thursday'],['friday','Friday'],['saturday','Saturday'],['sunday','Sunday']];
+    const todayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+
+    let anyHours = false;
+    const rows = days.map(([key,label]) => {
+      const t = timeStr(src[key]);
+      let time = 'Hours not available', cls = 'closed';
+      if (t && t.closed) { time = 'Closed'; }
+      else if (t) { time = t.open + ' - ' + t.close; cls = ''; anyHours = true; }
+      return '<div class="hrow '+(key===todayKey?'is-today':'')+'"><span class="d">'+label+'</span><span class="t '+cls+'">'+time+'</span></div>';
     }).join('');
+    $('#hours-list').innerHTML = rows;
+
+    // Status line uses the real open/closed flag + today's real closing/opening time.
+    const open = (r.availability && typeof r.availability.isOpen === 'boolean') ? r.availability.isOpen
+               : (typeof r.isOpen === 'boolean' ? r.isOpen : true);
+    const todayT = timeStr(src[todayKey]);
+    let html;
+    if (open) {
+      html = '<span class="open">Open now</span>' + (todayT && todayT.close ? ' • Closes ' + todayT.close : '');
+    } else {
+      html = '<span class="closed">Closed now</span>' + (todayT && todayT.open ? ' • Opens ' + todayT.open : '');
+    }
+    $('#hours-status').innerHTML = html;
+
+    // If the backend supplied no usable hours at all, hide the list but keep the status line.
+    if (!anyHours) { $('#hours-list').innerHTML = ''; }
+  }
+
+  function renderServices(r){
+    const el = $('#services'); const rows = [];
+    // Every Eatswada restaurant provides delivery (core platform function).
+    rows.push(['fa-solid fa-bag-shopping','Provides delivery']);
+    if (r.freeDeliveryEnabled !== false && num(r.freeDeliveryAbove) && num(r.freeDeliveryAbove) > 0)
+      rows.push(['fa-solid fa-motorcycle','Free delivery on orders above ₹'+num(r.freeDeliveryAbove).toFixed(0)]);
+    if (num(r.deliveryRadiusKm) && num(r.deliveryRadiusKm) > 0)
+      rows.push(['fa-solid fa-location-dot','Delivers within '+num(r.deliveryRadiusKm)+' km']);
+    if (r.codEnabled === true)
+      rows.push(['fa-solid fa-indian-rupee-sign','Cash on delivery available']);
+    el.innerHTML = rows.map(([ic,txt]) => '<div class="svc"><span class="si"><i class="'+ic+'"></i></span><span>'+esc(txt)+'</span></div>').join('');
+  }
+
+  function renderFssai(r){
+    const v = (r.fssaiLicenseNumber || r.fssai || '').toString().trim();
+    if (!v) return;                         // hide gracefully when unavailable
+    $('#fssai-val').textContent = v;
+    $('#fssai').hidden = false;
   }
 
   function render(r){
-    document.title=(r.name||'Restaurant')+' – Eatswada';
-    $('#name').textContent=r.name||'Restaurant';
-    $('#cuisine').textContent=cuisine(r);
-    $('#address').textContent=r.address || (r.location&&r.location.address) || 'Address not available';
-    renderGallery(r);
+    currentRestaurant = r;
+    document.title = (r.name || 'Restaurant') + ' – Eatswada';
+    $('#name').textContent = r.name || 'Restaurant';
 
-    const open = r.availability && typeof r.availability.isOpen==='boolean' ? r.availability.isOpen : (typeof r.isOpen==='boolean'?r.isOpen:true);
-    $('#status').innerHTML='<span class="status '+(open?'':'closed')+'"><span class="dot"></span>'+ (open?'Open now':'Currently closed')+'</span>';
+    const cu = cuisineText(r), cost = costForOne(r);
+    const sub = [cu, cost ? '₹'+cost.toFixed(0)+' for one' : ''].filter(Boolean).join(' · ');
+    if (sub) $('#cuisine').textContent = sub; else $('#cuisine').hidden = true;
 
-    const rating=Number(r.rating), ratingCount=Number(r.ratingCount||r.reviewCount||0);
-    const min=Number(r.estimatedDeliveryMin), max=Number(r.estimatedDeliveryMax||r.estimatedDeliveryMin);
-    const quick=[];
-    if(Number.isFinite(rating)) quick.push('<div class="stat"><i class="fa-solid fa-star"></i><b>'+rating.toFixed(1)+'</b><span>'+ratingCount+' ratings</span></div>');
-    if(Number.isFinite(min)) quick.push('<div class="stat"><i class="fa-regular fa-clock"></i><b>'+min+'–'+max+' min</b><span>delivery</span></div>');
-    const fee=Number(r.deliveryFee);
-    quick.push('<div class="stat"><i class="fa-solid fa-motorcycle"></i><b>'+ (r.freeDeliveryEnabled!==false?'Free':'₹'+(Number.isFinite(fee)?fee:0)) +'</b><span>delivery</span></div>');
-    $('#quick').innerHTML=quick.join('');
+    const addr = r.address || (r.location && r.location.address) || '';
+    if (addr) $('#address').textContent = addr; else $('#address').hidden = true;
 
-    if(r.description){
-      $('#description').textContent=r.description;
-      $('#about-card').hidden=false;
-    }
-
-    const rows=[];
-    if(r.phone) rows.push(['Phone',r.phone]);
-    // Show the restaurant's FSSAI reference when Admin has supplied one.
-    // If it has not been added yet, clearly indicate that it is coming soon.
-    rows.push(['FSSAI', r.fssaiLicenseNumber ? r.fssaiLicenseNumber : 'Coming soon']);
-    if(cuisine(r)) rows.push(['Cuisine',cuisine(r)]);
-    if(Number.isFinite(Number(r.minOrder)) && Number(r.minOrder)>0) rows.push(['Minimum order','₹'+Number(r.minOrder).toFixed(0)]);
-    if(r.freeDeliveryEnabled!==false && Number.isFinite(Number(r.freeDeliveryAbove)) && Number(r.freeDeliveryAbove)>0) rows.push(['Free delivery above','₹'+Number(r.freeDeliveryAbove).toFixed(0)]);
-    if(Number.isFinite(Number(r.deliveryFee)) && r.freeDeliveryEnabled===false) rows.push(['Delivery fee','₹'+Number(r.deliveryFee).toFixed(0)]);
-    if(Number.isFinite(Number(r.deliveryRadiusKm)) && Number(r.deliveryRadiusKm)>0) rows.push(['Delivery radius',Number(r.deliveryRadiusKm)+' km']);
-    if(r.codEnabled!==undefined) rows.push(['Cash on delivery',r.codEnabled?'Available':'Not available']);
-    if(r.totalOrders!==undefined) rows.push(['Total orders',String(r.totalOrders)]);
-    $('#details').innerHTML=rows.length?rows.map(x=>'<div class="info"><div class="info-label">'+esc(x[0])+'</div><div class="info-value">'+esc(x[1])+'</div></div>').join(''):'<div class="muted">No additional details available.</div>';
+    renderActions(r);
     renderHours(r);
+    renderServices(r);
+    renderFssai(r);
   }
 
-  async function loadReviews(){
-    try{
-      const payload=await window.API.request('/restaurants/'+encodeURIComponent(id)+'/reviews');
-      const d=window.API.unwrap(payload);
-      const list=Array.isArray(d)?d:(d&&Array.isArray(d.reviews)?d.reviews:[]);
-      if(!list.length)return;
-      $('#reviews-card').hidden=false;
-      $('#review-count').textContent=list.length+(list.length===1?' review':' reviews');
-      $('#reviews').innerHTML=list.slice(0,10).map(r=>{
-        const n=(r.user&&(r.user.name||r.user.fullName))||r.userName||r.name||'Customer';
-        const score=Number(r.score??r.rating??r.foodRating);
-        const text=r.comment||r.text||r.review||'';
-        const photo=r.image||r.photo||r.foodImage||r.imageUrl||'';
-        return '<article class="review"><div class="review-head"><span class="review-name">'+esc(n)+'</span><span class="rating">'+(Number.isFinite(score)?'★ '+score.toFixed(1):'')+'</span></div>'+(text?'<p class="review-text">'+esc(text)+'</p>':'')+(safeUrl(photo)?'<img class="review-photo" src="'+esc(safeUrl(photo))+'" alt="Customer food photo" loading="lazy">':'')+'</article>';
-      }).join('');
-    }catch(e){}
-  }
+  // collapsible opening hours
+  $('#hours-head').addEventListener('click', () => {
+    const head = $('#hours-head'), list = $('#hours-list');
+    const open = head.getAttribute('aria-expanded') === 'true';
+    head.setAttribute('aria-expanded', open ? 'false' : 'true');
+    if (open) { list.style.maxHeight = '0'; }
+    else { list.style.maxHeight = list.scrollHeight + 'px'; }
+  });
 
   async function init(){
-    if(!id){
-      $('#loading').hidden=true; $('#error-card').hidden=false; $('#error-text').textContent='Restaurant ID is missing.';
+    initSave(); initShare();
+    if (!id){
+      $('#loading').hidden = true; $('#error-card').hidden = false;
+      $('#error-text').textContent = 'Restaurant ID is missing.';
       return;
     }
     try{
-      const r=await window.API.getObject(window.API.routes.restaurant(id));
+      const r = await window.API.getObject(window.API.routes.restaurant(id));
       render(r);
-      $('#loading').hidden=true;
-      $('#content').hidden=false;
-      loadReviews();
+      $('#loading').hidden = true;
+      $('#content').hidden = false;
+      const list = $('#hours-list'); list.style.maxHeight = list.scrollHeight + 'px';
     }catch(e){
-      $('#loading').hidden=true;
-      $('#error-card').hidden=false;
-      $('#error-text').textContent=e.message||'Please try again.';
+      $('#loading').hidden = true;
+      $('#error-card').hidden = false;
+      $('#error-text').textContent = (e && e.message) || 'Please try again.';
     }
   }
-  document.addEventListener('DOMContentLoaded',init);
+  document.addEventListener('DOMContentLoaded', init);
 })();
 </script>
 </body>
