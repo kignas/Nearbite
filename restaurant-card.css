@@ -750,7 +750,10 @@
   right: 0;
   bottom: 0;
   z-index: 3;
-  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;                         /* compact, fixed — no giant block */
+  padding: 0 14px;
   background: #FFFFFF;
   color: #20242B;
   font-size: 14px;
@@ -759,8 +762,8 @@
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
-  border-radius: 12px 0 0 0;            /* only the top-left corner */
-  box-shadow: -1px -1px 6px rgba(15, 23, 42, .10);
+  border-radius: 14px 0 0 0;            /* only the top-left corner */
+  box-shadow: -1px -1px 4px rgba(15, 23, 42, .06);
 }
 
 /* ── Favourite — white outline heart over the image, no circle ────── */
@@ -827,9 +830,9 @@
 }
 
 /* ── Gallery dots — small, white, integrated ──────────────────────── */
-.es-gallery-dots { bottom: 12px; }
-.es-gallery-dot { width: 6px; height: 6px; background: rgba(255, 255, 255, .6); }
-.es-gallery-dot.active { width: 15px; background: #FFFFFF; }
+.es-gallery-dots { bottom: 16px; }
+.es-gallery-dot { width: 6px; height: 6px; background: rgba(255, 255, 255, .55); }
+.es-gallery-dot.active { width: 20px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .95); }
 
 /* ── Content block — compact, information-dense ───────────────────── */
 .es-card-content { padding: 14px 18px 16px; }
@@ -923,7 +926,7 @@
   .es-name { font-size: 18.5px; }
   .es-meta, .es-subtitle { font-size: 13px; }
   .es-offer { font-size: 13.5px; max-width: calc(100% - 108px); }
-  .es-time-badge { font-size: 13px; padding: 8px 12px; }
+  .es-time-badge { font-size: 13px; height: 38px; padding: 0 12px; }
   .es-fav { right: 48px; }
   .es-more { right: 16px; }
 }
