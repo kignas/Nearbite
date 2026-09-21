@@ -439,7 +439,97 @@
     if(r.discountPercent!=null&&Number(r.discountPercent)>0)return Math.round(Number(r.discountPercent))+'% LOWER PRICES';
     return 'LOWER PRICES';
   }
+  /*
+   * Homepage restaurant results do not always include the restaurant menu.
+   * The 99 Store page explicitly enriches each restaurant with
+   * GET /api/restaurants/:id/menu before rendering its cards. Do the same
+   * here so the 99 Store card is not left showing "Menu unavailable".
+   */
+  function homeFlattenMenuPayload(payload){
+    var data=payload && payload.data!=null ? payload.data : payload;
+    if(Array.isArray(data)) return data;
+    if(!data || typeof data!=='object') return [];
+    var keys=['menu','items','results'];
+    for(var k=0;k<keys.length;k++){
+      if(Array.isArray(data[keys[k]])) return data[keys[k]];
+    }
+    var groups=[];
+    Object.keys(data).forEach(function(key){
+      var value=data[key];
+      if(Array.isArray(value)) groups.push.apply(groups,value);
+      else if(value && typeof value==='object'){
+        Object.keys(value).forEach(function(nk){
+          if(Array.isArray(value[nk])) groups.push.apply(groups,value[nk]);
+        });
+      }
+    });
+    return groups;
+  }
+
+  function homeNormalizeMenu(menu){
+    return (Array.isArray(menu)?menu:[]).map(function(item){
+      if(!item || typeof item!=='object') return null;
+      var price=Number(item.price);
+      return Object.assign({},item,{
+        id:item.id || item._id || item.menuItemId || item.menuItem || '',
+        name:item.name || item.title || 'Item',
+        price:Number.isFinite(price)?price:0,
+        originalPrice:item.originalPrice==null?null:Number(item.originalPrice),
+        discountPercent:item.discountPercent==null?null:Number(item.discountPercent),
+        image:item.image || item.img || item.imageUrl || item.photo || '',
+        isVeg:Boolean(item.isVeg),
+        inStock:item.inStock!==false
+      });
+    }).filter(function(item){return item && item.price>0;});
+  }
+
+  var homeMenuFetchCache=Object.create(null);
+  function homeFetchMenu(restaurantId){
+    var id=String(restaurantId||'');
+    if(!id) return Promise.resolve([]);
+    if(homeMenuFetchCache[id]) return homeMenuFetchCache[id];
+    homeMenuFetchCache[id]=fetch('https://eatswada.onrender.com/api/restaurants/'+encodeURIComponent(id)+'/menu',{
+      headers:{Accept:'application/json'},cache:'no-store'
+    }).then(function(response){
+      if(!response.ok) throw new Error('HTTP '+response.status);
+      return response.json();
+    }).then(function(payload){
+      return homeNormalizeMenu(homeFlattenMenuPayload(payload));
+    }).catch(function(error){
+      console.warn('[restaurant-card] menu load failed for',id,error);
+      return [];
+    });
+    return homeMenuFetchCache[id];
+  }
+
   function homeSortedMenu(r){return Array.isArray(r.menu)?r.menu.filter(function(i){return i&&Number(i.price)>0;}).slice().sort(function(a,b){return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||''));}):[];}
+
+  function homeHydrateMenus(container,list,renderToken){
+    var missing=(Array.isArray(list)?list:[]).filter(function(r){
+      return r && read.id(r) && !homeSortedMenu(r).length;
+    });
+    if(!missing.length)return;
+    Promise.all(missing.map(function(r){
+      var id=read.id(r);
+      return homeFetchMenu(id).then(function(menu){
+        if(menu.length) r.menu=menu;
+        return {restaurant:r,menu:menu};
+      });
+    })).then(function(results){
+      if(renderToken!==window.__home99RenderToken || !container || !document.contains(container))return;
+      results.forEach(function(result){
+        var r=result.restaurant,id=read.id(r);
+        if(!id)return;
+        window.__home99Data[id]=r;
+        var host=container.querySelector('[data-home99-restaurant=\"'+CSS.escape(id)+'\"]');
+        if(!host)return;
+        var carousel=host.querySelector('.u99-carousel');
+        if(!carousel)return;
+        var menu=homeSortedMenu(r).slice(0,6);
+        carousel.innerHTML=menu.length?menu.map(function(item){return homeItemMarkup(item,r);}).join(''):'<div class=\"u99-no-items\">Menu unavailable</div>';
+      });
+    });
+  }
   function homeRatingMarkup(r){var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
   function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
   function homeBuildCard(res,index,customerCoords){
@@ -482,6 +572,8 @@
     var unavailable = new Set();
     var rendered = 0;
     window.__home99Data = Object.create(null);
+    window.__home99RenderToken = (window.__home99RenderToken || 0) + 1;
+    var renderToken = window.__home99RenderToken;
     var html = list.map(function(res,i){
       var markup=buildCard(res,i,customerCoords);
       if(markup){ rendered++; window.__home99Data[read.id(res)]=res; if(resolveAvailability(res,customerCoords)) unavailable.add(read.id(res)); }
@@ -490,6 +582,7 @@
     window.__unavailableRestaurantIds=unavailable;
     container.innerHTML=html;
     bindHome99Interactions();
+    homeHydrateMenus(container,list,renderToken);
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(function(){syncFavoriteButtons();});
     return rendered;
   }
