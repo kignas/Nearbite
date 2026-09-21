@@ -1,109 +1,97 @@
 /* ══════════════════════════════════════════════════════════════
    EATSWADA — END OF RESTAURANT FEED
    Benchmark-matched closing section.
-   This stylesheet owns only #home-feed-end.
+   This stylesheet owns ONLY #home-feed-end / .ew-feed-end.
+   Left-aligned, editorial, heavy headline — mobile-first,
+   scales up to desktop without becoming absurd.
    ══════════════════════════════════════════════════════════════ */
 
 .ew-feed-end{
+  /* palette */
+  --ew-ink:        #9AA0AD;   /* small supporting lines */
+  --ew-ink-strong: #A1A7B3;   /* dominant headline       */
+  --ew-pink:       #FF9EC7;   /* heart                   */
+
   width:100%;
+  box-sizing:border-box;
+  margin:0;
+  background:#fff;
+
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
+  align-items:flex-start;      /* stays LEFT on every width */
   text-align:left;
-  padding:54px 5.2vw 92px;
-  margin:0;
+
+  /* section spacing + left margin scale like the benchmark (~5%) */
+  padding-block:clamp(40px, 8vw, 72px) clamp(72px, 12vw, 104px);
+  padding-inline:clamp(16px, 5vw, 96px);
+
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 
+/* ── 1 · intro line — "That's all we've got!" ─────────────────── */
 .ew-feed-end__title{
-  margin:0 0 24px;
-  color:#A3A9B6;
-  font-size:clamp(22px, 2.15vw, 34px);
-  line-height:1.1;
+  margin:0 0 clamp(20px, 5.5vw, 30px);
+  color:var(--ew-ink);
+  font-size:clamp(17px, 4.6vw, 24px);
   font-weight:500;
-  letter-spacing:-.8px;
+  line-height:1.15;
+  letter-spacing:-0.02em;
 }
 
+/* ── 2 · dominant headline ────────────────────────────────────── */
+/* "A curated list of"  /  "top-rated restaurants ♥" (two lines)   */
 .ew-feed-end__sub{
   margin:0;
-  max-width:1280px;
-  color:#A1A7B4;
-  font-size:clamp(42px, 5.65vw, 86px);
-  line-height:.96;
-  font-weight:900;
-  letter-spacing:-3.2px;
+  max-width:12em;              /* forces the 2-line wrap; scales w/ font-size */
+  color:var(--ew-ink-strong);
+  font-size:clamp(27px, 8.8vw, 72px);
+  font-weight:800;             /* Manrope tops out at 800 */
+  line-height:0.98;            /* tight stacked lines */
+  letter-spacing:-0.045em;     /* tight, benchmark-close */
+  text-wrap:balance;           /* keeps "top-rated restaurants" whole */
 }
 
+/* pink heart — large, sits immediately after the headline */
 .ew-feed-end__heart{
   display:inline-block;
-  color:#F18DB8;
-  font-size:.92em;
-  line-height:0;
-  margin-left:.08em;
-  vertical-align:-.02em;
+  color:var(--ew-pink);
+  font-size:0.96em;            /* nearly cap-height of the headline */
+  line-height:1;
+  margin-left:0.12em;
+  vertical-align:-0.06em;
 }
 
+/* ── 3 · "Made in Maynaguri 🌻" ───────────────────────────────── */
 .ew-feed-end__made{
-  margin:38px 0 0;
-  color:#A3A9B6;
-  font-size:clamp(22px, 2.15vw, 34px);
-  line-height:1.1;
+  margin:clamp(28px, 7vw, 46px) 0 0;
+  color:var(--ew-ink);
+  font-size:clamp(16px, 4.3vw, 23px);
   font-weight:500;
-  letter-spacing:-.8px;
+  line-height:1.2;
+  letter-spacing:-0.01em;
 }
 
+/* sunflower renders as its own emoji colour — no ink override */
 .ew-feed-end__sun{
   display:inline-block;
-  margin-left:10px;
-  font-size:.9em;
-  vertical-align:-.05em;
+  margin-left:0.34em;
+  font-size:0.95em;
+  line-height:1;
+  vertical-align:-0.08em;
 }
 
-@media (max-width:599px){
-  .ew-feed-end{
-    align-items:center;
-    text-align:center;
-    padding:48px 24px 82px;
-  }
+/* ── Safety · strip the unwanted "4.0+ rated on Eatswada" line ──── */
+/* Any stray direct child that isn't one of the three intended
+   blocks is removed visually (heart/sun are nested, so untouched). */
+.ew-feed-end > *:not(.ew-feed-end__title):not(.ew-feed-end__sub):not(.ew-feed-end__made){
+  display:none !important;
+}
 
-  .ew-feed-end__title{
-    margin-bottom:20px;
-    font-size:24px;
-    letter-spacing:-.6px;
-  }
-
+/* ── Small phones · keep the headline line-2 intact ───────────── */
+@media (max-width:360px){
   .ew-feed-end__sub{
-    max-width:100%;
-    font-size:30px;
-    line-height:1.02;
-    letter-spacing:-1.25px;
-  }
-
-  .ew-feed-end__made{
-    margin-top:28px;
-    font-size:18px;
-    letter-spacing:-.4px;
-  }
-
-  .ew-feed-end__sun{
-    margin-left:7px;
-  }
-}
-
-@media (max-width:380px){
-  .ew-feed-end{
-    padding-left:18px;
-    padding-right:18px;
-  }
-
-  .ew-feed-end__sub{
-    font-size:27px;
-    letter-spacing:-1.05px;
-  }
-}
-
-@media (prefers-reduced-motion:reduce){
-  .ew-feed-end *{
-    transition:none !important;
-    animation:none !important;
+    letter-spacing:-0.05em;    /* extra squeeze so line 2 never wraps to 3 */
   }
 }
