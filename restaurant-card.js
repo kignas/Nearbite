@@ -180,45 +180,6 @@
         return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
       }).filter(function (n) { return n != null; });
       return prices.length ? Math.min.apply(null, prices) : null;
-    },
-
-    /* Optional featured item for the image label.
-       Uses only an explicitly supplied API field. It never invents a
-       "featured" item from menu ordering or price. */
-    featuredItem: function (res) {
-      var raw = res.featuredItem || res.featuredMenuItem || res.highlightedItem ||
-        res.featuredDish || res.featured_item;
-
-      var name = '';
-      var price = null;
-      var isVeg = null;
-
-      if (raw && typeof raw === 'object') {
-        name = firstText(raw.name, raw.itemName, raw.title, raw.label);
-        price = firstNumber(raw.price, raw.sellingPrice, raw.finalPrice, raw.amount);
-        if (typeof raw.isVeg === 'boolean') isVeg = raw.isVeg;
-        else if (typeof raw.veg === 'boolean') isVeg = raw.veg;
-        else if (typeof raw.isVegetarian === 'boolean') isVeg = raw.isVegetarian;
-      } else if (typeof raw === 'string') {
-        name = raw.trim();
-      }
-
-      if (!name) {
-        name = firstText(
-          res.featuredItemName,
-          res.featuredDishName,
-          res.highlightedItemName
-        );
-        price = firstNumber(
-          res.featuredItemPrice,
-          res.featuredDishPrice,
-          res.highlightedItemPrice
-        );
-        if (typeof res.featuredItemIsVeg === 'boolean') isVeg = res.featuredItemIsVeg;
-      }
-
-      if (!name) return null;
-      return { name: name, price: price, isVeg: isVeg };
     }
   };
 
@@ -462,29 +423,43 @@
        so it is no longer duplicated in the subtitle. distanceText is still
        computed above and consumed by the rail — no data source changed. */
 
-    /* Optional image item label. Only render it when the API explicitly
-       provides a featured item; never manufacture one from the menu. */
-    var featuredItem = read.featuredItem(res);
-    var foodLabelHtml = '';
+    /* Floating badge — priority chain, first match wins, at most one.
+       Every branch is backed by a field the card already reads; nothing
+       here is derived from data that does not exist.
+         Near & Fast  read.nearFastFlag(res) === true
+         Top Rated    read.rating(res) >= 4.5
+         Pure Veg     read.pureVeg(res) === true
+         Offer        read.offer(res) non-empty
+       "New" is absent on purpose: no createdAt / isNew field is read
+       anywhere in the frontend, so it cannot be supported honestly. */
+    var TOP_RATED_MIN = 4.5;
+    var badge = null;
 
-    if (featuredItem) {
-      var foodIcon = '';
-      if (featuredItem.isVeg === true) {
-        foodIcon = '<i class="es-item-icon es-item-icon-veg" aria-hidden="true"></i>';
-      } else if (featuredItem.isVeg === false) {
-        foodIcon = '<i class="es-item-icon es-item-icon-nonveg" aria-hidden="true"></i>';
-      }
-
-      var foodPrice = featuredItem.price != null
-        ? ' · ₹' + String(featuredItem.price)
-        : '';
-
-      foodLabelHtml =
-        '<div class="es-food-label">' +
-          foodIcon +
-          '<span class="es-food-label-text">' + esc(featuredItem.name + foodPrice) + '</span>' +
-        '</div>';
+    if (nearFast) {
+      badge = { key: 'near', cls: 'es-badge-near', icon: 'fa-bolt', text: 'Near & Fast' };
+    } else if (rating != null && rating >= TOP_RATED_MIN) {
+      badge = { key: 'top', cls: 'es-badge-top', icon: 'fa-star', text: 'Top Rated' };
+    } else if (read.pureVeg(res) === true) {
+      badge = { key: 'veg', cls: 'es-badge-veg', icon: 'fa-leaf', text: 'Pure Veg' };
+    } else if (offer) {
+      badge = { key: 'offer', cls: 'es-badge-offer', icon: 'fa-tag', text: offer };
     }
+
+    var badgeHtml = badge
+      ? '<span class="es-media-badge ' + badge.cls + '">' +
+          '<i class="fa-solid ' + badge.icon + '" aria-hidden="true"></i>' +
+          '<span class="es-media-badge-label">' + esc(badge.text) + '</span>' +
+        '</span>'
+      : '';
+
+    /* A signal promoted to the image badge is not repeated below it —
+       the same fact twice on one card is noise, not hierarchy. Anything
+       the badge did NOT take still renders here exactly as before. */
+    var badgeKey = badge ? badge.key : '';
+    var tagsHtml = '';
+    if (nearFast && badgeKey !== 'near') tagsHtml += '<span class="es-tag es-tag-near"><i class="fa-solid fa-bolt"></i> Near & Fast</span>';
+    if (offer && badgeKey !== 'offer') tagsHtml += '<span class="es-tag es-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
+    if (coupon) tagsHtml += '<span class="es-tag es-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
 
     /* Rating is promoted next to the restaurant name (premium hierarchy).
        The element, its .es-stat-rating class and the star markup are
@@ -556,7 +531,7 @@
 
       '<div class="es-card-media">' +
         media +
-        foodLabelHtml +
+        badgeHtml +
         (isUnavailable
           ? '<div class="es-availability-overlay"><div class="es-availability-pill">' +
             '<i class="' + pillIcon + '" aria-hidden="true"></i> ' + esc(label) + '</div></div>'
@@ -569,6 +544,7 @@
           ratingHtml +
         '</div>' +
         (subtitleHtml ? '<div class="es-subtitle">' + subtitleHtml + '</div>' : '') +
+        (tagsHtml ? '<div class="es-tags-row">' + tagsHtml + '</div>' : '') +
         '<div class="es-bottom-row">' +
           '<div class="es-stats">' + statsHtml + '</div>' +
           '<div class="es-btn-order">' + (isUnavailable ? 'View Menu' : 'Order') + '</div>' +
