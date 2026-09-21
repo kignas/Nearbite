@@ -575,6 +575,7 @@
       homeCustEls.body.querySelectorAll('.u99-cust-group[data-required="1"] input[type="radio"]').forEach(function(input,i){if(!input.closest('.u99-cust-group').querySelector('input:checked'))input.checked=true;});
     }
     homeRefreshCustomize(); homeCustEls.bd.classList.add('show'); requestAnimationFrame(function(){homeCustEls.sh.classList.add('show');});
+    document.body.classList.add('u99-cust-open');   /* lock page + hide cart bar/help (see CSS) */
     return true;
   }
   function homeRefreshCustomize(){
@@ -587,7 +588,7 @@
   function homeConfirmCustomize(){
     if(!homeCustCurrent||homeCustEls.add.disabled)return;
     var base=homeCustCurrent.base,cart=homeGetCart();
-    if(homeCustCurrent.qty===0){if(homeCustCurrent.editKey&&cart[homeCustCurrent.editKey])delete cart[homeCustCurrent.editKey];homeSaveCart(cart);homeCloseCustomize();if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();return;}
+    if(homeCustCurrent.qty===0){if(homeCustCurrent.editKey&&cart[homeCustCurrent.editKey])delete cart[homeCustCurrent.editKey];homeSaveCart(cart);document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,removed:true}}));homeCloseCustomize();if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();return;}
     var flat=[],labels=[];
     homeCustEls.body.querySelectorAll('.u99-cust-group').forEach(function(group){var title=group.querySelector('.u99-cust-group-title').textContent.trim();group.querySelectorAll('input:checked').forEach(function(input){var row=input.closest('.u99-cust-option'),label=row.querySelector('.u99-cust-label').textContent.trim(),veg=row.querySelector('.u99-cust-diet');flat.push({title:title,label:label,extraPrice:Number(input.dataset.extra)||0,isVeg:veg.classList.contains('veg')});labels.push(label);});});
     var composite=labels.length?base.name+' ('+labels.join(', ')+')':base.name,unit=Number(homeCustCurrent.unit)||Number(base.price),existing=cart[composite];
@@ -596,7 +597,7 @@
     homeSaveCart(cart); document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,item:base}})); if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
     var host=document.querySelector('[data-home99-restaurant="'+CSS.escape(base.resId)+'"]'); if(host){var rr=window.__home99Data&&window.__home99Data[base.resId];if(rr)homeSyncCard(host,rr);} homeCloseCustomize();
   }
-  function homeCloseCustomize(){if(!homeCustEls)return;homeCustEls.sh.classList.remove('show');homeCustEls.bd.classList.remove('show');homeCustCurrent=null;if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();}
+  function homeCloseCustomize(){document.body.classList.remove('u99-cust-open');if(!homeCustEls)return;homeCustEls.sh.classList.remove('show');homeCustEls.bd.classList.remove('show');homeCustCurrent=null;if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();}
 
   function homeSortedMenu(r){return Array.isArray(r.menu)?r.menu.filter(function(i){return i&&Number(i.price)>0;}).slice().sort(function(a,b){return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||''));}):[];}
 
@@ -642,8 +643,25 @@
     return card;
   }
   function homeSyncCard(host,r){homeSortedMenu(r).slice(0,6).forEach(function(item){var el=host.querySelector('.u99-item[data-item-id="'+CSS.escape(homeItemId(item))+'"]');if(el){var a=el.querySelector('.u99-item-action');if(a)a.innerHTML=homeAddControl(item,r);}});}
+  /* Re-derive EVERY visible card's +/− controls from the real cart
+     (localStorage nearbite_cart, via homeAddControl → homeQty). This is the
+     single homepage response to any cart change, wherever it originates. */
+  function homeResyncAllCards(){
+    if(!window.__home99Data)return;
+    document.querySelectorAll('.u99-card-host[data-home99-restaurant]').forEach(function(host){
+      var id=host.getAttribute('data-home99-restaurant'), r=id&&window.__home99Data[id];
+      if(r)homeSyncCard(host,r);
+    });
+  }
   function bindHome99Interactions(){
     if(window.__home99Interactions)return;window.__home99Interactions=true;
+    /* Cart synchronization: any add/remove/qty-change/clear from anywhere —
+       homepage cards, the cart bar, the cart page — dispatches the existing
+       eatswada:cart-updated event; a bfcache "back" fires pageshow; another
+       tab fires storage. All three re-sync every card from the one cart. */
+    document.addEventListener('eatswada:cart-updated',homeResyncAllCards);
+    window.addEventListener('pageshow',homeResyncAllCards);
+    window.addEventListener('storage',function(e){if(!e||e.key===HOME_CART_KEY||e.key===null)homeResyncAllCards();});
     document.addEventListener('keydown',function(e){var h=e.target.closest&&e.target.closest('.u99-restaurant-head');if(h&&(e.key==='Enter'||e.key===' ')){e.preventDefault();var host=h.closest('.u99-card-host'),id=host&&host.getAttribute('data-home99-restaurant');if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);}});
     document.addEventListener('click',function(e){
       var el=e.target.closest&&e.target.closest('[data-home99-action]');if(!el)return;var host=el.closest('.u99-card-host');if(!host)return;var id=host.getAttribute('data-home99-restaurant');

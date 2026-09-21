@@ -138,6 +138,9 @@
 
     // Save and Trigger Floating Cart Bar
     localStorage.setItem('nearbite_cart', JSON.stringify(cartMemory));
+    // Notify any page that derives UI from the cart (e.g. homepage product
+    // cards) via the existing shared event — no separate cart state.
+    try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'updateCart', itemName: itemName } })); } catch (e) {}
     if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
   };
 
@@ -842,6 +845,8 @@
       e.stopPropagation();
       localStorage.removeItem('nearbite_cart');
       localStorage.removeItem('nearbite_checkout_key');
+      // Same shared event so homepage cards immediately return to "+".
+      try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'clearCart', cleared: true } })); } catch (e) {}
       isDismissed = false;
       const r = document.getElementById('white-cart-root');
       if (r) { r.classList.remove('wc-enter', 'wc-exiting'); r.style.display = 'none'; }

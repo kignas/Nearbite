@@ -1652,3 +1652,22 @@
 @supports not selector(:has(*)){
   .u99-card-host{ margin-inline:clamp(16px, 4vw, 22px); }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   CUSTOMIZATION SHEET — layering + scroll-lock fix (functional).
+   ------------------------------------------------------------------
+   The sheet was z-index 10000/10001 — BELOW the bottom nav (99999), the
+   floating cart bar (#white-cart-root, 100000), the help button (100000)
+   and the cart drawer (100001/100002), so they punched through it.
+   Raise it above the entire floating stack, and while it is open lock the
+   page and HIDE the cart bar + help button (prefer hiding over stacking).
+   The bottom nav (99999) simply sits under the raised dark backdrop.
+   CSS only; paired with the .u99-cust-open class toggled in restaurant-card.js.
+   ═══════════════════════════════════════════════════════════════════ */
+.u99-cust-backdrop{ z-index:100050; }   /* dark backdrop — above nav/cart bar */
+.u99-cust-sheet{ z-index:100051; }       /* sheet — highest of all */
+
+body.u99-cust-open{ overflow:hidden; }   /* page cannot scroll behind sheet */
+body.u99-cust-open #white-cart-root,
+body.u99-cust-open #nearbite-help-center{ display:none !important; }
