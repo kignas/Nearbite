@@ -34,6 +34,10 @@
   gap:8px 12px;
   padding:4px 18px 10px;
   overflow-x:auto;
+  overflow-y:hidden;            /* FIX 2: horizontal-only scroll container.
+                                   Without this, overflow-y computes to `auto`
+                                   and the strip traps vertical drags instead of
+                                   letting them scroll the page. */
   -webkit-overflow-scrolling:touch;
   scroll-behavior:smooth;
   scroll-snap-type:x proximity;
@@ -92,17 +96,26 @@
   }
 }
 
-/* Existing mobile overrides — preserved exactly */
-/* Compact mobile rhythm — scoped only to this component */
+/* ══════════════════════════════════════════════════════════════
+   MOBILE RHYTHM — single source of truth for this component.
+   Consolidates the three previous mobile override blocks into one,
+   preserving every winning value (sizing, images, typography and
+   interaction are unchanged).
+
+   The category strip owns NO bottom gap. The small, deliberate
+   space between the last category row and the filter pills is
+   owned by the filter bar's TOP padding (see filter-bar.css), so
+   there is exactly one place responsible for that gap.
+   ══════════════════════════════════════════════════════════════ */
 @media (max-width:599px){
   #mind-section{
-    padding-top:20px !important;
-    padding-bottom:0;
+    padding-top:8px !important;
+    padding-bottom:0 !important;
     background:#fff;
   }
 
   #mind-section .sec-head{
-    margin-bottom:10px;
+    margin-bottom:7px !important;
   }
 
   #mind-section .sec-title{
@@ -112,9 +125,9 @@
   }
 
   #mind-section .cat-scroll{
-    gap:8px 12px;
-    padding-top:2px;
-    padding-bottom:8px;
+    gap:4px 12px !important;
+    padding-top:0 !important;
+    padding-bottom:0 !important;
   }
 
   #mind-section .cat-ring{
@@ -126,40 +139,5 @@
     font-size:14px;
     font-weight:700;
     line-height:1.2;
-  }
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   FINAL HOME LAYOUT RHYTHM — MOBILE
-   Only controls vertical spacing around the category component.
-   No category sizing, images, typography, or interaction changes.
-   ══════════════════════════════════════════════════════════════ */
-@media (max-width:599px){
-  #mind-section{
-    padding-top:8px !important;
-    padding-bottom:0 !important;
-  }
-
-  #mind-section .sec-head{
-    margin-bottom:7px !important;
-  }
-
-  #mind-section .cat-scroll{
-    gap:4px 12px !important;
-    padding-top:0 !important;
-    padding-bottom:4px !important;
-  }
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   FINAL MICRO SPACING — CATEGORIES → FILTERS
-   Removes only the remaining gap between the last category row
-   and the separate filter bar.
-   ══════════════════════════════════════════════════════════════ */
-@media (max-width:599px){
-  #mind-section .cat-scroll{
-    padding-bottom:0 !important;
   }
 }

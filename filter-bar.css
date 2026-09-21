@@ -8,7 +8,8 @@
   align-items:center;
   gap:8px;
   overflow-x:auto;
-  padding:4px 18px 14px;
+  padding:0 18px 6px;          /* desktop unchanged: top 0, bottom 6.
+                                  Mobile top gap is set in the media query below. */
   margin:0;
   scrollbar-width:none;
   background:transparent;
@@ -73,49 +74,29 @@
   font-weight:800;
 }
 
-/* Keep the restaurant section clearly separated from the filters.
-   This is intentionally scoped to the two adjacent homepage components. */
-#filter-bar + #restaurants-section{
-  padding-top:10px;
-}
-
-@media (max-width:599px){
-  #filter-bar{
-    gap:8px;
-    padding:2px 18px 12px;
-    margin:0;
-  }
-
-  #filter-bar .filter-pill{
-    padding:9px 14px;
-    border-radius:14px;
-    font-size:14px;
-  }
-
-  #filter-bar + #restaurants-section{
-    padding-top:12px;
-  }
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   FINAL HOME LAYOUT RHYTHM — FILTERS / RESTAURANTS
-   Keeps filters visually attached to categories and separates
-   them cleanly from the restaurant heading.
-   ══════════════════════════════════════════════════════════════ */
-#filter-bar{
-  padding-top:0;
-  padding-bottom:6px;
-}
-
+/* Clean separation between the filters and the restaurant section.
+   filter-bar bottom (6) + this top (6) = ~12px to the heading. */
 #filter-bar + #restaurants-section{
   padding-top:6px;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   MOBILE RHYTHM — single source of truth for the filter spacing.
+
+   FIX 1: ~14px of deliberate breathing space between the last
+   category row and the filter pills, owned here as the filter
+   bar's TOP padding. One rule — no stacked/contradictory overrides.
+
+   Rhythm on mobile:
+     category label
+       ↓ 14px  (this top padding)
+     filter pills
+       ↓ 12px  (bottom 6 + #restaurants-section top 6)
+     Restaurants near you
+   ══════════════════════════════════════════════════════════════ */
 @media (max-width:599px){
   #filter-bar{
-    padding-top:0 !important;
-    padding-bottom:6px !important;
+    padding:14px 18px 6px !important;
   }
 
   #filter-bar + #restaurants-section{
