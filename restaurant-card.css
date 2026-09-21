@@ -1517,3 +1517,72 @@
   .u99-item-name{font-size:14px;margin-top:6px}
   .u99-price-row strong{font-size:16px}
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   REFERENCE-MATCH REFINEMENT — item tiles restyled to match the
+   benchmark card: tall full-bleed image, filled "+" button, clean price.
+   Appended last so it overrides the earlier item-tile rules by source
+   order. CSS ONLY — every JS hook, class and data-attribute is untouched.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* 1 ── Tall, full-bleed square image (matches the reference).
+   Replaces the short 1.68/1 and mobile 2.40/1 boxes, and swaps the
+   letterboxing 'contain' fit (which left grey side-bars around any
+   off-ratio photo — the broken look in the 2nd card) for 'cover',
+   so the photo fills the whole tile edge-to-edge. */
+.u99-item-image{
+  aspect-ratio:1/1;
+  border-radius:14px;
+}
+.u99-item-image img,
+.u99-image-fallback{
+  border-radius:14px;
+  object-fit:cover;            /* was 'contain' — no more grey side-bars */
+  background:#F1F3F6;
+}
+
+/* Tiles are now a fixed square, so every tile is the same height and
+   the old min-height math (built for the short wide box) is dropped. */
+.u99-carousel{ min-height:0; }
+.u99-carousel.u99-carousel-empty{ min-height:0; }
+
+/* 2 ── Filled "+" button on the image, bottom-right, with a white ring
+   to lift it off the photo (matches the reference). Moved up from the
+   old hanging position (bottom:-8px) to sit inside the image corner. */
+.u99-item-action{
+  right:8px;
+  bottom:8px;
+}
+.u99-add{
+  width:40px;
+  height:40px;
+  border:0;
+  background:#E5177F;
+  color:#fff;
+  font-size:24px;
+  box-shadow:0 3px 9px rgba(224,27,131,.38), 0 0 0 2px #fff;
+}
+/* Qty stepper keeps the same white ring so add/stepper read as one control. */
+.u99-stepper{
+  box-shadow:0 3px 9px rgba(16,24,40,.18), 0 0 0 2px #fff;
+}
+
+/* 3 ── Clean single price: hide the per-item strikethrough + % OFF pill.
+   Markup/JS untouched (the data still flows) — only the visuals are
+   hidden, matching the reference, where the discount lives at card
+   level ("10% LOWER PRICES"). */
+.u99-old-price,
+.u99-off{ display:none !important; }
+
+/* Narrow phones — keep the square tile and larger button in proportion. */
+@media(max-width:430px){
+  .u99-item-image{ aspect-ratio:1/1; border-radius:13px; }
+  .u99-item-image img,
+  .u99-image-fallback{ border-radius:13px; }
+  .u99-add{ width:38px; height:38px; font-size:23px; }
+  .u99-item-action{ right:7px; bottom:7px; }
+}
+@media(max-width:370px){
+  .u99-add{ width:36px; height:36px; font-size:22px; }
+}
