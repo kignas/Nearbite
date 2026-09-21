@@ -19,18 +19,54 @@
 .sk.d4 { animation-delay: .32s; }
 
 /* ── Homepage hero / banner skeleton ─────────────────────────── */
-/* Fills the reserved hero dimensions so the banner area shows a shimmer
-   placeholder instead of the empty pink header shell while the banner
-   feed loads. home-banners.js overwrites the whole track once the real
-   slides (or its pink fallback slide) are ready, so this is only ever
-   visible during the banner fetch. Mirrors .header-slide's box so the
-   swap to the real banner causes no size change. */
-#header-carousel-track .banner-sk{
-  flex:0 0 100%;
-  width:100%;
-  height:100%;
-  border-radius:0;
+/* The skeleton is a real .header-slide shell (data-theme="pink"), so it
+   inherits the EXACT hero box, the pink background and the copy/art
+   positions from the page CSS — the swap to the real banner causes no
+   shift. Only the inner .sk blocks (badge, two title lines, subtitle,
+   CTA on the left; artwork on the right) are placeholders, so the pink
+   hero shell stays visible around them. NOT one full-size grey block.
+   home-banners.js overwrites the whole track once the feed is ready. */
+.banner-skeleton{ pointer-events:none; }
+
+.banner-skeleton .bsk-badge{ width:64px;  height:15px; border-radius:999px; margin-bottom:9px; }
+.banner-skeleton .bsk-title{ height:22px; border-radius:7px; }
+.banner-skeleton .bsk-title-1{ width:66%; max-width:150px; }
+.banner-skeleton .bsk-title-2{ width:90%; max-width:196px; margin-top:6px; }
+.banner-skeleton .bsk-sub{  width:70%; max-width:150px; height:13px; border-radius:6px; margin-top:13px; }
+.banner-skeleton .bsk-sub-2{ width:48%; max-width:104px; height:13px; border-radius:6px; margin-top:6px; }
+.banner-skeleton .bsk-cta{  width:132px; height:42px; border-radius:999px; margin-top:14px; }
+
+/* Right-side artwork placeholder. Sits inside the slide (does not bleed
+   like the real art), centred vertically, so it never reads as a giant
+   rectangle. */
+.banner-skeleton .bsk-art{
+  position:absolute;
+  top:50%; right:5%;
+  width:42%; height:74%;
+  transform:translateY(-50%);
+  border-radius:22px;
 }
+@media (max-width:380px){
+  .banner-skeleton .bsk-cta{ width:120px; height:40px; }
+}
+
+/* ── Homepage filter-bar skeleton ────────────────────────────────
+   Seeded inside the real #filter-bar and built from the real
+   .filter-pill class, so the reserved band and pill heights match the
+   loaded filter bar exactly. renderFilterBar() replaces these with the
+   real pills the moment restaurant data is ready. Painted as solid
+   shimmer blocks (not outlined pills) and made non-interactive. */
+#filter-bar .filter-pill.is-skeleton{
+  pointer-events:none;
+  color:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  background:linear-gradient(90deg, #E7E9ED 25%, #F3F4F7 50%, #E7E9ED 75%) !important;
+  background-size:1200px 100% !important;
+  animation:shimmer 1.5s infinite linear;
+}
+#filter-bar .filter-pill.is-skeleton.d1{ animation-delay:.08s; }
+#filter-bar .filter-pill.is-skeleton.d2{ animation-delay:.16s; }
 
 /* ── Homepage category skeleton ─────────────────────────────── */
 

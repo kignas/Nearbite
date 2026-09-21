@@ -647,7 +647,19 @@
   <div class="banner-wrap es-header-item" id="hero-banner-region" aria-live="polite">
     <div class="header-carousel" id="banner-carousel" aria-roledescription="carousel" aria-label="Promotions">
       <div class="header-carousel-track" id="header-carousel-track">
-        <div class="sk banner-sk" aria-hidden="true"></div>
+        <article class="header-slide banner-skeleton" data-theme="pink" aria-hidden="true">
+          <div class="header-slide__panel">
+            <div class="header-slide__copy">
+              <span class="sk bsk-badge"></span>
+              <span class="sk bsk-title bsk-title-1"></span>
+              <span class="sk bsk-title bsk-title-2"></span>
+              <span class="sk bsk-sub"></span>
+              <span class="sk bsk-sub-2"></span>
+              <span class="sk bsk-cta"></span>
+            </div>
+            <span class="sk bsk-art"></span>
+          </div>
+        </article>
       </div>
     </div>
     <div class="banner-controls" id="banner-controls" role="tablist" aria-label="Choose promotion" hidden></div>
@@ -672,7 +684,11 @@
     </div>
   </section>
 
-  <div class="filter-bar" id="filter-bar" role="group" aria-label="Restaurant filters" hidden></div>
+  <div class="filter-bar" id="filter-bar" role="group" aria-label="Restaurant filters">
+    <button type="button" class="filter-pill filter-pill-sheet is-skeleton" style="width:104px" tabindex="-1" aria-hidden="true" disabled></button>
+    <button type="button" class="filter-pill is-skeleton d1" style="width:124px" tabindex="-1" aria-hidden="true" disabled></button>
+    <button type="button" class="filter-pill is-skeleton d2" style="width:112px" tabindex="-1" aria-hidden="true" disabled></button>
+  </div>
 
   <section class="section" id="restaurants-section">
     <div class="sec-head">
