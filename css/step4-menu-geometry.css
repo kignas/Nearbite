@@ -1,60 +1,124 @@
 /*
- STEP 4 — FINAL BENCHMARK MENU / ITEM GEOMETRY
- Single source of truth for menu item / food-image / ADD-button geometry.
- Values below come from the design spec sheet. Functionality is untouched.
-   Food image : 112 x 78, radius 10, object-fit cover
-   ADD button : 92 x 38, radius 8, 1.5px #E40073 border, #fff bg, #E40073 text, 16px/700
-   Overlap    : button sits 27px over the image's lower edge
-   Customisable: 12px #8D95A0, 6px above
+ STEP 4 — FINAL BENCHMARK MENU / ITEM GEOMETRY  (single source of truth)
+ Consolidated here so the messy legacy item rules are overridden in ONE place
+ (this file is loaded last). Values are measured from the reference screenshot,
+ scaled to a ~390px mobile viewport. Functionality / API / cart are untouched.
+
+   Food image  : 112 x 116, radius 14, object-fit cover (portrait, like reference)
+   ADD button  : 90 x 34, radius 10, 1.5px #E40073 border, #fff bg, #E40073 text, 14px/700
+   Overlap     : button sits ~28px over the image's lower edge, centred on the image
+   Rating      : green star + green value, light-green pill, one shared restaurant rating
+   Customisable: 11.5px #8D95A0, centred, 6px under the button
+   Row rhythm  : left content flexes, right media column fixed; thin divider between items
 */
 
 /* --- Delivery banner copy alignment (unchanged, not part of this task) --- */
-.delivery-banner-line{
-  left:8px !important;
-  width:54px !important;
-}
-.delivery-copy{
-  left:82px !important;
-  right:112px !important;
-}
+.delivery-banner-line{ left:8px !important; width:54px !important; }
+.delivery-copy{ left:82px !important; right:112px !important; }
 
-/* --- Menu section / category heading --- */
-.menu-section{
-  padding-left:16px !important;
-  padding-right:16px !important;
-  margin-top:12px !important;
-}
-.menu-cat-group{margin-bottom:0 !important}
+/* --- Menu section / category heading (compact) --- */
+.menu-section{ padding-left:16px !important; padding-right:16px !important; margin-top:10px !important; }
+.menu-cat-group{ margin-bottom:0 !important; }
 .menu-cat-header{
   padding:12px 0 8px !important;
-  min-height:46px !important;
+  min-height:44px !important; height:auto !important;
   box-sizing:border-box !important;
 }
+.menu-cat-title{ font-size:18px !important; line-height:1.15 !important; letter-spacing:-.02em !important; }
+.menu-cat-count{ font-size:13px !important; font-weight:600 !important; }
 
-/* --- Benchmark item row (tightened toward the reference rhythm) --- */
+/* =====================================================================
+   ITEM ROW
+   ===================================================================== */
 .nb-menu-item{
   display:flex !important;
   align-items:flex-start !important;
   gap:12px !important;
-  padding:12px 0 !important;
-  min-height:118px !important;
+  padding:13px 0 !important;
+  min-height:0 !important;
+  height:auto !important;               /* release the old fixed 142/144px heights */
   box-sizing:border-box !important;
+  border:0 !important;
+  border-bottom:1px solid #EDEEF1 !important;   /* thin divider between items */
+  background:#fff !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
 }
+
+/* --- LEFT: text content takes the remaining width --- */
 .nb-item-main{
   min-width:0 !important;
   flex:1 1 auto !important;
   padding-top:0 !important;
 }
-.nb-item-tag-row{
-  margin-bottom:5px !important;
-  min-height:15px !important;
-  height:auto !important;
-  gap:5px !important;
-}
-.nb-item-title{margin:0 !important}
-.nb-item-price-row{margin-top:6px !important;gap:7px !important}
 
-/* --- Food media column = image width, so the CTA centres on the image --- */
+/* offer / badge row — only rendered when an offer exists */
+.nb-item-tag-row{
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:wrap !important;
+  gap:6px !important;
+  margin:0 0 4px !important;
+  min-height:0 !important; height:auto !important;
+}
+
+/* offer (coupon) — compact green line with gift icon, like the reference */
+.nb-item-coupon{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  color:#1B9E5A !important;
+  font-weight:700 !important;
+}
+.nb-item-coupon i{ font-size:11px !important; color:#1B9E5A !important; }
+/* badge (Bestseller / Must Try) — small amber pill */
+.nb-item-badge{
+  display:inline-flex !important;
+  align-items:center !important;
+  padding:3px 7px !important;
+  border-radius:5px !important;
+  background:#FFF3E0 !important;
+  color:#A96A15 !important;
+  font-weight:700 !important;
+}
+
+/* veg mark now sits inline with the item name (like the reference) */
+.nb-item-title-row{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:7px !important;
+}
+.nb-item-title-row .nb-veg-mark{
+  flex:0 0 auto !important;
+  margin-top:2px !important;
+}
+.nb-item-title{ margin:0 !important; }
+
+.nb-item-price-row{ margin-top:5px !important; gap:7px !important; align-items:center !important; }
+
+/* item rating — one shared restaurant rating, compact green pill */
+.nb-item-rating{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:3px !important;
+  margin-top:6px !important;
+  padding:2px 7px !important;
+  border-radius:6px !important;
+  background:#E7F6EE !important;
+  line-height:1 !important;
+}
+.nb-item-rating-star{ color:#1B9E5A !important; font-size:12px !important; line-height:1 !important; }
+.nb-item-rating-value{ color:#0E7C4C !important; font-weight:700 !important; font-variant-numeric:tabular-nums !important; }
+.nb-item-rating-count{ color:#2A8765 !important; font-weight:600 !important; }
+
+.nb-item-desc{ margin-top:6px !important; }
+
+/* =====================================================================
+   RIGHT: media column — fixed width so the CTA always centres on the image
+   ===================================================================== */
 .nb-item-media{
   width:112px !important;
   min-width:112px !important;
@@ -62,16 +126,17 @@
   display:flex !important;
   flex-direction:column !important;
   align-items:center !important;
-  margin-top:1px !important;
+  margin-top:2px !important;
 }
 .nb-item-image-wrap{
   width:112px !important;
-  height:78px !important;
+  height:116px !important;
   aspect-ratio:auto !important;
-  border-radius:10px !important;
+  border-radius:14px !important;
   overflow:hidden !important;
   box-sizing:border-box !important;
-  background:#F3F4F5 !important;
+  background:#F3F4F6 !important;
+  box-shadow:none !important;
 }
 .nb-item-image,
 .nb-item-image-wrap img{
@@ -81,56 +146,61 @@
   display:block !important;
 }
 
-/* --- CTA: overlaps the lower 27px of the food image, centred --- */
+/* CTA overlaps the lower ~28px of the food image, centred */
 .nb-item-cta{
   width:100% !important;
-  margin-top:-27px !important;
+  margin-top:-28px !important;
   display:flex !important;
   justify-content:center !important;
   position:relative !important;
   z-index:4 !important;
 }
 .nb-add-btn,.nb-qty{
-  width:92px !important;
-  min-width:92px !important;
-  max-width:92px !important;
-  height:38px !important;
-  min-height:38px !important;
-  max-height:38px !important;
+  width:90px !important;
+  min-width:90px !important;
+  max-width:90px !important;
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
   box-sizing:border-box !important;
   padding:0 10px !important;
-  border-radius:8px !important;
+  border-radius:10px !important;
   background:#fff !important;
   border:1.5px solid #E40073 !important;
-  box-shadow:0 2px 7px rgba(20,24,32,.10) !important;
-  font-size:16px !important;
+  box-shadow:0 2px 8px rgba(20,24,32,.12) !important;
+  font-size:14px !important;
   font-weight:700 !important;
   line-height:1 !important;
-  letter-spacing:0 !important;
+  letter-spacing:.01em !important;
 }
-.nb-add-btn{color:#E40073 !important}
-.nb-qty{border-color:#159A62 !important}
-.nb-qty-btn{color:#159A62 !important}
+.nb-add-btn{ color:#E40073 !important; }
+.nb-qty{ border-color:#159A62 !important; }
+.nb-qty-btn{ color:#159A62 !important; }
 
-/* --- Customisable label under the button --- */
+/* Customisable label under the button */
 .nb-item-customisable{
   margin-top:6px !important;
-  font-size:12px !important;
+  font-size:11.5px !important;
   line-height:1.2 !important;
   color:#8D95A0 !important;
   text-align:center !important;
 }
+.nb-item-customisable-spacer{ visibility:hidden !important; }
 
-/* --- Responsive: shrink the image only, keep the 92px button + 27px overlap --- */
+/* =====================================================================
+   RESPONSIVE — shrink the image column only; keep the button + overlap fixed
+   so text never pushes the image/button off-screen at any phone width.
+   ===================================================================== */
 @media(max-width:380px){
-  .menu-section{padding-left:14px !important;padding-right:14px !important}
-  .nb-menu-item{gap:10px !important;padding:11px 0 !important}
-  .nb-item-media{width:106px !important;min-width:106px !important;flex-basis:106px !important}
-  .nb-item-image-wrap{width:106px !important;height:75px !important}
-  .delivery-copy{left:76px !important;right:104px !important}
+  .menu-section{ padding-left:14px !important; padding-right:14px !important; }
+  .nb-menu-item{ gap:10px !important; padding:12px 0 !important; }
+  .nb-item-media{ width:106px !important; min-width:106px !important; flex-basis:106px !important; }
+  .nb-item-image-wrap{ width:106px !important; height:110px !important; }
+  .delivery-copy{ left:76px !important; right:104px !important; }
 }
 @media(max-width:340px){
-  .nb-item-media{width:100px !important;min-width:100px !important;flex-basis:100px !important}
-  .nb-item-image-wrap{width:100px !important;height:70px !important}
-  .delivery-copy{left:70px !important;right:96px !important}
+  .nb-item-media{ width:100px !important; min-width:100px !important; flex-basis:100px !important; }
+  .nb-item-image-wrap{ width:100px !important; height:104px !important; }
+  .nb-add-btn,.nb-qty{ width:86px !important; min-width:86px !important; max-width:86px !important; }
+  .delivery-copy{ left:70px !important; right:96px !important; }
 }
