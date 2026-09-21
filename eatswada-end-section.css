@@ -1,16 +1,20 @@
 /* ══════════════════════════════════════════════════════════════
    EATSWADA — END OF RESTAURANT FEED
-   Benchmark-matched closing section.
-   This stylesheet owns ONLY #home-feed-end / .ew-feed-end.
-   Left-aligned, editorial, heavy headline — mobile-first,
-   scales up to desktop without becoming absurd.
+   Benchmark-matched closing section. Owns ONLY #home-feed-end.
+
+   The section's HTML bakes in three things the target doesn't want:
+     • a stray "4.0+ rated on Eatswada" text node inside the headline
+     • a glossy 💗 emoji as the headline heart (emoji ignore `color`)
+     • a 💗 (not 🌻) after "Made in Maynaguri"
+   CSS can't edit HTML text, so the headline's real text is hidden
+   (font-size:0) and repainted with pseudo-content, and the two emoji
+   are glyph-swapped the same way. No HTML/JS is touched.
    ══════════════════════════════════════════════════════════════ */
 
 .ew-feed-end{
-  /* palette */
   --ew-ink:        #9AA0AD;   /* small supporting lines */
   --ew-ink-strong: #A1A7B3;   /* dominant headline       */
-  --ew-pink:       #FF9EC7;   /* heart                   */
+  --ew-pink:       #FF9EC7;   /* flat heart              */
 
   width:100%;
   box-sizing:border-box;
@@ -19,18 +23,17 @@
 
   display:flex;
   flex-direction:column;
-  align-items:flex-start;      /* stays LEFT on every width */
+  align-items:flex-start;      /* LEFT on every width */
   text-align:left;
 
-  /* section spacing + left margin scale like the benchmark (~5%) */
-  padding-block:clamp(40px, 8vw, 72px) clamp(72px, 12vw, 104px);
-  padding-inline:clamp(16px, 5vw, 96px);
+  padding-block:clamp(40px, 8vw, 72px) clamp(64px, 11vw, 96px);
+  padding-inline:clamp(16px, 5vw, 96px);   /* left margin scales ~5% like the target */
 
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
 
-/* ── 1 · intro line — "That's all we've got!" ─────────────────── */
+/* ── 1 · intro — "That's all we've got!" (kept as real text) ──── */
 .ew-feed-end__title{
   margin:0 0 clamp(20px, 5.5vw, 30px);
   color:var(--ew-ink);
@@ -40,58 +43,63 @@
   letter-spacing:-0.02em;
 }
 
-/* ── 2 · dominant headline ────────────────────────────────────── */
-/* "A curated list of"  /  "top-rated restaurants ♥" (two lines)   */
+/* ── 2 · dominant headline ─────────────────────────────────────
+   Real text is hidden; the two visible lines are repainted below,
+   which also drops the baked-in "4.0+ rated on Eatswada".        */
 .ew-feed-end__sub{
+  --h:clamp(28px, 8.9vw, 76px);      /* single source for headline scale */
   margin:0;
-  max-width:12em;              /* forces the 2-line wrap; scales w/ font-size */
-  color:var(--ew-ink-strong);
-  font-size:clamp(27px, 8.8vw, 72px);
-  font-weight:800;             /* Manrope tops out at 800 */
-  line-height:0.98;            /* tight stacked lines */
-  letter-spacing:-0.045em;     /* tight, benchmark-close */
-  text-wrap:balance;           /* keeps "top-rated restaurants" whole */
+  font-size:0;                        /* hides real text + 💗 span + stray line */
+  max-width:calc(var(--h) * 10.2);    /* forces the intentional 2-line wrap */
+  hyphens:none;
+  overflow-wrap:normal;
+  word-break:normal;
 }
 
-/* pink heart — large, sits immediately after the headline */
-.ew-feed-end__heart{
-  display:inline-block;
-  color:var(--ew-pink);
-  font-size:0.96em;            /* nearly cap-height of the headline */
-  line-height:1;
-  margin-left:0.12em;
-  vertical-align:-0.06em;
+/* line 1 + line 2, with a NON-BREAKING hyphen so "top-rated" never splits */
+.ew-feed-end__sub::before{
+  content:"A curated list of top\2011 rated restaurants";
+  font-size:var(--h);
+  font-weight:800;                    /* Manrope tops out at 800 */
+  color:var(--ew-ink-strong);
+  line-height:0.98;
+  letter-spacing:-0.05em;
 }
+
+/* flat pink heart — large, immediately after the headline */
+.ew-feed-end__sub::after{
+  content:"\2665";
+  font-size:calc(var(--h) * 0.92);
+  color:var(--ew-pink);
+  line-height:0.98;
+  margin-left:0.12em;
+  vertical-align:-0.04em;
+}
+
+/* belt-and-suspenders: keep the original 💗 span collapsed */
+.ew-feed-end__sub .ew-feed-end__heart{ font-size:0; }
 
 /* ── 3 · "Made in Maynaguri 🌻" ───────────────────────────────── */
 .ew-feed-end__made{
+  --m:clamp(16px, 4.3vw, 23px);
   margin:clamp(28px, 7vw, 46px) 0 0;
   color:var(--ew-ink);
-  font-size:clamp(16px, 4.3vw, 23px);
+  font-size:var(--m);
   font-weight:500;
   line-height:1.2;
   letter-spacing:-0.01em;
 }
 
-/* sunflower renders as its own emoji colour — no ink override */
-.ew-feed-end__sun{
-  display:inline-block;
+/* swap the trailing 💗 for a real sunflower */
+.ew-feed-end__sun{ font-size:0; }
+.ew-feed-end__sun::after{
+  content:"\1F33B";                   /* 🌻 */
+  font-size:calc(var(--m) * 0.98);
   margin-left:0.34em;
-  font-size:0.95em;
-  line-height:1;
   vertical-align:-0.08em;
 }
 
-/* ── Safety · strip the unwanted "4.0+ rated on Eatswada" line ──── */
-/* Any stray direct child that isn't one of the three intended
-   blocks is removed visually (heart/sun are nested, so untouched). */
-.ew-feed-end > *:not(.ew-feed-end__title):not(.ew-feed-end__sub):not(.ew-feed-end__made){
-  display:none !important;
-}
-
-/* ── Small phones · keep the headline line-2 intact ───────────── */
+/* ── Small phones · guarantee line 2 stays one line ───────────── */
 @media (max-width:360px){
-  .ew-feed-end__sub{
-    letter-spacing:-0.05em;    /* extra squeeze so line 2 never wraps to 3 */
-  }
+  .ew-feed-end__sub::before{ letter-spacing:-0.055em; }
 }
