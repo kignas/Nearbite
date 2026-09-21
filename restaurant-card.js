@@ -113,6 +113,34 @@
       return firstText(raw);
     },
 
+    /* Optional fields — surfaced only when the API actually provides them.
+       Each returns null when absent so the card omits it (never invented). */
+    reviewCount: function (res) {
+      var n = firstNumber(
+        res.reviewCount, res.reviewsCount, res.ratingCount, res.ratingsCount,
+        res.numReviews, res.totalRatings, res.totalReviews
+      );
+      if (n == null && typeof res.reviews === 'number') n = res.reviews;
+      if (n == null || n < 0) return null;
+      return Math.round(n);
+    },
+
+    locality: function (res) {
+      var loc = res.location || {};
+      var addr = res.address && typeof res.address === 'object' ? res.address : {};
+      return firstText(
+        res.locality, res.area, res.subLocality, res.neighbourhood,
+        loc.locality, loc.area, addr.locality, addr.area
+      );
+    },
+
+    costForTwo: function (res) {
+      return firstNumber(
+        res.costForTwo, res.priceForTwo, res.avgCostForTwo,
+        res.approxCostForTwo, res.costForTwoAmount
+      );
+    },
+
     images: function (res) {
       var list = Array.isArray(res.images) && res.images.length
         ? res.images
@@ -262,6 +290,16 @@
     return km.toFixed(1) + ' km';
   }
 
+  /* Compact review counts: 332 -> "332", 4200 -> "4.2K". Display only. */
+  function formatCount(n) {
+    if (n == null) return '';
+    if (n >= 1000) {
+      var k = n / 1000;
+      return (k >= 10 ? Math.round(k) : k.toFixed(1)) + 'K';
+    }
+    return String(n);
+  }
+
   /* ── Cuisine display formatting ─────────────────────────────────
    * Presentation only. Never mutates the source data and is never used
    * for filtering or sorting — read.cuisine() still returns the raw
@@ -298,7 +336,7 @@
       out.push(token.split(' ').map(capitalizeToken).join(' '));
     }
 
-    return out.join(' \u2022 ');
+    return out.join(', ');
   }
 
   /* ── Availability ───────────────────────────────────────────── */
@@ -387,6 +425,9 @@
     var offer = read.offer(res);
     var coupon = read.coupon(res);
     var nearFast = read.nearFastFlag(res) === true;
+    var reviewCount = read.reviewCount(res);
+    var locality = read.locality(res);
+    var costForTwo = read.costForTwo(res);
 
     /* A clock explains a closure; it does not explain a distance. */
     var pillIcon = status === 'outside_delivery_area'
@@ -417,88 +458,68 @@
       : '<div class="es-img-placeholder"><i class="fa-solid fa-utensils"></i></div>';
 
     var cuisineDisplay = formatCuisineDisplay(cuisine);
-    var subtitleHtml = '';
-    if (cuisineDisplay) subtitleHtml += '<span class="es-cuisine">' + esc(cuisineDisplay) + '</span>';
-    /* Distance now renders in the metric rail below (premium two-line rail),
-       so it is no longer duplicated in the subtitle. distanceText is still
-       computed above and consumed by the rail — no data source changed. */
 
-    /* Floating badge — priority chain, first match wins, at most one.
-       Every branch is backed by a field the card already reads; nothing
-       here is derived from data that does not exist.
-         Near & Fast  read.nearFastFlag(res) === true
-         Top Rated    read.rating(res) >= 4.5
-         Pure Veg     read.pureVeg(res) === true
-         Offer        read.offer(res) non-empty
-       "New" is absent on purpose: no createdAt / isNew field is read
-       anywhere in the frontend, so it cannot be supported honestly. */
-    var TOP_RATED_MIN = 4.5;
-    var badge = null;
-
-    if (nearFast) {
-      badge = { key: 'near', cls: 'es-badge-near', icon: 'fa-bolt', text: 'Near & Fast' };
-    } else if (rating != null && rating >= TOP_RATED_MIN) {
-      badge = { key: 'top', cls: 'es-badge-top', icon: 'fa-star', text: 'Top Rated' };
-    } else if (read.pureVeg(res) === true) {
-      badge = { key: 'veg', cls: 'es-badge-veg', icon: 'fa-leaf', text: 'Pure Veg' };
-    } else if (offer) {
-      badge = { key: 'offer', cls: 'es-badge-offer', icon: 'fa-tag', text: offer };
-    }
-
-    var badgeHtml = badge
-      ? '<span class="es-media-badge ' + badge.cls + '">' +
-          '<i class="fa-solid ' + badge.icon + '" aria-hidden="true"></i>' +
-          '<span class="es-media-badge-label">' + esc(badge.text) + '</span>' +
-        '</span>'
+    /* Delivery-time badge text: "50-60 min" -> "50–60 mins" (uppercased in
+       CSS). Real delivery-time value only; nothing invented. */
+    var timeBadgeText = time
+      ? String(time.text)
+          .replace(/(\d)\s*-\s*(\d)/, '$1\u2013$2')
+          .replace(/\s*mins?\b/i, ' mins')
       : '';
 
-    /* A signal promoted to the image badge is not repeated below it —
-       the same fact twice on one card is noise, not hierarchy. Anything
-       the badge did NOT take still renders here exactly as before. */
-    var badgeKey = badge ? badge.key : '';
-    var tagsHtml = '';
-    if (nearFast && badgeKey !== 'near') tagsHtml += '<span class="es-tag es-tag-near"><i class="fa-solid fa-bolt"></i> Near & Fast</span>';
-    if (offer && badgeKey !== 'offer') tagsHtml += '<span class="es-tag es-tag-offer"><i class="fa-solid fa-tag"></i> ' + esc(offer) + '</span>';
-    if (coupon) tagsHtml += '<span class="es-tag es-tag-coupon"><i class="fa-solid fa-ticket"></i> ' + esc(coupon) + '</span>';
-
-    /* Rating is promoted next to the restaurant name (premium hierarchy).
-       The element, its .es-stat-rating class and the star markup are
-       unchanged — only its position in the card moves. */
-    var ratingHtml = rating != null
-      ? '<span class="es-stat es-stat-rating"><i class="fa-solid fa-star" aria-hidden="true"></i> ' + esc(rating.toFixed(1)) + '</span>'
+    /* Image overlays — real offer (read.offer) at bottom-left, delivery
+       time at bottom-right. Each renders only when its data exists. */
+    var offerOverlay = offer
+      ? '<span class="es-offer"><i class="es-ic-offer" aria-hidden="true"></i>' +
+          '<span class="es-offer-text">' + esc(offer) + '</span></span>'
+      : '';
+    var timeBadge = timeBadgeText
+      ? '<span class="es-time-badge">' + esc(timeBadgeText) + '</span>'
       : '';
 
-    /* Metric rail — premium two-line columns, real data only. Every column
-       is a value the card already reads (delivery time, distance, then
-       offer OR minimum order); nothing here is invented. Icons keep FA
-       classes so they still render correctly if the SVG-mask CSS is ever
-       absent, while the CSS paints premium inline SVGs over them. */
-    var statsHtml = '';
-    if (time) {
-      // Display only: 35-58 min -> 35–58 min. time.text itself is untouched.
-      var timeText = String(time.text).replace(/(\d)\s*-\s*(\d)/, '$1\u2013$2');
-      statsHtml +=
-        '<span class="es-stat es-stat-time"><i class="fa-regular fa-clock" aria-hidden="true"></i>' +
-          '<span class="es-stat-body"><span class="es-stat-value">' + esc(timeText) + '</span>' +
-          '<span class="es-stat-label">Delivery time</span></span></span>';
+    /* Rating · reviews · locality · distance — every part is a real field
+       and is omitted when absent (see read.reviewCount / read.locality). */
+    var metaBits = [];
+    if (rating != null) {
+      var ratingText = esc(rating.toFixed(1));
+      if (reviewCount != null) ratingText += ' (' + esc(formatCount(reviewCount)) + ')';
+      metaBits.push('<span class="es-meta-rating"><i class="es-ic-star" aria-hidden="true"></i>' + ratingText + '</span>');
     }
-    if (distanceText) {
-      statsHtml +=
-        '<span class="es-stat es-stat-distance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>' +
-          '<span class="es-stat-body"><span class="es-stat-value">' + esc(distanceText) + '</span>' +
-          '<span class="es-stat-label">Distance</span></span></span>';
+    var place = '';
+    if (locality && distanceText) place = esc(locality) + ', ' + esc(distanceText);
+    else if (locality) place = esc(locality);
+    else if (distanceText) place = esc(distanceText);
+    if (place) metaBits.push('<span class="es-meta-place">' + place + '</span>');
+    var metaHtml = metaBits.length
+      ? '<div class="es-meta">' + metaBits.join('<span class="es-sep">·</span>') + '</div>'
+      : '';
+
+    /* Cuisine · cost-for-two — real fields only; price omitted if absent. */
+    var cuisineHtml = '';
+    if (cuisineDisplay || costForTwo != null) {
+      cuisineHtml = '<div class="es-subtitle">';
+      if (cuisineDisplay) cuisineHtml += '<span class="es-cuisine">' + esc(cuisineDisplay) + '</span>';
+      if (costForTwo != null) {
+        cuisineHtml += (cuisineDisplay ? '<span class="es-sep">·</span>' : '') +
+          '<span class="es-price">₹' + esc(costForTwo) + ' for two</span>';
+      }
+      cuisineHtml += '</div>';
     }
-    if (offer) {
-      statsHtml +=
-        '<span class="es-stat es-stat-offer"><i class="fa-solid fa-percent" aria-hidden="true"></i>' +
-          '<span class="es-stat-body"><span class="es-stat-value">' + esc(offer) + '</span>' +
-          '<span class="es-stat-label">Offer</span></span></span>';
-    } else if (minOrder != null) {
-      statsHtml +=
-        '<span class="es-stat es-stat-min"><i class="fa-solid fa-percent" aria-hidden="true"></i>' +
-          '<span class="es-stat-body"><span class="es-stat-value">Min ₹' + esc(minOrder) + '</span>' +
-          '<span class="es-stat-label">Min order</span></span></span>';
-    }
+
+    /* Three-dot control — a sibling of the card link (like the heart), so
+       its tap never triggers the card's own navigation. It opens the SAME
+       existing restaurant-details route, and honours the availability guard
+       exactly as the card does. */
+    var moreHtml =
+      '<a class="es-more" href="restaurant-details.html?id=' + encodeURIComponent(id) + '"' +
+        (isUnavailable ? guard : '') +
+        ' aria-label="More options for ' + esc(name) + '">' +
+        '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">' +
+          '<circle cx="12" cy="5" r="1.7"></circle>' +
+          '<circle cx="12" cy="12" r="1.7"></circle>' +
+          '<circle cx="12" cy="19" r="1.7"></circle>' +
+        '</svg>' +
+      '</a>';
 
 
     /* No Favorites store means the heart could not persist anything, so it
@@ -531,7 +552,8 @@
 
       '<div class="es-card-media">' +
         media +
-        badgeHtml +
+        offerOverlay +
+        timeBadge +
         (isUnavailable
           ? '<div class="es-availability-overlay"><div class="es-availability-pill">' +
             '<i class="' + pillIcon + '" aria-hidden="true"></i> ' + esc(label) + '</div></div>'
@@ -539,19 +561,13 @@
       '</div>' +
 
       '<div class="es-card-content">' +
-        '<div class="es-name-row">' +
-          '<h3 class="es-name">' + esc(name) + '</h3>' +
-          ratingHtml +
-        '</div>' +
-        (subtitleHtml ? '<div class="es-subtitle">' + subtitleHtml + '</div>' : '') +
-        (tagsHtml ? '<div class="es-tags-row">' + tagsHtml + '</div>' : '') +
-        '<div class="es-bottom-row">' +
-          '<div class="es-stats">' + statsHtml + '</div>' +
-          '<div class="es-btn-order">' + (isUnavailable ? 'View Menu' : 'Order') + '</div>' +
-        '</div>' +
+        '<h3 class="es-name">' + esc(name) + '</h3>' +
+        metaHtml +
+        cuisineHtml +
       '</div>' +
     '</a>' +
     favHtml +
+    moreHtml +
     '</div>';
   }
 
