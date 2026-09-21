@@ -113,34 +113,6 @@
       return firstText(raw);
     },
 
-    /* Optional fields — surfaced only when the API actually provides them.
-       Each returns null when absent so the card omits it (never invented). */
-    reviewCount: function (res) {
-      var n = firstNumber(
-        res.reviewCount, res.reviewsCount, res.ratingCount, res.ratingsCount,
-        res.numReviews, res.totalRatings, res.totalReviews
-      );
-      if (n == null && typeof res.reviews === 'number') n = res.reviews;
-      if (n == null || n < 0) return null;
-      return Math.round(n);
-    },
-
-    locality: function (res) {
-      var loc = res.location || {};
-      var addr = res.address && typeof res.address === 'object' ? res.address : {};
-      return firstText(
-        res.locality, res.area, res.subLocality, res.neighbourhood,
-        loc.locality, loc.area, addr.locality, addr.area
-      );
-    },
-
-    costForTwo: function (res) {
-      return firstNumber(
-        res.costForTwo, res.priceForTwo, res.avgCostForTwo,
-        res.approxCostForTwo, res.costForTwoAmount
-      );
-    },
-
     images: function (res) {
       var list = Array.isArray(res.images) && res.images.length
         ? res.images
@@ -290,16 +262,6 @@
     return km.toFixed(1) + ' km';
   }
 
-  /* Compact review counts: 332 -> "332", 4200 -> "4.2K". Display only. */
-  function formatCount(n) {
-    if (n == null) return '';
-    if (n >= 1000) {
-      var k = n / 1000;
-      return (k >= 10 ? Math.round(k) : k.toFixed(1)) + 'K';
-    }
-    return String(n);
-  }
-
   /* ── Cuisine display formatting ─────────────────────────────────
    * Presentation only. Never mutates the source data and is never used
    * for filtering or sorting — read.cuisine() still returns the raw
@@ -336,7 +298,7 @@
       out.push(token.split(' ').map(capitalizeToken).join(' '));
     }
 
-    return out.join(', ');
+    return out.join(' \u2022 ');
   }
 
   /* ── Availability ───────────────────────────────────────────── */
@@ -404,171 +366,113 @@
       : null;
   }
 
+
+
+  /* ================================================================
+     EXACT 99 STORE RESTAURANT CARD DESIGN
+     Visual structure copied from under99card.js. Homepage data/filter/
+     availability ownership stays in this component; no backend changes.
+     ================================================================ */
+  var HOME_CART_KEY = 'nearbite_cart';
+  function homeGetCart() { try { return JSON.parse(localStorage.getItem(HOME_CART_KEY)) || {}; } catch (e) { return {}; } }
+  function homeSaveCart(c) { localStorage.setItem(HOME_CART_KEY, JSON.stringify(c)); }
+  function homeItemId(item) { return String(item && (item.id || item._id || item.menuItemId || item.menuItem) || '').trim(); }
+  function homeRestaurantId(r) { return String(r && (r.id || r._id || r.restaurantId) || '').trim(); }
+  function homeNormName(v) { return String(v == null ? '' : v).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').replace(/[–—-]/g,'-').trim(); }
+  function homeCartKey(item, r) { return String(homeItemId(item) || ((homeRestaurantId(r) || 'restaurant') + '|' + homeNormName(item && item.name))); }
+  function homeFindCartKey(c, item, r) {
+    var rid=homeRestaurantId(r), mid=homeItemId(item), name=homeNormName(item && item.name), canonical=homeCartKey(item,r);
+    if (c[canonical]) return canonical;
+    Object.keys(c).some(function(k){
+      var e=c[k]; if(!e || Number(e.quantity||0)<=0) return false;
+      var erid=String(e.resId||e.restaurantId||''), emid=String(e.menuItem||e.menuItemId||'');
+      if(rid && erid===rid && mid && emid===mid){ canonical=k; return true; }
+      if(rid && erid===rid && name && homeNormName(e.name||k)===name){ canonical=k; return true; }
+      return false;
+    });
+    return c[canonical] ? canonical : null;
+  }
+  function homeQty(item,r){ var c=homeGetCart(),k=homeFindCartKey(c,item,r); return k&&c[k] ? Number(c[k].quantity||0) : 0; }
+  function homeChangeCart(item,r,delta){
+    if(item && item.inStock===false && delta>0)return;
+    var c=homeGetCart(), existingKey=homeFindCartKey(c,item,r), k=existingKey||homeCartKey(item,r);
+    var e=c[k]||{quantity:0,price:Number(item.price)||0,originalPrice:item.originalPrice??null,resId:homeRestaurantId(r),menuItem:homeItemId(item),image:item.image||'',name:item.name||'Item',isVeg:Boolean(item.isVeg),restaurantName:String(r.name||'')};
+    if(!e.restaurantName && r && r.name)e.restaurantName=String(r.name);
+    e.quantity=Number(e.quantity||0)+delta;
+    if(e.quantity<=0)delete c[k]; else c[k]=e;
+    homeSaveCart(c);
+    document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{item:item,restaurant:r}}));
+    if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
+    var host=document.querySelector('[data-home99-restaurant="'+CSS.escape(homeRestaurantId(r))+'"]');
+    if(host)homeSyncCard(host,r);
+  }
+  function homeFormatCount(v){ var n=Number(v); if(!Number.isFinite(n)||n<=0)return ''; if(n>=1000000)return (n/1000000).toFixed(1).replace(/\.0$/,'')+'m'; if(n>=1000)return (n/1000).toFixed(1).replace(/\.0$/,'')+'k'; return String(Math.round(n)); }
+  var home99Icon={
+    ratingBadge:'<svg class="u99-rating-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#159A62"/><path d="M12 5.4 13.94 9.33 18.28 9.96 15.14 13.02 15.88 17.34 12 15.3 8.12 17.34 8.86 13.02 5.72 9.96 10.06 9.33Z" fill="#fff"/></svg>',
+    offerSeal:'<svg class="u99-seal" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0.8Q12 0.8 13.3 1.99Q14.59 3.17 16.32 2.88Q18.06 2.58 18.5 4.28Q18.95 5.98 20.57 6.66Q22.19 7.35 21.65 9.02Q21.11 10.69 22.1 12.14Q23.09 13.59 21.73 14.71Q20.37 15.82 20.42 17.58Q20.46 19.33 18.72 19.54Q16.97 19.74 16.06 21.24Q15.16 22.75 13.58 21.97Q12 21.2 10.42 21.97Q8.84 22.75 7.94 21.24Q7.03 19.74 5.28 19.54Q3.54 19.33 3.58 17.58Q3.63 15.82 2.27 14.71Q0.91 13.59 1.9 12.14Q2.89 10.69 2.35 9.02Q1.81 7.35 3.43 6.66Q5.05 5.98 5.5 4.28Q5.94 2.58 7.68 2.88Q9.41 3.17 10.7 1.99Z" fill="#159A62"/><path d="M9 15.2 15 8.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.4" cy="9.4" r="1.55" fill="#fff"/><circle cx="14.6" cy="14.6" r="1.55" fill="#fff"/></svg>',
+    clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
+  };
+  function homeImageMarkup(item){
+    var src=item && (item.image||item.img||item.imageUrl||item.photo);
+    if(!src)return '<div class="u99-image-fallback" aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
+    src=typeof safeUrl==='function'?safeUrl(src):src;
+    if(!src)return '<div class="u99-image-fallback" aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
+    return '<img src="'+esc(src)+'" alt="'+esc(item.name||'Item')+'" loading="lazy" decoding="async" onerror="this.hidden=true;var f=this.parentNode&&this.parentNode.querySelector(\'.u99-image-fallback\');if(f)f.hidden=false;"><div class="u99-image-fallback" hidden aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
+  }
+  function homeAddControl(item,r){
+    if(item && item.inStock===false)return '<button type="button" class="u99-add u99-unavailable" disabled>Unavailable</button>';
+    var q=homeQty(item,r);
+    if(q>0)return '<div class="u99-stepper"><button type="button" data-home99-action="minus" aria-label="Remove one">−</button><span>'+q+'</span><button type="button" data-home99-action="plus" aria-label="Add one">+</button></div>';
+    return '<button type="button" class="u99-add" data-home99-action="add" aria-label="Add '+esc(item.name||'Item')+'">+</button>';
+  }
+  function homeItemMarkup(item,r){
+    var price=Number(item.price)||0, original=item.originalPrice!=null&&Number(item.originalPrice)>price?Number(item.originalPrice):null;
+    var discount=item.discountPercent!=null&&Number(item.discountPercent)>0?Math.round(Number(item.discountPercent)):(original?Math.round((1-price/original)*100):null);
+    var dietary=item.isVeg?'<span class="u99-dietary" aria-label="Vegetarian"></span>':'<span class="u99-dietary u99-nonveg" aria-label="Non-vegetarian"></span>';
+    var popular=(item.isBestseller||item.isRecommended)?'<span class="u99-popular">Popular</span>':'';
+    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-name">'+dietary+'<span>'+esc(item.name||'Item')+'</span></div><div class="u99-price-row"><strong>₹'+price+'</strong>'+(original!=null?'<span class="u99-old-price">₹'+original+'</span>':'')+(discount?'<span class="u99-off">'+discount+'% OFF</span>':'')+'</div></article>';
+  }
+  function homeRestaurantOffer(r){
+    var raw=String(r.offer||r.offerText||r.discountText||'').trim();
+    if(raw){var m=raw.match(/(\d+(?:\.\d+)?)\s*%/);if(m)return Math.round(Number(m[1]))+'% LOWER PRICES';if(/lower|off|deal|discount/i.test(raw))return raw.toUpperCase();}
+    if(r.discountPercent!=null&&Number(r.discountPercent)>0)return Math.round(Number(r.discountPercent))+'% LOWER PRICES';
+    return 'LOWER PRICES';
+  }
+  function homeSortedMenu(r){return Array.isArray(r.menu)?r.menu.filter(function(i){return i&&Number(i.price)>0;}).slice().sort(function(a,b){return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||''));}):[];}
+  function homeRatingMarkup(r){var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
+  function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
+  function homeBuildCard(res,index,customerCoords){
+    var id=read.id(res),name=read.name(res);if(!id||!name)return '';
+    var status=resolveAvailability(res,customerCoords),unavailable=!!status,label=unavailable?getAvailabilityLabel(status):'';
+    var cuisine=read.cuisine(res)||'', time=read.deliveryTime(res), delivery=time?time.text:'', menu=homeSortedMenu(res).slice(0,6);
+    var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
+      '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
+      '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
+      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name">'+esc(name)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
+      '<div class="u99-carousel-wrap"><div class="u99-carousel" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i){return homeItemMarkup(i,res);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
+      (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
+      '</article></div>';
+    return card;
+  }
+  function homeSyncCard(host,r){homeSortedMenu(r).slice(0,6).forEach(function(item){var el=host.querySelector('.u99-item[data-item-id="'+CSS.escape(homeItemId(item))+'"]');if(el){var a=el.querySelector('.u99-item-action');if(a)a.innerHTML=homeAddControl(item,r);}});}
+  function bindHome99Interactions(){
+    if(window.__home99Interactions)return;window.__home99Interactions=true;
+    document.addEventListener('keydown',function(e){var h=e.target.closest&&e.target.closest('.u99-restaurant-head');if(h&&(e.key==='Enter'||e.key===' ')){e.preventDefault();var host=h.closest('.u99-card-host'),id=host&&host.getAttribute('data-home99-restaurant');if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);}});
+    document.addEventListener('click',function(e){
+      var el=e.target.closest&&e.target.closest('[data-home99-action]');if(!el)return;var host=el.closest('.u99-card-host');if(!host)return;var id=host.getAttribute('data-home99-restaurant');
+      if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
+      var action=el.getAttribute('data-home99-action');
+      if(action==='info'){e.preventDefault();e.stopPropagation();var rr=window.__home99Data&&window.__home99Data[id];if(rr&&typeof window.showToast==='function')window.showToast('Free delivery information');return;}
+      if(action==='add'||action==='plus'||action==='minus'){e.preventDefault();e.stopPropagation();var itemEl=el.closest('.u99-item'),rr=window.__home99Data&&window.__home99Data[id],item=rr&&homeSortedMenu(rr).find(function(x){return homeItemId(x)===itemEl.getAttribute('data-item-id');});if(item)homeChangeCart(item,rr,action==='minus'?-1:1);}
+    });
+    document.addEventListener('wheel',function(e){var c=e.target.closest&&e.target.closest('.u99-carousel');if(c&&Math.abs(e.deltaY)>Math.abs(e.deltaX))c.scrollLeft+=e.deltaY;},{passive:true});
+  }
+
   /* ── Card markup ────────────────────────────────────────────── */
 
   function buildCard(res, index, customerCoords) {
-    var id = read.id(res);
-    var name = read.name(res);
-
-    if (!id || !name) return '';
-
-    var status = resolveAvailability(res, customerCoords);
-    var isUnavailable = !!status;
-    var label = isUnavailable ? getAvailabilityLabel(status) : '';
-
-    var images = read.images(res);
-    var cuisine = read.cuisine(res);
-    var distanceText = formatDistance(getDistanceKm(res, customerCoords));
-    var rating = read.rating(res);
-    var time = read.deliveryTime(res);
-    var minOrder = read.minimumOrder(res);
-    var offer = read.offer(res);
-    var coupon = read.coupon(res);
-    var nearFast = read.nearFastFlag(res) === true;
-    var reviewCount = read.reviewCount(res);
-    var locality = read.locality(res);
-    var costForTwo = read.costForTwo(res);
-
-    /* A clock explains a closure; it does not explain a distance. */
-    var pillIcon = status === 'outside_delivery_area'
-      ? 'fa-solid fa-location-dot'
-      : 'fa-regular fa-clock';
-
-    var guard = isUnavailable
-      ? ' onclick="event.preventDefault(); RestaurantCard.showAvailabilityToast(\'' +
-        esc(label).replace(/'/g, '&#39;') + '\');"'
-      : '';
-
-    var media = images.length
-      ? '<div class="es-gallery" data-gallery="' + esc(id) + '" data-index="' + index + '">' +
-          '<div class="es-gallery-track">' +
-            images.map(function (src, idx) {
-              return '<img class="es-gallery-slide" src="' + esc(src) + '" alt="' + esc(name) +
-                '" loading="' + (idx === 0 ? 'eager' : 'lazy') + '"' +
-                ' onload="this.classList.add(\'loaded\')"' +
-                ' onerror="RestaurantCard.handleImageError(this)">';
-            }).join('') +
-          '</div>' +
-          (images.length > 1
-            ? '<div class="es-gallery-dots">' + images.map(function (_, idx) {
-                return '<span class="es-gallery-dot' + (idx === 0 ? ' active' : '') + '"></span>';
-              }).join('') + '</div>'
-            : '') +
-        '</div>'
-      : '<div class="es-img-placeholder"><i class="fa-solid fa-utensils"></i></div>';
-
-    var cuisineDisplay = formatCuisineDisplay(cuisine);
-
-    /* Delivery-time badge text: "50-60 min" -> "50–60 mins" (uppercased in
-       CSS). Real delivery-time value only; nothing invented. */
-    var timeBadgeText = time
-      ? String(time.text)
-          .replace(/(\d)\s*-\s*(\d)/, '$1\u2013$2')
-          .replace(/\s*mins?\b/i, ' mins')
-      : '';
-
-    /* Image overlays — real offer (read.offer) at bottom-left, delivery
-       time at bottom-right. Each renders only when its data exists. */
-    var offerOverlay = offer
-      ? '<span class="es-offer"><i class="es-ic-offer" aria-hidden="true"></i>' +
-          '<span class="es-offer-text">' + esc(offer) + '</span></span>'
-      : '';
-    var timeBadge = timeBadgeText
-      ? '<span class="es-time-badge">' + esc(timeBadgeText) + '</span>'
-      : '';
-
-    /* Rating · reviews · locality · distance — every part is a real field
-       and is omitted when absent (see read.reviewCount / read.locality). */
-    var metaBits = [];
-    if (rating != null) {
-      var ratingText = esc(rating.toFixed(1));
-      if (reviewCount != null) ratingText += ' (' + esc(formatCount(reviewCount)) + ')';
-      metaBits.push('<span class="es-meta-rating"><i class="es-ic-star" aria-hidden="true"></i>' + ratingText + '</span>');
-    }
-    var place = '';
-    if (locality && distanceText) place = esc(locality) + ', ' + esc(distanceText);
-    else if (locality) place = esc(locality);
-    else if (distanceText) place = esc(distanceText);
-    if (place) metaBits.push('<span class="es-meta-place">' + place + '</span>');
-    var metaHtml = metaBits.length
-      ? '<div class="es-meta">' + metaBits.join('<span class="es-sep">·</span>') + '</div>'
-      : '';
-
-    /* Cuisine · cost-for-two — real fields only; price omitted if absent. */
-    var cuisineHtml = '';
-    if (cuisineDisplay || costForTwo != null) {
-      cuisineHtml = '<div class="es-subtitle">';
-      if (cuisineDisplay) cuisineHtml += '<span class="es-cuisine">' + esc(cuisineDisplay) + '</span>';
-      if (costForTwo != null) {
-        cuisineHtml += (cuisineDisplay ? '<span class="es-sep">·</span>' : '') +
-          '<span class="es-price">₹' + esc(costForTwo) + ' for two</span>';
-      }
-      cuisineHtml += '</div>';
-    }
-
-    /* Three-dot control — a sibling of the card link (like the heart), so
-       its tap never triggers the card's own navigation. It opens the SAME
-       existing restaurant-details route, and honours the availability guard
-       exactly as the card does. */
-    var moreHtml =
-      '<a class="es-more" href="restaurant-details.html?id=' + encodeURIComponent(id) + '"' +
-        (isUnavailable ? guard : '') +
-        ' aria-label="More options for ' + esc(name) + '">' +
-        '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">' +
-          '<circle cx="12" cy="5" r="1.7"></circle>' +
-          '<circle cx="12" cy="12" r="1.7"></circle>' +
-          '<circle cx="12" cy="19" r="1.7"></circle>' +
-        '</svg>' +
-      '</a>';
-
-
-    /* No Favorites store means the heart could not persist anything, so it
-       is not rendered at all rather than shown as a control that does
-       nothing when tapped. */
-    var favHtml = '';
-    if (window.Favorites) {
-      var isFav = !!window.Favorites.isFavorite(id);
-      favHtml =
-        '<button type="button" class="es-fav' + (isFav ? ' is-active' : '') + '"' +
-          ' data-fav-id="' + esc(id) + '"' +
-          ' aria-pressed="' + (isFav ? 'true' : 'false') + '"' +
-          ' aria-label="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' +
-          '<i class="' + (isFav ? 'fa-solid' : 'fa-regular') + ' fa-heart" aria-hidden="true"></i>' +
-        '</button>';
-    } else {
-      warnMissingFavorites();
-    }
-
-    /* The heart is a sibling of the <a>, not a child: interactive content
-       cannot legally nest inside a link, and keeping them separate means
-       no click on the heart can ever reach the card's navigation. */
-    return '<div class="es-card-wrap"' +
-      ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
-      's; opacity:0;">' +
-
-      '<a href="restaurant-details.html?id=' + encodeURIComponent(id) +
-      '" class="es-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
-      ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '">' +
-
-      '<div class="es-card-media">' +
-        media +
-        offerOverlay +
-        timeBadge +
-        (isUnavailable
-          ? '<div class="es-availability-overlay"><div class="es-availability-pill">' +
-            '<i class="' + pillIcon + '" aria-hidden="true"></i> ' + esc(label) + '</div></div>'
-          : '') +
-      '</div>' +
-
-      '<div class="es-card-content">' +
-        '<h3 class="es-name">' + esc(name) + '</h3>' +
-        metaHtml +
-        cuisineHtml +
-      '</div>' +
-    '</a>' +
-    favHtml +
-    moreHtml +
-    '</div>';
+    return homeBuildCard(res,index,customerCoords);
   }
 
   function renderList(container, restaurants) {
@@ -577,25 +481,16 @@
     var customerCoords = getSelectedCustomerCoordinates();
     var unavailable = new Set();
     var rendered = 0;
-
-    var html = list.map(function (res, i) {
-      var markup = buildCard(res, i, customerCoords);
-      if (markup) {
-        rendered++;
-        if (resolveAvailability(res, customerCoords)) unavailable.add(read.id(res));
-      }
+    window.__home99Data = Object.create(null);
+    var html = list.map(function(res,i){
+      var markup=buildCard(res,i,customerCoords);
+      if(markup){ rendered++; window.__home99Data[read.id(res)]=res; if(resolveAvailability(res,customerCoords)) unavailable.add(read.id(res)); }
       return markup;
     }).join('');
-
-    window.__unavailableRestaurantIds = unavailable;
-    container.innerHTML = html;
-
-    pruneGalleries();
-
-    if (rendered) requestAnimationFrame(function () {
-      initGalleries();
-      syncFavoriteButtons();
-    });
+    window.__unavailableRestaurantIds=unavailable;
+    container.innerHTML=html;
+    bindHome99Interactions();
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(function(){syncFavoriteButtons();});
     return rendered;
   }
 
