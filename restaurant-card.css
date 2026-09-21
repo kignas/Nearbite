@@ -1520,71 +1520,82 @@
 
 
 /* ═══════════════════════════════════════════════════════════════════
-   REFERENCE-MATCH REFINEMENT — item tiles restyled to match the
-   benchmark card: tall full-bleed image, filled "+" button, clean price.
-   Appended last so it overrides the earlier item-tile rules by source
-   order. CSS ONLY — every JS hook, class and data-attribute is untouched.
+   BENCHMARK LAYOUT FIX — fixed-width scrolling product rail.
+   ------------------------------------------------------------------
+   Root cause of every issue in the review: the tiles were flexible
+   HALF-COLUMNS (width = (100% − gap)/2), so exactly two items stretched
+   to fill the card and nothing peeked. This block makes them FIXED-WIDTH
+   scroll tiles (~2.5 visible, 3rd peeking), landscape thumbnails, and
+   ONE image box for every product via object-fit:cover — so no image can
+   change a card's dimensions. Structural, not per-image. Appended last so
+   it overrides the earlier rail rules by source order. CSS only — every
+   JS hook, class and data-attribute is untouched.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* 1 ── Full-bleed landscape image (4:3 — shorter than the reference's
-   near-square so the tiles don't feel massive, while keeping the same
-   edge-to-edge 'cover' fill). Replaces the short 1.68/1 and mobile
-   2.40/1 boxes, and swaps the letterboxing 'contain' fit (which left
-   grey side-bars around off-ratio photos — the broken look in the 2nd
-   card) for 'cover'. */
+/* Image — ONE fixed box for every product: wide landscape (3:2, clearly
+   wider than tall), cover-cropped so Samosa / Lassi / any photo fills the
+   same box identically and never resizes the tile. */
 .u99-item-image{
-  aspect-ratio:4/3;
-  border-radius:14px;
+  aspect-ratio:3/2;
+  border-radius:12px;
+  overflow:visible;              /* lets the + ring show; img self-clips */
 }
 .u99-item-image img,
 .u99-image-fallback{
-  border-radius:14px;
-  object-fit:cover;            /* was 'contain' — no more grey side-bars */
+  border-radius:12px;
+  object-fit:cover;              /* was 'contain' — no grey bars, no tall crop */
   background:#F1F3F6;
 }
 
-/* Every tile is now a fixed ratio, so tiles share one height and the
-   old min-height math (built for the short wide box) is dropped. */
-.u99-carousel{ min-height:0; }
+/* Tile — FIXED width, not a flexible half-column. THE core fix: the rail
+   scrolls horizontally and the next item peeks in. min() keeps it tied to
+   the viewport on phones and caps it on wide screens, so ~2.5–3 tiles show
+   on every device automatically. */
+.u99-item{
+  flex:0 0 auto;
+  width:min(132px, 35vw);
+}
+
+/* Rail — scrolls; every tile shares one height (fixed ratio) so the old
+   min-height math (built for the short wide box) is dropped. */
+.u99-carousel{ gap:9px; min-height:0; }
 .u99-carousel.u99-carousel-empty{ min-height:0; }
 
-/* 2 ── Filled "+" button on the image, bottom-right, with a white ring
-   to lift it off the photo (matches the reference). Moved up from the
-   old hanging position (bottom:-8px) to sit inside the image corner. */
-.u99-item-action{
-  right:8px;
-  bottom:8px;
-}
+/* "+" button — smaller, overlapping the image's bottom-right corner, no
+   longer dominating the thumbnail or hanging below it. */
+.u99-item-action{ right:6px; bottom:6px; }
 .u99-add{
-  width:40px;
-  height:40px;
+  width:30px; height:30px;
   border:0;
-  background:#E5177F;
-  color:#fff;
-  font-size:24px;
-  box-shadow:0 3px 9px rgba(224,27,131,.38), 0 0 0 2px #fff;
+  background:#E5177F; color:#fff;
+  font-size:19px;
+  box-shadow:0 2px 6px rgba(224,27,131,.34), 0 0 0 2px #fff;
 }
-/* Qty stepper keeps the same white ring so add/stepper read as one control. */
-.u99-stepper{
-  box-shadow:0 3px 9px rgba(16,24,40,.18), 0 0 0 2px #fff;
-}
+.u99-stepper{ box-shadow:0 2px 7px rgba(16,24,40,.16), 0 0 0 2px #fff; }
 
-/* 3 ── Real price kept: strikethrough original price + "% OFF" pill stay
-   visible (the earlier hide rule is removed). */
+/* Real price kept — strikethrough original + "% OFF" pill stay visible. */
 
-/* 4 ── Vertical breathing room between restaurant cards. */
-.u99-card-host{
-  margin-bottom:16px;
-}
+/* One compact info block: balanced gap from the offer line down to the
+   rail, and space between restaurant cards. */
+.u99-carousel-wrap{ margin-top:9px; }
+.u99-card-host{ margin-bottom:16px; }
 
-/* Narrow phones — keep the tile ratio and larger button in proportion. */
+/* Popular badge stays an in-image overlay (upper-left, fixed padding),
+   never affecting tile size. */
+.u99-popular{ left:6px; top:6px; }
+
+/* Narrow phones — same fixed-width scrolling rail; only fine-tuning. */
 @media(max-width:430px){
-  .u99-item-image{ aspect-ratio:4/3; border-radius:13px; }
+  .u99-item{ flex:0 0 auto; width:35vw; }
+  .u99-item-image{ aspect-ratio:3/2; border-radius:12px; }
   .u99-item-image img,
-  .u99-image-fallback{ border-radius:13px; }
-  .u99-add{ width:38px; height:38px; font-size:23px; }
-  .u99-item-action{ right:7px; bottom:7px; }
+  .u99-image-fallback{ border-radius:12px; }
+  .u99-carousel{ gap:9px; }
+  .u99-carousel-wrap{ margin-top:8px; }
+  .u99-add{ width:29px; height:29px; font-size:18px; }
+  .u99-item-action{ right:6px; bottom:6px; }
+  .u99-item-name{ font-size:13.5px; margin-top:7px; }
 }
 @media(max-width:370px){
-  .u99-add{ width:36px; height:36px; font-size:22px; }
+  .u99-add{ width:28px; height:28px; font-size:18px; }
 }
