@@ -497,7 +497,7 @@
       ' style="animation: cardFadeUp .28s ease forwards ' + (Math.min(index, 6) * 0.045) +
       's; opacity:0;">' +
 
-      '<a href="restaurant.html?id=' + encodeURIComponent(id) +
+      '<a href="restaurant-details.html?id=' + encodeURIComponent(id) +
       '" class="es-card' + (isUnavailable ? ' is-unavailable' : '') + '"' + guard +
       ' aria-disabled="' + (isUnavailable ? 'true' : 'false') + '">' +
 
