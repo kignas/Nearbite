@@ -39,6 +39,7 @@
   var state = {
     restaurants: [],
     categories: [],
+    categoryStatus: 'loading',   // loading | ready | empty  — owned only by the category request
     filter: {
       active: [],            // ids from FILTERS
       sort: 'recommended'
@@ -713,30 +714,60 @@
 
   /* ── Categories ─────────────────────────────────────────────── */
 
+  /* Re-seeds the original Eatswada category skeleton, but only when it is
+     not already on screen — so re-renders during loading never restart the
+     shimmer or momentarily blank the row. Markup mirrors the initial HTML. */
+  function ensureCategorySkeleton(scroll) {
+    if (scroll.querySelector('.sk')) return;
+    scroll.innerHTML =
+      '<div class="cs-item"><div class="sk cs-ring"></div><div class="sk cs-name"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d4"></div><div class="sk cs-name d4"></div></div>';
+  }
+
   function renderCategories() {
     var scroll = el('cat-scroll');
     var section = el('mind-section');
     if (!scroll) return;
 
-    if (!state.categories.length) {
+    /* READY — real categories to show. Replace whatever is there
+       (skeleton or an earlier list) in a single clean pass. */
+    if (state.categories.length) {
+      if (section) section.hidden = false;
+      scroll.innerHTML = state.categories.map(function (cat, i) {
+        return '<a class="cat-item" href="category.html?type=' + encodeURIComponent(cat.type) +
+          '" style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
+          '<span class="cat-ring">' +
+            '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
+            '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
+            ' onerror="this.closest(\'.cat-item\').remove()">' +
+          '</span>' +
+          '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
+        '</a>';
+      }).join('');
+      return;
+    }
+
+    /* EMPTY — the category request itself succeeded and there are genuinely
+       no categories. This is the ONLY case that removes the section, and it
+       is driven solely by the category request, never by the restaurant or
+       banner requests completing. */
+    if (state.categoryStatus === 'empty') {
       if (section) section.hidden = true;
       scroll.innerHTML = '';
       return;
     }
 
+    /* LOADING (or a transient failure) — keep the section and its skeleton
+       in place at full height. The skeleton must not be torn down just
+       because another request finished first. */
     if (section) section.hidden = false;
-
-    scroll.innerHTML = state.categories.map(function (cat, i) {
-      return '<a class="cat-item" href="category.html?type=' + encodeURIComponent(cat.type) +
-        '" style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
-        '<span class="cat-ring">' +
-          '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
-          '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
-          ' onerror="this.closest(\'.cat-item\').remove()">' +
-        '</span>' +
-        '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
-      '</a>';
-    }).join('');
+    ensureCategorySkeleton(scroll);
   }
 
   function loadCategories() {
@@ -744,8 +775,12 @@
       window.API.CACHE_KEYS.categories, CACHE_MAX_AGE_MS
     );
 
-    if (cached) {
+    /* Only treat the cache as "ready" when it actually holds categories.
+       An empty cached array must not collapse the section before the live
+       request has even been tried. */
+    if (cached && cached.length) {
       state.categories = cached;
+      state.categoryStatus = 'ready';
       renderCategories();
     }
 
@@ -760,12 +795,23 @@
             return { name: cat.name, type: cat.name, image: cat.image };
           });
 
-        state.categories = categories;
-        window.API.cache.writeList(window.API.CACHE_KEYS.categories, categories);
+        if (categories.length) {
+          state.categories = categories;
+          state.categoryStatus = 'ready';
+          window.API.cache.writeList(window.API.CACHE_KEYS.categories, categories);
+        } else if (state.categoryStatus !== 'ready') {
+          /* Successful response, genuinely no categories, and nothing already
+             on screen -> settle to the empty state (section is removed). */
+          state.categoryStatus = 'empty';
+        }
         renderCategories();
       })
       .catch(function (error) {
         console.warn('[home] categories unavailable:', error.message);
+        /* Network/parse failure. Never collapse the section on an error: if
+           we already have categories they stay; otherwise the skeleton stays
+           in place instead of disappearing mid-load. */
+        if (state.categoryStatus !== 'ready') state.categoryStatus = 'loading';
         renderCategories();
       });
   }
