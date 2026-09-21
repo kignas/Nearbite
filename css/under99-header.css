@@ -1,0 +1,30 @@
+.u99-header{
+  position:relative;background:#FBD4E1;overflow:hidden;
+}
+.u99-topbar{
+  height:76px;display:flex;align-items:center;gap:12px;padding:10px 18px 8px;
+  position:relative;z-index:3;
+}
+.u99-circle-btn{
+  width:52px;height:52px;flex:0 0 52px;border:1px solid rgba(16,24,40,.07);
+  border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;
+  box-shadow:0 3px 10px rgba(16,24,40,.04);color:var(--u99-ink);
+}
+.u99-circle-btn svg{width:25px;height:25px}
+.u99-location{
+  min-width:0;display:flex;align-items:center;gap:10px;padding:7px 13px;
+  height:52px;max-width:235px;border-radius:999px;border:1px solid rgba(16,24,40,.06);
+  background:rgba(255,255,255,.62);text-align:left;
+}
+.u99-location svg{width:23px;height:23px;color:var(--u99-pink);flex:0 0 23px}
+.u99-location-copy{min-width:0}
+.u99-location-name{font-size:16px;font-weight:850;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u99-location-sub{
+  margin-top:3px;font-size:11px;font-weight:750;color:#596171;white-space:nowrap;
+}
+.u99-search-btn{margin-left:auto}
+@media(max-width:370px){
+  .u99-topbar{padding-left:12px;padding-right:12px}
+  .u99-circle-btn{width:48px;height:48px;flex-basis:48px}
+  .u99-location{max-width:205px}
+}
