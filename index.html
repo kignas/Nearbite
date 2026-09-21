@@ -380,54 +380,6 @@
   .state-btn:disabled { opacity: .6; cursor: default; }
 
   /* ══════════════════════════════════════════════════════════════
-     5. FILTER SHEET
-     ══════════════════════════════════════════════════════════════ */
-  .filter-sheet { position: fixed; inset: 0; z-index: 100001; }
-  .filter-sheet[hidden] { display: none; }
-
-  .sheet-backdrop {
-    position: absolute; inset: 0; background: rgba(15,23,42,.45);
-    opacity: 0; transition: opacity .22s ease;
-  }
-  .filter-sheet.open .sheet-backdrop { opacity: 1; }
-
-  .sheet-panel {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    background: var(--surface); border-radius: 22px 22px 0 0;
-    padding: 8px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    max-height: 78vh; overflow-y: auto;
-    transform: translateY(100%); transition: transform .24s cubic-bezier(.22,1,.36,1);
-  }
-  .filter-sheet.open .sheet-panel { transform: translateY(0); }
-
-  .sheet-grabber { width: 40px; height: 4px; border-radius: 2px; background: #DEE2E8; margin: 6px auto 14px; }
-  .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .sheet-title { font-size: 18px; font-weight: 800; margin: 0; color: var(--text); }
-  .sheet-clear {
-    border: none; background: transparent; color: var(--brand);
-    font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; padding: 4px;
-  }
-  .sheet-group-title {
-    font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
-    color: var(--text-mute); margin: 18px 0 8px;
-  }
-  .sheet-options { display: flex; flex-direction: column; }
-  .sheet-option {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; padding: 14px 2px; border: none; border-bottom: 1px solid #F1F2F5;
-    background: transparent; font-family: inherit; font-size: 15px; font-weight: 600;
-    color: #333A45; text-align: left; cursor: pointer;
-  }
-  .sheet-option i { color: var(--brand); opacity: 0; font-size: 14px; }
-  .sheet-option.selected { color: #C2560A; font-weight: 800; }
-  .sheet-option.selected i { opacity: 1; }
-  .sheet-done {
-    width: 100%; margin-top: 20px; padding: 15px;
-    background: var(--brand-ink); color: #fff; border: none; border-radius: 14px;
-    font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
-  }
-
-  /* ══════════════════════════════════════════════════════════════
      6. LOCATION — permission sheet, status banner, card availability
      Additive only. Reuses the sheet shell, tokens and type above so
      the existing Home layout is untouched.
@@ -437,6 +389,10 @@
   .loc-sheet .sheet-backdrop { opacity: 0; transition: opacity .22s ease; }
   .loc-sheet.open .sheet-backdrop { opacity: 1; }
   .loc-sheet .sheet-panel {
+    position:absolute; left:0; right:0; bottom:0;
+    background:var(--surface); border-radius:22px 22px 0 0;
+    padding:8px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    max-height:78vh; overflow-y:auto;
     transform: translateY(100%);
     transition: transform .24s cubic-bezier(.22,1,.36,1);
     padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -664,6 +620,7 @@
 <link rel="stylesheet" href="eatswada-end-section.css"/>
 <link rel="stylesheet" href="whats-on-your-mind.css"/>
 <link rel="stylesheet" href="filter-bar.css"/>
+<link rel="stylesheet" href="filter-sheet.css"/>
 </head>
 
 <body>
@@ -760,11 +717,17 @@
   <div class="sheet-panel">
     <div class="sheet-grabber"></div>
     <div class="sheet-head">
-      <h3 class="sheet-title">Filters</h3>
+      <h3 class="sheet-title">Filters &amp; sorting</h3>
       <button type="button" class="sheet-clear" id="filter-sheet-clear">Clear all</button>
     </div>
-    <div id="filter-sheet-body"></div>
-    <button type="button" class="sheet-done" data-close-sheet="1">Show results</button>
+    <div class="filter-layout">
+      <nav class="filter-tabs" id="filter-sheet-tabs" aria-label="Filter categories"></nav>
+      <div class="filter-content" id="filter-sheet-body"></div>
+    </div>
+    <div class="sheet-footer">
+      <button type="button" class="sheet-close-btn" data-close-sheet="1">Close</button>
+      <button type="button" class="sheet-done" data-close-sheet="1">Show results</button>
+    </div>
   </div>
 </div>
 

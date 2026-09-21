@@ -140,6 +140,19 @@
       }
     },
     {
+      id: 'rating35',
+      label: '3.5+',
+      group: 'RATING',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.rating(r) != null; });
+      },
+      match: function (res) {
+        var rating = card.read.rating(res);
+        return rating != null && rating >= 3.5;
+      }
+    },
+    {
       id: 'rating45',
       label: '4.5+',
       group: 'RATING',
@@ -154,7 +167,7 @@
     },
     {
       id: 'under200',
-      label: 'Items under ₹200',
+      label: 'Under ₹200',
       group: 'PRICE',
       showInBar: false,
       supported: function (list) {
@@ -167,7 +180,7 @@
     },
     {
       id: 'under300',
-      label: 'Items under ₹300',
+      label: 'Under ₹300',
       group: 'PRICE',
       showInBar: false,
       supported: function (list) {
@@ -176,6 +189,32 @@
       match: function (res) {
         var price = card.read.lowestItemPrice(res);
         return price != null && price <= 300;
+      }
+    },
+    {
+      id: 'price100to200',
+      label: '₹100 – ₹200',
+      group: 'PRICE',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
+      },
+      match: function (res) {
+        var price = card.read.lowestItemPrice(res);
+        return price != null && price > 100 && price <= 200;
+      }
+    },
+    {
+      id: 'priceAbove200',
+      label: 'Above ₹200',
+      group: 'PRICE',
+      showInBar: false,
+      supported: function (list) {
+        return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
+      },
+      match: function (res) {
+        var price = card.read.lowestItemPrice(res);
+        return price != null && price > 200;
       }
     },
     {
@@ -551,44 +590,93 @@
 
   /* ── Filter sheet ───────────────────────────────────────────── */
 
+  var activeSheetTab = 'SORT';
+
+  function sheetTabIcon(group) {
+    var icons = {
+      SORT: 'fa-arrow-down-wide-short',
+      'DELIVERY TIME': 'fa-clock',
+      RATING: 'fa-star',
+      PRICE: 'fa-indian-rupee-sign',
+      OFFERS: 'fa-tags',
+      'FOOD TYPE': 'fa-leaf'
+    };
+    return icons[group] || 'fa-sliders';
+  }
+
+  function sheetGroups(filters) {
+    var groups = [];
+    filters.forEach(function (f) {
+      if (f.id === 'nearfast') return;
+      var group = f.group || 'OTHER';
+      if (!groups.some(function (g) { return g === group; })) groups.push(group);
+    });
+    return groups;
+  }
+
+  function renderSheetTabs(groups) {
+    var tabs = el('filter-sheet-tabs');
+    if (!tabs) return;
+    var names = ['SORT'].concat(groups);
+    if (names.indexOf(activeSheetTab) === -1) activeSheetTab = names[0];
+    tabs.innerHTML = names.map(function (name) {
+      var label = name === 'SORT' ? 'Sort By' : name === 'DELIVERY TIME' ? 'Time' : name === 'FOOD TYPE' ? 'Food Type' : name.charAt(0) + name.slice(1).toLowerCase();
+      return '<button type="button" class="filter-tab' + (activeSheetTab === name ? ' active' : '') + '" data-sheet-tab="' + card.escape(name) + '">' +
+        '<i class="fa-solid ' + sheetTabIcon(name) + '" aria-hidden="true"></i>' +
+        '<span>' + card.escape(label) + '</span></button>';
+    }).join('');
+
+    tabs.querySelectorAll('[data-sheet-tab]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        activeSheetTab = button.getAttribute('data-sheet-tab');
+        renderSheetBody();
+      });
+    });
+  }
+
+  function optionIcon(filter) {
+    var icons = {
+      nearfast: 'fa-bolt', under30m: 'fa-bolt', under45m: 'fa-clock',
+      rating45: 'fa-star', rating: 'fa-star', under100: 'fa-indian-rupee-sign',
+      under200: 'fa-indian-rupee-sign', under300: 'fa-indian-rupee-sign', price100to200: 'fa-indian-rupee-sign', priceAbove200: 'fa-indian-rupee-sign',
+      offers: 'fa-tags', veg: 'fa-leaf', nonveg: 'fa-drumstick-bite'
+    };
+    return icons[filter.id] || 'fa-circle-check';
+  }
+
   function renderSheetBody() {
     var body = el('filter-sheet-body');
     if (!body) return;
 
     var sorts = supportedSorts();
     var filters = supportedFilters();
+    var groups = sheetGroups(filters);
+    renderSheetTabs(groups);
+
     var html = '';
-
-    if (sorts.length > 1) {
-      html += '<h4 class="sheet-group-title">Sort by</h4><div class="sheet-options">';
+    if (activeSheetTab === 'SORT') {
+      html += '<section class="filter-section"><h4 class="filter-section-title">Sort by</h4>';
+      html += '<div class="sort-list">';
       html += sorts.map(function (sort) {
-        return '<button type="button" class="sheet-option' +
-          (state.filter.sort === sort.id ? ' selected' : '') +
-          '" data-sort="' + sort.id + '">' + card.escape(sort.label) +
-          '<i class="fa-solid fa-check"></i></button>';
+        return '<button type="button" class="sort-option' + (state.filter.sort === sort.id ? ' selected' : '') + '" data-sort="' + card.escape(sort.id) + '">' +
+          '<span>' + card.escape(sort.label) + '</span><i class="fa-solid fa-check check-icon" aria-hidden="true"></i></button>';
       }).join('');
-      html += '</div>';
-    }
-
-    if (filters.length) {
-      var groupedFilters = {};
-      filters.forEach(function(f) {
-        if (f.id === 'nearfast') return; 
-        var group = f.group || 'OTHER';
-        if (!groupedFilters[group]) groupedFilters[group] = [];
-        groupedFilters[group].push(f);
-      });
-
-      Object.keys(groupedFilters).forEach(function(groupName) {
-        html += '<h4 class="sheet-group-title">' + card.escape(groupName) + '</h4><div class="sheet-options">';
-        html += groupedFilters[groupName].map(function (filter) {
-          return '<button type="button" class="sheet-option' +
-            (isFilterActive(filter.id) ? ' selected' : '') +
-            '" data-sheet-filter="' + filter.id + '">' + card.escape(filter.label) +
-            '<i class="fa-solid fa-check"></i></button>';
-        }).join('');
-        html += '</div>';
-      });
+      html += '</div></section>';
+    } else {
+      var selected = filters.filter(function (f) { return (f.group || 'OTHER') === activeSheetTab && f.id !== 'nearfast'; });
+      if (activeSheetTab === 'DELIVERY TIME') {
+        selected = filters.filter(function (f) { return f.group === 'DELIVERY TIME' || f.id === 'nearfast'; });
+      }
+      html += '<section class="filter-section"><h4 class="filter-section-title">' + card.escape(activeSheetTab === 'DELIVERY TIME' ? 'Time' : activeSheetTab === 'FOOD TYPE' ? 'Food type' : activeSheetTab.charAt(0) + activeSheetTab.slice(1).toLowerCase()) + '</h4>';
+      html += '<div class="filter-grid' + (selected.length >= 3 ? ' three' : '') + '">';
+      html += selected.map(function (filter) {
+        return '<button type="button" class="sheet-option' + (isFilterActive(filter.id) ? ' selected' : '') + '" data-sheet-filter="' + card.escape(filter.id) + '">' +
+          '<i class="fa-solid ' + optionIcon(filter) + ' option-icon" aria-hidden="true"></i>' +
+          '<span>' + card.escape(filter.label) + '</span>' +
+          '<i class="fa-solid fa-check check-icon" aria-hidden="true"></i></button>';
+      }).join('');
+      html += '</div></section>';
+      if (!selected.length) html += '<p class="filter-section-sub">No compatible options are available for the current restaurant data.</p>';
     }
 
     body.innerHTML = html;

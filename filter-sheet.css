@@ -1,0 +1,76 @@
+/* ================================================================
+   EATSWADA — FILTER SHEET
+   Dedicated filter-sheet UI. Does not alter the homepage filter bar.
+   ================================================================ */
+.filter-sheet{position:fixed;inset:0;z-index:100001;}
+.filter-sheet[hidden]{display:none;}
+.filter-sheet .sheet-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);opacity:0;transition:opacity .22s ease;}
+.filter-sheet.open .sheet-backdrop{opacity:1;}
+
+.filter-sheet .sheet-panel{
+  position:absolute;left:0;right:0;bottom:0;
+  height:min(86vh,760px);
+  background:#fff;border-radius:24px 24px 0 0;
+  overflow:hidden;display:flex;flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .24s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 -10px 35px rgba(15,23,42,.12);
+}
+.filter-sheet.open .sheet-panel{transform:translateY(0);}
+
+.sheet-grabber{width:42px;height:4px;border-radius:99px;background:#dfe3e8;margin:8px auto 6px;flex:0 0 auto;}
+.sheet-head{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #e9ebef;flex:0 0 auto;}
+.sheet-title{font-size:18px;font-weight:800;letter-spacing:-.35px;margin:0;color:#303846;}
+.sheet-clear{border:0;background:transparent;color:#a0a6b0;font:800 13px/1 'Manrope',sans-serif;padding:8px 0;cursor:pointer;}
+.sheet-clear:active,.sheet-close-btn:active,.sheet-done:active{transform:scale(.98);}
+
+.filter-layout{display:grid;grid-template-columns:126px minmax(0,1fr);min-height:0;flex:1;overflow:hidden;}
+.filter-tabs{background:#fff;border-right:1px solid #e4e7ec;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;}
+.filter-tabs::-webkit-scrollbar{display:none;}
+.filter-tab{width:100%;min-height:78px;border:0;border-left:3px solid transparent;background:#fff;color:#7a818c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:9px 7px;font:700 11px/1.15 'Manrope',sans-serif;text-align:center;cursor:pointer;}
+.filter-tab i{font-size:18px;color:#9ba2ad;}
+.filter-tab.active{background:#fff7f9;border-left-color:#d20a61;color:#252d3a;}
+.filter-tab.active i{color:#d20a61;}
+
+.filter-content{min-width:0;overflow-y:auto;overflow-x:hidden;padding:18px 16px 24px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+.filter-content::-webkit-scrollbar{width:4px;}
+.filter-content::-webkit-scrollbar-thumb{background:#dfe3e8;border-radius:99px;}
+.filter-panel[hidden]{display:none;}
+.filter-section{margin:0 0 18px;padding:0;}
+.filter-section:last-child{margin-bottom:0;}
+.filter-section-title{margin:0 0 10px;padding:0 2px;font:800 16px/1.25 'Manrope',sans-serif;color:#303846;letter-spacing:-.2px;}
+.filter-section-sub{margin:-4px 0 10px;padding:0 2px;font:600 11px/1.4 'Manrope',sans-serif;color:#9299a4;}
+
+.sort-current{width:100%;min-height:58px;border:0;border-radius:15px;background:#f5f6fa;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:700 14px/1 'Manrope',sans-serif;color:#353d4b;text-align:left;}
+.sort-current .current-value{color:#d20a61;}
+.sort-current i{color:#a0a6b0;font-size:11px;}
+.filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.filter-grid.three{grid-template-columns:repeat(3,minmax(0,1fr));}
+.sheet-option{min-height:62px;border:1px solid #e4e7ec;border-radius:15px;background:#fff;box-shadow:0 3px 9px rgba(15,23,42,.055);font:700 13px/1.2 'Manrope',sans-serif;color:#343c49;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;cursor:pointer;}
+.sheet-option i.option-icon{font-size:17px;color:#159a62;}
+.sheet-option i.check-icon{position:absolute;right:9px;top:9px;font-size:11px;color:#fff;opacity:0;}
+.sheet-option{position:relative;}
+.sheet-option.selected{border-color:#d20a61;background:#fff6f9;box-shadow:0 0 0 1px rgba(210,10,97,.08);color:#b90055;}
+.sheet-option.selected i.check-icon{opacity:1;}
+.sheet-option.selected i.option-icon{color:#d20a61;}
+
+.sort-list{display:flex;flex-direction:column;gap:8px;}
+.sort-option{width:100%;min-height:52px;border:1px solid #e4e7ec;border-radius:14px;background:#fff;padding:0 14px;display:flex;align-items:center;justify-content:space-between;font:700 13px/1.2 'Manrope',sans-serif;color:#343c49;cursor:pointer;}
+.sort-option.selected{border-color:#d20a61;background:#fff6f9;color:#c00059;}
+.sort-option .check-icon{opacity:0;color:#d20a61;font-size:12px;}
+.sort-option.selected .check-icon{opacity:1;}
+
+.sheet-footer{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid #e9ebef;background:rgba(255,255,255,.98);flex:0 0 auto;}
+.sheet-close-btn,.sheet-done{height:52px;border-radius:14px;font:800 14px/1 'Manrope',sans-serif;cursor:pointer;}
+.sheet-close-btn{border:0;background:#fff;color:#4e5662;}
+.sheet-done{border:0;background:#d20a61;color:#fff;box-shadow:0 8px 18px rgba(210,10,97,.18);}
+
+@media(max-width:380px){
+  .filter-sheet .sheet-panel{height:90vh;border-radius:20px 20px 0 0;}
+  .filter-layout{grid-template-columns:108px minmax(0,1fr);}
+  .filter-content{padding:16px 12px 20px;}
+  .filter-tab{min-height:72px;font-size:10px;}
+  .filter-tab i{font-size:16px;}
+  .filter-grid{gap:8px;}
+  .sheet-option{min-height:58px;font-size:12px;}
+}
