@@ -71,10 +71,6 @@
   .sk.d3 { animation-delay: .24s; }
   .sk.d4 { animation-delay: .32s; }
 
-  .cs-item { display: flex; flex-direction: column; align-items: center; width: 100%; }
-  .cs-ring { width: 100%; aspect-ratio: 1/1; border-radius: 50%; }
-  .cs-name { width: 70%; height: 11px; margin-top: 8px; border-radius: 5px; }
-
   /* ══════════════════════════════════════════════════════════════
      3. EATSWADA HEADER — BENCHMARK COMPOSITION
      Location + search + promotion are one responsive visual shell.
@@ -305,19 +301,6 @@
     .veg-track.on .veg-thumb{
       transform:translateX(17px);
     }
-
-    #mind-section{
-      padding-top:20px !important;
-      background:#fff;
-    }
-    #mind-section .sec-head{margin-bottom:16px;}
-    #mind-section .sec-title{font-size:12px;letter-spacing:1.5px;}
-    #mind-section .cat-scroll{
-      gap:18px 12px;
-      padding-top:4px;
-      padding-bottom:20px;
-    }
-    .cat-name{font-size:14px;font-weight:700;}
   }
 
   @media (max-width:380px){
@@ -368,37 +351,6 @@
     white-space: nowrap;
   }
   .sec-head::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-
-  /* ── What's on your mind ── */
-  .cat-scroll {
-    display: grid;
-    grid-template-rows: repeat(2, auto);
-    grid-auto-flow: column;
-    grid-auto-columns: 25vw;
-    justify-content: start;
-    gap: 18px 14px;
-    padding: 4px 18px 20px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    scroll-snap-type: x proximity;
-    overscroll-behavior-x: contain;
-  }
-  @media (min-width: 620px) { .cat-scroll { grid-auto-columns: 120px; } }
-
-  .cat-item {
-    display: flex; flex-direction: column; align-items: center; width: 100%;
-    text-decoration: none; scroll-snap-align: start;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .18s ease, opacity .18s ease;
-  }
-  .cat-item:active { transform: scale(.93); opacity: .8; }
-
-  .cat-ring { width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
-  .cat-ring img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.2); opacity: 0; transition: opacity .25s ease; }
-  .cat-ring img.loaded { opacity: 1; }
-
-  .cat-name { font-size: 14px; font-weight: 700; color: #2A2F3A; text-align: center; line-height: 1.2; }
 
   /* ── Filter bar ── */
   .filter-bar {
@@ -664,11 +616,6 @@
     letter-spacing:-.35px;
     text-transform:none;
   }
-  .cat-name{
-    font-size:var(--ew-text-body);
-    line-height:1.25;
-    font-weight:700;
-  }
 
   /* Filters */
   .filter-pill{
@@ -748,6 +695,7 @@
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
 <link rel="stylesheet" href="eatswada-end-section.css"/>
+<link rel="stylesheet" href="whats-on-your-mind.css"/>
 </head>
 
 <body>
