@@ -1,0 +1,118 @@
+/* EatSwada — benchmark ADD button geometry
+   Load this file AFTER css/step4-menu-geometry.css. */
+
+:root{
+  --ew-item-img-w:128px;
+  --ew-item-img-h:88px;
+  --ew-add-w:92px;
+  --ew-add-h:38px;
+}
+
+/* Keep the media column at the benchmark footprint. */
+.nb-item-media{
+  width:var(--ew-item-img-w)!important;
+  flex:0 0 var(--ew-item-img-w)!important;
+  min-width:var(--ew-item-img-w)!important;
+  max-width:var(--ew-item-img-w)!important;
+  align-items:center!important;
+}
+
+.nb-item-image-wrap{
+  width:var(--ew-item-img-w)!important;
+  height:var(--ew-item-img-h)!important;
+  aspect-ratio:auto!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+}
+
+.nb-item-image-wrap img,
+.nb-item-image{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+}
+
+/* CTA overlaps the lower edge of the food image exactly like benchmark. */
+.nb-item-cta{
+  width:100%!important;
+  height:var(--ew-add-h)!important;
+  margin-top:-27px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  z-index:5!important;
+}
+
+.nb-add-btn,
+.nb-qty{
+  width:var(--ew-add-w)!important;
+  min-width:var(--ew-add-w)!important;
+  max-width:var(--ew-add-w)!important;
+  height:var(--ew-add-h)!important;
+  min-height:var(--ew-add-h)!important;
+  max-height:var(--ew-add-h)!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  border-radius:11px!important;
+  border:1.5px solid #E40073!important;
+  background:#fff!important;
+  color:#E40073!important;
+  box-shadow:0 2px 7px rgba(20,28,40,.10)!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  line-height:1!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  letter-spacing:0!important;
+  overflow:hidden!important;
+}
+
+.nb-add-btn:active{transform:scale(.98)!important}
+
+.nb-add-btn--cust{
+  padding:0!important;
+}
+
+.nb-add-plus{
+  margin-left:2px!important;
+  font-size:13px!important;
+  line-height:1!important;
+}
+
+/* Quantity state uses the same benchmark footprint. */
+.nb-qty{
+  border-color:#159A62!important;
+  color:#159A62!important;
+}
+.nb-qty-btn{
+  font-size:16px!important;
+  line-height:1!important;
+}
+
+/* Label under a customised item. */
+.nb-item-customisable,
+.nb-customisable{
+  margin-top:7px!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  text-align:center!important;
+  color:#8E949D!important;
+}
+
+/* Small screens: benchmark keeps the image proportional rather than
+   collapsing into the old 104px square. */
+@media(max-width:380px){
+  :root{
+    --ew-item-img-w:120px;
+    --ew-item-img-h:82px;
+  }
+}
+@media(max-width:340px){
+  :root{
+    --ew-item-img-w:112px;
+    --ew-item-img-h:78px;
+  }
+}
