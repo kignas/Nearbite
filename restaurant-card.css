@@ -1622,3 +1622,33 @@
   .u99-add{ width:23px; height:23px; font-size:15px; }
   .u99-item-name{ font-size:13px; min-height:34px; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE INSET — restaurant cards sit inside the page, not edge-to-edge.
+   ------------------------------------------------------------------
+   Pads the cards' PARENT container (the element renderList fills, whose
+   direct children are .u99-card-host) via :has() — so the inset is done
+   with container padding, NOT per-card margin, and needs no HTML change.
+   Cards then run width:100% inside that padded container, giving equal
+   left/right breathing room. Only the product rail scrolls horizontally;
+   the card's own overflow:hidden already stops the rail from creating
+   page-level horizontal scroll. CSS only — nothing else is touched.
+   ═══════════════════════════════════════════════════════════════════ */
+:has(> .u99-card-host){
+  box-sizing:border-box;                    /* padding can't push page width */
+  padding-inline:clamp(16px, 4vw, 22px);    /* equal left/right page inset */
+}
+
+.u99-card-host{
+  box-sizing:border-box;
+  width:100%;                               /* fill the padded container */
+  margin-bottom:18px;                       /* vertical gap between cards */
+}
+
+/* Fallback for any engine without :has() — inset each card directly so it
+   still sits inside the page. (No double inset: this only applies when the
+   container-padding rule above cannot.) */
+@supports not selector(:has(*)){
+  .u99-card-host{ margin-inline:clamp(16px, 4vw, 22px); }
+}
