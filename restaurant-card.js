@@ -622,7 +622,7 @@
         var carousel=host.querySelector('.u99-carousel');
         if(!carousel)return;
         var menu=homeSortedMenu(r).slice(0,6);
-        carousel.innerHTML=menu.length?menu.map(function(item){return homeItemMarkup(item,r);}).join(''):'<div class=\"u99-no-items\">Menu unavailable</div>';
+        carousel.classList.toggle('u99-carousel-empty',!menu.length); carousel.innerHTML=menu.length?menu.map(function(item){return homeItemMarkup(item,r);}).join(''):'<div class=\"u99-no-items\">Menu unavailable</div>';
       });
     });
   }
@@ -636,7 +636,7 @@
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
       '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name">'+esc(name)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
-      '<div class="u99-carousel-wrap"><div class="u99-carousel" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i){return homeItemMarkup(i,res);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
+      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i){return homeItemMarkup(i,res);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
     return card;

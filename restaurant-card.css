@@ -1402,6 +1402,49 @@
 
 
 /* ===== FINAL MOBILE CARD REFINEMENT ===== */
+/* ===== FINAL STRUCTURE REFINEMENT ===== */
+/* Keep the two food columns full-width. Only the image box gets shorter.
+   The image itself is never cropped: contain shows the complete source image. */
+.u99-item-image img{object-fit:contain;background:#F7F8FA}
+
+/* Every restaurant that has menu items gets the same food-section height.
+   One-item restaurants therefore do not collapse while two-item restaurants
+   do not grow simply because a second tile exists. */
+.u99-carousel{
+  min-height:154px;
+  align-items:flex-start;
+}
+.u99-item{align-self:flex-start}
+
+/* Empty/unavailable menus stay compact instead of inheriting the food-section height. */
+.u99-carousel.u99-carousel-empty{
+  min-height:0;
+  height:auto;
+  align-items:flex-start;
+  padding-bottom:0;
+}
+.u99-no-items{
+  padding:5px 1px 2px;
+  color:#475467;
+  font-size:14px;
+  line-height:1.25;
+  font-weight:500;
+}
+
+@media(max-width:430px){
+  .u99-carousel{
+    min-height:calc((100vw - 42px)/2.4 + 57px);
+  }
+  .u99-carousel.u99-carousel-empty{min-height:0}
+}
+
+@media(max-width:370px){
+  .u99-carousel{
+    min-height:calc((100vw - 40px)/2.4 + 55px);
+  }
+  .u99-carousel.u99-carousel-empty{min-height:0}
+}
+
 .u99-restaurant-card{
   padding:11px 11px 10px;
   border-radius:18px;
@@ -1409,7 +1452,7 @@
 .u99-carousel-wrap{margin-top:6px}
 .u99-carousel{gap:8px;padding-bottom:1px}
 .u99-item{flex-basis:calc((100% - 8px)/2);width:calc((100% - 8px)/2)}
-.u99-item-image{aspect-ratio:1.92/1;border-radius:11px}
+.u99-item-image{aspect-ratio:2.40/1;border-radius:11px}
 .u99-item-image img,.u99-image-fallback{border-radius:11px}
 .u99-item-name{margin-top:6px;font-size:14px;line-height:1.16;min-height:17px;max-height:34px;gap:4px}
 .u99-dietary{width:14px;height:14px;flex-basis:14px}
