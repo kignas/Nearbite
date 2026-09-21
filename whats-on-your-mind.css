@@ -5,7 +5,9 @@
    existing category component so its spacing can be tuned safely.
    ══════════════════════════════════════════════════════════════ */
 
-/* Skeleton state */
+/* Skeleton state — mirrors the real .cat-item geometry below so the
+   loading placeholders occupy the same space (same 88% ring, same 1/1
+   aspect, same name line-box) and swap to real categories with no shift. */
 #mind-section .cs-item{
   display:flex;
   flex-direction:column;
@@ -13,15 +15,16 @@
   width:100%;
 }
 #mind-section .cs-ring{
-  width:100%;
+  width:88%;
   aspect-ratio:1/1;
   border-radius:50%;
+  margin-bottom:6px;
 }
 #mind-section .cs-name{
-  width:70%;
-  height:11px;
-  margin-top:8px;
-  border-radius:5px;
+  width:64%;
+  height:12px;
+  margin-top:5px;
+  border-radius:6px;
 }
 
 /* What's on your mind */

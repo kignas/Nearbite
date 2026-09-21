@@ -888,13 +888,22 @@
   function showSkeleton() {
     var list = el('restaurant-list');
     if (!list) return;
-    list.innerHTML =
-      '<div class="rs-card"><div class="sk rs-img"></div><div class="rs-row">' +
-        '<div class="sk rs-name"></div><div class="sk rs-badge"></div></div>' +
-        '<div class="sk rs-cuis"></div><div class="sk rs-meta"></div></div>' +
-      '<div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-row">' +
-        '<div class="sk rs-name d1"></div><div class="sk rs-badge d1"></div></div>' +
-        '<div class="sk rs-cuis d1"></div><div class="sk rs-meta d1"></div></div>';
+    var cardSk =
+      '<div class="u99-card-host rs-skeleton" aria-hidden="true">' +
+        '<article class="u99-restaurant-card">' +
+          '<div class="u99-restaurant-head"><div class="u99-card-copy">' +
+            '<div class="u99-discount-line"><span class="sk rsk-line" style="width:36%"></span></div>' +
+            '<h2 class="u99-restaurant-name"><span class="sk rsk-line" style="width:62%"></span></h2>' +
+            '<div class="u99-meta"><span class="sk rsk-line" style="width:52px"></span><span class="sk rsk-line" style="width:70px"></span><span class="sk rsk-line" style="width:88px"></span></div>' +
+            '<div class="u99-free-row"><span class="sk rsk-line" style="width:54%"></span></div>' +
+          '</div></div>' +
+          '<div class="u99-carousel-wrap"><div class="u99-carousel">' +
+            '<article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill"></span><span class="sk rsk-add"></span></div><div class="u99-item-name"><span class="sk rsk-line" style="width:80%"></span></div><div class="u99-price-row"><span class="sk rsk-line" style="width:46%"></span></div></article>' +
+            '<article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill"></span><span class="sk rsk-add"></span></div><div class="u99-item-name"><span class="sk rsk-line" style="width:72%"></span></div><div class="u99-price-row"><span class="sk rsk-line" style="width:50%"></span></div></article>' +
+          '</div></div>' +
+        '</article>' +
+      '</div>';
+    list.innerHTML = cardSk + cardSk.replace(/rsk-line/g, 'rsk-line d1').replace(/rsk-fill/g, 'rsk-fill d1').replace(/rsk-add/g, 'rsk-add d1');
   }
 
   function loadRestaurants() {

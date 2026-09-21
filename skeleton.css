@@ -69,84 +69,38 @@
 #filter-bar .filter-pill.is-skeleton.d2{ animation-delay:.16s; }
 
 /* ── Homepage category skeleton ─────────────────────────────── */
-
-#cat-scroll .cs-item{
-  flex:0 0 auto;
-  width:68px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-}
-
-#cat-scroll .cs-ring{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-}
-
-#cat-scroll .cs-name{
-  width:52px;
-  height:10px;
-  border-radius:6px;
-}
+/* The category skeleton geometry is owned entirely by whats-on-your-mind.css
+   (the "Skeleton state" block), so it stays locked to the real .cat-* grid —
+   same 25vw columns, same ring size, same 2-row layout. Defining .cs-ring /
+   .cs-name here as well produced conflicting widths/heights (a 100%-wide,
+   60px-tall oval instead of a matching circle), so those rules are removed. */
 
 /* ── Homepage restaurant skeleton ────────────────────────────── */
+/* The skeleton card is a REAL .u99-card-host / .u99-restaurant-card built
+   from the same classes the loaded card uses, so it inherits the exact
+   padding, border, radius, meta layout, 2-column item rail, item-image
+   aspect-ratio and every responsive breakpoint — no guessing, no shift.
+   Only the text/images become .sk shimmer; the container line-heights and
+   min-heights keep each row at its real height. restaurant-card.js's
+   renderList() overwrites the list with real cards when data is ready. */
+.rs-skeleton{ pointer-events:none; }
 
-#restaurant-list:has(.sk){
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
+/* Inline shimmer lines standing in for text. Widths are set per element in
+   the markup; heights track each row's real type size. */
+.rs-skeleton .rsk-line{ display:inline-block; border-radius:6px; vertical-align:middle; }
+.rs-skeleton .u99-discount-line .sk{ height:10px; }
+.rs-skeleton .u99-restaurant-name .sk{ height:16px; }
+.rs-skeleton .u99-meta .sk{ height:13px; border-radius:6px; }
+.rs-skeleton .u99-free-row .sk{ height:12px; }
+.rs-skeleton .u99-item-name .sk{ height:12px; }
+.rs-skeleton .u99-price-row .sk{ height:14px; }
 
-#restaurant-list .rs-card{
-  width:100%;
-  min-height:270px;
-  padding:0 0 2px;
-  background:transparent;
-  border:0;
-  box-shadow:none;
-}
+/* Item-image placeholder: fills the real .u99-item-image box and inherits
+   its radius, so the food thumbnail reserves the exact same space. */
+.rs-skeleton .rsk-fill{ position:absolute; inset:0; border-radius:inherit; }
 
-#restaurant-list .rs-img{
-  width:100%;
-  height:178px;
-  border-radius:16px;
-}
-
-#restaurant-list .rs-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-top:13px;
-}
-
-#restaurant-list .rs-name{
-  width:56%;
-  height:18px;
-  border-radius:7px;
-}
-
-#restaurant-list .rs-badge{
-  width:66px;
-  height:22px;
-  border-radius:8px;
-}
-
-#restaurant-list .rs-cuis{
-  width:70%;
-  height:11px;
-  margin-top:10px;
-  border-radius:6px;
-}
-
-#restaurant-list .rs-meta{
-  width:46%;
-  height:11px;
-  margin-top:10px;
-  border-radius:6px;
-}
+/* Add-button placeholder, positioned exactly like the real .u99-add. */
+.rs-skeleton .rsk-add{ position:absolute; right:4px; bottom:-8px; width:34px; height:34px; border-radius:50%; z-index:4; }
 
 @media (prefers-reduced-motion: reduce){
   .sk{animation:none!important;}
