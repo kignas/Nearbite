@@ -90,18 +90,28 @@
   display:flex !important;
   align-items:flex-start !important;
   gap:7px !important;
+  min-width:0 !important;
 }
 .nb-item-title-row .nb-veg-mark{
   flex:0 0 auto !important;
   margin-top:2px !important;
 }
-.nb-item-title{ margin:0 !important; }
+.nb-item-title{
+  margin:0 !important;
+  min-width:0 !important;
+  overflow-wrap:anywhere !important;   /* long single words wrap instead of overflowing */
+}
 
 .nb-item-price-row{ margin-top:5px !important; gap:7px !important; align-items:center !important; }
 
-/* item rating — one shared restaurant rating, compact green pill */
+/* item rating — one shared restaurant rating, compact green pill.
+   width:fit-content + align-self:flex-start stop it stretching to the full
+   column width when .nb-item-main is a flex column (as style.css makes it). */
 .nb-item-rating{
   display:inline-flex !important;
+  align-self:flex-start !important;
+  width:fit-content !important;
+  max-width:max-content !important;
   align-items:center !important;
   gap:3px !important;
   margin-top:6px !important;
