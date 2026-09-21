@@ -1,168 +1,110 @@
 /*
- STEP 4 — MENU / ITEM GEOMETRY + DELIVERY-BANNER MICRO ALIGNMENT
-
- Only geometry is changed here. Existing data, API, cart, filtering,
- typography and item rendering remain untouched.
+ STEP 4B — BENCHMARK-CALIBRATED MENU / ITEM GEOMETRY
 */
-
-/* ─────────────────────────────────────────────
-   DELIVERY BANNER — tiny alignment correction
-   ───────────────────────────────────────────── */
 .delivery-banner-line{
   left:8px !important;
-  width:46px !important;
+  width:54px !important;
 }
-
 .delivery-copy{
-  left:14px !important;
-  right:110px !important;
+  left:82px !important;
+  right:112px !important;
 }
 
-/* ─────────────────────────────────────────────
-   MENU SECTION
-   Benchmark uses a tighter, cleaner vertical rhythm.
-   ───────────────────────────────────────────── */
 .menu-section{
   padding-left:16px !important;
   padding-right:16px !important;
-  margin-top:14px !important;
+  margin-top:12px !important;
 }
-
-.menu-cat-group{
-  margin-bottom:0 !important;
-}
-
+.menu-cat-group{ margin-bottom:0 !important; }
 .menu-cat-header{
   padding:12px 0 8px !important;
   min-height:46px !important;
   box-sizing:border-box !important;
 }
 
-.menu-cat-title{
-  display:inline-flex !important;
-  align-items:baseline !important;
-}
-
-/* ─────────────────────────────────────────────
-   FOOD ITEM ROW
-   Benchmark: compact left content + landscape
-   food image on the right.
-   ───────────────────────────────────────────── */
 .nb-menu-item{
   display:flex !important;
   align-items:flex-start !important;
-  gap:10px !important;
+  gap:14px !important;
   padding:14px 0 !important;
-  min-height:96px !important;
+  min-height:118px !important;
   box-sizing:border-box !important;
 }
-
 .nb-item-main{
   min-width:0 !important;
   flex:1 1 auto !important;
   padding-top:0 !important;
 }
-
 .nb-item-tag-row{
   margin-bottom:5px !important;
   min-height:15px !important;
   height:auto !important;
   gap:5px !important;
 }
-
-.nb-item-title{
-  margin:0 !important;
-}
-
+.nb-item-title{ margin:0 !important; }
 .nb-item-price-row{
   margin-top:6px !important;
   gap:7px !important;
 }
 
-/* Landscape benchmark image footprint */
 .nb-item-media{
-  width:104px !important;
-  flex:0 0 104px !important;
+  width:208px !important;
+  flex:0 0 208px !important;
   display:flex !important;
   flex-direction:column !important;
   align-items:center !important;
 }
-
 .nb-item-image-wrap{
-  width:104px !important;
-  height:72px !important;
+  width:208px !important;
+  height:144px !important;
   aspect-ratio:auto !important;
-  border-radius:11px !important;
+  border-radius:12px !important;
   overflow:hidden !important;
   box-sizing:border-box !important;
+  background:#F3F4F5 !important;
 }
-
 .nb-item-image{
   width:100% !important;
   height:100% !important;
   object-fit:cover !important;
 }
-
-/* Button sits on the lower part of the image */
 .nb-item-cta{
   width:100% !important;
-  margin-top:-18px !important;
+  margin-top:-22px !important;
   display:flex !important;
   justify-content:center !important;
 }
-
-.nb-add-btn,
-.nb-qty{
-  min-width:88px !important;
-  height:36px !important;
+.nb-add-btn,.nb-qty{
+  min-width:132px !important;
+  height:42px !important;
   box-sizing:border-box !important;
 }
+.nb-item-customisable{ margin-top:7px !important; }
 
-.nb-item-customisable{
-  margin-top:6px !important;
+@media(max-width:600px){
+  .nb-item-media{
+    width:38vw !important;
+    flex-basis:38vw !important;
+    max-width:208px !important;
+    min-width:150px !important;
+  }
+  .nb-item-image-wrap{
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:1.44 / 1 !important;
+  }
+  .nb-add-btn,.nb-qty{
+    min-width:78% !important;
+    height:40px !important;
+  }
 }
-
-/* Keep category/item spacing compact on narrow phones */
 @media(max-width:380px){
-  .menu-section{
-    padding-left:14px !important;
-    padding-right:14px !important;
-  }
-
-  .nb-menu-item{
-    gap:9px !important;
-    padding:13px 0 !important;
-  }
-
-  .nb-item-media,
-  .nb-item-image-wrap{
-    width:102px !important;
-  }
-
-  .nb-item-media{
-    flex-basis:102px !important;
-  }
-
-  .nb-item-image-wrap{
-    height:70px !important;
-  }
+  .menu-section{padding-left:14px !important;padding-right:14px !important;}
+  .nb-menu-item{gap:9px !important;padding:13px 0 !important;}
+  .nb-item-media{width:38vw !important;flex-basis:38vw !important;min-width:142px !important;}
+  .delivery-copy{left:76px !important;right:104px !important;}
 }
-
 @media(max-width:340px){
-  .nb-menu-item{
-    gap:8px !important;
-  }
-
-  .nb-item-media,
-  .nb-item-image-wrap{
-    width:94px !important;
-  }
-
-  .nb-item-media{
-    flex-basis:94px !important;
-  }
-
-  .nb-item-image-wrap{
-    height:66px !important;
-  }
+  .nb-item-media{width:36vw !important;flex-basis:36vw !important;min-width:132px !important;}
+  .delivery-copy{left:70px !important;right:96px !important;}
 }
