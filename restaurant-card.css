@@ -65,12 +65,13 @@
   margin: 0;
   background: #FFFFFF;
   border: 1px solid #EFF1F5;
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .05);
+  border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .025), 0 8px 24px rgba(15, 23, 42, .055);
   text-decoration: none;
   color: inherit;
+  font-family: inherit;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease;
 }
 
 @media (min-width: 700px) {
@@ -235,15 +236,15 @@
 .es-card-content {
   display: flex;
   flex-direction: column;
-  padding: 11px 14px 12px;
+  padding: 13px 15px 14px;
   min-width: 0;
 }
 
 .es-name {
-  font-size: 18px;
+  font-size: var(--ew-text-card-title, 17px);
   font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -.3px;
+  line-height: 1.28;
+  letter-spacing: -.35px;
   color: #101828;
   margin: 0 0 3px;
   white-space: nowrap;
@@ -258,8 +259,8 @@
   align-items: baseline;
   min-width: 0;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: var(--ew-text-body-sm, 13px);
+  line-height: 1.45;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -313,10 +314,10 @@
   max-width: 100%;
   padding: 4px 8px;
   border-radius: 7px;
-  font-size: 10px;
+  font-size: var(--ew-text-xs, 11px);
   font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: .4px;
+  line-height: 1.35;
+  letter-spacing: .25px;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -335,8 +336,8 @@
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid #F2F4F7;
 }
 
@@ -348,8 +349,8 @@
   min-width: 0;
   overflow: hidden;
   gap: 0;                           /* separators carry the spacing */
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ew-text-body-sm, 13px);
+  font-weight: 650;
   color: #4A5567;
 }
 
@@ -375,10 +376,10 @@
 .es-stat-rating {
   gap: 2px;
   padding: 4px 7px;
-  border-radius: 7px;
+  border-radius: 8px;
   background: #159A62;
   color: #FFFFFF;
-  font-size: 12px;
+  font-size: var(--ew-text-xs, 11px);
   font-weight: 800;
   letter-spacing: .1px;
 }
@@ -400,17 +401,17 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-height: 36px;
-  padding: 0 16px;
+  min-height: 38px;
+  padding: 0 17px;
   border: 0;
-  border-radius: 11px;
+  border-radius: 12px;
   background: linear-gradient(180deg, #FFA23C 0%, #F47B20 100%);
   color: #FFFFFF;
-  font-size: 13px;
+  font-size: var(--ew-text-body-sm, 13px);
   font-weight: 800;
   letter-spacing: .2px;
   white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(244, 123, 32, .28),
+  box-shadow: 0 5px 14px rgba(244, 123, 32, .20),
               inset 0 1px 0 rgba(255, 255, 255, .28);
   transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
 }
@@ -436,12 +437,13 @@
   .rs-card { padding-bottom: 12px; }
   .rs-row, .rs-cuis, .rs-meta { margin-left: 12px; margin-right: 12px; }
 
-  .es-name { font-size: 16px; }
-  .es-subtitle { font-size: 12px; }
-  .es-stats { font-size: 12px; }
+  .es-card-content { padding: 12px 13px 13px; }
+  .es-name { font-size: var(--ew-text-card-title, 17px); }
+  .es-subtitle { font-size: var(--ew-text-body-sm, 13px); }
+  .es-stats { font-size: var(--ew-text-body-sm, 13px); }
   .es-stat + .es-stat::before { margin: 0 6px; }
-  .es-stat-rating { font-size: 11px; padding: 4px 6px; }
-  .es-btn-order { min-height: 35px; padding: 0 13px; font-size: 13px; }
+  .es-stat-rating { font-size: 11px; padding: 4px 7px; }
+  .es-btn-order { min-height: 37px; padding: 0 14px; font-size: var(--ew-text-body-sm, 13px); }
 }
 
 
@@ -468,7 +470,8 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, .18);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, .14);
+  border: 1px solid rgba(15, 23, 42, .05);
   transition: transform .16s ease, color .16s ease, background .16s ease;
 }
 
@@ -525,10 +528,10 @@
   border-radius: 7px;
   background: rgba(255, 255, 255, .94);
   color: #1F2937;
-  font-size: 10px;
+  font-size: var(--ew-text-xs, 11px);
   font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: .4px;
+  line-height: 1.35;
+  letter-spacing: .25px;
   text-transform: uppercase;
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(15, 23, 42, .16);
@@ -596,7 +599,7 @@
   border-radius: 20px;
   background: rgba(255, 255, 255, .95);
   color: #1E293B;
-  font-size: 13px;
+  font-size: var(--ew-text-body-sm, 13px);
   font-weight: 800;
   line-height: 1.3;
   text-align: center;
@@ -630,6 +633,34 @@
 #es-availability-toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* ── Eatswada homepage design-system alignment ───────────────────
+   The homepage uses Manrope plus the shared 11/12/13/15/17/19px scale.
+   Keep restaurant cards on that same typographic rhythm instead of
+   introducing a separate component font system. */
+.es-card {
+  font-family: inherit;
+}
+
+.es-card-content,
+.es-name,
+.es-subtitle,
+.es-stats,
+.es-btn-order,
+.es-tag,
+.es-media-badge,
+.es-availability-pill {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.es-card:hover {
+  box-shadow: 0 2px 4px rgba(15, 23, 42, .035), 0 12px 30px rgba(15, 23, 42, .075);
+}
+
+@media (hover: none) {
+  .es-card:hover { box-shadow: 0 1px 2px rgba(15, 23, 42, .025), 0 8px 24px rgba(15, 23, 42, .055); }
 }
 
 /* ── Motion preference ──────────────────────────────────────────── */
