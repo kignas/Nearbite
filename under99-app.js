@@ -17,6 +17,7 @@
   let allRestaurants = [];
   let discountOnly = true;
   let sortMode = 'default';
+  let searchText = '';
 
   function showToast(message){
     const t=$('toast');
@@ -78,6 +79,11 @@
     }
     const visible = r.menu.filter(item => {
       if(item.price > 99) return false;
+      if(searchText){
+        const inItem = String(item.name||'').toLowerCase().includes(searchText);
+        const inRest = String(r.name||'').toLowerCase().includes(searchText);
+        if(!inItem && !inRest) return false;
+      }
       if(foodType==='veg' && !item.isVeg) return false;
       if(foodType==='nonveg' && item.isVeg) return false;
       if(priceRanges.length){
@@ -104,12 +110,27 @@
 
     skeleton.style.display='none';
     list.style.display='flex';
-    $('item-count').textContent = groups.length
-      ? `${groups.length} Restaurant${groups.length===1?'':'s'}`
-      : 'Deals for you';
+
+    const totalItems = groups.reduce((sum,g)=>sum+g.visible.length,0);
+    const anyFilter = Boolean(searchText) || foodType!=='all' || priceRanges.length>0 || deliveryLimit!==null || !discountOnly;
+    const countEl = $('item-count');
+    if(countEl){
+      countEl.textContent = totalItems
+        ? `${anyFilter?'':'All '}${totalItems} item${totalItems===1?'':'s'}`
+        : '';
+      countEl.style.display = totalItems ? 'block' : 'none';
+    }
 
     if(!groups.length){
-      list.innerHTML='<div class="empty"><div style="font-size:35px">₹</div><h3>No deals match these filters</h3><p>Try another price or food preference.</p></div>';
+      const searching = Boolean(searchText);
+      const glyph = searching
+        ? '<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#C9CED6" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m17 17 4 4"/></svg>'
+        : '<div style="font-size:35px">₹</div>';
+      const title = searching ? 'No matches' : 'No deals match these filters';
+      const line = searching
+        ? `We couldn’t find any dishes for “${esc(searchText)}”.`
+        : 'Try another price or food preference.';
+      list.innerHTML=`<div class="empty">${glyph}<h3>${title}</h3><p>${line}</p></div>`;
       return;
     }
 
@@ -140,6 +161,7 @@
     if(name==='all') return $('all-sheet');
     if(name==='delivery') return $('delivery-sheet');
     if(name==='veg') return $('veg-sheet');
+    if(name==='sort') return $('sort-sheet');
     return $('price-sheet');
   }
 
@@ -176,6 +198,8 @@
       document.querySelectorAll('input[name="delivery-time"]').forEach(i=>i.checked=Number(i.value)===deliveryLimit);
     }else if(name==='veg'){
       document.querySelectorAll('input[name="food-type"]').forEach(i=>i.checked=i.value===foodType);
+    }else if(name==='sort'){
+      document.querySelectorAll('input[name="sort-mode"]').forEach(i=>i.checked=i.value===sortMode);
     }else{
       document.querySelectorAll('input[name="price-range"]').forEach(i=>i.checked=priceRanges.includes(i.value));
     }
@@ -186,6 +210,7 @@
     $('veg-btn')?.classList.toggle('active',foodType!=='all');$('price-btn')?.classList.toggle('active',priceRanges.length>0);
     $('delivery-btn')?.classList.toggle('active',deliveryLimit!==null);$('sort-btn')?.classList.toggle('has-filter',
       foodType!=='all'||priceRanges.length>0||deliveryLimit!==null||!discountOnly);
+    $('sort-pill')?.classList.toggle('active',sortMode!=='default');
   }
 
   function applyFilter(){
@@ -202,6 +227,9 @@
       foodType=checked ? checked.value : 'all';
     }else if(activeSheet==='price'){
       priceRanges=[...document.querySelectorAll('input[name="price-range"]:checked')].map(i=>i.value);
+    }else if(activeSheet==='sort'){
+      const checked=document.querySelector('input[name="sort-mode"]:checked');
+      sortMode=checked ? checked.value : 'default';
     }
     updateFilterButtons();
     closeFilter();
@@ -220,6 +248,8 @@
       foodType='all';
     }else if(activeSheet==='price'){
       priceRanges=[];
+    }else if(activeSheet==='sort'){
+      sortMode='default';
     }
     updateFilterButtons();
     closeFilter();
@@ -468,5 +498,35 @@
     );
   }
 
-  document.addEventListener('DOMContentLoaded',()=>{ loadUnder99Hero(); load(); });
+  function toggleSearchClear(){
+    const clear=$('u99-search-clear');
+    if(clear) clear.hidden=!searchText;
+  }
+
+  function initSearch(){
+    const input=$('u99-search-input');
+    const clear=$('u99-search-clear');
+    if(input){
+      let timer=null;
+      input.addEventListener('input',()=>{
+        clearTimeout(timer);
+        timer=setTimeout(()=>{
+          searchText=input.value.trim().toLowerCase();
+          toggleSearchClear();
+          if(allRestaurants.length) render();
+        },200);
+      });
+    }
+    if(clear){
+      clear.addEventListener('click',()=>{
+        if(input) input.value='';
+        searchText='';
+        toggleSearchClear();
+        if(allRestaurants.length) render();
+        if(input) input.focus();
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{ initSearch(); loadUnder99Hero(); load(); });
 })();

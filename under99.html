@@ -84,7 +84,19 @@
 </header>
 
 <main>
-  <p id="item-count" class="items-found-label">Deals for you</p>
+  <div class="u99-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m17 17 4 4"/></svg>
+    <input id="u99-search-input" type="search" inputmode="search" autocomplete="off" placeholder="Search dishes under ₹99" aria-label="Search dishes under ₹99">
+    <button id="u99-search-clear" type="button" class="u99-search-clear" aria-label="Clear search" hidden>×</button>
+  </div>
+
+  <div class="u99-results-bar">
+    <p id="item-count" class="items-found-label">Deals for you</p>
+    <button id="sort-pill" class="sort-pill" type="button" data-open-filter="sort" aria-label="Sort dishes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3"/></svg>
+      <span>Sort</span>
+    </button>
+  </div>
 
   <section id="skeleton-feed" class="skeleton-feed" aria-hidden="true">
     <div class="skeleton-card">
@@ -179,6 +191,22 @@
     <div class="filter-actions">
       <button class="filter-apply" data-apply-filter>Apply</button>
       <button class="filter-clear" data-clear-filter>Clear Filters</button>
+    </div>
+  </section>
+
+  <section id="sort-sheet" class="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="sort-title" hidden>
+    <div class="filter-sheet-head">
+      <h2 id="sort-title" class="filter-sheet-title">Sort by</h2>
+      <button class="filter-sheet-close" data-close-filter aria-label="Close">×</button>
+    </div>
+    <div class="filter-options">
+      <label class="filter-option"><input type="radio" name="sort-mode" value="default"><span>Relevance</span></label>
+      <label class="filter-option"><input type="radio" name="sort-mode" value="price"><span>Price – low to high</span></label>
+      <label class="filter-option"><input type="radio" name="sort-mode" value="rating"><span>Rating – high to low</span></label>
+    </div>
+    <div class="filter-actions">
+      <button class="filter-apply" data-apply-filter>Apply</button>
+      <button class="filter-clear" data-clear-filter>Clear</button>
     </div>
   </section>
 </div>
