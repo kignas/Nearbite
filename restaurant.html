@@ -725,7 +725,7 @@
 
         const itemCoupon = item.coupon || item.couponText || item.couponCode || item.couponLabel || '';
         const tagHTML = (badgeLabel ? `<span class="nb-item-badge">${escapeMenuHtml(badgeLabel)}</span>` : '') +
-          (itemCoupon ? `<span class="nb-item-coupon"><i class="fa-solid fa-ticket"></i> ${escapeMenuHtml(itemCoupon)}</span>` : '');
+          (itemCoupon ? `<span class="nb-item-coupon"><i class="fa-solid fa-gift"></i> ${escapeMenuHtml(itemCoupon)}</span>` : '');
 
         const vegKnown = typeof item.isVeg === 'boolean';
         const vegIcon = !vegKnown
@@ -764,11 +764,11 @@
                style="animation-delay:${delay}s;">
 
             <div class="nb-item-main">
-              <div class="nb-item-tag-row">
+              ${tagHTML ? `<div class="nb-item-tag-row">${tagHTML}</div>` : ''}
+              <div class="nb-item-title-row">
                 ${vegIcon}
-                ${tagHTML}
+                <h3 class="nb-item-title">${escapeMenuHtml(item.name)}</h3>
               </div>
-              <h3 class="nb-item-title">${escapeMenuHtml(item.name)}</h3>
 
               <div class="nb-item-price-row">
                 <span class="nb-item-current-price">₹${cleanPrice}</span>
@@ -776,19 +776,17 @@
               </div>
 
               ${(() => {
-                const itemRating = Number(
-                  item.rating ?? item.itemRating ?? item.avgRating ?? item.averageRating
-                );
-                const itemRatingCount = Number(
-                  item.ratingCount ?? item.itemRatingCount ?? item.reviewCount ?? item.reviewsCount ?? item.ratingsCount
-                );
-                if (!Number.isFinite(itemRating) || itemRating <= 0) return '';
-                const countText = Number.isFinite(itemRatingCount) && itemRatingCount > 0
-                  ? ' <span class="nb-item-rating-count">(' + formatCompactCount(itemRatingCount) + ')</span>'
+                // Every item shows the SAME restaurant rating (real data, no per-item/random values).
+                const res = currentRestaurant || {};
+                const resRating = Number(res.rating);
+                const resRatingCount = Number(res.ratingCount);
+                if (!Number.isFinite(resRating) || resRating <= 0) return '';
+                const countText = Number.isFinite(resRatingCount) && resRatingCount > 0
+                  ? ' <span class="nb-item-rating-count">(' + formatCompactCount(resRatingCount) + ')</span>'
                   : '';
-                return '<div class="nb-item-rating" aria-label="Item rating ' + itemRating.toFixed(1) + '">'
+                return '<div class="nb-item-rating" aria-label="Rating ' + resRating.toFixed(1) + '">'
                   + '<span class="nb-item-rating-star" aria-hidden="true">★</span>'
-                  + '<span class="nb-item-rating-value">' + itemRating.toFixed(1) + '</span>'
+                  + '<span class="nb-item-rating-value">' + resRating.toFixed(1) + '</span>'
                   + countText
                   + '</div>';
               })()}
