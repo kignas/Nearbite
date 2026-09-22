@@ -27,6 +27,7 @@ const FORM_IDS = ['house','area','landmark','receiverName','receiverPhone','inst
 
 const ENTRY = new URLSearchParams(location.search);
 const cameFromSetupUrl = ENTRY.get('add') === '1';
+const cameFromExistingAdd = ENTRY.get('new') === '1';
 
 /* The single selector drives both the field wording and the stored `tag`.
    House → Home, Office → Work, Other → Other. */
@@ -194,38 +195,32 @@ function render(){
   }
 
   const sel = selectedId();
-
   root.innerHTML = addresses.map(a => {
-    const [la] = coords(a);
-    const isDefault  = a.isDefault === true;
     const isSelected = sel && String(a._id) === String(sel);
     const label = a.tag || 'Other';
-    const icon  = label === 'Home' ? 'fa-house' : label === 'Work' ? 'fa-briefcase' : 'fa-location-dot';
-    const text  = [a.house, a.area, a.landmark].filter(Boolean).join(', ');
+    const icon  = label === 'Home' ? 'fa-house' : (label === 'Work' || label === 'Office') ? 'fa-briefcase' : 'fa-location-dot';
+    const text  = [a.house, a.area, a.landmark, a.city, a.pincode].filter(Boolean).join(', ');
+    const phone = tenDigits(a.receiverPhone || a.phone || '');
     const id    = escapeHtml(a._id);
 
-    return `<div class="ea-card ${isSelected ? 'is-selected' : ''}"><div class="ea-addr">
-      <div class="ea-addr-top">
-        <div class="ea-addr-icon ${isDefault ? 'is-default' : ''}"><i class="fa-solid ${icon}"></i></div>
-        <div class="ea-addr-body">
-          <div class="ea-tagline">
-            <span class="ea-tag">${escapeHtml(label)}</span>
-            ${isDefault ? '<span class="ea-chip default">Default</span>' : ''}
-            ${isSelected ? '<span class="ea-chip selected">Delivering here</span>' : ''}
+    return `<article class="ea-card ${isSelected ? 'is-selected' : ''}">
+      <div class="ea-addr">
+        <div class="ea-addr-top">
+          <div class="ea-addr-icon"><i class="fa-solid ${icon}"></i></div>
+          <div class="ea-addr-body">
+            <div class="ea-tagline"><span class="ea-tag">${escapeHtml(label)}</span></div>
+            <div class="ea-line">${escapeHtml(text || 'Address details')}</div>
+            ${phone ? `<div class="ea-meta">Phone number: ${escapeHtml(phone)}</div>` : ''}
           </div>
-          <div class="ea-line">${escapeHtml(text || 'Address details')}</div>
-          <div class="ea-meta">${[a.city, a.pincode].filter(Boolean).map(escapeHtml).join(' · ') || 'Location details'}${Number.isFinite(la) ? ' · Map location saved' : ' · Map location missing'}</div>
+          <button type="button" class="ea-more" aria-label="Address options" onclick="event.stopPropagation();">⋮</button>
+        </div>
+        <div class="ea-actions">
+          <button class="ea-action edit" onclick="editAddress('${id}')">EDIT</button>
+          <button class="ea-action danger" onclick="deleteAddress('${id}')">DELETE</button>
+          ${isSelected ? '<span class="ea-current-mark"><i class="fa-solid fa-circle-check"></i> Delivering here</span>' : `<button class="ea-action use" onclick="useAddressById('${id}')">USE</button>`}
         </div>
       </div>
-      <div class="ea-actions">
-        ${isSelected
-          ? '<button class="ea-action current" disabled><i class="fa-solid fa-circle-check"></i> Delivering here</button>'
-          : `<button class="ea-action primary" onclick="useAddressById('${id}')"><i class="fa-solid fa-check"></i> Use this address</button>`}
-        ${!isDefault ? `<button class="ea-action" onclick="setDefault('${id}')">Set default</button>` : ''}
-        <button class="ea-action" onclick="editAddress('${id}')">Edit</button>
-        <button class="ea-action danger" onclick="deleteAddress('${id}')">Delete</button>
-      </div>
-    </div></div>`;
+    </article>`;
   }).join('');
 }
 
@@ -437,6 +432,13 @@ function openEditor(id = null){
 }
 
 function editAddress(id){ openEditor(id); }
+
+function openAddAddressFlow(){
+  const next = 'address.html?new=1';
+  const returnParam = ENTRY.get('return');
+  const handoff = returnParam ? next + '&return=' + encodeURIComponent(returnParam) : next;
+  location.href = 'location-onboarding.html?from=address&next=' + encodeURIComponent(handoff);
+}
 
 function closeEditor(){
   $('modal').classList.remove('show');
@@ -692,9 +694,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // MODE 1 is the first address, reached from Complete Profile via the map.
   // An existing customer with saved addresses is always MODE 2.
   if (cameFromSetupUrl){
-    // ?add=1 is an explicit onboarding handoff. Do not show an empty
-    // saved-address list first; open the first-address form immediately.
+    // ?add=1 is the first-address onboarding handoff.
     mode = 'setup';
+    openEditor();
+  } else if (cameFromExistingAdd){
+    // Existing customers arrive here only after confirming a new map point.
+    mode = 'manage';
     openEditor();
   }
 });

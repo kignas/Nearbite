@@ -79,3 +79,71 @@ body.ea-body{background:#f7f7f8;color:var(--ea3-ink)}
   .ea-action{font-size:10.5px}
 }
 @media(prefers-reduced-motion:reduce){.ea-card,.ea-action,.ea-fab button{transition:none!important}}
+
+
+/* ================================================================
+   PHASE 3 PIXEL REFINEMENT — saved addresses reference
+   ================================================================ */
+body.ea-body{background:#fff}
+.ea-app{max-width:none;background:#fff}
+.ea-header{position:relative;padding:18px 24px 16px;background:#fff;border-bottom:1px solid #e5e5e7;backdrop-filter:none}
+.ea-top{gap:16px}
+.ea-back{width:42px;height:42px;flex-basis:42px;border-radius:12px;background:transparent;color:#25272b}
+.ea-add{display:none}
+.ea-title{font-size:18px;font-weight:800;letter-spacing:-.25px}
+.ea-sub{display:none}
+.ea-main{padding:0 0 104px;background:#fff}
+.ea-main:before{content:'SAVED ADDRESSES';display:block;padding:28px 24px 25px;background:#f4f4f5;color:#73757b;font-size:13px;font-weight:800;letter-spacing:.01em}
+.ea-card{border:0;border-radius:0;box-shadow:none;margin:0;background:#fff}
+.ea-card.is-selected{border:0;box-shadow:none}
+.ea-addr{padding:28px 24px 26px 32px}
+.ea-card+.ea-card .ea-addr{border-top:1px solid #e7e7e9}
+.ea-addr-top{display:grid;grid-template-columns:40px minmax(0,1fr) 26px;gap:14px;align-items:start}
+.ea-addr-icon{width:40px;height:40px;flex-basis:40px;border-radius:10px;background:transparent;color:#25272b;font-size:24px}
+.ea-addr-icon.is-default{background:transparent;color:#25272b}
+.ea-tagline{gap:0}
+.ea-tag{font-size:18px;font-weight:700;color:#33353a;line-height:1.2}
+.ea-chip{display:none}
+.ea-line{font-size:15px;line-height:1.45;color:#5f6268;margin-top:13px;max-width:560px}
+.ea-meta{font-size:14px;line-height:1.4;color:#686b71;margin-top:9px}
+.ea-more{border:0;background:transparent;color:#292b2f;font-size:25px;line-height:1;padding:0;width:26px;height:32px}
+.ea-actions{margin:17px 0 0 54px;padding:0;border:0;display:flex;align-items:center;justify-content:flex-start;gap:34px}
+.ea-action{border:0!important;background:transparent!important;padding:0!important;min-width:auto!important;flex:none!important;font-size:14px;font-weight:800;letter-spacing:.01em;color:#18843f}
+.ea-action.edit,.ea-action.use{color:#18843f}
+.ea-action.danger{color:#18843f}
+.ea-current-mark{font-size:12px;font-weight:700;color:#18843f;margin-left:auto}
+.ea-current-mark i{font-size:12px;margin-right:4px}
+.ea-empty{border:0;border-radius:0;box-shadow:none;margin:20px 24px}
+.ea-fab{padding:26px 24px calc(16px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #e7e7e9;backdrop-filter:none}
+.ea-fab button{max-width:none;min-height:60px;border:2px solid #74b75c;background:#fff;color:#6aab57;box-shadow:none;border-radius:31px;font-size:16px;font-weight:800}
+.ea-fab button i{margin-right:5px}
+
+/* Add/edit screen — reference form geometry */
+.ea-form{background:#f5f4f8}
+.ea-form-head{padding:18px 24px 15px;background:#f5f4f8;border-bottom:0}
+.ea-form-head .ea-back{margin-right:4px}
+.ea-eyebrow{display:none}
+.ea-head-primary{font-size:15px;font-weight:800}
+.ea-head-secondary{font-size:11px;color:#92959b}
+.ea-change{background:#fff;color:#c47a2e;border:1px solid #f0d2b3;border-radius:12px;font-weight:800}
+.ea-form-body{padding:8px 24px 112px}
+.ea-sec{margin-bottom:22px}
+.ea-sec-head{margin:0 4px 10px}
+.ea-sec-title{font-size:20px;font-weight:800;letter-spacing:-.35px}
+.ea-sec-note{font-size:13px;color:#85878d}
+.ea-panel{border:0;border-radius:22px;padding:15px;background:#fff;box-shadow:none}
+.ea-check{width:100%;padding:0 0 14px;border:0;border-bottom:1px solid #eeeeef;background:transparent;display:flex;align-items:center;gap:12px;text-align:left}
+.ea-box{width:27px;height:27px;border-radius:7px;background:#19a657;color:#fff;display:grid;place-items:center}
+.ea-check-text{font-size:16px;font-weight:700;color:#303237}
+.ea-field{margin-top:14px}
+.ea-label{font-size:14px;font-weight:700;color:#85888e}
+.ea-input,.ea-area{min-height:64px;border:1px solid #e0e1e4;border-radius:17px;background:#fff;font-size:15px;padding:0 18px}
+.ea-seg{background:#eef0f2;border-radius:28px;padding:4px;gap:2px}
+.ea-seg button{min-height:48px;border-radius:24px;font-size:14px}
+.ea-seg button.on{background:#111216;color:#fff}
+.ea-row{min-height:76px;border:0;border-radius:20px;background:#fff;box-shadow:none;padding:0 18px;font-size:15px}
+.ea-row-cta{font-size:15px;font-weight:800;color:#18843f}
+.ea-pending{background:#fff7ef;border-color:#f0ddca}
+.ea-save{height:64px!important;border-radius:32px!important;background:#19a657!important;box-shadow:none!important;font-size:17px!important}
+.ea-form-foot{padding:10px 24px calc(14px + env(safe-area-inset-bottom));background:#f5f4f8;border-top:0;backdrop-filter:none}
+@media(max-width:390px){.ea-addr{padding-left:24px;padding-right:24px}.ea-actions{margin-left:54px;gap:25px}.ea-main:before{padding-left:24px}}
