@@ -172,8 +172,14 @@
     }
     @keyframes wcPinkPulse {
       0% { transform: scale(1); }
-      45% { transform: scale(1.018); }
+      38% { transform: scale(1.024); }
+      72% { transform: scale(.995); }
       100% { transform: scale(1); }
+    }
+    @keyframes wcPinkTextBump {
+      0% { transform: translateY(0); opacity:1; }
+      35% { transform: translateY(-2px); opacity:.86; }
+      100% { transform: translateY(0); opacity:1; }
     }
     @keyframes wcShine {
       0% { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
@@ -199,7 +205,11 @@
       animation: wcPinkEnter .36s cubic-bezier(.22,1,.36,1) forwards;
     }
     #white-cart-root.wc-pink.wc-cart-update #es-pink-inner {
-      animation: wcPinkPulse .22s cubic-bezier(.22,1,.36,1);
+      animation: wcPinkPulse .32s cubic-bezier(.22,1,.36,1);
+    }
+    #white-cart-root.wc-pink.wc-cart-update .wc-pink-left,
+    #white-cart-root.wc-pink.wc-cart-update .wc-pink-cta {
+      animation: wcPinkTextBump .28s cubic-bezier(.22,1,.36,1);
     }
     #white-cart-root.wc-exiting {
       animation: slideDownWhiteCart 0.26s ease forwards;
@@ -467,6 +477,7 @@
   /* ── 4. UI BEHAVIOR LOGIC ── */
   let isDismissed = false;
   let lastTotalQty = null;
+  let lastTotalPrice = null;
   let exitTimer = null;
   const EXIT_MS = 260;
 
@@ -712,6 +723,7 @@
     if (itemNames.length === 0) {
       hideCartBar(root);
       lastTotalQty = null;
+      lastTotalPrice = null;
       const allup = document.getElementById('wc-allup');
       if (allup) allup.classList.remove('show');
       return;
@@ -733,7 +745,8 @@
     const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
     if (countEl) countEl.innerText = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
 
-    if (lastTotalQty !== null && lastTotalQty !== totalQty) {
+    const totalChanged = lastTotalQty !== null && (lastTotalQty !== totalQty || lastTotalPrice !== totalPrice);
+    if (totalChanged) {
       bump(countEl);
       if (CART_BAR_MODE === 'pink') {
         root.classList.remove('wc-cart-update');
@@ -784,6 +797,7 @@
     }
 
     lastTotalQty = totalQty;
+    lastTotalPrice = totalPrice;
     positionCartAboveNav(root);
     showCartBar(root);
   };
@@ -877,6 +891,7 @@
       const r = document.getElementById('white-cart-root');
       if (r) { r.classList.remove('wc-enter', 'wc-exiting'); r.style.display = 'none'; }
       lastTotalQty = null;
+      lastTotalPrice = null;
     });
 
     positionCartAboveNav(root);
