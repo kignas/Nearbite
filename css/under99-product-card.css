@@ -188,3 +188,25 @@
   .u99-add-btn:active,.u99-step-btn:active{transform:none}
   .u99-stepper,.u99-stepper.u99-collapsing,.u99-step-qty.roll-up,.u99-step-qty.roll-down{animation:none}
 }
+
+/* ================================================================
+   VISUAL PASS 03.1 — ANDROID / WEBKIT TAP-HIGHLIGHT CLEANUP
+   Suppresses the native blue tap/focus flash on the add + stepper
+   controls only. The custom :active scale animation is untouched;
+   an accessible pink :focus-visible ring is kept for keyboard users.
+   ================================================================ */
+.u99-add-btn,
+.u99-step-btn{
+  -webkit-tap-highlight-color:transparent;
+  tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+  outline:none;
+}
+.u99-add-btn:focus,
+.u99-step-btn:focus{outline:none}
+.u99-add-btn:focus-visible,
+.u99-step-btn:focus-visible{
+  outline:2px solid var(--u99-primary);
+  outline-offset:2px;
+}
