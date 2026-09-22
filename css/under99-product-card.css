@@ -1,9 +1,35 @@
-/* 99 STORE — PRODUCT CARD */
-.u99-product-card{min-width:0;background:var(--u99-surface);border:0;border-radius:var(--u99-radius-lg);padding:0 0 8px;overflow:hidden}
-.u99-product-image{position:relative;aspect-ratio:1/0.96;border-radius:var(--u99-radius-lg);overflow:hidden;background:var(--u99-surface-2)}
+/* 99 STORE — PRODUCT CARD
+   Same visual language as the Eatswada homepage. Food image is the primary
+   visual, typography follows the homepage scale, and controls stay compact. */
+.u99-product-card{min-width:0;cursor:pointer}
+.u99-product-image{position:relative;aspect-ratio:1/1;border-radius:18px;overflow:hidden;background:#f5f5f6}
 .u99-product-image img{width:100%;height:100%;object-fit:cover;object-position:center}
-.u99-badge{position:absolute;top:8px;left:8px;max-width:calc(100% - 58px);padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.95);font-size:8.5px;font-weight:var(--u99-fw-black);white-space:nowrap;box-shadow:var(--u99-shadow-card)}
+.u99-badge{position:absolute;top:9px;left:9px;max-width:calc(100% - 60px);padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.96);font-size:10px;line-height:1;font-weight:800;white-space:nowrap;box-shadow:0 2px 8px rgba(15,23,42,.08)}
 .u99-badge.bestseller{background:var(--u99-primary);color:#fff}
-.u99-food-marker{position:absolute;right:8px;top:8px;width:20px;height:20px;border-radius:5px;padding:1px;background:#fff;display:grid;place-items:center;color:var(--u99-green);box-shadow:0 1px 3px rgba(0,0,0,.12)}.u99-food-marker.nonveg{color:var(--u99-nonveg)}.u99-food-marker svg{display:block}
-.u99-add-control{position:absolute;right:8px;bottom:8px;z-index:3}.u99-add-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--u99-primary);background:#fff;color:var(--u99-primary);display:grid;place-items:center;box-shadow:var(--u99-shadow-float);transition:transform var(--u99-t-fast)}.u99-add-btn:active{transform:scale(.92)}.u99-add-btn svg{display:block}.u99-add-btn .u99-add-cust{position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);font-size:7.5px;font-weight:var(--u99-fw-black);letter-spacing:.2px;color:var(--u99-primary);background:#fff;padding:1px 5px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.12);white-space:nowrap}.u99-stepper{display:flex;align-items:center;height:44px;border-radius:var(--u99-radius-pill);overflow:hidden;background:var(--u99-primary);box-shadow:var(--u99-shadow-pink)}.u99-step-btn{width:34px;height:100%;border:0;background:transparent;color:#fff;display:grid;place-items:center}.u99-step-btn svg{display:block}.u99-step-qty{min-width:20px;padding:0 2px;text-align:center;color:#fff;font-size:13px;font-weight:var(--u99-fw-black)}
-.u99-product-body{padding:8px 2px 0}.u99-restaurant-name{margin-top:4px;color:var(--u99-muted);font-size:var(--u99-fs-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u99-product-name{margin:0;font-size:var(--u99-fs-body);line-height:1.25;font-weight:var(--u99-fw-bold);letter-spacing:-.2px;min-height:32px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.u99-product-meta{display:flex;align-items:center;gap:5px;min-width:0;margin-top:5px;color:var(--u99-muted);font-size:var(--u99-fs-xs);font-weight:700;white-space:nowrap;overflow:hidden}.u99-rating{display:inline-flex;align-items:center;gap:3px;color:var(--u99-green);font-weight:var(--u99-fw-black)}.u99-rating svg{display:block}.u99-rating-count{color:var(--u99-muted);font-weight:700}.u99-meta-dot{color:#b2b5bc}.u99-product-price-row{display:flex;align-items:center;gap:6px;margin-top:8px;min-height:25px;flex-wrap:nowrap}.u99-current-price{padding:5px 7px;border-radius:5px;background:var(--u99-yellow);font-size:var(--u99-fs-body);font-weight:var(--u99-fw-black)}.u99-old-price{color:#9297a0;font-size:var(--u99-fs-xs);text-decoration:line-through}.u99-discount{padding:4px 6px;border-radius:5px;background:var(--u99-primary-soft);color:var(--u99-primary);font-size:8.5px;font-weight:var(--u99-fw-black);white-space:nowrap}
+.u99-food-marker{position:absolute;right:9px;top:9px;width:21px;height:21px;border-radius:6px;padding:2px;background:#fff;display:grid;place-items:center;color:var(--u99-green);box-shadow:0 2px 6px rgba(15,23,42,.10)}
+.u99-food-marker.nonveg{color:var(--u99-nonveg)}
+.u99-food-marker svg{display:block}
+.u99-add-control{position:absolute;right:8px;bottom:8px;z-index:3}
+.u99-add-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--u99-primary);background:#fff;color:var(--u99-primary);display:grid;place-items:center;box-shadow:0 4px 14px rgba(216,11,111,.20);transition:transform var(--u99-t-fast)}
+.u99-add-btn:active{transform:scale(.92)}
+.u99-add-btn svg{display:block}
+.u99-stepper{display:flex;align-items:center;height:44px;border-radius:999px;overflow:hidden;background:var(--u99-primary);box-shadow:var(--u99-shadow-pink)}
+.u99-step-btn{width:34px;height:100%;border:0;background:transparent;color:#fff;display:grid;place-items:center}
+.u99-step-btn svg{display:block}
+.u99-step-qty{min-width:20px;padding:0 2px;text-align:center;color:#fff;font-size:13px;font-weight:900}
+.u99-product-body{padding:9px 2px 0}
+.u99-restaurant-name{margin:0;color:var(--u99-muted);font-size:13px;line-height:1.25;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u99-product-name{margin:2px 0 0;font-size:17px;line-height:1.24;font-weight:800;letter-spacing:-.35px;min-height:42px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.u99-product-meta{display:flex;align-items:center;gap:5px;min-width:0;margin-top:5px;color:var(--u99-muted);font-size:11px;line-height:1.25;font-weight:600;white-space:nowrap;overflow:hidden}
+.u99-rating{display:inline-flex;align-items:center;gap:3px;color:var(--u99-green);font-weight:800}
+.u99-rating-count{color:var(--u99-muted);font-weight:600}
+.u99-meta-dot{color:#b2b5bc}
+.u99-product-price-row{display:flex;align-items:center;gap:6px;margin-top:8px;min-height:25px;flex-wrap:nowrap}
+.u99-current-price{padding:5px 7px;border-radius:6px;background:var(--u99-yellow);font-size:15px;line-height:1;font-weight:900}
+.u99-old-price{color:#9297a0;font-size:12px;text-decoration:line-through}
+.u99-discount{padding:4px 6px;border-radius:6px;background:var(--u99-primary-soft);color:var(--u99-primary);font-size:10px;line-height:1;font-weight:900;white-space:nowrap}
+@media(max-width:350px){
+  .u99-product-name{font-size:15px;min-height:38px}
+  .u99-add-btn{width:44px;height:44px}
+  .u99-current-price{font-size:14px}
+}
