@@ -39,6 +39,8 @@
   var state = {
     restaurants: [],
     categories: [],
+    categoryMode: null,        // { name, restaurantIds, itemByRestaurant }
+    categorySearchSeq: 0,
     categoryStatus: 'loading',   // loading | ready | empty  — owned only by the category request
     filter: {
       active: [],            // ids from FILTERS
@@ -345,7 +347,13 @@
   /* Filters are independent predicates combined with AND. Because each one
      only narrows the list, they cannot contradict each other. */
   function visibleRestaurants() {
+    var categoryIds = state.categoryMode && state.categoryMode.restaurantIds
+      ? state.categoryMode.restaurantIds
+      : null;
+
     var list = state.restaurants.filter(function (res) {
+      var rid = String(res && (res._id || res.id || res.slug) || '');
+      if (categoryIds && !categoryIds.has(rid)) return false;
       return state.filter.active.every(function (id) {
         var filter = filterById(id);
         return filter ? filter.match(res) : true;
@@ -730,6 +738,63 @@
       '<div class="cs-item"><div class="sk cs-ring d4"></div><div class="sk cs-name d4"></div></div>';
   }
 
+
+  function showCategorySkeleton() {
+    state.status = 'loading';
+    var list = el('restaurant-list');
+    if (list) showSkeleton();
+    renderSectionTitle();
+  }
+
+  function searchCategory(name) {
+    var query = String(name || '').trim();
+    if (query.length < 2) return Promise.resolve();
+
+    /* Tapping the same category again restores the normal homepage list. */
+    if (state.categoryMode && state.categoryMode.name.toLowerCase() === query.toLowerCase()) {
+      state.categoryMode = null;
+      state.status = state.restaurants.length ? 'ready' : 'empty';
+      renderSectionTitle();
+      renderFilterBar();
+      renderRestaurants();
+      return Promise.resolve();
+    }
+
+    var seq = ++state.categorySearchSeq;
+    state.categoryMode = { name: query, restaurantIds: new Set(), itemByRestaurant: Object.create(null) };
+    showCategorySkeleton();
+    renderFilterBar();
+
+    return window.API.searchMenuItems(query, 'home')
+      .then(function (items) {
+        if (seq !== state.categorySearchSeq) return;
+        var ids = new Set();
+        var byRestaurant = Object.create(null);
+
+        items.forEach(function (item) {
+          var rid = String(item && item.restaurantId || (item.restaurant && item.restaurant.id) || '');
+          if (!rid) return;
+          ids.add(rid);
+          if (!byRestaurant[rid]) byRestaurant[rid] = item;
+        });
+
+        state.categoryMode.restaurantIds = ids;
+        state.categoryMode.itemByRestaurant = byRestaurant;
+        state.status = ids.size ? 'ready' : 'empty';
+        renderSectionTitle();
+        renderFilterBar();
+        renderRestaurants();
+      })
+      .catch(function (error) {
+        if (seq !== state.categorySearchSeq) return;
+        console.error('[home] category search failed:', error);
+        state.categoryMode = null;
+        state.status = 'error';
+        state.errorMessage = error.message || 'Could not load dishes for this category.';
+        renderRestaurants();
+      });
+  }
+
   function renderCategories() {
     var scroll = el('cat-scroll');
     var section = el('mind-section');
@@ -740,8 +805,9 @@
     if (state.categories.length) {
       if (section) section.hidden = false;
       scroll.innerHTML = state.categories.map(function (cat, i) {
-        return '<a class="cat-item" href="category.html?type=' + encodeURIComponent(cat.type) +
-          '" style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
+        return '<a class="cat-item" href="#' + encodeURIComponent(cat.type) +
+          '" data-category-name="' + card.escape(cat.type) + '"' +
+          ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
           '<span class="cat-ring">' +
             '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
@@ -750,6 +816,13 @@
           '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
         '</a>';
       }).join('');
+
+      scroll.querySelectorAll('[data-category-name]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          searchCategory(link.getAttribute('data-category-name') || '');
+        });
+      });
       return;
     }
 
@@ -831,6 +904,11 @@
   function renderSectionTitle() {
     var title = el('restaurants-title');
     if (!title) return;
+
+    if (state.categoryMode) {
+      title.textContent = state.categoryMode.name + ' near you';
+      return;
+    }
 
     var hasOffers = state.restaurants.some(function (res) {
       return !!card.read.offer(res);
