@@ -101,12 +101,31 @@
       '</div>';
   }
 
-  function render() {
+  const prefersReduce = () =>
+    !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  function paint() {
     const grid = document.getElementById('u99-product-grid');
     if (!grid) return;
     const groups = filtered(), count = document.getElementById('u99-count');
     if (count) count.textContent = 'All ' + groups.length + ' ' + (groups.length === 1 ? 'item' : 'items');
     grid.innerHTML = groups.length ? groups.map(card).join('') : emptyState();
+  }
+
+  /* Subtle cross-fade when the visible set changes (price/filter/sort).
+     Old grid eases to .55 / +4px, content swaps while dimmed, new grid
+     eases back — no per-card stagger, no cart involvement. */
+  let swapTimer = null;
+  function render(animate) {
+    const grid = document.getElementById('u99-product-grid');
+    if (!grid) return;
+    if (!animate || prefersReduce() || !grid.children.length) { paint(); return; }
+    grid.classList.add('is-swapping');
+    clearTimeout(swapTimer);
+    swapTimer = setTimeout(() => {
+      paint();
+      requestAnimationFrame(() => grid.classList.remove('is-swapping'));
+    }, 140);
   }
 
   function resetFilters() {
@@ -118,8 +137,8 @@
     document.dispatchEvent(new Event('eatswada99:filters-changed'));
   }
 
-  document.addEventListener('eatswada99:data-ready', render);
-  document.addEventListener('eatswada99:filters-changed', render);
+  document.addEventListener('eatswada99:data-ready', () => render(false));
+  document.addEventListener('eatswada99:filters-changed', () => render(true));
   document.addEventListener('click', e => {
     if (e.target.closest('[data-empty-clear]')) { resetFilters(); return; }
   });
