@@ -65,9 +65,9 @@
         E.renderAddControl(item, r) +
       '</div>' +
       '<div class="u99-product-body">' +
+        '<div class="u99-restaurant-name">' + E.esc(r.name) + '</div>' +
         '<h3 class="u99-product-name">' + E.esc(item.name) + '</h3>' +
         '<div class="u99-product-meta">' + rating + (rating && delivery ? '<span class="u99-meta-dot">\u2022</span>' : '') + delivery + '</div>' +
-        '<div class="u99-restaurant-name">' + E.esc(r.name) + '</div>' +
         '<div class="u99-product-price-row">' +
           '<span class="u99-current-price">\u20B9' + Math.round(item.price) + '</span>' +
           (old ? '<span class="u99-old-price">\u20B9' + Math.round(old) + '</span>' : '') +

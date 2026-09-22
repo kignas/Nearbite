@@ -190,8 +190,7 @@
     }
     const label = hasOptions(item) ? 'Customise ' + esc(item.name) : 'Add ' + esc(item.name);
     return '<button type="button" class="u99-add-btn' + (hasOptions(item) ? ' has-options' : '') +
-      '" data-cart-add aria-label="' + label + '">' + U99Icons.icon('plus', { size: 22 }) +
-      (hasOptions(item) ? '<span class="u99-add-cust">Customise</span>' : '') + '</button>';
+      '" data-cart-add aria-label="' + label + '">' + U99Icons.icon('plus', { size: 23 }) + '</button>';
   }
   function renderAddControl(item, r) {
     return '<div class="u99-add-control" data-mi="' + esc(item.id) + '" data-ri="' + esc(r.id) + '">' +
