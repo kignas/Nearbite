@@ -1,0 +1,81 @@
+/* Eatswada Address UX — Phase 3
+   UI-only layer over the Phase 2 address domain. No API/state ownership. */
+:root{
+  --ea3-brand:#ff4f8b;
+  --ea3-brand-2:#ff6b9f;
+  --ea3-ink:#17181c;
+  --ea3-muted:#747982;
+  --ea3-soft:#f7f7f8;
+  --ea3-line:#e9eaed;
+  --ea3-green:#18a957;
+}
+body.ea-body{background:#f7f7f8;color:var(--ea3-ink)}
+.ea-app{max-width:620px;background:#f7f7f8}
+.ea-header{position:sticky;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid #ececef;padding:10px 16px 13px}
+.ea-top{gap:10px}
+.ea-back,.ea-add{width:40px;height:40px;flex-basis:40px;border-radius:13px;background:#f4f4f5;color:#292c31}
+.ea-add{background:#fff0f5;color:var(--ea3-brand)}
+.ea-title{font-size:18px;letter-spacing:-.45px}
+.ea-sub{margin:3px 0 0 50px;font-size:12px;color:#7d8188}
+.ea-main{padding:16px 16px calc(94px + env(safe-area-inset-bottom))}
+
+/* Saved address cards */
+.ea-card{position:relative;border:1px solid #e7e8eb;border-radius:18px;box-shadow:0 2px 10px rgba(22,24,29,.035);margin-bottom:10px;background:#fff}
+.ea-card.is-selected{border-color:#ffb8cf;box-shadow:0 3px 16px rgba(255,79,139,.08)}
+.ea-addr{padding:15px 14px 12px}
+.ea-addr-top{gap:12px}
+.ea-addr-icon{width:40px;height:40px;flex-basis:40px;border-radius:13px;background:#f5f5f6;color:#5f646d;font-size:14px}
+.ea-addr-icon.is-default{background:#fff0f5;color:var(--ea3-brand)}
+.ea-tagline{gap:7px}
+.ea-tag{font-size:14px;color:#191b20}
+.ea-chip{font-size:8px;padding:4px 7px}
+.ea-chip.default{background:#fff0f5;color:#d83b73}
+.ea-chip.selected{background:#eaf9f0;color:#16884a}
+.ea-line{font-size:12px;line-height:1.55;color:#454950;margin-top:6px}
+.ea-meta{font-size:10.5px;color:#969aa1;margin-top:5px}
+.ea-actions{gap:0;margin:12px -14px -12px;padding:0;border-top:1px solid #f0f0f2}
+.ea-action{border:0;border-right:1px solid #f0f0f2;border-radius:0;background:#fff;padding:11px 9px;font-size:11px;color:#555a62;min-width:0;flex:1 1 0}
+.ea-action:last-child{border-right:0}
+.ea-action.primary,.ea-action.current{border:0;border-right:1px solid #f0f0f2;background:#fff;color:var(--ea3-brand);min-width:0;flex:1 1 0}
+.ea-action.danger{color:#d64545}
+.ea-action i{margin-right:4px}
+
+.ea-empty{background:#fff;border:1px solid #e8e9ec;border-radius:18px;padding:36px 20px;box-shadow:0 2px 10px rgba(22,24,29,.03)}
+.ea-empty i{width:54px;height:54px;border-radius:17px;background:#fff0f5;color:var(--ea3-brand);display:grid;place-items:center;margin:0 auto 13px;font-size:20px}
+.ea-empty b{font-size:16px}
+.ea-empty-cta{background:linear-gradient(135deg,#ff4f8b,#ff6a9e);border-radius:13px;box-shadow:0 7px 18px rgba(255,79,139,.18)}
+
+.ea-fab{padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-top:1px solid #e9eaed}
+.ea-fab button{max-width:588px;min-height:50px;border:0;border-radius:15px;background:linear-gradient(135deg,#ff4f8b,#ff6a9e);color:#fff;box-shadow:0 8px 20px rgba(255,79,139,.2);font-size:13px}
+
+/* Add/edit screen */
+.ea-form{background:#f7f7f8}
+.ea-form-head{padding:10px 16px calc(11px + env(safe-area-inset-bottom));padding-top:calc(10px + env(safe-area-inset-top));border-bottom:1px solid #e9eaed}
+.ea-eyebrow{color:#9a9da3;font-size:9px}
+.ea-head-primary{font-size:15px}
+.ea-head-secondary{font-size:11px}
+.ea-change{border:0;background:#fff0f5;color:#d83b73;border-radius:12px;padding:9px 11px}
+.ea-form-body{padding:13px 16px 20px}
+.ea-sec{margin-bottom:13px}
+.ea-sec-head{margin:0 2px 8px}
+.ea-sec-title{font-size:13px}
+.ea-panel{border:1px solid #e7e8eb;border-radius:17px;padding:13px;background:#fff;box-shadow:0 2px 9px rgba(22,24,29,.025)}
+.ea-seg{background:#f2f2f3;border-radius:13px;padding:3px;gap:3px}
+.ea-seg button{min-height:39px;border-radius:10px;font-size:12px}
+.ea-seg button.on{background:#1d1e22}
+.ea-input,.ea-area{min-height:47px;border-radius:12px;background:#fafafa;border-color:#e4e5e8;font-size:14px}
+.ea-input:focus,.ea-area:focus{border-color:var(--ea3-brand);box-shadow:0 0 0 3px rgba(255,79,139,.10)}
+.ea-save{background:linear-gradient(135deg,#ff4f8b,#ff6a9e)!important;border:0!important;border-radius:14px!important;box-shadow:0 8px 20px rgba(255,79,139,.18)!important}
+.ea-form-foot{background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-top:1px solid #e9eaed}
+
+/* Turn the confirmed map location into a compact delivery-point card. */
+.ea-pending{background:#fff4f7;border-color:#ffd4e2;border-radius:13px}
+.ea-pending i{color:var(--ea3-brand)}
+.ea-row{border:1px solid #e7e8eb;border-radius:15px;background:#fff;box-shadow:0 2px 8px rgba(22,24,29,.025)}
+.ea-row-cta{color:var(--ea3-brand)}
+
+@media(max-width:380px){
+  .ea-main,.ea-form-body{padding-left:13px;padding-right:13px}
+  .ea-action{font-size:10.5px}
+}
+@media(prefers-reduced-motion:reduce){.ea-card,.ea-action,.ea-fab button{transition:none!important}}
