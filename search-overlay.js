@@ -15,7 +15,7 @@
 
   const API='https://eatswada.onrender.com/api';
   const MIN=2;
-  let root=null,input=null,body=null,contextLabel=null,clearBtn=null;
+  let root=null,input=null,body=null,contextLabel=null;
   let context='home',restaurantId='';
   let debounceTimer=0,requestSeq=0,aborter=null;
 
@@ -60,10 +60,9 @@
           <button class="ew-search-back" type="button" data-search-close aria-label="Close search">${icon('back',24)}</button>
           <div class="ew-search-input-wrap">
             <span class="ew-search-icon">${icon('search',20)}</span>
-            <input class="ew-search-input" id="ew-search-input" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search dishes & restaurants" enterkeyhint="search" />
-            <button class="ew-search-clear" id="ew-search-clear" type="button" aria-label="Clear search" hidden>${icon('x',20)}</button>
+            <input class="ew-search-input" id="ew-search-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Try 'Sweets'" enterkeyhint="search" />
             <span class="ew-search-divider" aria-hidden="true"></span>
-            <button class="ew-search-mic" type="button" id="ew-search-mic" aria-label="Voice search">${icon('mic',20)}</button>
+            <button class="ew-search-mic" type="button" id="ew-search-mic" aria-label="Voice search">${icon('mic',22)}</button>
           </div>
         </div>
         <div class="ew-search-context" id="ew-search-context"></div>
@@ -74,15 +73,15 @@
   }
 
   function refs(){
-    root=build();input=root.querySelector('#ew-search-input');body=root.querySelector('#ew-search-body');contextLabel=root.querySelector('#ew-search-context');clearBtn=root.querySelector('#ew-search-clear');
+    root=build();input=root.querySelector('#ew-search-input');body=root.querySelector('#ew-search-body');contextLabel=root.querySelector('#ew-search-context');
   }
 
   function open(prefill=''){
     ensureStyles(); refs();
     const c=detectContext();context=c.scope;restaurantId=c.restaurantId;
-    contextLabel.textContent=contextText();
+    if(contextLabel) contextLabel.textContent=contextText();
     root.classList.add('is-open');root.setAttribute('aria-hidden','false');document.body.classList.add('ew-search-open');
-    input.value=prefill||'';updateClear();
+    input.value=prefill||'';
     if(!prefill) renderIdle(); else scheduleSearch(true);
     requestAnimationFrame(()=>input.focus({preventScroll:true}));
   }
@@ -120,7 +119,6 @@
   }
 
   function scheduleSearch(immediate=false){
-    updateClear();
     const q=input.value.trim();
     clearTimeout(debounceTimer);
     if(q.length<MIN){renderIdle();return;}
@@ -158,7 +156,6 @@
     location.href=`restaurant.html?${qs.toString()}`;
   }
 
-  function updateClear(){if(clearBtn) clearBtn.hidden=!input.value;}
 
   function bind(){
     document.addEventListener('click',(e)=>{
@@ -176,9 +173,6 @@
       if(e.key==='Escape'){e.preventDefault();close();}
     });
     document.addEventListener('click',(e)=>{
-      if(e.target.closest('#ew-search-clear')){input.value='';updateClear();renderIdle();input.focus({preventScroll:true});}
-    });
-    document.addEventListener('click',(e)=>{
       if(e.target.closest('#ew-search-mic')) startVoice();
     });
   }
@@ -187,7 +181,7 @@
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!SR){input.focus();return;}
     const recognition=new SR();recognition.lang='en-IN';recognition.interimResults=false;recognition.maxAlternatives=1;
-    recognition.onresult=e=>{input.value=e.results?.[0]?.[0]?.transcript||'';scheduleSearch(true);updateClear();};
+    recognition.onresult=e=>{input.value=e.results?.[0]?.[0]?.transcript||'';scheduleSearch(true);};
     try{recognition.start();}catch(_){input.focus();}
   }
 
