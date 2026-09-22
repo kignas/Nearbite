@@ -1,22 +1,11 @@
 document.addEventListener('DOMContentLoaded',()=>{
-  const S=window.Eatswada99State;
-  const skeleton=document.getElementById('u99-skeleton');
-  document.addEventListener('eatswada99:data-ready',()=>{
-    skeleton?.classList.add('u99-hidden');
-  });
-  document.getElementById('u99-sort')?.addEventListener('click',()=>{
-    const next=S.sortMode==='default'?'rating':S.sortMode==='rating'?'price':'default';
-    S.sortMode=next;
-    const el=document.getElementById('u99-sort-label');
-    if(el)el.textContent=next==='default'?'Sort':next==='rating'?'Top rated':'Price';
-    window.Eatswada99Products?.render();
-  });
-  window.Eatswada99.loadHero();
-  window.Eatswada99.load();
+  const S=window.Eatswada99State,skeleton=document.getElementById('u99-skeleton');
+  document.addEventListener('eatswada99:data-ready',()=>skeleton?.classList.add('u99-hidden'));
+  const backdrop=document.getElementById('u99-sort-backdrop');
+  const syncSort=()=>{document.querySelectorAll('.u99-sort-option').forEach(x=>x.classList.toggle('selected',x.dataset.sortOption===S.sortMode));};
+  document.getElementById('u99-sort')?.addEventListener('click',()=>{syncSort();backdrop?.classList.add('open');document.body.classList.add('u99-modal-open')});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-sort-action="close"]')||e.target===backdrop){backdrop?.classList.remove('open');document.body.classList.remove('u99-modal-open')}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){backdrop?.classList.remove('open');document.body.classList.remove('u99-modal-open')}});
+  window.Eatswada99.loadHero();window.Eatswada99.load();
 });
-
-window.showToast=(message)=>{
-  const t=document.getElementById('u99-toast'); if(!t)return;
-  t.textContent=message;t.classList.add('show');
-  clearTimeout(window.__u99Toast);window.__u99Toast=setTimeout(()=>t.classList.remove('show'),1600);
-};
+window.showToast=(message)=>{const t=document.getElementById('u99-toast');if(!t)return;t.textContent=message;t.classList.add('show');clearTimeout(window.__u99Toast);window.__u99Toast=setTimeout(()=>t.classList.remove('show'),1600)};
