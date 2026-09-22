@@ -1,13 +1,125 @@
-/* 99 STORE — HEADER */
-.u99-header{position:relative;background:var(--u99-bg)}
-.u99-topbar{height:66px;display:flex;align-items:center;gap:10px;padding:8px 16px;position:relative;z-index:3;background:var(--u99-bg);border-bottom:1px solid var(--u99-border)}
-.u99-circle-btn{width:44px;height:44px;flex:0 0 44px;border:1px solid transparent;border-radius:50%;background:var(--u99-surface-2);display:grid;place-items:center;color:var(--u99-ink);transition:transform var(--u99-t-fast),background var(--u99-t-fast)}
-.u99-circle-btn:active{transform:scale(.95);background:#f0f1f3}
-.u99-circle-btn svg{width:21px;height:21px}
-.u99-location{min-width:0;flex:1;display:flex;align-items:center;gap:9px;padding:5px 8px;height:48px;max-width:270px;border:0;background:transparent;text-align:left}
-.u99-location-pin{width:18px;height:18px;flex:0 0 19px;color:var(--u99-primary);display:grid;place-items:center}
-.u99-location-copy{min-width:0;display:block}
-.u99-location-name{display:block;font-size:17px;font-weight:var(--u99-fw-bold);letter-spacing:-.35px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.u99-location-sub{display:block;margin-top:3px;font-size:11px;line-height:1.15;font-weight:var(--u99-fw-medium);color:var(--u99-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* =====================================================================
+   99 STORE — HEADER  (reference-matched: floats on the pink hero sheet)
+
+   The header IS the pink sheet: the hero gradient runs from the very top
+   (behind the status bar) down through the hero art and is rounded at the
+   bottom. Back / Search are white circles and the location is a white pill,
+   all floating on the pink — exactly as in the reference.
+
+   Font is inherited from the app (Manrope, via --u99-font on <body>); no new
+   font is introduced. Colours use the locked 99-store tokens.
+   ===================================================================== */
+
+/* Pink sheet — one continuous surface for the top bar + hero. */
+.u99-header{
+  position:relative;
+  margin:0 0 12px;
+  background:linear-gradient(112deg,
+    var(--u99-hero-1) 0%,
+    var(--u99-hero-2) 58%,
+    var(--u99-hero-3) 100%);
+  border-radius:0 0 var(--u99-radius-xl) var(--u99-radius-xl);
+  overflow:hidden;
+}
+
+/* Top bar — transparent over the pink, no divider, safe-area aware. */
+.u99-topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px var(--u99-gutter);
+  padding-top:calc(16px + env(safe-area-inset-top, 0px));
+  position:relative;
+  z-index:3;
+  background:transparent;
+  border:0;
+}
+
+/* Back + Search — matching white circles, soft pink-tinted lift. */
+.u99-circle-btn{
+  width:54px;height:54px;flex:0 0 54px;
+  border:0;
+  border-radius:50%;
+  background:#fff;
+  color:var(--u99-ink);
+  display:grid;place-items:center;
+  box-shadow:0 2px 10px rgba(120,40,80,.12);
+  transition:transform var(--u99-t-fast), background var(--u99-t-fast);
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-circle-btn:active{transform:scale(.95);background:#f7f7f8}
+.u99-circle-btn svg{width:22px;height:22px;display:block}
+
+/* Location capsule — white pill; grows to fill spare space but is capped so
+   Search stays pinned to the right edge (reference composition). */
+.u99-location{
+  flex:1 1 auto;
+  min-width:0;
+  max-width:205px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  height:56px;
+  padding:0 16px 0 13px;
+  border:0;
+  border-radius:var(--u99-radius-pill);
+  background:#fff;
+  text-align:left;
+  box-shadow:0 2px 10px rgba(120,40,80,.12);
+  transition:transform var(--u99-t-fast), background var(--u99-t-fast);
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-location:active{transform:scale(.985);background:#fcfcfd}
+
+.u99-location-pin{
+  width:20px;height:20px;flex:0 0 20px;
+  color:var(--u99-primary);
+  display:grid;place-items:center;
+}
+.u99-location-pin svg{width:20px;height:20px;display:block}
+
+.u99-location-copy{flex:1 1 auto;min-width:0;display:block}
+
+/* Line 1 — location name (strong, dark) + chevron. */
+.u99-location-line{display:flex;align-items:center;gap:5px;min-width:0}
+.u99-location-name{
+  min-width:0;
+  font-size:16px;
+  font-weight:var(--u99-fw-bold);
+  letter-spacing:-.02em;
+  line-height:1.12;
+  color:var(--u99-ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.u99-location-chevron{flex:0 0 auto;color:var(--u99-muted);display:grid;place-items:center}
+.u99-location-chevron svg{display:block}
+
+/* Line 2 — delivery time (smaller, muted). */
+.u99-location-sub{
+  display:block;
+  margin-top:2px;
+  font-size:12.5px;
+  font-weight:var(--u99-fw-medium);
+  letter-spacing:-.005em;
+  line-height:1.12;
+  color:var(--u99-muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
 .u99-search-btn{margin-left:auto}
-@media(max-width:370px){.u99-topbar{padding-left:12px;padding-right:12px}.u99-circle-btn{width:40px;height:40px;flex-basis:40px}.u99-location{max-width:215px}.u99-location-sub{font-size:10px}}
+
+/* ── Responsive: shrink gracefully, never overflow, never overlap ── */
+@media (max-width:380px){
+  .u99-topbar{gap:10px;padding:14px;padding-top:calc(14px + env(safe-area-inset-top, 0px));}
+  .u99-circle-btn{width:48px;height:48px;flex-basis:48px}
+  .u99-circle-btn svg{width:20px;height:20px}
+  .u99-location{height:52px;max-width:180px;padding:0 13px 0 11px;gap:8px}
+  .u99-location-pin,.u99-location-pin svg{width:18px;height:18px;flex-basis:18px}
+  .u99-location-name{font-size:15px}
+  .u99-location-sub{font-size:12px}
+}
+@media (max-width:340px){
+  .u99-location{max-width:150px}
+  .u99-location-name{font-size:14.5px}
+  .u99-location-sub{font-size:11.5px}
+}

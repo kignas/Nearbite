@@ -1,5 +1,8 @@
 /* 99 STORE — COMPACT HERO */
-.u99-hero{position:relative;min-height:154px;margin:0 0 12px;border-radius:0 0 var(--u99-radius-xl) var(--u99-radius-xl);overflow:hidden;background:linear-gradient(112deg,var(--u99-hero-1) 0%,var(--u99-hero-2) 58%,var(--u99-hero-3) 100%)}
+/* The pink gradient + rounded bottom now live on .u99-header so the top bar
+   and hero read as one continuous sheet (see under99-header.css). The hero
+   keeps its own overflow clip so the decorative circle/art stay within it. */
+.u99-hero{position:relative;min-height:154px;margin:0;border-radius:0 0 var(--u99-radius-xl) var(--u99-radius-xl);overflow:hidden;background:transparent}
 .u99-hero::before{content:"";position:absolute;width:170px;height:170px;right:-48px;top:-70px;border-radius:50%;background:rgba(255,255,255,.18);pointer-events:none}
 .u99-hero-copy{position:relative;z-index:2;width:56%;padding:19px 0 18px 22px}
 .u99-kicker{font-size:17px;font-weight:var(--u99-fw-black);letter-spacing:-.45px;line-height:1.05;color:var(--u99-ink)}
@@ -12,3 +15,7 @@
 @media(max-width:430px){.u99-hero{min-height:150px}.u99-hero-copy{padding-left:20px;padding-top:18px}.u99-kicker{font-size:16px}.u99-price .currency{font-size:32px}.u99-price .number{font-size:62px}.u99-sub{font-size:10.5px}.u99-hero-art{width:61%;right:-8px}}
 
 .u99-hero-fallback{position:absolute;right:4%;bottom:0;width:46%;height:100%;z-index:1;opacity:.95;pointer-events:none}.u99-hero-bubble{position:absolute;border-radius:50%;background:rgba(255,255,255,.58);box-shadow:0 10px 20px rgba(180,54,110,.08)}.u99-hero-bubble.b1{width:92px;height:92px;right:34px;bottom:20px}.u99-hero-bubble.b2{width:56px;height:56px;right:2px;bottom:58px}.u99-hero-bubble.b3{width:34px;height:34px;right:76px;bottom:96px}.u99-hero-fizz{position:absolute;right:64px;bottom:42px;width:62px;height:24px;border-radius:50%;border-top:5px solid rgba(216,11,111,.18);transform:rotate(-10deg)}.u99-hero-art.loaded + *{} .u99-hero-art.loaded{opacity:1}.u99-hero-art:not(.loaded){opacity:0}
+
+/* Shared Eatswada fallback: keep the hero visually intentional if banner API is unavailable. */
+.u99-hero-fallback{position:absolute;inset:0;background:linear-gradient(135deg,#ffe8f0 0%,#ffd5e4 100%);pointer-events:none}
+.u99-hero-fallback .u99-hero-bubble,.u99-hero-fallback .u99-hero-fizz{display:none!important}
