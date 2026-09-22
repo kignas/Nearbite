@@ -1,0 +1,19 @@
+
+/* Eatswada shared contextual search — production interaction layer */
+:root{--ew-search-pink:#d20a61;--ew-search-ink:#20242d}
+.ew-search-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(15,12,16,.52);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;pointer-events:none;transition:opacity .22s ease}
+.ew-search-sheet{position:fixed;top:0;left:0;right:0;z-index:10001;background:#fff;border-radius:0 0 26px 26px;padding:calc(12px + env(safe-area-inset-top)) 16px 18px;transform:translateY(-105%);transition:transform .34s cubic-bezier(.22,.8,.24,1);box-shadow:0 12px 34px rgba(0,0,0,.16)}
+.ew-search-sheet.is-open{transform:translateY(0)}
+.ew-search-backdrop.is-open{opacity:1;pointer-events:auto}
+.ew-search-grabber{width:42px;height:4px;border-radius:999px;background:#d9dbe0;margin:0 auto 12px}
+.ew-search-form{display:flex;align-items:center;gap:9px;height:54px;border:1px solid #e4e5e9;border-radius:18px;background:#fff;padding:0 12px;box-shadow:0 5px 18px rgba(25,25,30,.08)}
+.ew-search-icon{font-size:18px;color:#69717d;flex:0 0 auto}
+.ew-search-input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--ew-search-ink);font:600 16px/1.2 Inter,system-ui,sans-serif}
+.ew-search-input::placeholder{color:#9aa0aa}
+.ew-search-close{width:36px;height:36px;border:0;border-radius:50%;background:#f4f5f7;color:#343942;display:grid;place-items:center;font-size:18px;cursor:pointer}
+.ew-search-context{margin:12px 4px 0;font:700 11px/1.3 Inter,system-ui,sans-serif;color:#8b919b;letter-spacing:.02em}
+.ew-search-hints{display:flex;gap:8px;overflow:auto;padding:12px 2px 2px;scrollbar-width:none}
+.ew-search-hints::-webkit-scrollbar{display:none}
+.ew-search-hint{flex:0 0 auto;border:1px solid #ececef;background:#fafafa;border-radius:999px;padding:9px 13px;color:#444a54;font:700 12px/1 Inter,system-ui,sans-serif}
+.ew-search-hint:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){.ew-search-sheet,.ew-search-backdrop{transition:none}}

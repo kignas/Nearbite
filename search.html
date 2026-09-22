@@ -132,7 +132,7 @@
     .suggestion-chips{padding-left:24px;padding-right:24px}
     #results-section{max-width:760px;margin:0 auto}
   }
-</style>
+.search-result-heading{margin:18px 4px 9px;font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#9a526f}\n</style>
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
@@ -195,7 +195,7 @@
   const clearBtn = document.getElementById('clear-btn');
   const chipsSection = document.getElementById('suggestion-chips');
   let restaurants = [];
-
+  const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
 
   function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -232,14 +232,22 @@
   });
 
   function doSearch(q){
-    const matched=restaurants.filter(res=>{
+    const term=String(q||'').trim().toLowerCase();
+    const restaurantMatches=[];
+    const dishMatches=[];
+    restaurants.forEach(res=>{
       const name=String(res.name||'').toLowerCase();
       const cuisine=Array.isArray(res.cuisine)?res.cuisine.join(' ').toLowerCase():String(res.cuisine||'').toLowerCase();
       const menu=Array.isArray(res.menu)?res.menu:[];
-      return name.includes(q)||cuisine.includes(q)||menu.some(item=>String(item.name||'').toLowerCase().includes(q));
+      if(name.includes(term)||cuisine.includes(term)) restaurantMatches.push(res);
+      menu.forEach(item=>{
+        if(String(item?.name||'').toLowerCase().includes(term)){
+          dishMatches.push({res,item});
+        }
+      });
     });
-    
-    if(!matched.length){
+
+    if(!restaurantMatches.length && !dishMatches.length){
       resultsList.innerHTML=`<div class="search-empty">
         <i class="fa-solid fa-magnifying-glass"></i>
         <p>No restaurants or dishes found</p>
@@ -247,22 +255,36 @@
       </div>`;
       return;
     }
-    
-    resultsList.innerHTML=matched.map(res=>{
+
+    const restaurantHtml=restaurantMatches.slice(0,8).map(res=>{
       const id=esc(res._id||res.id||'');
-      const dishes=(Array.isArray(res.menu)?res.menu:[]).filter(i=>String(i.name||'').toLowerCase().includes(q)).slice(0,3).map(i=>i.name).join(', ');
       return `<a href="restaurant.html?id=${encodeURIComponent(id)}" class="result-card">
         <img src="${esc(safeUrl(res.image||res.img||''))}" alt="${esc(res.name)}" onerror="this.style.display='none'">
         <div class="result-main">
-          <div class="result-title-row">
-            <strong>${esc(res.name)}</strong>
-            <span class="result-rating">${esc(res.rating||'4.0')} <i class="fa-solid fa-star text-[8px]"></i></span>
-          </div>
+          <div class="result-title-row"><strong>${esc(res.name)}</strong>
+          <span class="result-rating">${esc(res.rating||'4.0')} <i class="fa-solid fa-star text-[8px]"></i></span></div>
           <p>${esc(Array.isArray(res.cuisine)?res.cuisine.join(', '):(res.cuisine||'Indian, Fast Food'))}</p>
-          ${dishes?`<small>Matches: ${esc(dishes)}</small>`:''}
         </div>
       </a>`;
     }).join('');
+
+    const dishHtml=dishMatches.slice(0,20).map(({res,item})=>{
+      const rid=esc(res._id||res.id||'');
+      const iid=esc(item._id||item.id||'');
+      const price=item.price!=null?'₹'+esc(item.price):'';
+      return `<a href="restaurant.html?id=${encodeURIComponent(rid)}" class="result-card">
+        <img src="${esc(safeUrl(item.image||res.image||res.img||''))}" alt="${esc(item.name)}" onerror="this.style.display='none'">
+        <div class="result-main">
+          <div class="result-title-row"><strong>${esc(item.name)}</strong><span class="result-rating">${price}</span></div>
+          <p>${esc(res.name)}</p>
+          <small>${iid ? 'Open restaurant menu' : 'View restaurant'}</small>
+        </div>
+      </a>`;
+    }).join('');
+
+    resultsList.innerHTML=
+      (restaurantHtml?'<div class="search-result-heading">Restaurants</div>'+restaurantHtml:'')+
+      (dishHtml?'<div class="search-result-heading">Dishes</div>'+dishHtml:'');
   }
 
   function clearSearch(){
@@ -274,7 +296,13 @@
   }
   window.clearSearch=clearSearch;
 
-  document.addEventListener('DOMContentLoaded',()=>{loadRestaurants();});
+  document.addEventListener('DOMContentLoaded',async()=>{
+    await loadRestaurants();
+    if(initialQuery){
+      searchInput.value=initialQuery;
+      searchInput.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  });
 </script>
 </body>
 </html>
