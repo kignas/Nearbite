@@ -86,31 +86,10 @@
 }
 
 
-/* ================================================================
-   PHASE 1 — SLIM BENCHMARK PRICE CAPSULE
-   ================================================================ */
-.u99-price-seg{
-  height:46px;
-  margin:4px var(--u99-gutter) 16px;
-  padding:3px;
-  border-color:#e3e4e8;
-  background:#f6f6f7;
-}
-.u99-price-thumb{
-  top:3px;
-  bottom:3px;
-  left:3px;
-  width:calc((100% - 6px) / 3);
-  box-shadow:0 4px 12px rgba(216,11,111,.25);
-  transition:transform .32s cubic-bezier(.22,1,.36,1);
-}
+/* PHASE 1.1 — SLIM PRICE CAPSULE */
+.u99-price-seg{height:44px;margin-bottom:16px;padding:3px}
+.u99-price-thumb{top:3px;left:3px;bottom:3px;width:calc((100% - 6px) / 3);box-shadow:0 4px 11px rgba(216,11,111,.24)}
 .u99-price-tab{font-size:12.5px}
-.u99-price-tab:active{transform:scale(.985)}
-@media(max-width:390px){
-  .u99-price-seg{height:44px;margin:4px 12px 15px}
-  .u99-price-tab{font-size:11.5px}
-}
-@media(max-width:360px){
-  .u99-price-seg{height:42px}
-  .u99-price-tab{font-size:11px}
-}
+.u99-price-tab + .u99-price-tab::before{height:15px}
+@media(max-width:390px){.u99-price-seg{height:42px;margin-left:18px;margin-right:18px;margin-bottom:15px}.u99-price-tab{font-size:11.5px}}
+@media(max-width:360px){.u99-price-seg{height:40px}.u99-price-tab{font-size:11px}}
