@@ -106,7 +106,10 @@
   function hydrateImages(grid) {
     if (!grid) return;
     grid.querySelectorAll('.u99-item-img').forEach(img => {
-      const reveal = () => {
+      const reveal = async () => {
+        try {
+          if (typeof img.decode === 'function') await img.decode();
+        } catch (_) {}
         requestAnimationFrame(() => img.classList.add('is-loaded'));
       };
       if (img.complete && img.naturalWidth > 0) reveal();
@@ -146,7 +149,7 @@
         grid.classList.remove('is-loading-set');
         skeleton?.classList.add('u99-hidden');
       });
-    }, 190);
+    }, 240);
   }
 
   function resetFilters() {
