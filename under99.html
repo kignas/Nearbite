@@ -14,7 +14,6 @@
 <link rel="stylesheet" href="css/under99-header.css">
 <link rel="stylesheet" href="css/under99-hero.css">
 <link rel="stylesheet" href="css/under99-filters.css">
-<link rel="stylesheet" href="css/under99-popular.css">
 <link rel="stylesheet" href="css/under99-price-tabs.css">
 <link rel="stylesheet" href="css/under99-product-card.css">
 <link rel="stylesheet" href="css/under99-product-grid.css">
@@ -59,15 +58,11 @@
 
 <main class="u99-page">
 
-  <section class="u99-popular">
-    <div class="u99-section-title u99-section"><span>Popular dishes near you</span><a class="link" href="#u99-products">See all <span data-icon="chevron-right" data-icon-size="13"></span></a></div>
-    <div id="u99-popular-rail" class="u99-popular-rail"></div>
-  </section>
-
-  <nav class="u99-price-tabs" aria-label="Price range">
-    <button class="u99-price-tab active" data-price-band="99">₹99 &amp; under</button>
-    <button class="u99-price-tab" data-price-band="100">₹100 – ₹149</button>
-    <button class="u99-price-tab" data-price-band="150">₹150 – ₹200</button>
+  <nav class="u99-price-seg" role="tablist" aria-label="Price range">
+    <span class="u99-price-thumb" aria-hidden="true"></span>
+    <button class="u99-price-tab active" role="tab" aria-selected="true" data-price-band="99">₹99 &amp; under</button>
+    <button class="u99-price-tab" role="tab" aria-selected="false" data-price-band="100">₹100 – ₹149</button>
+    <button class="u99-price-tab" role="tab" aria-selected="false" data-price-band="150">₹150 – ₹200</button>
   </nav>
 
   <section id="u99-products">
@@ -80,7 +75,6 @@
     </div>
 
     <div id="u99-skeleton" class="u99-skeleton">
-      <div class="u99-skel-pop"><div><div class="u99-skel-circle u99-shimmer"></div><div class="u99-skel-line u99-shimmer"></div></div><div><div class="u99-skel-circle u99-shimmer"></div><div class="u99-skel-line u99-shimmer"></div></div><div><div class="u99-skel-circle u99-shimmer"></div><div class="u99-skel-line u99-shimmer"></div></div><div><div class="u99-skel-circle u99-shimmer"></div><div class="u99-skel-line u99-shimmer"></div></div></div>
       <div class="u99-skel-grid"><div class="u99-skel-card u99-shimmer"></div><div class="u99-skel-card u99-shimmer"></div><div class="u99-skel-card u99-shimmer"></div><div class="u99-skel-card u99-shimmer"></div></div>
     </div>
 
@@ -160,7 +154,6 @@
 <script src="js/under99-core.js"></script>
 <script src="js/under99-header.js"></script>
 <script src="js/under99-filters.js"></script>
-<script src="js/under99-popular.js"></script>
 <script src="js/under99-price-tabs.js"></script>
 <script src="js/under99-products.js"></script>
 <script src="js/under99-customize.js"></script>
