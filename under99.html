@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>99 Store – Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
 
+<link rel="stylesheet" href="css/under99-tokens.css">
 <link rel="stylesheet" href="css/under99-base.css">
 <link rel="stylesheet" href="css/under99-header.css">
 <link rel="stylesheet" href="css/under99-hero.css">
@@ -17,6 +18,7 @@
 <link rel="stylesheet" href="css/under99-price-tabs.css">
 <link rel="stylesheet" href="css/under99-product-card.css">
 <link rel="stylesheet" href="css/under99-product-grid.css">
+<link rel="stylesheet" href="css/under99-customize.css">
 <link rel="stylesheet" href="css/under99-responsive.css">
 <link rel="stylesheet" href="css/under99-skeleton.css">
 </head>
@@ -24,16 +26,15 @@
 
 <header class="u99-header">
   <div class="u99-topbar">
-    <a class="u99-circle-btn" href="index.html" aria-label="Back">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-    </a>
+    <a class="u99-circle-btn" href="index.html" aria-label="Back"><span data-icon="back" data-icon-size="21"></span></a>
     <button id="u99-location" class="u99-location" type="button" aria-label="Change delivery location">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.7A7.35 7.35 0 0 0 4.65 10c0 5.35 7.35 11.3 7.35 11.3S19.35 15.35 19.35 10A7.35 7.35 0 0 0 12 2.7Zm0 10.05A2.75 2.75 0 1 1 12 7.25a2.75 2.75 0 0 1 0 5.5Z"/></svg>
-      <span class="u99-location-copy"><strong id="u99-location-name" class="u99-location-name">Takaturi</strong><span id="u99-location-sub" class="u99-location-sub">Delivery in 35–40 minutes</span></span>
+      <span class="u99-location-pin" data-icon="location" data-icon-size="19"></span>
+      <span class="u99-location-copy">
+        <strong id="u99-location-name" class="u99-location-name">Takatuli</strong>
+        <span id="u99-location-sub" class="u99-location-sub">Delivery in 35–40 minutes</span>
+      </span>
     </button>
-    <button class="u99-circle-btn u99-search-btn" type="button" onclick="location.href='search.html'" aria-label="Search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.1 16.1 4.1 4.1"/></svg>
-    </button>
+    <button class="u99-circle-btn u99-search-btn" type="button" onclick="location.href='search.html'" aria-label="Search"><span data-icon="search" data-icon-size="21"></span></button>
   </div>
 
   <section class="u99-hero" aria-label="Meals under ₹99">
@@ -42,23 +43,21 @@
       <div class="u99-price"><span class="currency">₹</span><span class="number">99</span></div>
       <p class="u99-sub">Great food. Lower prices. Everyday.</p>
     </div>
-    <img id="u99-hero-art" class="u99-hero-art" alt="" hidden>
+    <div class="u99-hero-fallback" aria-hidden="true"><span class="u99-hero-bubble b1"></span><span class="u99-hero-bubble b2"></span><span class="u99-hero-bubble b3"></span><span class="u99-hero-fizz"></span></div><img id="u99-hero-art" class="u99-hero-art" alt="" hidden>
   </section>
 
   <nav class="u99-filter-rail" aria-label="99 Store filters">
-    <button class="u99-filter u99-filter-icon" data-filter-action="open" type="button" aria-label="Filters">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16"/><circle cx="9" cy="7" r="2"/><path d="M4 17h16"/><circle cx="15" cy="17" r="2"/></svg>
-    </button>
-    <button id="u99-discount" class="u99-filter active" data-filter-action="discount" type="button"><span class="u99-percent">%</span>40–60% Lower Prices</button>
-    <button class="u99-filter" data-filter-action="open" type="button">Veg / Non-Veg <span aria-hidden="true">⌄</span></button>
-    <button class="u99-filter" data-filter-action="open" type="button">Delivery time <span aria-hidden="true">⌄</span></button>
+    <button class="u99-filter u99-filter-icon" data-filter-action="open" type="button" aria-label="Open filters"><span data-icon="filter" data-icon-size="17"></span><span class="u99-filter-icon-label">Filters</span></button>
+    <button id="u99-discount" class="u99-filter featured" data-filter-action="discount" type="button"><span class="u99-percent">%</span>25–60% lower prices</button>
+    <button class="u99-filter" data-filter-action="open" data-rail="delivery" type="button">Delivery time <span data-icon="chevron-down" data-icon-size="15"></span></button>
+    <button class="u99-filter" data-filter-action="open" data-rail="food" type="button">Veg / Non-Veg <span data-icon="chevron-down" data-icon-size="15"></span></button>
   </nav>
 </header>
 
 <main class="u99-page">
 
   <section class="u99-popular">
-    <div class="u99-section-title u99-section"><span>Popular dishes near you</span><a class="link" href="#u99-products">See all →</a></div>
+    <div class="u99-section-title u99-section"><span>Popular dishes near you</span><a class="link" href="#u99-products">See all <span data-icon="chevron-right" data-icon-size="13"></span></a></div>
     <div id="u99-popular-rail" class="u99-popular-rail"></div>
   </section>
 
@@ -72,7 +71,7 @@
     <div class="u99-products-head">
       <h2 id="u99-count" class="u99-products-title">All items</h2>
       <button id="u99-sort" class="u99-sort" type="button" aria-haspopup="dialog">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 4v16M5 7l3-3 3 3M16 20V4m-3 13 3 3 3-3"/></svg>
+        <span data-icon="sort" data-icon-size="15"></span>
         <span id="u99-sort-label">Sort</span>
       </button>
     </div>
@@ -86,61 +85,82 @@
   </section>
 </main>
 
+<!-- ===================== FILTERS SHEET (ref #04) ===================== -->
 <div id="u99-filter-backdrop" class="u99-filter-backdrop" aria-hidden="true">
   <section class="u99-filter-sheet" role="dialog" aria-modal="true" aria-labelledby="u99-filter-title">
-    <div class="u99-filter-head"><h2 id="u99-filter-title" class="u99-filter-title">Filters &amp; sorting</h2><button class="u99-filter-close" data-filter-action="close" aria-label="Close">×</button></div>
-
-    <div class="u99-filter-block">
-      <div class="u99-filter-label">Discount</div>
-      <div class="u99-filter-options"><button class="u99-option selected" data-filter-choice="discount" data-value="discount">40–60% Lower Prices</button></div>
+    <div class="u99-sheet-grab"></div>
+    <div class="u99-filter-head">
+      <h2 id="u99-filter-title" class="u99-filter-title">Filters</h2>
+      <button class="u99-filter-close" data-filter-action="close" aria-label="Close"><span data-icon="close" data-icon-size="18"></span></button>
     </div>
 
-    <div class="u99-filter-block">
-      <div class="u99-filter-label">Food preference</div>
-      <div class="u99-filter-options">
-        <button class="u99-option selected" data-filter-choice="food" data-value="all">All</button>
-        <button class="u99-option" data-filter-choice="food" data-value="veg">Veg</button>
-        <button class="u99-option" data-filter-choice="food" data-value="nonveg">Non-Veg</button>
+    <div class="u99-filter-scroll">
+      <div class="u99-filter-block">
+        <div class="u99-filter-label">Offers &amp; pricing</div>
+        <button class="u99-row" data-filter-choice="offer" data-value="discount"><span class="u99-row-label">25–60% lower prices</span><span class="u99-check" aria-hidden="true"></span></button>
+        <button class="u99-row" data-filter-choice="offer" data-value="free"><span class="u99-row-label">Free delivery</span><span class="u99-check" aria-hidden="true"></span></button>
+        <button class="u99-row" data-filter-choice="offer" data-value="great"><span class="u99-row-label">Great offers</span><span class="u99-check" aria-hidden="true"></span></button>
       </div>
-    </div>
 
-    <div class="u99-filter-block">
-      <div class="u99-filter-label">Delivery time</div>
-      <div class="u99-filter-options">
-        <button class="u99-option" data-filter-choice="delivery" data-value="20">Under 20 min</button>
-        <button class="u99-option" data-filter-choice="delivery" data-value="30">Under 30 min</button>
-        <button class="u99-option" data-filter-choice="delivery" data-value="45">Under 45 min</button>
+      <div class="u99-filter-block">
+        <div class="u99-filter-label">Delivery time</div>
+        <button class="u99-row" data-filter-choice="delivery" data-value="30"><span class="u99-row-label">Fastest (under 30 mins)</span><span class="u99-radio" aria-hidden="true"></span></button>
+        <button class="u99-row" data-filter-choice="delivery" data-value="40"><span class="u99-row-label">30–40 mins</span><span class="u99-radio" aria-hidden="true"></span></button>
+        <button class="u99-row" data-filter-choice="delivery" data-value="60"><span class="u99-row-label">40–60 mins</span><span class="u99-radio" aria-hidden="true"></span></button>
+      </div>
+
+      <div class="u99-filter-block">
+        <div class="u99-filter-label">Veg / Non-Veg</div>
+        <button class="u99-row" data-filter-choice="food" data-value="veg"><span class="u99-row-label">Pure Veg</span><span class="u99-radio" aria-hidden="true"></span></button>
+        <button class="u99-row" data-filter-choice="food" data-value="all"><span class="u99-row-label">Both</span><span class="u99-radio" aria-hidden="true"></span></button>
+        <button class="u99-row" data-filter-choice="food" data-value="nonveg"><span class="u99-row-label">Non-Veg</span><span class="u99-radio" aria-hidden="true"></span></button>
       </div>
     </div>
 
     <div class="u99-filter-actions">
-      <button class="u99-clear" data-filter-action="clear">Clear all</button>
-      <button class="u99-apply" data-filter-action="apply">Show results</button>
+      <button class="u99-clear" data-filter-action="clear" type="button">Clear all</button>
+      <button class="u99-apply" data-filter-action="apply" type="button">Apply</button>
     </div>
   </section>
 </div>
 
-
+<!-- ===================== SORT SHEET (ref #03) ===================== -->
 <div id="u99-sort-backdrop" class="u99-filter-backdrop" aria-hidden="true">
   <section class="u99-sort-sheet" role="dialog" aria-modal="true" aria-labelledby="u99-sort-title">
-    <div class="u99-filter-head"><h2 id="u99-sort-title" class="u99-filter-title">Sort by</h2><button class="u99-filter-close" data-sort-action="close" aria-label="Close">×</button></div>
+    <div class="u99-sheet-grab"></div>
+    <div class="u99-filter-head">
+      <h2 id="u99-sort-title" class="u99-filter-title">Sort by</h2>
+      <button class="u99-filter-close" data-sort-action="close" aria-label="Close"><span data-icon="close" data-icon-size="18"></span></button>
+    </div>
     <div class="u99-sort-options">
-      <button class="u99-sort-option" data-sort-option="default"><span>Recommended</span><span class="u99-sort-radio"></span></button>
-      <button class="u99-sort-option" data-sort-option="rating"><span>Top rated</span><span class="u99-sort-radio"></span></button>
-      <button class="u99-sort-option" data-sort-option="price"><span>Price: low to high</span><span class="u99-sort-radio"></span></button>
+      <button class="u99-sort-option selected" data-sort-option="default"><span class="u99-sort-ic" data-icon="sort-updown" data-icon-size="18"></span><span class="u99-sort-text">Recommended</span><span class="u99-sort-radio"></span></button>
+      <button class="u99-sort-option" data-sort-option="price"><span class="u99-sort-ic" data-icon="price-up" data-icon-size="18"></span><span class="u99-sort-text">Price: Low to High</span><span class="u99-sort-radio"></span></button>
+      <button class="u99-sort-option" data-sort-option="price-desc"><span class="u99-sort-ic" data-icon="price-down" data-icon-size="18"></span><span class="u99-sort-text">Price: High to Low</span><span class="u99-sort-radio"></span></button>
+      <button class="u99-sort-option" data-sort-option="rating"><span class="u99-sort-ic" data-icon="star" data-icon-size="18"></span><span class="u99-sort-text">Rating: High to Low</span><span class="u99-sort-radio"></span></button>
+      <button class="u99-sort-option" data-sort-option="delivery"><span class="u99-sort-ic" data-icon="clock" data-icon-size="18"></span><span class="u99-sort-text">Delivery time</span><span class="u99-sort-radio"></span></button>
+    </div>
+    <div class="u99-filter-actions single">
+      <button class="u99-apply" data-sort-action="apply" type="button">Apply</button>
     </div>
   </section>
+</div>
+
+<!-- ===================== ITEM CUSTOMIZATION SHEET (ref #02) ===================== -->
+<div id="u99-item-backdrop" class="u99-filter-backdrop u99-item-backdrop" aria-hidden="true">
+  <section id="u99-item-sheet" class="u99-item-sheet" role="dialog" aria-modal="true" aria-label="Item details"></section>
 </div>
 
 <div id="u99-toast" class="u99-toast" role="status"></div>
 
 <script src="cart-bar.js"></script>
+<script src="js/under99-icons.js"></script>
 <script src="js/under99-core.js"></script>
 <script src="js/under99-header.js"></script>
 <script src="js/under99-filters.js"></script>
 <script src="js/under99-popular.js"></script>
 <script src="js/under99-price-tabs.js"></script>
 <script src="js/under99-products.js"></script>
+<script src="js/under99-customize.js"></script>
 <script src="js/under99.js"></script>
 </body>
 </html>
