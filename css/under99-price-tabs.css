@@ -14,7 +14,7 @@
   padding:4px;
   background:#f0f0f2;
   border:1px solid #e7e7ea;
-  border-radius:15px;
+  border-radius:999px;
   isolation:isolate;
   -webkit-tap-highlight-color:transparent;
 }
@@ -26,11 +26,11 @@
   left:4px;
   bottom:4px;
   width:calc((100% - 8px) / 3);
-  border-radius:12px;
+  border-radius:999px;
   background:var(--u99-primary);
-  box-shadow:0 4px 12px rgba(216,11,111,.26);
+  box-shadow:0 5px 14px rgba(216,11,111,.32);
   transform:translateX(0);
-  transition:transform .24s cubic-bezier(.22,1,.36,1);
+  transition:transform .26s cubic-bezier(.22,1,.36,1);
   z-index:0;
   pointer-events:none;
 }
@@ -43,7 +43,7 @@
   min-width:0;
   padding:0 4px;
   border:0;
-  border-radius:12px;
+  border-radius:999px;
   background:transparent;
   color:#3a3f49;
   font-family:inherit;
@@ -51,10 +51,11 @@
   font-weight:var(--u99-fw-bold);
   letter-spacing:-.1px;
   white-space:nowrap;
-  transition:color .2s ease;
+  transition:color .2s ease, transform .12s ease;
   -webkit-tap-highlight-color:transparent;
 }
 .u99-price-tab.active{color:#fff}
+.u99-price-tab:active{transform:scale(.97)}
 
 /* Hairline dividers between resting segments; hidden around the thumb. */
 .u99-price-tab + .u99-price-tab::before{
@@ -80,4 +81,6 @@
 }
 @media(prefers-reduced-motion:reduce){
   .u99-price-thumb{transition:none}
+  .u99-price-tab{transition:color .2s ease}
+  .u99-price-tab:active{transform:none}
 }

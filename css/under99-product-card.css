@@ -160,3 +160,18 @@
   .u99-old-price{font-size:11.5px}
   .u99-discount{padding:3px 6px;font-size:9.5px}
 }
+
+/* ================================================================
+   VISUAL PASS 03 — ADD CONTROL MOTION (UI only; cart untouched)
+   ================================================================ */
+.u99-add-btn{transition:transform .19s cubic-bezier(.34,1.56,.64,1),box-shadow .18s ease}
+.u99-add-btn:active{transform:scale(.9)}
+@keyframes u99-stepper-in{from{transform:scale(.78);opacity:.5}to{transform:scale(1);opacity:1}}
+.u99-stepper{transform-origin:right center;animation:u99-stepper-in .18s cubic-bezier(.22,1,.36,1)}
+.u99-step-btn{transition:transform .12s ease}
+.u99-step-btn:active{transform:scale(.86)}
+@media(prefers-reduced-motion:reduce){
+  .u99-add-btn,.u99-step-btn{transition:none}
+  .u99-add-btn:active,.u99-step-btn:active{transform:none}
+  .u99-stepper{animation:none}
+}
