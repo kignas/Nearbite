@@ -731,8 +731,12 @@ async function loadAddresses(){
     const selectedId=localStorage.getItem('nearbite_selected_address_id');
     const selected=selectedId?list.find(a=>String(a._id)===String(selectedId)):null;
     const preferred=selected||list.find(a=>a.isDefault||a.default||a.tag==='Home')||list[0];
-    localStorage.setItem('nearbite_address',JSON.stringify(preferred));
-    if(preferred?._id&&String(preferred._id)!==String(selectedId)) localStorage.setItem('nearbite_selected_address_id',String(preferred._id));
+    if(window.EatswadaAddressStore?.setActive){
+      window.EatswadaAddressStore.setActive(preferred,'profile-hydrate');
+    }else{
+      localStorage.setItem('nearbite_address',JSON.stringify(preferred));
+      if(preferred?._id&&String(preferred._id)!==String(selectedId)) localStorage.setItem('nearbite_selected_address_id',String(preferred._id));
+    }
     const label=preferred.tag||preferred.label||'Saved address';
     const text=[preferred.house,preferred.area||preferred.locality,preferred.city].filter(Boolean).join(', ');
     $('addressSummary').textContent=(label+': '+(text||'Saved location')).slice(0,90);
@@ -772,7 +776,12 @@ $('logoutBtn').onclick=()=>{
   localStorage.removeItem('token');
   localStorage.removeItem('nearbite_token');
   localStorage.removeItem('nearbite_user');
-  localStorage.removeItem('nearbite_address');
+  if(window.EatswadaAddressStore?.clearSession){
+    window.EatswadaAddressStore.clearSession();
+  }else{
+    localStorage.removeItem('nearbite_address');
+    localStorage.removeItem('nearbite_selected_address_id');
+  }
   location.replace('login.html');
 };
 // loadProfile and loadAddresses are independent and can run in parallel.
@@ -806,6 +815,7 @@ window.addEventListener('nearbite:address-changed',loadAddresses);
 </script>
 
 <script src="api.js"></script>
+<script src="address-store.js"></script>
 <script src="favorites.js"></script>
 <script src="restaurant-card.js"></script>
 <script src="navigation.js"></script>

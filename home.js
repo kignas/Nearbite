@@ -1084,6 +1084,10 @@
 
   function readSavedAddress() {
     try {
+      if (window.EatswadaAddressStore && window.EatswadaAddressStore.getActive) {
+        var active = window.EatswadaAddressStore.getActive();
+        if (active) return active;
+      }
       return JSON.parse(localStorage.getItem('nearbite_address') || 'null');
     } catch (e) {
       return null;
@@ -1124,6 +1128,21 @@
   /* Looks only at locations that already exist. Never prompts. */
   function resolveStoredLocation() {
     if (card.getAddressCoordinates()) return setLocationStatus('ready', 'address');
+    if (readSavedAddress()) return setLocationStatus('ready', 'address');
+    if (window.EatswadaAddressStore && window.EatswadaAddressStore.hydrate &&
+        (localStorage.getItem('nearbite_token') || localStorage.getItem('token'))) {
+      setLocationStatus('locating', 'address');
+      window.EatswadaAddressStore.hydrate().then(function () {
+        if (card.getAddressCoordinates() || readSavedAddress()) {
+          setLocationStatus('ready', 'address');
+        } else if (readDeviceLocation()) {
+          setLocationStatus('ready', 'device');
+        } else {
+          setLocationStatus('idle');
+        }
+      });
+      return;
+    }
     if (readDeviceLocation()) return setLocationStatus('ready', 'device');
     return setLocationStatus('idle');
   }
