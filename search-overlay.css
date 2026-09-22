@@ -8,6 +8,9 @@
 .ew-search-sheet{position:absolute;left:0;right:0;top:0;background:#fff;border-radius:0 0 28px 28px;box-shadow:0 18px 50px rgba(16,24,40,.18);transform:translateY(-104%);transition:transform .34s cubic-bezier(.22,.8,.25,1);padding:calc(8px + env(safe-area-inset-top,0px)) 18px 18px;max-height:min(78dvh,720px);display:flex;flex-direction:column;overflow:hidden}
 .ew-search-root.is-open .ew-search-scrim{opacity:1}
 .ew-search-root.is-open .ew-search-sheet{transform:translateY(0)}
+.ew-search-root.is-closing{visibility:visible;pointer-events:auto}
+.ew-search-root.is-closing .ew-search-scrim{opacity:0}
+.ew-search-root.is-closing .ew-search-sheet{transform:translateY(104%)}
 .ew-search-handle{width:38px;height:4px;border-radius:99px;background:#d9dce2;margin:0 auto 12px;flex:none}
 .ew-search-head{display:flex;align-items:center;gap:10px;min-height:54px}
 .ew-search-back{width:38px;height:38px;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;color:#20242d;cursor:pointer;flex:none}
@@ -15,7 +18,9 @@
 .ew-search-input-wrap{height:52px;flex:1;min-width:0;border:1.5px solid #dfe2e7;border-radius:18px;display:flex;align-items:center;gap:11px;padding:0 12px 0 14px;background:#fff;transition:border-color .18s,box-shadow .18s}
 .ew-search-input-wrap:focus-within{border-color:rgba(217,9,110,.45);box-shadow:0 0 0 3px rgba(217,9,110,.07)}
 .ew-search-icon{width:20px;height:20px;color:#7c8490;flex:none}
-.ew-search-input{width:100%;height:100%;border:0;outline:0;background:transparent;color:var(--ew-search-text);font:700 17px/1 Manrope,Inter,sans-serif;letter-spacing:-.2px}
+.ew-search-input{width:100%;height:100%;border:0;outline:0;background:transparent;color:var(--ew-search-text);font:700 17px/1 Manrope,Inter,sans-serif;letter-spacing:-.2px;-webkit-appearance:none;appearance:none}
+.ew-search-input::-webkit-search-cancel-button,.ew-search-input::-webkit-search-decoration{display:none;-webkit-appearance:none;appearance:none}
+.ew-search-input::-ms-clear{display:none;width:0;height:0}
 .ew-search-input::placeholder{color:#9aa1ab;font-weight:600}
 .ew-search-clear{width:34px;height:34px;border:0;background:transparent;color:#7d8490;display:grid;place-items:center;border-radius:50%;cursor:pointer;flex:none}
 .ew-search-clear[hidden]{display:none}
