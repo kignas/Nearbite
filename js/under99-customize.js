@@ -170,11 +170,16 @@
     document.body.classList.add('u99-modal-open');
     backdrop().setAttribute('aria-hidden', 'false');
   }
+  const reduce = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function close() {
-    backdrop().classList.remove('open');
-    document.body.classList.remove('u99-modal-open');
-    backdrop().setAttribute('aria-hidden', 'true');
+    const bd = backdrop();
+    bd.classList.remove('open');
+    bd.setAttribute('aria-hidden', 'true');
     ctx = null;
+    // Keep the cart bar beneath the sheet (via body.u99-modal-open) until the
+    // sheet has finished sliding down, so it can't flash above during close.
+    const unlock = () => document.body.classList.remove('u99-modal-open');
+    if (reduce()) unlock(); else setTimeout(unlock, 300);
   }
 
   document.addEventListener('eatswada99:open-customize', e => open(e.detail.menuItemId, e.detail.restaurantId));

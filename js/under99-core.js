@@ -216,21 +216,51 @@
     cartChange(hit.item, hit.r, btn.hasAttribute('data-cart-dec') ? -1 : 1);
   });
 
-  /* Tapping a product card body/image opens the item detail sheet. */
-  document.addEventListener('click', e => {
-    if (e.target.closest('.u99-add-control')) return;
-    const card = e.target.closest('[data-open-item]');
-    if (!card) return;
-    const hit = findItem(card.dataset.menuId, card.dataset.restaurantId);
-    if (!hit) return;
-    document.dispatchEvent(new CustomEvent('eatswada99:open-customize',
-      { detail: { menuItemId: hit.item.id, restaurantId: hit.r.id } }));
-  });
+  /* Image / card-body taps deliberately do NOT add or open customization.
+     Add is an explicit action that belongs to the add control only (above),
+     which stops propagation. Tapping the food image never adds an item. */
 
+  const reduceMotion = () =>
+    !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* Vertical number roll on the existing stepper — no DOM rebuild. */
+  function rollQty(qtyEl, val, dir) {
+    qtyEl.textContent = val;
+    if (reduceMotion()) return;
+    qtyEl.classList.remove('roll-up', 'roll-down');
+    void qtyEl.offsetWidth;                       // restart the animation
+    qtyEl.classList.add(dir >= 0 ? 'roll-up' : 'roll-down');
+  }
+
+  /* Reconcile each card control with the canonical cart. The three state
+     changes animate distinctly and never rebuild an existing stepper:
+       0 → n : render the stepper (CSS expands it from the + button)
+       n → m : roll the number in place (up or down)
+       n → 0 : collapse the stepper, then restore the + button          */
   function syncAddControls() {
     document.querySelectorAll('.u99-add-control').forEach(c => {
-      const hit = findItem(c.dataset.mi, c.dataset.ri);
-      if (hit) c.innerHTML = addControlInner(hit.item, hit.r);
+      const hit = window.Eatswada99.findItem(c.dataset.mi, c.dataset.ri);
+      if (!hit) return;
+      const qty = cartQty(hit.item.id, hit.r.id);
+      const prev = Number(c.dataset.qty || '0');
+      const stepper = c.querySelector('.u99-stepper');
+
+      if (qty > 0 && stepper) {
+        const qtyEl = stepper.querySelector('.u99-step-qty');
+        if (qtyEl && Number(qtyEl.textContent) !== qty) rollQty(qtyEl, qty, qty - prev);
+        c.dataset.qty = String(qty);
+        return;
+      }
+      if (qty === 0 && stepper && !reduceMotion()) {
+        let done = false;
+        const finish = () => { if (done) return; done = true; c.innerHTML = addControlInner(hit.item, hit.r); c.dataset.qty = '0'; };
+        stepper.classList.add('u99-collapsing');
+        stepper.addEventListener('animationend', finish, { once: true });
+        setTimeout(finish, 220);                   // safety net
+        return;
+      }
+      c.innerHTML = addControlInner(hit.item, hit.r);
+      c.dataset.qty = String(qty);
     });
   }
   document.addEventListener('eatswada:cart-updated', syncAddControls);

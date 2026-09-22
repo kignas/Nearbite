@@ -70,8 +70,7 @@
       (off ? '<span class="u99-discount">' + off + '% OFF</span>' : '') +
     '</div>';
 
-    return '<article class="u99-product-card" data-open-item data-menu-id="' + E.esc(item.id) +
-      '" data-restaurant-id="' + E.esc(r.id) + '">' +
+    return '<article class="u99-product-card">' +
       '<div class="u99-product-image">' +
         '<img src="' + E.esc(item.image) + '" alt="' + E.esc(item.name) + '" loading="lazy" decoding="async">' +
         badge + marker + ratingBadge +
