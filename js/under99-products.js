@@ -110,7 +110,7 @@
         try {
           if (typeof img.decode === 'function') await img.decode();
         } catch (_) {}
-        requestAnimationFrame(() => img.classList.add('is-loaded'));
+        requestAnimationFrame(() => { img.classList.remove('is-loading'); img.classList.add('is-loaded'); });
       };
       if (img.complete && img.naturalWidth > 0) reveal();
       else img.addEventListener('load', reveal, { once: true });
