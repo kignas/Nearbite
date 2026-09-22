@@ -32,3 +32,27 @@
   .u99-hero-skeleton::before{animation:none}
   .u99-hero-skeleton{transition:none}
 }
+
+/* ================================================================
+   PHASE 1 FINAL — RESULT + IMAGE LOADING
+   Skeleton geometry follows the new compact landscape card proportions.
+   ================================================================ */
+.u99-skeleton{padding-bottom:18px}
+.u99-skel-grid{row-gap:18px}
+.u99-skel-card{
+  height:auto;
+  aspect-ratio:1.44/1;
+  border-radius:14px;
+}
+.u99-product-grid.is-loading-set{
+  opacity:.18;
+  transform:translateY(2px);
+}
+.u99-item-img{
+  opacity:0;
+  transform:scale(.985);
+  transition:opacity .30s ease,transform .34s cubic-bezier(.22,1,.36,1);
+}
+.u99-item-img.is-loaded{opacity:1;transform:scale(1)}
+.u99-item-img.is-error{opacity:1;transform:none}
+@media(max-width:430px){.u99-skel-card{aspect-ratio:1.44/1;height:auto}}

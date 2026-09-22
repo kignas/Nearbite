@@ -185,3 +185,23 @@
   .u99-circle-btn{width:46px;height:46px;flex-basis:46px}
   .u99-location{height:46px;max-width:none;padding-left:11px;padding-right:11px}
 }
+
+/* ================================================================
+   PHASE 1 FINAL — SLIM HEADER / CLEAR FILTER SEPARATION
+   Keeps the same structure; only tightens vertical rhythm.
+   ================================================================ */
+.u99-header{
+  margin:0 0 8px;
+  border-radius:0 0 20px 20px;
+}
+.u99-topbar{
+  padding-top:calc(7px + env(safe-area-inset-top,0px));
+  padding-bottom:7px;
+}
+.u99-circle-btn{width:44px;height:44px;flex-basis:44px}
+.u99-location{height:44px}
+@media(max-width:380px){
+  .u99-topbar{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:7px}
+  .u99-circle-btn{width:42px;height:42px;flex-basis:42px}
+  .u99-location{height:42px}
+}
