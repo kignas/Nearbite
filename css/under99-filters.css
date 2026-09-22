@@ -1,10 +1,16 @@
 /* 99 STORE — FILTER RAIL + SHEETS */
 .u99-filter-rail{display:flex;gap:8px;overflow-x:auto;padding:0 var(--u99-gutter) 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .u99-filter-rail::-webkit-scrollbar{display:none}
-.u99-filter{height:40px;flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:0 13px;border:1px solid var(--u99-border-strong);border-radius:var(--u99-radius-pill);background:var(--u99-surface);color:#363a43;font-size:var(--u99-fs-sm);font-weight:var(--u99-fw-bold);white-space:nowrap;transition:background var(--u99-t-fast),border-color var(--u99-t-fast),color var(--u99-t-fast)}
+.u99-filter{
+  height:42px;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;
+  padding:0 14px;border:1px solid #dedfe4;border-radius:14px;
+  background:#fff;color:#3b4453;font-family:inherit;font-size:14px;
+  font-weight:600;white-space:nowrap;box-shadow:0 1px 2px rgba(15,23,42,.04);
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s ease
+}
 .u99-filter:active{transform:scale(.985)}
-.u99-filter.active{color:var(--u99-primary);border-color:var(--u99-primary-line);background:var(--u99-primary-soft)}.u99-filter.featured{color:var(--u99-primary);border-color:var(--u99-primary-line);background:var(--u99-primary-soft)}
-.u99-filter-icon{padding:0 14px;justify-content:center}.u99-filter-icon-label{display:inline-block}.u99-filter-icon svg{display:block}
+.u99-filter.active{color:var(--u99-primary);border-color:#efb0d1;background:#fff1f7}.u99-filter.featured{color:var(--u99-primary);border-color:#efb0d1;background:#fff1f7}
+.u99-filter-icon{padding:0 15px;justify-content:center}.u99-filter-icon-label{display:inline-block}.u99-filter-icon svg{display:block}
 .u99-percent{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;background:var(--u99-primary);color:#fff;font-size:10px;font-weight:var(--u99-fw-black)}
 .u99-filter-backdrop{position:fixed;inset:0;z-index:20000;background:rgba(14,17,25,.52);opacity:0;visibility:hidden;transition:opacity var(--u99-t-base),visibility var(--u99-t-base);display:flex;align-items:flex-end}
 .u99-filter-backdrop.open{opacity:1;visibility:visible}
@@ -21,3 +27,11 @@
 .u99-row-label{min-width:0}.u99-check,.u99-radio{flex:0 0 auto;width:21px;height:21px;display:grid;place-items:center;border:1.6px solid #cfd1d6;color:#fff;transition:border-color var(--u99-t-fast),background var(--u99-t-fast)}.u99-check{border-radius:6px}.u99-radio{border-radius:50%;position:relative}.u99-row.selected .u99-check{background:var(--u99-primary);border-color:var(--u99-primary)}.u99-row.selected .u99-radio{border-color:var(--u99-primary)}.u99-row.selected .u99-radio::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--u99-primary)}
 .u99-filter-actions{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;padding-top:14px;margin-top:auto}.u99-filter-actions.single{grid-template-columns:1fr}.u99-clear,.u99-apply{height:48px;border-radius:var(--u99-radius-md);font-size:13px;font-weight:var(--u99-fw-bold)}.u99-clear{border:1px solid var(--u99-border-strong);background:#fff;color:var(--u99-ink)}.u99-apply{border:0;background:var(--u99-primary);color:#fff}
 .u99-sort-options{padding-top:4px;overflow:auto}.u99-sort-option{width:100%;min-height:56px;border:0;border-bottom:1px solid var(--u99-border);background:#fff;display:flex;align-items:center;gap:14px;text-align:left;color:var(--u99-ink);font-size:13px;font-weight:700}.u99-sort-ic{flex:0 0 24px;display:grid;place-items:center;color:#6b7180}.u99-sort-ic svg{display:block}.u99-sort-text{flex:1}.u99-sort-radio{flex:0 0 auto;width:20px;height:20px;border:1.6px solid #cfd1d6;border-radius:50%;position:relative}.u99-sort-option.selected{color:var(--u99-primary)}.u99-sort-option.selected .u99-sort-ic{color:var(--u99-primary)}.u99-sort-option.selected .u99-sort-radio{border-color:var(--u99-primary)}.u99-sort-option.selected .u99-sort-radio::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--u99-primary)}
+
+/* VISUAL PASS 01 — COMPACT FILTER RAIL */
+.u99-filter-rail{gap:7px;padding-bottom:12px}
+.u99-filter{height:38px;padding:0 12px;border-radius:11px;font-size:12px;gap:6px;box-shadow:none}
+.u99-filter-icon{padding:0 12px}
+.u99-percent{width:17px;height:17px;font-size:9px}
+.u99-filter svg{width:14px;height:14px}
+.u99-filter.active,.u99-filter.featured{background:#fff1f7;border-color:#f0b7d5}

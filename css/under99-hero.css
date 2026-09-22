@@ -19,3 +19,27 @@
 /* Shared Eatswada fallback: keep the hero visually intentional if banner API is unavailable. */
 .u99-hero-fallback{position:absolute;inset:0;background:linear-gradient(135deg,#ffe8f0 0%,#ffd5e4 100%);pointer-events:none}
 .u99-hero-fallback .u99-hero-bubble,.u99-hero-fallback .u99-hero-fizz{display:none!important}
+
+/* ================================================================
+   VISUAL PASS 01 — COMPACT HERO
+   The benchmark hero is a compact promotional block, not a full-screen
+   banner. Artwork remains secondary to the headline and price.
+   ================================================================ */
+.u99-hero{min-height:138px;border-radius:0 0 18px 18px}
+.u99-hero-copy{width:58%;padding:16px 0 15px 20px}
+.u99-kicker{font-size:15px;letter-spacing:-.35px}
+.u99-price{letter-spacing:-2.6px}
+.u99-price .currency{font-size:30px}
+.u99-price .number{font-size:58px}
+.u99-sub{margin-top:8px;font-size:10.5px}
+.u99-hero-art{width:55%;height:104%;right:-5px;bottom:-7px;filter:drop-shadow(0 7px 10px rgba(83,35,55,.10))}
+.u99-hero::before{width:150px;height:150px;right:-48px;top:-66px}
+@media(max-width:430px){
+  .u99-hero{min-height:136px}
+  .u99-hero-copy{padding:16px 0 14px 18px}
+  .u99-kicker{font-size:14.5px}
+  .u99-price .currency{font-size:29px}
+  .u99-price .number{font-size:56px}
+  .u99-sub{font-size:10px;margin-top:7px}
+  .u99-hero-art{width:57%;right:-8px}
+}
