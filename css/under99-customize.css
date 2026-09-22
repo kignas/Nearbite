@@ -2,12 +2,12 @@
    Uses the same sheet language as Filters/Sort. While this sheet is open,
    it owns the foreground so the shared cart bar never covers its footer. */
 .u99-item-backdrop.open + *{}
-body.u99-item-modal-open #white-cart-root{z-index:19000!important}
+body.u99-modal-open #white-cart-root{z-index:19000!important}
 .u99-item-sheet{
   width:100%;max-height:94vh;background:#fff;
   border-radius:24px 24px 0 0;
   box-shadow:var(--u99-shadow-sheet);
-  transform:translateY(26px);transition:transform var(--u99-t-sheet);
+  transform:translateY(100%);transition:transform var(--u99-t-sheet);
   display:flex;flex-direction:column;overflow:hidden;
 }
 .u99-item-backdrop.open .u99-item-sheet{transform:translateY(0)}
@@ -53,3 +53,17 @@ body.u99-item-modal-open #white-cart-root{z-index:19000!important}
 .u99-qty-n{min-width:26px;text-align:center;font-size:15px;font-weight:900;color:var(--u99-ink)}
 .u99-item-add{flex:1 1 auto;height:50px;border:0;border-radius:12px;background:var(--u99-primary);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800}
 .u99-item-add .u99-item-addTotal{font-weight:900}.u99-item-add.is-disabled{background:#d9dbe0;color:#fff}
+
+/* VISUAL PASS 03 — SHEET TOUCH FEEDBACK */
+.u99-choice,.u99-qty-btn,.u99-item-add,.u99-item-back{transition:transform .12s ease,background .15s ease,opacity .15s ease}
+.u99-choice:active{transform:scale(.99);background:var(--u99-surface-2)}
+.u99-qty-btn:active,.u99-item-back:active{transform:scale(.9)}
+.u99-item-add:active{transform:scale(.98)}
+.u99-choice-radio,.u99-choice-box{transition:border-color .15s ease,background .15s ease}
+.u99-choice-radio::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--u99-primary);transform:scale(0);transition:transform .18s cubic-bezier(.22,1,.36,1)}
+.u99-choice-radio.on::after{transform:scale(1)}
+@media(prefers-reduced-motion:reduce){
+  .u99-choice,.u99-qty-btn,.u99-item-add,.u99-item-back{transition:background .15s ease}
+  .u99-choice:active,.u99-qty-btn:active,.u99-item-back:active,.u99-item-add:active{transform:none}
+  .u99-choice-radio::after{transition:none}
+}
