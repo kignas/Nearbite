@@ -48,31 +48,40 @@
     const old = item.originalPrice && item.originalPrice > item.price ? item.originalPrice : null;
     const off = item.discountPercent != null ? Math.round(item.discountPercent)
       : old ? Math.round((1 - item.price / old) * 100) : null;
-    const rating = r.rating
-      ? '<span class="u99-rating">' + I.icon('star', { size: 11 }) + ' ' + E.esc(r.rating) +
-        (r.ratingCount ? ' <span class="u99-rating-count">(' + E.esc(r.ratingCount) + ')</span>' : '') + '</span>'
-      : '';
-    const delivery = r.deliveryTime ? '<span>' + E.esc(r.deliveryTime) + '</span>' : '';
+
+    // Popular/Bestseller only from real backend flags (see brief §23).
     const badge = item.isBestseller ? '<span class="u99-badge bestseller">Bestseller</span>'
       : item.isRecommended ? '<span class="u99-badge">Popular</span>' : '';
+
+    // Rating rides on the image as a compact badge; omitted when no real value.
+    const ratingBadge = r.rating
+      ? '<span class="u99-rating-badge">' + I.icon('star', { size: 11 }) +
+        '<span>' + E.esc(r.rating) + '</span></span>'
+      : '';
+
+    const marker = '<span class="u99-food-marker ' + (item.isVeg ? 'veg' : 'nonveg') + '" aria-label="' +
+      (item.isVeg ? 'Veg' : 'Non-veg') + '">' + I.icon(item.isVeg ? 'veg' : 'nonveg', { size: 16 }) + '</span>';
+    const nameMarker = '<span class="u99-name-marker ' + (item.isVeg ? 'veg' : 'nonveg') + '" aria-hidden="true">' +
+      I.icon(item.isVeg ? 'veg' : 'nonveg', { size: 13 }) + '</span>';
+
+    const priceRow = '<div class="u99-product-price-row">' +
+      (old ? '<span class="u99-old-price">\u20B9' + Math.round(old) + '</span>' : '') +
+      '<span class="u99-current-price' + (old ? ' deal' : '') + '">\u20B9' + Math.round(item.price) + '</span>' +
+      (off ? '<span class="u99-discount">' + off + '% OFF</span>' : '') +
+    '</div>';
+
     return '<article class="u99-product-card" data-open-item data-menu-id="' + E.esc(item.id) +
       '" data-restaurant-id="' + E.esc(r.id) + '">' +
       '<div class="u99-product-image">' +
         '<img src="' + E.esc(item.image) + '" alt="' + E.esc(item.name) + '" loading="lazy" decoding="async">' +
-        badge +
-        '<span class="u99-food-marker ' + (item.isVeg ? 'veg' : 'nonveg') + '" aria-label="' +
-          (item.isVeg ? 'Veg' : 'Non-veg') + '">' + I.icon(item.isVeg ? 'veg' : 'nonveg', { size: 16 }) + '</span>' +
+        badge + marker + ratingBadge +
         E.renderAddControl(item, r) +
       '</div>' +
       '<div class="u99-product-body">' +
         '<div class="u99-restaurant-name">' + E.esc(r.name) + '</div>' +
-        '<h3 class="u99-product-name">' + E.esc(item.name) + '</h3>' +
-        '<div class="u99-product-meta">' + rating + (rating && delivery ? '<span class="u99-meta-dot">\u2022</span>' : '') + delivery + '</div>' +
-        '<div class="u99-product-price-row">' +
-          '<span class="u99-current-price">\u20B9' + Math.round(item.price) + '</span>' +
-          (old ? '<span class="u99-old-price">\u20B9' + Math.round(old) + '</span>' : '') +
-          (off ? '<span class="u99-discount">' + off + '% OFF</span>' : '') +
-        '</div>' +
+        '<div class="u99-name-row">' + nameMarker +
+          '<h3 class="u99-product-name">' + E.esc(item.name) + '</h3></div>' +
+        priceRow +
       '</div></article>';
   }
 
