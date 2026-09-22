@@ -16,9 +16,6 @@
   const API='https://eatswada.onrender.com/api';
   const MIN=2;
   let root=null,input=null,body=null,contextLabel=null,clearBtn=null;
-  let closeTimer=null;
-  let touchStartY=0;
-  let touchCurrentY=0;
   let context='home',restaurantId='';
   let debounceTimer=0,requestSeq=0,aborter=null;
 
@@ -84,8 +81,6 @@
     ensureStyles(); refs();
     const c=detectContext();context=c.scope;restaurantId=c.restaurantId;
     contextLabel.textContent=contextText();
-    clearTimeout(closeTimer);
-    root.classList.remove('is-closing');
     root.classList.add('is-open');root.setAttribute('aria-hidden','false');document.body.classList.add('ew-search-open');
     input.value=prefill||'';updateClear();
     if(!prefill) renderIdle(); else scheduleSearch(true);
@@ -95,14 +90,7 @@
   function close(){
     if(!root) return;
     clearTimeout(debounceTimer);if(aborter) aborter.abort();aborter=null;
-    root.classList.remove('is-open');
-    root.classList.add('is-closing');
-    document.body.classList.remove('ew-search-open');
-    clearTimeout(closeTimer);
-    closeTimer=setTimeout(()=>{
-      root.classList.remove('is-closing');
-      root.setAttribute('aria-hidden','true');
-    },360);
+    root.classList.remove('is-open');root.setAttribute('aria-hidden','true');document.body.classList.remove('ew-search-open');
   }
 
   function renderIdle(){
@@ -173,24 +161,6 @@
   function updateClear(){if(clearBtn) clearBtn.hidden=!input.value;}
 
   function bind(){
-    const sheet=root.querySelector('.ew-search-sheet');
-    if(sheet){
-      sheet.addEventListener('touchstart',e=>{
-        if(e.touches.length!==1) return;
-        touchStartY=e.touches[0].clientY; touchCurrentY=touchStartY;
-      },{passive:true});
-      sheet.addEventListener('touchmove',e=>{
-        if(!touchStartY) return;
-        touchCurrentY=e.touches[0].clientY;
-      },{passive:true});
-      sheet.addEventListener('touchend',()=>{
-        if(!touchStartY) return;
-        const dy=touchCurrentY-touchStartY;
-        touchStartY=0; touchCurrentY=0;
-        if(dy>70) close();
-      },{passive:true});
-    }
-
     document.addEventListener('click',(e)=>{
       const trigger=e.target.closest('a[href="search.html"],a[href$="/search.html"],.search-box[data-search-trigger],.u99-search-btn');
       if(!trigger) return;
