@@ -64,3 +64,18 @@
   .u99-apply,.u99-clear,.u99-filter-close{transition:background .15s ease}
   .u99-apply:active,.u99-clear:active,.u99-filter-close:active{transform:none}
 }
+
+
+/* FINAL MICRO-POLISH — horizontal chip rail */
+.u99-filter-rail{
+  scroll-snap-type:x proximity;
+  padding-right:24px;
+  overscroll-behavior-x:contain;
+  touch-action:pan-x;
+  -webkit-mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 16px),transparent 100%);
+  mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 16px),transparent 100%);
+}
+.u99-filter{scroll-snap-align:start}
+.u99-filter:focus{outline:none}
+.u99-filter:focus-visible{outline:2px solid rgba(216,11,111,.28);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.u99-filter-rail{scroll-snap-type:none}}
