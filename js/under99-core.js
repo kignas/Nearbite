@@ -193,7 +193,8 @@
       '" data-cart-add aria-label="' + label + '">' + U99Icons.icon('plus', { size: 23 }) + '</button>';
   }
   function renderAddControl(item, r) {
-    return '<div class="u99-add-control" data-mi="' + esc(item.id) + '" data-ri="' + esc(r.id) + '">' +
+    const qty = cartQty(item.id, r.id);
+    return '<div class="u99-add-control' + (qty > 0 ? ' has-qty' : '') + '" data-mi="' + esc(item.id) + '" data-ri="' + esc(r.id) + '" data-qty="' + qty + '">' +
       addControlInner(item, r) + '</div>';
   }
 
@@ -248,17 +249,38 @@
       if (qty > 0 && stepper) {
         const qtyEl = stepper.querySelector('.u99-step-qty');
         if (qtyEl && Number(qtyEl.textContent) !== qty) rollQty(qtyEl, qty, qty - prev);
+        c.classList.add('has-qty');
         c.dataset.qty = String(qty);
+        return;
+      }
+      if (qty > 0 && !stepper) {
+        // Paint the stepper at the old circular width first, then expand on the
+        // next style calculation so the 0 → 1 transition is actually visible.
+        c.innerHTML = addControlInner(hit.item, hit.r);
+        c.dataset.qty = String(qty);
+        if (reduceMotion()) {
+          c.classList.add('has-qty');
+        } else {
+          void c.offsetWidth;
+          requestAnimationFrame(() => c.classList.add('has-qty'));
+        }
         return;
       }
       if (qty === 0 && stepper && !reduceMotion()) {
         let done = false;
-        const finish = () => { if (done) return; done = true; c.innerHTML = addControlInner(hit.item, hit.r); c.dataset.qty = '0'; };
+        const finish = () => {
+          if (done) return; done = true;
+          c.classList.remove('has-qty');
+          c.innerHTML = addControlInner(hit.item, hit.r);
+          c.dataset.qty = '0';
+        };
         stepper.classList.add('u99-collapsing');
+        c.style.width = '';
         stepper.addEventListener('animationend', finish, { once: true });
-        setTimeout(finish, 220);                   // safety net
+        setTimeout(finish, 220);
         return;
       }
+      c.classList.remove('has-qty');
       c.innerHTML = addControlInner(hit.item, hit.r);
       c.dataset.qty = String(qty);
     });
