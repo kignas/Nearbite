@@ -162,7 +162,17 @@
     }
     @keyframes wcBump {
       0% { transform: scale(1); }
-      35% { transform: scale(1.22); }
+      35% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    @keyframes wcPinkEnter {
+      0% { transform: translate(-50%, 130%) scale(.96); opacity:0; }
+      70% { transform: translate(-50%, -4px) scale(1.015); opacity:1; }
+      100% { transform: translate(-50%, 0) scale(1); opacity:1; }
+    }
+    @keyframes wcPinkPulse {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.018); }
       100% { transform: scale(1); }
     }
     @keyframes wcShine {
@@ -184,6 +194,12 @@
     }
     #white-cart-root.wc-enter {
       animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    #white-cart-root.wc-pink.wc-enter {
+      animation: wcPinkEnter .36s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    #white-cart-root.wc-pink.wc-cart-update #es-pink-inner {
+      animation: wcPinkPulse .22s cubic-bezier(.22,1,.36,1);
     }
     #white-cart-root.wc-exiting {
       animation: slideDownWhiteCart 0.26s ease forwards;
@@ -302,7 +318,9 @@
       cursor: pointer; -webkit-tap-highlight-color: transparent;
       transition: transform 0.1s ease;
     }
-    #es-pink-inner:active { transform: scale(0.99); }
+    #es-pink-inner:active { transform: scale(0.985); }
+    #white-cart-root.wc-pink{padding-bottom:env(safe-area-inset-bottom,0px)}
+    #es-pink-inner{will-change:transform}
     .wc-pink-left {
       font-size: 15px; font-weight: 800; color: #ffffff;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
@@ -715,7 +733,15 @@
     const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
     if (countEl) countEl.innerText = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
 
-    if (lastTotalQty !== null && lastTotalQty !== totalQty) bump(countEl);
+    if (lastTotalQty !== null && lastTotalQty !== totalQty) {
+      bump(countEl);
+      if (CART_BAR_MODE === 'pink') {
+        root.classList.remove('wc-cart-update');
+        void root.offsetWidth;
+        root.classList.add('wc-cart-update');
+        setTimeout(() => root.classList.remove('wc-cart-update'), 260);
+      }
+    }
 
     // Home-only visuals: image stack, badge, restaurant label, "All ↑".
     if (CART_BAR_MODE !== 'pink') {
