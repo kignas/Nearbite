@@ -17,6 +17,7 @@
     deliveryLimit: null,    // minutes cap or null
     priceBand: '99',        // 99 | 100 | 150
     sortMode: 'default',
+    searchQuery: '',
     freeDeliveryOnly: false,
     greatOffersOnly: false
   };

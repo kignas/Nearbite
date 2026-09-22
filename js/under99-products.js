@@ -18,6 +18,13 @@
       if (S.deliveryLimit != null && E.deliveryMax(r.deliveryTime) > S.deliveryLimit) return;
 
       let items = r.menu.filter(x => bandMatch(x.price, S.priceBand));
+      const search = String(S.searchQuery || '').trim().toLowerCase();
+      if (search) {
+        items = items.filter(x => {
+          const hay = [x.name, x.description, x.category].map(v => String(v || '').toLowerCase()).join(' ');
+          return hay.includes(search);
+        });
+      }
       if (S.foodType === 'veg') items = items.filter(x => x.isVeg);
       if (S.foodType === 'nonveg') items = items.filter(x => !x.isVeg);
       if (S.priceRanges.length) items = items.filter(x => S.priceRanges.some(range => {
@@ -122,7 +129,7 @@
     const grid = document.getElementById('u99-product-grid');
     if (!grid) return;
     const groups = filtered(), count = document.getElementById('u99-count');
-    if (count) count.textContent = 'All ' + groups.length + ' ' + (groups.length === 1 ? 'item' : 'items');
+    if (count) count.textContent = (S.searchQuery ? 'Results for "' + S.searchQuery + '" · ' : 'All ') + groups.length + ' ' + (groups.length === 1 ? 'item' : 'items');
     grid.innerHTML = groups.length ? groups.map(card).join('') : emptyState();
     hydrateImages(grid);
   }
@@ -154,7 +161,7 @@
 
   function resetFilters() {
     S.discountOnly = false; S.freeDeliveryOnly = false; S.greatOffersOnly = false;
-    S.deliveryLimit = null; S.foodType = 'all'; S.priceRanges = [];
+    S.deliveryLimit = null; S.foodType = 'all'; S.priceRanges = []; S.searchQuery = '';
     document.getElementById('u99-discount')?.classList.remove('active');
     document.querySelector('[data-rail="delivery"]')?.classList.remove('active');
     document.querySelector('[data-rail="food"]')?.classList.remove('active');
