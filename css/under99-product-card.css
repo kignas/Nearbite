@@ -263,3 +263,19 @@
 @media(prefers-reduced-motion:reduce){
   .u99-add-control,.u99-add-btn,.u99-step-btn{transition:none}
 }
+
+
+/* ================================================================
+   PHASE 1 — HOMEPAGE-MATCHED ITEM IMAGE GEOMETRY
+   Homepage uses a 4:3 landscape item tile. This reduces the 99 Store
+   image height by ~25% versus the previous square tile while preserving
+   the 2-column card width.
+   ================================================================ */
+.u99-product-image{
+  aspect-ratio:4/3;
+  border-radius:14px;
+}
+.u99-product-image img{object-fit:cover}
+@media(max-width:370px){
+  .u99-product-image{border-radius:13px}
+}

@@ -145,3 +145,43 @@
   .u99-location-name{font-size:14px}
   .u99-location-sub{font-size:10px}
 }
+
+
+/* ================================================================
+   PHASE 1 — SLIM PRODUCTION MOBILE HEADER
+   Filter rail is now outside the pink header surface.
+   ================================================================ */
+.u99-header{
+  margin:0;
+  border-radius:0;
+}
+.u99-topbar{
+  gap:10px;
+  padding-top:calc(9px + env(safe-area-inset-top, 0px));
+  padding-bottom:9px;
+}
+.u99-circle-btn{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+}
+.u99-location{
+  height:48px;
+  max-width:none;
+  padding-left:12px;
+  padding-right:13px;
+}
+.u99-location-name{font-size:15.5px}
+.u99-location-sub{font-size:11.5px}
+
+@media(max-width:380px){
+  .u99-topbar{
+    gap:8px;
+    padding-left:12px;
+    padding-right:12px;
+    padding-top:calc(8px + env(safe-area-inset-top,0px));
+    padding-bottom:8px;
+  }
+  .u99-circle-btn{width:46px;height:46px;flex-basis:46px}
+  .u99-location{height:46px;max-width:none;padding-left:11px;padding-right:11px}
+}
