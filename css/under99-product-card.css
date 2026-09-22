@@ -284,3 +284,24 @@
 @media(max-width:370px){
   .u99-product-image{aspect-ratio:1.44/1;border-radius:13px}
 }
+
+
+/* ================================================================
+   PHASE 2 — ADD → STEPPER MOTION POLISH
+   ================================================================ */
+.u99-add-control{will-change:width,transform}
+.u99-add-btn{will-change:transform;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.u99-add-btn::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(circle at center,rgba(216,11,111,.12) 0 18%,transparent 19% 100%);
+  transform:scale(.2);opacity:0;pointer-events:none;
+}
+.u99-add-btn.is-adding::after{animation:u99-add-ripple .34s ease-out}
+.u99-add-control.is-changing{animation:u99-control-pop .28s cubic-bezier(.22,1,.36,1)}
+@keyframes u99-add-ripple{0%{transform:scale(.2);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+@keyframes u99-control-pop{0%{transform:scale(1)}38%{transform:scale(1.045)}100%{transform:scale(1)}}
+.u99-stepper{will-change:width,transform;backface-visibility:hidden}
+.u99-step-qty{will-change:transform,opacity}
+@media(prefers-reduced-motion:reduce){
+  .u99-add-btn.is-adding::after,.u99-add-control.is-changing{animation:none}
+}

@@ -154,3 +154,27 @@
   .u99-filter-rail{padding-left:18px;padding-right:18px;padding-bottom:8px}
   .u99-filter{height:35px;font-size:12.5px;padding-left:11px;padding-right:11px}
 }
+
+
+/* ================================================================
+   PHASE 2 — FILTER RAIL INTERACTION POLISH
+   Keep the Phase 1 geometry unchanged; improve touch feedback and the
+   horizontal-scroll affordance without changing the filter contract.
+   ================================================================ */
+.u99-filter-rail{
+  position:relative;
+  -webkit-tap-highlight-color:transparent;
+  scrollbar-width:none;
+}
+.u99-filter{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  will-change:transform;
+}
+.u99-filter:active{transform:scale(.965)}
+.u99-filter.featured{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .14s cubic-bezier(.22,1,.36,1),box-shadow .18s ease}
+.u99-filter.featured:active{box-shadow:0 2px 7px rgba(216,11,111,.10)}
+@media(prefers-reduced-motion:reduce){
+  .u99-filter{transition:background .18s ease,border-color .18s ease,color .18s ease}
+  .u99-filter:active{transform:none}
+}

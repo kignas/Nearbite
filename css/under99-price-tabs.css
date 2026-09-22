@@ -125,3 +125,20 @@
   .u99-price-tab{font-size:11px}
 }
 @media(max-width:360px){.u99-price-seg{height:38px}.u99-price-tab{font-size:10.5px}}
+
+
+/* ================================================================
+   PHASE 2 — SEGMENTED TAB MOTION POLISH
+   ================================================================ */
+.u99-price-seg{overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.035)}
+.u99-price-thumb{
+  will-change:transform;
+  transition:transform .34s cubic-bezier(.16,1,.3,1),box-shadow .22s ease;
+}
+.u99-price-tab{will-change:color,transform;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.u99-price-tab.active{font-weight:800}
+.u99-price-tab:active{transform:scale(.965)}
+@media(prefers-reduced-motion:reduce){
+  .u99-price-thumb{transition:none}
+  .u99-price-tab:active{transform:none}
+}
