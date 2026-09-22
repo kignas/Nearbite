@@ -1,10 +1,83 @@
-/* 99 STORE — PRICE RANGE TABS */
-.u99-price-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 var(--u99-gutter);margin:0 0 20px}
-.u99-price-tab{height:52px;border:1px solid var(--u99-border-strong);border-radius:var(--u99-radius-md);background:#fff;color:#343840;font-size:12px;font-weight:var(--u99-fw-bold);white-space:nowrap;transition:background var(--u99-t-fast),border-color var(--u99-t-fast),color var(--u99-t-fast),box-shadow var(--u99-t-fast)}
-.u99-price-tab.active{border-color:var(--u99-primary-line);background:var(--u99-primary-soft);color:var(--u99-primary);box-shadow:inset 0 -2px 0 var(--u99-primary)}
-@media(max-width:370px){.u99-price-tab{font-size:10.5px}}
+/* =====================================================================
+   99 STORE — PRICE RANGE  (segmented capsule with sliding pink thumb)
+   One continuous rounded track holds three segments. A single pink pill
+   (.u99-price-thumb) slides between them; segment text flips to white when
+   active. Selected state is exposed via aria-selected in JS.
+   ===================================================================== */
+.u99-price-seg{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  height:52px;
+  margin:0 var(--u99-gutter) 18px;
+  padding:4px;
+  background:#f0f0f2;
+  border:1px solid #e7e7ea;
+  border-radius:15px;
+  isolation:isolate;
+  -webkit-tap-highlight-color:transparent;
+}
 
-/* VISUAL PASS 01 — PRICE TABS */
-.u99-price-tabs{gap:7px;margin-bottom:18px}
-.u99-price-tab{height:50px;border-radius:12px;font-size:11.5px}
-.u99-price-tab.active{box-shadow:inset 0 -2px 0 var(--u99-primary),0 2px 8px rgba(216,11,111,.05)}
+/* The sliding indicator — width = one segment, moves in 100% steps. */
+.u99-price-thumb{
+  position:absolute;
+  top:4px;
+  left:4px;
+  bottom:4px;
+  width:calc((100% - 8px) / 3);
+  border-radius:12px;
+  background:var(--u99-primary);
+  box-shadow:0 4px 12px rgba(216,11,111,.26);
+  transform:translateX(0);
+  transition:transform .24s cubic-bezier(.22,1,.36,1);
+  z-index:0;
+  pointer-events:none;
+}
+
+.u99-price-tab{
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  min-width:0;
+  padding:0 4px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:#3a3f49;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:var(--u99-fw-bold);
+  letter-spacing:-.1px;
+  white-space:nowrap;
+  transition:color .2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-price-tab.active{color:#fff}
+
+/* Hairline dividers between resting segments; hidden around the thumb. */
+.u99-price-tab + .u99-price-tab::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  height:18px;
+  width:1px;
+  transform:translateY(-50%);
+  background:#d9d9dd;
+  transition:opacity .2s ease;
+}
+.u99-price-tab.active::before,
+.u99-price-tab.active + .u99-price-tab::before{opacity:0}
+
+@media(max-width:390px){
+  .u99-price-seg{height:50px;margin-left:18px;margin-right:18px}
+  .u99-price-tab{font-size:12px}
+}
+@media(max-width:360px){
+  .u99-price-tab{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .u99-price-thumb{transition:none}
+}

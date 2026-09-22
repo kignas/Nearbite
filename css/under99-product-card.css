@@ -62,3 +62,101 @@
   .u99-add-btn{width:40px;height:40px}
   .u99-current-price{font-size:13px}
 }
+
+/* ================================================================
+   VISUAL PASS 02 — 99 STORE BENCHMARK
+   Aligns the card to the reference screenshot: on-image rating badge,
+   inline veg/non-veg mark before the item name, solid-pink add button /
+   outlined stepper, and a text-based (non-badged) pink price row.
+   ================================================================ */
+
+/* Popular badge reads green on white (bestseller stays solid pink). */
+.u99-badge{
+  background:#fff;
+  color:var(--u99-green);
+  font-weight:900;
+  box-shadow:0 2px 8px rgba(15,23,42,.12);
+}
+.u99-badge.bestseller{background:var(--u99-primary);color:#fff}
+
+/* Rating badge — sits on the image, bottom-left, above the food. */
+.u99-rating-badge{
+  position:absolute;
+  left:8px;
+  bottom:8px;
+  z-index:3;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:4px 7px 4px 6px;
+  border-radius:9px;
+  background:#fff;
+  color:var(--u99-green);
+  font-size:12px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.2px;
+  box-shadow:0 2px 8px rgba(15,23,42,.14);
+}
+.u99-rating-badge svg{display:block;color:var(--u99-green)}
+
+/* Add button — white circle, pink outline, pink glyph (reference design). */
+.u99-add-btn{
+  border:1.5px solid var(--u99-primary);
+  background:#fff;
+  color:var(--u99-primary);
+  box-shadow:0 4px 12px rgba(216,11,111,.20);
+}
+.u99-add-btn:active{transform:scale(.9)}
+
+/* Stepper — white pill with a pink outline and pink controls. */
+.u99-stepper{
+  background:#fff;
+  border:1.5px solid var(--u99-primary);
+  box-shadow:0 4px 12px rgba(216,11,111,.18);
+}
+.u99-step-btn{color:var(--u99-primary)}
+.u99-step-qty{color:var(--u99-primary)}
+
+/* Inline veg / non-veg mark before the item name. */
+.u99-name-row{display:flex;align-items:flex-start;gap:6px;margin-top:2px}
+.u99-name-marker{
+  flex:0 0 auto;
+  margin-top:3px;
+  width:14px;height:14px;
+  display:grid;place-items:center;
+  color:var(--u99-green);
+}
+.u99-name-marker.nonveg{color:var(--u99-nonveg)}
+.u99-name-marker svg{display:block}
+.u99-name-row .u99-product-name{margin-top:0}
+
+/* Price row — struck original, strong price, compact discount pill.
+   Discounted price reads pink; a regular (undiscounted) price reads ink. */
+.u99-product-price-row{margin-top:7px;gap:6px;align-items:baseline}
+.u99-current-price{
+  padding:0;
+  background:transparent;
+  color:var(--u99-ink);
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:-.4px;
+}
+.u99-current-price.deal{color:var(--u99-primary)}
+.u99-old-price{color:#9aa0a9;font-size:12.5px;font-weight:700;text-decoration:line-through}
+.u99-discount{
+  padding:3px 7px;
+  border-radius:6px;
+  background:var(--u99-primary-soft);
+  color:var(--u99-primary);
+  font-size:10.5px;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+
+@media(max-width:360px){
+  .u99-current-price{font-size:15px}
+  .u99-old-price{font-size:11.5px}
+  .u99-discount{padding:3px 6px;font-size:9.5px}
+}
