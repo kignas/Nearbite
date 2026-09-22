@@ -20,12 +20,26 @@
 .u99-food-marker.nonveg{border-color:#D74467}
 .u99-food-marker::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--u99-green)}
 .u99-food-marker.nonveg::after{background:#D74467}
-.u99-product-add{
-  position:absolute;right:7px;bottom:7px;width:42px;height:42px;border-radius:50%;
+/* ── Add / quantity control — shared by product grid + popular rail ── */
+.u99-add-control{position:absolute;right:7px;bottom:7px;z-index:3}
+.u99-add-btn{
+  width:42px;height:42px;border-radius:50%;
   border:2px solid var(--u99-pink);background:#fff;color:var(--u99-pink);
   display:grid;place-items:center;font-size:27px;line-height:1;font-weight:500;
-  box-shadow:0 3px 10px rgba(0,0,0,.13)
+  box-shadow:0 3px 10px rgba(0,0,0,.13);transition:transform .08s ease;
 }
+.u99-add-btn:active{transform:scale(.92)}
+.u99-stepper{
+  display:flex;align-items:center;height:42px;border-radius:21px;overflow:hidden;
+  background:var(--u99-pink);box-shadow:0 3px 10px rgba(233,21,131,.30);
+}
+.u99-step-btn{
+  width:34px;height:100%;border:0;background:transparent;color:#fff;
+  font-size:20px;font-weight:800;line-height:1;display:grid;place-items:center;
+  transition:transform .08s ease;
+}
+.u99-step-btn:active{transform:scale(.86)}
+.u99-step-qty{min-width:22px;padding:0 2px;text-align:center;color:#fff;font-size:14px;font-weight:850}
 .u99-product-body{padding:8px 4px 0}
 .u99-product-name{
   margin:0;font-size:14px;line-height:1.2;font-weight:850;letter-spacing:-.25px;
