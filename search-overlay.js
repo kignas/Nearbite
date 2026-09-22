@@ -25,7 +25,7 @@
     if(name==='back') return `<svg ${common}><path d="M15 18l-6-6 6-6"/></svg>`;
     if(name==='search') return `<svg ${common}><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>`;
     if(name==='x') return `<svg ${common}><path d="M6 6l12 12M18 6 6 18"/></svg>`;
-    if(name==='mic') return `<svg ${common}><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>`;
+    if(name==='mic') return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" aria-hidden="true"><defs><linearGradient id="ewMicGradient" x1="4" y1="4" x2="20" y2="20"><stop offset="0" stop-color="#d9096e"/><stop offset="1" stop-color="#ff4d5f"/></linearGradient></defs><rect x="8" y="3" width="8" height="13" rx="4" stroke="url(#ewMicGradient)" stroke-width="2.2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" stroke="url(#ewMicGradient)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     return `<svg ${common}><path d="m9 18 6-6-6-6"/></svg>`;
   };
 
@@ -46,7 +46,7 @@
 
   function ensureStyles(){
     if(document.getElementById('ew-search-overlay-css')) return;
-    const link=document.createElement('link');link.id='ew-search-overlay-css';link.rel='stylesheet';link.href='search-overlay.css';document.head.appendChild(link);
+    const link=document.createElement('link');link.id='ew-search-overlay-css';link.rel='stylesheet';link.href='search-overlay.css?v=20260922-2';document.head.appendChild(link);
   }
 
   function build(){
@@ -92,9 +92,7 @@
     root.classList.remove('is-open');root.setAttribute('aria-hidden','true');document.body.classList.remove('ew-search-open');
   }
 
-  function renderIdle(){
-    body.innerHTML=`<div class="ew-search-state"><p class="ew-search-state-title">What are you craving?</p><p class="ew-search-state-sub">Search for dishes, cuisines or something specific.</p></div>`;
-  }
+  function renderIdle(){ body.innerHTML=''; }
   function renderSkeleton(){body.innerHTML='<div class="ew-search-list">'+Array.from({length:5},()=>'<div class="ew-search-skeleton" aria-hidden="true"></div>').join('')+'</div>';}
   function renderState(title,sub){body.innerHTML=`<div class="ew-search-state"><p class="ew-search-state-title">${esc(title)}</p><p class="ew-search-state-sub">${esc(sub)}</p></div>`;}
 

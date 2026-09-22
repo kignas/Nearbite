@@ -5,15 +5,15 @@
 .ew-search-root{position:fixed;inset:0;z-index:2147483000;visibility:hidden;pointer-events:none;font-family:Manrope,Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .ew-search-root.is-open{visibility:visible;pointer-events:auto}
 .ew-search-scrim{position:absolute;inset:0;background:rgba(18,20,27,.48);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;transition:opacity .26s ease}
-.ew-search-sheet{position:absolute;left:0;right:0;top:0;background:#fff;border-radius:0 0 28px 28px;box-shadow:0 18px 50px rgba(16,24,40,.18);transform:translateY(-104%);transition:transform .34s cubic-bezier(.22,.8,.25,1);padding:calc(10px + env(safe-area-inset-top,0px)) 24px 22px;max-height:min(78dvh,720px);display:flex;flex-direction:column;overflow:hidden}
+.ew-search-sheet{position:absolute;left:0;right:0;top:0;background:#fff;border-radius:0 0 28px 28px;box-shadow:0 18px 50px rgba(16,24,40,.18);transform:translateY(-104%);transition:transform .34s cubic-bezier(.22,.8,.25,1);padding:calc(8px + env(safe-area-inset-top,0px)) 24px 22px;max-height:min(72dvh,680px);display:flex;flex-direction:column;overflow:hidden}
 .ew-search-root.is-open .ew-search-scrim{opacity:1}
 .ew-search-root.is-open .ew-search-sheet{transform:translateY(0)}
 .ew-search-handle{display:none}
-.ew-search-head{display:flex;align-items:center;gap:0;min-height:78px}
-.ew-search-back{width:36px;height:54px;margin-right:0;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;color:#777c84;cursor:pointer;flex:none}
+.ew-search-head{display:flex;align-items:center;gap:0;min-height:60px}
+.ew-search-back{width:36px;height:52px;margin-right:0;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;color:#777c84;cursor:pointer;flex:none}
 .ew-search-back:active{background:#f4f5f7}
-.ew-search-input-wrap{height:76px;flex:1;min-width:0;border:1px solid #d8d9dc;border-radius:16px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;background:#fff;transition:border-color .18s,box-shadow .18s}
-.ew-search-input-wrap:focus-within{border-color:#cfd1d5;box-shadow:none}
+.ew-search-input-wrap{height:54px;flex:1;min-width:0;border:1px solid #d8d9dc;border-radius:16px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;background:#fff;transition:border-color .18s,box-shadow .18s}
+.ew-search-input-wrap:focus-within{border-color:#d9dadd;box-shadow:0 0 0 2px rgba(217,9,110,.035)}
 .ew-search-icon{width:21px;height:21px;color:#8b9097;flex:none}
 .ew-search-input{width:100%;height:100%;border:0;outline:0;background:transparent;color:#252932;font:500 18px/1 Manrope,Inter,sans-serif;letter-spacing:-.25px}
 .ew-search-input::placeholder{color:#7f858d;font-weight:500;opacity:1}
@@ -22,7 +22,7 @@
 .ew-search-context{display:none}
 .ew-search-body{margin-top:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 2px 8px;min-height:0}
 .ew-search-body::-webkit-scrollbar{display:none}
-.ew-search-state{padding:34px 16px;text-align:center;color:var(--ew-search-muted)}
+.ew-search-state{padding:18px 16px;text-align:center;color:var(--ew-search-muted)}
 .ew-search-state-title{margin:0;color:#303641;font-size:15px;font-weight:800;line-height:1.35}
 .ew-search-state-sub{margin:6px 0 0;font-size:12px;font-weight:600;line-height:1.45;color:#9299a3}
 .ew-search-list{display:flex;flex-direction:column;gap:2px}
@@ -41,10 +41,10 @@
 @keyframes ewSearchShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @media(max-width:430px){
   .ew-search-sheet{padding-left:18px;padding-right:18px;border-radius:0 0 24px 24px}
-  .ew-search-head{min-height:76px}
+  .ew-search-head{min-height:58px}
   .ew-search-back{width:30px}
   .ew-search-input{font-size:17px}
-  .ew-search-input-wrap{height:76px;border-radius:16px;padding-left:14px;padding-right:12px}
+  .ew-search-input-wrap{height:54px;border-radius:16px;padding-left:14px;padding-right:12px}
 }
 @media(prefers-reduced-motion:reduce){
   .ew-search-scrim,.ew-search-sheet{transition:none}
