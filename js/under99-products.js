@@ -1,16 +1,7 @@
 (() => {
   const S=window.Eatswada99State, E=window.Eatswada99;
-  const cartKey='nearbite_cart';
-  const cart=()=>{try{return JSON.parse(localStorage.getItem(cartKey))||{}}catch{return{}}};
-  const save=c=>localStorage.setItem(cartKey,JSON.stringify(c));
-  function add(item,r){
-    const c=cart(),k=String(item.id||`${r.id}|${item.name}`);
-    const x=c[k]||{quantity:0,price:item.price,resId:r.id,menuItem:item.id,name:item.name,image:item.image,isVeg:item.isVeg};
-    x.quantity++;c[k]=x;save(c);
-    document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{item,restaurant:r}}));
-    if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
-    if(window.showToast)window.showToast(`${item.name} added`);
-  }
+  // No cart writer here. All cart mutations go through the canonical
+  // window.updateCart() via E.cartChange/E.renderAddControl (see core).
   function filtered(){
     let groups=[];
     S.restaurants.forEach(r=>{
@@ -38,7 +29,7 @@
         ${item.isBestseller?'<span class="u99-badge bestseller">Bestseller</span>':''}
         ${!item.isBestseller&&item.isRecommended?'<span class="u99-badge">Popular</span>':''}
         <span class="u99-food-marker ${item.isVeg?'':'nonveg'}" aria-label="${item.isVeg?'Veg':'Non-veg'}"></span>
-        <button class="u99-product-add" data-add-item="${E.esc(item.id)}" data-add-restaurant="${E.esc(r.id)}" aria-label="Add ${E.esc(item.name)}">+</button>
+        ${E.renderAddControl(item,r)}
       </div>
       <div class="u99-product-body">
         <h3 class="u99-product-name">${E.esc(item.name)}</h3>
@@ -58,10 +49,7 @@
     document.getElementById('u99-count').textContent=`${groups.length} ${groups.length===1?'item':'items'}`;
     if(!groups.length){grid.innerHTML='<div class="u99-empty"><strong>No dishes found</strong><span>Try another filter or price range.</span></div>';return}
     grid.innerHTML=groups.map(card).join('');
-    document.querySelectorAll('[data-add-item]').forEach(btn=>btn.addEventListener('click',()=>{
-      const r=S.restaurants.find(x=>x.id===btn.dataset.addRestaurant);const item=r?.menu.find(x=>String(x.id)===btn.dataset.addItem);
-      if(item&&r)add(item,r);
-    }));
+    // Add/stepper clicks are handled by the single delegated listener in core.
   }
   document.addEventListener('eatswada99:data-ready',render);
   document.addEventListener('eatswada99:filters-changed',render);
