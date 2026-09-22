@@ -227,6 +227,15 @@
       return request(path, options).then(asObject);
     },
 
+    /* Context-aware menu search. Returns only matching menu items plus restaurant data. */
+    searchMenuItems: function (q, scope) {
+      return request((this.routes && this.routes.search) ? this.routes.search(q, scope) : '/restaurants/search?q=' + encodeURIComponent(q) + '&scope=' + encodeURIComponent(scope || 'home'))
+        .then(function (payload) {
+          var data = payload && payload.data;
+          return data && Array.isArray(data.menuItems) ? data.menuItems : [];
+        });
+    },
+
     /* Endpoint map — keeps route strings in one place too. */
     routes: {
       restaurants: '/restaurants',
@@ -237,7 +246,13 @@
         return '/restaurants/' + encodeURIComponent(id) + '/menu';
       },
       categories: '/categories',
-      under99: '/restaurants/under99'
+      under99: '/restaurants/under99',
+      search: function (q, scope) {
+        var params = new URLSearchParams();
+        params.set('q', String(q || '').trim());
+        params.set('scope', scope || 'home');
+        return '/restaurants/search?' + params.toString();
+      }
     },
 
     CACHE_KEYS: {
