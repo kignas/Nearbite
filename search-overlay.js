@@ -15,7 +15,7 @@
 
   const API='https://eatswada.onrender.com/api';
   const MIN=2;
-  let root=null,input=null,body=null,contextLabel=null;
+  let root=null,input=null,body=null,contextLabel=null,clearBtn=null;
   let context='home',restaurantId='';
   let debounceTimer=0,requestSeq=0,aborter=null;
 
@@ -61,6 +61,7 @@
           <div class="ew-search-input-wrap">
             <span class="ew-search-icon">${icon('search',20)}</span>
             <input class="ew-search-input" id="ew-search-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Try 'Sweets'" enterkeyhint="search" />
+            <button class="ew-search-clear" type="button" id="ew-search-clear" aria-label="Clear search" hidden>${icon('x',20)}</button>
             <span class="ew-search-divider" aria-hidden="true"></span>
             <button class="ew-search-mic" type="button" id="ew-search-mic" aria-label="Voice search">${icon('mic',22)}</button>
           </div>
@@ -73,7 +74,7 @@
   }
 
   function refs(){
-    root=build();input=root.querySelector('#ew-search-input');body=root.querySelector('#ew-search-body');contextLabel=root.querySelector('#ew-search-context');
+    root=build();input=root.querySelector('#ew-search-input');body=root.querySelector('#ew-search-body');contextLabel=root.querySelector('#ew-search-context');clearBtn=root.querySelector('#ew-search-clear');
   }
 
   function open(prefill=''){
@@ -82,6 +83,7 @@
     if(contextLabel) contextLabel.textContent=contextText();
     root.classList.add('is-open');root.setAttribute('aria-hidden','false');document.body.classList.add('ew-search-open');
     input.value=prefill||'';
+    updateClearButton();
     if(!prefill) renderIdle(); else scheduleSearch(true);
     requestAnimationFrame(()=>input.focus({preventScroll:true}));
   }
@@ -92,7 +94,8 @@
     root.classList.remove('is-open');root.setAttribute('aria-hidden','true');document.body.classList.remove('ew-search-open');
   }
 
-  function renderIdle(){ body.innerHTML=''; }
+  function renderIdle(){ body.innerHTML=''; updateClearButton(); }
+  function updateClearButton(){ if(!clearBtn) return; clearBtn.hidden=!input.value.trim(); }
   function renderSkeleton(){body.innerHTML='<div class="ew-search-list">'+Array.from({length:5},()=>'<div class="ew-search-skeleton" aria-hidden="true"></div>').join('')+'</div>';}
   function renderState(title,sub){body.innerHTML=`<div class="ew-search-state"><p class="ew-search-state-title">${esc(title)}</p><p class="ew-search-state-sub">${esc(sub)}</p></div>`;}
 
@@ -128,15 +131,10 @@
     if(!items.length){renderState(`No dishes found for “${q}”`,'Try another dish or a different spelling.');return;}
     body.innerHTML='<div class="ew-search-list">'+items.map((item,i)=>{
       const restaurant=item.restaurant||{};
-      const image=item.image||restaurant.image||'';
-      const price=Number.isFinite(Number(item.price))?`₹${Number(item.price)}`:'';
-      const meta=context==='restaurant'
-        ? (item.category||'Dish')
-        : `${restaurant.name||'Restaurant'}${item.category?' · '+item.category:''}`;
+      const image=item.image||item.imageUrl||restaurant.image||restaurant.imageUrl||'';
       return `<button class="ew-search-result" type="button" data-result-index="${i}">
-        ${image?`<img class="ew-search-thumb ew-search-thumb--square" src="${esc(image)}" alt="" loading="lazy" decoding="async">`:`<span class="ew-search-thumb ew-search-thumb--square"></span>`}
-        <span class="ew-search-copy"><span class="ew-search-name">${esc(item.name||'Dish')}</span><span class="ew-search-meta">${esc(meta)}</span>${price?`<span class="ew-search-price">${price}</span>`:''}</span>
-        <span class="ew-search-arrow">${icon('next',19)}</span>
+        ${image?`<img class="ew-search-thumb" src="${esc(image)}" alt="" loading="lazy" decoding="async">`:`<span class="ew-search-thumb" aria-hidden="true"></span>`}
+        <span class="ew-search-copy"><span class="ew-search-name">${esc(item.name||'Dish')}</span><span class="ew-search-meta">Dish</span></span>
       </button>`;
     }).join('')+`</div>`;
     body.querySelectorAll('[data-result-index]').forEach((btn)=>btn.addEventListener('click',()=>openResult(items[Number(btn.dataset.resultIndex)])));
@@ -164,7 +162,8 @@
     document.addEventListener('click',(e)=>{
       const closeBtn=e.target.closest('[data-search-close]');if(closeBtn){e.preventDefault();close();}
     });
-    document.addEventListener('input',(e)=>{if(e.target===input) scheduleSearch(false);});
+    document.addEventListener('input',(e)=>{if(e.target!==input) return; updateClearButton(); scheduleSearch(false);});
+    document.addEventListener('click',(e)=>{if(e.target.closest('#ew-search-clear')){e.preventDefault(); input.value=''; updateClearButton(); renderIdle(); input.focus({preventScroll:true});}});
     document.addEventListener('keydown',(e)=>{
       if(e.target!==input) return;
       if(e.key==='Enter'){e.preventDefault();scheduleSearch(true);}
