@@ -1,0 +1,89 @@
+/* 99 STORE — PRODUCT CARD
+   Derived from the Eatswada restaurant-menu item language.
+   The 99 Store changes only the layout: two columns instead of the
+   restaurant's single horizontal list. */
+.u99-product-card{min-width:0;cursor:pointer}
+.u99-product-image{
+  position:relative;width:100%;aspect-ratio:1.45/1;border-radius:14px;
+  overflow:hidden;background:#f4f4f5
+}
+.u99-product-image img{
+  width:100%;height:100%;object-fit:cover;object-position:center;display:block
+}
+.u99-badge{
+  position:absolute;top:8px;left:8px;max-width:calc(100% - 56px);
+  padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.96);
+  color:#3d4653;font-size:11px;line-height:1;font-weight:700;
+  white-space:nowrap;box-shadow:0 1px 5px rgba(15,23,42,.08)
+}
+.u99-badge.bestseller{background:#fff3e0;color:#a96a15}
+.u99-food-marker{
+  position:absolute;right:8px;top:8px;width:21px;height:21px;border-radius:6px;
+  padding:2px;background:#fff;display:grid;place-items:center;
+  color:var(--u99-green);box-shadow:0 1px 5px rgba(15,23,42,.08)
+}
+.u99-food-marker.nonveg{color:var(--u99-nonveg)}
+.u99-food-marker svg{display:block}
+
+.u99-add-control{
+  position:absolute;left:50%;bottom:-1px;transform:translate(-50%,50%);
+  z-index:3
+}
+.u99-add-btn{
+  width:92px;height:38px;border-radius:11px;border:1.5px solid #e40073;
+  background:#fff;color:#e40073;display:inline-flex;align-items:center;
+  justify-content:center;gap:2px;box-shadow:0 2px 7px rgba(20,28,40,.10);
+  font-size:13px;font-weight:800;line-height:1
+}
+.u99-add-btn svg{width:14px;height:14px}
+.u99-add-btn.has-options::before{content:"ADD";font-size:13px}
+.u99-add-btn.has-options svg{display:none}
+.u99-stepper{
+  width:92px;height:38px;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid #e40073;border-radius:11px;overflow:hidden;
+  background:#fff;color:#e40073;box-shadow:0 2px 7px rgba(20,28,40,.10)
+}
+.u99-step-btn{
+  width:30px;height:100%;border:0;background:#fff;color:#e40073;
+  display:grid;place-items:center
+}
+.u99-step-qty{min-width:28px;text-align:center;font-size:13px;font-weight:800;color:#20232d}
+
+.u99-product-body{padding:19px 1px 0}
+.u99-restaurant-name{
+  margin:0;color:#7a828d;font-size:13px;line-height:1.25;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.u99-product-name{
+  margin:3px 0 0;font-size:16px;line-height:1.22;font-weight:700;
+  letter-spacing:-.32px;color:#1b1f27;min-height:0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+.u99-product-price-row{
+  display:flex;align-items:center;gap:7px;margin-top:6px;min-height:23px;flex-wrap:nowrap
+}
+.u99-current-price{font-size:15px;line-height:1;font-weight:800;color:#1b1f27}
+.u99-old-price{color:#9297a0;font-size:12px;text-decoration:line-through;font-weight:500}
+.u99-discount{
+  padding:4px 7px;border-radius:6px;background:var(--u99-primary-soft);
+  color:var(--u99-primary);font-size:10px;line-height:1;font-weight:700;white-space:nowrap
+}
+.u99-product-meta{
+  display:flex;align-items:center;gap:6px;min-width:0;margin-top:7px;
+  color:#7a828d;font-size:12px;line-height:1.2;font-weight:500;white-space:nowrap;overflow:hidden
+}
+.u99-rating{display:inline-flex;align-items:center;gap:3px;color:#1b9e5a;font-weight:700}
+.u99-rating-count{color:#7a828d;font-weight:600}
+.u99-meta-dot{color:#aeb3bb}
+.u99-product-desc{
+  margin:7px 0 0;color:#7a828d;font-size:12px;line-height:1.35;font-weight:500;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+.u99-product-customisable{
+  margin-top:5px;color:#8e949d;font-size:11px;line-height:1.2;font-weight:500
+}
+@media(max-width:350px){
+  .u99-add-btn,.u99-stepper{width:82px;height:36px}
+  .u99-step-btn{width:27px}
+  .u99-product-name{font-size:15px}
+}
