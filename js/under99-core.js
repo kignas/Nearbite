@@ -79,8 +79,8 @@
       const result = await fetchJson(HERO_API, 12000);
       const b = Array.isArray(result?.data) ? result.data[0] : null;
       const image = String(b?.mobileImage || b?.image || '').trim();
-      if (image) { const el = qs('u99-hero-art'); if (el) { el.onload = () => el.classList.add('loaded'); el.onerror = () => el.classList.remove('loaded'); el.src = image; el.hidden = false; } }
-    } catch (e) { console.warn('[99 Store] hero artwork unavailable', e); }
+      if (image) { const el = qs('u99-hero-art'); const hero = document.querySelector('.u99-hero'); if (el) { el.onload = () => { el.classList.add('loaded'); hero?.classList.add('u99-hero-ready'); }; el.onerror = () => { el.classList.remove('loaded'); hero?.classList.add('u99-hero-error'); }; el.src = image; el.hidden = false; } } else { document.querySelector('.u99-hero')?.classList.add('u99-hero-error'); }
+    } catch (e) { console.warn('[99 Store] hero artwork unavailable', e); document.querySelector('.u99-hero')?.classList.add('u99-hero-error'); }
   }
 
   async function load() {

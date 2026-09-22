@@ -72,7 +72,7 @@
 
     return '<article class="u99-product-card">' +
       '<div class="u99-product-image">' +
-        '<img src="' + E.esc(item.image) + '" alt="' + E.esc(item.name) + '" loading="lazy" decoding="async">' +
+        '<img class="u99-item-img is-loading" src="' + E.esc(item.image) + '" alt="' + E.esc(item.name) + '" loading="lazy" decoding="async">' +
         badge + marker + ratingBadge +
         E.renderAddControl(item, r) +
       '</div>' +
@@ -103,12 +103,25 @@
   const prefersReduce = () =>
     !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
+  function hydrateImages(grid) {
+    if (!grid) return;
+    grid.querySelectorAll('.u99-item-img').forEach(img => {
+      const reveal = () => {
+        requestAnimationFrame(() => img.classList.add('is-loaded'));
+      };
+      if (img.complete && img.naturalWidth > 0) reveal();
+      else img.addEventListener('load', reveal, { once: true });
+      img.addEventListener('error', () => img.classList.add('is-error'), { once: true });
+    });
+  }
+
   function paint() {
     const grid = document.getElementById('u99-product-grid');
     if (!grid) return;
     const groups = filtered(), count = document.getElementById('u99-count');
     if (count) count.textContent = 'All ' + groups.length + ' ' + (groups.length === 1 ? 'item' : 'items');
     grid.innerHTML = groups.length ? groups.map(card).join('') : emptyState();
+    hydrateImages(grid);
   }
 
   /* Subtle cross-fade when the visible set changes (price/filter/sort).
@@ -117,14 +130,23 @@
   let swapTimer = null;
   function render(animate) {
     const grid = document.getElementById('u99-product-grid');
+    const skeleton = document.getElementById('u99-skeleton');
     if (!grid) return;
     if (!animate || prefersReduce() || !grid.children.length) { paint(); return; }
-    grid.classList.add('is-swapping');
+
+    // Price/filter transitions use a short skeleton phase instead of leaving
+    // the old menu dimmed. This makes the state change feel like a real app
+    // loading the next result set, while preserving the existing data flow.
+    skeleton?.classList.remove('u99-hidden');
+    grid.classList.add('is-loading-set');
     clearTimeout(swapTimer);
     swapTimer = setTimeout(() => {
       paint();
-      requestAnimationFrame(() => grid.classList.remove('is-swapping'));
-    }, 140);
+      requestAnimationFrame(() => {
+        grid.classList.remove('is-loading-set');
+        skeleton?.classList.add('u99-hidden');
+      });
+    }, 190);
   }
 
   function resetFilters() {
