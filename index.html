@@ -51,6 +51,25 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     2. SKELETONS
+     ══════════════════════════════════════════════════════════════ */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+  }
+
+  .sk {
+    display: block;
+    background: linear-gradient(90deg, #E7E9ED 25%, #F3F4F7 50%, #E7E9ED 75%);
+    background-size: 1200px 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 10px;
+  }
+  .sk.d1 { animation-delay: .08s; }
+  .sk.d2 { animation-delay: .16s; }
+  .sk.d3 { animation-delay: .24s; }
+  .sk.d4 { animation-delay: .32s; }
 
   /* ══════════════════════════════════════════════════════════════
      3. EATSWADA HEADER — BENCHMARK COMPOSITION
@@ -361,6 +380,54 @@
   .state-btn:disabled { opacity: .6; cursor: default; }
 
   /* ══════════════════════════════════════════════════════════════
+     5. FILTER SHEET
+     ══════════════════════════════════════════════════════════════ */
+  .filter-sheet { position: fixed; inset: 0; z-index: 100001; }
+  .filter-sheet[hidden] { display: none; }
+
+  .sheet-backdrop {
+    position: absolute; inset: 0; background: rgba(15,23,42,.45);
+    opacity: 0; transition: opacity .22s ease;
+  }
+  .filter-sheet.open .sheet-backdrop { opacity: 1; }
+
+  .sheet-panel {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: var(--surface); border-radius: 22px 22px 0 0;
+    padding: 8px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    max-height: 78vh; overflow-y: auto;
+    transform: translateY(100%); transition: transform .24s cubic-bezier(.22,1,.36,1);
+  }
+  .filter-sheet.open .sheet-panel { transform: translateY(0); }
+
+  .sheet-grabber { width: 40px; height: 4px; border-radius: 2px; background: #DEE2E8; margin: 6px auto 14px; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .sheet-title { font-size: 18px; font-weight: 800; margin: 0; color: var(--text); }
+  .sheet-clear {
+    border: none; background: transparent; color: var(--brand);
+    font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; padding: 4px;
+  }
+  .sheet-group-title {
+    font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+    color: var(--text-mute); margin: 18px 0 8px;
+  }
+  .sheet-options { display: flex; flex-direction: column; }
+  .sheet-option {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 14px 2px; border: none; border-bottom: 1px solid #F1F2F5;
+    background: transparent; font-family: inherit; font-size: 15px; font-weight: 600;
+    color: #333A45; text-align: left; cursor: pointer;
+  }
+  .sheet-option i { color: var(--brand); opacity: 0; font-size: 14px; }
+  .sheet-option.selected { color: #C2560A; font-weight: 800; }
+  .sheet-option.selected i { opacity: 1; }
+  .sheet-done {
+    width: 100%; margin-top: 20px; padding: 15px;
+    background: var(--brand-ink); color: #fff; border: none; border-radius: 14px;
+    font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
      6. LOCATION — permission sheet, status banner, card availability
      Additive only. Reuses the sheet shell, tokens and type above so
      the existing Home layout is untouched.
@@ -370,10 +437,6 @@
   .loc-sheet .sheet-backdrop { opacity: 0; transition: opacity .22s ease; }
   .loc-sheet.open .sheet-backdrop { opacity: 1; }
   .loc-sheet .sheet-panel {
-    position:absolute; left:0; right:0; bottom:0;
-    background:var(--surface); border-radius:22px 22px 0 0;
-    padding:8px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    max-height:78vh; overflow-y:auto;
     transform: translateY(100%);
     transition: transform .24s cubic-bezier(.22,1,.36,1);
     padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -598,12 +661,9 @@
 
 </style>
 <link rel="stylesheet" href="restaurant-card.css"/>
-<link rel="stylesheet" href="skeleton.css"/>
 <link rel="stylesheet" href="eatswada-end-section.css"/>
 <link rel="stylesheet" href="whats-on-your-mind.css"/>
 <link rel="stylesheet" href="filter-bar.css"/>
-<link rel="stylesheet" href="filter-sheet.css"/>
-<link rel="stylesheet" href="search-overlay.css">
 </head>
 
 <body>
@@ -632,7 +692,7 @@
   </div>
 
   <div class="search-row es-header-item">
-    <a class="search-box tap" href="#" data-ew-search>
+    <a class="search-box tap" href="search.html">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
       <span class="search-text" id="search-placeholder">Search dishes, restaurants &amp; cuisines</span>
       <span class="search-mic" id="header-voice-search" role="button" tabindex="0" aria-label="Voice search">
@@ -647,21 +707,7 @@
 
   <div class="banner-wrap es-header-item" id="hero-banner-region" aria-live="polite">
     <div class="header-carousel" id="banner-carousel" aria-roledescription="carousel" aria-label="Promotions">
-      <div class="header-carousel-track" id="header-carousel-track">
-        <article class="header-slide banner-skeleton" data-theme="pink" aria-hidden="true">
-          <div class="header-slide__panel">
-            <div class="header-slide__copy">
-              <span class="sk bsk-badge"></span>
-              <span class="sk bsk-title bsk-title-1"></span>
-              <span class="sk bsk-title bsk-title-2"></span>
-              <span class="sk bsk-sub"></span>
-              <span class="sk bsk-sub-2"></span>
-              <span class="sk bsk-cta"></span>
-            </div>
-            <span class="sk bsk-art"></span>
-          </div>
-        </article>
-      </div>
+      <div class="header-carousel-track" id="header-carousel-track"></div>
     </div>
     <div class="banner-controls" id="banner-controls" role="tablist" aria-label="Choose promotion" hidden></div>
   </div>
@@ -685,11 +731,7 @@
     </div>
   </section>
 
-  <div class="filter-bar" id="filter-bar" role="group" aria-label="Restaurant filters">
-    <button type="button" class="filter-pill filter-pill-sheet is-skeleton" style="width:104px" tabindex="-1" aria-hidden="true" disabled></button>
-    <button type="button" class="filter-pill is-skeleton d1" style="width:124px" tabindex="-1" aria-hidden="true" disabled></button>
-    <button type="button" class="filter-pill is-skeleton d2" style="width:112px" tabindex="-1" aria-hidden="true" disabled></button>
-  </div>
+  <div class="filter-bar" id="filter-bar" role="group" aria-label="Restaurant filters" hidden></div>
 
   <section class="section" id="restaurants-section">
     <div class="sec-head">
@@ -700,41 +742,15 @@
     <div id="location-banner" role="status" hidden></div>
 
     <div id="restaurant-list">
-      <div class="u99-card-host rs-skeleton" aria-hidden="true">
-        <article class="u99-restaurant-card">
-          <div class="u99-restaurant-head"><div class="u99-card-copy">
-            <div class="u99-discount-line"><span class="sk rsk-line" style="width:38%"></span></div>
-            <h2 class="u99-restaurant-name"><span class="sk rsk-line" style="width:64%"></span></h2>
-            <div class="u99-meta"><span class="sk rsk-line" style="width:52px"></span><span class="sk rsk-line" style="width:70px"></span><span class="sk rsk-line" style="width:88px"></span></div>
-            <div class="u99-free-row"><span class="sk rsk-line" style="width:56%"></span></div>
-          </div></div>
-          <div class="u99-carousel-wrap"><div class="u99-carousel">
-            <article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill"></span><span class="sk rsk-add"></span></div><div class="u99-item-name"><span class="sk rsk-line" style="width:82%"></span></div><div class="u99-price-row"><span class="sk rsk-line" style="width:44%"></span></div></article>
-            <article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill"></span><span class="sk rsk-add"></span></div><div class="u99-item-name"><span class="sk rsk-line" style="width:74%"></span></div><div class="u99-price-row"><span class="sk rsk-line" style="width:50%"></span></div></article>
-          </div></div>
-        </article>
-      </div>
-      <div class="u99-card-host rs-skeleton" aria-hidden="true">
-        <article class="u99-restaurant-card">
-          <div class="u99-restaurant-head"><div class="u99-card-copy">
-            <div class="u99-discount-line"><span class="sk rsk-line d1" style="width:32%"></span></div>
-            <h2 class="u99-restaurant-name"><span class="sk rsk-line d1" style="width:58%"></span></h2>
-            <div class="u99-meta"><span class="sk rsk-line d1" style="width:52px"></span><span class="sk rsk-line d1" style="width:66px"></span><span class="sk rsk-line d1" style="width:92px"></span></div>
-            <div class="u99-free-row"><span class="sk rsk-line d1" style="width:52%"></span></div>
-          </div></div>
-          <div class="u99-carousel-wrap"><div class="u99-carousel">
-            <article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill d1"></span><span class="sk rsk-add d1"></span></div><div class="u99-item-name"><span class="sk rsk-line d1" style="width:78%"></span></div><div class="u99-price-row"><span class="sk rsk-line d1" style="width:48%"></span></div></article>
-            <article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill d1"></span><span class="sk rsk-add d1"></span></div><div class="u99-item-name"><span class="sk rsk-line d1" style="width:70%"></span></div><div class="u99-price-row"><span class="sk rsk-line d1" style="width:52%"></span></div></article>
-          </div></div>
-        </article>
-      </div>
+      <div class="rs-card"><div class="sk rs-img"></div><div class="rs-row"><div class="sk rs-name"></div><div class="sk rs-badge"></div></div><div class="sk rs-cuis"></div><div class="sk rs-meta"></div></div>
+      <div class="rs-card"><div class="sk rs-img d1"></div><div class="rs-row"><div class="sk rs-name d1"></div><div class="sk rs-badge d1"></div></div><div class="sk rs-cuis d1"></div><div class="sk rs-meta d1"></div></div>
     </div>
   </section>
 
     <div class="ew-feed-end" id="home-feed-end" aria-label="End of restaurant list">
       <h2 class="ew-feed-end__title">That's all we've got!</h2>
       <p class="ew-feed-end__sub">A curated list of top-rated restaurants 💗<br>4.0+ rated on Eatswada</p>
-      <p class="ew-feed-end__made"> EatSwada <span class="ew-feed-end__heart" aria-hidden="true"></span></p>
+      <p class="ew-feed-end__made">Made in Maynaguri <span class="ew-feed-end__heart" aria-hidden="true">♥</span></p>
     </div>
 
 </main>
@@ -744,17 +760,11 @@
   <div class="sheet-panel">
     <div class="sheet-grabber"></div>
     <div class="sheet-head">
-      <h3 class="sheet-title">Filters &amp; sorting</h3>
+      <h3 class="sheet-title">Filters</h3>
       <button type="button" class="sheet-clear" id="filter-sheet-clear">Clear all</button>
     </div>
-    <div class="filter-layout">
-      <nav class="filter-tabs" id="filter-sheet-tabs" aria-label="Filter categories"></nav>
-      <div class="filter-content" id="filter-sheet-body"></div>
-    </div>
-    <div class="sheet-footer">
-      <button type="button" class="sheet-close-btn" data-close-sheet="1">Close</button>
-      <button type="button" class="sheet-done" data-close-sheet="1">Show results</button>
-    </div>
+    <div id="filter-sheet-body"></div>
+    <button type="button" class="sheet-done" data-close-sheet="1">Show results</button>
   </div>
 </div>
 
@@ -775,7 +785,6 @@
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
 <script src="api.js"></script>
-<script src="search-overlay.js"></script>
 <script src="favorites.js"></script>
 <script src="restaurant-card.js"></script>
 <script src="home.js"></script>
@@ -792,6 +801,8 @@
   if (root) new MutationObserver(normalize).observe(root,{childList:true,subtree:true,characterData:true});
 })();
 </script>
+<!-- Shared inline search overlay: Home / 99 Store / Restaurant Menu -->
+<script src="search-overlay.js"></script>
 <script src="cart-bar.js"></script>
 <script src="bottom-tab-bar.js"></script>
 
