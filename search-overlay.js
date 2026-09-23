@@ -46,7 +46,7 @@
 
   function ensureStyles(){
     if(document.getElementById('ew-search-overlay-css')) return;
-    const link=document.createElement('link');link.id='ew-search-overlay-css';link.rel='stylesheet';link.href='search-overlay.css?v=20260922-2';document.head.appendChild(link);
+    const link=document.createElement('link');link.id='ew-search-overlay-css';link.rel='stylesheet';link.href='search-overlay.css?v=20260924-polish';document.head.appendChild(link);
   }
 
   function build(){
@@ -77,6 +77,25 @@
     root=build();input=root.querySelector('#ew-search-input');body=root.querySelector('#ew-search-body');contextLabel=root.querySelector('#ew-search-context');clearBtn=root.querySelector('#ew-search-clear');
   }
 
+  /* Keeps the sheet sized to the space the on-screen keyboard leaves behind,
+     so the results area resizes smoothly instead of jumping. Display only. */
+  let viewportBound=false;
+  function syncViewport(){
+    const vv=window.visualViewport;
+    if(!root||!vv) return;
+    root.style.setProperty('--ew-search-vh',Math.max(240,Math.round(vv.height)-14)+'px');
+  }
+  function bindViewport(){
+    if(viewportBound||!window.visualViewport) return;
+    viewportBound=true;
+    window.visualViewport.addEventListener('resize',syncViewport);
+  }
+  function unbindViewport(){
+    if(!window.visualViewport) return;
+    if(viewportBound){window.visualViewport.removeEventListener('resize',syncViewport);viewportBound=false;}
+    if(root) root.style.removeProperty('--ew-search-vh');
+  }
+
   function open(prefill=''){
     ensureStyles(); refs();
     const c=detectContext();context=c.scope;restaurantId=c.restaurantId;
@@ -85,6 +104,7 @@
     input.value=prefill||'';
     updateClearButton();
     if(!prefill) renderIdle(); else scheduleSearch(true);
+    syncViewport(); bindViewport();
     requestAnimationFrame(()=>input.focus({preventScroll:true}));
   }
 
@@ -92,6 +112,7 @@
     if(!root) return;
     clearTimeout(debounceTimer);if(aborter) aborter.abort();aborter=null;
     root.classList.remove('is-open');root.setAttribute('aria-hidden','true');document.body.classList.remove('ew-search-open');
+    unbindViewport();
   }
 
   function renderIdle(){ body.innerHTML=''; updateClearButton(); }
@@ -185,4 +206,9 @@
   ensureStyles();bind();
   window.openEatswadaSearch=open;
   window.closeEatswadaSearch=close;
+  // search.html calls EatswadaSearch.open({context,query}); accepts a plain string too.
+  window.EatswadaSearch={
+    open:o=>open(o&&typeof o==='object'?(o.query||o.prefill||''):(o||'')),
+    close
+  };
 })();
