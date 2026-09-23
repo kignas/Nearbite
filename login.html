@@ -338,7 +338,9 @@
      immediately, exactly as before. */
   (function(){
     try{
-      if(sessionStorage.getItem('eatswada_google_redirect_pending')==='1'){
+      const pending = sessionStorage.getItem('eatswada_google_redirect_pending')==='1'
+        || localStorage.getItem('eatswada_google_redirect_pending')==='1';
+      if(pending){
         document.documentElement.classList.add('auth-callback');
       }
     }catch(e){}
@@ -540,7 +542,7 @@
       return user || {};
     }
     async function finishGoogleLogin(firebaseUser){
-      const idToken=await firebaseUser.getIdToken(true);
+      const idToken=await firebaseUser.getIdToken();
       const res=await fetch(`${AUTH_API}/firebase`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
       const data=await res.json().catch(()=>({}));
       if(data.code==='PROFILE_REQUIRED'){
@@ -596,13 +598,19 @@
       try{ return sessionStorage.getItem(GOOGLE_REDIRECT_KEY)==='1'; }catch(e){ return false; }
     }
     function clearGoogleRedirectPending(){
-      try{ sessionStorage.removeItem(GOOGLE_REDIRECT_KEY); }catch(e){}
+      try{
+        sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+        localStorage.removeItem(GOOGLE_REDIRECT_KEY);
+      }catch(e){}
     }
     function authGateActive(){
       return document.documentElement.classList.contains('auth-callback');
     }
     function markGoogleRedirectPending(){
-      try{ sessionStorage.setItem(GOOGLE_REDIRECT_KEY,'1'); }catch(e){}
+      try{
+        sessionStorage.setItem(GOOGLE_REDIRECT_KEY,'1');
+        localStorage.setItem(GOOGLE_REDIRECT_KEY,'1');
+      }catch(e){}
       document.documentElement.classList.add('auth-callback');
     }
     function revealLoginForm(message){
