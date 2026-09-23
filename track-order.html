@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
-  <title>Track Order – EatSwada</title>
+  <title>Track order – Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
@@ -14,372 +14,318 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
+    /* ============================================================
+       EATSWADA · ORDER TRACKING
+       Same tokens as the Address flow and Orders: Manrope, #367E34
+       green, #F1F0F5 page, white 14 px cards, restrained motion.
+       ============================================================ */
     :root {
       --font: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --brand:#FC8019; --brand-dark:#E06B12; --brand-darker:#C85F0E;
-      --brand-50:#FFF4E9; --brand-100:#FFE8D1;
-      --ink-900:#14171F; --ink-800:#1F232C; --ink-700:#3A3F4B; --ink-500:#6B7280;
-      --ink-400:#9AA1AC; --ink-300:#C9CDD4; --ink-200:#E4E6EA;
-      --line:#ECEDF1; --paper:#F7F7F9; --card:#FFFFFF;
-      --success:#16A673; --success-light:#E8F8F1; --success-deep:#0E7A57;
-      --danger:#E5484D; --danger-light:#FDECEC;
-      --info:#2F6FEB; --info-light:#EAF1FE;
-      --amber:#D97706; --amber-light:#FFF7E6;
-      --violet:#6D5BD0; --violet-light:#EFEBFC;
-      --shadow-sm: 0 2px 8px rgba(20,23,31,0.05);
-      --shadow:    0 4px 20px rgba(20,23,31,0.07), 0 1px 3px rgba(20,23,31,0.03);
-      --shadow-lg: 0 24px 60px rgba(20,23,31,0.14);
-      --shadow-brand: 0 10px 24px rgba(252,128,25,.28);
+      --brand:#367E34; --brand-press:#2C6A2B; --brand-tint:#EEF5EE; --brand-soft:#74B054;
+      --ink-900:#16191E; --ink-800:#1F232A; --ink-700:#3E414A; --ink-500:#68696B;
+      --ink-400:#8E8F91; --ink-300:#B6B8BD; --ink-200:#D9DADC;
+      --line:#E5E7E6; --line-soft:#F0F0F2; --paper:#F1F0F5; --card:#FFFFFF; --icon-bg:#F2F2F4;
+      --success:#367E34; --success-light:#EEF5EE;
+      --danger:#C8453B; --danger-light:#FBEDEB;
+      --info:#2F6FEB; --info-light:#EEF3FE;
+      --amber:#B26A12; --amber-light:#FFF6E8;
+      --shadow-xs: 0 1px 2px rgba(16,24,40,.04);
+      --shadow-pop: 0 8px 28px rgba(16,24,40,.16);
       --ease: cubic-bezier(.4,0,.2,1);
       --ease-out: cubic-bezier(.16,1,.3,1);
-      --r-lg: 24px; --r-md: 16px; --r-sm: 12px;
+      --r-lg: 14px; --r-md: 12px; --r-sm: 10px;
+      --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    html body {
+      font-family: var(--font); background: var(--paper); color: var(--ink-900);
+      -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+      line-height: 1.45; overflow-x: hidden; min-height: 100vh;
+      padding-bottom: calc(24px + var(--safe-b));
+    }
+    button, input, textarea { font-family: inherit; color: inherit; }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+    .tap { transition: transform .14s var(--ease-out), opacity .14s var(--ease-out); cursor: pointer; }
+    .tap:active { transform: scale(.97); opacity: .88; }
+    :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-    body {
-      font-family:var(--font);
-      background: var(--paper);
-      color: var(--ink-900);
-      -webkit-tap-highlight-color: transparent;
-      margin: 0;
-      overflow-x: hidden;
-      line-height: 1.5;
+    @keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes textIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(54,126,52,.35); } 100% { box-shadow: 0 0 0 7px rgba(54,126,52,0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
+    @keyframes confettiFall { 0% { transform: translateY(-10px) rotate(0); opacity: 1; } 100% { transform: translateY(220px) rotate(260deg); opacity: 0; } }
+
+    /* ---------- loading ---------- */
+    .loading-overlay { position: fixed; inset: 0; z-index: 900; background: var(--paper); padding: calc(72px + var(--safe-t)) 14px 0; display: grid; align-content: start; gap: 12px; }
+    .skel { background: linear-gradient(90deg,#E9E9ED 0,#E0E0E5 50%,#E9E9ED 100%); background-size: 1200px 100%; animation: shimmer 1.3s linear infinite; border-radius: 8px; }
+    .skel-circle { width: 44px; height: 44px; border-radius: 12px; }
+    .skel-line { height: 14px; } .w-40 { width: 55%; } .w-30 { width: 35%; }
+    .skel-block { height: 120px; border-radius: var(--r-lg); }
+
+    /* ---------- app bar ---------- */
+    .app-bar {
+      position: sticky; top: 0; z-index: 60; background: #fff; border-bottom: 1px solid #EAEAEC;
+      padding: calc(4px + var(--safe-t)) 10px 0 8px;
+    }
+    .app-bar-row { display: flex; align-items: center; gap: 6px; height: 54px; max-width: 640px; margin: 0 auto; }
+    .ab-btn {
+      width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: transparent; color: #131313;
+      display: grid; place-items: center; font-size: 17px; text-decoration: none;
+    }
+    .ab-btn:active { background: rgba(0,0,0,.05); }
+    .ab-title { flex: 1; min-width: 0; padding-left: 2px; }
+    .ab-title h1 { font-size: 15px; line-height: 20px; font-weight: 800; letter-spacing: -.2px; color: var(--ink-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ab-title p { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ink-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ab-support {
+      display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; flex: none;
+      border: 1px solid var(--ink-200); border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--brand); text-decoration: none;
     }
 
-    button { font-family: inherit; border: none; background: none; cursor: pointer; }
-    a { color: inherit; text-decoration: none; }
-
-    .tap { cursor: pointer; transition: transform 0.16s var(--ease-out), opacity 0.16s var(--ease-out); }
-    .tap:active { transform: scale(0.96); opacity: 0.85; }
-    :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 4px; }
-
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(12px);} to { opacity: 1; transform: translateY(0); } }
-    @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-    @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(252,128,25,0.3); } 70% { box-shadow: 0 0 0 8px rgba(252,128,25,0); } 100% { box-shadow: 0 0 0 0 rgba(252,128,25,0); } }
-    @keyframes pulseDotAnim { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:.5;} }
-    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-    @keyframes scalePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-    @keyframes popStar { 0%{transform:scale(1);} 40%{transform:scale(1.35);} 100%{transform:scale(1);} }
-    @keyframes confettiFall {
-      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(220px) rotate(340deg); opacity: 0; }
+    /* ---------- page ---------- */
+    .tracking-sheet { max-width: 640px; margin: 0 auto; padding: 12px 14px 0; }
+    .card, .tracker-hero, .customer-otp-box, .map-card, .rider-card, .timeline-card, .info-card,
+    .order-summary, .details-card, .cancel-card, .help-card, .rating-card, .completion-screen {
+      background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-xs); margin-bottom: 12px;
     }
+    .card-fade { animation: cardIn .38s var(--ease-out) both; }
+    .d1 { animation-delay: .03s; } .d2 { animation-delay: .06s; } .d3 { animation-delay: .09s; }
+    .d4 { animation-delay: .12s; } .d5 { animation-delay: .15s; }
+    .sec-label { font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: #84888B; margin-bottom: 10px; }
 
-    /* ════════════════════════════════════════════
-       PREMIUM HERO SECTION
-    ════════════════════════════════════════════ */
-    .tracker-hero {
-      position: relative;
-      background: var(--paper);
-      padding-bottom: 22px;
-      display: flex; flex-direction: column; align-items: center; text-align: center;
-      z-index: 10;
-    }
-    .hero-banner {
-      width: 100%; height: 148px; position: relative; overflow: hidden;
-      background: linear-gradient(135deg, var(--brand-100), var(--brand-50));
-      border-radius: 0 0 28px 28px;
-    }
-    .hero-banner img { width: 100%; height: 100%; object-fit: cover; }
-    .hero-banner::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,23,31,0) 45%, rgba(15,17,22,.4) 100%); }
-
+    /* ---------- status card ---------- */
+    .tracker-hero { display: flex; align-items: center; gap: 12px; padding: 14px; transition: background-color .3s var(--ease); }
     .hero-icon-wrapper {
-      width: 62px; height: 62px; border-radius: 50%;
-      background: var(--card);
-      box-shadow: 0 12px 28px rgba(252,128,25,0.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px; color: var(--brand);
-      margin: -31px auto 14px; position: relative; z-index: 5;
-      border: 3px solid var(--paper);
+      width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--brand-tint); color: var(--brand);
+      display: grid; place-items: center; font-size: 18px; transition: background-color .3s var(--ease), color .3s var(--ease);
     }
-    .tracker-hero.delivered .hero-icon-wrapper { color: var(--success); box-shadow: 0 12px 28px rgba(16,166,115,0.22); }
-    .tracker-hero.cancelled .hero-icon-wrapper { color: var(--danger); box-shadow: 0 12px 28px rgba(229,72,77,0.22); }
-    .tracker-hero.stage-prep .hero-icon-wrapper { color: var(--amber); box-shadow: 0 12px 28px rgba(217,119,6,0.2); }
-    .tracker-hero.stage-dispatch .hero-icon-wrapper { color: var(--info); box-shadow: 0 12px 28px rgba(47,111,235,0.2); }
-    .tracker-hero.stage-arriving .hero-icon-wrapper { color: var(--success); box-shadow: 0 12px 28px rgba(16,166,115,0.2); }
+    .status-text { flex: 1; min-width: 0; }
+    .status-title { font-size: 16px; line-height: 21px; font-weight: 800; letter-spacing: -.25px; color: var(--ink-900); }
+    .status-sub { margin-top: 2px; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--ink-500); }
+    .status-note { margin-top: 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--amber); }
+    .status-anim { animation: textIn .3s var(--ease-out); }
+    .eta-header { flex: none; text-align: right; padding-left: 12px; border-left: 1px solid var(--line-soft); min-width: 86px; }
+    .eta-title { font-size: 11px; line-height: 14px; font-weight: 600; color: var(--ink-500); }
+    .eta-time { margin-top: 2px; font-size: 20px; line-height: 24px; font-weight: 800; letter-spacing: -.4px; color: var(--ink-900); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .eta-time.tick { animation: textIn .35s var(--ease-out); }
+    .tracker-hero.is-late .hero-icon-wrapper { background: var(--amber-light); color: var(--amber); }
+    .tracker-hero.cancelled .hero-icon-wrapper { background: var(--danger-light); color: var(--danger); }
+    .tracker-hero.cancelled .status-title { color: var(--danger); }
 
-    .hero-icon-wrapper i { animation: floatIcon 3s ease-in-out infinite; }
-    .tracker-hero.delivered .hero-icon-wrapper i, .tracker-hero.cancelled .hero-icon-wrapper i { animation: none; }
+    /* ---------- delivered ---------- */
+    .completion-screen { display: none; position: relative; overflow: hidden; flex-direction: column; align-items: center; text-align: center; padding: 24px 16px 16px; }
+    .completion-icon { width: 52px; height: 52px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font-size: 22px; margin-bottom: 12px; }
+    .completion-title { font-size: 18px; font-weight: 800; letter-spacing: -.3px; color: var(--ink-900); }
+    .completion-time { margin-top: 3px; font-size: 13px; color: var(--ink-500); }
+    .milestone-chip { display: none; align-items: center; gap: 6px; margin-top: 12px; padding: 6px 12px; border-radius: 999px; background: var(--brand-tint); color: var(--brand); font-size: 12px; font-weight: 700; }
+    .completion-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 16px; }
+    .btn-primary, .btn-secondary { height: 44px; border-radius: 999px; font-size: 14px; font-weight: 800; border: 0; }
+    .btn-primary { background: var(--brand); color: #fff; }
+    .btn-secondary { background: #fff; color: var(--ink-700); border: 1px solid var(--ink-200); }
+    .share-experience-btn { margin-top: 10px; height: 40px; border: 0; background: none; font-size: 13px; font-weight: 700; color: var(--brand); display: inline-flex; align-items: center; gap: 7px; }
+    .confetti-layer { position: absolute; inset: 0; pointer-events: none; }
+    .confetti-piece { position: absolute; top: 0; width: 6px; height: 10px; border-radius: 2px; animation: confettiFall 1.8s ease-in forwards; }
 
-    .hero-info-row { display:flex; align-items:center; gap:12px; padding: 0 24px; margin-bottom: 18px; max-width: 420px; width: 100%; }
-    .hero-logo { width:44px; height:44px; border-radius:13px; flex-shrink:0; object-fit:cover; background:var(--brand-50); color:var(--brand); font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: var(--shadow-sm); }
-    .hero-logo img { width:100%; height:100%; object-fit:cover; }
-    .hero-info-text { min-width:0; text-align:left; }
-    .hero-info-text h2 { font-size:16px; font-weight:800; color:var(--ink-900); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .hero-info-text p { font-size:12px; font-weight:600; color:var(--ink-500); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /* ---------- OTP ---------- */
+    .customer-otp-box { display: none; align-items: center; gap: 12px; padding: 12px 14px; }
+    .otp-lock-icon { width: 40px; height: 40px; flex: none; border-radius: 10px; background: var(--icon-bg); color: var(--ink-700); display: grid; place-items: center; font-size: 15px; }
+    .otp-left { flex: 1; min-width: 0; }
+    .otp-label { font-size: 14px; line-height: 19px; font-weight: 700; color: var(--ink-900); }
+    .otp-instructions { font-size: 12px; line-height: 16px; color: var(--ink-500); }
+    .otp-value { flex: none; padding: 6px 12px; border-radius: 10px; background: var(--brand-tint); color: var(--brand); font-size: 20px; font-weight: 800; letter-spacing: 4px; font-variant-numeric: tabular-nums; }
+    .customer-otp-box.verified .otp-lock-icon { background: var(--brand-tint); color: var(--brand); }
+    .customer-otp-box.verified .otp-value { letter-spacing: 0; font-size: 18px; }
 
-    .eta-header { display: flex; flex-direction: column; align-items: center; }
-    .eta-title { font-size: 13px; font-weight: 700; color: var(--ink-500); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
-    .eta-time { font-size: 40px; font-weight: 800; color: var(--ink-900); letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
-    .eta-time span { font-size: 18px; font-weight: 700; color: var(--ink-500); margin-left: 4px; letter-spacing: 0; }
-    .eta-time.cancelled-text { color: var(--danger); font-size: 24px; }
-    .eta-time.delivered-text { color: var(--success); font-size: 24px; }
-
-    .floating-back {
-      position: absolute; top: calc(16px + env(safe-area-inset-top)); left: 16px;
-      width: 38px; height: 38px; border-radius: 50%;
-      background: rgba(255,255,255,.92); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
-      z-index: 100; box-shadow: var(--shadow-sm); font-size: 15px; color: var(--ink-900);
+    /* ---------- map ---------- */
+    .map-card { overflow: hidden; }
+    .map-card-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; font-size: 14px; font-weight: 700; color: var(--ink-900); }
+    .map-card-header i { color: var(--brand); font-size: 13px; }
+    .map-visual { position: relative; height: 220px; background: #E9ECE8; }
+    #live-map { position: absolute; inset: 0; }
+    .map-recenter {
+      position: absolute; right: 10px; bottom: 10px; z-index: 500; display: none; align-items: center; gap: 6px; height: 34px; padding: 0 12px;
+      border: 1px solid var(--ink-200); border-radius: 999px; background: #fff; color: var(--ink-800); font-size: 12px; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(16,24,40,.12);
     }
-    .floating-share {
-      position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px;
-      width: 38px; height: 38px; border-radius: 50%;
-      background: rgba(255,255,255,.92); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
-      z-index: 100; box-shadow: var(--shadow-sm); font-size: 14px; color: var(--ink-900);
-    }
+    .map-recenter.show { display: inline-flex; }
+    .map-recenter i { color: var(--brand); }
+    .map-card-footer { padding: 10px 14px 12px; font-size: 12px; line-height: 17px; font-weight: 600; color: var(--ink-500); }
+    .map-marker { display: grid; place-items: center; border-radius: 50%; color: #fff; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(16,24,40,.3); }
+    .map-marker.rider { width: 34px; height: 34px; background: var(--brand); font-size: 14px; }
+    .map-marker.home { width: 28px; height: 28px; background: #1F232A; font-size: 11px; }
+    .leaflet-control-attribution { font-size: 8px; }
+    .leaflet-bar a { color: var(--ink-800); }
 
-    /* ════════════════════════════════════════════
-       MAIN TRACKING SHEET & CARDS
-    ════════════════════════════════════════════ */
-    .tracking-sheet { position: relative; padding: 0 18px calc(40px + env(safe-area-inset-bottom)); z-index: 10; max-width: 600px; margin: 0 auto; }
-
-    .card-fade { opacity: 0; transform: translateY(12px); }
-    body.data-loaded .card-fade { animation: fadeInUp 0.55s var(--ease-out) forwards; }
-    body.data-loaded .d1 { animation-delay: 0.05s; }
-    body.data-loaded .d2 { animation-delay: 0.1s; }
-    body.data-loaded .d3 { animation-delay: 0.15s; }
-    body.data-loaded .d4 { animation-delay: 0.2s; }
-    body.data-loaded .d5 { animation-delay: 0.25s; }
-    body.data-loaded .d6 { animation-delay: 0.3s; }
-
-    /* Reliability fallback: keep tracking cards visible after data loads. */
-    body.data-loaded .card-fade { opacity: 1 !important; transform: none !important; }
-
-    /* ── OTP Card ── */
-    .customer-otp-box {
-      display: none; align-items: center; justify-content: space-between; gap: 12px;
-      background: var(--card); border: 1px solid var(--brand-100); border-radius: var(--r-md);
-      padding: 16px 18px; margin-bottom: 16px; box-shadow: var(--shadow); position: relative; overflow: hidden;
-    }
-    .customer-otp-box::before { content:""; position:absolute; top:-30px; right:-30px; width:90px; height:90px; border-radius:50%; background:var(--brand-50); z-index:0; }
-    .otp-lock-icon { width:38px; height:38px; border-radius:11px; background:var(--brand-50); color:var(--brand); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; z-index:1; }
-    .otp-left { display: flex; flex-direction: column; z-index:1; min-width:0; }
-    .otp-label { font-size: 12px; font-weight: 800; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.5px; }
-    .otp-instructions { font-size: 13px; color: var(--ink-700); font-weight: 500; margin-top: 2px; }
-    .otp-value { font-size: 24px; font-weight: 800; color: var(--ink-900); letter-spacing: 7px; font-variant-numeric: tabular-nums; z-index:1; padding-left:8px; }
-
-    .customer-otp-box.verified { background: var(--success-light); border-color: #A7F3D0; }
-    .customer-otp-box.verified::before { background: rgba(16,166,115,.12); }
-    .customer-otp-box.verified .otp-lock-icon { background:#fff; color: var(--success); }
-    .customer-otp-box.verified .otp-label { color: var(--success-deep); }
-    .customer-otp-box.verified .otp-value { color: var(--success); letter-spacing: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-
-    /* ════════════════════════════════════════════
-       PREMIUM 6-STAGE TIMELINE
-    ════════════════════════════════════════════ */
-    .timeline-card { background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); padding:20px 20px 6px; margin-bottom:16px; box-shadow:var(--shadow); }
-    .timeline-card-title { font-size:13px; font-weight:800; color:var(--ink-900); margin-bottom:16px; text-transform:uppercase; letter-spacing:.4px; }
-    .timeline { position: relative; padding-left: 24px; margin: 0 0 4px; }
-    .timeline::before { content: ''; position: absolute; top: 6px; bottom: 22px; left: 6px; width: 2px; background: var(--line); z-index: 1; border-radius:2px; }
-    .timeline-fill { position: absolute; top: 6px; left: 6px; width: 2px; height: 0%; background: var(--brand); z-index: 1; transition: height 0.8s var(--ease); border-radius:2px; }
-
-    .step { position: relative; margin-bottom: 22px; z-index: 2; display: flex; align-items: flex-start; gap: 14px; opacity: 0.4; transition: opacity 0.4s var(--ease); }
-    .step:last-child { margin-bottom: 0; }
-    .step.passed, .step.active { opacity: 1; }
-
-    .step-dot { width: 13px; height: 13px; border-radius: 50%; background: var(--ink-300); flex-shrink: 0; position: relative; left: -30px; margin-top: 3px; z-index: 3; transition: .4s var(--ease); display:flex; align-items:center; justify-content:center; }
-    .step.passed .step-dot { background: var(--brand); }
-    .step.passed .step-dot::after { content:"\f00c"; font-family:"Font Awesome 6 Free"; font-weight:900; font-size:7px; color:#fff; }
-    .step.active .step-dot { background: var(--brand); animation: pulseRing 2s infinite; }
-
-    .step-text h4 { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 2px; }
-    .step-text p { font-size: 13px; color: var(--ink-500); font-weight: 500; }
-    .step.active .step-text h4 { color: var(--brand-darker); }
-
-    /* ════════════════════════════════════════════
-       LIVE ROUTE PLACEHOLDER CARD
-    ════════════════════════════════════════════ */
-    .map-card { display:none; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 18px 14px; margin-bottom: 16px; box-shadow: var(--shadow); }
-    .map-card-header { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:var(--ink-900); margin-bottom:16px; text-transform:uppercase; letter-spacing:.4px; }
-    .map-card-header i { color: var(--brand); }
-    .map-visual { position: relative; height: 220px; margin-bottom: 12px; background: #EAEDF0; border-radius: var(--r-sm); overflow: hidden; }
-    #live-map { position:absolute; inset:0; width:100%; height:100%; z-index:1; }
-    .leaflet-container { font-family: var(--font); background:#EAEDF0; }
-    .map-marker { display:flex; align-items:center; justify-content:center; border-radius:50%; border:2px solid #fff; box-shadow: var(--shadow); }
-    .map-marker.rider { width:38px; height:38px; background: var(--brand); color:#fff; font-size:16px; }
-    .map-marker.home  { width:32px; height:32px; background:#fff; color: var(--brand-darker); font-size:13px; }
-    .map-route-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .map-pin { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: var(--card); border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-700); box-shadow: var(--shadow-sm); top: 60%; transform: translate(-50%,-50%); z-index:2; }
-    .map-pin-store { left: 12%; }
-    .map-pin-home { left: 88%; background: var(--brand-50); border-color: var(--brand-100); color: var(--brand-darker); }
-    .map-rider { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: var(--shadow-brand); transition: left 0.9s var(--ease-out), top 0.9s var(--ease-out); z-index: 3; top: 60%; left: 12%; transform: translate(-50%, -50%); }
-    .map-card-footer { font-size: 11px; color: var(--ink-400); font-weight: 600; text-align: center; }
-
-    /* ════════════════════════════════════════════
-       RIDER CARD
-    ════════════════════════════════════════════ */
-    .rider-card { background: var(--card); border-radius: var(--r-md); padding: 16px; display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--line); gap:10px; }
-    .rider-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
-    .rider-photo { width: 48px; height: 48px; border-radius: 50%; background: var(--paper); color: var(--ink-500); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 20px; }
+    /* ---------- rider ---------- */
+    .rider-card { display: none; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; }
+    .rider-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .rider-photo { width: 44px; height: 44px; flex: none; border-radius: 50%; overflow: hidden; background: var(--icon-bg); color: var(--ink-400); display: grid; place-items: center; font-size: 17px; }
     .rider-photo img { width: 100%; height: 100%; object-fit: cover; }
     .rider-info { min-width: 0; }
-    .rider-info h3 { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rider-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-    .rider-rating, .rider-vehicle { display: none; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--ink-700); background: var(--paper); padding: 4px 8px; border-radius: 7px; }
-    .rider-rating i { color: #F5A623; font-size: 11px; }
-    .rider-vehicle i { color: var(--ink-500); font-size: 11px; }
-
-    .rider-actions { display: flex; gap: 8px; flex-shrink:0; }
-    .btn-action { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-    .btn-call { background: var(--success-light); color: var(--success-deep); }
-    .btn-message { background: var(--info-light); color: var(--info); }
-    .btn-share2 { background: var(--paper); color: var(--ink-700); }
-
-    /* ════════════════════════════════════════════
-       INFO CARDS (Restaurant / Address / Payment)
-    ════════════════════════════════════════════ */
-    .info-card { display: none; align-items: flex-start; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
-    .info-card-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--paper); color: var(--ink-700); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-    .info-card-body { min-width: 0; flex:1; }
-    .info-card-label { font-size: 12px; font-weight: 700; color: var(--ink-500); margin-bottom: 2px; }
-    .info-card-title { font-size: 15px; font-weight: 800; color: var(--ink-900); margin-bottom: 2px; }
-    .info-card-sub { font-size: 13px; color: var(--ink-500); font-weight: 500; line-height: 1.4; }
-    .info-card-sub.instructions { margin-top:6px; padding-top:6px; border-top:1px dashed var(--line); font-style:italic; }
-    .pay-status-pill { font-size: 10px; font-weight: 800; padding: 4px 9px; border-radius: 8px; text-transform: uppercase; letter-spacing:.3px; background: var(--success-light); color: var(--success-deep); flex-shrink:0; }
-    .pay-status-pill.cod { background: var(--amber-light); color: var(--amber); }
-
-    /* Cancellation + refund card (shown only for cancelled orders) */
-    .cancel-card { background: var(--card, #fff); border:1px solid rgba(229,72,77,0.18); border-radius:16px; padding:16px 16px 14px; margin:0 16px 14px; box-shadow:0 6px 18px rgba(0,0,0,0.04); }
-    .cancel-card-head { display:flex; align-items:center; gap:9px; font-weight:800; font-size:15px; color: var(--danger); margin-bottom:10px; }
-    .cancel-reason { display:flex; flex-direction:column; gap:3px; padding:10px 12px; background: rgba(229,72,77,0.06); border-radius:10px; margin-bottom:10px; }
-    .cancel-reason-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color: var(--danger); }
-    .cancel-reason-text { font-size:14px; font-weight:600; color: var(--text, #1a1a1a); }
-    .refund-status-line { display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color: var(--text,#1a1a1a); }
-    .refund-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:#bbb; }
-    .refund-dot.processing { background: var(--amber, #F5A623); box-shadow:0 0 0 3px rgba(245,166,35,0.16); }
-    .refund-dot.done { background: var(--success-deep, #16A673); box-shadow:0 0 0 3px rgba(22,166,115,0.16); }
-    .refund-dot.failed { background: var(--danger, #E5484D); box-shadow:0 0 0 3px rgba(229,72,77,0.16); }
-    .refund-note { margin:6px 0 0; font-size:12.5px; line-height:1.5; color: var(--muted, #6b7280); }
-    .cancel-reason-input { width:100%; box-sizing:border-box; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font-family:inherit; font-size:14px; resize:none; margin:6px 0 10px; }
-    .sheet-cta.danger { background: var(--danger, #E5484D); }
-    .sheet-cta-ghost { display:block; width:100%; text-align:center; background:transparent; border:none; color: var(--muted,#6b7280); font-family:inherit; font-weight:700; font-size:14px; padding:10px; margin-top:4px; cursor:pointer; }
-
-    /* ════════════════════════════════════════════
-       ORDER SUMMARY — INVOICE STYLE
-    ════════════════════════════════════════════ */
-    .order-summary { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
-    .summary-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-    .summary-header h3 { font-size: 16px; font-weight: 800; color: var(--ink-900); }
-    .order-id { font-size: 13px; font-weight: 700; color: var(--ink-500); }
-    .summary-restaurant { font-size: 15px; font-weight: 700; color: var(--ink-700); padding-bottom: 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
-
-    .item-row { display:flex; align-items:flex-start; gap:8px; font-size: 14px; color: var(--ink-700); font-weight:600; margin-bottom:9px; }
-    .item-row .item-qty { color: var(--ink-400); font-weight:700; flex-shrink:0; }
-    .item-row .item-name { flex:1; }
-    .item-row .item-price { font-weight:700; color:var(--ink-900); font-variant-numeric: tabular-nums; }
-    .summary-items-list { padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
-
-    .charge-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
-    .charge-row .charge-label { color: var(--ink-500); font-weight: 600; }
-    .charge-row .charge-val { font-weight: 700; color: var(--ink-900); font-variant-numeric: tabular-nums; }
-    .charge-row.discount .charge-val { color: var(--success); }
-    .summary-charges:empty { display:none; }
-    .summary-charges { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed var(--line); }
-    .summary-charges:empty + .summary-total { border-top:none; }
-
-    .summary-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-top:4px; }
-    .total-label { font-size: 15px; font-weight: 800; color: var(--ink-900); }
-    .total-price { font-size: 20px; font-weight: 800; color: var(--ink-900); font-variant-numeric: tabular-nums; }
-
-    .invoice-btn { width: 100%; padding: 14px; border-radius: var(--r-sm); background: var(--paper); color: var(--ink-900); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); }
-
-    /* ════════════════════════════════════════════
-       HELP CENTER CARD
-    ════════════════════════════════════════════ */
-    .help-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
-    .help-card-title { font-size: 14px; font-weight: 800; color: var(--ink-900); margin-bottom: 14px; }
-    .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .help-item { display: flex; align-items: center; gap: 9px; padding: 12px; border-radius: var(--r-sm); background: var(--paper); font-size: 13px; font-weight: 700; color: var(--ink-700); border:1px solid transparent; }
-    .help-item i { font-size: 14px; color: var(--ink-500); width:16px; text-align:center; }
-    .help-item.danger { color: var(--danger); background: var(--danger-light); }
-    .help-item.danger i { color: var(--danger); }
-
-    /* ════════════════════════════════════════════
-       DELIVERY COMPLETED SCREEN
-    ════════════════════════════════════════════ */
-    .completion-screen { display: none; flex-direction: column; align-items: center; text-align: center; padding: 26px 0 32px; position: relative; overflow: hidden; }
-    .confetti-layer { position: absolute; top: -10px; left: 0; right: 0; height: 220px; pointer-events: none; overflow: hidden; }
-    .confetti-piece { position: absolute; top: 0; width: 8px; height: 14px; border-radius: 2px; animation: confettiFall linear forwards; }
-    .completion-icon { width: 84px; height: 84px; border-radius: 50%; background: var(--success-light); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; box-shadow: 0 14px 28px rgba(16,166,115,0.18); animation: scalePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); position:relative; z-index:2; }
-    .completion-title { font-size: 24px; font-weight: 800; color: var(--ink-900); margin-bottom: 6px; position:relative; z-index:2; }
-    .completion-time { font-size: 15px; color: var(--ink-500); font-weight: 500; margin-bottom: 18px; position:relative; z-index:2; }
-    .milestone-chip { display:none; align-items:center; gap:8px; background:var(--brand-50); color:var(--brand-darker); font-size:13px; font-weight:800; padding:9px 16px; border-radius:999px; margin-bottom:22px; position:relative; z-index:2; }
-    .milestone-chip i { color: var(--brand); }
-
-    .completion-actions { display: flex; gap: 12px; width: 100%; margin-bottom: 14px; position:relative; z-index:2; }
-    .completion-actions button { flex: 1; padding: 15px; border-radius: var(--r-md); font-size: 15px; font-weight: 800; transition: background 0.2s; }
-    .btn-primary { background: var(--brand); color: #FFF; box-shadow: 0 8px 16px rgba(252,128,25,0.22); }
-    .btn-primary:active { background: var(--brand-dark); }
-    .btn-secondary { background: var(--card); color: var(--ink-900); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
-    .btn-secondary:active { background: var(--paper); }
-    .share-experience-btn { display:flex; align-items:center; gap:8px; justify-content:center; font-size:13px; font-weight:700; color: var(--ink-500); padding:10px; position:relative; z-index:2; }
-
-    /* ════════════════════════════════════════════
-       RATING CARD
-    ════════════════════════════════════════════ */
-    .rating-card { display: none; text-align: center; background: var(--card); border-radius: var(--r-md); padding: 26px 20px; box-shadow: var(--shadow); border: 1px solid var(--line); margin-bottom: 16px; }
-    .rating-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--ink-900); }
-    .rating-card > p { font-size: 14px; color: var(--ink-500); font-weight: 500; margin-bottom: 20px; }
-    .rating-block { margin-bottom: 18px; }
-    .rating-block-label { font-size: 13px; font-weight: 800; color: var(--ink-700); margin-bottom: 10px; }
-    .stars { display: flex; justify-content: center; gap: 10px; }
-    .stars i { font-size: 28px; color: var(--ink-300); cursor: pointer; transition: color .2s var(--ease), transform .15s var(--ease); }
-    .stars i:active { transform: scale(1.2); }
-    .stars i.active { color: #F5A623; }
-    .stars.just-set i.active { animation: popStar .3s var(--ease-out); }
-    .review-box { width: 100%; min-height: 78px; border: 1px solid var(--line); background: var(--paper); border-radius: var(--r-sm); padding: 12px 14px; font-family: inherit; font-size: 14px; color: var(--ink-900); resize: vertical; margin-bottom: 14px; }
-    .review-box::placeholder { color: var(--ink-400); }
-    .photo-upload-label { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--ink-700); background: var(--paper); border: 1px dashed var(--ink-300); padding: 10px 16px; border-radius: var(--r-sm); margin-bottom: 14px; }
-    .photo-preview-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
-    .photo-thumb { position: relative; width: 56px; height: 56px; border-radius: 10px; overflow: hidden; }
-    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-thumb .rm { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; font-size: 8px; display: flex; align-items: center; justify-content: center; }
-    .rating-submit { width: 100%; padding: 15px; border-radius: var(--r-sm); background: var(--ink-300); color: #FFF; font-size: 15px; font-weight: 800; transition: background .2s var(--ease); margin-top:4px; }
-    .rating-submit:not(:disabled) { background: var(--brand); box-shadow: 0 4px 12px rgba(252,128,25,0.3); }
-    .rating-thanks { display: none; font-size: 16px; font-weight: 800; color: var(--success); }
-
-    /* ════════════════════════════════════════════
-       BOTTOM SHEET (Invoice / Cancel / Help)
-    ════════════════════════════════════════════ */
-    .sheet-overlay { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: flex-end; justify-content: center; background: rgba(17,24,39,0); pointer-events: none; transition: background .3s var(--ease); }
-    .sheet-overlay.open { background: rgba(17,24,39,.45); pointer-events: auto; }
-    .sheet-panel { background: #fff; width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 22px 22px calc(22px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .35s var(--ease); box-shadow: var(--shadow-lg); max-height: 85vh; overflow-y: auto; }
-    .sheet-overlay.open .sheet-panel { transform: translateY(0); }
-    .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-    .sheet-head h3 { font-size: 18px; font-weight: 800; }
-    .sheet-close { width: 34px; height: 34px; border-radius: 50%; background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--ink-700); }
-    .invoice-meta { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px dashed var(--ink-300); }
-    .invoice-meta > div { display: flex; justify-content: space-between; font-size: 14px; }
-    .invoice-meta span { color: var(--ink-500); font-weight: 500; }
-    .invoice-meta strong { color: var(--ink-900); font-weight: 700; }
-    .invoice-items { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px dashed var(--ink-300); }
-    .invoice-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--ink-700); }
-    .invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 800; margin-bottom: 20px; }
-    .sheet-cta { width: 100%; padding: 15px; border-radius: var(--r-sm); background: var(--ink-900); color: #fff; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .sheet-note { font-size: 14px; color: var(--ink-700); font-weight: 500; line-height: 1.6; margin-bottom: 18px; }
-
-    @media print {
-      body * { visibility: hidden; }
-      .sheet-panel, .sheet-panel * { visibility: visible; }
-      .sheet-panel { position: absolute; top: 0; left: 0; width: 100%; max-height: none; transform: none; box-shadow: none; }
-      .sheet-cta, .sheet-close { display: none !important; }
+    .rider-kicker { font-size: 11px; line-height: 14px; font-weight: 600; color: var(--ink-500); }
+    .rider-info h3 { font-size: 15px; line-height: 20px; font-weight: 700; color: var(--ink-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rider-meta-row { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 1px; }
+    .rider-rating, .rider-vehicle { display: none; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--ink-500); white-space: nowrap; }
+    .rider-rating i { color: #E5A100; font-size: 10px; }
+    .rider-vehicle i { font-size: 11px; color: var(--ink-400); }
+    .rider-actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; width: 100%; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+    .btn-action {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 12px;
+      border-radius: 999px; border: 1px solid var(--ink-200); background: #fff; font-size: 13px; font-weight: 700; color: var(--ink-800); text-decoration: none;
     }
+    .btn-action i { font-size: 13px; color: var(--brand); }
+    .btn-call { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .btn-call i { color: #fff; }
+    .rider-card.is-searching .rider-photo i { animation: spin 1.2s linear infinite; color: var(--brand); }
+    .rider-card.is-searching .rider-actions, .rider-card.is-searching .rider-meta-row { display: none; }
 
-    .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 999; padding: 40px 20px; }
-    .skel { border-radius: 8px; background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 37%, #E5E7EB 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
-    .skel-circle { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 24px; }
-    .skel-line { height: 16px; margin: 0 auto 12px; }
-    .skel-line.w-40 { width: 40%; height: 12px; }
-    .skel-line.w-30 { width: 30%; height: 36px; margin-bottom: 40px; }
-    .skel-block { height: 100px; border-radius: var(--r-md); margin-bottom: 20px; }
+    /* ---------- timeline ---------- */
+    .timeline-card { padding: 14px 14px 6px; }
+    .timeline-card-title { font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: #84888B; margin-bottom: 12px; }
+    .tl { list-style: none; }
+    .tl-step { position: relative; display: grid; grid-template-columns: 20px minmax(0,1fr) auto; column-gap: 12px; padding-bottom: 14px; }
+    .tl-step::before { content: ''; position: absolute; left: 9px; top: 20px; bottom: 0; width: 2px; background: var(--line); }
+    .tl-step:last-child::before { display: none; }
+    .tl-step.done::before { background: var(--brand); transition: background-color .4s var(--ease); }
+    .tl-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink-200); background: #fff; display: grid; place-items: center; font-size: 9px; color: #fff; transition: background-color .3s var(--ease), border-color .3s var(--ease); }
+    .tl-step.done .tl-dot { background: var(--brand); border-color: var(--brand); }
+    .tl-step.current .tl-dot { border-color: var(--brand); animation: ring 1.8s ease-out infinite; }
+    .tl-step.current .tl-dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+    .tl-label { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink-400); }
+    .tl-step.done .tl-label { color: var(--ink-700); }
+    .tl-step.current .tl-label { color: var(--ink-900); font-weight: 800; }
+    .tl-sub { font-size: 12px; line-height: 16px; color: var(--ink-500); }
+    .tl-time { font-size: 12px; line-height: 20px; font-weight: 600; color: var(--ink-500); font-variant-numeric: tabular-nums; }
+
+    /* ---------- restaurant ---------- */
+    .info-card { display: flex; align-items: center; gap: 12px; padding: 14px; }
+    .hero-logo { width: 44px; height: 44px; flex: none; border-radius: 10px; overflow: hidden; background: var(--icon-bg); color: var(--ink-500); display: grid; place-items: center; font-size: 16px; font-weight: 800; }
+    .hero-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .info-card-body { flex: 1; min-width: 0; }
+    .info-card-label { font-size: 11px; line-height: 14px; font-weight: 600; color: var(--ink-500); }
+    .info-card-title { font-size: 15px; line-height: 20px; font-weight: 700; color: var(--ink-900); overflow-wrap: anywhere; }
+    .info-card-sub { font-size: 12px; line-height: 17px; color: var(--ink-500); overflow-wrap: anywhere; }
+    .call-restaurant {
+      display: inline-flex; align-items: center; gap: 7px; flex: none; height: 38px; padding: 0 14px; border-radius: 999px;
+      border: 1px solid var(--brand-soft); color: var(--brand); background: #fff; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap;
+    }
+    .call-restaurant:active { background: var(--brand-tint); }
+
+    /* ---------- order summary ---------- */
+    .order-summary { padding: 14px; }
+    .summary-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .summary-header h3 { font-size: 15px; font-weight: 800; color: var(--ink-900); }
+    .order-id { font-size: 12px; font-weight: 600; color: var(--ink-500); }
+    .summary-restaurant { display: none; margin-top: 2px; font-size: 12px; color: var(--ink-500); }
+    .summary-items-list { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-soft); display: grid; gap: 8px; }
+    .item-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; line-height: 18px; }
+    .item-qty { flex: none; min-width: 24px; font-weight: 700; color: var(--ink-900); }
+    .item-name { flex: 1; min-width: 0; color: var(--ink-700); font-weight: 500; overflow-wrap: anywhere; }
+    .item-price { flex: none; font-weight: 600; color: var(--ink-900); font-variant-numeric: tabular-nums; }
+    .summary-charges { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); display: grid; gap: 7px; }
+    .summary-charges:empty { display: none; }
+    .charge-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--ink-500); }
+    .charge-val { color: var(--ink-800); font-variant-numeric: tabular-nums; }
+    .charge-row.discount, .charge-row.discount .charge-val { color: var(--brand); }
+    .summary-total { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .total-label { font-size: 14px; font-weight: 800; color: var(--ink-900); }
+    .total-price { font-size: 15px; font-weight: 800; color: var(--ink-900); font-variant-numeric: tabular-nums; }
+    .invoice-btn { margin-top: 12px; width: 100%; height: 40px; border: 1px solid var(--ink-200); border-radius: 999px; background: #fff; font-size: 13px; font-weight: 700; color: var(--ink-800); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .invoice-btn i { color: var(--ink-400); }
+
+    /* ---------- receiver / payment / address ---------- */
+    .details-card { padding: 4px 14px; }
+    .d-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; }
+    .d-row + .d-row { border-top: 1px solid var(--line-soft); }
+    .d-row[hidden] { display: none; }
+    .d-ico { width: 36px; height: 36px; flex: none; border-radius: 50%; background: var(--icon-bg); color: var(--ink-700); display: grid; place-items: center; font-size: 14px; }
+    .d-body { flex: 1; min-width: 0; }
+    .d-title { font-size: 13px; line-height: 18px; font-weight: 700; color: var(--ink-900); }
+    .d-sub { font-size: 12px; line-height: 17px; color: var(--ink-500); overflow-wrap: anywhere; }
+    .d-sub.instructions { margin-top: 3px; font-style: italic; }
+    .pay-status-pill { flex: none; align-self: center; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #F2F2F4; color: var(--ink-700); }
+    .pay-status-pill.good { background: var(--success-light); color: var(--success); }
+    .pay-status-pill.warn { background: var(--amber-light); color: var(--amber); }
+    .pay-status-pill.bad { background: var(--danger-light); color: var(--danger); }
+
+    /* ---------- cancellation ---------- */
+    .cancel-card { padding: 14px; }
+    .cancel-card-head { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--danger); }
+    .cancel-reason { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
+    .cancel-reason-label { font-size: 11px; font-weight: 600; color: var(--ink-500); }
+    .cancel-reason-text { font-size: 13px; color: var(--ink-800); }
+    .refund-row { margin-top: 12px; padding: 10px 12px; border-radius: var(--r-md); background: var(--paper); }
+    .refund-status-line { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--ink-900); }
+    .refund-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-300); }
+    .refund-dot.done { background: var(--brand); } .refund-dot.processing { background: #E5A100; } .refund-dot.failed { background: var(--danger); }
+    .refund-note { margin-top: 3px; font-size: 12px; line-height: 17px; color: var(--ink-500); }
+
+    /* ---------- help ---------- */
+    .help-card { padding: 14px; }
+    .help-card-title { font-size: 14px; font-weight: 800; color: var(--ink-900); margin-bottom: 10px; }
+    .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .help-item { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--line); background: #fff; font-size: 13px; font-weight: 700; color: var(--ink-800); text-decoration: none; text-align: left; }
+    .help-item i { color: var(--ink-400); font-size: 13px; width: 14px; text-align: center; }
+    .help-item.danger { color: var(--danger); } .help-item.danger i { color: var(--danger); }
+
+    /* ---------- rating ---------- */
+    .rating-card { display: none; padding: 16px 14px; text-align: center; }
+    .rating-card h3 { font-size: 16px; font-weight: 800; color: var(--ink-900); }
+    .rating-card > p { font-size: 13px; color: var(--ink-500); margin-top: 2px; }
+    .rating-block { margin-top: 14px; }
+    .rating-block-label { font-size: 12px; font-weight: 700; color: var(--ink-700); margin-bottom: 6px; }
+    .stars { display: inline-flex; gap: 6px; }
+    .stars i { font-size: 26px; color: #E1E2E6; cursor: pointer; padding: 4px; transition: color .15s var(--ease), transform .15s var(--ease-out); }
+    .stars i.active { color: #E5A100; }
+    .stars.just-set i.active { transform: scale(1.08); }
+    .review-box { width: 100%; min-height: 76px; margin-top: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); resize: vertical; font-size: 13px; outline: 0; background: #fff; }
+    .review-box:focus { border-color: #9FA3A8; }
+    .photo-upload-label, .photo-preview-row { display: none !important; }
+    .rating-submit { margin-top: 12px; width: 100%; height: 46px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font-size: 15px; font-weight: 800; }
+    .rating-submit:disabled { background: #DEDDE2; color: #989BA0; cursor: not-allowed; }
+    .rating-thanks { display: none; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--brand); }
+
+    /* ---------- bottom sheet (invoice / cancel) ---------- */
+    .sheet-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: flex-end; justify-content: center; background: rgba(17,18,20,.5); opacity: 0; pointer-events: none; transition: opacity .2s var(--ease); }
+    .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+    .sheet-panel { width: 100%; max-width: 560px; max-height: 90vh; overflow: auto; background: #fff; border-radius: 20px 20px 0 0; padding: 18px 16px calc(16px + var(--safe-b)); transform: translateY(24px); transition: transform .25s var(--ease-out); }
+    .sheet-overlay.open .sheet-panel { transform: none; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .sheet-head h3 { font-size: 17px; font-weight: 800; color: var(--ink-900); }
+    .sheet-close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: #F4F4F6; color: var(--ink-500); font-size: 15px; }
+    .sheet-note { font-size: 13px; line-height: 19px; color: var(--ink-500); margin-bottom: 10px; }
+    .cancel-reason-input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); font-size: 13px; resize: none; outline: 0; margin-bottom: 12px; }
+    .sheet-cta { width: 100%; height: 46px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .sheet-cta.danger { background: var(--danger); }
+    .sheet-cta:disabled { opacity: .7; }
+    .sheet-cta-ghost { width: 100%; height: 44px; margin-top: 8px; border: 1px solid var(--ink-200); border-radius: 999px; background: #fff; font-size: 14px; font-weight: 700; color: var(--ink-700); }
+    .invoice-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .invoice-meta div { padding: 10px 12px; border-radius: var(--r-md); background: var(--paper); }
+    .invoice-meta span { display: block; font-size: 11px; color: var(--ink-500); }
+    .invoice-meta strong { font-size: 13px; color: var(--ink-900); }
+    .invoice-items { border-top: 1px solid var(--line-soft); }
+    .invoice-row { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; color: var(--ink-800); }
+    .invoice-total { display: flex; justify-content: space-between; padding: 12px 0; font-size: 15px; font-weight: 800; }
+
+    @media (max-width: 374px) {
+      .tracking-sheet { padding-left: 12px; padding-right: 12px; }
+      .eta-header { min-width: 74px; padding-left: 10px; }
+      .eta-time { font-size: 18px; }
+      .btn-action { padding: 0 10px; }
+      .info-card { flex-wrap: wrap; }
+      .call-restaurant { margin-left: 56px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
   </style>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="loading-overlay" id="loading-overlay">
+  <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
     <div class="skel skel-circle"></div>
     <div class="skel-line w-40 skel"></div>
     <div class="skel-line w-30 skel"></div>
@@ -387,103 +333,76 @@
     <div class="skel-block skel"></div>
   </div>
 
-  <a href="orders.html" class="floating-back tap"><i class="fa-solid fa-arrow-left"></i></a>
-  <button class="floating-share tap" id="hero-share-btn" aria-label="Share tracking link"><i class="fa-solid fa-share-nodes"></i></button>
-
-  <!-- Premium Hero: banner + status badge + restaurant identity + ETA -->
-  <div class="tracker-hero" id="hero-bg">
-    <div class="hero-banner"><img id="hero-banner-img" alt="" style="display:none;"></div>
-
-    <div class="hero-icon-wrapper" id="hero-icon-wrapper">
-      <i class="fa-solid fa-motorcycle" id="hero-icon"></i>
-    </div>
-
-    <div class="hero-info-row">
-      <div class="hero-logo" id="hero-logo">E</div>
-      <div class="hero-info-text">
-        <h2 id="hero-restaurant-name">EatSwada Partner</h2>
+  <!-- App bar -->
+  <header class="app-bar">
+    <div class="app-bar-row">
+      <a href="orders.html" class="ab-btn floating-back tap" aria-label="Back to orders"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="ab-title">
+        <h1 id="hero-restaurant-name">Your order</h1>
         <p id="hero-meta-line">Order #------</p>
       </div>
+      <a href="support.html" class="ab-support tap" id="header-support"><i class="fa-regular fa-message"></i>Support</a>
+      <button class="ab-btn tap" id="hero-share-btn" aria-label="Share tracking link"><i class="fa-solid fa-share-nodes"></i></button>
     </div>
-
-    <div class="eta-header" id="eta-header-container">
-      <div class="eta-title" id="eta-title">Estimated Arrival</div>
-      <div class="eta-time" id="eta-time">-- <span>mins</span></div>
-    </div>
-  </div>
+  </header>
 
   <div class="tracking-sheet">
 
-    <!-- Delivery Completed State (Hidden by default) -->
+    <!-- Current state + ETA (preparation ETA while preparing, delivery ETA after) -->
+    <div class="tracker-hero card-fade" id="hero-bg" role="status" aria-live="polite">
+      <div class="hero-icon-wrapper" id="hero-icon-wrapper"><i class="fa-solid fa-receipt" id="hero-icon" aria-hidden="true"></i></div>
+      <div class="status-text">
+        <div class="status-title" id="status-title">Loading your order…</div>
+        <div class="status-sub" id="status-sub"></div>
+        <div class="status-note" id="status-note" hidden></div>
+      </div>
+      <div class="eta-header" id="eta-header-container" hidden>
+        <div class="eta-title" id="eta-title">Arriving in</div>
+        <div class="eta-time" id="eta-time"></div>
+      </div>
+    </div>
+
+    <!-- Delivered -->
     <div class="completion-screen card-fade" id="completion-screen">
       <div class="confetti-layer" id="confetti-layer"></div>
       <div class="completion-icon"><i class="fa-solid fa-check"></i></div>
-      <h2 class="completion-title">Delivered successfully</h2>
-      <p class="completion-time" id="completion-time">Enjoy your meal!</p>
+      <h2 class="completion-title">Delivered</h2>
+      <p class="completion-time" id="completion-time">Enjoy your meal</p>
       <div class="milestone-chip" id="milestone-chip"><i class="fa-solid fa-trophy"></i><span id="milestone-text"></span></div>
-
       <div class="completion-actions">
-        <button class="btn-primary tap" onclick="window.location.href='orders.html'">Reorder</button>
-        <button class="btn-secondary tap" onclick="window.location.href='support.html'">Need Help</button>
+        <button class="btn-primary tap" id="completion-reorder">Reorder</button>
+        <button class="btn-secondary tap" id="completion-help">Need help</button>
       </div>
       <button class="share-experience-btn tap" id="share-experience-btn"><i class="fa-solid fa-share-nodes"></i> Share your experience</button>
     </div>
 
-    <!-- OTP Card -->
+    <!-- Delivery PIN -->
     <div class="customer-otp-box card-fade d1" id="otp-container">
       <div class="otp-lock-icon"><i class="fa-solid fa-lock"></i></div>
       <div class="otp-left">
-        <div class="otp-label" id="otp-title-text">Hand PIN to Rider</div>
-        <div class="otp-instructions" id="otp-sub-text">Share only upon arrival</div>
+        <div class="otp-label" id="otp-title-text">Share PIN with delivery partner</div>
+        <div class="otp-instructions" id="otp-sub-text">Only when they arrive</div>
       </div>
       <div class="otp-value" id="otp-display">----</div>
     </div>
 
-    <!-- Premium 6-Stage Timeline -->
-    <div class="timeline-card card-fade d2" id="timeline">
-      <div class="timeline-card-title">Order Progress</div>
-      <div class="timeline">
-        <div class="timeline-fill" id="timeline-fill"></div>
-        <div class="step" id="step-1">
-          <div class="step-dot"></div>
-          <div class="step-text"><h4>Order Confirmed</h4><p>Restaurant accepted your order</p></div>
-        </div>
-        <div class="step" id="step-2">
-          <div class="step-dot"></div>
-          <div class="step-text"><h4>Preparing</h4><p>Cooking at the kitchen</p></div>
-        </div>
-        <div class="step" id="step-3">
-          <div class="step-dot"></div>
-          <div class="step-text"><h4 id="dispatch-title">Finding a Rider...</h4><p id="dispatch-desc">Assigning delivery partner</p></div>
-        </div>
-        <div class="step" id="step-4">
-          <div class="step-dot"></div>
-          <div class="step-text"><h4>Picked Up</h4><p>Rider has collected your order</p></div>
-        </div>
-        <div class="step" id="step-5">
-          <div class="step-dot"></div>
-          <div class="step-text"><h4>Near You</h4><p>Almost at your doorstep</p></div>
-        </div>
-        <div class="step" id="step-6">
-          <div class="step-dot"></div>
-          <div class="step-text"><h4>Delivered</h4><p>Order handed over to you</p></div>
-        </div>
+    <!-- Live map (only while the backend reports a real rider position) -->
+    <div class="map-card card-fade d2" id="map-card" style="display:none;">
+      <div class="map-card-header"><i class="fa-solid fa-location-dot"></i> Live location</div>
+      <div class="map-visual">
+        <div id="live-map"></div>
+        <button type="button" class="map-recenter tap" id="map-recenter"><i class="fa-solid fa-location-crosshairs"></i> Re-center</button>
       </div>
-    </div>
-
-    <!-- Live Route Placeholder Card -->
-    <div class="map-card card-fade d3" id="map-card">
-      <div class="map-card-header"><i class="fa-solid fa-location-dot"></i> Live Route</div>
-      <div class="map-visual"><div id="live-map"></div></div>
       <div class="map-card-footer" id="map-card-footer">Live location updates every few seconds.</div>
     </div>
 
-    <!-- Premium Rider Card -->
-    <div class="rider-card card-fade d3" id="rider-card">
+    <!-- Delivery partner -->
+    <div class="rider-card card-fade d2" id="rider-card">
       <div class="rider-left">
         <div class="rider-photo" id="rider-photo"><i class="fa-solid fa-user"></i></div>
         <div class="rider-info">
-          <h3 id="rider-name">Delivery Partner</h3>
+          <div class="rider-kicker" id="rider-kicker">Delivery partner</div>
+          <h3 id="rider-name">Delivery partner</h3>
           <div class="rider-meta-row">
             <span class="rider-rating" id="rider-rating"><i class="fa-solid fa-star"></i><span id="rider-rating-value"></span></span>
             <span class="rider-vehicle" id="rider-vehicle"><i class="fa-solid fa-motorcycle"></i></span>
@@ -491,49 +410,33 @@
         </div>
       </div>
       <div class="rider-actions">
-        <button class="btn-action btn-share2 tap" id="rider-share-btn" aria-label="Share location"><i class="fa-solid fa-share-nodes"></i></button>
-        <a href="support.html" id="rider-chat-btn" class="btn-action btn-message tap" aria-label="Chat"><i class="fa-solid fa-comment-dots"></i></a>
-        <a href="#" id="rider-call-btn" class="btn-action btn-call tap" style="display:none;" aria-label="Call rider"><i class="fa-solid fa-phone"></i></a>
+        <a href="#" id="rider-chat-btn" class="btn-action btn-message tap" style="display:none;" aria-label="Message delivery partner"><i class="fa-solid fa-comment-dots"></i>Message</a>
+        <a href="#" id="rider-call-btn" class="btn-action btn-call tap" style="display:none;" aria-label="Call delivery partner"><i class="fa-solid fa-phone"></i>Call</a>
       </div>
     </div>
 
-    <!-- Info Cards -->
-    <div class="info-card card-fade d4" id="restaurant-card">
-      <div class="info-card-icon"><i class="fa-solid fa-store"></i></div>
+    <!-- Timeline -->
+    <div class="timeline-card card-fade d3" id="timeline">
+      <div class="timeline-card-title">Order progress</div>
+      <ol class="tl" id="timeline-steps"></ol>
+    </div>
+
+    <!-- Restaurant + Call Restaurant -->
+    <div class="info-card card-fade d3" id="restaurant-card">
+      <div class="hero-logo" id="hero-logo">E</div>
       <div class="info-card-body">
         <div class="info-card-label">Restaurant</div>
         <div class="info-card-title" id="restaurant-name">—</div>
         <div class="info-card-sub" id="restaurant-address"></div>
-        <div id="restaurant-owner-contact" style="display:none;margin-top:9px;">
-          <a id="restaurant-call-btn" href="#" style="display:inline-flex;align-items:center;gap:7px;color:#FC8019;text-decoration:none;font-size:12px;font-weight:800;">
-            <i class="fa-solid fa-phone"></i><span id="restaurant-phone"></span>
-          </a>
-        </div>
+      </div>
+      <div id="restaurant-owner-contact" style="display:none;">
+        <a id="restaurant-call-btn" class="call-restaurant tap" href="#"><i class="fa-solid fa-phone"></i>Call Restaurant<span id="restaurant-phone" hidden></span></a>
       </div>
     </div>
 
-    <div class="info-card card-fade d4" id="address-card">
-      <div class="info-card-icon"><i class="fa-solid fa-location-dot"></i></div>
-      <div class="info-card-body">
-        <div class="info-card-label">Delivering To</div>
-        <div class="info-card-sub" id="address-text"></div>
-        <div class="info-card-sub instructions" id="address-instructions" style="display:none;"></div>
-      </div>
-    </div>
-
-    <div class="info-card card-fade d4" id="payment-card">
-      <div class="info-card-icon"><i class="fa-solid fa-wallet"></i></div>
-      <div class="info-card-body">
-        <div class="info-card-label">Payment Method</div>
-        <div class="info-card-title" id="payment-type">Loading...</div>
-        <div class="info-card-sub" id="payment-txn-row" style="display:none;">Transaction ID: <span id="payment-txn-id"></span></div>
-      </div>
-      <span class="pay-status-pill" id="pay-status-pill">Paid</span>
-    </div>
-
-    <!-- Cancellation + refund details (populated + shown only for cancelled orders) -->
+    <!-- Cancellation + refund (cancelled orders only) -->
     <div class="cancel-card" id="cancellation-card" style="display:none;">
-      <div class="cancel-card-head"><i class="fa-solid fa-circle-info"></i><span>Order Cancelled</span></div>
+      <div class="cancel-card-head"><i class="fa-solid fa-circle-info"></i><span>Order cancelled</span></div>
       <div class="cancel-reason" id="cancel-reason-row" style="display:none;">
         <span class="cancel-reason-label" id="cancel-reason-label">Reason</span>
         <span class="cancel-reason-text" id="cancel-reason-text"></span>
@@ -544,40 +447,68 @@
       </div>
     </div>
 
-    <!-- Order Summary — Invoice Style -->
-    <div class="order-summary card-fade d5">
+    <!-- Items + bill -->
+    <div class="order-summary card-fade d4">
       <div class="summary-header">
-        <h3>Order Details</h3>
-        <span class="order-id" id="display-res-name">Loading...</span>
+        <h3>Order details</h3>
+        <span class="order-id" id="display-res-name">Loading…</span>
       </div>
       <div class="summary-restaurant" id="summary-restaurant-name"></div>
       <div class="summary-items-list" id="summary-items-list"></div>
       <div class="summary-charges" id="summary-charges"></div>
       <div class="summary-total">
-        <span class="total-label">Grand Total</span>
+        <span class="total-label">Grand total</span>
         <span class="total-price" id="display-total">₹0</span>
       </div>
-      <button class="invoice-btn tap" id="invoice-btn"><i class="fa-solid fa-file-lines"></i> View Full Invoice</button>
+      <button class="invoice-btn tap" id="invoice-btn"><i class="fa-solid fa-file-lines"></i> View invoice</button>
     </div>
 
-    <!-- Help Center -->
+    <!-- Receiver, payment, address -->
+    <div class="details-card card-fade d4">
+      <div class="d-row" id="receiver-row" hidden>
+        <div class="d-ico"><i class="fa-solid fa-user"></i></div>
+        <div class="d-body">
+          <div class="d-title" id="receiver-name"></div>
+          <div class="d-sub" id="receiver-phone"></div>
+        </div>
+      </div>
+      <div class="d-row" id="payment-card">
+        <div class="d-ico"><i class="fa-solid fa-wallet"></i></div>
+        <div class="d-body">
+          <div class="d-title">Payment</div>
+          <div class="d-sub" id="payment-type">Loading…</div>
+          <div class="d-sub" id="payment-txn-row" style="display:none;">Transaction ID: <span id="payment-txn-id"></span></div>
+        </div>
+        <span class="pay-status-pill" id="pay-status-pill"></span>
+      </div>
+      <div class="d-row" id="address-card">
+        <div class="d-ico"><i class="fa-solid fa-location-dot"></i></div>
+        <div class="d-body">
+          <div class="d-title">Delivery address</div>
+          <div class="d-sub" id="address-text"></div>
+          <div class="d-sub instructions" id="address-instructions" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help -->
     <div class="help-card card-fade d5" id="help-card">
       <div class="help-card-title">Need help with this order?</div>
       <div class="help-grid">
-        <a class="help-item tap" id="help-call-restaurant" href="#" style="display:none;"><i class="fa-solid fa-store"></i>Call Restaurant</a>
-        <a class="help-item tap" id="help-chat" href="support.html"><i class="fa-solid fa-comment-dots"></i>Chat Support</a>
-        <a class="help-item tap" id="help-report" href="support.html"><i class="fa-solid fa-triangle-exclamation"></i>Report Issue</a>
-        <button class="help-item danger tap" id="help-cancel" style="display:none;"><i class="fa-solid fa-ban"></i>Cancel Order</button>
+        <a class="help-item tap" id="help-chat" href="support.html"><i class="fa-solid fa-comment-dots"></i>Chat with support</a>
+        <a class="help-item tap" id="help-report" href="support.html"><i class="fa-solid fa-triangle-exclamation"></i>Report an issue</a>
+        <a class="help-item tap" id="help-call-restaurant" href="#" style="display:none;"><i class="fa-solid fa-store"></i>Call restaurant</a>
+        <button class="help-item danger tap" id="help-cancel" style="display:none;"><i class="fa-solid fa-ban"></i>Cancel order</button>
       </div>
     </div>
 
-    <!-- Premium Rating Card -->
+    <!-- Rating (delivered orders) -->
     <div class="rating-card card-fade" id="rating-card">
       <h3>How was your order?</h3>
-      <p>Your feedback helps us improve</p>
+      <p>Your feedback helps the restaurant and delivery partner</p>
 
       <div class="rating-block">
-        <div class="rating-block-label">Delivery Partner</div>
+        <div class="rating-block-label">Delivery partner</div>
         <div class="stars" id="rider-rating-stars">
           <i class="fa-solid fa-star" data-value="1"></i><i class="fa-solid fa-star" data-value="2"></i>
           <i class="fa-solid fa-star" data-value="3"></i><i class="fa-solid fa-star" data-value="4"></i>
@@ -586,7 +517,7 @@
       </div>
 
       <div class="rating-block">
-        <div class="rating-block-label">Food &amp; Restaurant</div>
+        <div class="rating-block-label">Food &amp; restaurant</div>
         <div class="stars" id="food-rating-stars">
           <i class="fa-solid fa-star" data-value="1"></i><i class="fa-solid fa-star" data-value="2"></i>
           <i class="fa-solid fa-star" data-value="3"></i><i class="fa-solid fa-star" data-value="4"></i>
@@ -596,22 +527,24 @@
 
       <textarea class="review-box" id="review-text" placeholder="Tell us more about your experience (optional)"></textarea>
 
-      <label class="photo-upload-label tap" for="review-photo-input"><i class="fa-solid fa-camera"></i> Add a photo</label>
-      <input type="file" accept="image/*" id="review-photo-input" hidden>
-      <div class="photo-preview-row" id="photo-preview-row"></div>
+      <!-- Photo upload is not wired to the review API, so it stays hidden
+           (the old picker previewed a photo that was never uploaded). -->
+      <label class="photo-upload-label" for="review-photo-input" hidden><i class="fa-solid fa-camera"></i> Add a photo</label>
+      <input type="file" accept="image/*" id="review-photo-input" hidden disabled>
+      <div class="photo-preview-row" id="photo-preview-row" hidden></div>
 
-      <button class="rating-submit tap" id="rating-submit" disabled>Submit Rating</button>
-      <div class="rating-thanks" id="rating-thanks">Thanks for rating your order! 💛</div>
+      <button class="rating-submit tap" id="rating-submit" disabled>Submit rating</button>
+      <div class="rating-thanks" id="rating-thanks">Thanks for rating your order.</div>
     </div>
 
   </div>
 
-  <!-- Shared Bottom Sheet (Invoice / Cancel order info) -->
+  <!-- Shared bottom sheet (invoice / cancel) -->
   <div class="sheet-overlay" id="sheet-modal">
-    <div class="sheet-panel">
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
       <div class="sheet-head">
         <h3 id="sheet-title">Invoice</h3>
-        <button class="sheet-close tap" id="sheet-close"><i class="fa-solid fa-xmark"></i></button>
+        <button class="sheet-close tap" id="sheet-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="sheet-body"></div>
     </div>
@@ -621,6 +554,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
   <script src="push.js"></script>
+  <script src="order-status.js?v=20260923-1"></script>
   <script>
     let pollInterval;
     // ── Customer push notifications are owned by push.js. ────────────────
@@ -724,17 +658,11 @@
     function renderLogo(order) {
       const el = document.getElementById('hero-logo');
       if (order.restaurantImage) {
-        el.innerHTML = `<img src="${safeUrl(order.restaurantImage)}" alt="">`;
+        el.innerHTML = `<img src="${esc(safeUrl(order.restaurantImage))}" alt="">`;
       } else {
         el.textContent = initials(order.restaurantName);
       }
-      const banner = document.getElementById('hero-banner-img');
-      if (order.restaurantImage) {
-        banner.src = safeUrl(order.restaurantImage);
-        banner.style.display = 'block';
-      } else {
-        banner.style.display = 'none';
-      }
+
     }
 
     function fmtMoney(n) { return '₹' + n; }
@@ -782,14 +710,36 @@
     }
 
     // ── Real live map (Leaflet + MapTiler) ─────────────────────────
+    // Shows only a real rider position. The camera fits once; after that
+    // it only nudges to keep the rider in view, and never fights a user
+    // who has panned or zoomed (Re-center brings the view back).
     let liveMap = null, riderMarker = null, homeMarker = null, routeLine = null;
+    let mapFitted = false, userMovedMap = false, programmaticMove = false;
+    let riderAnim = null, lastRiderLL = null, lastHomeLL = null;
+    const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-    function riderIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker rider"><i class="fa-solid fa-motorcycle"></i></div>', iconSize:[38,38], iconAnchor:[19,19] }); }
-    function homeIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker home"><i class="fa-solid fa-house"></i></div>', iconSize:[32,32], iconAnchor:[16,16] }); }
+    function riderIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker rider"><i class="fa-solid fa-motorcycle"></i></div>', iconSize:[34,34], iconAnchor:[17,17] }); }
+    function homeIcon(){ return L.divIcon({ className:'', html:'<div class="map-marker home"><i class="fa-solid fa-house"></i></div>', iconSize:[28,28], iconAnchor:[14,14] }); }
+
+    function showRecenter(show){
+      const b = document.getElementById('map-recenter');
+      if (b) b.classList.toggle('show', !!show);
+    }
+
+    function moveCamera(fn){
+      programmaticMove = true;
+      try { fn(); } catch (e) {}
+      clearTimeout(moveCamera.t);
+      moveCamera.t = setTimeout(function(){ programmaticMove = false; }, 700);
+    }
 
     function ensureMap(){
       if (liveMap || typeof L === 'undefined') return liveMap;
       liveMap = L.map('live-map', { zoomControl:true, attributionControl:true });
+      liveMap.on('movestart', function(){
+        if (!programmaticMove){ userMovedMap = true; showRecenter(true); }
+      });
+      liveMap.on('moveend', function(){ programmaticMove = false; });
       const mapCfg = window.CONFIG?.MAPTILER;
       if (!mapCfg?.enabled || !mapCfg.apiKey) {
         console.warn('[Map] MapTiler is not configured; map tiles unavailable.');
@@ -803,18 +753,41 @@
         attribution:'© MapTiler © OpenStreetMap contributors',
         crossOrigin:true
       }).addTo(liveMap);
-      liveMap.setView([26.8700, 88.8200], 13); // Maynaguri default until the first GPS fix
+      moveCamera(function(){ liveMap.setView([26.8700, 88.8200], 13); }); // replaced by the first real rider fix below
       return liveMap;
     }
 
-    // Draws the rider's REAL position (order.riderLocation) heading to the
-    // delivery address. Only shows while the backend is sending live GPS
-    // (picked_up / out_for_delivery); hidden otherwise — never a fake pin.
+    function fitView(){
+      if (!liveMap || !lastRiderLL) return;
+      moveCamera(function(){
+        if (lastHomeLL) liveMap.fitBounds(L.latLngBounds([lastRiderLL, lastHomeLL]).pad(0.3));
+        else liveMap.setView(lastRiderLL, 15);
+      });
+    }
+
+    // Glides the rider marker to its new real position instead of jumping.
+    function glideMarker(marker, to){
+      if (riderAnim) { cancelAnimationFrame(riderAnim); riderAnim = null; }
+      const from = marker.getLatLng();
+      if (reduceMotion || !from || (Math.abs(from.lat - to[0]) < 1e-7 && Math.abs(from.lng - to[1]) < 1e-7)) {
+        marker.setLatLng(to); return;
+      }
+      const t0 = performance.now(), dur = 1200;
+      const step = function(now){
+        const k = Math.min(1, (now - t0) / dur);
+        const e = 1 - Math.pow(1 - k, 3);
+        marker.setLatLng([from.lat + (to[0] - from.lat) * e, from.lng + (to[1] - from.lng) * e]);
+        riderAnim = k < 1 ? requestAnimationFrame(step) : null;
+      };
+      riderAnim = requestAnimationFrame(step);
+    }
+
     function updateLiveMap(order){
       const card = document.getElementById('map-card');
       const footer = document.getElementById('map-card-footer');
       const rl = order && order.riderLocation;
-      const hasRider = rl && Number.isFinite(Number(rl.lat)) && Number.isFinite(Number(rl.lng));
+      const hasRider = rl && Number.isFinite(Number(rl.lat)) && Number.isFinite(Number(rl.lng)) &&
+        !(Number(rl.lat) === 0 && Number(rl.lng) === 0);
       if (!hasRider){ if (card) card.style.display = 'none'; return; }
 
       if (card) card.style.display = 'block';
@@ -826,56 +799,165 @@
       const homeLL = (Array.isArray(destC) && destC.length === 2 &&
                       Number.isFinite(Number(destC[1])) && Number.isFinite(Number(destC[0])))
         ? [Number(destC[1]), Number(destC[0])] : null;
+      lastRiderLL = riderLL; lastHomeLL = homeLL;
 
       if (!riderMarker) riderMarker = L.marker(riderLL, { icon: riderIcon(), zIndexOffset:1000 }).addTo(map);
-      else riderMarker.setLatLng(riderLL);
+      else glideMarker(riderMarker, riderLL);
 
       if (homeLL){
         if (!homeMarker) homeMarker = L.marker(homeLL, { icon: homeIcon() }).addTo(map);
         else homeMarker.setLatLng(homeLL);
-        // Mapbox Directions geometry is returned as [lng,lat] pairs. Use the
-        // real road route when available; otherwise keep the safe straight-line
-        // fallback between rider and customer.
+        // Road geometry arrives as [lng,lat] pairs. Use the real route when
+        // present; otherwise a dotted straight line marks direction only.
         const road = Array.isArray(order.riderRoute) ? order.riderRoute
           .filter(p => Array.isArray(p) && p.length >= 2 && Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])))
           .map(p => [Number(p[1]), Number(p[0])]) : [];
         const routePts = road.length >= 2 ? road : [riderLL, homeLL];
-        if (!routeLine) routeLine = L.polyline(routePts, { color:'#159A62', weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' }).addTo(map);
-        else routeLine.setLatLngs(routePts);
-        map.fitBounds(L.latLngBounds([riderLL, homeLL]).pad(0.35));
-      } else {
-        map.setView(riderLL, 15);
+        const style = { color:'#367E34', weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' };
+        if (!routeLine) routeLine = L.polyline(routePts, style).addTo(map);
+        else { routeLine.setLatLngs(routePts); routeLine.setStyle(style); }
+      }
+
+      if (!mapFitted) {
+        mapFitted = true;
+        // The card was hidden when Leaflet measured it; re-measure first.
+        setTimeout(function(){ moveCamera(function(){ map.invalidateSize(); }); fitView(); }, 60);
+      } else if (!userMovedMap) {
+        moveCamera(function(){ map.panInside(riderLL, { padding:[36, 36] }); });
       }
 
       if (footer){
         const eta = Number(order.riderEtaMinutes);
-        footer.textContent = (Number.isFinite(eta) && eta > 0)
-          ? ('Rider ' + (order.riderDistanceKm != null ? '~' + order.riderDistanceKm + ' km away · ' : '') + 'arriving in ~' + Math.max(1, Math.ceil(eta)) + ' min')
-          : 'Live location updates every few seconds.';
+        const km = Number(order.riderDistanceKm);
+        const parts = [];
+        if (order.riderDistanceKm != null && Number.isFinite(km) && km >= 0) parts.push(km < 1 ? Math.round(km * 1000) + ' m away' : km.toFixed(1) + ' km away');
+        if (Number.isFinite(eta) && eta > 0) parts.push('arriving in ~' + Math.ceil(eta) + ' min');
+        footer.textContent = parts.length ? 'Delivery partner ' + parts.join(' · ') : 'Live location updates every few seconds.';
       }
-
-      // The card starts hidden, so Leaflet first measured it as 0×0 — recompute
-      // now that it's visible, then re-fit.
-      setTimeout(function(){
-        try { map.invalidateSize(); if (homeLL) map.fitBounds(L.latLngBounds([riderLL, homeLL]).pad(0.35)); } catch(e){}
-      }, 60);
     }
 
     // Kept as a no-op so nothing that referenced the old animator can throw.
     function renderStageMapAndRoute(){ /* replaced by updateLiveMap */ }
 
+    function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text == null ? '' : String(text); }
+    function replay(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+    // Current state + the one ETA that applies (order-status.js):
+    // preparation time while preparing, delivery ETA afterwards. Never a
+    // per-status guess and never "0 min".
+    function renderStatusCard(order) {
+      const OS = window.EatswadaOrderStatus;
+      const info = OS.info(order);
+      const head = OS.headline(order);
+      const hero = document.getElementById('hero-bg');
+      hero.style.display = 'flex';
+      hero.classList.toggle('cancelled', info.group === 'cancelled');
+      hero.classList.toggle('is-late', !!head.overdue);
+      document.getElementById('hero-icon').className = 'fa-solid ' + info.icon;
+
+      const titleEl = document.getElementById('status-title');
+      if (titleEl.textContent !== head.title) { titleEl.textContent = head.title; replay(titleEl, 'status-anim'); }
+      setText('status-sub', head.etaValue ? info.sub : head.detail);
+      const note = document.getElementById('status-note');
+      note.textContent = head.note || '';
+      note.hidden = !head.note;
+
+      const etaBox = document.getElementById('eta-header-container');
+      const etaTime = document.getElementById('eta-time');
+      if (head.etaValue) {
+        etaBox.hidden = false;
+        setText('eta-title', head.etaLabel);
+        if (etaTime.textContent !== head.etaValue) { etaTime.textContent = head.etaValue; replay(etaTime, 'tick'); }
+      } else {
+        etaBox.hidden = true;
+        etaTime.textContent = '';
+      }
+    }
+
+    let lastTimelineHtml = '';
+    function renderTimeline(order) {
+      const html = window.EatswadaOrderStatus.timeline(order).map(st => `
+        <li class="tl-step ${st.state}">
+          <span class="tl-dot" aria-hidden="true">${st.state === 'done' ? '<i class="fa-solid fa-check"></i>' : ''}</span>
+          <span><span class="tl-label">${esc(st.label)}</span>${st.sub ? `<span class="tl-sub" style="display:block">${esc(st.sub)}</span>` : ''}</span>
+          <span class="tl-time">${st.time ? esc(st.time) : ''}</span>
+        </li>`).join('');
+      if (html !== lastTimelineHtml) {
+        document.getElementById('timeline-steps').innerHTML = html;
+        lastTimelineHtml = html;
+      }
+    }
+
+    // Delivery partner: "Finding…" before assignment, real details after.
+    // Call and Message use the rider's real number and are hidden without it.
+    function renderRider(order) {
+      const OS = window.EatswadaOrderStatus;
+      const card = document.getElementById('rider-card');
+      const key = OS.info(order).key;
+      const searching = key === 'waiting_for_rider';
+      if (!searching && !OS.riderAssigned(order)) { card.style.display = 'none'; return; }
+      card.style.display = 'flex';
+      card.classList.toggle('is-searching', searching);
+
+      const photoEl = document.getElementById('rider-photo');
+      const callBtn = document.getElementById('rider-call-btn');
+      const msgBtn = document.getElementById('rider-chat-btn');
+      if (searching) {
+        setText('rider-kicker', 'Delivery partner');
+        setText('rider-name', 'Finding a delivery partner…');
+        photoEl.innerHTML = '<i class="fa-solid fa-circle-notch"></i>';
+        callBtn.style.display = 'none';
+        msgBtn.style.display = 'none';
+        return;
+      }
+
+      const r = order.rider || {};
+      setText('rider-kicker', key === 'assigned' ? 'Heading to the restaurant' : 'Your delivery partner');
+      setText('rider-name', r.name || 'Delivery partner');
+      const src = safeUrl(r.photo || r.avatar || r.image);
+      photoEl.innerHTML = src ? `<img src="${esc(src)}" alt="">` : '<i class="fa-solid fa-user"></i>';
+
+      const ratingEl = document.getElementById('rider-rating');
+      if (r.rating) { setText('rider-rating-value', r.rating); ratingEl.style.display = 'inline-flex'; }
+      else ratingEl.style.display = 'none';
+
+      const vehicleEl = document.getElementById('rider-vehicle');
+      const vehicle = r.vehicleNumber || r.vehicle || r.vehicleType;
+      if (vehicle) {
+        vehicleEl.innerHTML = '<i class="fa-solid fa-motorcycle"></i><span></span>';
+        vehicleEl.lastElementChild.textContent = vehicle;
+        vehicleEl.style.display = 'inline-flex';
+      } else vehicleEl.style.display = 'none';
+
+      const tel = OS.riderPhone(order);
+      callBtn.href = tel ? 'tel:' + tel : '#';
+      msgBtn.href = tel ? 'sms:' + tel : '#';
+      callBtn.style.display = tel ? 'inline-flex' : 'none';
+      msgBtn.style.display = tel ? 'inline-flex' : 'none';
+    }
+
+    function maskPhone(v) {
+      const d = String(v || '').replace(/\D/g, '').slice(-10);
+      return d.length === 10 ? d.slice(0, 6) + 'XXXX' : '';
+    }
+
     function renderLiveUI(order, deliveredCount) {
+      const OS = window.EatswadaOrderStatus;
       document.getElementById('loading-overlay').style.display = 'none';
 
       const idLabel = order.orderNumber || String(order._id).slice(-5).toUpperCase();
+      const placedAt = OS.fmtDateTime(order.createdAt);
       document.getElementById('display-res-name').innerText = `Order #${idLabel}`;
-      document.getElementById('hero-meta-line').innerText = `${order.cuisine ? order.cuisine + ' · ' : ''}Order #${idLabel}`;
+      document.getElementById('hero-meta-line').innerText = `Order #${idLabel}${placedAt ? ' · ' + placedAt : ''}`;
       document.getElementById('display-total').innerText = `₹${order.total}`;
-      document.getElementById('payment-type').innerText = order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery';
 
+      // Payment: real state only. Checkout is UPI-only, so "not paid" is a
+      // pending/failed payment, never assumed to be cash on delivery.
+      const pay = OS.payment(order);
+      setText('payment-type', pay.method || (pay.label === 'Paid' ? 'Online payment' : 'Payment'));
       const payPill = document.getElementById('pay-status-pill');
-      payPill.textContent = order.paymentStatus === 'paid' ? 'Paid' : 'COD';
-      payPill.classList.toggle('cod', order.paymentStatus !== 'paid');
+      payPill.textContent = pay.short || pay.label;
+      payPill.className = 'pay-status-pill ' + pay.tone;
 
       const txnId = order.transactionId || order.paymentId || order.txnId;
       const txnRow = document.getElementById('payment-txn-row');
@@ -886,119 +968,47 @@
       renderLogo(order);
 
       const orderOTP = order.deliveryOtp || '----';
-      document.getElementById('otp-display').innerText = orderOTP;
 
-      const s1 = document.getElementById('step-1');
-      const s2 = document.getElementById('step-2');
-      const s3 = document.getElementById('step-3');
-      const s4 = document.getElementById('step-4');
-      const s5 = document.getElementById('step-5');
-      const s6 = document.getElementById('step-6');
+      const supportUrl = `support.html?order=${encodeURIComponent(order._id)}`;
+      document.getElementById('header-support').href = supportUrl;
+      document.getElementById('help-chat').href = supportUrl;
+      document.getElementById('help-report').href = `${supportUrl}&type=issue`;
 
-      const heroBg = document.getElementById('hero-bg');
-      const heroIcon = document.getElementById('hero-icon');
-      const etaTitle = document.getElementById('eta-title');
-      const etaTime = document.getElementById('eta-time');
-
-      const otpBox = document.getElementById('otp-container');
-      const riderCard = document.getElementById('rider-card');
-      const timeline = document.getElementById('timeline');
-      const mapCard = document.getElementById('map-card');
-      const riderNameEl = document.getElementById('rider-name');
-      const riderCallBtn = document.getElementById('rider-call-btn');
-      const riderChatBtn = document.getElementById('rider-chat-btn');
-
-      const riderPhotoEl = document.getElementById('rider-photo');
-      const riderRatingEl = document.getElementById('rider-rating');
-      const riderRatingValueEl = document.getElementById('rider-rating-value');
-      const riderVehicleEl = document.getElementById('rider-vehicle');
-      const restaurantCard = document.getElementById('restaurant-card');
-      const addressCard = document.getElementById('address-card');
-      const timelineFill = document.getElementById('timeline-fill');
-      const ratingCard = document.getElementById('rating-card');
-      const helpCancelBtn = document.getElementById('help-cancel');
-      const helpCallRestaurant = document.getElementById('help-call-restaurant');
-
-      riderChatBtn.href = `support.html?order=${order._id}`;
-      document.getElementById('help-chat').href = `support.html?order=${order._id}`;
-      document.getElementById('help-report').href = `support.html?order=${order._id}&type=issue`;
-
-      if (order.rider && order.rider.name) {
-        riderNameEl.innerText = order.rider.name;
-      } else {
-        riderNameEl.innerText = 'Delivery Partner';
-      }
-      if (order.rider && order.rider.phone) {
-        riderCallBtn.href = `tel:${order.rider.phone}`;
-        riderCallBtn.style.display = 'flex';
-      } else {
-        riderCallBtn.style.display = 'none';
-      }
-
-      if (order.rider && (order.rider.photo || order.rider.avatar || order.rider.image)) {
-        const src = order.rider.photo || order.rider.avatar || order.rider.image;
-        riderPhotoEl.innerHTML = `<img src="${safeUrl(src)}" alt="">`;
-      } else {
-        riderPhotoEl.innerHTML = '<i class="fa-solid fa-user"></i>';
-      }
-      if (order.rider && order.rider.rating) {
-        riderRatingValueEl.innerText = order.rider.rating;
-        riderRatingEl.style.display = 'inline-flex';
-      } else {
-        riderRatingEl.style.display = 'none';
-      }
-      const vehicleLabel = order.rider && (order.rider.vehicleNumber || order.rider.vehicle || order.rider.vehicleType);
-      if (vehicleLabel) {
-        riderVehicleEl.querySelector('span') ? null : riderVehicleEl.appendChild(document.createElement('span'));
-        riderVehicleEl.lastElementChild.innerText = vehicleLabel;
-        riderVehicleEl.style.display = 'inline-flex';
-      } else {
-        riderVehicleEl.style.display = 'none';
-      }
-
-      const summaryRestaurantName = document.getElementById('summary-restaurant-name');
       const restaurantName = order.restaurantName ||
-        (order.restaurant && order.restaurant.name) || 'EatSwada Partner';
+        (order.restaurant && order.restaurant.name) || 'Eatswada partner';
       const restaurantAddress = order.restaurantAddress ||
         (order.restaurant && order.restaurant.address) || '';
-      const restaurantPhone = order.restaurantPhone ||
-        (order.restaurant && order.restaurant.phone) || '';
-
       document.getElementById('restaurant-name').innerText = restaurantName;
       document.getElementById('hero-restaurant-name').innerText = restaurantName;
-      if (summaryRestaurantName) {
-        summaryRestaurantName.innerText = restaurantName;
-        summaryRestaurantName.style.display = 'block';
-      }
-
+      const summaryRestaurantName = document.getElementById('summary-restaurant-name');
+      if (summaryRestaurantName) { summaryRestaurantName.innerText = restaurantName; summaryRestaurantName.style.display = 'block'; }
       const rAddrEl = document.getElementById('restaurant-address');
       rAddrEl.innerText = restaurantAddress;
       rAddrEl.style.display = restaurantAddress ? 'block' : 'none';
-      restaurantCard.style.display = 'flex';
+      document.getElementById('restaurant-card').style.display = 'flex';
 
-      const restaurantOwnerContact = document.getElementById('restaurant-owner-contact');
-      const restaurantCallBtn = document.getElementById('restaurant-call-btn');
-      const restaurantPhoneEl = document.getElementById('restaurant-phone');
+      // Call Restaurant — only the order's existing restaurant contact
+      // (restaurantPhone / restaurant.phone), only when it is a real number.
+      const restaurantTel = OS.restaurantPhone(order);
+      const helpCallRestaurant = document.getElementById('help-call-restaurant');
+      document.getElementById('restaurant-owner-contact').style.display = restaurantTel ? 'block' : 'none';
+      document.getElementById('restaurant-call-btn').href = restaurantTel ? 'tel:' + restaurantTel : '#';
+      helpCallRestaurant.href = restaurantTel ? 'tel:' + restaurantTel : '#';
+      helpCallRestaurant.style.display = restaurantTel ? 'flex' : 'none';
 
-      if (restaurantPhone) {
-        restaurantPhoneEl.innerText = restaurantPhone;
-        restaurantCallBtn.href = `tel:${restaurantPhone}`;
-        restaurantOwnerContact.style.display = 'block';
-
-        helpCallRestaurant.href = `tel:${restaurantPhone}`;
-        helpCallRestaurant.style.display = 'flex';
-      } else {
-        restaurantOwnerContact.style.display = 'none';
-        helpCallRestaurant.style.display = 'none';
-      }
+      // Receiver — shown only if the saved address carried it into the order.
+      const da = (order.deliveryAddress && typeof order.deliveryAddress === 'object') ? order.deliveryAddress : {};
+      const receiverName = String(da.receiverName || '').trim();
+      const receiverPhone = maskPhone(da.receiverPhone);
+      const receiverRow = document.getElementById('receiver-row');
+      receiverRow.hidden = !(receiverName || receiverPhone);
+      setText('receiver-name', receiverName || 'Receiver');
+      setText('receiver-phone', receiverPhone);
 
       const addressText = getDeliveryAddressText(order);
-      if (addressText) {
-        document.getElementById('address-text').innerText = addressText;
-        addressCard.style.display = 'flex';
-      } else {
-        addressCard.style.display = 'none';
-      }
+      const addressCard = document.getElementById('address-card');
+      if (addressText) { setText('address-text', addressText); addressCard.hidden = false; }
+      else addressCard.hidden = true;
       const instructions = order.deliveryInstructions || order.instructions || order.notes;
       const instrEl = document.getElementById('address-instructions');
       if (instructions) { instrEl.style.display = 'block'; instrEl.innerText = `"${instructions}"`; }
@@ -1007,215 +1017,87 @@
       currentOrder = order;
       document.body.classList.add('data-loaded');
 
-      function minutesRemaining() {
-        // 1) Prefer server-calculated live rider ETA.
-        const liveEta = Number(order?.riderEtaMinutes);
-        if (Number.isFinite(liveEta) && liveEta > 0) {
-          return Math.max(1, Math.ceil(liveEta));
-        }
-
-        // 2) Fall back to the stored order estimate.
-        if (order?.estimatedDelivery) {
-          const diffMs = new Date(order.estimatedDelivery) - Date.now();
-          if (Number.isFinite(diffMs)) {
-            return Math.max(1, Math.ceil(diffMs / 60000));
-          }
-        }
-
-        // 3) Active orders must still show a useful ETA if an older backend
-        // response has neither field. This is explicitly a UI estimate.
-        const status = String(order?.status || '').toLowerCase();
-        const fallbackByStatus = {
-          placed: 40, pending: 40, confirmed: 35, preparing: 30,
-          waiting_for_rider: 25, assigned: 20, picked_up: 15,
-          out_for_delivery: 10, otp_verified: 5
-        };
-        return fallbackByStatus[status] || null;
-      }
-
-      function etaHTML() {
-        const mins = minutesRemaining();
-        if (mins === null) return '-- <span>mins</span>';
-        return `~${mins} <span>mins</span>`;
-      }
-
-      s1.className = 'step'; s2.className = 'step'; s3.className = 'step'; s4.className = 'step'; s5.className = 'step'; s6.className = 'step';
-      heroBg.className = 'tracker-hero';
-      heroIcon.className = 'fa-solid fa-motorcycle';
-
-      ratingCard.style.display = 'none';
-      timelineFill.style.height = '0%';
-      mapCard.style.display = 'none';
-      helpCancelBtn.style.display = 'none';
+      const otpBox = document.getElementById('otp-container');
+      const timelineCard = document.getElementById('timeline');
+      const ratingCard = document.getElementById('rating-card');
+      const helpCancelBtn = document.getElementById('help-cancel');
+      const compScreen = document.getElementById('completion-screen');
 
       otpBox.style.display = 'none';
       otpBox.className = 'customer-otp-box card-fade d1';
-      document.getElementById('otp-title-text').innerText = 'Hand PIN to Rider';
-      document.getElementById('otp-sub-text').innerText = 'Share only upon arrival';
-      document.getElementById('otp-display').innerText = orderOTP;
+      setText('otp-title-text', 'Share PIN with delivery partner');
+      setText('otp-sub-text', 'Only when they arrive');
+      setText('otp-display', orderOTP);
+      ratingCard.style.display = 'none';
+      helpCancelBtn.style.display = 'none';
+      compScreen.style.display = 'none';
 
-      riderCard.style.display = 'none';
-      etaTitle.innerText = "Estimated Arrival";
-
-      const status = order.status.toLowerCase();
+      const status = OS.norm(order.status);
 
       if (status === 'cancelled') {
-         clearInterval(pollInterval);
-         heroBg.classList.add('cancelled');
-         heroIcon.className = 'fa-solid fa-xmark';
-         etaTitle.innerText = "Status";
-         etaTime.innerHTML = "CANCELLED";
-         etaTime.className = "eta-time cancelled-text";
-         timeline.style.display = "none";
-         document.getElementById('timeline').closest('.timeline-card').style.display = "none";
-         renderCancellation(order);
-         return;
+        clearInterval(pollInterval);
+        renderStatusCard(order);
+        const reason = String(order.cancelReason || '').trim();
+        setText('status-sub', /^rejected by restaurant/i.test(reason) ? 'Cancelled by the restaurant' : 'This order was cancelled');
+        timelineCard.style.display = 'none';
+        document.getElementById('rider-card').style.display = 'none';
+        document.getElementById('map-card').style.display = 'none';
+        renderCancellation(order);
+        return;
       }
 
       if (status === 'delivered') {
-         clearInterval(pollInterval);
-         heroBg.classList.add('delivered');
-         heroIcon.className = 'fa-solid fa-check-double';
+        clearInterval(pollInterval);
+        document.getElementById('hero-bg').style.display = 'none';
+        timelineCard.style.display = 'none';
+        document.getElementById('rider-card').style.display = 'none';
+        document.getElementById('map-card').style.display = 'none';
 
-         document.getElementById('eta-header-container').style.display = 'none';
-         document.getElementById('hero-icon-wrapper').style.display = 'none';
-         document.getElementById('timeline').closest('.timeline-card').style.display = 'none';
-         otpBox.style.display = 'none';
-         restaurantCard.style.display = 'none';
-         addressCard.style.display = 'none';
-         riderCard.style.display = 'none';
+        compScreen.style.display = 'flex';
+        // No delivered-at timestamp is in the order data used here, so no
+        // time is shown (the old screen printed the current clock time).
+        setText('completion-time', `Order #${idLabel} · Enjoy your meal`);
+        document.getElementById('completion-reorder').onclick = () => { window.location.href = `orders.html?reorder=${encodeURIComponent(order._id)}`; };
+        document.getElementById('completion-help').onclick = () => { window.location.href = supportUrl; };
 
-         const compScreen = document.getElementById('completion-screen');
-         compScreen.style.display = 'flex';
-         document.getElementById('completion-time').innerText = `Delivered at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        if (deliveredCount > 0) {
+          const chip = document.getElementById('milestone-chip');
+          chip.style.display = 'inline-flex';
+          const ord = deliveredCount === 1 ? '1st' : deliveredCount === 2 ? '2nd' : deliveredCount === 3 ? '3rd' : `${deliveredCount}th`;
+          setText('milestone-text', `Your ${ord} delivery with Eatswada`);
+        }
+        if (!renderLiveUI.celebrated) { renderLiveUI.celebrated = true; launchConfetti(); }
 
-         if (deliveredCount > 0) {
-           const chip = document.getElementById('milestone-chip');
-           chip.style.display = 'inline-flex';
-           const ord = deliveredCount === 1 ? '1st' : deliveredCount === 2 ? '2nd' : deliveredCount === 3 ? '3rd' : `${deliveredCount}th`;
-           document.getElementById('milestone-text').innerText = `Your ${ord} delivery with EatSwada!`;
-         }
-         launchConfetti();
-
-         ratingCard.style.display = 'block';
-         return;
+        ratingCard.style.display = 'block';
+        if (location.hash === '#rate' && !renderLiveUI.scrolledToRating) {
+          renderLiveUI.scrolledToRating = true;
+          setTimeout(() => ratingCard.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+        }
+        return;
       }
 
-      document.getElementById('timeline').closest('.timeline-card').style.display = "block";
-      timeline.style.display = "block";
-      mapCard.style.display = 'block';
-      etaTime.className = "eta-time";
+      // Active order
+      renderStatusCard(order);
+      timelineCard.style.display = 'block';
+      renderTimeline(order);
+      renderRider(order);
 
-      let progress = 0.1;
-
-      if (status === 'pending' || status === 'placed' || status === 'confirmed') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('active');
-         progress = 0.1;
-         etaTitle.innerText = "Order Confirmed";
-      }
-      else if (status === 'preparing') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('active');
-         progress = 0.28;
-         etaTitle.innerText = "Preparing Order";
-         heroBg.classList.add('stage-prep');
-         heroIcon.className = 'fa-solid fa-fire-burner';
-      }
-      else if (status === 'waiting_for_rider') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('passed');
-         s3.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Finding a rider...";
-         document.getElementById('dispatch-desc').innerText = "Assigning delivery partner";
-         progress = 0.46;
-         etaTitle.innerText = "Assigning Rider";
-         heroBg.classList.add('stage-dispatch');
-      }
-      else if (status === 'assigned') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('passed');
-         s3.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
-         riderCard.style.display = 'flex';
-         progress = 0.46;
-         etaTitle.innerText = "Heading to Restaurant";
-         heroBg.classList.add('stage-dispatch');
-      }
-      else if (status === 'picked_up') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('passed');
-         s3.classList.add('passed');
-         s4.classList.add('active');
-         document.getElementById('dispatch-title').innerText = 'Picked Up';
-         document.getElementById('dispatch-desc').innerText = 'Rider has collected your order';
-         otpBox.style.display = 'flex';
-         riderCard.style.display = 'flex';
-         progress = 0.66;
-         etaTitle.innerText = 'On the Way';
-         heroBg.classList.add('stage-dispatch');
-      }
-      else if (status === 'out_for_delivery') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('passed');
-         s3.classList.add('passed');
-         s4.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
-         otpBox.style.display = 'flex';
-         riderCard.style.display = 'flex';
-         progress = 0.66;
-         etaTitle.innerText = "Out for Delivery";
-         heroBg.classList.add('stage-dispatch');
-      }
-      else if (status === 'otp_verified') {
-         etaTime.innerHTML = etaHTML();
-         s1.classList.add('passed');
-         s2.classList.add('passed');
-         s3.classList.add('passed');
-         s4.classList.add('passed');
-         s5.classList.add('active');
-         document.getElementById('dispatch-title').innerText = "Rider Assigned";
-         document.getElementById('dispatch-desc').innerText = "Partner is heading to restaurant";
-
-         otpBox.style.display = 'flex';
-         otpBox.classList.add('verified');
-         document.getElementById('otp-title-text').innerText = 'OTP Verified';
-         document.getElementById('otp-sub-text').innerText = 'Rider confirmed handoff';
-         document.getElementById('otp-display').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-
-         riderCard.style.display = 'flex';
-         progress = 0.86;
-         etaTitle.innerText = "Arriving Now";
-         heroBg.classList.add('stage-arriving');
-         heroIcon.className = 'fa-solid fa-location-arrow';
+      if (['picked_up', 'out_for_delivery', 'otp_verified'].includes(status)) {
+        otpBox.style.display = 'flex';
+        if (status === 'otp_verified') {
+          otpBox.classList.add('verified');
+          setText('otp-title-text', 'PIN verified');
+          setText('otp-sub-text', 'Your delivery partner confirmed the handover');
+          document.getElementById('otp-display').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        }
       }
 
       // Cancel is offered only before the kitchen starts preparing. isCancellable
-      // is the backend's source of truth (flipped false at 'preparing' and beyond),
-      // so gating on it keeps the button in lockstep with what the server allows.
+      // is the backend's source of truth (flipped false at 'preparing' and beyond).
       if (order.isCancellable && ['pending', 'placed', 'confirmed'].includes(status)) {
         helpCancelBtn.style.display = 'flex';
       }
 
-      // Live rider ETA (#7) — shown only while the backend reports the rider on
-      // the move with a recent GPS fix. Overrides the generic ETA text.
-      const liveEtaMinutes = Number(order?.riderEtaMinutes);
-      if (order.riderLocation && Number.isFinite(liveEtaMinutes) && liveEtaMinutes > 0 &&
-          (status === 'out_for_delivery' || status === 'otp_verified' || status === 'picked_up')) {
-        etaTitle.innerText = 'Arriving in';
-        etaTime.innerHTML = '~' + Math.max(1, Math.ceil(liveEtaMinutes)) + ' min';
-        const dd = document.getElementById('dispatch-desc');
-        if (dd && order.riderDistanceKm != null) dd.innerText = 'Rider ~' + order.riderDistanceKm + ' km away';
-      }
-
-      timelineFill.style.height = `${progress * 100}%`;
       updateLiveMap(order);
     }
 
@@ -1282,7 +1164,7 @@
       const layer = document.getElementById('confetti-layer');
       if (!layer) return;
       layer.innerHTML = '';
-      const colors = ['#FC8019', '#16A673', '#2F6FEB', '#F5A623', '#6D5BD0'];
+      const colors = ['#367E34', '#74B054', '#E5A100', '#2F6FEB', '#C8453B'];
       for (let i = 0; i < 26; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
@@ -1321,7 +1203,7 @@
           const body = `
             <div class="invoice-meta">
               <div><span>Order</span><strong>#${idLabel}</strong></div>
-              <div><span>Payment</span><strong>${order.paymentStatus === 'paid' ? 'Paid Online' : 'Cash on Delivery'}</strong></div>
+              <div><span>Payment</span><strong>${esc(window.EatswadaOrderStatus.payment(order).label)}</strong></div>
             </div>
             <div class="invoice-items">${itemsHtml}</div>
             <div class="invoice-total"><span>Total</span><strong>₹${order.total}</strong></div>
@@ -1388,8 +1270,8 @@
       // Share buttons (Web Share API with clipboard fallback)
       const shareHandler = async () => {
         const shareData = {
-          title: 'Track my EatSwada order',
-          text: currentOrder ? `Track my order from ${currentOrder.restaurantName || 'EatSwada'} live:` : 'Track my order live:',
+          title: 'Track my Eatswada order',
+          text: currentOrder ? `Track my order from ${currentOrder.restaurantName || 'Eatswada'} live:` : 'Track my order live:',
           url: window.location.href
         };
         try {
@@ -1397,6 +1279,9 @@
           else { await navigator.clipboard.writeText(shareData.url); alert('Tracking link copied to clipboard!'); }
         } catch (e) { /* user cancelled share — no action needed */ }
       };
+      const recenterBtn = document.getElementById('map-recenter');
+      if (recenterBtn) recenterBtn.addEventListener('click', () => { userMovedMap = false; showRecenter(false); fitView(); });
+
       const heroShareBtn = document.getElementById('hero-share-btn');
       const riderShareBtn = document.getElementById('rider-share-btn');
       const shareExpBtn = document.getElementById('share-experience-btn');
@@ -1404,7 +1289,7 @@
       if (riderShareBtn) riderShareBtn.addEventListener('click', shareHandler);
       if (shareExpBtn) shareExpBtn.addEventListener('click', async () => {
         try {
-          const shareData = { title: 'EatSwada', text: 'Just got my order delivered via EatSwada — fast and fresh! 🍽️', url: window.location.origin };
+          const shareData = { title: 'Eatswada', text: 'Just got my order delivered via Eatswada.', url: window.location.origin };
           if (navigator.share) await navigator.share(shareData);
           else { await navigator.clipboard.writeText(shareData.text + ' ' + shareData.url); alert('Copied to clipboard!'); }
         } catch (e) {}
@@ -1433,7 +1318,7 @@
       // Photo upload — local preview only, nothing is uploaded anywhere
       const photoInput = document.getElementById('review-photo-input');
       const previewRow = document.getElementById('photo-preview-row');
-      if (photoInput) {
+      if (photoInput && !photoInput.disabled) {
         photoInput.addEventListener('change', () => {
           const file = photoInput.files && photoInput.files[0];
           if (!file) return;
@@ -1468,14 +1353,15 @@
             document.getElementById('food-rating-stars').style.display = 'none';
             document.querySelectorAll('.rating-block-label').forEach(l => l.style.display = 'none');
             document.getElementById('review-text').style.display = 'none';
-            document.querySelector('.photo-upload-label').style.display = 'none';
-            previewRow.style.display = 'none';
+            const photoLabel = document.querySelector('.photo-upload-label');
+            if (photoLabel) photoLabel.style.display = 'none';
+            if (previewRow) previewRow.style.display = 'none';
             ratingSubmitBtn.style.display = 'none';
-            document.getElementById('rating-thanks').textContent = 'Thanks! Your verified review is live. 💛';
+            document.getElementById('rating-thanks').textContent = 'Thanks! Your verified review is live.';
             document.getElementById('rating-thanks').style.display = 'block';
           } catch (err) {
             ratingSubmitBtn.disabled = false;
-            ratingSubmitBtn.textContent = 'Submit Rating';
+            ratingSubmitBtn.textContent = 'Submit rating';
             alert(err.message || 'Could not submit review.');
           }
         });
