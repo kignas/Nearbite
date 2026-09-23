@@ -142,8 +142,8 @@ a{text-decoration:none;color:inherit}
 a.row:active,button.row:active{background:var(--soft)}
 a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
 .row-icon{
-  width:38px;height:38px;border-radius:12px;background:var(--soft);
-  display:grid;place-items:center;color:#4B5563;font-size:14px;flex:none;
+  width:36px;height:36px;border-radius:11px;background:#F7F8FA;
+  display:grid;place-items:center;color:#667085;font-size:13px;flex:none;
 }
 .row-main{min-width:0;flex:1}
 
@@ -285,11 +285,11 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   --ew-text-xs:11px;
   --ew-text-sm:12px;
   --ew-text-body-sm:13px;
-  --ew-text-body:15px;
+  --ew-text-body:14px;
   --ew-text-card-title:17px;
-  --ew-text-section:19px;
-  --ew-text-page:21px;
-  --ew-text-display:27px;
+  --ew-text-section:15px;
+  --ew-text-page:16px;
+  --ew-text-display:24px;
 }
 
 body{
@@ -306,7 +306,7 @@ body{
 }
 
 .user h1{
-  font-size:var(--ew-text-page);
+  font-size:18px;
   line-height:1.18;
   font-weight:800;
   letter-spacing:-.55px;
@@ -326,7 +326,7 @@ body{
 
 /* Quick actions */
 .quick-tile span{
-  font-size:var(--ew-text-body);
+  font-size:13px;
   line-height:1.2;
   font-weight:700;
 }
@@ -348,13 +348,13 @@ body{
 }
 
 .row-sub{
-  font-size:var(--ew-text-body);
+  font-size:14px;
   line-height:1.4;
   font-weight:700;
 }
 
 .row.is-nav .row-title{
-  font-size:var(--ew-text-body);
+  font-size:14px;
   line-height:1.3;
   font-weight:700;
   letter-spacing:-.15px;
@@ -380,7 +380,7 @@ body{
 
 /* Favourites */
 .fav-summary .row-title{
-  font-size:var(--ew-text-body);
+  font-size:14px;
   line-height:1.3;
   font-weight:800;
 }
@@ -392,7 +392,7 @@ body{
 }
 
 .fav-empty h3{
-  font-size:var(--ew-text-body);
+  font-size:14px;
   line-height:1.3;
   font-weight:800;
 }
@@ -468,6 +468,39 @@ body{
 <link rel="stylesheet" href="restaurant-card.css">
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
+
+<style>
+/* Premium inline SVG icon treatment — icons only */
+.row-icon .premium-svg, .quick-ico .premium-svg{
+  width:21px;height:21px;display:block;overflow:visible;
+}
+.quick-ico .premium-svg{width:20px;height:20px}
+.row-icon{color:inherit}
+</style>
+
+<!-- Small inline SVG icon set: no external icon dependency -->
+<svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+  <defs>
+    <linearGradient id="ewG1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CBF73"/><stop offset="1" stop-color="#367E34"/></linearGradient>
+    <linearGradient id="ewG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#78A9FF"/><stop offset="1" stop-color="#3B6FD8"/></linearGradient>
+    <linearGradient id="ewG3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC56B"/><stop offset="1" stop-color="#F28A18"/></linearGradient>
+    <linearGradient id="ewG4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A9A"/><stop offset="1" stop-color="#E34C64"/></linearGradient>
+    <symbol id="ew-orders" viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="17" rx="3" fill="url(#ewG2)"/><path d="M9 8h6M9 11.5h6M9 15h4" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M9 3.5h6v3H9z" fill="#DCE8FF"/></symbol>
+    <symbol id="ew-address" viewBox="0 0 24 24"><path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Z" fill="url(#ewG4)"/><circle cx="12" cy="10" r="2.3" fill="#fff"/></symbol>
+    <symbol id="ew-heart" viewBox="0 0 24 24"><path d="M12 20.2 4.7 13A4.9 4.9 0 0 1 11.6 6l.4.5.4-.5A4.9 4.9 0 0 1 19.3 13L12 20.2Z" fill="url(#ewG4)"/></symbol>
+    <symbol id="ew-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="url(#ewG2)"/><path d="M5 20a7 7 0 0 1 14 0" fill="url(#ewG2)"/></symbol>
+    <symbol id="ew-phone" viewBox="0 0 24 24"><path d="M7.3 4.5 9.6 3.5l2 4.6-2 1.3a13 13 0 0 0 5 5l1.3-2 4.6 2-1 2.3a2.2 2.2 0 0 1-2.4 1.3C10.5 17 7 13.5 5.9 7a2.2 2.2 0 0 1 1.4-2.5Z" fill="url(#ewG1)"/></symbol>
+    <symbol id="ew-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="3" fill="url(#ewG2)"/><path d="m5.5 7.5 6.5 5 6.5-5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ew-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="url(#ewG2)"/><path d="M12 10.5v6M12 7.5h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="ew-help" viewBox="0 0 24 24"><path d="M4 10.5a8 8 0 0 1 16 0v5a2 2 0 0 1-2 2h-1v-6h3M4 11.5H3v4a2 2 0 0 0 2 2h1v-6H4Z" fill="url(#ewG2)"/><path d="M8 18.5h3" stroke="#3B6FD8" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="ew-doc" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7z" fill="url(#ewG2)"/><path d="M14 3.5v5h4M9.5 12h5M9.5 15h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="ew-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.2c0 4.5-3 7.7-7 9.3-4-1.6-7-4.8-7-9.3V6z" fill="url(#ewG2)"/><path d="m8.8 12 2.1 2.1 4.4-4.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ew-refund" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="url(#ewG3)"/><path d="M8 10h8M8 14h5M7 7.5 4.5 10 7 12.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ew-star" viewBox="0 0 24 24"><path d="m12 3.5 2.5 5.1 5.6.8-4 4 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-4 5.6-.8z" fill="url(#ewG3)"/></symbol>
+    <symbol id="ew-logout" viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" fill="none" stroke="url(#ewG4)" stroke-width="2" stroke-linecap="round"/><path d="M13 8l4 4-4 4M8 12h9" fill="none" stroke="url(#ewG4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
 </head>
 <body>
 <div class="app">
@@ -489,8 +522,8 @@ body{
 </header>
 
 <div class="quick">
-  <a class="quick-tile" href="orders.html"><span class="quick-ico"><i class="fa-solid fa-receipt" aria-hidden="true"></i></span><span>Orders</span></a>
-  <a class="quick-tile" href="address.html"><span class="quick-ico"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span><span>Addresses</span></a>
+  <a class="quick-tile" href="orders.html"><span class="quick-ico"><svg class="premium-svg" aria-hidden="true"><use href="#ew-orders"></use></svg></span><span>Orders</span></a>
+  <a class="quick-tile" href="address.html"><span class="quick-ico"><svg class="premium-svg" aria-hidden="true"><use href="#ew-address"></use></svg></span><span>Addresses</span></a>
 </div>
 
 <main class="content">
@@ -498,7 +531,7 @@ body{
     <div class="section-title">Favourites</div>
     <details class="pf-card fav-toggle" id="favoritesSection">
       <summary class="fav-summary">
-        <div class="row-icon"><i class="fa-solid fa-heart" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-heart"></use></svg></div>
         <div class="row-main">
           <div class="row-title">Saved restaurants</div>
           <div class="row-sub">Tap to view your favourite restaurants</div>
@@ -515,17 +548,17 @@ body{
     <div class="section-title">Your account</div>
     <div class="pf-card">
       <div class="row">
-        <div class="row-icon"><i class="fa-regular fa-user" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-user"></use></svg></div>
         <div class="row-main"><div class="row-title">Name</div><div class="row-sub" id="nameValue"><span class="skeleton"></span></div></div>
         <button class="edit-btn" id="editProfileBtn">Edit</button>
       </div>
       <div class="row">
-        <div class="row-icon"><i class="fa-solid fa-phone" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-phone"></use></svg></div>
         <div class="row-main"><div class="row-title">Mobile number</div><div class="row-sub" id="phoneValue"><span class="skeleton"></span></div></div>
         <span class="locked"><i class="fa-solid fa-lock" aria-hidden="true"></i>Verified</span>
       </div>
       <div class="row">
-        <div class="row-icon"><i class="fa-regular fa-envelope" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-mail"></use></svg></div>
         <div class="row-main"><div class="row-title">Email</div><div class="row-sub" id="emailValue">Not added</div></div>
         <button class="edit-btn" id="editEmailBtn">Edit</button>
       </div>
@@ -554,12 +587,12 @@ body{
     <div class="section-title">About & help</div>
     <div class="pf-card">
       <a class="row is-nav" href="about.html">
-        <div class="row-icon"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-info"></use></svg></div>
         <div class="row-main"><div class="row-title">About us</div><div class="row-sub">What Eatswada is and how it works</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
       <a class="row is-nav" href="support.html">
-        <div class="row-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-help"></use></svg></div>
         <div class="row-main"><div class="row-title">Contact us</div><div class="row-sub">Reach our Maynaguri support team</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
@@ -570,17 +603,17 @@ body{
     <div class="section-title">Legal & policies</div>
     <div class="pf-card">
       <a class="row is-nav" href="legal.html#terms">
-        <div class="row-icon"><i class="fa-solid fa-file-contract" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-doc"></use></svg></div>
         <div class="row-main"><div class="row-title">Terms &amp; conditions</div><div class="row-sub">Rules for using Eatswada</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
       <a class="row is-nav" href="legal.html#privacy">
-        <div class="row-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-shield"></use></svg></div>
         <div class="row-main"><div class="row-title">Privacy policy</div><div class="row-sub">How your data is handled</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
       <a class="row is-nav" href="refund-policy.html">
-        <div class="row-icon"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-refund"></use></svg></div>
         <div class="row-main"><div class="row-title">Cancellation &amp; refund</div><div class="row-sub">Cancellations, refunds &amp; delivery issues</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
@@ -591,7 +624,7 @@ body{
     <div class="section-title">Feedback</div>
     <div class="pf-card">
       <a class="row is-nav" href="rate-us.html">
-        <div class="row-icon"><i class="fa-solid fa-star" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-star"></use></svg></div>
         <div class="row-main"><div class="row-title">Rate your experience</div><div class="row-sub">Tell us how we're doing</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </a>
@@ -601,7 +634,7 @@ body{
   <section class="section">
     <div class="pf-card">
       <button class="row is-nav logout" id="logoutBtn" type="button">
-        <div class="row-icon"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></div>
+        <div class="row-icon"><svg class="premium-svg" aria-hidden="true"><use href="#ew-logout"></use></svg></div>
         <div class="row-main"><div class="row-title">Log out</div><div class="row-sub">Sign out of this device</div></div>
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </button>
@@ -731,12 +764,8 @@ async function loadAddresses(){
     const selectedId=localStorage.getItem('nearbite_selected_address_id');
     const selected=selectedId?list.find(a=>String(a._id)===String(selectedId)):null;
     const preferred=selected||list.find(a=>a.isDefault||a.default||a.tag==='Home')||list[0];
-    if(window.EatswadaAddressStore?.setActive){
-      window.EatswadaAddressStore.setActive(preferred,'profile-hydrate');
-    }else{
-      localStorage.setItem('nearbite_address',JSON.stringify(preferred));
-      if(preferred?._id&&String(preferred._id)!==String(selectedId)) localStorage.setItem('nearbite_selected_address_id',String(preferred._id));
-    }
+    localStorage.setItem('nearbite_address',JSON.stringify(preferred));
+    if(preferred?._id&&String(preferred._id)!==String(selectedId)) localStorage.setItem('nearbite_selected_address_id',String(preferred._id));
     const label=preferred.tag||preferred.label||'Saved address';
     const text=[preferred.house,preferred.area||preferred.locality,preferred.city].filter(Boolean).join(', ');
     $('addressSummary').textContent=(label+': '+(text||'Saved location')).slice(0,90);
@@ -776,12 +805,7 @@ $('logoutBtn').onclick=()=>{
   localStorage.removeItem('token');
   localStorage.removeItem('nearbite_token');
   localStorage.removeItem('nearbite_user');
-  if(window.EatswadaAddressStore?.clearSession){
-    window.EatswadaAddressStore.clearSession();
-  }else{
-    localStorage.removeItem('nearbite_address');
-    localStorage.removeItem('nearbite_selected_address_id');
-  }
+  localStorage.removeItem('nearbite_address');
   location.replace('login.html');
 };
 // loadProfile and loadAddresses are independent and can run in parallel.
@@ -815,7 +839,6 @@ window.addEventListener('nearbite:address-changed',loadAddresses);
 </script>
 
 <script src="api.js"></script>
-<script src="address-store.js"></script>
 <script src="favorites.js"></script>
 <script src="restaurant-card.js"></script>
 <script src="navigation.js"></script>
