@@ -1,6 +1,6 @@
 
 /* Address API/model are injected before this file. */
-let addresses = [], editingId = null, locType = 'House', tag = 'Home';
+let addresses = [], editingId = null, locType = 'Village', tag = 'Home';
 let lat = null, lng = null, locGeo = null;
 let account = null, useAccountOn = false;
 
@@ -23,7 +23,7 @@ const token   = () => localStorage.getItem('nearbite_token') || localStorage.get
 /* Session-only scratch space for the "Change location" round trip.
    Not a nearbite_* compatibility key. */
 const DRAFT_KEY = 'eatswada_address_draft';
-const FORM_IDS = ['house','area','landmark','receiverName','receiverPhone','instructions'];
+const FORM_IDS = ['house','area','landmark','receiverName','receiverPhone'];
 
 const ENTRY = new URLSearchParams(location.search);
 const cameFromSetupUrl = ENTRY.get('add') === '1';
@@ -89,14 +89,73 @@ const ICONS = {
   warn:   SVG('<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.2"/>')
 };
 
-/* The single selector drives both the field wording and the stored `tag`.
-   House → Home, Office → Work, Other → Other. */
+/* Village/Town controls the address detail structure. Save-as is independent. */
 const TYPE_FIELDS = {
-  House:  { f1:'House / Flat / Floor', f2:'Building / Street', tag:'Home'  },
-  Office: { f1:'Office name / Floor',  f2:'Building / Street', tag:'Work'  },
-  Other:  { f1:'Building / Floor',     f2:'Street',            tag:'Other' }
+  Village: { houseRequired:false, landmarkRequired:true, houseLabel:'', landmarkLabel:'Address details', landmarkPlaceholder:'Para, road, landmark, nearby shop...', areaLabel:'Locality / Village' },
+  Town:    { houseRequired:true,  landmarkRequired:false, houseLabel:'House / Flat / Floor', landmarkLabel:'Building / Street', landmarkPlaceholder:'', areaLabel:'Area / Locality' }
 };
-const TAG_TO_TYPE = { Home:'House', Work:'Office', Other:'Other' };
+
+const TAG_TO_SAVE = { Home:'Home', Work:'Work', Office:'Work', Other:'Other' };
+
+function chooseType(t){
+  locType = TYPE_FIELDS[t] ? t : 'Village';
+  const f = TYPE_FIELDS[locType];
+  document.querySelectorAll('#locSeg button').forEach(b => {
+    const on = b.dataset.type === locType;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+
+  const root = $('addressFields');
+  if (root) root.dataset.mode = locType.toLowerCase();
+
+  const houseField = $('houseField');
+  const landmarkField = $('landmarkField');
+  const landmarkInput = $('landmark');
+  const houseLabel = $('lbl_house');
+  const landmarkLabel = $('lbl_landmark');
+  const areaLabel = $('lbl_area');
+  const landmarkReq = $('landmarkReq');
+  const areaReq = $('areaReq');
+
+  if (houseField) houseField.hidden = locType === 'Village';
+  if (houseLabel) houseLabel.textContent = f.houseLabel;
+  if (landmarkLabel) landmarkLabel.textContent = f.landmarkLabel;
+  if (areaLabel) areaLabel.textContent = f.areaLabel;
+  if (landmarkReq) landmarkReq.hidden = !f.landmarkRequired;
+  if (areaReq) areaReq.hidden = false;
+  if (landmarkInput) {
+    landmarkInput.placeholder = f.landmarkPlaceholder ? f.landmarkPlaceholder : ' ';
+    landmarkInput.setAttribute('aria-required', f.landmarkRequired ? 'true' : 'false');
+  }
+  if ($('house')) $('house').setAttribute('aria-required', f.houseRequired ? 'true' : 'false');
+
+  syncSave();
+}
+
+function chooseSaveAs(nextTag){
+  tag = TAG_TO_SAVE[nextTag] || 'Other';
+  document.querySelectorAll('#saveAsSeg button').forEach(b => {
+    const on = b.dataset.tag === tag;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function syncSaveAsUI(){
+  const current = TAG_TO_SAVE[tag] || 'Other';
+  document.querySelectorAll('#saveAsSeg button').forEach(b => {
+    const on = b.dataset.tag === current;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+/* Keep the existing "Save address as" value without coupling it to Village/Town. */
+function focusTypeSelector(){
+  const el = $('saveAsSeg') || $('locSeg');
+  if (el) el.scrollIntoView({ block:'center', behavior:'smooth' });
+}
 
 function toast(s){
   $('toast').textContent = s;
@@ -600,30 +659,6 @@ function toggleUseAccount(){ setUseAccount(!useAccountOn); }
 
 /* ---------------- form ---------------- */
 
-/* The one selector on the page. It sets the field wording and the payload
-   tag together, so the customer never sees two address-type controls. */
-function chooseType(t){
-  locType = TYPE_FIELDS[t] ? t : 'House';
-  const f = TYPE_FIELDS[locType];
-  tag = f.tag;
-  document.querySelectorAll('#locSeg button').forEach(b => {
-    const on = b.dataset.type === locType;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
-  });
-  // Labels float; the placeholder stays a single space for :placeholder-shown.
-  $('lbl_house').textContent    = f.f1;
-  $('lbl_landmark').textContent = f.f2;
-  $('saveAsValue').textContent  = Model.tagLabel(tag);
-}
-
-/* "Save address as · Edit" moves the customer to the one type selector. */
-function focusTypeSelector(){
-  const b = document.querySelector('#locSeg button.on') || document.querySelector('#locSeg button');
-  $('locSeg').scrollIntoView({ block: 'center', behavior: 'smooth' });
-  if (b) b.focus({ preventScroll: true });
-}
-
 function paintLocation(){
   if (validCoords(lat, lng)){
     const lines = tidyLines(locationLines(locGeo, { area:$('area').value.trim(), city:addrCity, pincode:addrPin }));
@@ -654,7 +689,7 @@ function deriveCityPin(existing){
 }
 
 function clearErrors(){
-  ['location','house','area','receiverName','receiverPhone'].forEach(id => setErr(id, ''));
+  ['location','house','area','landmark','receiverName','receiverPhone'].forEach(id => setErr(id, ''));
 }
 
 function setErr(id, msg){
@@ -662,22 +697,6 @@ function setErr(id, msg){
   if (box){ box.textContent = msg || ''; box.classList.toggle('show', !!msg); }
   if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA')) input.classList.toggle('invalid', !!msg);
 }
-
-function openInstructions(){
-  $('instrPanel').style.display = 'block';
-  $('instrRow').style.display = 'none';
-  $('instructions').focus();
-}
-
-function closeInstructions(){
-  const v = $('instructions').value.trim();
-  $('instrPanel').style.display = 'none';
-  $('instrRow').style.display = 'flex';
-  $('instrText').textContent = v || 'Instructions to reach location';
-  $('instrCta').textContent  = v ? 'Edit' : 'Add';
-}
-
-function photosUnavailable(){ toast('Photo upload isn\u2019t available yet.'); }
 
 /* MODE 1 only holds while this really is the first address and the account
    can supply the receiver. Otherwise the receiver card is shown so nothing
@@ -687,7 +706,6 @@ function applyMode(){
   const hideReceiver = setup && accountUsable();
 
   $('receiverSec').style.display = hideReceiver ? 'none' : 'block';
-  $('photoSec').style.display    = setup ? 'none' : 'block';
   $('formTitle').textContent = editingId ? 'Edit address'
                              : setup     ? 'Set your delivery address'
                              : 'Add delivery address';
@@ -703,6 +721,9 @@ function applyMode(){
     $('receiverName').value  = account.name;
     $('receiverPhone').value = account.phone;
   }
+
+  chooseType(locType);
+  syncSaveAsUI();
 }
 
 function openEditor(id = null){
@@ -720,13 +741,17 @@ function openEditor(id = null){
   $('landmark').value = a?.landmark || '';
   $('receiverName').value  = a?.receiverName || '';
   $('receiverPhone').value = tenDigits(a?.receiverPhone);
-  $('instructions').value  = a?.deliveryInstructions || '';
 
   addrCity = a?.city || '';
   addrPin  = a?.pincode || '';
 
-  chooseType(TAG_TO_TYPE[a?.tag] || 'House');
-  closeInstructions();
+  /* Existing detailed addresses open in Town mode; locality/address-detail
+     addresses open in Village mode. The saved label remains independent. */
+  const hasDetailedBuilding = !!String(a?.house || '').trim();
+  locType = a ? (hasDetailedBuilding ? 'Town' : 'Village') : 'Village';
+  tag = a?.tag || 'Home';
+  chooseType(locType);
+  syncSaveAsUI();
 
   const c = coords(a);
   lat = c[0]; lng = c[1];
@@ -776,7 +801,7 @@ function closeEditor(){
 
 function changeLocation(){
   // `at` lets the resume step tell a newly confirmed point from a stale one.
-  const draft = { editingId, locType, mode, useAccount: useAccountOn, city: addrCity, pincode: addrPin, at: Date.now() };
+  const draft = { editingId, locType, tag, mode, useAccount: useAccountOn, city: addrCity, pincode: addrPin, at: Date.now() };
   FORM_IDS.forEach(id => draft[id] = $(id).value);
   try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
 
@@ -805,7 +830,9 @@ function resumeDraft(){
   openEditor(draft.editingId || null);
 
   FORM_IDS.forEach(id => { if (typeof draft[id] === 'string') $(id).value = draft[id]; });
-  chooseType(draft.locType || 'House');
+  chooseType(draft.locType || 'Village');
+  tag = draft.tag || tag;
+  syncSaveAsUI();
   addrCity = draft.city || addrCity;
   addrPin  = draft.pincode || addrPin;
 
@@ -826,7 +853,6 @@ function resumeDraft(){
 
   applyMode();
   if (mode === 'manage') setUseAccount(!!draft.useAccount);
-  closeInstructions();
   paintLocation();
   syncSave();
   return true;
@@ -836,10 +862,12 @@ function resumeDraft(){
 
 function formState(){
   const needsReceiverInput = !(mode === 'setup' && accountUsable());
+  const village = locType === 'Village';
   return {
     location: validCoords(lat, lng),
-    house: !!$('house').value.trim(),
+    house: village ? true : !!$('house').value.trim(),
     area: !!$('area').value.trim(),
+    landmark: village ? !!$('landmark').value.trim() : true,
     receiverName: !needsReceiverInput || $('receiverName').value.trim().length >= 2,
     receiverPhone: !needsReceiverInput || /^\d{10}$/.test($('receiverPhone').value.replace(/\D/g,''))
   };
@@ -856,10 +884,11 @@ function validateForm(){
   const fail = (id, msg) => { setErr(id, msg); if (!firstBad) firstBad = id; };
 
   if (!s.location)      fail('location', 'Please confirm your delivery location.');
-  if (!s.receiverName)  fail('receiverName', 'Enter the receiver\u2019s name.');
+  if (!s.receiverName)  fail('receiverName', 'Enter the receiver’s name.');
   if (!s.receiverPhone) fail('receiverPhone', 'Enter a 10-digit mobile number.');
-  if (!s.house)         fail('house', 'Enter your ' + TYPE_FIELDS[locType].f1.toLowerCase() + '.');
-  if (!s.area)          fail('area', 'Enter your area or locality.');
+  if (!s.house)         fail('house', 'Enter your house, flat or floor.');
+  if (!s.area)          fail('area', locType === 'Village' ? 'Enter your locality or village.' : 'Enter your area or locality.');
+  if (!s.landmark)      fail('landmark', 'Add para, road, landmark or a nearby shop.');
 
   if (firstBad){
     const el = $(firstBad) || $('err_' + firstBad);
@@ -918,11 +947,6 @@ async function saveAddress(){
     // Editing must not silently change which address is the account default.
     isDefault: editingId ? (byId(editingId)?.isDefault === true) : !addresses.length
   };
-
-  // Only sent when the customer actually wrote something, so the default
-  // payload stays identical to what the backend already accepts.
-  const instr = $('instructions').value.trim();
-  if (instr) data.deliveryInstructions = instr;
 
   const b = $('save');
   const wasEditing = !!editingId;

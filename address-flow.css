@@ -287,6 +287,69 @@ html[data-address-view="manage"] body.ea-body{background:#fff}
 
 .ea-panel{background:var(--address-card);border-radius:var(--address-radius);padding:14px 11px}
 
+/* ── Eatswada Village / Town address structure ── */
+.ea-seg{
+  grid-template-columns:repeat(2,1fr);
+  background:var(--address-green-tint);
+  border:1px solid rgba(54,126,52,.10);
+}
+.ea-seg button.on{
+  background:var(--address-green);
+  color:#fff;
+  box-shadow:0 1px 3px rgba(54,126,52,.18);
+}
+.ea-address-fields{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+.ea-address-fields[data-mode="village"] .ea-house-field{display:none}
+.ea-address-fields[data-mode="village"] .ea-area-row{order:1}
+.ea-address-fields[data-mode="village"] .ea-landmark-field{order:2}
+.ea-address-fields[data-mode="town"] .ea-house-field{order:1}
+.ea-address-fields[data-mode="town"] .ea-landmark-field{order:2}
+.ea-address-fields[data-mode="town"] .ea-area-row{order:3}
+.ea-address-fields .ea-float{width:100%}
+.ea-address-fields .ea-area-row{width:100%}
+
+.ea-saveas{
+  margin-top:18px;
+}
+.ea-saveas-title{
+  display:block;
+  margin:0 2px 9px;
+  font-size:13px;
+  line-height:18px;
+  font-weight:750;
+  color:var(--address-text);
+}
+.ea-saveas-title .req{color:var(--address-green)}
+.ea-saveas-seg{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  padding:4px;
+  border:1px solid var(--address-line);
+  border-radius:999px;
+  background:#F8F9F8;
+}
+.ea-saveas-seg button{
+  min-height:38px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--address-text-2);
+  font:700 13px/18px var(--font, Manrope, sans-serif);
+}
+.ea-saveas-seg button.on{
+  background:#fff;
+  color:var(--address-green);
+  box-shadow:0 1px 4px rgba(16,24,40,.08);
+}
+.ea-saveas-seg button:active{transform:scale(.98)}
+.ea-address-fields .ea-err{margin-left:4px}
+
+
 /* receiver */
 .ea-receiver{padding:11px 14px}
 .ea-check{
@@ -544,3 +607,22 @@ html[data-address-view="manage"] body.ea-body{background:#fff}
   .ea-line{font-size:13px}
   .ea-sec-title{font-size:16px}
 }
+
+
+/* Final address-form overrides */
+.ea .ea-seg{grid-template-columns:repeat(2,1fr);background:var(--address-green-tint);border:1px solid rgba(54,126,52,.10)}
+.ea .ea-seg button.on{background:var(--address-green);color:#fff;box-shadow:0 1px 3px rgba(54,126,52,.18)}
+.ea .ea-address-fields{display:flex;flex-direction:column;min-width:0}
+.ea .ea-address-fields[data-mode="village"] .ea-house-field{display:none}
+.ea .ea-address-fields[data-mode="village"] .ea-area-row{order:1}
+.ea .ea-address-fields[data-mode="village"] .ea-landmark-field{order:2}
+.ea .ea-address-fields[data-mode="town"] .ea-house-field{order:1}
+.ea .ea-address-fields[data-mode="town"] .ea-landmark-field{order:2}
+.ea .ea-address-fields[data-mode="town"] .ea-area-row{order:3}
+.ea .ea-saveas{margin-top:18px}
+.ea .ea-saveas-title{display:block;margin:0 2px 9px;font-size:13px;line-height:18px;font-weight:750;color:var(--address-text)}
+.ea .ea-saveas-title .req{color:var(--address-green)}
+.ea .ea-saveas-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px;border:1px solid var(--address-line);border-radius:999px;background:#F8F9F8}
+.ea .ea-saveas-seg button{min-height:38px;border:0;border-radius:999px;background:transparent;color:var(--address-text-2);font:700 13px/18px Manrope,system-ui,sans-serif}
+.ea .ea-saveas-seg button.on{background:#fff;color:var(--address-green);box-shadow:0 1px 4px rgba(16,24,40,.08)}
+@media (max-width:380px){.ea .ea-saveas-seg button{font-size:12px}.ea .ea-seg button{font-size:13px}}

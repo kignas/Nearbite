@@ -172,78 +172,55 @@
         </div>
         <div class="ea-err" id="err_location"></div>
 
-        <div class="ea-seg" id="locSeg" role="group" aria-label="Address type">
-          <button type="button" class="on" data-type="House" onclick="chooseType('House')" aria-pressed="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.4L12 4l8 6.4V19a1 1 0 0 1-1 1h-4.6v-5.6H9.6V20H5a1 1 0 0 1-1-1z"/></svg> House
+        <div class="ea-seg" id="locSeg" role="group" aria-label="Location type">
+          <button type="button" class="on" data-type="Village" onclick="chooseType('Village')" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20v-7.5L12 7l6 5.5V20M9 20v-4h6v4"/></svg>
+            Village
           </button>
-          <button type="button" data-type="Office" onclick="chooseType('Office')" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="8.6" width="16" height="11" rx="2.6"/><path d="M8.2 5h7.6"/></svg> Office
-          </button>
-          <button type="button" data-type="Other" onclick="chooseType('Other')" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M20 4L3.8 10.9l7.1 2.2 2.2 7.1z"/></svg> Other
+          <button type="button" data-type="Town" onclick="chooseType('Town')" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V8l7-4v16M11 20V6l9 3v11M7 11h1M7 14h1M7 17h1M15 12h1M15 15h1M15 18h1"/></svg>
+            Town
           </button>
         </div>
 
-        <div class="ea-float">
-          <input class="ea-input" id="house" maxlength="120" placeholder=" " autocomplete="address-line1">
-          <label for="house"><span id="lbl_house">House / Flat / Floor</span> <span class="req">*</span></label>
-          <div class="ea-err" id="err_house"></div>
-        </div>
-
-        <div class="ea-float">
-          <input class="ea-input" id="landmark" maxlength="160" placeholder=" " autocomplete="address-line2">
-          <label for="landmark"><span id="lbl_landmark">Building / Street</span> (Recommended)</label>
-        </div>
-
-        <div class="ea-area-row">
-          <div class="ea-float">
-            <textarea class="ea-input ea-textarea" id="area" rows="2" maxlength="120" placeholder=" "></textarea>
-            <label for="area">Area / Locality <span class="req">*</span></label>
-            <div class="ea-err" id="err_area"></div>
+        <div class="ea-address-fields" id="addressFields">
+          <div class="ea-float ea-house-field" id="houseField">
+            <input class="ea-input" id="house" maxlength="120" placeholder=" " autocomplete="address-line1">
+            <label for="house"><span id="lbl_house">House / Flat / Floor</span> <span class="req">*</span></label>
+            <div class="ea-err" id="err_house"></div>
           </div>
-          <button type="button" class="ea-maptile" onclick="changeLocation()" aria-label="Change delivery location on the map">
-            <svg viewBox="0 0 16 21" aria-hidden="true"><circle cx="8" cy="7" r="6.5" fill="currentColor"/><circle cx="8" cy="7" r="2.4" fill="#fff"/><path d="M8 13.5v3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="19" r="1.5" fill="currentColor"/></svg>
-            <span id="changeLocText">Change</span>
-          </button>
-        </div>
 
-        <div class="ea-float ea-saveas">
-          <div class="ea-input ea-saveas-box">
-            <span class="ea-saveas-value" id="saveAsValue">Home</span>
-            <button type="button" class="ea-link" onclick="focusTypeSelector()" aria-label="Change what this address is saved as">Edit</button>
+          <div class="ea-float ea-landmark-field" id="landmarkField">
+            <input class="ea-input" id="landmark" maxlength="160" placeholder=" " autocomplete="address-line2">
+            <label for="landmark"><span id="lbl_landmark">Address details</span> <span id="landmarkReq" class="req">*</span></label>
+            <div class="ea-err" id="err_landmark"></div>
           </div>
-          <span class="ea-float-label is-static">Save address as <span class="req">*</span></span>
+
+          <div class="ea-area-row" id="areaRow">
+            <div class="ea-float">
+              <textarea class="ea-input ea-textarea" id="area" rows="2" maxlength="120" placeholder=" "></textarea>
+              <label for="area"><span id="lbl_area">Locality / Village</span> <span id="areaReq" class="req">*</span></label>
+              <div class="ea-err" id="err_area"></div>
+            </div>
+            <button type="button" class="ea-maptile" onclick="changeLocation()" aria-label="Change delivery location on the map">
+              <svg viewBox="0 0 16 21" aria-hidden="true"><circle cx="8" cy="7" r="6.5" fill="currentColor"/><circle cx="8" cy="7" r="2.4" fill="#fff"/><path d="M8 13.5v3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="19" r="1.5" fill="currentColor"/></svg>
+              <span id="changeLocText">Change</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ea-saveas">
+          <span class="ea-saveas-title">Save address as <span class="req">*</span></span>
+          <div class="ea-saveas-seg" id="saveAsSeg" role="group" aria-label="Save address as">
+            <button type="button" data-tag="Home" onclick="chooseSaveAs('Home')" aria-pressed="true">Home</button>
+            <button type="button" data-tag="Work" onclick="chooseSaveAs('Work')" aria-pressed="false">Office</button>
+            <button type="button" data-tag="Other" onclick="chooseSaveAs('Other')" aria-pressed="false">Other</button>
+          </div>
         </div>
 
       </div>
     </section>
 
-    <!-- Location photos — hidden in first-address setup -->
-    <section class="ea-sec" id="photoSec">
-      <h2 class="ea-sec-title">Location Photos <span class="ea-sec-note">(Recommended)</span> <span class="ea-new">NEW</span></h2>
-      <div class="ea-row ea-photos" role="button" tabindex="0" aria-disabled="true" onclick="photosUnavailable()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();photosUnavailable()}">
-        <span class="ea-row-text">Add photos to help delivery partners reach faster<small>Photo upload isn't available yet.</small></span>
-        <span class="ea-photo-box" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5H9.6L8 7H5.6A1.6 1.6 0 0 0 4 8.6v9A1.6 1.6 0 0 0 5.6 19.2h12.8a1.6 1.6 0 0 0 1.6-1.6V11"/><circle cx="12" cy="13" r="3.1"/><path d="M19 3.2v4.6M16.7 5.5h4.6"/></svg>
-        </span>
-      </div>
-    </section>
-
-    <!-- Delivery instructions -->
-    <section class="ea-sec">
-      <h2 class="ea-sec-title">Delivery Instructions <span class="ea-sec-note">(Recommended)</span></h2>
-      <div class="ea-row" id="instrRow" role="button" tabindex="0" onclick="openInstructions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openInstructions()}">
-        <span class="ea-row-text" id="instrText">Instructions to reach location</span>
-        <span class="ea-row-cta" id="instrCta">Add</span>
-      </div>
-      <div class="ea-panel ea-instr" id="instrPanel" style="display:none">
-        <div class="ea-float">
-          <textarea class="ea-input ea-textarea" id="instructions" maxlength="240" placeholder=" "></textarea>
-          <label for="instructions">Instructions to reach location</label>
-        </div>
-        <button type="button" class="ea-instr-done" onclick="closeInstructions()">Done</button>
-      </div>
-    </section>
 
    </div>
   </div>
