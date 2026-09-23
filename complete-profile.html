@@ -16,18 +16,18 @@
     /* ===== Eatswada onboarding design system — identical in login.html,
        complete-profile.html, location-onboarding.html and address.html ===== */
     :root{
-      --brand:#C2185B;
-      --brand-dark:#A1114B;
-      --brand-tint:#FFF1F8;
-      --brand-ink:#A5164C;
-      --brand-soft:#E4A9C0;
-      --bg:#F1F5F9;
-      --ink:#1A1D21;
+      --brand:#388E3C;
+      --brand-dark:#2E7D32;
+      --brand-tint:#EEF8EF;
+      --brand-ink:#347A37;
+      --brand-soft:#A8D5AA;
+      --bg:#F4F4F8;
+      --ink:#202126;
       --ink-2:#4B5563;
-      --label:#8E959F;
+      --label:#737780;
       --muted:#6B7280;
-      --line:#E6E9ED;
-      --field:#FBFCFD;
+      --line:#E4E5E8;
+      --field:#FCFCFD;
       --green:#16A34A;
       --danger:#DC2626;
       --font:'Manrope',system-ui,-apple-system,sans-serif;
@@ -55,14 +55,14 @@
     /* ---------------- header ---------------- */
     .topbar{
       background:var(--bg);
-      padding:12px 14px 22px;
+      padding:14px 16px 22px;
       padding-top:calc(12px + env(safe-area-inset-top));
     }
 
     .back{
       display:flex;align-items:center;justify-content:center;
-      width:38px;height:38px;margin-left:-2px;
-      border:0;border-radius:12px;background:#fff;
+      width:40px;height:40px;margin-left:-2px;
+      border:1px solid var(--line);border-radius:14px;background:#fff;
       border:1px solid var(--line);
       color:var(--ink);font-size:14px;cursor:pointer;
       -webkit-tap-highlight-color:transparent;
@@ -71,33 +71,33 @@
     .back:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 
     .topbar h1{
-      margin-top:16px;
-      font-size:24px;line-height:1.18;font-weight:800;letter-spacing:-.6px;color:var(--ink);
+      margin-top:17px;
+      font-size:25px;line-height:1.18;font-weight:800;letter-spacing:-.6px;color:var(--ink);
     }
     .topbar p{
-      margin-top:7px;font-size:13.5px;line-height:1.5;font-weight:500;
+      margin-top:8px;font-size:13px;line-height:1.5;font-weight:500;
       color:var(--muted);max-width:34ch;
     }
 
     /* ---------------- form ---------------- */
-    .form{flex:1;padding:0 14px}
+    .form{flex:1;padding:0 16px}
 
     .sec-head{
       display:flex;align-items:center;gap:7px;margin:0 2px 9px;
     }
-    .sec-title{font-size:13.5px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+    .sec-title{font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
 
     .panel{
-      background:#fff;border:1px solid var(--line);border-radius:20px;
-      box-shadow:0 1px 2px rgba(17,24,39,.04);
-      padding:14px 13px;
+      background:#fff;border:1px solid var(--line);border-radius:22px;
+      box-shadow:0 2px 8px rgba(17,24,39,.035);
+      padding:16px 14px;
     }
 
     .field{margin-bottom:12px}
     .field:last-child{margin-bottom:0}
 
     label{
-      display:block;font-size:12.5px;line-height:1.3;font-weight:600;
+      display:block;font-size:12px;line-height:1.3;font-weight:700;
       color:var(--label);margin:0 0 7px;
     }
     label .req{color:var(--brand)}
@@ -105,15 +105,15 @@
     .control{position:relative}
 
     input{
-      display:block;width:100%;min-height:48px;
-      border:1.5px solid var(--line);background:var(--field);border-radius:14px;
-      padding:13px;outline:0;
+      display:block;width:100%;min-height:50px;
+      border:1.5px solid var(--line);background:var(--field);border-radius:15px;
+      padding:13px 14px;outline:0;
       font-size:15px;font-weight:600;line-height:1.35;color:var(--ink);
       -webkit-appearance:none;
       transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
     }
     input::placeholder{color:#AEB4BC;font-weight:500}
-    input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(194,24,91,.10)}
+    input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(56,142,60,.11)}
     input.invalid,input.invalid:focus{border-color:#F0A5A5;background:#FFFAFA}
 
     /* verified mobile number */
@@ -157,19 +157,19 @@
     .reassure i{color:var(--green);font-size:12px;flex:none}
 
     /* ---------------- CTA ---------------- */
-    .cta-wrap{padding:26px 14px calc(16px + env(safe-area-inset-bottom))}
+    .cta-wrap{padding:24px 16px calc(18px + env(safe-area-inset-bottom))}
 
     .cta{
       display:flex;align-items:center;justify-content:center;gap:8px;
-      width:100%;min-height:50px;
-      border:0;border-radius:14px;
+      width:100%;min-height:52px;
+      border:0;border-radius:17px;
       background:var(--brand-soft);color:#fff;
       font-size:15px;font-weight:800;letter-spacing:-.2px;
       cursor:not-allowed;transition:background .15s ease;
       -webkit-tap-highlight-color:transparent;
     }
     .cta i{font-size:12px}
-    .cta:not(:disabled){background:var(--brand);cursor:pointer}
+    .cta:not(:disabled){background:var(--brand);cursor:pointer;box-shadow:0 5px 14px rgba(56,142,60,.16)}
     .cta:not(:disabled):active{background:var(--brand-dark)}
     .cta:focus-visible{outline:2px solid var(--brand-dark);outline-offset:3px}
 
@@ -186,6 +186,13 @@
     .loading span{margin-top:13px;font-size:12.5px;font-weight:600;color:var(--muted)}
     @keyframes spin{to{transform:rotate(360deg)}}
 
+    .panel,.reassure,.sec-head{animation:ewFadeUp .28s ease both}
+    .panel{animation-delay:.03s}
+    .reassure{animation-delay:.07s}
+    @keyframes ewFadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+    input,.cta,.back{transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+    input:focus{transform:translateY(-1px)}
+    .cta:not(:disabled):active{transform:translateY(1px);box-shadow:none}
     @media (prefers-reduced-motion:reduce){
       *{animation-duration:.01ms !important;transition-duration:.01ms !important}
     }
