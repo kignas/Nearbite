@@ -668,8 +668,22 @@
       if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
       var action=el.getAttribute('data-home99-action');
       if(action==='info'){e.preventDefault();e.stopPropagation();var rr=window.__home99Data&&window.__home99Data[id];if(rr&&typeof window.showToast==='function')window.showToast('Free delivery information');return;}
-      if(action==='customize'){e.preventDefault();e.stopPropagation();var itemEl=el.closest('.u99-item'),rr=window.__home99Data&&window.__home99Data[id],item=rr&&homeSortedMenu(rr).find(function(x){return homeItemId(x)===itemEl.getAttribute('data-item-id');});if(item)homeOpenCustomize(item,rr);return;}
-      if(action==='add'||action==='plus'||action==='minus'){e.preventDefault();e.stopPropagation();var itemEl=el.closest('.u99-item'),rr=window.__home99Data&&window.__home99Data[id],item=rr&&homeSortedMenu(rr).find(function(x){return homeItemId(x)===itemEl.getAttribute('data-item-id');});if(item)homeChangeCart(item,rr,action==='minus'?-1:1);}
+      if(action==='customize'){e.preventDefault();e.stopPropagation();
+        /* Customisable items should be completed in the real restaurant menu,
+           which already owns the full customization flow. */
+        if(id){window.location.href='restaurant.html?id='+encodeURIComponent(id);}
+        return;
+      }
+      if(action==='add'||action==='plus'||action==='minus'){e.preventDefault();e.stopPropagation();var itemEl=el.closest('.u99-item'),rr=window.__home99Data&&window.__home99Data[id],item=rr&&homeSortedMenu(rr).find(function(x){return homeItemId(x)===itemEl.getAttribute('data-item-id');});if(!item)return;
+        /* First-time add from Home opens the restaurant menu after preserving
+           the existing cart update. Quantity stepper changes stay on Home. */
+        if(action==='add'){
+          homeChangeCart(item,rr,1);
+          if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);
+          return;
+        }
+        homeChangeCart(item,rr,action==='minus'?-1:1);
+      }
     });
     document.addEventListener('wheel',function(e){var c=e.target.closest&&e.target.closest('.u99-carousel');if(c&&Math.abs(e.deltaY)>Math.abs(e.deltaX))c.scrollLeft+=e.deltaY;},{passive:true});
   }
