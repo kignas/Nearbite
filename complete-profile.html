@@ -348,8 +348,17 @@
         if(result.data?.token){ localStorage.setItem('nearbite_token',result.data.token); localStorage.setItem('token',result.data.token); }
         localStorage.setItem('nearbite_user',JSON.stringify(result.data?.user||result.data||{}));
       }
-      // Profile completion is no longer a gateway. Return to the page that
-      // opened this screen, or Home when opened directly.
+      // New-account onboarding continues directly to location/serviceability.
+      // This removes the old login-page flash and keeps the first-order journey
+      // deterministic: authentication -> profile -> location -> serviceability.
+      const onboarding = googleMode || new URLSearchParams(location.search).get('onboarding') === '1';
+      if (onboarding) {
+        localStorage.removeItem('nearbite_after_login');
+        window.location.replace('location-onboarding.html?from=complete-profile&next=index.html');
+        return;
+      }
+
+      // When opened later from Profile/Home, return to the page that opened it.
       const requested=localStorage.getItem('nearbite_after_login')||'index.html';
       localStorage.removeItem('nearbite_after_login');
       window.location.replace(requested);

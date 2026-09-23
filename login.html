@@ -433,10 +433,6 @@
   <script>
     const API_URL = CONFIG.API_BASE_URL + '/users';
     const AUTH_API = CONFIG.API_BASE_URL + '/auth';
-    const LOCATION_STEP = 'location-onboarding.html?from=login'
-      + '&next=' + encodeURIComponent('address.html?add=1')
-      + '&return=' + encodeURIComponent('address.html?add=1');
-
     function showOnlyStep(id){
       document.querySelectorAll('.step-container').forEach(el=>el.classList.remove('active'));
       const el=document.getElementById(id); if(el) el.classList.add('active');

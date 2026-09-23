@@ -649,36 +649,71 @@ function showPresetPoint(pt){
  setAddress(pt.title||'Selected delivery location','Move the map to adjust the pin',pt.sub||'','map');
  $('confirm').disabled=false;
 }
+async function checkServiceability(lat, lng) {
+  const base = (window.CONFIG && window.CONFIG.API_BASE_URL) || '';
+  const url = `${base}/restaurants/serviceability?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`;
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), 5000) : null;
+  try {
+    const response = await fetch(url, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+      signal: controller ? controller.signal : undefined
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.success) throw new Error(data.message || 'Could not check delivery availability.');
+    return data.data || {};
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function confirmLocation(){
  // Saving is allowed only after a genuine GPS fix or an explicit search/map
  // selection. The DEFAULT map centre is never treated as a customer location.
  if(!current||!locationReady)return;
  const btn=$('confirm');
- btn.disabled=true; btn.textContent='Saving location…';
+ btn.disabled=true;
+ btn.textContent='Checking availability…';
  try{
-   const d=await reverseGeocode(current.lat,current.lng);
+   // Run reverse geocoding and the 10 km serviceability check together. They
+   // are independent operations, so there is no reason to make the customer
+   // wait for one before the other.
+   const lat=Number(current.lat.toFixed(7));
+   const lng=Number(current.lng.toFixed(7));
+   const [d, service] = await Promise.all([
+     reverseGeocode(current.lat,current.lng),
+     checkServiceability(lat,lng)
+   ]);
+
    const pointPayload={
-     latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),
+     latitude:lat,longitude:lng,
      accuracy:Number((current.accuracy||0).toFixed(1)),
      source:current.source|| (firstFix?'gps':'map'),capturedAt:Date.now()
    };
    localStorage.setItem('nearbite_onboarding_location',JSON.stringify(pointPayload));
-   // Home uses this lightweight device-location cache when the customer is
-   // browsing before a saved delivery address exists. It does not create or
-   // overwrite a saved address.
-   localStorage.setItem('eatswada_device_location',JSON.stringify({lat:pointPayload.latitude,lng:pointPayload.longitude,ts:Date.now()}));
+   localStorage.setItem('eatswada_device_location',JSON.stringify({lat,lng,ts:Date.now()}));
    if(d) localStorage.setItem('nearbite_onboarding_geocode',JSON.stringify(d));
    localStorage.setItem('nearbite_location_permission_seen','1');
-   // Coordinates are already stored above, so either destination receives
-   // the same confirmed point.
+
+   // The first onboarding gate is the delivery radius. A location can be
+   // selected anywhere; only delivery serviceability is restricted to the
+   // platform's existing 10 km maximum.
+   if (service.serviceable !== true) {
+     window.location.replace('service-unavailable.html');
+     return;
+   }
+
    const handoff=nextDestination();
-   if(handoff){ window.location.href=handoff; return }
+   if(handoff){ window.location.replace(handoff); return }
    const next=localStorage.getItem('nearbite_after_login');
    localStorage.removeItem('nearbite_after_login');
    window.location.replace(next || 'index.html');
  }catch(e){
-   warn('We could not save the location. Please try again.');
-   btn.disabled=false; btn.textContent='Confirm & proceed';
+   console.error('[location] serviceability check failed:',e);
+   warn('We could not check delivery availability. Please try again.');
+   btn.disabled=false;
+   btn.textContent='Confirm & proceed';
  }
 }
 function init(){
