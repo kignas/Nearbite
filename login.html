@@ -300,7 +300,50 @@
       .hero-img{width:72px;height:72px}
       .sheet-header{margin-bottom:16px}
     }
+
+    /* ---------------- Google redirect callback gate ----------------
+       Only active while a Firebase Google redirect is being resolved.
+       The class is set synchronously in <head> (see the script below),
+       so the normal login form is never painted during the callback. */
+    html.auth-callback .hero-section,
+    html.auth-callback .bottom-sheet{display:none !important}
+
+    #authCallback{display:none}
+    html.auth-callback #authCallback{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+      position:fixed;inset:0;z-index:60;
+      padding:24px calc(24px + env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom));
+      background:var(--bg);text-align:center;
+    }
+    #authCallback .brand-mark{margin-bottom:2px}
+    .auth-callback-spinner{
+      width:34px;height:34px;border-radius:50%;
+      border:3px solid rgba(194,24,91,.16);border-top-color:var(--brand);
+      animation:spin .7s linear infinite;
+    }
+    .auth-callback-title{font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+    .auth-callback-sub{font-size:13px;font-weight:500;color:var(--muted)}
+    .auth-callback-exit{
+      margin-top:10px;border:0;background:none;
+      color:var(--label);font-size:12px;font-weight:700;cursor:pointer;
+    }
   </style>
+
+<script>
+  /* Google redirect callback gate.
+     Runs before <body> is parsed, so it decides what the very first paint
+     shows. The flag is written synchronously right before we hand the
+     browser to Google, and read synchronously here on the way back. No
+     flag (normal visit, refresh, deep link) => the login page renders
+     immediately, exactly as before. */
+  (function(){
+    try{
+      if(sessionStorage.getItem('eatswada_google_redirect_pending')==='1'){
+        document.documentElement.classList.add('auth-callback');
+      }
+    }catch(e){}
+  })();
+</script>
 
 <link rel="stylesheet" href="style.css">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -308,6 +351,16 @@
 <script src="config.js"></script>
 </head>
 <body>
+
+  <!-- Shown only while a pending Google redirect is being resolved.
+       Never shown on a normal visit to login.html. -->
+  <div id="authCallback" role="status" aria-live="polite">
+    <div class="brand-mark">Eatswada</div>
+    <div class="auth-callback-spinner" aria-hidden="true"></div>
+    <div class="auth-callback-title">Signing you in securely…</div>
+    <div class="auth-callback-sub">Finishing your Google sign-in.</div>
+    <button type="button" class="auth-callback-exit tap" onclick="revealLoginForm('')">Return to login</button>
+  </div>
 
   <div class="hero-section">
     <button class="hero-btn-skip tap" onclick="window.location.href='index.html'" aria-label="Skip introduction">Skip</button>
@@ -512,17 +565,93 @@
         let result;
         try{ result=await firebase.auth().signInWithPopup(provider); }
         catch(e){
-          if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') { await firebase.auth().signInWithRedirect(provider); return; }
+          if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') {
+            // Mark the redirect as pending BEFORE leaving the page. This flag is
+            // what login.html reads on the way back, before it renders anything.
+            markGoogleRedirectPending();
+            try{ await firebase.auth().signInWithRedirect(provider); }
+            catch(redirectError){ revealLoginForm(''); throw redirectError; }
+            return;
+          }
           throw e;
         }
         await finishGoogleLogin(result.user);
       }catch(e){ console.error(e); showBanner(banner,text,e.code==='auth/popup-closed-by-user'?'Google sign-in was cancelled.':(e.message||'Google sign-in failed.')); }
       finally{ if(btn)btn.disabled=false; }
     }
-    async function handleRedirectResult(){
-      if(!initFirebase())return;
-      try{ const result=await firebase.auth().getRedirectResult(); if(result?.user) await finishGoogleLogin(result.user); }catch(e){ console.error(e); showBanner(document.getElementById('step1Banner'),document.getElementById('step1BannerText'),e.message||'Google sign-in failed.'); }
+    /* ============================================================
+       Google redirect callback handling
+       ------------------------------------------------------------
+       signInWithRedirect() sends the browser to Google and brings it back
+       to login.html. Resolving that redirect is asynchronous (Firebase
+       state + ID token + Eatswada backend call), so the login form used to
+       repaint during that window. The gate below is purely state driven:
+       a flag written before leaving, read before the first paint, and
+       cleared on every terminal outcome. No timers are involved.
+       ============================================================ */
+    const GOOGLE_REDIRECT_KEY='eatswada_google_redirect_pending';
+    let googleRedirectResolving=false;
+
+    function googleRedirectPending(){
+      try{ return sessionStorage.getItem(GOOGLE_REDIRECT_KEY)==='1'; }catch(e){ return false; }
     }
+    function clearGoogleRedirectPending(){
+      try{ sessionStorage.removeItem(GOOGLE_REDIRECT_KEY); }catch(e){}
+    }
+    function authGateActive(){
+      return document.documentElement.classList.contains('auth-callback');
+    }
+    function markGoogleRedirectPending(){
+      try{ sessionStorage.setItem(GOOGLE_REDIRECT_KEY,'1'); }catch(e){}
+      document.documentElement.classList.add('auth-callback');
+    }
+    function revealLoginForm(message){
+      clearGoogleRedirectPending();
+      document.documentElement.classList.remove('auth-callback');
+      if(message) showBanner(document.getElementById('step1Banner'),document.getElementById('step1BannerText'),message);
+    }
+
+    async function resolveGoogleRedirect(){
+      if(googleRedirectResolving) return;
+      googleRedirectResolving=true;
+
+      const pending=googleRedirectPending();   // we started a Google redirect from this tab
+      const gated=authGateActive();            // the login form is currently held back
+
+      try{
+        if(!initFirebase()){
+          if(gated) revealLoginForm(pending?'Google Sign-In is unavailable right now. Please log in with your email or mobile number.':'');
+          return;
+        }
+
+        const result=await firebase.auth().getRedirectResult();
+        clearGoogleRedirectPending();          // the redirect has now been consumed
+
+        if(result && result.user){
+          // Keeps the gate up: finishGoogleLogin routes on to complete-profile
+          // or the requested page, so the login form is never exposed.
+          await finishGoogleLogin(result.user);
+          return;
+        }
+
+        // Came back without a completed sign-in (cancelled at Google, or a
+        // reload after the redirect was already consumed).
+        if(gated) revealLoginForm(pending?'Google sign-in was not completed. Please try again.':'');
+      }catch(e){
+        console.error(e);
+        clearGoogleRedirectPending();
+        revealLoginForm(e.message||'Google sign-in failed.');
+      }finally{
+        googleRedirectResolving=false;
+      }
+    }
+
+    // A bfcache restore (browser Back from Google, or Back from
+    // complete-profile.html) re-shows this page without re-running the
+    // scripts, so the gate has to be re-evaluated on that event too.
+    window.addEventListener('pageshow',function(e){
+      if(e.persisted && authGateActive()) resolveGoogleRedirect();
+    });
     async function passwordLogin(){
       const identifier=document.getElementById('loginIdentifierInput').value.trim();
       const password=document.getElementById('loginPasswordInput').value;
@@ -749,7 +878,7 @@
     }
 
     setupResetOtpInputs();
-    handleRedirectResult();
+    resolveGoogleRedirect();
   </script>
 
 <script src="navigation.js"></script>
