@@ -23,6 +23,7 @@ const token   = () => localStorage.getItem('nearbite_token') || localStorage.get
 /* Session-only scratch space for the "Change location" round trip.
    Not a nearbite_* compatibility key. */
 const DRAFT_KEY = 'eatswada_address_draft';
+const MODE_KEY = 'eatswada_address_modes_v1';
 const FORM_IDS = ['house','area','landmark','receiverName','receiverPhone'];
 
 const ENTRY = new URLSearchParams(location.search);
@@ -97,6 +98,37 @@ const TYPE_FIELDS = {
 
 const TAG_TO_SAVE = { Home:'Home', Work:'Work', Office:'Work', Other:'Other' };
 
+function readModeMap(){
+  try {
+    const v = JSON.parse(localStorage.getItem(MODE_KEY) || '{}');
+    return v && typeof v === 'object' ? v : {};
+  } catch { return {}; }
+}
+function rememberAddressMode(id, type){
+  if (!id) return;
+  try {
+    const map = readModeMap();
+    map[String(id)] = type === 'Town' ? 'Town' : 'Village';
+    localStorage.setItem(MODE_KEY, JSON.stringify(map));
+  } catch {}
+}
+function rememberedAddressMode(a){
+  if (!a?._id) return '';
+  const type = readModeMap()[String(a._id)];
+  return type === 'Town' || type === 'Village' ? type : '';
+}
+function inferAddressMode(a){
+  const remembered = rememberedAddressMode(a);
+  if (remembered) return remembered;
+  const house = String(a?.house || '').trim();
+  const landmark = String(a?.landmark || '').trim();
+  // Village addresses saved through the legacy API compatibility adapter
+  // carry the same natural-address text in house + landmark. This keeps the
+  // backend contract intact while allowing the new UI to reopen in Village.
+  if (house && landmark && house.toLowerCase() === landmark.toLowerCase()) return 'Village';
+  return house ? 'Town' : 'Village';
+}
+
 function chooseType(t){
   locType = TYPE_FIELDS[t] ? t : 'Village';
   const f = TYPE_FIELDS[locType];
@@ -107,7 +139,14 @@ function chooseType(t){
   });
 
   const root = $('addressFields');
-  if (root) root.dataset.mode = locType.toLowerCase();
+  if (root) {
+    root.dataset.mode = locType.toLowerCase();
+    root.classList.remove('mode-swap');
+    void root.offsetWidth;
+    root.classList.add('mode-swap');
+  }
+  const seg = $('locSeg');
+  if (seg) seg.dataset.active = locType === 'Town' ? 'town' : 'village';
 
   const houseField = $('houseField');
   const landmarkField = $('landmarkField');
@@ -135,6 +174,8 @@ function chooseType(t){
 
 function chooseSaveAs(nextTag){
   tag = TAG_TO_SAVE[nextTag] || 'Other';
+  const saveSeg = $('saveAsSeg');
+  if (saveSeg) saveSeg.dataset.active = tag === 'Work' ? 'office' : tag === 'Other' ? 'other' : 'home';
   document.querySelectorAll('#saveAsSeg button').forEach(b => {
     const on = b.dataset.tag === tag;
     b.classList.toggle('on', on);
@@ -144,6 +185,8 @@ function chooseSaveAs(nextTag){
 
 function syncSaveAsUI(){
   const current = TAG_TO_SAVE[tag] || 'Other';
+  const saveSeg = $('saveAsSeg');
+  if (saveSeg) saveSeg.dataset.active = current === 'Work' ? 'office' : current === 'Other' ? 'other' : 'home';
   document.querySelectorAll('#saveAsSeg button').forEach(b => {
     const on = b.dataset.tag === current;
     b.classList.toggle('on', on);
@@ -747,8 +790,7 @@ function openEditor(id = null){
 
   /* Existing detailed addresses open in Town mode; locality/address-detail
      addresses open in Village mode. The saved label remains independent. */
-  const hasDetailedBuilding = !!String(a?.house || '').trim();
-  locType = a ? (hasDetailedBuilding ? 'Town' : 'Village') : 'Village';
+  locType = a ? inferAddressMode(a) : 'Village';
   tag = a?.tag || 'Home';
   chooseType(locType);
   syncSaveAsUI();
@@ -933,11 +975,18 @@ async function saveAddress(){
     return !!o && o.latitude === lat && o.longitude === lng;
   })();
 
+  const village = locType === 'Village';
+  const villageDetails = $('landmark').value.trim();
   const data = {
     tag,
-    house: $('house').value.trim(),
+    // Keep the existing backend contract. The current API/server requires a
+    // non-empty `house` value, so Village mode mirrors its natural address
+    // details into the legacy house field. `landmark` is retained as well;
+    // the UI remembers the mode locally and the model de-duplicates display.
+    // No backend/schema change is required.
+    house: village ? villageDetails : $('house').value.trim(),
     area: $('area').value.trim(),
-    landmark: $('landmark').value.trim(),
+    landmark: village ? villageDetails : $('landmark').value.trim(),
     city: addrCity,        // derived from the map point, '' when unknown
     pincode: addrPin,      // derived from the map point, '' when unknown
     receiverName: $('receiverName').value.trim(),
@@ -957,6 +1006,7 @@ async function saveAddress(){
   try {
     const p = await window.EatswadaAddressAPI.save(editingId, data);
     const savedId = (p.data || p.address)?._id || editingId;
+    rememberAddressMode(savedId, locType);
     const wasEditingSelected = editingId && String(selectedId()) === String(editingId);
 
     await load();

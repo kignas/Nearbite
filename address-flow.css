@@ -626,3 +626,89 @@ html[data-address-view="manage"] body.ea-body{background:#fff}
 .ea .ea-saveas-seg button{min-height:38px;border:0;border-radius:999px;background:transparent;color:var(--address-text-2);font:700 13px/18px Manrope,system-ui,sans-serif}
 .ea .ea-saveas-seg button.on{background:#fff;color:var(--address-green);box-shadow:0 1px 4px rgba(16,24,40,.08)}
 @media (max-width:380px){.ea .ea-saveas-seg button{font-size:12px}.ea .ea-seg button{font-size:13px}}
+
+/* ================================================================
+   EATSWADA MICRO-INTERACTIONS — Village/Town + Save-as
+   Frontend-only animation pass. No layout/API behavior changes.
+   ================================================================ */
+.ea .ea-seg,
+.ea .ea-saveas-seg{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+}
+.ea .ea-seg::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:4px;
+  bottom:4px;
+  left:4px;
+  width:calc(50% - 4px);
+  border-radius:999px;
+  background:var(--address-green);
+  box-shadow:0 2px 7px rgba(54,126,52,.18);
+  transform:translateX(0);
+  transition:transform .28s cubic-bezier(.22,1,.36,1);
+}
+.ea .ea-seg[data-active="town"]::before{transform:translateX(100%);}
+.ea .ea-seg button{
+  position:relative;
+  z-index:1;
+  transition:color .22s ease, transform .18s ease;
+}
+.ea .ea-seg button.on{background:transparent;box-shadow:none;}
+.ea .ea-seg button:active{transform:scale(.97);}
+
+.ea .ea-saveas-seg::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:4px;
+  bottom:4px;
+  left:4px;
+  width:calc((100% - 8px - 12px) / 3);
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(16,24,40,.10);
+  transform:translateX(0);
+  transition:transform .28s cubic-bezier(.22,1,.36,1);
+}
+.ea .ea-saveas-seg[data-active="office"]::before{
+  transform:translateX(calc(100% + 6px));
+}
+.ea .ea-saveas-seg[data-active="other"]::before{
+  transform:translateX(calc(200% + 12px));
+}
+.ea .ea-saveas-seg button{
+  position:relative;
+  z-index:1;
+  transition:color .22s ease, transform .18s ease;
+}
+.ea .ea-saveas-seg button.on{
+  background:transparent;
+  box-shadow:none;
+}
+.ea .ea-saveas-seg button:active{transform:scale(.97);}
+
+/* The field group gently cross-fades/slides when its structure changes.
+   Height is still determined by the existing fields, so there is no fake
+   fixed-height container or broken keyboard scrolling. */
+.ea .ea-address-fields.mode-swap{
+  animation:eaAddressModeSwap .24s ease both;
+}
+@keyframes eaAddressModeSwap{
+  from{opacity:.35;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Small tactile feedback when changing the map point. */
+.ea .ea-maptile:active{transform:scale(.97);transition:transform .14s ease;}
+
+@media (prefers-reduced-motion:reduce){
+  .ea .ea-seg::before,
+  .ea .ea-saveas-seg::before,
+  .ea .ea-seg button,
+  .ea .ea-saveas-seg button{transition:none!important}
+  .ea .ea-address-fields.mode-swap{animation:none!important}
+}
