@@ -439,3 +439,108 @@ html[data-address-view="manage"] body.ea-body{background:#fff}
 @media (prefers-reduced-motion:reduce){
   .ea *{transition-duration:.01ms!important;animation:none!important}
 }
+
+
+/* ================================================================
+   PIXEL REFINEMENT — benchmark alignment pass
+   Keep the existing structure/behavior. These overrides only tune the
+   visual scale, rhythm and placement against the supplied 709×1536
+   reference captures.
+   ================================================================ */
+
+/* Select Your Location */
+.ls-inner{padding-left:14px;padding-right:14px}
+.ls-head{gap:13px;padding-top:calc(15px + var(--address-safe-t));padding-bottom:14px}
+.ls-back{width:34px;height:34px}
+.ls-back svg{width:24px;height:24px}
+.ls-title{font-size:18px;line-height:24px;font-weight:700;letter-spacing:-.25px}
+.ls-search{height:48px;padding:0 16px}
+.ls-search input{font-size:15px;line-height:20px}
+.ls-search .ls-search-ico{width:19px;height:19px}
+.ls-actions{gap:9px;margin-top:12px}
+.ls-action{height:44px;padding:0 10px;gap:7px;font-size:13px;font-weight:600}
+.ls-action svg{width:17px;height:17px}
+.ls-eyebrow{margin:26px 2px 13px;font-size:12px;line-height:16px;letter-spacing:.015em}
+.ls-list{border-radius:16px;padding:5px 0 7px}
+.ls-item{grid-template-columns:46px minmax(0,1fr) 24px;column-gap:12px;padding:14px 11px 16px}
+.ls-item.no-menu{grid-template-columns:46px minmax(0,1fr)}
+.ls-item+.ls-item::before{left:12px;right:12px}
+.ls-ico{width:46px;height:46px;border-radius:10px;gap:2px}
+.ls-ico svg{width:19px;height:19px}
+.ls-ico.has-distance svg{width:16px;height:16px}
+.ls-dist{font-size:10px;line-height:11px}
+.ls-item-title{font-size:17px;line-height:22px;letter-spacing:-.18px}
+.ls-item-sub{margin-top:3px;font-size:14px;line-height:19px}
+.ls-more{width:30px;height:30px;margin:-3px -2px 0 -3px}
+.ls-more svg{width:19px;height:19px}
+.ls-results{margin-top:18px}
+
+/* Profile → Addresses: same visual language, but keep the management
+   screen deliberately simpler than the selection screen. */
+.ea-top{height:56px;gap:12px}
+.ea-title{font-size:17px;line-height:22px;font-weight:700;letter-spacing:.01em}
+.ea-band{height:43px;padding:0 15px;font-size:12px}
+.ea-item{grid-template-columns:20px minmax(0,1fr);column-gap:17px;padding:20px 14px 21px 20px}
+.ea-item+.ea-item::before{left:57px;right:14px}
+.ea-item-ico{padding-top:2px}
+.ea-item-ico svg{width:20px;height:20px}
+.ea-tag{font-size:16px;line-height:21px;font-weight:650}
+.ea-current{font-size:12px;line-height:16px}
+.ea-current svg{width:13px;height:13px}
+.ea-line{margin-top:6px;font-size:14px;line-height:19px}
+.ea-meta{margin-top:7px;font-size:13px;line-height:18px}
+.ea-actions{gap:24px;margin-top:12px}
+.ea-action{font-size:14px;line-height:18px}
+.ea-fab{position:relative;bottom:auto;padding:16px 14px calc(20px + var(--address-safe-b))}
+.ea-fab button{height:38px;font-size:15px}
+
+/* Address details */
+.ea-form-head-row{height:56px}
+.ea-head-line{font-size:14px;line-height:19px}
+.ea-sec{margin-top:20px}
+.ea-sec-title{margin-bottom:11px;font-size:17px;line-height:22px;letter-spacing:-.25px}
+.ea-panel{border-radius:16px;padding:15px 14px}
+.ea-receiver{padding:13px 16px}
+.ea-check{gap:9px}
+.ea-box{width:16px;height:16px;flex-basis:16px}
+.ea-box svg{width:12px;height:12px}
+.ea-check-text{font-size:14px;line-height:20px}
+.ea-check-sub{font-size:14px;line-height:19px}
+.ea-receiver-fields{margin-top:15px}
+.ea-seg{height:42px;padding:4px}
+.ea-seg button{font-size:14px;gap:7px}
+.ea-seg button svg{width:15px;height:15px}
+.ea-seg+.ea-float{margin-top:16px}
+.ea-float{margin-top:13px}
+.ea-input{height:48px;padding:0 16px;font-size:15px}
+.ea-float>label,.ea-float-label{left:16px;top:24px;font-size:15px;line-height:19px}
+.ea-input:focus+label,.ea-input:not(:placeholder-shown)+label,.ea-float-label.is-static{top:0;left:12px;padding:0 5px;font-size:12px;line-height:15px}
+.ea-area-row{grid-template-columns:minmax(0,1fr) 65px;gap:9px;margin-top:15px}
+.ea-textarea{height:70px;padding:10px 16px 8px;font-size:14px;line-height:19px;border-radius:15px}
+.ea-textarea+label{top:35px}
+.ea-maptile{height:70px;border-radius:15px;padding:7px 0 6px;font-size:13px;line-height:15px}
+.ea-maptile svg{width:18px;height:23px}
+.ea-saveas{margin-top:15px}
+.ea-saveas-box{height:48px;padding:0 15px 0 16px}
+.ea-saveas-value,.ea-link{font-size:15px}
+.ea-row{min-height:58px;padding:0 16px;border-radius:16px}
+.ea-row-text{font-size:14px;line-height:19px}
+.ea-row-text small{font-size:12px;line-height:15px}
+.ea-row-cta{font-size:15px}
+.ea-photos{min-height:58px;padding:0 8px 0 14px}
+.ea-photo-box{width:44px;height:44px}
+.ea-form-foot{padding:10px 14px calc(84px + var(--address-safe-b))}
+.ea-save{height:48px;font-size:18px}
+
+@media (max-width:374px){
+  .ls-title{font-size:17px}
+  .ls-action{font-size:12px}
+  .ls-item{grid-template-columns:44px minmax(0,1fr) 22px;column-gap:10px}
+  .ls-item.no-menu{grid-template-columns:44px minmax(0,1fr)}
+  .ls-ico{width:44px;height:44px}
+  .ls-item-title{font-size:16px}
+  .ls-item-sub{font-size:13px}
+  .ea-item{column-gap:15px;padding-left:17px}
+  .ea-line{font-size:13px}
+  .ea-sec-title{font-size:16px}
+}
