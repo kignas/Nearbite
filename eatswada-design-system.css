@@ -1,0 +1,164 @@
+/* ================================================================
+   EATSWADA DESIGN SYSTEM v1
+   Visual-only foundation. No API, JS, auth, payment or data behavior.
+   Master visual language: current Eatswada Home + premium navy headers.
+   ================================================================ */
+:root{
+  --ew-navy:#14213D;
+  --ew-navy-deep:#0F1A31;
+  --ew-green:#367E34;
+  --ew-pink:#D20A61;
+  --ew-bg:#F4F4F6;
+  --ew-surface:#FFFFFF;
+  --ew-text:#17191E;
+  --ew-muted:#69707A;
+  --ew-line:#E4E6E9;
+  --ew-radius-sm:10px;
+  --ew-radius-md:14px;
+  --ew-radius-lg:18px;
+  --ew-radius-pill:999px;
+  --ew-font:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --ew-fs-display:28px;
+  --ew-fs-page:22px;
+  --ew-fs-section:18px;
+  --ew-fs-card:16px;
+  --ew-fs-ui:15px;
+  --ew-fs-body:14px;
+  --ew-fs-label:13px;
+  --ew-fs-caption:12px;
+  --ew-fw-body:500;
+  --ew-fw-label:600;
+  --ew-fw-title:700;
+  --ew-fw-strong:800;
+}
+
+/* Manrope is the customer-facing master font. Existing explicit display
+   fonts (e.g. the Home banner script) remain intentionally untouched. */
+html body,
+html body button,
+html body input,
+html body textarea,
+html body select{
+  font-family:var(--ew-font) !important;
+}
+
+/* ================================================================
+   Shared customer-page header language
+   ================================================================ */
+.hero-header,
+.top-bar,
+.ct-header,
+.orders-header,
+.app-bar,
+.ea-header,
+.cat-header,
+.topbar,
+body.login-page .header,
+.header{
+  background:var(--ew-navy) !important;
+  color:#fff !important;
+  border-color:rgba(255,255,255,.10) !important;
+}
+
+/* Home header: keep the promotional banner below it pink; only the
+   location/search/profile header surface becomes navy. */
+.hero-header{
+  --hd-bg:var(--ew-navy) !important;
+  --hd-ink:#fff !important;
+  --hd-muted:rgba(255,255,255,.78) !important;
+  --hd-accent:#FF4F9A !important;
+}
+.hero-header .loc-pin-wrap,
+.hero-header .btn-store,
+.hero-header .btn-profile{
+  background:rgba(255,255,255,.96) !important;
+  color:var(--ew-navy) !important;
+  box-shadow:0 3px 12px rgba(0,0,0,.10) !important;
+}
+.hero-header .loc-pin-wrap i,
+.hero-header .search-mic{color:var(--ew-pink) !important}
+.hero-header .search-box,
+.hero-header .veg-box{box-shadow:0 5px 15px rgba(15,23,42,.12) !important}
+
+/* Common icon treatment in dark headers. */
+.top-bar .icon-btn,
+.orders-header .header-back-btn,
+.app-bar .ab-btn,
+.ea-header .ea-back,
+.cat-header .icon-btn-round,
+.topbar .back,
+.header .icon-btn,
+.ct-header .ct-back{
+  color:#fff !important;
+}
+.top-bar .icon-btn,
+.orders-header .header-back-btn,
+.app-bar .ab-btn,
+.ea-header .ea-back,
+.cat-header .icon-btn-round,
+.topbar .back,
+.header .icon-btn,
+.ct-header .ct-back{
+  background:rgba(255,255,255,.10) !important;
+  border-color:rgba(255,255,255,.14) !important;
+}
+
+/* Header text. */
+.orders-header .header-titles h1,
+.app-bar .ab-title h1,
+.ea-header .ea-title,
+.cat-header .cat-title,
+.topbar h1,
+.header .title,
+.ct-header .ct-head-title{
+  color:#fff !important;
+}
+.orders-header .header-stats,
+.app-bar .ab-title p,
+.cat-header .cat-sub,
+.topbar p,
+.ct-header .ct-head-sub{
+  color:rgba(255,255,255,.72) !important;
+}
+
+/* Tracking support action remains clearly actionable on navy. */
+.app-bar .ab-support{
+  background:#fff !important;
+  border-color:#fff !important;
+  color:var(--ew-green) !important;
+}
+
+/* Restaurant header is the compact back/favourite bar. */
+.top-bar .top-actions .icon-btn i,
+.top-bar > .icon-btn i{
+  color:#fff !important;
+}
+
+/* Cart header controls remain readable on navy. */
+.ct-header .ct-clear{
+  background:rgba(255,255,255,.10) !important;
+  border-color:rgba(255,255,255,.18) !important;
+  color:#fff !important;
+}
+
+/* Category filter rail stays light; only its page header is branded. */
+.cat-header + .filter-bar{color:var(--ew-text)}
+
+/* The 99 Store is intentionally exempt: its pink hero is a promotional
+   campaign surface, not the shared utility header. */
+.u99-header{font-family:var(--ew-font) !important}
+
+/* Consistent section/title weight without forcing page-specific geometry. */
+.section-title,
+.page-title,
+.section-heading{
+  font-family:var(--ew-font) !important;
+  font-weight:var(--ew-fw-title);
+}
+
+/* Shared interactive focus ring. */
+:focus-visible{outline-color:var(--ew-green) !important}
+
+@media (prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto !important}
+}
