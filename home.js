@@ -1082,6 +1082,45 @@
     request: function () { requestDeviceLocation(); }
   };
 
+  /* Display only: the visible label for a stored tag ('Work' → Office)
+     and a locality line that never repeats a place name. */
+  function tagLabel(tag) {
+    var t = String(tag || '').trim();
+    if (/^(work|office)$/i.test(t)) return 'Office';
+    if (/^(home|house)$/i.test(t)) return 'Home';
+    return t;
+  }
+
+  function uniqueParts(values) {
+    var seen = {};
+    var out = [];
+    values.forEach(function (value) {
+      String(value || '').split(',').forEach(function (piece) {
+        var text = piece.replace(/\s+/g, ' ').trim();
+        var key = text.toLowerCase();
+        if (!text || seen[key]) return;
+        seen[key] = true;
+        out.push(text);
+      });
+    });
+    return out;
+  }
+
+  /* What the header and restaurant verdicts were last built from. A
+     server revalidation that returns the same address repaints nothing. */
+  var renderedAddressKey = null;
+
+  function addressKey(address) {
+    if (!address) return '';
+    var c = address.location && address.location.coordinates;
+    return JSON.stringify([
+      address._id || '', Array.isArray(c) ? c.join(',') : '',
+      address.latitude || '', address.longitude || '',
+      address.tag || '', address.house || '', address.area || '',
+      address.landmark || '', address.city || ''
+    ]);
+  }
+
   function readSavedAddress() {
     try {
       if (window.EatswadaAddressStore && window.EatswadaAddressStore.getActive) {
@@ -1125,26 +1164,49 @@
     }
   }
 
-  /* Looks only at locations that already exist. Never prompts. */
+  function isSignedIn() {
+    return !!(localStorage.getItem('nearbite_token') || localStorage.getItem('token'));
+  }
+
+  /* Looks only at locations that already exist. Never prompts.
+     Order: saved address (cache) → saved address (server) → device fix.
+     GPS is never allowed to stand in for a saved address. */
   function resolveStoredLocation() {
-    if (card.getAddressCoordinates()) return setLocationStatus('ready', 'address');
-    if (readSavedAddress()) return setLocationStatus('ready', 'address');
-    if (window.EatswadaAddressStore && window.EatswadaAddressStore.hydrate &&
-        (localStorage.getItem('nearbite_token') || localStorage.getItem('token'))) {
+    var saved = readSavedAddress();
+    renderedAddressKey = addressKey(saved);
+    if (card.getAddressCoordinates() || saved) return setLocationStatus('ready', 'address');
+    if (window.EatswadaAddressStore && window.EatswadaAddressStore.hydrate && isSignedIn()) {
       setLocationStatus('locating', 'address');
       window.EatswadaAddressStore.hydrate().then(function () {
-        if (card.getAddressCoordinates() || readSavedAddress()) {
+        /* A found address already repainted through the store's
+           nearbite:address-changed event; settle only if still waiting. */
+        if (state.loc.status !== 'locating') return;
+        var hydrated = readSavedAddress();
+        renderedAddressKey = addressKey(hydrated);
+        if (card.getAddressCoordinates() || hydrated) {
           setLocationStatus('ready', 'address');
         } else if (readDeviceLocation()) {
           setLocationStatus('ready', 'device');
         } else {
           setLocationStatus('idle');
+          maybePromptForLocation();
         }
       });
       return;
     }
     if (readDeviceLocation()) return setLocationStatus('ready', 'device');
     return setLocationStatus('idle');
+  }
+
+  /* The cached address renders instantly; the server list is then checked
+     once per page load so a stale or foreign cache (another account, an
+     address deleted elsewhere) is replaced by the account's real
+     selected/default address. Runs only when a cache was used. */
+  function revalidateSavedAddress() {
+    var store = window.EatswadaAddressStore;
+    if (!store || !store.hydrate || !isSignedIn()) return;
+    if (state.loc.source !== 'address' || state.loc.status !== 'ready') return;
+    store.hydrate();
   }
 
   function requestDeviceLocation() {
@@ -1237,7 +1299,7 @@
     host.querySelectorAll('[data-loc-action]').forEach(function (button) {
       button.addEventListener('click', function () {
         var action = button.getAttribute('data-loc-action');
-        if (action === 'address') window.location.href = 'address.html';
+        if (action === 'address') window.location.href = 'address.html?view=select';
         else if (action === 'retry') requestDeviceLocation();
         else openLocationSheet();
       });
@@ -1417,17 +1479,20 @@
     var address = readSavedAddress();
 
     if (address) {
-      var label = address.tag || address.city || 'Delivering to';
-      var detail = [address.house, address.area, address.landmark]
-        .filter(Boolean).join(', ');
+      var label = tagLabel(address.tag) || address.city || 'Delivering to';
+      var detail = uniqueParts([address.house, address.landmark, address.area, address.city])
+        .join(', ');
 
-      if (label) nameEl.textContent = label;
-      if (detail) subEl.textContent = detail;
+      nameEl.textContent = label;
+      subEl.textContent = detail || 'Saved delivery address';
       return;
     }
 
+    subEl.textContent = 'Choose your delivery location';
     if (state.loc.status === 'ready' && state.loc.source === 'device') {
       nameEl.textContent = 'Current location';
+    } else if (state.loc.status === 'locating' && state.loc.source === 'address') {
+      nameEl.textContent = 'Loading your address…';
     } else if (state.loc.status === 'locating') {
       nameEl.textContent = 'Getting location…';
     } else {
@@ -1478,10 +1543,22 @@
        coordinates is synchronous, so the list is recalculated and repainted
        in one pass — the old verdicts are never left standing. */
     function onAddressChanged() {
+      /* Same address as the one on screen (e.g. the server confirmed the
+         cache): refresh the header text only, keep every card verdict. */
+      if (state.loc.status === 'ready' && state.loc.source === 'address' &&
+          addressKey(readSavedAddress()) === renderedAddressKey && renderedAddressKey) {
+        renderSavedAddress();
+        return;
+      }
       resolveStoredLocation();
     }
 
     window.addEventListener('nearbite:address-changed', onAddressChanged);
+    /* Returning with the browser Back button restores this page from the
+       back-forward cache without re-running init; re-read the address. */
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) onAddressChanged();
+    });
     window.addEventListener('storage', function (event) {
       if (event.key === 'nearbite_address' ||
           event.key === 'nearbite_selected_address_id') {
@@ -1502,6 +1579,7 @@
 
     /* One location read per page load, before any distance is shown. */
     resolveStoredLocation();
+    revalidateSavedAddress();
 
     showProfileInitial();
     startSearchPlaceholder();

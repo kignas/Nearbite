@@ -29,6 +29,66 @@ const ENTRY = new URLSearchParams(location.search);
 const cameFromSetupUrl = ENTRY.get('add') === '1';
 const cameFromExistingAdd = ENTRY.get('new') === '1';
 
+/* ---------------- screen / entry context ----------------
+   'select' — "Select Your Location", reached from the Homepage and Cart.
+   'manage' — "Addresses", reached from Profile.
+   The inline script in <head> decides this before first paint; this
+   file only reads the result so the two can never disagree. */
+const VIEW = document.documentElement.getAttribute('data-address-view') === 'select' ? 'select' : 'manage';
+const RETURN_TO = ENTRY.get('return') === 'cart' ? 'cart' : '';
+const Model = window.EatswadaAddressModel;
+const DEVICE_LOC_KEY = 'eatswada_device_location';   // written by home.js
+const DEVICE_LOC_MAX_AGE_MS = 30 * 60 * 1000;         // same freshness as home.js
+
+/* address.html URL that keeps this screen's context (view + return). */
+function addressUrl(extra){
+  const q = new URLSearchParams();
+  if (VIEW === 'select' && !RETURN_TO) q.set('view', 'select');
+  if (RETURN_TO) q.set('return', RETURN_TO);
+  Object.keys(extra || {}).forEach(k => q.set(k, extra[k]));
+  const qs = q.toString();
+  return 'address.html' + (qs ? '?' + qs : '');
+}
+
+/* The map step, returning to this screen. `extra` may carry a point to
+   open the map on (lat, lng, title, sub). */
+function mapUrl(extra){
+  const q = new URLSearchParams({
+    from: VIEW === 'select' ? 'select' : 'address',
+    next: addressUrl({ new: '1' }),
+    return: addressUrl()
+  });
+  Object.keys(extra || {}).forEach(k => q.set(k, extra[k]));
+  return 'location-onboarding.html?' + q.toString();
+}
+
+/* navigation.js assigns window.goBack after this file loads (always to
+   index.html), so the address screens use their own parents. */
+function exitTarget(){
+  if (RETURN_TO === 'cart') return 'cart.html';
+  return VIEW === 'select' ? 'index.html' : 'profile.html';
+}
+function addressBack(){ location.replace(exitTarget()); }
+
+function authExpired(){
+  localStorage.removeItem('nearbite_token');
+  localStorage.removeItem('token');
+  location.replace('login.html');
+}
+
+const SVG = (body, extra = '') =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"${extra}>${body}</svg>`;
+const ICONS = {
+  home:   SVG('<path d="M4 10.4L12 4l8 6.4V19a1 1 0 0 1-1 1h-4.6v-5.6H9.6V20H5a1 1 0 0 1-1-1z"/>'),
+  office: SVG('<rect x="4" y="8.6" width="16" height="11" rx="2.6"/><path d="M8.2 5h7.6"/>'),
+  other:  SVG('<path d="M12 21s-6.6-5.7-6.6-11.1a6.6 6.6 0 0 1 13.2 0C18.6 15.3 12 21 12 21z"/><circle cx="12" cy="9.9" r="2.3"/>'),
+  clock:  SVG('<path d="M12 21s-6.6-5.7-6.6-11.1a6.6 6.6 0 0 1 13.2 0C18.6 15.3 12 21 12 21z"/><path d="M12 6.9v3.3l2 1.3"/>'),
+  pin:    SVG('<path d="M12 21s-6.6-5.7-6.6-11.1a6.6 6.6 0 0 1 13.2 0C18.6 15.3 12 21 12 21z"/><circle cx="12" cy="9.9" r="2.3"/>'),
+  check:  SVG('<path d="M5 12.5l4.3 4.2L19 7"/>', ' stroke-width="2.6"'),
+  dots:   '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg>',
+  warn:   SVG('<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.2"/>')
+};
+
 /* The single selector drives both the field wording and the stored `tag`.
    House → Home, Office → Work, Other → Other. */
 const TYPE_FIELDS = {
@@ -45,11 +105,6 @@ function toast(s){
   toast.t = setTimeout(() => $('toast').classList.remove('show'), 2400);
 }
 
-function goBack(){
-  if (ENTRY.get('return') === 'cart') location.replace('cart.html');
-  else if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack();
-  else history.length > 1 ? history.back() : location.replace('index.html');
-}
 
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -82,7 +137,7 @@ function readOnboardingLocation(){
   try { raw = JSON.parse(localStorage.getItem('nearbite_onboarding_location') || 'null'); } catch { return null; }
   if (!raw || typeof raw !== 'object') return null;
   const la = Number(raw.latitude), lo = Number(raw.longitude);
-  return validCoords(la, lo) ? { latitude: la, longitude: lo } : null;
+  return validCoords(la, lo) ? { latitude: la, longitude: lo, capturedAt: Number(raw.capturedAt) || 0 } : null;
 }
 
 function readOnboardingGeocode(){
@@ -159,6 +214,15 @@ function locationLines(geo, fallbackAddress){
   return fb;
 }
 
+/* Display only: never repeat the place name or a locality in the header. */
+function tidyLines(lines){
+  const primary = String(lines && lines.primary || '').trim();
+  const secondary = Model.dedupeParts([lines && lines.secondary])
+    .filter(p => p.toLowerCase() !== primary.toLowerCase())
+    .join(', ');
+  return { primary, secondary };
+}
+
 /* ---------------- saved list ---------------- */
 
 function selectedId(){ return window.EatswadaAddressModel.selectedId(); }
@@ -176,80 +240,321 @@ function useAddress(a){
     cache(a);
     window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail:a }));
   }
-  toast('Delivery address selected');
-  setTimeout(() => goBack(), 300);
+  // The destination header (Home / Cart) shows the new address itself.
+  location.replace(exitTarget());
 }
 
 function byId(id){ return addresses.find(a => String(a._id) === String(id)); }
-function useAddressById(id){ const a = byId(id); if (a) useAddress(a); }
+function useAddressById(id){ closeMenu(); const a = byId(id); if (a) useAddress(a); }
 
 function render(){
+  if (VIEW === 'select') renderSelect();
+  else renderManage();
+}
+
+/* ---- Profile → Addresses ---- */
+function renderManage(){
   const root = $('list');
+  root.removeAttribute('aria-busy');
   if (!addresses.length){
     root.innerHTML =
-      '<div class="ea-empty"><i class="fa-solid fa-location-dot"></i>' +
+      '<div class="ea-empty">' + ICONS.pin +
       '<b>No saved addresses yet</b>' +
-      '<span>Add your delivery address so we can bring your food to the right door.</span>' +
-      '<button class="ea-empty-cta" onclick="openEditor()">Add an address</button></div>';
+      '<span>Add your delivery address so we can bring your food to the right door.</span><br>' +
+      '<button type="button" class="ea-empty-cta" data-action="add">Add an address</button></div>';
     return;
   }
 
   const sel = selectedId();
   root.innerHTML = addresses.map(a => {
     const isSelected = sel && String(a._id) === String(sel);
-    const label = a.tag || 'Other';
-    const icon  = label === 'Home' ? 'fa-house' : (label === 'Work' || label === 'Office') ? 'fa-briefcase' : 'fa-location-dot';
-    const text  = [a.house, a.area, a.landmark, a.city, a.pincode].filter(Boolean).join(', ');
     const phone = tenDigits(a.receiverPhone || a.phone || '');
     const id    = escapeHtml(a._id);
-
-    return `<article class="ea-card ${isSelected ? 'is-selected' : ''}">
-      <div class="ea-addr">
-        <div class="ea-addr-top">
-          <div class="ea-addr-icon"><i class="fa-solid ${icon}"></i></div>
-          <div class="ea-addr-body">
-            <div class="ea-tagline"><span class="ea-tag">${escapeHtml(label)}</span></div>
-            <div class="ea-line">${escapeHtml(text || 'Address details')}</div>
-            ${phone ? `<div class="ea-meta">Phone number: ${escapeHtml(phone)}</div>` : ''}
-          </div>
-          <button type="button" class="ea-more" aria-label="Address options" onclick="event.stopPropagation();">⋮</button>
+    return `<article class="ea-item">
+      <div class="ea-item-ico">${ICONS[Model.tagKind(a.tag)]}</div>
+      <div class="ea-item-body">
+        <div class="ea-item-head">
+          <span class="ea-tag">${escapeHtml(Model.tagLabel(a.tag))}</span>
+          ${isSelected ? `<span class="ea-current">${ICONS.check}Delivering here</span>` : ''}
         </div>
+        <div class="ea-line">${escapeHtml(Model.formatLine(a) || 'Address details')}</div>
+        ${phone ? `<div class="ea-meta">Phone number: ${escapeHtml(phone)}</div>` : ''}
         <div class="ea-actions">
-          <button class="ea-action edit" onclick="editAddress('${id}')">EDIT</button>
-          <button class="ea-action danger" onclick="deleteAddress('${id}')">DELETE</button>
-          ${isSelected ? '<span class="ea-current-mark"><i class="fa-solid fa-circle-check"></i> Delivering here</span>' : `<button class="ea-action use" onclick="useAddressById('${id}')">USE</button>`}
+          <button type="button" class="ea-action" data-action="edit" data-id="${id}">Edit</button>
+          <button type="button" class="ea-action" data-action="delete" data-id="${id}">Delete</button>
         </div>
       </div>
     </article>`;
-  }).join('');
+  }).join('') + '<div class="ea-list-end"></div>';
+}
+
+/* ---- Select Your Location ---- */
+function deviceFix(){
+  try {
+    const d = JSON.parse(localStorage.getItem(DEVICE_LOC_KEY) || 'null');
+    if (!d || !d.ts || Date.now() - d.ts > DEVICE_LOC_MAX_AGE_MS) return null;
+    return validCoords(d.lat, d.lng) ? { lat: Number(d.lat), lng: Number(d.lng) } : null;
+  } catch { return null; }
+}
+
+/* Straight-line distance from the last device fix; '' when either point
+   is unknown. Display only — never used for delivery decisions. */
+function distanceLabel(from, a){
+  if (!from) return '';
+  const [la, lo] = coords(a);
+  if (!validCoords(la, lo)) return '';
+  const r = x => x * Math.PI / 180;
+  const dLat = r(la - from.lat), dLng = r(lo - from.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(from.lat)) * Math.cos(r(la)) * Math.sin(dLng / 2) ** 2;
+  const km = 2 * 6371 * Math.asin(Math.sqrt(h));
+  return (km < 100 ? km.toFixed(1) : String(Math.round(km))) + ' km';
+}
+
+function renderSelect(){
+  const root = $('lsSaved');
+  root.removeAttribute('aria-busy');
+  if (!addresses.length){
+    root.innerHTML = '<div class="ls-note"><b>No saved addresses yet</b>Add a new address or use your current location.</div>';
+  } else {
+    const here = deviceFix();
+    root.innerHTML = addresses.map(a => {
+      const id    = escapeHtml(a._id);
+      const label = Model.tagLabel(a.tag);
+      const line  = Model.formatLine(a) || 'Address details';
+      const km    = distanceLabel(here, a);
+      return `<div class="ls-item">
+        <span class="ls-ico${km ? ' has-distance' : ''}" aria-hidden="true">${ICONS[Model.tagKind(a.tag)]}${km ? `<span class="ls-dist">${escapeHtml(km)}</span>` : ''}</span>
+        <button type="button" class="ls-item-main" data-action="use" data-id="${id}">
+          <span class="ls-item-title">${escapeHtml(label)}</span>
+          <span class="ls-item-sub">${escapeHtml(line)}</span>
+          ${km ? `<span class="ea-sr">, ${escapeHtml(km)} away</span>` : ''}
+        </button>
+        <button type="button" class="ls-more" data-action="menu" data-id="${id}" aria-haspopup="menu" aria-expanded="false" aria-label="More options for ${escapeHtml(label)}">${ICONS.dots}</button>
+      </div>`;
+    }).join('');
+  }
+  renderRecent();
+}
+
+function renderRecent(){
+  const list = Model.recent.list();
+  $('lsRecentSec').hidden = !list.length;
+  $('lsRecent').innerHTML = list.map((r, i) => `<div class="ls-item no-menu">
+      <span class="ls-ico" aria-hidden="true">${ICONS.clock}</span>
+      <button type="button" class="ls-item-main" data-action="recent" data-index="${i}">
+        <span class="ls-item-title">${escapeHtml(r.title)}</span>
+        ${r.sub ? `<span class="ls-item-sub">${escapeHtml(r.sub)}</span>` : ''}
+      </button>
+    </div>`).join('');
+}
+
+function renderLoadError(){
+  const html = VIEW === 'select'
+    ? '<div class="ls-note"><b>Could not load your addresses</b>Check your connection and try again.<br><button type="button" data-action="retry">Retry</button></div>'
+    : '<div class="ea-empty">' + ICONS.warn + '<b>Could not load your addresses</b><span>Check your connection and try again.</span><br><button type="button" class="ea-empty-cta" data-action="retry">Retry</button></div>';
+  const root = VIEW === 'select' ? $('lsSaved') : $('list');
+  root.removeAttribute('aria-busy');
+  root.innerHTML = html;
+}
+
+/* ---- location search on "Select Your Location" ---- */
+let lsTimer = null, lsCtrl = null, lsPlaces = [];
+
+/* Bias results toward the customer's own point when one is known.
+   No fixed city coordinates are used here. */
+function proximityParam(){
+  const active = window.EatswadaAddressStore && window.EatswadaAddressStore.getActive();
+  const [la, lo] = coords(active);
+  if (validCoords(la, lo)) return lo.toFixed(4) + ',' + la.toFixed(4);
+  const d = deviceFix();
+  return d ? d.lng.toFixed(4) + ',' + d.lat.toFixed(4) : '';
+}
+
+function featureToPlace(f){
+  const c = f && f.geometry && f.geometry.coordinates;
+  if (!Array.isArray(c) || c.length < 2) return null;
+  const lng = Number(c[0]), la = Number(c[1]);
+  if (!validCoords(la, lng)) return null;
+  const title = String(f.text || f.place_name || '').trim();
+  if (!title) return null;
+  const sub = Model.dedupeParts([f.place_name])
+    .filter(p => p.toLowerCase() !== title.toLowerCase())
+    .join(', ');
+  return { title, sub, lat: la, lng };
+}
+
+function showSearchArea(on){
+  $('lsSearchArea').hidden = !on;
+  $('lsHome').hidden = on;
+}
+
+function lsStatusText(text){
+  $('lsStatus').textContent = text || '';
+  $('lsStatus').hidden = !text;
+}
+
+function lsAbort(){ if (lsCtrl){ lsCtrl.abort(); lsCtrl = null; } }
+
+function onSearchInput(){
+  const raw = $('lsSearch').value;
+  const q = raw.trim();
+  $('lsClear').hidden = !raw;
+  clearTimeout(lsTimer);
+  if (q.length < 2){ lsAbort(); lsPlaces = []; showSearchArea(false); return; }
+  lsTimer = setTimeout(() => runSearch(q), 350);
+}
+
+async function runSearch(q){
+  showSearchArea(true);
+  lsAbort();
+  const key = window.CONFIG && window.CONFIG.MAPTILER && window.CONFIG.MAPTILER.apiKey;
+  if (!key){
+    $('lsResults').hidden = true;
+    lsStatusText('Location search is unavailable right now. Use your current location instead.');
+    return;
+  }
+  lsCtrl = new AbortController();
+  $('lsResults').hidden = true;
+  lsStatusText('Searching\u2026');
+  const prox = proximityParam();
+  const url = 'https://api.maptiler.com/geocoding/' + encodeURIComponent(q) + '.json?key=' + encodeURIComponent(key) +
+    '&country=in&autocomplete=true&limit=6' + (prox ? '&proximity=' + prox : '');
+  try {
+    const r = await fetch(url, { signal: lsCtrl.signal, headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error('Search failed (' + r.status + ')');
+    const d = await r.json();
+    if ($('lsSearch').value.trim() !== q) return;          // a newer query owns the screen
+    lsPlaces = (Array.isArray(d.features) ? d.features : []).map(featureToPlace).filter(Boolean);
+    if (!lsPlaces.length){
+      lsStatusText('No matching location found. Try a nearby landmark or area.');
+      return;
+    }
+    lsStatusText('');
+    $('lsResults').innerHTML = lsPlaces.map((p, i) => `<div class="ls-item no-menu">
+        <span class="ls-ico" aria-hidden="true">${ICONS.pin}</span>
+        <button type="button" class="ls-item-main" role="option" data-action="result" data-index="${i}">
+          <span class="ls-item-title">${escapeHtml(p.title)}</span>
+          ${p.sub ? `<span class="ls-item-sub">${escapeHtml(p.sub)}</span>` : ''}
+        </button>
+      </div>`).join('');
+    $('lsResults').hidden = false;
+  } catch (e){
+    if (e.name === 'AbortError') return;
+    console.error('[address] location search failed:', e);
+    lsStatusText('Location search is unavailable right now. Please try again.');
+  }
+}
+
+function clearSearch(){
+  $('lsSearch').value = '';
+  onSearchInput();
+  $('lsSearch').focus();
+}
+
+/* A searched or recent place opens the map on that point so the pin can
+   be fine-tuned before the address details step. */
+function pickPlace(place){
+  if (!place) return;
+  Model.recent.add(place);
+  location.href = mapUrl({ lat: place.lat, lng: place.lng, title: place.title, sub: place.sub || '' });
+}
+
+function useCurrentLocation(){ location.href = mapUrl(); }
+
+/* ---- three-dot menu ---- */
+let menuFor = null, menuBtn = null;
+
+function openMenu(id, btn){
+  const m = $('addrMenu');
+  if (menuFor === id && !m.hidden){ closeMenu(true); return; }
+  closeMenu();
+  menuFor = id; menuBtn = btn;
+  m.hidden = false;
+  const r = btn.getBoundingClientRect();
+  const mw = m.offsetWidth, mh = m.offsetHeight;
+  let top = r.bottom + 4;
+  if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 4);
+  m.style.top  = top + 'px';
+  m.style.left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw)) + 'px';
+  btn.setAttribute('aria-expanded', 'true');
+  m.querySelector('button').focus();
+}
+
+function closeMenu(returnFocus){
+  const m = $('addrMenu');
+  if (!m || m.hidden) return;
+  m.hidden = true;
+  if (menuBtn){
+    menuBtn.setAttribute('aria-expanded', 'false');
+    if (returnFocus) menuBtn.focus();
+  }
+  menuFor = null; menuBtn = null;
+}
+
+/* One delegated handler per list container, bound once. */
+function onListClick(e){
+  const t = e.target.closest('[data-action]');
+  if (!t || !e.currentTarget.contains(t)) return;
+  const id = t.dataset.id;
+  switch (t.dataset.action){
+    case 'use':    useAddressById(id); break;
+    case 'menu':   e.stopPropagation(); openMenu(id, t); break;
+    case 'edit':   editAddress(id); break;
+    case 'delete': deleteAddress(id); break;
+    case 'recent': pickPlace(Model.recent.list()[Number(t.dataset.index)]); break;
+    case 'result': pickPlace(lsPlaces[Number(t.dataset.index)]); break;
+    case 'retry':  load(); break;
+    case 'add':    openAddAddressFlow(); break;
+  }
+}
+
+function bindScreens(){
+  ['list', 'lsSaved', 'lsRecent', 'lsResults'].forEach(id => $(id).addEventListener('click', onListClick));
+
+  $('addrMenu').addEventListener('click', e => {
+    const b = e.target.closest('[data-menu-action]');
+    if (!b) return;
+    const id = menuFor;
+    closeMenu();
+    if (b.dataset.menuAction === 'edit') editAddress(id);
+    else if (b.dataset.menuAction === 'delete') deleteAddress(id);
+  });
+  document.addEventListener('click', e => {
+    if (!$('addrMenu').hidden && !e.target.closest('#addrMenu')) closeMenu();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('addrMenu').hidden){ e.preventDefault(); closeMenu(true); }
+  });
+  window.addEventListener('resize', () => closeMenu());
+  window.addEventListener('scroll', () => closeMenu(), { passive: true });
+
+  $('lsSearch').addEventListener('input', onSearchInput);
+  $('lsSearch').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const q = $('lsSearch').value.trim();
+    if (q.length >= 2){ clearTimeout(lsTimer); runSearch(q); }
+  });
+  $('lsClear').addEventListener('click', clearSearch);
+
+  if (VIEW === 'select') renderRecent();
 }
 
 async function load(){
   if (!token()){ location.replace('login.html'); return; }
-  try {
-    const p = await window.EatswadaAddressAPI.list();
-    addresses = window.EatswadaAddressModel.normalizeList(p);
-
-    const initial = window.EatswadaAddressModel.chooseInitial(addresses);
-    // Server data wins. If the client contains a stale/missing selection,
-    // immediately repair both the selected ID and cached active address.
-    if (initial){
-      if (initial._id) localStorage.setItem('nearbite_selected_address_id', String(initial._id));
-      cache(initial);
-      if (window.EatswadaAddressStore && window.EatswadaAddressStore.setActive) {
-        window.EatswadaAddressStore.setActive(initial, 'address-page-hydrate');
-      }
-    }
-    render();
-  } catch (e){
-    if (e.message === 'AUTH'){
-      localStorage.removeItem('nearbite_token');
-      localStorage.removeItem('token');
-      location.replace('login.html');
-      return;
-    }
-    $('list').innerHTML = '<div class="ea-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Could not load your addresses</b><span>Check your connection and try again.</span><button class="ea-empty-cta" onclick="load()">Retry</button></div>';
+  const S = window.EatswadaAddressStore;
+  // The store is the one client path to the saved list. Hydrating also
+  // repairs a stale or missing selection (selected → default → first) and
+  // updates the shared cache every other page reads.
+  await S.hydrate({ force: true });
+  if (S.state.status === 'error'){
+    if (S.state.error && S.state.error.message === 'AUTH'){ authExpired(); return; }
+    console.error('[address] could not load saved addresses:', S.state.error);
+    renderLoadError();
+    return;
   }
+  addresses = S.getAll();
+  render();
 }
 
 /* ---------------- account details ---------------- */
@@ -286,6 +591,8 @@ function setUseAccount(on){
   }
   $('receiverName').readOnly  = useAccountOn;
   $('receiverPhone').readOnly = useAccountOn;
+  // Benchmark: with account details on, only "name, phone" is shown.
+  $('receiverFields').hidden  = useAccountOn;
   syncSave();
 }
 
@@ -299,23 +606,36 @@ function chooseType(t){
   locType = TYPE_FIELDS[t] ? t : 'House';
   const f = TYPE_FIELDS[locType];
   tag = f.tag;
-  document.querySelectorAll('#locSeg button').forEach(b => b.classList.toggle('on', b.dataset.type === locType));
+  document.querySelectorAll('#locSeg button').forEach(b => {
+    const on = b.dataset.type === locType;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  // Labels float; the placeholder stays a single space for :placeholder-shown.
   $('lbl_house').textContent    = f.f1;
-  $('house').placeholder        = f.f1;
   $('lbl_landmark').textContent = f.f2;
-  $('landmark').placeholder     = f.f2 === 'Street' ? 'Street or nearby landmark' : 'Building name, street or nearby landmark';
+  $('saveAsValue').textContent  = Model.tagLabel(tag);
+}
+
+/* "Save address as · Edit" moves the customer to the one type selector. */
+function focusTypeSelector(){
+  const b = document.querySelector('#locSeg button.on') || document.querySelector('#locSeg button');
+  $('locSeg').scrollIntoView({ block: 'center', behavior: 'smooth' });
+  if (b) b.focus({ preventScroll: true });
 }
 
 function paintLocation(){
   if (validCoords(lat, lng)){
-    const lines = locationLines(locGeo, { area:$('area').value.trim(), city:addrCity, pincode:addrPin });
+    const lines = tidyLines(locationLines(locGeo, { area:$('area').value.trim(), city:addrCity, pincode:addrPin }));
     $('headPrimary').textContent   = lines.primary;
-    $('headSecondary').textContent = lines.secondary || 'Confirmed delivery point';
+    $('headSecondary').textContent = lines.secondary;
+    $('headSep').hidden            = !lines.secondary;
     $('changeLocText').textContent = 'Change';
     $('pendingLoc').style.display  = 'none';
   } else {
     $('headPrimary').textContent   = 'No location set';
     $('headSecondary').textContent = 'Confirm your delivery point on the map';
+    $('headSep').hidden            = false;
     $('changeLocText').textContent = 'Set';
     $('pendingLoc').style.display  = 'flex';
   }
@@ -376,6 +696,8 @@ function applyMode(){
   btn.disabled = !accountUsable();
   btn.querySelector('.ea-check-text').textContent =
     accountUsable() ? 'Use my account details' : 'Account details not available';
+  $('accountLine').textContent = accountUsable() ? account.name + ', ' + account.phone : '';
+  $('accountLine').hidden = !accountUsable();
 
   if (hideReceiver){
     $('receiverName').value  = account.name;
@@ -384,6 +706,7 @@ function applyMode(){
 }
 
 function openEditor(id = null){
+  closeMenu();
   editingId = id;
   const a = id ? byId(id) : null;
 
@@ -419,9 +742,13 @@ function openEditor(id = null){
   deriveCityPin(a);
   applyMode();
 
-  // MODE 2: default to the account details for a new address, off when
-  // editing so the saved receiver is preserved.
-  setUseAccount(mode === 'manage' && !a && accountUsable());
+  // MODE 2: default to the account details for a new address. When
+  // editing, it is on only if the saved receiver already is the account,
+  // so a different saved receiver is always preserved and visible.
+  const receiverIsAccount = !!a && accountUsable() &&
+    tenDigits(a.receiverPhone) === account.phone &&
+    String(a.receiverName || '').trim().toLowerCase() === account.name.trim().toLowerCase();
+  setUseAccount(mode === 'manage' && accountUsable() && (!a || receiverIsAccount));
 
   paintLocation();
   syncSave();
@@ -433,32 +760,36 @@ function openEditor(id = null){
 
 function editAddress(id){ openEditor(id); }
 
-function openAddAddressFlow(){
-  const next = 'address.html?new=1';
-  const returnParam = ENTRY.get('return');
-  const handoff = returnParam ? next + '&return=' + encodeURIComponent(returnParam) : next;
-  location.href = 'location-onboarding.html?from=address&next=' + encodeURIComponent(handoff);
-}
+function openAddAddressFlow(){ location.href = mapUrl(); }
 
 function closeEditor(){
   $('modal').classList.remove('show');
   document.body.style.overflow = '';
   mode = 'manage';
   try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+  if (/[?&](new|add|resume)=1(&|$)/.test(location.search)){
+    try { history.replaceState(history.state, '', addressUrl()); } catch {}
+  }
 }
 
 /* ---------------- change location round trip ---------------- */
 
 function changeLocation(){
-  const draft = { editingId, locType, mode, useAccount: useAccountOn, city: addrCity, pincode: addrPin };
+  // `at` lets the resume step tell a newly confirmed point from a stale one.
+  const draft = { editingId, locType, mode, useAccount: useAccountOn, city: addrCity, pincode: addrPin, at: Date.now() };
   FORM_IDS.forEach(id => draft[id] = $(id).value);
   try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
 
-  let back = 'address.html?resume=1';
-  if (ENTRY.get('return')) back += '&return=' + encodeURIComponent(ENTRY.get('return'));
-  back = encodeURIComponent(back);
-
-  location.href = 'location-onboarding.html?from=address&return=' + back + '&next=' + back;
+  const back = addressUrl({ resume: '1' });
+  const q = new URLSearchParams({ from: 'address', return: back, next: back });
+  // Open the map on the point being changed, when there is one.
+  if (validCoords(lat, lng)){
+    q.set('lat', String(lat));
+    q.set('lng', String(lng));
+    q.set('title', $('headPrimary').textContent);
+    q.set('sub', $('headSecondary').textContent);
+  }
+  location.href = 'location-onboarding.html?' + q.toString();
 }
 
 /* Restores the in-progress form after the map round trip and swaps in the
@@ -478,8 +809,10 @@ function resumeDraft(){
   addrCity = draft.city || addrCity;
   addrPin  = draft.pincode || addrPin;
 
+  // Only a point confirmed AFTER leaving for the map replaces the
+  // coordinates. Coming back without confirming keeps the original point.
   const onboard = readOnboardingLocation();
-  if (onboard){
+  if (onboard && (!draft.at || onboard.capturedAt > draft.at)){
     lat = onboard.latitude;
     lng = onboard.longitude;
     locGeo = readOnboardingGeocode();
@@ -554,6 +887,12 @@ function routeAfterSave(wasEditing, wasSetup){
     setTimeout(() => location.replace('cart.html'), 350);
     return true;
   }
+  // "Select Your Location": the new address is now the delivery address,
+  // so continue to the homepage, which shows it.
+  if (VIEW === 'select' && !wasEditing){
+    setTimeout(() => location.replace(exitTarget()), 350);
+    return true;
+  }
   return false; // stay on the saved-address list
 }
 
@@ -598,24 +937,21 @@ async function saveAddress(){
 
     await load();
 
+    const Store = window.EatswadaAddressStore;
     if (!editingId){
-      // A newly added address becomes the delivery selection when nothing is
-      // selected yet, or always on the first-address setup leg so Checkout
-      // has something to use.
+      // A new address becomes the delivery selection on the first-address
+      // setup leg and on "Select Your Location" / Cart, where choosing
+      // where to deliver is the point. Profile → Addresses keeps the
+      // current selection (load() already selects a first-ever address).
       const fresh = savedId ? byId(savedId) : null;
-      if (fresh && (wasSetup || !selectedId())){
-        localStorage.setItem('nearbite_selected_address_id', String(fresh._id));
-        cache(fresh);
-        window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: fresh }));
+      if (fresh && (wasSetup || VIEW === 'select')){
+        Store.setActive(fresh, 'address-added');
         render();
       }
     } else if (wasEditingSelected){
       // Editing an unrelated address must never move the checkout selection.
       const fresh = byId(editingId);
-      if (fresh){
-        cache(fresh);
-        window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: fresh }));
-      }
+      if (fresh) Store.setActive(fresh, 'address-edited');
     }
 
     // Only after a confirmed server save is the onboarding handoff consumed.
@@ -629,7 +965,9 @@ async function saveAddress(){
     routeAfterSave(wasEditing, wasSetup);
   } catch (e){
     // A failed save leaves the onboarding coordinates exactly where they are.
-    toast(e.message);
+    if (e && e.message === 'AUTH'){ authExpired(); return; }
+    console.error('[address] save failed:', e);
+    toast((e && e.message) || 'Could not save the address. Please try again.');
   } finally {
     b.textContent = 'Save Address';
     syncSave();
@@ -647,31 +985,23 @@ async function setDefault(id){
 }
 
 async function deleteAddress(id){
+  closeMenu();
   const a = byId(id);
   if (!a) return;
-  if (!confirm(`Delete your ${a.tag || 'saved'} address?`)) return;
+  if (!confirm(`Delete your ${Model.tagLabel(a.tag)} address?`)) return;
   try {
     await window.EatswadaAddressAPI.remove(id);
-
-    const wasSelected = String(selectedId()) === String(id);
+    // Re-hydrating the store is the whole selection repair: a deleted
+    // selection falls back to the default, then the first remaining
+    // address, and an empty list clears the active address everywhere.
+    // Deleting a non-selected address leaves the selection untouched.
     await load();
-
-    if (wasSelected){
-      // The selected address no longer exists — nearbite_selected_address_id must
-      // not keep pointing at it. Prefer the current default, else the first
-      // remaining address, else clear the selection entirely. Deleting a
-      // non-selected address must not touch the selection at all.
-      const next = addresses.find(x => x.isDefault) || addresses[0];
-      if (next){
-        window.EatswadaAddressModel.setSelected(next);
-      } else {
-        window.EatswadaAddressModel.clearSelected();
-      }
-      window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: next || null }));
-      render();
-    }
     toast('Address deleted');
-  } catch (e){ toast(e.message); }
+  } catch (e){
+    if (e && e.message === 'AUTH'){ authExpired(); return; }
+    console.error('[address] delete failed:', e);
+    toast((e && e.message) || 'Could not delete the address. Please try again.');
+  }
 }
 
 FORM_IDS.forEach(id => {
@@ -683,9 +1013,16 @@ $('receiverPhone').addEventListener('input', e => {
   if (v !== e.target.value) e.target.value = v;
   syncSave();
 });
-$('area').addEventListener('input', () => { if (!locGeo) paintLocation(); });
+$('area').addEventListener('input', () => {
+  const v = $('area').value;
+  if (/[\r\n]/.test(v)) $('area').value = v.replace(/[\r\n]+/g, ' ');
+  if (!locGeo) paintLocation();
+});
+$('area').addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
 
 document.addEventListener('DOMContentLoaded', async () => {
+  document.title = (VIEW === 'select' ? 'Select Your Location' : 'Addresses') + ' \u00b7 Eatswada';
+  bindScreens();
   await Promise.all([ load(), loadAccount() ]);
 
   const resuming = ENTRY.get('resume') === '1' || !!sessionStorage.getItem(DRAFT_KEY);

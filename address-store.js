@@ -146,11 +146,22 @@
       if (active) {
         setActive(active, 'hydrated');
       } else {
+        /* The server is authoritative: with no saved addresses left, a
+           cached address from an earlier session must not keep being
+           shown (getActive() falls back to the cache). Pages are told
+           only when something was actually cleared. */
+        var hadCached = !!cached();
         state.activeAddress = null;
         state.activeAddressId = null;
+        clearCache();
         state.status = 'ready';
         state.hydrated = true;
         emit('hydrated-empty');
+        if (hadCached) {
+          try {
+            window.dispatchEvent(new CustomEvent('nearbite:address-changed', { detail: null }));
+          } catch (e) {}
+        }
       }
 
       return active;
@@ -198,6 +209,8 @@
     state.hydrated = false;
     state.error = null;
     clearCache();
+    /* Recently searched places are device-local history of this session. */
+    try { localStorage.removeItem('eatswada_recent_locations'); } catch (e) {}
     hydratePromise = null;
     emit('logout');
   }

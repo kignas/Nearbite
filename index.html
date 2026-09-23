@@ -609,7 +609,7 @@
 
 <header class="hero-header" id="home-header" data-theme="anime">
   <div class="loc-row es-header-item">
-    <a class="loc-left tap" href="address.html" aria-label="Change delivery location">
+    <a class="loc-left tap" href="address.html?view=select" aria-label="Change delivery location">
       <span class="loc-pin-wrap" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
       <span class="loc-copy">
         <span class="loc-name-row">
@@ -766,7 +766,7 @@
     <h3 class="loc-sheet-title" id="location-sheet-title">Allow location to continue</h3>
     <p class="loc-sheet-text" id="location-sheet-text">We use your location to show restaurants that can deliver to you and calculate your delivery distance.</p>
     <button type="button" class="loc-btn loc-btn-primary" id="location-allow-btn">Allow location</button>
-    <a class="loc-btn loc-btn-secondary" id="location-address-btn" href="address.html">Choose address</a>
+    <a class="loc-btn loc-btn-secondary" id="location-address-btn" href="address.html?view=select">Choose address</a>
     <button type="button" class="loc-btn-quiet" id="location-sheet-close" data-close-location-sheet="1">Not now</button>
   </div>
 </div>
@@ -776,7 +776,10 @@
 <script src="api.js"></script>
 <script src="favorites.js"></script>
 <script src="restaurant-card.js"></script>
-<script src="home.js"></script>
+<!-- Shared address state: hydrates the saved/default address right after
+     authentication, so the header never waits for address.html. -->
+<script src="address-store.js?v=20260922-4"></script>
+<script src="home.js?v=20260922-4"></script>
 <script src="home-banners.js?v=20260917-2"></script>
 <script src="search-overlay.js"></script>
 <script>

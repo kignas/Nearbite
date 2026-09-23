@@ -3,423 +3,269 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F1F5F9">
-<title>Delivery address · Eatswada</title>
+<meta name="theme-color" content="#FFFFFF">
+<title>Addresses · Eatswada</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <!-- Shared stylesheet loads first so the page-scoped rules below win
      without any global change to style.css. -->
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
-<script src="address-store.js"></script>
+<script src="address-store.js?v=20260922-4"></script>
 <script src="address-api.js"></script>
-<script src="address-model.js"></script>
+<script src="address-model.js?v=20260922-4"></script>
 <script src="safe-html.js"></script>
-<style>
-/* ===== Eatswada onboarding design system — identical in login.html,
-   complete-profile.html, location-onboarding.html and address.html ===== */
-:root{
-  --brand:#FC8019;
-  --brand-dark:#E96F0A;
-  --brand-tint:#FFF4EC;
-  --brand-ink:#C85E0D;
-  --brand-soft:#FFCBB7;
-  --pill:#16181C;
-  --bg:#F1F5F9;
-  --ink:#1A1D21;
-  --ink-2:#4B5563;
-  --label:#8E959F;
-  --muted:#6B7280;
-  --line:#E6E9ED;
-  --field:#FBFCFD;
-  --green:#16A34A;
-  --danger:#DC2626;
-  --font:var(--font-sans);
-}
-html,body,button,input,textarea,select{font-family:var(--font)}
-
-.ea *,.ea *::before,.ea *::after{box-sizing:border-box}
-
-body.ea-body{
-  margin:0;background:var(--bg);color:var(--ink);
-  font-weight:500;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  overflow-x:hidden;
-}
-
-/* ================= saved list ================= */
-.ea-app{max-width:560px;margin:auto;min-height:100dvh}
-
-.ea-header{
-  position:sticky;top:0;z-index:30;
-  background:#fff;border-bottom:1px solid var(--line);padding:12px 14px;
-}
-.ea-top{display:flex;align-items:center;gap:11px}
-.ea-back,.ea-add{
-  width:38px;height:38px;flex:0 0 38px;border:0;border-radius:12px;
-  display:grid;place-items:center;color:#374151;background:#F1F3F6;
-  font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;
-}
-.ea-add{background:var(--brand-tint);color:var(--brand)}
-.ea-back:active,.ea-add:active{opacity:.6}
-.ea-title{font-size:16px;font-weight:800;letter-spacing:-.35px;flex:1;min-width:0}
-.ea-sub{font-size:12px;color:var(--muted);margin:3px 0 0 49px;font-weight:500}
-
-.ea-main{padding:13px 14px calc(86px + env(safe-area-inset-bottom))}
-
-.ea-card{
-  background:#fff;border:1px solid var(--line);border-radius:20px;
-  box-shadow:0 1px 2px rgba(17,24,39,.04);margin-bottom:10px;overflow:hidden;
-}
-.ea-card.is-selected{border-color:#FFD3B0}
-
-.ea-addr{padding:14px 13px}
-.ea-addr-top{display:flex;gap:11px}
-.ea-addr-icon{
-  width:38px;height:38px;flex:0 0 38px;border-radius:12px;
-  background:#F1F3F6;color:var(--muted);display:grid;place-items:center;font-size:13px;
-}
-.ea-addr-icon.is-default{background:var(--brand-tint);color:var(--brand)}
-.ea-addr-body{flex:1;min-width:0}
-
-.ea-tagline{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.ea-tag{font-size:14px;font-weight:800;letter-spacing:-.25px}
-.ea-chip{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 7px}
-.ea-chip.default{background:var(--brand-tint);color:var(--brand-ink)}
-.ea-chip.selected{background:#E9F8EF;color:#0B7A45}
-
-.ea-line{font-size:12px;color:var(--ink-2);line-height:1.55;margin-top:5px;overflow-wrap:anywhere}
-.ea-meta{font-size:11px;color:var(--label);margin-top:4px;font-weight:500;overflow-wrap:anywhere}
-
-.ea-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid #F1F3F6}
-.ea-action{
-  border:1.5px solid var(--line);background:#fff;border-radius:11px;
-  padding:9px 12px;font-size:11px;font-weight:800;color:#374151;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
-}
-.ea-action:active{opacity:.6}
-.ea-action.primary{border-color:#FFD5BD;background:#FFF8F3;color:var(--brand-ink);flex:1 1 auto;min-width:128px}
-.ea-action.danger{color:var(--danger);border-color:#F6DEDE}
-.ea-action.current{border-color:#CDEAD9;background:#F2FBF6;color:#0B7A45;flex:1 1 auto;min-width:128px}
-
-.ea-empty{
-  text-align:center;background:#fff;border:1px dashed #DDE1E6;border-radius:20px;
-  padding:32px 18px;color:var(--muted);font-size:13px;line-height:1.6;
-}
-.ea-empty i{font-size:24px;color:#CBD0D6;display:block;margin-bottom:11px}
-.ea-empty b{display:block;font-size:15px;color:var(--ink);margin-bottom:4px;font-weight:800}
-.ea-empty-cta{margin-top:15px;border:0;background:var(--brand);color:#fff;border-radius:13px;padding:12px 19px;font-size:13px;font-weight:800;cursor:pointer}
-
-.ea-fab{
-  position:fixed;left:0;right:0;bottom:0;z-index:40;
-  padding:9px 14px calc(11px + env(safe-area-inset-bottom));
-  background:#fff;border-top:1px solid var(--line);
-}
-.ea-fab button{
-  display:block;width:100%;max-width:532px;margin:auto;min-height:48px;
-  border:1.5px dashed #FFD0AD;background:#FFF8F3;color:var(--brand-ink);
-  border-radius:14px;font-size:13px;font-weight:800;cursor:pointer;
-}
-
-/* ================= address form ================= */
-.ea-form{position:fixed;inset:0;z-index:120;background:var(--bg);display:none;flex-direction:column}
-.ea-form.show{display:flex}
-
-/* The confirmed location is rendered here and nowhere else. */
-.ea-form-head{
-  background:#fff;border-bottom:1px solid var(--line);
-  padding:11px 14px;padding-top:calc(11px + env(safe-area-inset-top));
-  display:flex;align-items:center;gap:11px;
-}
-.ea-head-body{flex:1;min-width:0}
-.ea-eyebrow{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--label)}
-.ea-head-primary{
-  margin-top:2px;font-size:15px;font-weight:800;letter-spacing:-.35px;line-height:1.25;color:var(--ink);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.ea-head-secondary{
-  margin-top:2px;font-size:12px;font-weight:500;line-height:1.4;color:var(--muted);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.ea-change{
-  flex:none;display:flex;align-items:center;gap:5px;
-  border:1.5px solid #FFD5BD;background:var(--brand-tint);color:var(--brand-ink);
-  border-radius:11px;padding:9px 12px;min-height:38px;
-  font-size:12px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;
-}
-.ea-change:active{opacity:.6}
-
-.ea-form-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 18px}
-
-.ea-sec{margin-bottom:15px}
-.ea-sec:last-child{margin-bottom:0}
-.ea-sec-head{display:flex;align-items:center;gap:7px;margin:0 2px 9px}
-.ea-sec-title{font-size:14px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
-.ea-sec-note{font-size:12px;font-weight:500;color:var(--label)}
-.ea-new{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#E9F8EF;color:#0B7A45;border-radius:999px;padding:3px 6px}
-
-.ea-panel{
-  background:#fff;border:1px solid var(--line);border-radius:20px;
-  box-shadow:0 1px 2px rgba(17,24,39,.04);padding:14px 13px;
-}
-
-/* Shown only while coordinates are missing. */
-.ea-pending{
-  display:flex;align-items:center;gap:10px;
-  background:#FFF8F3;border:1px solid #FFD9C4;border-radius:14px;
-  padding:11px 12px;margin-bottom:14px;
-}
-.ea-pending i{color:var(--brand);font-size:14px;flex:none}
-.ea-pending span{flex:1;min-width:0;font-size:12px;font-weight:600;color:#8A4517;line-height:1.45}
-
-.ea-check{
-  display:flex;align-items:center;gap:10px;width:100%;
-  border:0;background:none;padding:0 0 13px;margin-bottom:13px;
-  border-bottom:1px solid #F1F3F6;cursor:pointer;text-align:left;
-  -webkit-tap-highlight-color:transparent;
-}
-.ea-box{
-  width:20px;height:20px;flex:0 0 20px;border-radius:6px;
-  border:1.5px solid #CFD4DA;background:#fff;display:grid;place-items:center;color:#fff;font-size:9px;
-}
-.ea-check.on .ea-box{background:var(--brand);border-color:var(--brand)}
-.ea-check-text{font-size:13px;font-weight:700;color:var(--ink)}
-.ea-check:disabled{opacity:.5;cursor:default}
-
-.ea-field{margin-bottom:12px}
-.ea-field:last-child{margin-bottom:0}
-
-.ea-label{display:block;font-size:13px;font-weight:600;color:var(--label);margin:0 0 7px;text-transform:none;letter-spacing:normal}
-.ea-label .req{color:var(--brand)}
-
-.ea-input,.ea-area{
-  width:100%;min-height:48px;
-  border:1.5px solid var(--line);background:var(--field);border-radius:14px;
-  padding:13px;outline:none;
-  font-size:15px;font-weight:600;line-height:1.35;color:var(--ink);
-  -webkit-appearance:none;
-  transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
-}
-.ea-input::placeholder,.ea-area::placeholder{color:#AEB4BC;font-weight:500}
-.ea-input:focus,.ea-area:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(252,128,25,.10)}
-.ea-input[readonly]{background:#F1F3F6;color:var(--ink-2)}
-.ea-input.invalid,.ea-area.invalid{border-color:#F0A5A5;background:#FFFAFA}
-.ea-area{min-height:80px;resize:none;padding-top:12px}
-
-.ea-err{display:none;margin-top:6px;font-size:12px;font-weight:600;color:var(--danger);line-height:1.45}
-.ea-err.show{display:block}
-
-/* Single address-type selector. */
-.ea-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#F1F3F6;border-radius:14px;padding:4px;margin-bottom:14px}
-.ea-seg button{
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  min-height:40px;border:0;border-radius:11px;background:transparent;
-  font-size:13px;font-weight:700;color:var(--ink-2);cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  transition:background .16s ease,color .16s ease;
-}
-.ea-seg button i{font-size:12px}
-.ea-seg button.on{background:var(--pill);color:#fff;font-weight:800}
-
-.ea-row{
-  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
-  background:#fff;border:1px solid var(--line);border-radius:20px;
-  box-shadow:0 1px 2px rgba(17,24,39,.04);padding:14px 13px;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-.ea-row-text{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink-2);line-height:1.45}
-.ea-row-text small{display:block;margin-top:3px;font-size:11px;font-weight:500;color:var(--label)}
-.ea-row-cta{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;font-size:12px;font-weight:800;color:#374151}
-.ea-row-icon{flex:none;width:38px;height:38px;border-radius:12px;background:#F1F3F6;display:grid;place-items:center;color:var(--muted);font-size:13px}
-.ea-row.is-off{cursor:default}
-.ea-row.is-off .ea-row-text,.ea-row.is-off .ea-row-icon{opacity:.55}
-
-.ea-form-foot{padding:9px 14px calc(11px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
-.ea-save{
-  display:block;width:100%;max-width:532px;margin:auto;min-height:50px;
-  border:0;border-radius:14px;background:var(--brand);color:#fff;
-  font-size:15px;font-weight:800;letter-spacing:-.2px;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s ease;
-}
-.ea-save:not(:disabled):active{background:var(--brand-dark)}
-.ea-save:disabled{background:var(--brand-soft);color:#fff;opacity:.85;cursor:not-allowed}
-
-.ea-toast{
-  position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));
-  transform:translate(-50%,14px);opacity:0;pointer-events:none;
-  background:#111827;color:#fff;padding:11px 15px;border-radius:12px;
-  font-size:12px;font-weight:600;z-index:200;transition:.2s;
-  max-width:calc(100% - 28px);text-align:center;
-}
-.ea-toast.show{opacity:1;transform:translate(-50%,0)}
-
-@media (prefers-reduced-motion:reduce){.ea *{transition-duration:.01ms !important}}
-
-@media(max-width:365px){
-  .ea-seg button{font-size:12px;gap:4px}
-  .ea-action{flex:1 1 100%}
-  .ea-action.primary,.ea-action.current{min-width:0}
-  .ea-sub{margin-left:0}
-  .ea-change{padding:9px 10px}
-}
-</style>
-<link rel="stylesheet" href="address-v3.css?v=20260922-3">
+<!-- The address flow is styled only by address-flow.css (scoped to
+     body.ea). address-v3.css is no longer loaded by this page. -->
+<link rel="stylesheet" href="address-flow.css?v=20260922-4">
+<script>
+/* Chooses the screen before first paint so the wrong view never flashes.
+   Homepage / Cart → "Select Your Location"; Profile → "Addresses". */
+(function () {
+  var p = new URLSearchParams(location.search);
+  var view = (p.get('view') === 'select' || p.get('return') === 'cart') ? 'select' : 'manage';
+  document.documentElement.setAttribute('data-address-view', view);
+  document.documentElement.classList.add('ea-html');
+})();
+</script>
 </head>
 <body class="ea ea-body">
 
-<!-- ===================== saved addresses ===================== -->
-<div class="ea-app">
+<!-- ================================================================
+     SCREEN 1 — SELECT YOUR LOCATION  (Homepage / Cart entry)
+     ================================================================ -->
+<div class="ls-view" id="selectView">
+  <div class="ls-inner">
+    <header class="ls-head">
+      <button type="button" class="ls-back" onclick="addressBack()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4.5M10.5 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="ls-title">Select Your Location</h1>
+    </header>
+
+    <div class="ls-search" role="search">
+      <label class="ea-sr" for="lsSearch">Search an area or address</label>
+      <input id="lsSearch" type="search" inputmode="search" autocomplete="off" enterkeyhint="search"
+             placeholder="Search an area or address" maxlength="120">
+      <button type="button" class="ls-clear" id="lsClear" aria-label="Clear search" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M17 7L7 17M7 7l10 10"/></svg>
+      </button>
+      <svg class="ls-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="M20 20l-4.3-4.3"/></svg>
+    </div>
+
+    <div class="ls-actions">
+      <button type="button" class="ls-action" id="lsUseCurrent" onclick="useCurrentLocation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><path d="M12 2.8v2.7M12 18.5v2.7M2.8 12h2.7M18.5 12h2.7"/></svg>
+        <span>Use Current Location</span>
+      </button>
+      <button type="button" class="ls-action" onclick="openAddAddressFlow()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3.8" y="3.8" width="16.4" height="16.4" rx="3.6"/><path d="M12 8.2v7.6M8.2 12h7.6"/></svg>
+        <span>Add New Address</span>
+      </button>
+    </div>
+
+    <!-- Search results replace the saved / recent sections while typing -->
+    <div id="lsSearchArea" hidden>
+      <div class="ls-status" id="lsStatus" role="status" aria-live="polite" hidden></div>
+      <div class="ls-list ls-results" id="lsResults" role="listbox" aria-label="Search results" hidden></div>
+    </div>
+
+    <div id="lsHome">
+      <section id="lsSavedSec" aria-labelledby="lsSavedTitle">
+        <h2 class="ls-eyebrow" id="lsSavedTitle">Saved Addresses</h2>
+        <div class="ls-list" id="lsSaved" aria-busy="true">
+          <div class="ls-skel" aria-hidden="true"><i></i><span><i></i><i></i></span></div>
+          <div class="ls-skel" aria-hidden="true"><i></i><span><i></i><i></i></span></div>
+        </div>
+      </section>
+      <section id="lsRecentSec" aria-labelledby="lsRecentTitle" hidden>
+        <h2 class="ls-eyebrow" id="lsRecentTitle">Recently Searched</h2>
+        <div class="ls-list" id="lsRecent"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 2 — PROFILE → ADDRESSES
+     ================================================================ -->
+<div class="ea-app" id="manageView">
   <header class="ea-header">
     <div class="ea-top">
-      <button class="ea-back" onclick="goBack()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-      <div class="ea-title">ADDRESSES</div>
-      <button class="ea-add" onclick="openAddAddressFlow()" aria-label="Add address"><i class="fa-solid fa-plus"></i></button>
+      <button type="button" class="ea-back" onclick="addressBack()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4.5M10.5 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="ea-title">Addresses</h1>
     </div>
-    
   </header>
 
-  <main class="ea-main">
-    <div id="list"><div class="ea-empty"><i class="fa-solid fa-location-dot"></i>Loading addresses…</div></div>
-  </main>
+  <div class="ea-band"><span>Saved Addresses</span></div>
+
+  <div class="ea-main" role="main">
+    <div id="list" aria-busy="true"><div class="ea-empty">Loading addresses…</div></div>
+  </div>
+
+  <div class="ea-fab">
+    <button type="button" onclick="openAddAddressFlow()">Add New Address</button>
+  </div>
 </div>
 
-<div class="ea-fab">
-  <button onclick="openAddAddressFlow()"><i class="fa-solid fa-plus"></i> Add a new address</button>
-</div>
-
-<!-- ===================== address form ===================== -->
+<!-- ================================================================
+     SCREEN 4 — ADDRESS DETAILS (add / edit)
+     ================================================================ -->
 <div class="ea-form" id="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
 
   <div class="ea-form-head">
-    <button class="ea-back" onclick="closeEditor()" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="ea-head-body">
-      <div class="ea-eyebrow" id="formTitle">Add delivery address</div>
-      <div class="ea-head-primary" id="headPrimary">No location set</div>
-      <div class="ea-head-secondary" id="headSecondary">Confirm your delivery point on the map</div>
+    <div class="ea-form-head-row">
+      <button type="button" class="ea-back" onclick="closeEditor()" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4.5M10.5 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="ea-head-body">
+        <span class="ea-sr" id="formTitle">Add delivery address</span>
+        <p class="ea-head-line"><span class="ea-head-primary" id="headPrimary">No location set</span><span class="ea-head-sep" id="headSep">|</span><span class="ea-head-secondary" id="headSecondary">Confirm your delivery point on the map</span></p>
+      </div>
     </div>
-    <button type="button" class="ea-change" onclick="changeLocation()">
-      <i class="fa-solid fa-location-crosshairs"></i> <span id="changeLocText">Change</span>
-    </button>
   </div>
 
   <div class="ea-form-body" id="formBody">
+   <div class="ea-form-inner">
 
-    <!-- Receiver Details — MODE 2 only -->
+    <!-- Receiver Details -->
     <section class="ea-sec" id="receiverSec">
-      <div class="ea-sec-head"><span class="ea-sec-title">Receiver Details</span></div>
-      <div class="ea-panel">
-
+      <h2 class="ea-sec-title">Receiver Details</h2>
+      <div class="ea-panel ea-receiver">
         <button type="button" class="ea-check" id="useAccount" onclick="toggleUseAccount()" aria-pressed="false">
-          <span class="ea-box"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
-          <span class="ea-check-text">Use my account details</span>
+          <span class="ea-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.3 4.2L19 7"/></svg></span>
+          <span class="ea-check-body">
+            <span class="ea-check-text">Use my account details</span>
+            <span class="ea-check-sub" id="accountLine" hidden></span>
+          </span>
         </button>
 
-        <div class="ea-field">
-          <label class="ea-label" for="receiverName">Receiver name <span class="req">*</span></label>
-          <input class="ea-input" id="receiverName" maxlength="60" placeholder="Who should we hand the order to?" autocomplete="name">
-          <div class="ea-err" id="err_receiverName"></div>
+        <div class="ea-receiver-fields" id="receiverFields">
+          <div class="ea-float">
+            <input class="ea-input" id="receiverName" maxlength="60" placeholder=" " autocomplete="name">
+            <label for="receiverName">Receiver name <span class="req">*</span></label>
+            <div class="ea-err" id="err_receiverName"></div>
+          </div>
+          <div class="ea-float">
+            <input class="ea-input" id="receiverPhone" inputmode="tel" maxlength="10" placeholder=" " autocomplete="tel">
+            <label for="receiverPhone">Receiver's number <span class="req">*</span></label>
+            <div class="ea-err" id="err_receiverPhone"></div>
+          </div>
         </div>
-
-        <div class="ea-field">
-          <label class="ea-label" for="receiverPhone">Receiver's number <span class="req">*</span></label>
-          <input class="ea-input" id="receiverPhone" inputmode="tel" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
-          <div class="ea-err" id="err_receiverPhone"></div>
-        </div>
-
       </div>
     </section>
 
     <!-- Location Details — the only address-type selector on the page -->
     <section class="ea-sec">
-      <div class="ea-sec-head"><span class="ea-sec-title">Location Details</span></div>
+      <h2 class="ea-sec-title">Location Details</h2>
       <div class="ea-panel">
 
         <div class="ea-pending" id="pendingLoc" style="display:none">
-          <i class="fa-solid fa-circle-exclamation"></i>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.2"/></svg>
           <span>Confirm your delivery point on the map before saving.</span>
-          <button type="button" class="ea-change" onclick="changeLocation()">Set location</button>
+          <button type="button" onclick="changeLocation()">Set location</button>
         </div>
-        <div class="ea-err" id="err_location" style="margin-bottom:10px"></div>
+        <div class="ea-err" id="err_location"></div>
 
         <div class="ea-seg" id="locSeg" role="group" aria-label="Address type">
-          <button type="button" class="on" data-type="House" onclick="chooseType('House')"><i class="fa-solid fa-house"></i> House</button>
-          <button type="button" data-type="Office" onclick="chooseType('Office')"><i class="fa-solid fa-briefcase"></i> Office</button>
-          <button type="button" data-type="Other" onclick="chooseType('Other')"><i class="fa-solid fa-location-arrow"></i> Other</button>
+          <button type="button" class="on" data-type="House" onclick="chooseType('House')" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.4L12 4l8 6.4V19a1 1 0 0 1-1 1h-4.6v-5.6H9.6V20H5a1 1 0 0 1-1-1z"/></svg> House
+          </button>
+          <button type="button" data-type="Office" onclick="chooseType('Office')" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="8.6" width="16" height="11" rx="2.6"/><path d="M8.2 5h7.6"/></svg> Office
+          </button>
+          <button type="button" data-type="Other" onclick="chooseType('Other')" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M20 4L3.8 10.9l7.1 2.2 2.2 7.1z"/></svg> Other
+          </button>
         </div>
 
-        <div class="ea-field">
-          <label class="ea-label" for="house"><span id="lbl_house">House / Flat / Floor</span> <span class="req">*</span></label>
-          <input class="ea-input" id="house" maxlength="120" placeholder="House / Flat / Floor">
+        <div class="ea-float">
+          <input class="ea-input" id="house" maxlength="120" placeholder=" " autocomplete="address-line1">
+          <label for="house"><span id="lbl_house">House / Flat / Floor</span> <span class="req">*</span></label>
           <div class="ea-err" id="err_house"></div>
         </div>
 
-        <div class="ea-field">
-          <label class="ea-label" for="landmark"><span id="lbl_landmark">Building / Street</span> <span class="ea-sec-note">(Recommended)</span></label>
-          <input class="ea-input" id="landmark" maxlength="160" placeholder="Building name, street or nearby landmark">
+        <div class="ea-float">
+          <input class="ea-input" id="landmark" maxlength="160" placeholder=" " autocomplete="address-line2">
+          <label for="landmark"><span id="lbl_landmark">Building / Street</span> (Recommended)</label>
         </div>
 
-        <div class="ea-field">
-          <label class="ea-label" for="area">Area / Locality <span class="req">*</span></label>
-          <input class="ea-input" id="area" maxlength="120" placeholder="Locality, village or area">
-          <div class="ea-err" id="err_area"></div>
+        <div class="ea-area-row">
+          <div class="ea-float">
+            <textarea class="ea-input ea-textarea" id="area" rows="2" maxlength="120" placeholder=" "></textarea>
+            <label for="area">Area / Locality <span class="req">*</span></label>
+            <div class="ea-err" id="err_area"></div>
+          </div>
+          <button type="button" class="ea-maptile" onclick="changeLocation()" aria-label="Change delivery location on the map">
+            <svg viewBox="0 0 16 21" aria-hidden="true"><circle cx="8" cy="7" r="6.5" fill="currentColor"/><circle cx="8" cy="7" r="2.4" fill="#fff"/><path d="M8 13.5v3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="19" r="1.5" fill="currentColor"/></svg>
+            <span id="changeLocText">Change</span>
+          </button>
         </div>
 
+        <div class="ea-float ea-saveas">
+          <div class="ea-input ea-saveas-box">
+            <span class="ea-saveas-value" id="saveAsValue">Home</span>
+            <button type="button" class="ea-link" onclick="focusTypeSelector()" aria-label="Change what this address is saved as">Edit</button>
+          </div>
+          <span class="ea-float-label is-static">Save address as <span class="req">*</span></span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Location photos — hidden in first-address setup -->
+    <section class="ea-sec" id="photoSec">
+      <h2 class="ea-sec-title">Location Photos <span class="ea-sec-note">(Recommended)</span> <span class="ea-new">NEW</span></h2>
+      <div class="ea-row ea-photos" role="button" tabindex="0" aria-disabled="true" onclick="photosUnavailable()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();photosUnavailable()}">
+        <span class="ea-row-text">Add photos to help delivery partners reach faster<small>Photo upload isn't available yet.</small></span>
+        <span class="ea-photo-box" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5H9.6L8 7H5.6A1.6 1.6 0 0 0 4 8.6v9A1.6 1.6 0 0 0 5.6 19.2h12.8a1.6 1.6 0 0 0 1.6-1.6V11"/><circle cx="12" cy="13" r="3.1"/><path d="M19 3.2v4.6M16.7 5.5h4.6"/></svg>
+        </span>
       </div>
     </section>
 
     <!-- Delivery instructions -->
     <section class="ea-sec">
-      <div class="ea-sec-head">
-        <span class="ea-sec-title">Delivery Instructions</span>
-        <span class="ea-sec-note">(Recommended)</span>
-      </div>
-
-      <div class="ea-row" id="instrRow" onclick="openInstructions()">
-        <div class="ea-row-text" id="instrText">Instructions to reach location</div>
+      <h2 class="ea-sec-title">Delivery Instructions <span class="ea-sec-note">(Recommended)</span></h2>
+      <div class="ea-row" id="instrRow" role="button" tabindex="0" onclick="openInstructions()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openInstructions()}">
+        <span class="ea-row-text" id="instrText">Instructions to reach location</span>
         <span class="ea-row-cta" id="instrCta">Add</span>
       </div>
-
-      <div class="ea-panel" id="instrPanel" style="display:none;margin-top:9px">
-        <div class="ea-field">
-          <label class="ea-label" for="instructions">Instructions to reach location</label>
-          <textarea class="ea-area" id="instructions" maxlength="240" placeholder="Ring the second bell, gate is behind the blue shop…"></textarea>
+      <div class="ea-panel ea-instr" id="instrPanel" style="display:none">
+        <div class="ea-float">
+          <textarea class="ea-input ea-textarea" id="instructions" maxlength="240" placeholder=" "></textarea>
+          <label for="instructions">Instructions to reach location</label>
         </div>
-        <button type="button" class="ea-change" style="width:100%;justify-content:center;margin-top:2px" onclick="closeInstructions()">
-          <i class="fa-solid fa-check"></i> Done
-        </button>
+        <button type="button" class="ea-instr-done" onclick="closeInstructions()">Done</button>
       </div>
     </section>
 
-    <!-- Location photos — MODE 2 only -->
-    <section class="ea-sec" id="photoSec">
-      <div class="ea-sec-head">
-        <span class="ea-sec-title">Location Photos</span>
-        <span class="ea-sec-note">(Recommended)</span>
-        <span class="ea-new">New</span>
-      </div>
-      <div class="ea-row is-off" onclick="photosUnavailable()">
-        <div class="ea-row-text">
-          Add photos to help delivery partners reach faster
-          <small>Photo upload isn't available yet.</small>
-        </div>
-        <div class="ea-row-icon"><i class="fa-solid fa-camera"></i></div>
-      </div>
-    </section>
-
+   </div>
   </div>
 
   <div class="ea-form-foot">
-    <button class="ea-save" id="save" onclick="saveAddress()" disabled>Save Address</button>
+    <button type="button" class="ea-save" id="save" onclick="saveAddress()" disabled>Save Address</button>
   </div>
 </div>
 
-<div class="ea-toast" id="toast"></div>
+<!-- Three-dot menu for a saved address on "Select Your Location" -->
+<div class="ea-menu" id="addrMenu" role="menu" aria-label="Address options" hidden>
+  <button type="button" role="menuitem" data-menu-action="edit">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4.2L19 9.2 14.8 5 4 15.8z"/><path d="M13 6.8l4.2 4.2"/></svg> Edit
+  </button>
+  <button type="button" role="menuitem" class="is-danger" data-menu-action="delete">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.6h5V7M6.8 7l.9 12.4h8.6L17.2 7"/></svg> Delete
+  </button>
+</div>
 
-<script src="address.js?v=20260922-2"></script>
+<div class="ea-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="address.js?v=20260922-4"></script>
 
 <script src="navigation.js"></script>
 </body>
