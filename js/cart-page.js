@@ -323,7 +323,7 @@ async function ctComputeBreakdown(groups, force) {
 function renderMultiBreakdown(rows) {
   const box = document.getElementById('bill-per-restaurant');
   if (!box) return;
-  const muted = 'font-size:11px;color:#6b7280;';
+  const muted = 'font-size:var(--fs-micro);color:#6b7280;';
   const html = ['<div style="' + muted + 'font-weight:800;letter-spacing:.3px;text-transform:uppercase;margin:2px 0 6px;">Bill by restaurant</div>'];
   rows.forEach(r => {
     const feeText = r.outsideRadius ? 'Unavailable' : (Number(r.fee) === 0 ? 'FREE' : '₹' + r.fee);
@@ -1715,46 +1715,99 @@ function ctRetryCompleteMeal(){
   }, 900);
 }
 
-/* ── Complete your meal — real same-restaurant menu, real cart-add ───────────
-   Reads the restaurant's own menu from the backend restaurant record. If none
-   is present, the whole section stays hidden (no invented items). The + button
-   writes to nearbite_cart in the exact schema the rest of the app uses, then
-   re-renders through the existing repaintCart()/scheduleDelivery() path. */
-let ctMealItems = [];
-function ctExtractMenu(rest){
-  if (!rest || typeof rest !== 'object') return [];
-  let raw = [];
-  if (Array.isArray(rest.menu)) raw = rest.menu;
-  else if (Array.isArray(rest.menuItems)) raw = rest.menuItems;
-  else if (Array.isArray(rest.items)) raw = rest.items;
-  else if (Array.isArray(rest.categories)) rest.categories.forEach(c => {
-    if (c && Array.isArray(c.items)) raw = raw.concat(c.items);
-    else if (c && Array.isArray(c.menu)) raw = raw.concat(c.menu);
-  });
-  const flat = [];
-  raw.forEach(x => { if (x && Array.isArray(x.items)) flat.push.apply(flat, x.items); else if (x && typeof x === 'object') flat.push(x); });
-  return flat.map(it => {
-    const name = String(it.name || it.title || it.itemName || '').trim();
-    const price = Number(it.price != null ? it.price : (it.sellingPrice != null ? it.sellingPrice : (it.finalPrice != null ? it.finalPrice : it.amount)));
-    if (!name || !Number.isFinite(price) || price <= 0) return null;
-    const original = Number(it.originalPrice != null ? it.originalPrice : (it.mrp != null ? it.mrp : it.actualPrice));
-    const image = String(it.image || it.imageUrl || it.photo || it.img || '').trim();
-    const menuItem = it._id || it.id || it.menuItem || null;
-    const category = String(it.category || it.categoryName || it.section || it.type || '').trim();
-    const rating = Number(it.rating || it.avgRating || it.averageRating || 0);
-    const popularity = Number(it.ordersCount || it.orderCount || it.popularity || it.sales || 0);
-    const bestseller = it.bestseller === true || it.isBestseller === true || it.popular === true || it.isPopular === true;
-    let isVeg; if (it.isVeg === true || it.veg === true) isVeg = true; else if (it.isVeg === false || it.veg === false) isVeg = false;
-    return { name, price, originalPrice: (Number.isFinite(original) && original > price) ? original : 0, image, menuItem, isVeg, category, rating, popularity, bestseller };
-  }).filter(Boolean);
+/* ── Complete your meal ───────────────────────────────────────────────────
+   Real menu data only, read with the same field rules restaurant.html uses:
+     • categories  — the restaurant's own menu groups (normalizeMenu shapes)
+     • "Popular"   — only items the menu itself flags (isBestseller /
+                     bestseller / isMustTry / mustTry / isHighlyReordered /
+                     highlyReordered / isReordered / reordered)
+     • badge       — badge / tag / Bestseller / Must Try, exactly as the menu
+     • veg mark    — only when isVeg is a real boolean
+     • price, originalPrice (strike + % off only when originalPrice > price)
+   Never suggested: items already in the cart (by menu id, name or a
+   customised variant key), inStock === false, no price, no menu id, or a
+   restaurant that is closed.
+   Adding: plain items go through the ONE cart engine (cart-bar.js →
+   window.updateCart); items with real customisation groups open the
+   restaurant's own customisation sheet instead of being added blind. */
+let ctMealItems = [];        // flat index read by the + buttons
+let ctMealTabs = [];         // [{ key, label, idx: [item indexes] }]
+let ctMealTab = null;        // active capsule, kept across repaints
+let ctMealSeq = 0;           // discards stale async paints
+
+/* restaurant.html normalizeMenu(): [{category|name, items}] groups, a flat
+   item list grouped by category/categoryName, or a {Category: [items]} map. */
+function ctMenuGroups(data){
+  if (!data) return [];
+  if (Array.isArray(data)){
+    if (data.length && data[0] && Array.isArray(data[0].items)){
+      return data.filter(Boolean).map(g => ({ name: String(g.category || g.name || 'Menu'), items: (g.items || []).filter(Boolean) }))
+        .filter(g => g.items.length);
+    }
+    const grouped = new Map();
+    data.filter(x => x && typeof x === 'object').forEach(it => {
+      const k = String(it.category || it.categoryName || 'Menu');
+      if (!grouped.has(k)) grouped.set(k, []);
+      grouped.get(k).push(it);
+    });
+    return Array.from(grouped, ([name, items]) => ({ name, items }));
+  }
+  if (typeof data === 'object'){
+    return Object.keys(data).filter(k => Array.isArray(data[k]))
+      .map(k => ({ name: k, items: data[k].filter(x => x && typeof x === 'object') }))
+      .filter(g => g.items.length);
+  }
+  return [];
 }
-/* Some backends embed the menu in /restaurants/{id}; others expose it only at
-   /restaurants/{id}/menu. We read the embedded copy first and fall back to the
-   dedicated endpoint. Both go through the same extractor, so ONLY real menu
-   data is ever shown — any failure leaves the section hidden, never faked. */
-const ctMenuCache = {};   // rid -> extracted menu items (per restaurant, so a
-                          // multi-restaurant cart never evicts one restaurant's
-                          // menu by fetching another's)
+
+/* A menu embedded in the restaurant document (only its menu keys — the
+   document's other arrays, e.g. cuisine, are never read as categories). */
+function ctMenuGroupsFromRestaurant(rest){
+  if (!rest || typeof rest !== 'object') return [];
+  if (Array.isArray(rest.menu)) return ctMenuGroups(rest.menu);
+  if (Array.isArray(rest.menuItems)) return ctMenuGroups(rest.menuItems);
+  if (Array.isArray(rest.items)) return ctMenuGroups(rest.items);
+  if (Array.isArray(rest.categories)) return ctMenuGroups(rest.categories.filter(Boolean).map(c => ({
+    category: c.name || c.category, items: Array.isArray(c.items) ? c.items : (Array.isArray(c.menu) ? c.menu : [])
+  })));
+  if (rest.menu && typeof rest.menu === 'object') return ctMenuGroups(rest.menu);
+  return [];
+}
+
+function ctMealItemFrom(raw, category){
+  if (!raw || typeof raw !== 'object') return null;
+  const name = String(raw.name || raw.title || raw.itemName || '').trim();
+  const rawPrice = raw.price != null ? raw.price : (raw.sellingPrice != null ? raw.sellingPrice : raw.finalPrice);
+  const price = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice == null ? '' : rawPrice).replace(/[^\d.]/g, ''));
+  const menuItem = raw._id || raw.id || null;
+  // updateCart() and POST /orders both require a menu id; the menu page
+  // blocks out-of-stock items the same way.
+  if (!name || !(price > 0) || !menuItem || raw.inStock === false) return null;
+  const orig = Number(raw.originalPrice);
+  const bestseller = raw.isBestseller === true || raw.bestseller === true;
+  const mustTry = raw.isMustTry === true || raw.mustTry === true;
+  const reordered = raw.isHighlyReordered === true || raw.highlyReordered === true || raw.isReordered === true || raw.reordered === true;
+  const badge = String(raw.badge || raw.tag || (bestseller ? 'Bestseller' : '') || (mustTry ? 'Must Try' : '')).trim();
+  return {
+    name, price, menuItem: String(menuItem),
+    originalPrice: (Number.isFinite(orig) && orig > price) ? orig : 0,
+    image: String(raw.image || raw.img || raw.imageUrl || raw.photo || '').trim(),
+    isVeg: typeof raw.isVeg === 'boolean' ? raw.isVeg : undefined,
+    category: String(category || raw.category || raw.categoryName || '').trim(),
+    badge, popular: bestseller || mustTry || reordered,
+    customizable: Array.isArray(raw.customizations) &&
+      raw.customizations.some(g => g && Array.isArray(g.options) && g.options.length)
+  };
+}
+
+/* Flat item list — kept for any caller of the previous API. */
+function ctExtractMenu(rest){
+  return ctMenuGroupsFromRestaurant(rest).flatMap(g => g.items.map(it => ctMealItemFrom(it, g.name)).filter(Boolean));
+}
+
+/* Menu groups per restaurant: the copy embedded in the restaurant document
+   (already fetched for delivery) first, then GET /restaurants/:id/menu. */
+const ctMenuCache = {};
 async function ctFetchMenu(rid){
   if (!rid) return [];
   if (ctMenuCache[rid]) return ctMenuCache[rid];
@@ -1762,112 +1815,242 @@ async function ctFetchMenu(rid){
     const res = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}/menu`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
-    const data = (json && (json.data != null ? json.data : json)) || [];
-    const items = ctExtractMenu(Array.isArray(data) ? { menu: data } : data);
-    ctMenuCache[rid] = items;
-    return items;
+    const data = (json && json.data != null) ? json.data : json;
+    const groups = ctMenuGroups(data);
+    ctMenuCache[rid] = groups;
+    return groups;
   } catch (_) { return []; }
 }
-
-/* Pull a restaurant's own menu, preferring the copy embedded in the restaurant
-   document (already cached from the delivery calc) and falling back to the
-   dedicated /menu endpoint. Returns only real, in-stock, priced items. */
 async function ctMenuForRestaurant(rid){
-  if (!rid) return [];
+  if (!rid) return { groups: [], open: true };
   let rest = (ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
   if (!rest){ try { rest = await getRestaurantLocation(rid); } catch (_) {} }
-  let items = ctExtractMenu(rest);
-  if (!items.length) items = await ctFetchMenu(rid);
-  return items;
+  // Same open rule as restaurant.html: a closed restaurant cannot take adds.
+  const open = !rest || (rest.isOpen !== false && !(rest.availability && rest.availability.isOpen === false));
+  let groups = ctMenuGroupsFromRestaurant(rest);
+  if (!groups.length) groups = await ctFetchMenu(rid);
+  return { groups, open };
 }
 
-function ctMealCardHtml(it, idx){
-  const media = it.image
-    ? '<img src="' + esc(it.image) + '" alt="" loading="lazy" onerror="this.remove()">'
-    : '<span class="ct-meal-ph"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4.5h10v15H7z" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 8h5M9.5 12h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>';
-  const veg = it.isVeg === true ? '<span class="ct-meal-veg" aria-label="Vegetarian"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></span>' : '';
-  const oldPrice = it.originalPrice > it.price ? '<s>₹' + it.originalPrice + '</s>' : '';
-  const off = it.originalPrice > it.price ? '<span class="ct-meal-off">' + Math.round((1 - it.price / it.originalPrice) * 100) + '% OFF</span>' : '';
-  const badge = it.bestseller ? '<span class="ct-meal-badge">Popular</span>' : '';
-  return '<div class="ct-meal-card">' +
-    '<div class="ct-meal-media">' + media + badge + veg +
-      '<button type="button" class="ct-meal-add" data-meal-add="' + idx + '" aria-label="Add ' + esc(it.name) + '">' +
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' +
-      '</button>' +
+/* Ordering only — capsule labels are always the menu's own category names.
+   Drinks, desserts and sides complete a meal, so they lead. */
+const CT_PAIRING = [
+  [/(beverage|drink|juice|shake|lassi|\btea\b|chai|coffee|soda|mocktail|cooler|thanda)/i, 3],
+  [/(dessert|sweet|mithai|ice ?cream|kulfi|cake|brownie|pastry|payesh|halwa)/i, 3],
+  [/(side|extra|add[- ]?on|raita|salad|bread|roti|naan|kulcha|papad|fries|dip|sauce|chutney)/i, 2],
+  [/(starter|snack|appeti[sz]er|momo|roll|soup|chaat)/i, 1]
+];
+function ctPairWeight(category){
+  for (const [re, w] of CT_PAIRING) if (re.test(category || '')) return w;
+  return 0;
+}
+
+function ctInCartTest(cart){
+  const ids = new Set(), names = new Set(), keys = Object.keys(cart || {});
+  keys.forEach(k => {
+    const e = cart[k] || {};
+    if (e.menuItem) ids.add(String(e.menuItem));
+    names.add(String(k).toLowerCase());
+  });
+  return it => ids.has(it.menuItem) || names.has(it.name.toLowerCase()) ||
+    keys.some(k => k.toLowerCase().indexOf(it.name.toLowerCase() + ' (') === 0);   // customised variant
+}
+
+function ctMealCardHtml(it, idx, multi){
+  const img = itemImage(it);
+  const media = img
+    ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">'
+    : '';
+  const off = it.originalPrice > it.price ? Math.round((1 - it.price / it.originalPrice) * 100) : 0;
+  const plus = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  const note = it.customizable ? 'Customisable' : (multi ? 'From ' + it.resName : '');
+  return '<article class="ct-cym-card" data-cym-card="' + idx + '">' +
+    '<div class="ct-cym-media">' + media +
+      (it.badge ? '<span class="ct-cym-badge">' + esc(it.badge) + '</span>' : '') +
+      '<button type="button" class="ct-cym-add" data-meal-add="' + idx + '" aria-label="' +
+        (it.customizable ? 'Customise ' : 'Add ') + esc(it.name) + '">' + plus + '</button>' +
     '</div>' +
-    '<div class="ct-meal-name">' + esc(it.name) + '</div>' +
-    '<div class="ct-meal-price"><span>₹' + it.price + '</span> ' + oldPrice + ' ' + off + '</div>' +
-  '</div>';
+    '<div class="ct-cym-name">' + vegMark(it) + '<span>' + esc(it.name) + '</span></div>' +
+    '<div class="ct-cym-price"><span class="ct-cym-now">₹' + esc(it.price) + '</span>' +
+      (off ? '<s>₹' + esc(it.originalPrice) + '</s><span class="ct-cym-off">' + off + '% OFF</span>' : '') +
+    '</div>' +
+    // Always present (empty when unused) so every card reserves the same
+    // height and switching capsules never resizes the section.
+    '<div class="ct-cym-note"' + (note ? '' : ' aria-hidden="true"') + '>' + esc(note) + '</div>' +
+  '</article>';
+}
+
+function ctPaintMealTrack(animate){
+  const track = document.getElementById('ct-meal-row');
+  const tabsEl = document.getElementById('ct-cym-tabs');
+  if (!track || !tabsEl) return;
+  const tab = ctMealTabs.find(t => t.key === ctMealTab) || ctMealTabs[0];
+  if (!tab) return;
+  ctMealTab = tab.key;
+  const multi = new Set(ctMealItems.map(x => x.resId)).size > 1;
+  track.innerHTML = tab.idx.map(i => ctMealCardHtml(ctMealItems[i], i, multi)).join('');
+  track.setAttribute('aria-labelledby', 'ct-cym-tab-' + ctMealTabs.indexOf(tab));
+  tabsEl.querySelectorAll('[data-cym-tab]').forEach(b => {
+    const on = b.getAttribute('data-cym-tab') === tab.key;
+    b.classList.toggle('is-active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+    b.tabIndex = on ? 0 : -1;
+  });
+  if (animate){
+    track.classList.remove('is-in'); void track.offsetWidth; track.classList.add('is-in');
+    track.scrollTo({ left: 0, behavior: ctReducedMotion() ? 'auto' : 'smooth' });
+  }
+}
+
+function ctSelectMealTab(key){
+  if (!key || key === ctMealTab) return;
+  ctMealTab = key;
+  ctPaintMealTrack(true);
+  const btn = document.querySelector('#ct-cym-tabs [data-cym-tab="' + CSS.escape(key) + '"]');
+  if (btn) btn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: ctReducedMotion() ? 'auto' : 'smooth' });
 }
 
 async function paintCompleteMeal(){
   const section = document.getElementById('ct-meal');
-  const stack = document.getElementById('ct-meal-row');
-  if (!section || !stack) return;
+  const track = document.getElementById('ct-meal-row');
+  const tabsEl = document.getElementById('ct-cym-tabs');
+  if (!section || !track || !tabsEl) return;
+  const seq = ++ctMealSeq;
   const cart = readCart() || {};
-  const groups = ctCartGroups();                       // one entry per restaurant in the cart
+  const groups = ctCartGroups();
   if (!groups.length){ section.hidden = true; return; }
-  const inCart = new Set(Object.keys(cart).map(n => n.toLowerCase()));
-  const multi = groups.length > 1;
 
-  // Rebuild the flat index the + button reads, spanning every restaurant strip.
-  ctMealItems = [];
-  const blocks = [];
+  const inCart = ctInCartTest(cart);
+  const cartEntries = Object.values(cart).filter(Boolean);
+  const cartVeg = cartEntries.some(x => x.isVeg === true) && !cartEntries.some(x => x.isVeg === false);
+  const avg = cartEntries.length ? cartEntries.reduce((a, x) => a + Number(x.price || 0), 0) / cartEntries.length : 0;
+
+  const items = [];
+  const catMap = new Map();                      // lower-case category → { label, idx[], order, pair, hasCart }
   for (const g of groups){
-    const rid = g.resId;
-    const menu = await ctMenuForRestaurant(rid);
-    const cartItems = Object.entries(cart).filter(([name, info]) => info && String(info.resId) === String(rid)).map(([name, info]) => ({ name: String(name), price: Number(info.price || 0), isVeg: info.isVeg }));
-    const cartWords = cartItems.flatMap(x => x.name.toLowerCase().split(/\s+/).filter(w => w.length > 2));
-    const cartVeg = cartItems.some(x => x.isVeg === true) && !cartItems.some(x => x.isVeg === false);
-    const avgPrice = cartItems.length ? cartItems.reduce((a,x)=>a+x.price,0) / cartItems.length : 0;
-    const scored = menu.filter(it => !inCart.has(it.name.toLowerCase())).map(it => {
-      let score = 0;
-      const words = (it.name + ' ' + (it.category || '')).toLowerCase();
-      cartWords.forEach(w => { if (words.includes(w)) score += 2; });
-      if (cartVeg && it.isVeg === true) score += 2;
-      if (avgPrice > 0) score += Math.max(0, 2 - Math.abs(it.price - avgPrice) / Math.max(avgPrice, 1));
-      if (it.bestseller) score += 3;
-      if (Number.isFinite(it.rating) && it.rating >= 4.5) score += 1.5;
-      if (it.originalPrice > it.price) score += 1;
-      score += Math.min(2, Number(it.popularity || 0) / 100);
-      return { it, score };
-    }).sort((a,b) => b.score - a.score || a.it.price - b.it.price);
-    const picks = scored.slice(0, 12).map(x => x.it);
-    if (!picks.length) continue;                       // this restaurant has nothing to suggest
-    const cards = picks.map(it => {
-      const idx = ctMealItems.length;
-      ctMealItems.push(Object.assign({}, it, { resId: rid, resName: g.name }));
-      return ctMealCardHtml(it, idx);
-    }).join('');
-    blocks.push(
-      (multi ? '<div class="ct-meal-group-label">More from ' + esc(g.name) + '</div>' : '') +
-      '<div class="ct-meal-row">' + cards + '</div>'
-    );
+    const { groups: menu, open } = await ctMenuForRestaurant(g.resId);
+    if (seq !== ctMealSeq) return;               // a newer repaint owns the section
+    if (!open) continue;
+    menu.forEach((grp, gi) => {
+      const cartHere = grp.items.some(raw => {
+        const it = ctMealItemFrom(raw, grp.name);
+        return it && inCart(it);
+      });
+      grp.items.forEach(raw => {
+        const it = ctMealItemFrom(raw, grp.name);
+        if (!it || inCart(it)) return;
+        it.resId = g.resId; it.resName = g.name;
+        const pair = ctPairWeight(it.category);
+        let score = pair + (it.popular ? 3 : 0) + (it.originalPrice ? 1 : 0);
+        if (cartVeg && it.isVeg === true) score += 1.5;
+        if (avg > 0) score += Math.max(0, 1 - Math.abs(it.price - avg) / Math.max(avg, 1));
+        it._score = score;
+        const idx = items.push(it) - 1;
+        const key = (it.category || 'Menu').toLowerCase();
+        if (!catMap.has(key)) catMap.set(key, { label: it.category || 'Menu', idx: [], order: gi, pair, hasCart: false });
+        const c = catMap.get(key);
+        c.idx.push(idx);
+        if (cartHere) c.hasCart = true;
+      });
+    });
   }
+  if (seq !== ctMealSeq) return;
+  if (!items.length){ section.hidden = true; ctMealItems = []; ctMealTabs = []; return; }
 
-  if (!blocks.length){ section.hidden = true; return; }  // no real menu data anywhere → stay hidden
-  stack.innerHTML = blocks.join('');
+  const byScore = (a, b) => items[b]._score - items[a]._score || items[a].price - items[b].price;
+  const tabs = [];
+  const popular = items.map((x, i) => i).filter(i => items[i].popular).sort(byScore).slice(0, 12);
+  if (popular.length) tabs.push({ key: 'popular', label: 'Popular', idx: popular });
+  Array.from(catMap.values())
+    .sort((a, b) => (b.pair - (b.hasCart ? 2 : 0)) - (a.pair - (a.hasCart ? 2 : 0)) || a.order - b.order)
+    .forEach((c, n) => tabs.push({ key: 'cat:' + c.label.toLowerCase(), label: c.label, idx: c.idx.slice().sort(byScore).slice(0, 12) }));
+  // A flat menu with no real categories normalises to one "Menu" group —
+  // that is not a category worth a capsule.
+  const realTabs = tabs.filter(t => t.key !== 'cat:menu' || tabs.length === 1).slice(0, 8);
+
+  ctMealItems = items;
+  ctMealTabs = realTabs;
+  if (!realTabs.some(t => t.key === ctMealTab)) ctMealTab = realTabs[0].key;
+
+  // Capsules only when there is a real choice to make.
+  tabsEl.hidden = realTabs.length < 2;
+  tabsEl.innerHTML = realTabs.map((t, i) =>
+    '<button type="button" role="tab" class="ct-cym-tab" id="ct-cym-tab-' + i + '" data-cym-tab="' + esc(t.key) + '" aria-controls="ct-meal-row">' + esc(t.label) + '</button>'
+  ).join('');
+  const from = document.getElementById('ct-cym-from');
+  if (from){
+    const names = Array.from(new Set(items.map(x => x.resName).filter(Boolean)));
+    from.textContent = names.length === 1 ? 'From ' + names[0] : '';
+    from.hidden = names.length !== 1;
+  }
+  const keepScroll = track.scrollLeft;
+  ctPaintMealTrack(false);
+  track.scrollLeft = keepScroll;
   section.hidden = false;
 }
 ctRetryCompleteMeal();
 
-function ctAddMealItem(idx){
+/* Capsules behave as a tablist: ←/→ move the selection. */
+(function ctBindMealTabKeys(){
+  const tabs = document.getElementById('ct-cym-tabs');
+  if (!tabs) return;
+  tabs.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const list = Array.from(tabs.querySelectorAll('[data-cym-tab]'));
+    const i = list.findIndex(b => b.getAttribute('data-cym-tab') === ctMealTab);
+    const next = list[(i + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length];
+    if (!next) return;
+    e.preventDefault();
+    ctSelectMealTab(next.getAttribute('data-cym-tab'));
+    next.focus();
+  });
+})();
+
+let ctMealBusy = false;
+function ctAddMealItem(idx, btn){
   const it = ctMealItems[idx];
-  if (!it) return;
-  let cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
-  if (cart[it.name]){
-    cart[it.name].quantity = Number(cart[it.name].quantity || 0) + 1;
-  } else {
-    cart[it.name] = { price: it.price, originalPrice: it.originalPrice || 0, quantity: 1,
-      resId: it.resId, resName: it.resName, menuItem: it.menuItem || null,
-      image: it.image || '', customizations: {} };
-    if (typeof it.isVeg === 'boolean') cart[it.name].isVeg = it.isVeg;
+  if (!it || ctMealBusy) return;
+
+  // Items with customisation groups use the restaurant's own sheet — never
+  // added with empty choices from here.
+  if (it.customizable){
+    window.location.href = 'restaurant.html?id=' + encodeURIComponent(it.resId) + '&customize=' + encodeURIComponent(it.menuItem);
+    return;
   }
-  localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+  if (typeof window.updateCart !== 'function'){
+    console.error('[checkout] cart engine (cart-bar.js) is not loaded');
+    showToast('Could not add this item right now. Please try again.', 'error');
+    return;
+  }
+
+  const before = readCart() || {};
+  const prevQty = before[it.name] ? Number(before[it.name].quantity || 0) : 0;
+  window.updateCart(it.name, 1, it.price, it.resId, true, it.menuItem, it.image || '', it.isVeg, it.originalPrice || null);
+  const cart = readCart() || {};
+  const entry = cart[it.name];
+  if (!entry || Number(entry.quantity || 0) <= prevQty){
+    showToast('Could not add ' + it.name + '. Please try again.', 'error');
+    return;
+  }
+  // The engine reads the restaurant name from the menu page's header; on
+  // checkout it is supplied from the cart group instead (same field).
+  if (!entry.restaurantName && it.resName){
+    entry.restaurantName = it.resName;
+    localStorage.setItem('nearbite_cart', JSON.stringify(cart));
+  }
+  // Same rule as cartAdjust(): any cart change voids the pending order key.
   localStorage.removeItem('nearbite_checkout_key');
-  repaintCart();
-  scheduleDelivery();
-  showToast(it.name + ' added to cart');
+
+  ctMealBusy = true;
+  const card = btn && btn.closest('.ct-cym-card');
+  if (card) card.classList.add('is-added');
+  const done = () => {
+    ctMealBusy = false;
+    repaintCart();
+    scheduleDelivery();
+    showToast(it.name + ' added to your order');
+  };
+  if (card && !ctReducedMotion()) setTimeout(done, 280); else done();
 }
 
 /* ── Savings hero + footer savings — display only, from the SAME real
@@ -2115,12 +2298,12 @@ function paintCheckoutDeliverySummary() {
     const eta = cached ? ctEtaText(cached) : '';
     // Never let "unavailable" become the headline — the line reads "{eta} to {tag}",
     // so a missing ETA falls back to a calm "Delivery to {tag}".
-    etaEl.textContent = eta || '30–40 mins';
+    etaEl.textContent = eta || 'Delivery';
     if (!eta && rid) {
       getRestaurantLocation(rid).then(r => {
         const t = r ? ctEtaText(r) : '';
         const el = document.getElementById('checkout-eta');
-        if (el) el.textContent = t || '30–40 mins';
+        if (el) el.textContent = t || 'Delivery';
       }).catch(() => {});
     }
   }
@@ -2136,6 +2319,14 @@ function paintCheckoutDeliverySummary() {
     addressDisplay.textContent = addressText.replace(/,\s*[^,]+$/, '');
   }
 
+  const shownTag = /^(work|office)$/i.test(tag) ? 'Office' : tag;   // display only
+  const dTag = document.getElementById('ct-details-tag');
+  const dAddr = document.getElementById('ct-details-address');
+  if (dTag) dTag.textContent = shownTag || 'your address';
+  if (dAddr) {
+    dAddr.textContent = addressText || 'Add a delivery address to continue';
+    dAddr.classList.toggle('is-empty', !addressText);
+  }
   const contact = ctCustomerContact();
   const nameEl = document.getElementById('checkout-customer-name');
   const phoneEl = document.getElementById('checkout-customer-phone');
@@ -2241,7 +2432,13 @@ document.addEventListener('click', (event) => {
 
   const mealAdd = target.closest('[data-meal-add]');
   if (mealAdd) {
-    ctAddMealItem(Number(mealAdd.getAttribute('data-meal-add')));
+    ctAddMealItem(Number(mealAdd.getAttribute('data-meal-add')), mealAdd);
+    return;
+  }
+
+  const mealTab = target.closest('#ct-cym-tabs [data-cym-tab]');
+  if (mealTab) {
+    ctSelectMealTab(mealTab.getAttribute('data-cym-tab'));
     return;
   }
 
