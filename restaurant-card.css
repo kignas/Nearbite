@@ -1671,3 +1671,42 @@
 body.u99-cust-open{ overflow:hidden; }   /* page cannot scroll behind sheet */
 body.u99-cust-open #white-cart-root,
 body.u99-cust-open #nearbite-help-center{ display:none !important; }
+
+/* ================================================================
+   STEP 1 — RESTAURANT CARD HEIGHT / PROPORTION ONLY
+   ----------------------------------------------------------------
+   The current food rail uses a very shallow 2.40:1 image box, which
+   makes the complete restaurant card read visually short on mobile.
+   This pass increases the food-image presence without changing:
+   - colours
+   - typography
+   - card branding
+   - JavaScript / cart behaviour
+   - markup
+   - restaurant data
+   ================================================================ */
+
+@media (max-width: 430px) {
+  .u99-item-image {
+    aspect-ratio: 1.75 / 1;
+  }
+
+  .u99-carousel {
+    min-height: calc((100vw - 42px) / 1.75 + 57px);
+  }
+
+  .u99-carousel.u99-carousel-empty {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 370px) {
+  .u99-carousel {
+    min-height: calc((100vw - 40px) / 1.75 + 55px);
+  }
+
+  .u99-carousel.u99-carousel-empty {
+    min-height: 0;
+  }
+}
+
