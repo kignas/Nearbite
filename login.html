@@ -623,8 +623,8 @@
       if(googleRedirectResolving) return;
       googleRedirectResolving=true;
 
-      const pending=googleRedirectPending();   // we started a Google redirect from this tab
-      const gated=authGateActive();            // the login form is currently held back
+      const pending=googleRedirectPending();
+      const gated=authGateActive();
 
       try{
         if(!initFirebase()){
@@ -632,19 +632,74 @@
           return;
         }
 
-        const result=await firebase.auth().getRedirectResult();
-        clearGoogleRedirectPending();          // the redirect has now been consumed
+        const auth=firebase.auth();
+        const result=await auth.getRedirectResult();
 
+        /*
+         * IMPORTANT:
+         * Do not clear the callback gate before authentication has reached a
+         * terminal state. Firebase can restore its auth state separately from
+         * the redirect result. Revealing login here can create the exact
+         * "Google -> login page -> Home" flash.
+         */
         if(result && result.user){
-          // Keeps the gate up: finishGoogleLogin routes on to complete-profile
-          // or the requested page, so the login form is never exposed.
           await finishGoogleLogin(result.user);
           return;
         }
 
-        // Came back without a completed sign-in (cancelled at Google, or a
-        // reload after the redirect was already consumed).
-        if(gated) revealLoginForm(pending?'Google sign-in was not completed. Please try again.':'');
+        /*
+         * If Firebase returned no redirect credential, check the already
+         * restored currentUser before exposing the login form.
+         */
+        if(pending){
+          const currentUser=auth.currentUser;
+
+          if(currentUser){
+            await finishGoogleLogin(currentUser);
+            return;
+          }
+
+          /*
+           * Wait for Firebase's initial auth-state restoration once.
+           * This is event-driven; there is no artificial timeout.
+           */
+          const restoredUser=await new Promise(resolve=>{
+            let settled=false;
+
+            const unsubscribe=auth.onAuthStateChanged(user=>{
+              if(settled) return;
+              settled=true;
+              try{ unsubscribe(); }catch(e){}
+              resolve(user||null);
+            });
+
+            /*
+             * onAuthStateChanged normally fires immediately after Firebase
+             * has restored persistence. This fallback prevents a listener
+             * from being left behind if the SDK behaves unexpectedly.
+             */
+            Promise.resolve().then(()=>{
+              if(settled) return;
+              const userNow=auth.currentUser;
+              if(userNow){
+                settled=true;
+                try{ unsubscribe(); }catch(e){}
+                resolve(userNow);
+              }
+            });
+          });
+
+          if(restoredUser){
+            await finishGoogleLogin(restoredUser);
+            return;
+          }
+
+          revealLoginForm('Google sign-in was not completed. Please try again.');
+          return;
+        }
+
+        // Normal visit to login.html: no redirect was initiated here.
+        if(gated) revealLoginForm('');
       }catch(e){
         console.error(e);
         clearGoogleRedirectPending();
