@@ -899,6 +899,36 @@
     renderRestaurants();
   }
 
+  function allowOutsideBrowse() {
+    try { return new URLSearchParams(window.location.search).get('allowOutside') === '1'; }
+    catch (e) { return false; }
+  }
+
+  /* If the selected location is outside every restaurant's verified delivery
+     radius, show the dedicated service-area page. This is a browsing/service
+     state, not an authentication state. The customer can still choose any
+     location and return to Home with ?allowOutside=1 to explore. */
+  function maybeRedirectOutsideServiceArea() {
+    if (allowOutsideBrowse()) return;
+    if (state.loc.status !== 'ready' || !state.restaurants.length) return;
+    var coords = card.getCustomerCoordinates();
+    if (!coords) return;
+    var allOutside = true;
+    var checked = 0;
+    state.restaurants.forEach(function (res) {
+      var restaurantCoords = card.read.coordinates(res);
+      if (!restaurantCoords) return;
+      checked += 1;
+      if (card.resolveAvailability(res, coords) !== 'outside_delivery_area') allOutside = false;
+    });
+    if (!checked || !allOutside) return;
+    if (window.__esOutsideServiceRedirected) return;
+    window.__esOutsideServiceRedirected = true;
+    window.setTimeout(function () {
+      window.location.replace('service-unavailable.html');
+    }, 120);
+  }
+
   /* "Recommended with deals" is only true when the data actually carries
      offers, so the heading follows the data instead of asserting it. */
   function renderSectionTitle() {
@@ -1161,6 +1191,7 @@
     if (state.status !== 'loading' && status !== 'locating') {
       renderFilterBar();   // the Distance sort appears once a location exists
       renderRestaurants(); // re-reads the coordinates and re-decides every card
+      maybeRedirectOutsideServiceArea();
     }
   }
 
@@ -1241,6 +1272,39 @@
       },
       GPS_OPTIONS
     );
+  }
+
+  /* ── Progressive profile setup ──────────────────────────────── */
+  function profileNeedsSetup() {
+    try {
+      var raw = localStorage.getItem('nearbite_user');
+      if (!raw) return false;
+      var user = JSON.parse(raw) || {};
+      var name = String(user.name || '').trim();
+      var placeholder = /^(Nearbite|Eatswada) User$/i.test(name);
+      return placeholder || !String(user.phone || '').trim();
+    } catch (e) { return false; }
+  }
+
+  function renderProfileSetupBanner() {
+    var host = el('profile-setup-banner');
+    if (!host) return;
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem('eatswada_profile_prompt_dismissed') === '1'; } catch (e) {}
+    if (!profileNeedsSetup() || dismissed) {
+      host.hidden = true;
+      host.innerHTML = '';
+      return;
+    }
+    host.innerHTML =
+      '<span class="psb-icon"><i class="fa-solid fa-user-pen" aria-hidden="true"></i></span>' +
+      '<span class="psb-copy"><span class="psb-title">Finish setting up your profile</span>' +
+      '<span class="psb-text">Add your mobile number and password when you are ready.</span></span>' +
+      '<button type="button" class="psb-btn" id="profile-setup-btn">Complete</button>';
+    host.hidden = false;
+    host.querySelector('#profile-setup-btn')?.addEventListener('click', function () {
+      window.location.href = 'complete-profile.html';
+    });
   }
 
   /* ── Location banner ────────────────────────────────────────── */
@@ -1582,6 +1646,7 @@
     revalidateSavedAddress();
 
     showProfileInitial();
+    renderProfileSetupBanner();
     startSearchPlaceholder();
     loadRestaurants();
     loadCategories();

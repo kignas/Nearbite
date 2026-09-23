@@ -29,6 +29,7 @@
     'track-order.html': 'orders.html',
     'legal.html': 'profile.html',
     'location-onboarding.html': 'index.html',
+    'service-unavailable.html': 'index.html',
     'complete-profile.html': 'login.html',
     'address-new.html': 'index.html'
   };

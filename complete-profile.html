@@ -286,13 +286,13 @@
   const $ = id => document.getElementById(id);
   const googleMode = new URLSearchParams(location.search).get('google') === '1';
   const pendingGoogleToken = sessionStorage.getItem('nearbite_google_pending_token') || '';
-  const ADDRESS_STEP='address.html?add=1';
-  const LOCATION_STEP='location-onboarding.html?from=complete-profile'
-    + '&next=' + encodeURIComponent(ADDRESS_STEP)
-    + '&return=' + encodeURIComponent(ADDRESS_STEP);
+  const sessionToken = localStorage.getItem('nearbite_token') || localStorage.getItem('token') || '';
 
-  if(!googleMode && !(localStorage.getItem('nearbite_token')||localStorage.getItem('token'))) window.location.replace('login.html');
-  if(googleMode && !pendingGoogleToken) window.location.replace('login.html');
+  // Profile is now progressive. This page can be opened from Home/Profile as
+  // well as the legacy Google onboarding link. Location/address are separate
+  // delivery concerns and are never forced here.
+  if(!googleMode && !sessionToken) window.location.replace('login.html');
+  if(googleMode && !pendingGoogleToken && !sessionToken) window.location.replace('login.html');
 
   function formatPhone(raw){
     const d=String(raw||'').replace(/\D/g,'').slice(-10);
@@ -321,8 +321,8 @@
     syncCta();
   }
   async function loadExistingProfile(){
-    if(googleMode){ paintGoogleProfile(); return; }
-    const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');
+    if(googleMode && pendingGoogleToken){ paintGoogleProfile(); return; }
+    const token=sessionToken;
     try{const r=await fetch(`${API}/users/profile`,{headers:{Authorization:`Bearer ${token}`}});const d=await r.json();if(!r.ok||!d.success)return;const u=d.data||{};$('phone').value=formatPhone(u.phone);if(u.name&&!/^(Nearbite|Eatswada) User$/i.test(u.name))$('name').value=u.name;if(u.email)$('email').value=u.email;}catch(e){console.warn(e)}finally{syncCta()}
   }
   function togglePassword(){const i=$('password'),shown=i.type==='text';i.type=shown?'password':'text';if($('pwIcon'))$('pwIcon').className=shown?'fa-solid fa-eye':'fa-solid fa-eye-slash';}
@@ -345,9 +345,14 @@
         const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');
         const res=await fetch(`${API}/users/profile`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),email:$('email').value.trim(),password:$('password').value})});
         result=await res.json().catch(()=>({}));if(!res.ok||!result.success)throw new Error(result.message||'Could not save your details. Please try again.');
-        localStorage.setItem('nearbite_user',JSON.stringify(result.data||{}));
+        if(result.data?.token){ localStorage.setItem('nearbite_token',result.data.token); localStorage.setItem('token',result.data.token); }
+        localStorage.setItem('nearbite_user',JSON.stringify(result.data?.user||result.data||{}));
       }
-      const requested=localStorage.getItem('nearbite_after_login')||'index.html';localStorage.setItem('nearbite_after_login',requested);window.location.href=LOCATION_STEP;
+      // Profile completion is no longer a gateway. Return to the page that
+      // opened this screen, or Home when opened directly.
+      const requested=localStorage.getItem('nearbite_after_login')||'index.html';
+      localStorage.removeItem('nearbite_after_login');
+      window.location.replace(requested);
     }catch(e){console.error(e);showError(e.message||'Something went wrong. Please try again.');$('loading').style.display='none';syncCta()}
   }
   document.addEventListener('DOMContentLoaded',loadExistingProfile);

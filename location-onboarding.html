@@ -272,7 +272,7 @@ body{animation:none}
 </div>
 
 <script src="safe-html.js"></script>
-<script src="address-model.js?v=20260922-4"></script>
+<script src="address-model.js?v=20260923-1"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // Maynaguri, West Bengal — visual fallback only.
@@ -657,11 +657,16 @@ async function confirmLocation(){
  btn.disabled=true; btn.textContent='Saving location…';
  try{
    const d=await reverseGeocode(current.lat,current.lng);
-   localStorage.setItem('nearbite_onboarding_location',JSON.stringify({
+   const pointPayload={
      latitude:Number(current.lat.toFixed(7)),longitude:Number(current.lng.toFixed(7)),
      accuracy:Number((current.accuracy||0).toFixed(1)),
      source:current.source|| (firstFix?'gps':'map'),capturedAt:Date.now()
-   }));
+   };
+   localStorage.setItem('nearbite_onboarding_location',JSON.stringify(pointPayload));
+   // Home uses this lightweight device-location cache when the customer is
+   // browsing before a saved delivery address exists. It does not create or
+   // overwrite a saved address.
+   localStorage.setItem('eatswada_device_location',JSON.stringify({lat:pointPayload.latitude,lng:pointPayload.longitude,ts:Date.now()}));
    if(d) localStorage.setItem('nearbite_onboarding_geocode',JSON.stringify(d));
    localStorage.setItem('nearbite_location_permission_seen','1');
    // Coordinates are already stored above, so either destination receives
@@ -669,7 +674,8 @@ async function confirmLocation(){
    const handoff=nextDestination();
    if(handoff){ window.location.href=handoff; return }
    const next=localStorage.getItem('nearbite_after_login');
-   window.location.href='complete-profile.html?location=done'+(next?'':'&new=1');
+   localStorage.removeItem('nearbite_after_login');
+   window.location.replace(next || 'index.html');
  }catch(e){
    warn('We could not save the location. Please try again.');
    btn.disabled=false; btn.textContent='Confirm & proceed';

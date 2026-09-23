@@ -473,19 +473,22 @@
       localStorage.setItem('nearbite_user',JSON.stringify(user));
       return {token,user};
     }
-    function routeAfterAuthentication(profile,requestedPage){
-      const addresses=Array.isArray(profile?.addresses)?profile.addresses:[];
-      const placeholder=/^(Nearbite|Eatswada) User$/i;
-      const hasRealName=!!profile?.name && !placeholder.test(String(profile.name).trim());
-      const hasAddress=addresses.length>0 || !!profile?.defaultAddress;
-      const complete=typeof profile?.isProfileComplete==='boolean'?profile.isProfileComplete:
-        typeof profile?.profileComplete==='boolean'?profile.profileComplete:hasRealName;
-      if(!complete){ localStorage.setItem('nearbite_after_login',requestedPage); window.location.href='complete-profile.html'; return; }
-      if(!hasAddress){ localStorage.setItem('nearbite_after_login',requestedPage); window.location.href=LOCATION_STEP; return; }
-      localStorage.removeItem('nearbite_after_login'); window.location.href=requestedPage;
+    /*
+     * Production startup rule:
+     * Authentication is the only login-time blocker. Profile completion,
+     * address setup and location are progressive tasks and must never keep a
+     * customer away from Home. Checkout/address flows remain responsible for
+     * enforcing delivery requirements when an order is actually placed.
+     */
+    function routeAfterAuthentication(_profile,requestedPage){
+      const requested = requestedPage || 'index.html';
+      localStorage.removeItem('nearbite_after_login');
+      window.location.replace(requested);
     }
     async function fetchProfileForRouting(token,user){
-      try{ const r=await fetch(`${API_URL}/profile`,{headers:{Authorization:`Bearer ${token}`}}); const d=await r.json().catch(()=>({})); return d?.success?d.data:user; }catch(e){ return user; }
+      // Kept as a compatibility helper for callers outside this file. Login
+      // routing no longer waits for this request.
+      return user || {};
     }
     async function finishGoogleLogin(firebaseUser){
       const idToken=await firebaseUser.getIdToken(true);
@@ -501,7 +504,7 @@
       if(!res.ok || !data.success) throw new Error(data.message||'Google authentication failed.');
       const session=persistSession(data);
       const requested=localStorage.getItem('nearbite_after_login')||'index.html';
-      routeAfterAuthentication(await fetchProfileForRouting(session.token,session.user),requested);
+      routeAfterAuthentication(session.user,requested);
     }
     async function signInWithGoogle(){
       const banner=document.getElementById('step1Banner'),text=document.getElementById('step1BannerText'); hideBanner(banner);
@@ -538,7 +541,7 @@
         if(!res.ok||!data.success) throw new Error(data.message||'Invalid email/mobile number or password.');
         const session=persistSession(data);
         const requested=localStorage.getItem('nearbite_after_login')||'index.html';
-        routeAfterAuthentication(await fetchProfileForRouting(session.token,session.user),requested);
+        routeAfterAuthentication(session.user,requested);
       }catch(e){ showBanner(banner,text,e.message||'Unable to log in. Please try again.'); }
       finally{ setAuthBtnLoading('passwordLoginBtn',false,'Log in'); }
     }
