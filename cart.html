@@ -11,7 +11,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
 <!-- Global sheet FIRST so cart-scoped rules below can win without !important. -->
 <link href="style.css" rel="stylesheet"/>
-<link href="css/cart-page.css?v=20260924-cym2" rel="stylesheet"/>
+<link href="css/cart-page.css?v=20260924-ckt3" rel="stylesheet"/>
 <link href="css/eatswada-ui-system.css?v=20260923-typography" rel="stylesheet"/>
 </head>
 <body class="ct-page">
@@ -25,6 +25,7 @@
 </button>
 <button aria-label="Change delivery address" class="ct-dh-main tap" id="address-block" onclick="window.location.href='address.html?return=cart'" type="button">
 <span class="ct-dh-copy">
+<span class="ct-dh-restaurant" id="ct-dh-restaurant"></span>
 <span class="ct-dh-meta">
 <svg aria-hidden="true" class="ct-dh-meta-icon" fill="none" height="15" viewbox="0 0 24 24" width="15">
 <path d="M5 7.5h14v10.25A1.25 1.25 0 0 1 17.75 19h-11A1.25 1.25 0 0 1 5.5 17.75V7.5Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path>
@@ -44,6 +45,16 @@
 <span aria-hidden="true" class="ct-dh-hidden">
 <span id="cart-restaurant-name"></span>
 </span>
+</div>
+<!-- ═══ 1b. EATSWADA FEE LINE — slim, factual: this checkout charges
+       neither a packaging fee nor a platform fee. Static by design; there is
+       no such field in the bill to read from. ═══ -->
+<div class="ct-fees" role="note">
+<svg aria-hidden="true" class="ct-fees-ic" fill="none" height="14" viewbox="0 0 24 24" width="14">
+<path d="M19.5 4.5c.6 6.9-2.8 11.5-8.4 11.5H8.6C8.2 10.3 12.6 5.7 19.5 4.5Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"></path>
+<path d="M5.2 19.5c.3-3.3 1.4-6 3.4-8.1" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"></path>
+</svg>
+<span class="ct-fees-copy"><strong>₹0</strong> Packaging Fee<span aria-hidden="true" class="ct-fees-dot"></span><strong>₹0</strong> Platform Fee</span>
 </div>
 <!-- ═══ 2. CART ITEM + inline actions (Add Items · Restaurant note) ═══ -->
 <div class="ct-card ct-item-card">
@@ -94,6 +105,10 @@
 <span class="ct-group-title">Payment offers &amp; more</span>
 <span class="ct-group-sub" id="coupon-card-sub">Apply coupon code if any</span>
 </span>
+<span class="ct-group-flag" id="coupon-applied-flag">
+<svg aria-hidden="true" fill="none" height="13" viewbox="0 0 24 24" width="13">
+<path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
+</svg>Applied</span>
 <svg aria-hidden="true" class="ct-group-chev ct-group-chev--nav" fill="none" height="16" viewbox="0 0 24 24" width="16">
 <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9"></path>
 </svg>
@@ -224,14 +239,27 @@
 <i class="fa-solid fa-circle-info"></i><span id="addr-toast-text">Add a delivery address first</span>
 </div>
 <div class="ct-footer" id="checkout-footer">
-<div class="ct-footer-save" id="ct-footer-save"><i class="fa-solid fa-tags"></i> <span id="ct-footer-save-text"></span></div>
+<div class="ct-footer-save" id="ct-footer-save">
+<svg aria-hidden="true" fill="none" height="14" viewbox="0 0 24 24" width="14">
+<path d="M4.5 8.25a2 2 0 0 1 2-2h8.8l4.2 4.2v5.3a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8.25Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"></path>
+<circle cx="8.5" cy="10" fill="currentColor" r="1.05"></circle>
+</svg>
+<span id="ct-footer-save-text"></span>
+</div>
 <div class="ct-paybar">
 <button aria-label="View detailed bill" class="ct-paybar-left tap" id="ct-view-bill" type="button">
 <span class="ct-paybar-amt" id="checkout-total">₹0</span>
-<span class="ct-paybar-link">View detailed bill <i aria-hidden="true" class="fa-solid fa-chevron-up" style="font-size:9px;"></i></span>
+<span class="ct-paybar-link">View detailed bill
+<svg aria-hidden="true" class="ct-paybar-chev" fill="none" height="11" viewbox="0 0 24 24" width="11">
+<path d="m7 14 5-5 5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
+</svg>
+</span>
 </button>
 <button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
 <span class="ct-cta-text" id="checkout-label">Proceed to Pay</span>
+<svg aria-hidden="true" class="ct-cta-arrow" fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="m9 6 6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
 </button>
 </div>
 <div class="ct-pay-note">
@@ -324,7 +352,7 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="config.js"></script>
 <script src="cart-bar.js"></script>
-<script src="js/cart-page.js?v=20260924-cym2"></script>
+<script src="js/cart-page.js?v=20260924-ckt3"></script>
 <script src="navigation.js"></script>
 </body>
 </html>
