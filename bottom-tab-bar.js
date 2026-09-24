@@ -41,7 +41,7 @@
       --nb-tab-muted: #90959D;
       --nb-tab-border: rgba(255,255,255,.65);
       --nb-tab-shadow: 0 10px 35px rgba(20,20,30,.14), 0 2px 8px rgba(20,20,30,.06);
-      --nb-tab-bar-height: 56px;
+      --nb-tab-bar-height: 54px;
       --nb-tab-bar-bottom-offset: 12px;
       --nb-tab-side-margin: 16px;
       --nb-tab-radius: 28px;
@@ -71,7 +71,7 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
       padding: 3px 5px;
-      background: linear-gradient(180deg, rgba(255,255,255,.88) 0%, rgba(248,249,251,.78) 100%);
+      background: linear-gradient(180deg, rgba(255,245,249,.96) 0%, rgba(255,239,246,.88) 100%);
       border: 1px solid rgba(255,255,255,.88);
       border-radius: var(--nb-tab-radius);
       box-shadow: 0 10px 28px rgba(15,23,42,.12), 0 2px 8px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.95);
@@ -98,69 +98,6 @@
       z-index: -1;
     }
 
-
-    #nearbite-help-center {
-      position: fixed;
-      right: 14px;
-      bottom: calc(var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
-      width: 48px;
-      height: 48px;
-      z-index: 100000;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255,255,255,.9);
-      border-radius: 50%;
-      background: rgba(255,255,255,.84);
-      color: #68717d;
-      box-shadow:
-        0 8px 22px rgba(15,23,42,.14),
-        inset 0 1px 0 rgba(255,255,255,.95);
-      backdrop-filter: blur(22px) saturate(180%);
-      -webkit-backdrop-filter: blur(22px) saturate(180%);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-
-    #nearbite-help-center:hover {
-      transform: translateY(-1px);
-      box-shadow:
-        0 10px 25px rgba(15,23,42,.17),
-        inset 0 1px 0 rgba(255,255,255,.95);
-    }
-
-    #nearbite-help-center:active {
-      transform: scale(.94);
-    }
-
-    #nearbite-help-center span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 23px;
-      height: 23px;
-      border: 2px solid currentColor;
-      border-radius: 50%;
-      font-size: 15px;
-      line-height: 1;
-    }
-
-    #nearbite-help-center i,
-    #nearbite-help-center svg {
-      width: 21px;
-      height: 21px;
-      font-size: 21px;
-      line-height: 1;
-    }
-
-    @media (max-width: 380px) {
-      #nearbite-help-center {
-        right: 10px;
-        width: 44px;
-        height: 44px;
-      }
-    }
 
     #nearbite-bottom-tabbar::after {
       content: "";
@@ -229,7 +166,7 @@
     }
 
     .nb-tab.is-active .nb-tab-pill {
-      background: rgba(255,255,255,.74);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,229,240,.82));
       box-shadow: 0 3px 10px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.9);
     }
 
@@ -433,18 +370,6 @@
     });
   }
 
-
-    // Separate floating Help Center button — intentionally not part of the 3-column nav.
-    if (!document.getElementById('nearbite-help-center')) {
-      const help = document.createElement('a');
-      help.id = 'nearbite-help-center';
-      help.href = 'support.html';
-      help.setAttribute('aria-label', 'Help Center');
-      help.title = 'Help Center';
-      help.innerHTML = '<span aria-hidden="true">?</span>';
-      help.style.textDecoration = 'none';
-      document.body.appendChild(help);
-    }
 
   function init() {
     // Remove any old Home-page / legacy bars BEFORE adding the universal bar.
