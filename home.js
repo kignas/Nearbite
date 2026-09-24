@@ -1034,80 +1034,88 @@
     var dish = placeholder.querySelector('.search-dish');
     if (!dish) return;
 
-    /* Keep "Search " fixed. Only the dish name rotates. */
+    /* "Search " stays fixed. Only the dish name rotates. */
     var dishes = [
       'Biryani', 'Pizza', 'Momos', 'Rolls', 'Chowmein',
       'Fried Rice', 'Chicken Biryani', 'Puchka', 'Burger', 'Dosa',
       'Momo', 'Noodles', 'Thali', 'Sweets', 'Pasta'
     ];
+
     var index = 0;
     var timer = null;
-    var resumeTimer = null;
     var scrollStopTimer = null;
-    var isScrolling = false;
+    var visibilityTimer = null;
+    var isScrollingDown = false;
+    var lastScrollY = window.scrollY || 0;
     var transitionMs = 600;
-    var intervalMs = 2600;
-
-    function applyTransitionSpeed(ms) {
-      dish.style.setProperty('--search-dish-duration', ms + 'ms');
-    }
-
-    function tick() {
-      if (document.hidden || isScrolling) return;
-
-      index = (index + 1) % dishes.length;
-
-      /* The first change is intentionally quick. Each later change eases
-         slightly slower, settling into a calm idle rotation. */
-      applyTransitionSpeed(transitionMs);
-      dish.classList.remove('is-sliding');
-      void dish.offsetWidth;
-      dish.textContent = '"' + dishes[index] + '"';
-      placeholder.setAttribute('aria-label', 'Search "' + dishes[index] + '"');
-      dish.classList.add('is-sliding');
-
-      transitionMs = Math.min(1100, transitionMs + 100);
-      intervalMs = Math.min(3600, intervalMs + 150);
-      scheduleNext();
-    }
-
-    function scheduleNext() {
-      stopTimer();
-      if (document.hidden || isScrolling) return;
-      timer = setTimeout(tick, intervalMs);
-    }
+    var intervalMs = 1800;
 
     function stopTimer() {
       if (timer) { clearTimeout(timer); timer = null; }
     }
 
-    function pauseForScroll() {
-      isScrolling = true;
+    function scheduleNext(delay) {
+      stopTimer();
+      if (document.hidden || isScrollingDown) return;
+      timer = setTimeout(tick, typeof delay === 'number' ? delay : intervalMs);
+    }
+
+    function tick() {
+      if (document.hidden || isScrollingDown) return;
+
+      index = (index + 1) % dishes.length;
+      dish.style.setProperty('--search-dish-duration', transitionMs + 'ms');
+
+      /* Force a real animation restart on Android Chrome. */
+      dish.style.animation = 'none';
+      void dish.offsetWidth;
+      dish.textContent = '"' + dishes[index] + '"';
+      placeholder.setAttribute('aria-label', 'Search "' + dishes[index] + '"');
+      void dish.offsetWidth;
+      dish.style.animation = '';
+      dish.classList.remove('is-sliding');
+      void dish.offsetWidth;
+      dish.classList.add('is-sliding');
+
+      /* Fast first movement, then progressively calmer. */
+      transitionMs = Math.min(1100, transitionMs + 100);
+      intervalMs = Math.min(3200, intervalMs + 180);
+      scheduleNext();
+    }
+
+    function handleScroll() {
+      var y = window.scrollY || document.documentElement.scrollTop || 0;
+      var scrollingDown = y > lastScrollY + 2;
+      lastScrollY = y;
+
+      /* Only a real downward user scroll pauses the rotation. */
+      if (!scrollingDown) return;
+
+      isScrollingDown = true;
       stopTimer();
       if (scrollStopTimer) clearTimeout(scrollStopTimer);
       scrollStopTimer = setTimeout(function () {
-        isScrolling = false;
-        scheduleNext();
+        isScrollingDown = false;
+        lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        scheduleNext(500);
       }, 900);
     }
 
-    window.addEventListener('scroll', pauseForScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
         stopTimer();
-        if (resumeTimer) clearTimeout(resumeTimer);
-      } else if (!isScrolling) {
-        if (resumeTimer) clearTimeout(resumeTimer);
-        resumeTimer = setTimeout(scheduleNext, 250);
+        if (visibilityTimer) clearTimeout(visibilityTimer);
+      } else if (!isScrollingDown) {
+        if (visibilityTimer) clearTimeout(visibilityTimer);
+        visibilityTimer = setTimeout(function () { scheduleNext(300); }, 300);
       }
     });
 
-    /* First change: 0.60s after Home settles. */
-    applyTransitionSpeed(600);
-    resumeTimer = setTimeout(function () {
-      if (!document.hidden && !isScrolling) tick();
-    }, 600);
+    /* First dish transition: exactly 0.60s after Home initializes. */
+    dish.style.setProperty('--search-dish-duration', '600ms');
+    scheduleNext(600);
   }
 
   /* ══════════════════════════════════════════════════════════════
