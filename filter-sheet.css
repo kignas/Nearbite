@@ -32,20 +32,6 @@
 .filter-tab.active{background:#fff7f9;border-left-color:#d20a61;color:#252d3a;}
 .filter-tab.active i{color:#d20a61;}
 
-/* Touch feedback: make sheet controls visibly respond without changing
-   their existing selected colors or layout. */
-.filter-tab,
-.sheet-option,
-.sort-option{
-  -webkit-tap-highlight-color:transparent;
-  transition:transform .12s ease, background .18s ease, border-color .18s ease, color .18s ease;
-}
-.filter-tab:active,
-.sheet-option:active,
-.sort-option:active{
-  transform:scale(.98);
-}
-
 .filter-content{min-width:0;overflow-y:auto;overflow-x:hidden;padding:18px 16px 24px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
 .filter-content::-webkit-scrollbar{width:4px;}
 .filter-content::-webkit-scrollbar-thumb{background:#dfe3e8;border-radius:99px;}
@@ -87,4 +73,59 @@
   .filter-tab i{font-size:16px;}
   .filter-grid{gap:8px;}
   .sheet-option{min-height:58px;font-size:12px;}
+}
+
+/* ── Tap feedback / ripple ─────────────────────────────────────── */
+.filter-sheet .sheet-option,
+.filter-sheet .sort-option{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.filter-sheet .sheet-option::after,
+.filter-sheet .sort-option::after{
+  content:"";
+  position:absolute;
+  left:var(--filter-ripple-x,50%);
+  top:var(--filter-ripple-y,50%);
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:currentColor;
+  opacity:0;
+  transform:translate(-50%,-50%) scale(0);
+  pointer-events:none;
+}
+
+.filter-sheet .sheet-option.is-rippling::after,
+.filter-sheet .sort-option.is-rippling::after{
+  animation:filterSheetRipple .46s cubic-bezier(.2,.7,.2,1);
+}
+
+.filter-sheet .sheet-option.is-rippling,
+.filter-sheet .sort-option.is-rippling{
+  animation:filterSheetPress .18s ease-out;
+}
+
+@keyframes filterSheetRipple{
+  0%{opacity:.14;transform:translate(-50%,-50%) scale(0);}
+  55%{opacity:.08;}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(13);}
+}
+
+@keyframes filterSheetPress{
+  0%{transform:scale(1);}
+  45%{transform:scale(.975);}
+  100%{transform:scale(1);}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .filter-sheet .sheet-option.is-rippling,
+  .filter-sheet .sheet-option.is-rippling::after,
+  .filter-sheet .sort-option.is-rippling,
+  .filter-sheet .sort-option.is-rippling::after{
+    animation:none !important;
+  }
 }

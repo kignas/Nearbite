@@ -464,19 +464,6 @@
     var bar = el('filter-bar');
     if (!bar) return;
 
-    /* While the restaurant/filter data is still loading, keep the filter
-       area occupied with lightweight skeleton pills instead of appearing
-       suddenly. Once real data is available this block is replaced normally. */
-    if (state.status === 'loading' && !state.restaurants.length) {
-      bar.hidden = false;
-      bar.innerHTML =
-        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>' +
-        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>' +
-        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>' +
-        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>';
-      return;
-    }
-
     var available = supportedFilters();
     var barFilters = available.filter(function(f) { return f.showInBar; });
     var sorts = supportedSorts();
@@ -512,31 +499,33 @@
     bar.innerHTML = html;
     bar.hidden = false;
 
-    bar.querySelectorAll('[data-filter], #filter-sheet-btn').forEach(function (button) {
-      /* CSS :active handles the instant press; this class keeps the feedback
-         visible long enough to be perceptible on touch devices. */
-      button.addEventListener('pointerdown', function () {
-        button.classList.add('is-pressing');
-      });
-      button.addEventListener('pointerup', function () {
-        button.classList.remove('is-pressing');
-      });
-      button.addEventListener('pointercancel', function () {
-        button.classList.remove('is-pressing');
-      });
-      button.addEventListener('pointerleave', function () {
-        button.classList.remove('is-pressing');
-      });
-    });
-
     bar.querySelectorAll('[data-filter]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        toggleFilter(button.getAttribute('data-filter'));
+      button.addEventListener('click', function (event) {
+        var filterId = button.getAttribute('data-filter');
+        button.style.setProperty('--filter-ripple-x', (event.clientX - button.getBoundingClientRect().left) + 'px');
+        button.style.setProperty('--filter-ripple-y', (event.clientY - button.getBoundingClientRect().top) + 'px');
+        button.classList.remove('is-rippling');
+        void button.offsetWidth;
+        button.classList.add('is-rippling');
+
+        window.setTimeout(function () {
+          toggleFilter(filterId);
+          animateFilterResult();
+        }, 170);
       });
     });
 
     var sheetBtn = el('filter-sheet-btn');
-    if (sheetBtn) sheetBtn.addEventListener('click', openFilterSheet);
+    if (sheetBtn) {
+      sheetBtn.addEventListener('click', function (event) {
+        sheetBtn.style.setProperty('--filter-ripple-x', (event.clientX - sheetBtn.getBoundingClientRect().left) + 'px');
+        sheetBtn.style.setProperty('--filter-ripple-y', (event.clientY - sheetBtn.getBoundingClientRect().top) + 'px');
+        sheetBtn.classList.remove('is-rippling');
+        void sheetBtn.offsetWidth;
+        sheetBtn.classList.add('is-rippling');
+        window.setTimeout(openFilterSheet, 130);
+      });
+    }
 
     syncVegToggle();
   }
@@ -590,6 +579,42 @@
         });
       }
     } catch (e) { }
+  }
+
+  /* ── Filter interaction feedback ──────────────────────────────
+     The existing filter state/rendering stays unchanged. These helpers only
+     give the tap a short, visible ripple/press window before the result
+     re-renders, so Android taps do not feel like they jump instantly. */
+  function playFilterTap(button, action) {
+    if (!button) {
+      action();
+      return;
+    }
+
+    var rect = button.getBoundingClientRect();
+    var x = Math.max(0, Math.min(rect.width, (window.event && window.event.clientX) - rect.left));
+    var y = Math.max(0, Math.min(rect.height, (window.event && window.event.clientY) - rect.top));
+
+    button.style.setProperty('--filter-ripple-x', x + 'px');
+    button.style.setProperty('--filter-ripple-y', y + 'px');
+    button.classList.remove('is-rippling');
+    void button.offsetWidth;
+    button.classList.add('is-rippling');
+
+    window.setTimeout(function () {
+      action();
+    }, 170);
+  }
+
+  function animateFilterResult() {
+    var list = el('restaurant-list');
+    if (!list) return;
+    list.classList.remove('filter-result-enter');
+    void list.offsetWidth;
+    list.classList.add('filter-result-enter');
+    window.setTimeout(function () {
+      list.classList.remove('filter-result-enter');
+    }, 420);
   }
 
   /* ── Filter actions ─────────────────────────────────────────── */
@@ -721,14 +746,32 @@
     body.innerHTML = html;
 
     body.querySelectorAll('[data-sort]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        setSort(button.getAttribute('data-sort'));
+      button.addEventListener('click', function (event) {
+        button.style.setProperty('--filter-ripple-x', (event.clientX - button.getBoundingClientRect().left) + 'px');
+        button.style.setProperty('--filter-ripple-y', (event.clientY - button.getBoundingClientRect().top) + 'px');
+        button.classList.remove('is-rippling');
+        void button.offsetWidth;
+        button.classList.add('is-rippling');
+
+        window.setTimeout(function () {
+          setSort(button.getAttribute('data-sort'));
+          animateFilterResult();
+        }, 170);
       });
     });
 
     body.querySelectorAll('[data-sheet-filter]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        toggleFilter(button.getAttribute('data-sheet-filter'));
+      button.addEventListener('click', function (event) {
+        button.style.setProperty('--filter-ripple-x', (event.clientX - button.getBoundingClientRect().left) + 'px');
+        button.style.setProperty('--filter-ripple-y', (event.clientY - button.getBoundingClientRect().top) + 'px');
+        button.classList.remove('is-rippling');
+        void button.offsetWidth;
+        button.classList.add('is-rippling');
+
+        window.setTimeout(function () {
+          toggleFilter(button.getAttribute('data-sheet-filter'));
+          animateFilterResult();
+        }, 170);
       });
     });
   }
