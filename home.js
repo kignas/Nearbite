@@ -805,9 +805,11 @@
     if (state.categories.length) {
       if (section) section.hidden = false;
       scroll.innerHTML = state.categories.map(function (cat, i) {
-        return '<a class="cat-item" href="#' + encodeURIComponent(cat.type) +
+        return '<a class="cat-item' +
+          (state.categoryMode && state.categoryMode.name.toLowerCase() === String(cat.type).toLowerCase() ? ' is-selected' : '') +
+          '" href="#' + encodeURIComponent(cat.type) +
           '" data-category-name="' + card.escape(cat.type) + '"' +
-          ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
+          ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">'
           '<span class="cat-ring">' +
             '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
@@ -820,7 +822,18 @@
       scroll.querySelectorAll('[data-category-name]').forEach(function (link) {
         link.addEventListener('click', function (event) {
           event.preventDefault();
-          searchCategory(link.getAttribute('data-category-name') || '');
+          var categoryName = link.getAttribute('data-category-name') || '';
+          var sameCategory = state.categoryMode &&
+            state.categoryMode.name.toLowerCase() === categoryName.toLowerCase();
+
+          /* Give the tap an immediate visual state before the menu search
+             starts, then renderCategories() keeps it in sync with state. */
+          scroll.querySelectorAll('.cat-item.is-selected').forEach(function (item) {
+            item.classList.remove('is-selected');
+          });
+          if (!sameCategory) link.classList.add('is-selected');
+
+          searchCategory(categoryName);
         });
       });
       return;
