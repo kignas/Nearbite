@@ -1036,40 +1036,80 @@
 
     /* Keep "Search " fixed. Only the dish name rotates. */
     var dishes = [
-      'Biryani',
-      'Pizza',
-      'Momos',
-      'Rolls',
-      'Chowmein',
-      'Fried Rice',
-      'Chicken',
-      'Puchka',
-      'Burger',
-      'Dosa'
+      'Biryani', 'Pizza', 'Momos', 'Rolls', 'Chowmein',
+      'Fried Rice', 'Chicken Biryani', 'Puchka', 'Burger', 'Dosa',
+      'Momo', 'Noodles', 'Thali', 'Sweets', 'Pasta'
     ];
     var index = 0;
     var timer = null;
+    var resumeTimer = null;
+    var scrollStopTimer = null;
+    var isScrolling = false;
+    var transitionMs = 600;
+    var intervalMs = 2600;
+
+    function applyTransitionSpeed(ms) {
+      dish.style.setProperty('--search-dish-duration', ms + 'ms');
+    }
 
     function tick() {
+      if (document.hidden || isScrolling) return;
+
       index = (index + 1) % dishes.length;
+
+      /* The first change is intentionally quick. Each later change eases
+         slightly slower, settling into a calm idle rotation. */
+      applyTransitionSpeed(transitionMs);
       dish.classList.remove('is-sliding');
       void dish.offsetWidth;
       dish.textContent = '"' + dishes[index] + '"';
       placeholder.setAttribute('aria-label', 'Search "' + dishes[index] + '"');
       dish.classList.add('is-sliding');
+
+      transitionMs = Math.min(1100, transitionMs + 100);
+      intervalMs = Math.min(3600, intervalMs + 150);
+      scheduleNext();
     }
 
-    function startTimer() { if (!timer) timer = setInterval(tick, 3000); }
-    function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+    function scheduleNext() {
+      stopTimer();
+      if (document.hidden || isScrolling) return;
+      timer = setTimeout(tick, intervalMs);
+    }
 
-    /* Decorative rotation only. Pause while the tab is backgrounded. */
+    function stopTimer() {
+      if (timer) { clearTimeout(timer); timer = null; }
+    }
+
+    function pauseForScroll() {
+      isScrolling = true;
+      stopTimer();
+      if (scrollStopTimer) clearTimeout(scrollStopTimer);
+      scrollStopTimer = setTimeout(function () {
+        isScrolling = false;
+        scheduleNext();
+      }, 900);
+    }
+
+    window.addEventListener('scroll', pauseForScroll, { passive: true });
+
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) stopTimer(); else startTimer();
+      if (document.hidden) {
+        stopTimer();
+        if (resumeTimer) clearTimeout(resumeTimer);
+      } else if (!isScrolling) {
+        if (resumeTimer) clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(scheduleNext, 250);
+      }
     });
 
-    dish.classList.add('is-sliding');
-    if (!document.hidden) startTimer();
+    /* First change: 0.60s after Home settles. */
+    applyTransitionSpeed(600);
+    resumeTimer = setTimeout(function () {
+      if (!document.hidden && !isScrolling) tick();
+    }, 600);
   }
+
   /* ══════════════════════════════════════════════════════════════
      CUSTOMER LOCATION
 
