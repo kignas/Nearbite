@@ -1682,3 +1682,169 @@
     .ct-stepper button:active,
     .ct-cta:active .ct-cta-arrow{ transform:none; }
   }
+
+
+/* ==========================================================================
+   EATSWADA CHECKOUT — COMPLETE YOUR MEAL REFINEMENT (2026-09-24)
+   Benchmark-inspired interaction refinement only.
+   Keeps the existing data/cart/customisation/API behaviour untouched.
+   ========================================================================== */
+
+/* Slim, factual zero-fee capsule — intentionally small, never a hero banner. */
+.ct-fees{
+  min-height:30px;
+  padding:5px 12px;
+  margin-top:7px;
+  margin-bottom:0;
+  border-radius:999px;
+  gap:6px;
+  font-size:11.5px;
+  letter-spacing:0;
+  box-shadow:none;
+}
+.ct-fees-copy{ white-space:nowrap; }
+.ct-fees-dot{ margin:0 6px; }
+
+/* The benchmark uses a quiet editorial section label rather than a large icon. */
+.ct-cym-head{ gap:0; }
+.ct-cym-head > .ct-line-ic{ display:none; }
+.ct-cym-title{
+  font-size:12.5px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--ct-muted);
+}
+.ct-cym-from{ display:none !important; }
+
+/* One continuous capsule rail with a real sliding active indicator. */
+.ct-cym-tabs{
+  margin:11px 0 0;
+  padding:4px;
+  gap:0;
+  min-height:42px;
+  border-radius:999px;
+  background:#F3F4F6;
+  border:1px solid #EEF0F2;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:none;
+}
+.ct-cym-tab{
+  flex:1 1 0;
+  min-width:78px;
+  min-height:34px;
+  padding:0 9px;
+  border:0;
+  border-radius:999px;
+  color:var(--ct-ink-2);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:-.05px;
+}
+.ct-cym-tab.is-active{ background:transparent; }
+.ct-cym-tabs.is-ready .ct-cym-tab.is-active{ color:#fff; }
+.ct-cym-ind{
+  top:4px;
+  height:calc(100% - 8px);
+  border-radius:999px;
+  background:var(--ct-green);
+  box-shadow:0 2px 7px rgba(194,24,91,.16);
+}
+
+/* Swipe rail: compact cards, visible next item, native touch inertia + snap. */
+.ct-cym-track{
+  gap:9px;
+  margin:11px -16px 0;
+  padding:2px 16px 3px;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:16px;
+  touch-action:pan-x;
+  overscroll-behavior-x:contain;
+}
+.ct-cym-card{
+  flex:0 0 112px;
+  width:112px;
+  scroll-snap-align:start;
+  scroll-snap-stop:normal;
+}
+.ct-cym-media{
+  width:112px;
+  height:112px;
+  border-radius:13px;
+  background:#F7F8F9;
+}
+.ct-cym-media img{ border-radius:13px; }
+.ct-cym-add{
+  right:4px;
+  bottom:-10px;
+  width:31px;
+  height:31px;
+  border-width:1px;
+  box-shadow:0 3px 9px rgba(28,32,36,.15);
+}
+.ct-cym-add svg{ width:17px; height:17px; }
+.ct-cym-veg{
+  left:5px;
+  bottom:5px;
+  padding:2px;
+  border-radius:5px;
+}
+.ct-cym-badge{
+  left:5px;
+  top:5px;
+  padding:3px 6px;
+  border-radius:6px;
+  font-size:9px;
+}
+.ct-cym-name{
+  margin-top:15px;
+  min-height:30px;
+  font-size:11.5px;
+  line-height:1.3;
+  font-weight:750;
+}
+.ct-cym-price{
+  margin-top:3px;
+  gap:2px 5px;
+}
+.ct-cym-now{ font-size:12.5px; }
+.ct-cym-price s{ font-size:9.5px; }
+.ct-cym-off{ font-size:9px; }
+.ct-cym-meta{ display:none; }
+
+/* Small progress indicator makes the swipe affordance obvious without adding
+   arrows or another control row. Active marker becomes a short capsule. */
+.ct-cym-dots{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:8px;
+  margin:7px 0 0;
+}
+.ct-cym-dots:empty{ display:none; }
+.ct-cym-dot{
+  width:5px;
+  height:5px;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:#CDD2D7;
+  transition:width .22s var(--ct-ease), background-color .22s var(--ct-ease), transform .22s var(--ct-ease);
+}
+.ct-cym-dot.is-active{
+  width:16px;
+  background:var(--ct-green);
+}
+
+@media(max-width:380px){
+  .ct-cym-card{ flex-basis:108px; width:108px; }
+  .ct-cym-media{ width:108px; height:108px; }
+  .ct-cym-tab{ min-width:74px; padding-left:7px; padding-right:7px; }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ct-cym-ind,.ct-cym-tab,.ct-cym-dot{ transition:none; }
+}
