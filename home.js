@@ -120,7 +120,7 @@
       id: 'under30m',
       label: 'Under 30 min',
       group: 'DELIVERY TIME',
-      showInBar: false,
+      showInBar: true,
       supported: function (list) {
         return list.some(function (r) { return card.read.deliveryTime(r) != null; });
       },
@@ -158,7 +158,7 @@
     {
       id: 'rating45',
       label: '4.5+',
-      group: 'RATING',
+      group: 'true',
       showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.rating(r) != null; });
@@ -172,7 +172,7 @@
       id: 'under200',
       label: 'Under ₹200',
       group: 'PRICE',
-      showInBar: false,
+      showInBar: true,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
       },
@@ -198,7 +198,7 @@
       id: 'price100to200',
       label: '₹100 – ₹200',
       group: 'PRICE',
-      showInBar: false,
+      showInBar: true,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
       },
@@ -223,7 +223,7 @@
     {
       id: 'offers',
       label: 'Offers available',
-      group: 'OFFERS',
+      group: 'true',
       showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return !!card.read.offer(r); });
