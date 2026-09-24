@@ -814,6 +814,7 @@
             '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
             ' onerror="this.closest(\'.cat-item\').remove()">' +
+            '<span class="cat-selected-badge" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +
           '</span>' +
           '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
         '</a>';
