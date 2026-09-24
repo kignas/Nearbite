@@ -32,6 +32,20 @@
 .filter-tab.active{background:#fff7f9;border-left-color:#d20a61;color:#252d3a;}
 .filter-tab.active i{color:#d20a61;}
 
+/* Touch feedback: make sheet controls visibly respond without changing
+   their existing selected colors or layout. */
+.filter-tab,
+.sheet-option,
+.sort-option{
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+.filter-tab:active,
+.sheet-option:active,
+.sort-option:active{
+  transform:scale(.98);
+}
+
 .filter-content{min-width:0;overflow-y:auto;overflow-x:hidden;padding:18px 16px 24px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
 .filter-content::-webkit-scrollbar{width:4px;}
 .filter-content::-webkit-scrollbar-thumb{background:#dfe3e8;border-radius:99px;}

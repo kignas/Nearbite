@@ -464,6 +464,19 @@
     var bar = el('filter-bar');
     if (!bar) return;
 
+    /* While the restaurant/filter data is still loading, keep the filter
+       area occupied with lightweight skeleton pills instead of appearing
+       suddenly. Once real data is available this block is replaced normally. */
+    if (state.status === 'loading' && !state.restaurants.length) {
+      bar.hidden = false;
+      bar.innerHTML =
+        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>' +
+        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>' +
+        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>' +
+        '<span class="filter-pill filter-pill-skeleton" aria-hidden="true"><span></span></span>';
+      return;
+    }
+
     var available = supportedFilters();
     var barFilters = available.filter(function(f) { return f.showInBar; });
     var sorts = supportedSorts();
@@ -498,6 +511,23 @@
 
     bar.innerHTML = html;
     bar.hidden = false;
+
+    bar.querySelectorAll('[data-filter], #filter-sheet-btn').forEach(function (button) {
+      /* CSS :active handles the instant press; this class keeps the feedback
+         visible long enough to be perceptible on touch devices. */
+      button.addEventListener('pointerdown', function () {
+        button.classList.add('is-pressing');
+      });
+      button.addEventListener('pointerup', function () {
+        button.classList.remove('is-pressing');
+      });
+      button.addEventListener('pointercancel', function () {
+        button.classList.remove('is-pressing');
+      });
+      button.addEventListener('pointerleave', function () {
+        button.classList.remove('is-pressing');
+      });
+    });
 
     bar.querySelectorAll('[data-filter]').forEach(function (button) {
       button.addEventListener('click', function () {
