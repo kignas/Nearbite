@@ -1987,36 +1987,6 @@ function ctSyncMealIndicator(animate){
   tabsEl.classList.add('is-ready');
 }
 
-function ctSyncMealDots(){
-  const track = document.getElementById('ct-meal-row');
-  const dots = document.getElementById('ct-cym-dots');
-  if (!track || !dots) return;
-  const max = Math.max(0, track.scrollWidth - track.clientWidth);
-  if (max < 8){ dots.innerHTML = ''; return; }
-  const pages = Math.min(4, Math.max(2, Math.ceil(track.scrollWidth / Math.max(track.clientWidth, 1))));
-  if (Number(dots.dataset.count) !== pages){
-    dots.dataset.count = String(pages);
-    dots.innerHTML = Array.from({length:pages}, (_, i) =>
-      '<button type="button" class="ct-cym-dot' + (i === 0 ? ' is-active' : '') +
-      '" data-cym-dot="' + i + '" tabindex="-1" aria-label="Show meal suggestions page ' + (i + 1) + '"></button>'
-    ).join('');
-  }
-  const ratio = max ? Math.min(1, Math.max(0, track.scrollLeft / max)) : 0;
-  const active = Math.min(pages - 1, Math.round(ratio * (pages - 1)));
-  dots.querySelectorAll('.ct-cym-dot').forEach((dot, i) => dot.classList.toggle('is-active', i === active));
-}
-
-function ctScrollMealDot(index){
-  const track = document.getElementById('ct-meal-row');
-  if (!track) return;
-  const dots = document.getElementById('ct-cym-dots');
-  const count = Math.max(1, Number(dots && dots.dataset.count) || 1);
-  const max = Math.max(0, track.scrollWidth - track.clientWidth);
-  if (count <= 1 || max <= 0) return;
-  const clamped = Math.min(count - 1, Math.max(0, Number(index) || 0));
-  track.scrollTo({ left: max * (clamped / (count - 1)), behavior: ctReducedMotion() ? 'auto' : 'smooth' });
-}
-
 function ctPaintMealTrack(animate){
   const track = document.getElementById('ct-meal-row');
   const tabsEl = document.getElementById('ct-cym-tabs');
@@ -2031,7 +2001,6 @@ function ctPaintMealTrack(animate){
   track.innerHTML = tab.idx.map(i => ctMealCardHtml(ctMealItems[i], i, multi)).join('');
   track.setAttribute('aria-labelledby', 'ct-cym-tab-' + ctMealTabs.indexOf(tab));
   ctSyncMealTabState();
-  ctSyncMealDots();
   track.classList.remove('is-swapping');
   if (animate && !ctReducedMotion()){
     track.classList.remove('is-in'); void track.offsetWidth; track.classList.add('is-in');
@@ -2160,11 +2129,7 @@ async function paintCompleteMeal(){
   // on the next frame (and once more after layout settles / fonts swap in).
   requestAnimationFrame(() => {
     ctSyncMealIndicator(false);
-    ctSyncMealDots();
-    requestAnimationFrame(() => {
-      ctSyncMealIndicator(false);
-      ctSyncMealDots();
-    });
+    requestAnimationFrame(() => ctSyncMealIndicator(false));
   });
 }
 ctRetryCompleteMeal();
@@ -2190,7 +2155,7 @@ ctRetryCompleteMeal();
 (function ctBindMealDrag(){
   const track = document.getElementById('ct-meal-row');
   if (!track || !window.PointerEvent) return;
-  let active = null, startX = 0, startLeft = 0, moved = 0, suppress = false;
+  let active = null, startX = 0, startY = 0, startLeft = 0, moved = 0, suppress = false, axis = null;
 
   const stop = () => {
     if (active === null) return;
@@ -2204,19 +2169,29 @@ ctRetryCompleteMeal();
     suppress = false;
     active = e.pointerId;
     startX = e.clientX;
+    startY = e.clientY;
     startLeft = track.scrollLeft;
     moved = 0;
+    axis = null;
   });
 
   track.addEventListener('pointermove', e => {
     if (active === null || e.pointerId !== active) return;
     const dx = e.clientX - startX;
-    if (moved === 0 && Math.abs(dx) < 3) return;          // tolerate a shaky click
+    const dy = e.clientY - startY;
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    if (!axis){
+      if (Math.max(ax, ay) < 6) return;
+      // On touch, let a vertical gesture belong to the page. Only claim the
+      // pointer once the user has clearly started a horizontal carousel drag.
+      if (e.pointerType === 'touch' && ay > ax){ stop(); return; }
+      axis = 'x';
+    }
     if (!track.hasPointerCapture(active)){
       track.setPointerCapture(active);
       track.classList.add('is-dragging');
     }
-    moved = Math.max(moved, Math.abs(dx));
+    moved = Math.max(moved, ax);
     track.scrollLeft = startLeft - dx;
     e.preventDefault();
   });
@@ -2237,22 +2212,6 @@ ctRetryCompleteMeal();
 
 /* The pill is positioned in pixels, so re-place it whenever the rail can
    change width. */
-(function ctBindMealDots(){
-  const track = document.getElementById('ct-meal-row');
-  const dots = document.getElementById('ct-cym-dots');
-  if (!track || !dots) return;
-  let raf = 0;
-  track.addEventListener('scroll', () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => { raf = 0; ctSyncMealDots(); });
-  }, {passive:true});
-  dots.addEventListener('click', e => {
-    const dot = e.target.closest && e.target.closest('[data-cym-dot]');
-    if (!dot) return;
-    ctScrollMealDot(Number(dot.getAttribute('data-cym-dot')));
-  });
-})();
-
 window.addEventListener('resize', () => ctSyncMealIndicator(false));
 
 let ctMealBusy = false;
