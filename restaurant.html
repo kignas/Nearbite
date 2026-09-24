@@ -1425,6 +1425,16 @@
     if (document.getElementById('ewcs-sheet')) return;
     var bd = document.createElement('div'); bd.className='ewcs-backdrop'; bd.id='ewcs-backdrop';
     var sh = document.createElement('div'); sh.className='ewcs-sheet'; sh.id='ewcs-sheet'; sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
+
+    /* Customization is a modal layer. Keep it above the restaurant cart bar
+       without changing any existing menu/cart styling or layout. */
+    bd.style.position = 'fixed';
+    bd.style.inset = '0';
+    bd.style.zIndex = '100050';
+    sh.style.position = 'fixed';
+    sh.style.left = '50%';
+    sh.style.bottom = '0';
+    sh.style.zIndex = '100051';
     sh.innerHTML =
       '<div class="ewcs-handle"></div>'+
       '<div class="ewcs-head"><div class="ewcs-htitle"><span class="ewcs-vegdot"></span><h3 id="ewcs-title"></h3></div><button class="ewcs-close" id="ewcs-close" aria-label="Close">✕</button></div>'+
@@ -1446,6 +1456,9 @@
     var base = window.__ewCust && window.__ewCust[id];
     if (!base){ return; }
     build();
+    document.body.classList.add('ewcs-custom-open');
+    var cartRoot = document.getElementById('white-cart-root');
+    if (cartRoot) cartRoot.style.display = 'none';
     cur = { base:base, qty:1 };
     el.title.textContent = base.name;
     document.querySelector('.ewcs-vegdot').className = 'ewcs-vegdot';
@@ -1556,7 +1569,9 @@
   function close(){
     if (!el.sh) return;
     el.sh.classList.remove('show'); el.bd.classList.remove('show');
+    document.body.classList.remove('ewcs-custom-open');
     cur = null;
+    if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
   }
 })();
 </script>

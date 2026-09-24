@@ -503,6 +503,12 @@
 
   function showCartBar(root) {
     if (!root) return;
+    // The restaurant customization sheet owns the viewport while open.
+    // Do not let cart refreshes re-show the floating cart over the sheet.
+    if (document.body.classList.contains('ewcs-custom-open')) {
+      root.style.display = 'none';
+      return;
+    }
     if (exitTimer) { clearTimeout(exitTimer); exitTimer = null; }
     root.classList.remove('wc-exiting');
     if (root.style.display === 'none' || root.style.display === '') {
