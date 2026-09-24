@@ -1848,3 +1848,191 @@
 @media(prefers-reduced-motion:reduce){
   .ct-cym-ind,.ct-cym-tab,.ct-cym-dot{ transition:none; }
 }
+
+/* ============================================================================
+   EATSWADA CHECKOUT — PIXEL REFINEMENT PASS 02 (2026-09-24)
+   Benchmark-led micro-adjustments only.
+   No API, cart, payment, address, auth or backend behaviour changes.
+   ============================================================================ */
+
+/* Header: slightly tighter, more deliberate hierarchy. */
+.ct-delivery-head{
+  padding-top:calc(7px + env(safe-area-inset-top));
+  padding-bottom:8px;
+}
+.ct-dh-main{ min-height:38px; padding:6px 9px; border-radius:13px; }
+.ct-dh-restaurant{ font-size:13.5px; line-height:1.15; }
+.ct-dh-meta{ gap:4px; }
+.ct-dh-eta{ font-size:13px; font-weight:750; }
+.ct-dh-to,.ct-dh-divider{ font-size:11.5px; }
+.ct-dh-tag{ font-size:12.5px; font-weight:700; }
+.ct-dh-addr{ font-size:11px; }
+
+/* The zero-fee message stays a slim factual strip, never a promotional hero. */
+.ct-fees{
+  min-height:29px;
+  height:29px;
+  margin-top:6px;
+  padding:4px 11px;
+  font-size:11px;
+  line-height:1;
+  border-radius:999px;
+}
+.ct-fees-ic{ width:13px; height:13px; }
+.ct-fees-dot{ margin:0 5px; }
+
+/* Cart: recover vertical space without making the item typography feel small. */
+.ct-card.ct-item-card{ padding:14px 14px 10px; }
+.ct-row{
+  padding:11px 0;
+  gap:10px;
+}
+.ct-row.has-media{ grid-template-columns:54px 1fr 84px; }
+.ct-media{ width:54px; height:54px; border-radius:13px; }
+.ct-name{ font-size:14px; line-height:1.25; }
+.ct-custom{ margin-top:3px; font-size:10.5px; }
+.ct-price-line{ margin-top:5px; gap:5px; }
+.ct-unit-price{ font-size:12.5px; }
+.ct-was-price{ font-size:10.5px; }
+.ct-off-badge{ height:18px; padding:0 6px; font-size:9px; }
+.ct-right{ gap:6px; }
+.ct-item-total{ font-size:14px; }
+.ct-item-save{ font-size:9px; margin-top:2px; }
+.ct-stepper{ border-radius:10px; }
+.ct-stepper button{ width:30px; height:30px; flex-basis:30px; }
+.ct-qty{ min-width:24px; font-size:12.5px; }
+.ct-item-actions{ padding-top:10px; margin-top:0; gap:7px; }
+.ct-pill-btn{ min-height:36px; padding:7px 12px; border-radius:999px; font-size:12px; }
+.ct-pill-btn svg{ width:16px; height:16px; }
+
+/* Complete Your Meal: compact merchandising strip — four cards + a peek on
+   normal phones, with native touch swipe, snap and a subtle entry motion. */
+.ct-cym{
+  padding:13px 14px 11px;
+}
+.ct-cym-title{
+  font-size:12px;
+  letter-spacing:1.05px;
+}
+.ct-cym-tabs{
+  margin-top:9px;
+  min-height:40px;
+  padding:3px;
+  border-radius:999px;
+}
+.ct-cym-tab{
+  min-height:34px;
+  min-width:0;
+  padding:0 10px;
+  font-size:12px;
+}
+.ct-cym-ind{
+  top:3px;
+  height:calc(100% - 6px);
+  border-radius:999px;
+}
+.ct-cym-track{
+  gap:8px;
+  margin-top:10px;
+  padding:2px 14px 3px;
+  scroll-padding-inline:14px;
+  scroll-snap-type:x mandatory;
+}
+.ct-cym-card{
+  flex:0 0 94px;
+  width:94px;
+}
+.ct-cym-media{
+  width:94px;
+  height:94px;
+  border-radius:12px;
+}
+.ct-cym-media img{ border-radius:12px; }
+.ct-cym-add{
+  right:3px;
+  bottom:-9px;
+  width:29px;
+  height:29px;
+  border-radius:50%;
+  box-shadow:0 2px 8px rgba(28,32,36,.14);
+}
+.ct-cym-add svg{ width:16px; height:16px; }
+.ct-cym-veg{ left:4px; bottom:4px; padding:2px; border-radius:5px; }
+.ct-cym-badge{ left:4px; top:4px; padding:2px 5px; border-radius:6px; font-size:8.5px; }
+.ct-cym-name{
+  margin-top:13px;
+  min-height:29px;
+  font-size:11px;
+  line-height:1.28;
+  font-weight:750;
+}
+.ct-cym-price{ margin-top:3px; gap:2px 4px; }
+.ct-cym-now{ font-size:11.5px; }
+.ct-cym-price s{ font-size:9px; }
+.ct-cym-off{ font-size:8.5px; }
+
+/* Keep the category rail balanced on narrow screens rather than shrinking the
+   product cards again. */
+@media(max-width:380px){
+  .ct-cym-card{ flex-basis:92px; width:92px; }
+  .ct-cym-media{ width:92px; height:92px; }
+  .ct-cym-tab{ padding-left:8px; padding-right:8px; }
+  .ct-row.has-media{ grid-template-columns:52px 1fr 80px; gap:9px; }
+  .ct-media{ width:52px; height:52px; }
+}
+
+/* Payment / delivery utility groups: match the compact rhythm of the
+   recommendation module. */
+.ct-group{ margin-top:9px; border-radius:17px; }
+.ct-group-head{ min-height:58px; padding:11px 13px; gap:10px; }
+.ct-line-ic{ width:34px; height:34px; flex-basis:34px; border-radius:10px; }
+.ct-line-ic svg{ width:18px; height:18px; }
+.ct-group-title{ font-size:13.5px; }
+.ct-group-sub{ font-size:11px; margin-top:2px; }
+.ct-group-chev{ width:17px; height:17px; }
+
+/* Delivery details: compact rows, same icon language. */
+.ct-details{ padding-top:2px; padding-bottom:2px; }
+.ct-details-row{ min-height:52px; padding:8px 0; gap:10px; }
+.ct-details-label{ font-size:12.5px; }
+.ct-details-text{ font-size:11px; margin-top:1px; }
+.ct-details-action{ font-size:12px; }
+
+/* Bill: tighter vertical rhythm while preserving the full calculation. */
+.ct-bill{ margin-top:9px; border-radius:18px; }
+.ct-bill-hero{ padding:13px 14px; gap:10px; }
+.ct-bill-hero-ic{ width:32px; height:32px; flex-basis:32px; border-radius:10px; }
+.ct-bill-hero-ic svg{ width:17px; height:17px; }
+.ct-bill-hero-top{ font-size:16px; }
+.ct-bill-hero-saved{ font-size:11.5px; margin-top:2px; }
+.ct-bill-rows{ padding:4px 14px 2px; }
+.ct-bill .ct-bill-row{ padding:8px 0; font-size:13px; }
+.ct-bill-cap{ padding-bottom:4px; font-size:10.5px; }
+.ct-bill-band{ padding:9px 14px; font-size:11.5px; }
+.ct-bill .ct-bill-total{ margin:0 14px; padding:12px 0 14px; }
+.ct-bill .ct-total-label{ font-size:14px; }
+.ct-bill .ct-total-val{ font-size:18px; }
+
+/* Quiet legal note — supporting information, not another content card. */
+.ct-cancel{ margin:11px 17px 7px; }
+.ct-cancel-title{ font-size:11.5px; letter-spacing:.35px; }
+.ct-cancel p{ margin-top:3px; font-size:10.5px; line-height:1.45; }
+
+/* Footer: retain the existing CTA architecture; only tighten its footprint. */
+.ct-footer{
+  gap:7px;
+  padding:8px 13px calc(8px + env(safe-area-inset-bottom));
+}
+.ct-footer-save{ font-size:11px; margin:-1px 2px 0; }
+.ct-paybar{ grid-template-columns:88px 1fr; gap:9px; }
+.ct-paybar-amt{ font-size:17px; }
+.ct-paybar-link{ margin-top:2px; font-size:10px; }
+.ct-cta{ min-height:52px; padding:10px 16px; border-radius:16px; }
+.ct-cta-text{ font-size:14.5px; }
+.ct-pay-note{ font-size:10px; }
+
+/* Respect reduced-motion users; otherwise keep the existing smooth tab/card
+   transitions and native swipe physics. */
+@media(prefers-reduced-motion:reduce){
+  .ct-cym-track.is-in .ct-cym-card{ animation:none; }
+}
