@@ -17,8 +17,6 @@
   const viewport = document.getElementById('banner-carousel');
   const track    = document.getElementById('header-carousel-track');
   const dotsWrap = document.getElementById('banner-controls');
-  const searchPlaceholderEl = document.getElementById('search-placeholder');
-  const defaultSearchPlaceholder = searchPlaceholderEl ? searchPlaceholderEl.textContent : '';
   if (!header || !viewport || !track) return;
 
   // Initialise exactly once, even if the script is somehow loaded twice.
@@ -140,12 +138,9 @@
     // The banner's legacy `background` field must not override the visual theme.
     // The active header theme is the single source of truth for the shell.
     header.style.removeProperty('--hd-bg');
-    // Admin-controlled search hint: "Search "Momos"". Falls back to the
-    // page default when this banner has no searchPlaceholder set.
-    if (searchPlaceholderEl) {
-      const hint = String(b?.searchPlaceholder || '').trim();
-      searchPlaceholderEl.textContent = hint ? `Search "${hint}"` : defaultSearchPlaceholder;
-    }
+    // Search placeholder is owned by home.js. Do not let banner data
+    // replace #search-placeholder because that destroys .search-dish and
+    // stops the rotating search animation.
   }
   // Marking the active slide (re)triggers its text wobble each time it
   // becomes active — on load, on swipe, and on every autoplay step.
