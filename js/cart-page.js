@@ -323,7 +323,7 @@ async function ctComputeBreakdown(groups, force) {
 function renderMultiBreakdown(rows) {
   const box = document.getElementById('bill-per-restaurant');
   if (!box) return;
-  const muted = 'font-size:var(--fs-micro);color:#6b7280;';
+  const muted = 'font-size:11px;color:#6b7280;';
   const html = ['<div style="' + muted + 'font-weight:800;letter-spacing:.3px;text-transform:uppercase;margin:2px 0 6px;">Bill by restaurant</div>'];
   rows.forEach(r => {
     const feeText = r.outsideRadius ? 'Unavailable' : (Number(r.fee) === 0 ? 'FREE' : '₹' + r.fee);
@@ -1709,10 +1709,12 @@ function toggleDIPill(label){
 /* Retry once after the initial restaurant/cart hydration so recommendations
    do not disappear simply because the restaurant response arrived late. */
 function ctRetryCompleteMeal(){
-  setTimeout(() => {
+  // Two passes: a slow /menu response used to land after the single 900ms
+  // retry had already run, leaving the section hidden for the whole session.
+  [900, 2600].forEach(ms => setTimeout(() => {
     const section = document.getElementById('ct-meal');
     if (section && section.hidden) paintCompleteMeal();
-  }, 900);
+  }, ms));
 }
 
 /* ── Complete your meal ───────────────────────────────────────────────────
@@ -1781,9 +1783,16 @@ function ctMealItemFrom(raw, category){
   const price = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice == null ? '' : rawPrice).replace(/[^\d.]/g, ''));
   const menuItem = raw._id || raw.id || null;
   // updateCart() and POST /orders both require a menu id; the menu page
-  // blocks out-of-stock items the same way.
-  if (!name || !(price > 0) || !menuItem || raw.inStock === false) return null;
+  // blocks out-of-stock items the same way. The extra availability shapes
+  // below only ever HIDE an item — an absent field changes nothing.
+  const unavailable = raw.inStock === false || raw.isAvailable === false ||
+    raw.available === false || raw.outOfStock === true || raw.isOutOfStock === true;
+  if (!name || !(price > 0) || !menuItem || unavailable) return null;
   const orig = Number(raw.originalPrice);
+  // Rating is rendered only when the menu record actually carries a sane one.
+  const rawRating = raw.rating != null ? raw.rating
+    : (raw.avgRating != null ? raw.avgRating : raw.averageRating);
+  const rating = Number(rawRating);
   const bestseller = raw.isBestseller === true || raw.bestseller === true;
   const mustTry = raw.isMustTry === true || raw.mustTry === true;
   const reordered = raw.isHighlyReordered === true || raw.highlyReordered === true || raw.isReordered === true || raw.reordered === true;
@@ -1793,6 +1802,7 @@ function ctMealItemFrom(raw, category){
     originalPrice: (Number.isFinite(orig) && orig > price) ? orig : 0,
     image: String(raw.image || raw.img || raw.imageUrl || raw.photo || '').trim(),
     isVeg: typeof raw.isVeg === 'boolean' ? raw.isVeg : undefined,
+    rating: (Number.isFinite(rating) && rating > 0 && rating <= 5) ? rating : 0,
     category: String(category || raw.category || raw.categoryName || '').trim(),
     badge, popular: bestseller || mustTry || reordered,
     customizable: Array.isArray(raw.customizations) &&
@@ -1817,7 +1827,9 @@ async function ctFetchMenu(rid){
     const json = await res.json();
     const data = (json && json.data != null) ? json.data : json;
     const groups = ctMenuGroups(data);
-    ctMenuCache[rid] = groups;
+    // Only a genuinely parsed menu is cached. Caching an empty result meant a
+    // single malformed/partial response disabled suggestions for the session.
+    if (groups.length) ctMenuCache[rid] = groups;
     return groups;
   } catch (_) { return []; }
 }
@@ -1856,27 +1868,45 @@ function ctInCartTest(cart){
     keys.some(k => k.toLowerCase().indexOf(it.name.toLowerCase() + ' (') === 0);   // customised variant
 }
 
+const CT_CYM_PLATE = '<span class="ct-cym-fallback" aria-hidden="true">' +
+  '<svg width="36" height="36" viewBox="0 0 24 24" fill="none">' +
+  '<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/>' +
+  '<circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.6"/>' +
+  '</svg></span>';
+const CT_CYM_STAR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+  '<path d="m12 4.2 2.28 4.62 5.1.74-3.69 3.6.87 5.08L12 15.84l-4.56 2.4.87-5.08-3.69-3.6 5.1-.74z"/></svg>';
+
 function ctMealCardHtml(it, idx, multi){
   const img = itemImage(it);
+  // A menu record with no image falls back to a neutral plate glyph — never a
+  // stock photo, and never an empty grey tile.
   const media = img
     ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">'
     : '';
+  // Strike price whenever a real higher originalPrice exists; the % tag only
+  // when it rounds to something meaningful, so no "0% OFF" is ever rendered.
   const off = it.originalPrice > it.price ? Math.round((1 - it.price / it.originalPrice) * 100) : 0;
+  const strike = it.originalPrice > it.price ? '<s>₹' + esc(it.originalPrice) + '</s>' : '';
+  const offTag = off >= 1 ? '<span class="ct-cym-off">' + off + '% OFF</span>' : '';
   const plus = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  // Veg/non-veg sits on the image (as the benchmark does), which also frees the
+  // full card width for the two-line name.
+  const veg = vegMark(it);
+  const vegChip = veg ? '<span class="ct-cym-veg">' + veg + '</span>' : '';
+  const rating = it.rating ? '<span class="ct-cym-rating">' + CT_CYM_STAR + it.rating.toFixed(1) + '</span>' : '';
   const note = it.customizable ? 'Customisable' : (multi ? 'From ' + it.resName : '');
+  const meta = (rating || note)
+    ? '<div class="ct-cym-meta">' + rating + (note ? '<span class="ct-cym-note">' + esc(note) + '</span>' : '') + '</div>'
+    : '';
   return '<article class="ct-cym-card" data-cym-card="' + idx + '">' +
-    '<div class="ct-cym-media">' + media +
+    '<div class="ct-cym-media">' + CT_CYM_PLATE + media + vegChip +
       (it.badge ? '<span class="ct-cym-badge">' + esc(it.badge) + '</span>' : '') +
       '<button type="button" class="ct-cym-add" data-meal-add="' + idx + '" aria-label="' +
         (it.customizable ? 'Customise ' : 'Add ') + esc(it.name) + '">' + plus + '</button>' +
     '</div>' +
-    '<div class="ct-cym-name">' + vegMark(it) + '<span>' + esc(it.name) + '</span></div>' +
-    '<div class="ct-cym-price"><span class="ct-cym-now">₹' + esc(it.price) + '</span>' +
-      (off ? '<s>₹' + esc(it.originalPrice) + '</s><span class="ct-cym-off">' + off + '% OFF</span>' : '') +
-    '</div>' +
-    // Always present (empty when unused) so every card reserves the same
-    // height and switching capsules never resizes the section.
-    '<div class="ct-cym-note"' + (note ? '' : ' aria-hidden="true"') + '>' + esc(note) + '</div>' +
+    '<div class="ct-cym-name"><span>' + esc(it.name) + '</span></div>' +
+    '<div class="ct-cym-price"><span class="ct-cym-now">₹' + esc(it.price) + '</span>' + strike + offTag + '</div>' +
+    meta +
   '</article>';
 }
 
@@ -1925,11 +1955,19 @@ async function paintCompleteMeal(){
   const cartVeg = cartEntries.some(x => x.isVeg === true) && !cartEntries.some(x => x.isVeg === false);
   const avg = cartEntries.length ? cartEntries.reduce((a, x) => a + Number(x.price || 0), 0) / cartEntries.length : 0;
 
+  // Multi-restaurant carts used to await each menu in turn; one round trip per
+  // restaurant is now issued at once. Results are consumed in cart order, so
+  // capsule ordering is unchanged.
+  const menus = await Promise.all(
+    groups.map(g => ctMenuForRestaurant(g.resId).catch(() => ({ groups: [], open: true })))
+  );
+  if (seq !== ctMealSeq) return;                 // a newer repaint owns the section
+
   const items = [];
   const catMap = new Map();                      // lower-case category → { label, idx[], order, pair, hasCart }
-  for (const g of groups){
-    const { groups: menu, open } = await ctMenuForRestaurant(g.resId);
-    if (seq !== ctMealSeq) return;               // a newer repaint owns the section
+  for (let gn = 0; gn < groups.length; gn++){
+    const g = groups[gn];
+    const { groups: menu, open } = menus[gn];
     if (!open) continue;
     menu.forEach((grp, gi) => {
       const cartHere = grp.items.some(raw => {
@@ -1974,8 +2012,11 @@ async function paintCompleteMeal(){
 
   // Capsules only when there is a real choice to make.
   tabsEl.hidden = realTabs.length < 2;
+  // data-label feeds a hidden bold copy of the text (see .ct-cym-tab::after) so
+  // the capsule keeps one width in both states and the rail never re-flows.
   tabsEl.innerHTML = realTabs.map((t, i) =>
-    '<button type="button" role="tab" class="ct-cym-tab" id="ct-cym-tab-' + i + '" data-cym-tab="' + esc(t.key) + '" aria-controls="ct-meal-row">' + esc(t.label) + '</button>'
+    '<button type="button" role="tab" class="ct-cym-tab" id="ct-cym-tab-' + i + '" data-cym-tab="' + esc(t.key) +
+    '" data-label="' + esc(t.label) + '" aria-controls="ct-meal-row"><span class="ct-cym-tab-l">' + esc(t.label) + '</span></button>'
   ).join('');
   const from = document.getElementById('ct-cym-from');
   if (from){
