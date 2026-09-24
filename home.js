@@ -1043,25 +1043,34 @@
 
     var index = 0;
     var timer = null;
-    var scrollStopTimer = null;
-    var visibilityTimer = null;
-    var isScrollingDown = false;
-    var lastScrollY = window.scrollY || 0;
     var transitionMs = 600;
     var intervalMs = 1800;
 
     function stopTimer() {
-      if (timer) { clearTimeout(timer); timer = null; }
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
     }
 
     function scheduleNext(delay) {
       stopTimer();
-      if (document.hidden || isScrollingDown) return;
       timer = setTimeout(tick, typeof delay === 'number' ? delay : intervalMs);
     }
 
     function tick() {
-      if (document.hidden || isScrollingDown) return;
+      /* Re-read the element in case another Home component replaced it. */
+      placeholder = el('search-placeholder');
+      if (!placeholder) {
+        scheduleNext(500);
+        return;
+      }
+
+      dish = placeholder.querySelector('.search-dish');
+      if (!dish) {
+        scheduleNext(500);
+        return;
+      }
 
       index = (index + 1) % dishes.length;
       dish.style.setProperty('--search-dish-duration', transitionMs + 'ms');
@@ -1077,45 +1086,32 @@
       void dish.offsetWidth;
       dish.classList.add('is-sliding');
 
-      /* Fast first movement, then progressively calmer. */
-      transitionMs = Math.min(1100, transitionMs + 100);
-      intervalMs = Math.min(3200, intervalMs + 180);
+      transitionMs = Math.min(900, transitionMs + 40);
+      intervalMs = Math.min(2600, intervalMs + 80);
+
       scheduleNext();
     }
 
-    function handleScroll() {
-      var y = window.scrollY || document.documentElement.scrollTop || 0;
-      var scrollingDown = y > lastScrollY + 2;
-      lastScrollY = y;
-
-      /* Only a real downward user scroll pauses the rotation. */
-      if (!scrollingDown) return;
-
-      isScrollingDown = true;
-      stopTimer();
-      if (scrollStopTimer) clearTimeout(scrollStopTimer);
-      scrollStopTimer = setTimeout(function () {
-        isScrollingDown = false;
-        lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-        scheduleNext(500);
-      }, 900);
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    /*
+     * The search animation is intentionally independent from:
+     * - banner loading/carousel
+     * - page scrolling
+     * - location resolution
+     * - restaurant/category API loading
+     *
+     * Those systems must never be allowed to stop the search rotation.
+     */
+    dish.style.setProperty('--search-dish-duration', '600ms');
+    placeholder.setAttribute('aria-label', 'Search "' + dishes[index] + '"');
+    scheduleNext(600);
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
         stopTimer();
-        if (visibilityTimer) clearTimeout(visibilityTimer);
-      } else if (!isScrollingDown) {
-        if (visibilityTimer) clearTimeout(visibilityTimer);
-        visibilityTimer = setTimeout(function () { scheduleNext(300); }, 300);
+      } else {
+        scheduleNext(300);
       }
     });
-
-    /* First dish transition: exactly 0.60s after Home initializes. */
-    dish.style.setProperty('--search-dish-duration', '600ms');
-    scheduleNext(600);
   }
 
   /* ══════════════════════════════════════════════════════════════
