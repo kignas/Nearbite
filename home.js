@@ -809,7 +809,7 @@
           (state.categoryMode && state.categoryMode.name.toLowerCase() === String(cat.type).toLowerCase() ? ' is-selected' : '') +
           '" href="#' + encodeURIComponent(cat.type) +
           '" data-category-name="' + card.escape(cat.type) + '"' +
-          ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">'
+          ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
           '<span class="cat-ring">' +
             '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
@@ -826,8 +826,7 @@
           var sameCategory = state.categoryMode &&
             state.categoryMode.name.toLowerCase() === categoryName.toLowerCase();
 
-          /* Give the tap an immediate visual state before the menu search
-             starts, then renderCategories() keeps it in sync with state. */
+          /* Immediate visual feedback; searchCategory() remains the existing data/filter path. */
           scroll.querySelectorAll('.cat-item.is-selected').forEach(function (item) {
             item.classList.remove('is-selected');
           });
