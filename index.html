@@ -80,6 +80,7 @@
   .loc-left{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:var(--hd-ink);}
   .loc-pin-wrap{flex:0 0 42px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.72);box-shadow:0 3px 12px rgba(15,23,42,.06);}
   .loc-pin-wrap i{font-size:17px;color:var(--hd-accent);}
+  .loc-pin-icon{width:21px;height:21px;display:block;color:var(--hd-accent);flex:0 0 auto;}
   .hero-header[data-theme="anime"] .loc-pin-wrap{background:rgba(255,255,255,.92);box-shadow:0 3px 12px rgba(15,23,42,.06);}
   .hero-header[data-theme="anime"] .loc-pin-wrap i{color:#d20a61;}
   .hero-header[data-theme="pink"] .loc-pin-wrap{background:rgba(255,255,255,.48);}
@@ -104,6 +105,13 @@
   .search-box{flex:1;min-width:0;height:52px;display:flex;align-items:center;gap:11px;padding:0 15px;border-radius:17px;background:#fff;border:1px solid rgba(15,23,42,.035);box-shadow:0 6px 17px rgba(15,23,42,.09);text-decoration:none;overflow:hidden;}
   .search-icon{font-size:18px;color:#263342;flex:0 0 auto;}
   .search-text{flex:1;min-width:0;font-size:14px;font-weight:600;color:#697386;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .search-static{display:inline-block;vertical-align:middle;}
+  .search-dish{display:inline-block;vertical-align:middle;will-change:transform,opacity;}
+  .search-dish.is-sliding{animation:searchDishSlideUp .42s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes searchDishSlideUp{
+    from{opacity:0;transform:translate3d(0,11px,0);}
+    to{opacity:1;transform:translate3d(0,0,0);}
+  }
   .search-mic{border:0;background:transparent;padding:4px 2px;flex:0 0 auto;color:#d20a61;font-size:17px;cursor:pointer;display:grid;place-items:center;}
   .search-mic.is-listening{animation:voicePulse .9s ease-in-out infinite;}
   @keyframes voicePulse{50%{transform:scale(1.15);opacity:.65;}}
@@ -625,7 +633,12 @@
 <header class="hero-header" id="home-header" data-theme="anime">
   <div class="loc-row es-header-item">
     <a class="loc-left tap" href="address.html?view=select" aria-label="Change delivery location">
-      <span class="loc-pin-wrap" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+      <span class="loc-pin-wrap" aria-hidden="true">
+        <svg class="loc-pin-icon" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
+          <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="2.35" stroke="currentColor" stroke-width="2.15"/>
+        </svg>
+      </span>
       <span class="loc-copy">
         <span class="loc-name-row">
           <span class="loc-name" id="loc-name">Home</span>
@@ -648,7 +661,9 @@
   <div class="search-row es-header-item">
     <a class="search-box tap" href="search.html">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <span class="search-text" id="search-placeholder">Search dishes, restaurants &amp; cuisines</span>
+      <span class="search-text" id="search-placeholder" aria-label='Search "Biryani"'>
+        <span class="search-static">Search </span><span class="search-dish">"Biryani"</span>
+      </span>
       <span class="search-mic" id="header-voice-search" role="button" tabindex="0" aria-label="Voice search">
         <i class="fa-solid fa-microphone"></i>
       </span>

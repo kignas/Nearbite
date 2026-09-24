@@ -120,7 +120,7 @@
       id: 'under30m',
       label: 'Under 30 min',
       group: 'DELIVERY TIME',
-      showInBar: true,
+      showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.deliveryTime(r) != null; });
       },
@@ -133,7 +133,7 @@
       id: 'under45m',
       label: 'Under 45 min',
       group: 'DELIVERY TIME',
-      showInBar: true,
+      showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.deliveryTime(r) != null; });
       },
@@ -159,7 +159,7 @@
       id: 'rating45',
       label: '4.5+',
       group: 'RATING',
-      showInBar: true,
+      showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.rating(r) != null; });
       },
@@ -172,7 +172,7 @@
       id: 'under200',
       label: 'Under ₹200',
       group: 'PRICE',
-      showInBar: true,
+      showInBar: false,
       supported: function (list) {
         return list.some(function (r) { return card.read.lowestItemPrice(r) != null; });
       },
@@ -1031,32 +1031,45 @@
     var placeholder = el('search-placeholder');
     if (!placeholder) return;
 
-    var phrases = ['Search "Biryani"', 'Search "Pizza"', 'Search "Momos"', 'Search "Rolls"'];
+    var dish = placeholder.querySelector('.search-dish');
+    if (!dish) return;
+
+    /* Keep "Search " fixed. Only the dish name rotates. */
+    var dishes = [
+      'Biryani',
+      'Pizza',
+      'Momos',
+      'Rolls',
+      'Chowmein',
+      'Fried Rice',
+      'Chicken',
+      'Puchka',
+      'Burger',
+      'Dosa'
+    ];
     var index = 0;
     var timer = null;
 
     function tick() {
-      placeholder.style.opacity = '0';
-      setTimeout(function () {
-        index = (index + 1) % phrases.length;
-        placeholder.textContent = phrases[index];
-        placeholder.style.opacity = '1';
-      }, 260);
+      index = (index + 1) % dishes.length;
+      dish.classList.remove('is-sliding');
+      void dish.offsetWidth;
+      dish.textContent = '"' + dishes[index] + '"';
+      placeholder.setAttribute('aria-label', 'Search "' + dishes[index] + '"');
+      dish.classList.add('is-sliding');
     }
 
     function startTimer() { if (!timer) timer = setInterval(tick, 3000); }
     function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
 
-    /* The rotation is purely decorative, so don't keep firing timers and writing
-       to the DOM while the tab is backgrounded. Pause when hidden and resume the
-       exact same animation when the page is visible again. */
+    /* Decorative rotation only. Pause while the tab is backgrounded. */
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stopTimer(); else startTimer();
     });
 
+    dish.classList.add('is-sliding');
     if (!document.hidden) startTimer();
   }
-
   /* ══════════════════════════════════════════════════════════════
      CUSTOMER LOCATION
 
