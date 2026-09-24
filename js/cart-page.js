@@ -554,6 +554,17 @@ function readCart() {
   catch (e) { return null; }
 }
 
+/* Inline SVG glyphs used inside painted markup. Line weight matches the rest
+   of the checkout iconography (1.65–1.8 stroke, round caps). No icon fonts. */
+const CT_ICON_PLATE =
+  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+  '<path d="M7.5 3.5v6.2a2.2 2.2 0 0 0 4.4 0V3.5M9.7 9.7V20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '<path d="M16.8 3.5c-1.2 1.4-1.8 3.2-1.8 5.2 0 1.6.6 2.6 1.8 2.9V20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CT_ICON_TRASH =
+  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+  '<path d="M5.5 7h13M10 4.8h4M9.4 10.5v6M14.6 10.5v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
+  '<path d="M7 7h10l-.7 11.1A1.6 1.6 0 0 1 14.7 19.6H9.3a1.6 1.6 0 0 1-1.6-1.5L7 7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+
 /* Optional media: rendered only when the cart object actually carries an
    image. Nothing is invented when the field is absent. */
 function itemImage(info) {
@@ -623,9 +634,12 @@ function paintItems(savedCart) {
     const img = itemImage(info);
     const media = anyMedia ? `
         <div class="ct-media">
-          <div class="ct-media-fallback"><i class="fa-solid fa-utensils"></i></div>
+          <div class="ct-media-fallback">${CT_ICON_PLATE}</div>
           ${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
         </div>` : '';
+    // At one unit the decrement IS the delete, so the control says so. Same
+    // data-step="-1", same cartAdjust() path — only the glyph and label change.
+    const last = quantity <= 1;
     const custom = customLine(info.customizations);
     return `
       <div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
@@ -643,10 +657,10 @@ function paintItems(savedCart) {
             <div class="ct-item-total ct-num">₹${itemTotal}</div>
             ${hasDiscount ? `<div class="ct-item-save ct-num">Save ₹${itemSavings.toFixed(0)}</div>` : ''}
           </div>
-          <div class="ct-stepper" role="group" aria-label="Quantity for ${esc(name)}">
-            <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
+          <div class="ct-stepper${last ? ' is-last' : ''}" role="group" aria-label="Quantity for ${esc(name)}">
+            <button type="button" data-step="-1" class="ct-step-down" aria-label="${last ? 'Remove ' + esc(name) : 'Decrease quantity'}">${last ? CT_ICON_TRASH : '<span class="ct-step-glyph" aria-hidden="true">−</span>'}</button>
             <span class="ct-qty">${quantity}</span>
-            <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+            <button type="button" data-step="1" class="ct-step-up" aria-label="Increase quantity"><span class="ct-step-glyph" aria-hidden="true">+</span></button>
           </div>
         </div>
       </div>`;
@@ -687,6 +701,16 @@ function paintItems(savedCart) {
   const resName = first.resName || first.restaurantName || 'Restaurant';
   const hiddenName = document.getElementById('cart-restaurant-name');
   if (hiddenName) hiddenName.innerText = resName;
+
+  // Visible header line. Deliberately a SEPARATE element from the hidden one
+  // above, which placeOrder() still reads as the restaurantName fallback — a
+  // multi-restaurant cart must never send "2 restaurants" to the backend.
+  const headName = document.getElementById('ct-dh-restaurant');
+  if (headName) {
+    headName.textContent = groups.length > 1
+      ? groups.length + ' restaurants'
+      : ((groups[0] && groups[0].name) || '');
+  }
 }
 
 /* ── Bill painting: money math identical to the previous build ───────────── */
@@ -1060,7 +1084,24 @@ function cartAdjust(name, change) {
     // A cart mutation invalidates any pending checkout idempotency key.
     localStorage.removeItem('nearbite_checkout_key');
     repaintCart();       // instant feedback
+    ctBumpQty(name);     // visual only — the row above is already repainted
     scheduleDelivery();  // debounced; free-delivery threshold depends on subtotal
+  }
+}
+
+/* Momentary pulse on the quantity that just changed. Rows are re-rendered
+   wholesale by paintItems(), so the class is applied after the repaint. */
+function ctBumpQty(name) {
+  if (ctReducedMotion()) return;
+  const rows = document.querySelectorAll('#cart-items-list .ct-row');
+  for (const row of rows) {
+    if (row.dataset.name !== name) continue;
+    const qty = row.querySelector('.ct-qty');
+    if (!qty) return;
+    qty.classList.remove('is-bump');
+    void qty.offsetWidth;
+    qty.classList.add('is-bump');
+    return;
   }
 }
 
@@ -1735,6 +1776,7 @@ function ctRetryCompleteMeal(){
 let ctMealItems = [];        // flat index read by the + buttons
 let ctMealTabs = [];         // [{ key, label, idx: [item indexes] }]
 let ctMealTab = null;        // active capsule, kept across repaints
+let ctMealTabsSig = '';      // last rendered capsule set, so repaints reuse the rail
 let ctMealSeq = 0;           // discards stale async paints
 
 /* restaurant.html normalizeMenu(): [{category|name, items}] groups, a flat
@@ -1910,6 +1952,41 @@ function ctMealCardHtml(it, idx, multi){
   '</article>';
 }
 
+/* Capsule state is class + ARIA only; the moving pill is a separate element
+   so switching category never re-lays-out the rail. */
+function ctSyncMealTabState(){
+  const tabsEl = document.getElementById('ct-cym-tabs');
+  if (!tabsEl) return;
+  tabsEl.querySelectorAll('[data-cym-tab]').forEach(b => {
+    const on = b.getAttribute('data-cym-tab') === ctMealTab;
+    b.classList.toggle('is-active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+    b.tabIndex = on ? 0 : -1;
+  });
+}
+
+/* The pill is absolutely positioned inside the (horizontally scrollable) rail,
+   so it travels with the capsules when the rail itself is scrolled and needs
+   no scroll listener. offsetLeft/offsetWidth are read against that rail. */
+function ctSyncMealIndicator(animate){
+  const tabsEl = document.getElementById('ct-cym-tabs');
+  if (!tabsEl || tabsEl.hidden) return;
+  const ind = tabsEl.querySelector('.ct-cym-ind');
+  if (!ind) return;
+  const active = tabsEl.querySelector('.ct-cym-tab.is-active');
+  if (!active){ ind.style.opacity = '0'; return; }
+  if (!active.offsetWidth) return;              // not laid out yet — a later pass sets it
+  const still = !animate || ctReducedMotion();
+  if (still) ind.style.transition = 'none';
+  ind.style.width = active.offsetWidth + 'px';
+  ind.style.transform = 'translate3d(' + active.offsetLeft + 'px,0,0)';
+  ind.style.opacity = '1';
+  if (still){ void ind.offsetWidth; ind.style.transition = ''; }
+  // Until this class lands the active capsule is tinted text on the bare rail,
+  // so a frame without a measured pill never shows white-on-grey.
+  tabsEl.classList.add('is-ready');
+}
+
 function ctPaintMealTrack(animate){
   const track = document.getElementById('ct-meal-row');
   const tabsEl = document.getElementById('ct-cym-tabs');
@@ -1918,26 +1995,38 @@ function ctPaintMealTrack(animate){
   if (!tab) return;
   ctMealTab = tab.key;
   const multi = new Set(ctMealItems.map(x => x.resId)).size > 1;
+  // Reset while the track is faded out: a smooth scroll here would read as the
+  // old cards sliding away under the new ones.
+  if (animate) track.scrollLeft = 0;
   track.innerHTML = tab.idx.map(i => ctMealCardHtml(ctMealItems[i], i, multi)).join('');
   track.setAttribute('aria-labelledby', 'ct-cym-tab-' + ctMealTabs.indexOf(tab));
-  tabsEl.querySelectorAll('[data-cym-tab]').forEach(b => {
-    const on = b.getAttribute('data-cym-tab') === tab.key;
-    b.classList.toggle('is-active', on);
-    b.setAttribute('aria-selected', on ? 'true' : 'false');
-    b.tabIndex = on ? 0 : -1;
-  });
-  if (animate){
+  ctSyncMealTabState();
+  track.classList.remove('is-swapping');
+  if (animate && !ctReducedMotion()){
     track.classList.remove('is-in'); void track.offsetWidth; track.classList.add('is-in');
-    track.scrollTo({ left: 0, behavior: ctReducedMotion() ? 'auto' : 'smooth' });
   }
+  ctSyncMealIndicator(animate);
 }
 
+let ctMealSwapTimer = 0;
 function ctSelectMealTab(key){
   if (!key || key === ctMealTab) return;
   ctMealTab = key;
-  ctPaintMealTrack(true);
+  // The pill leaves first and the cards follow it, so a tap reads as one
+  // continuous movement instead of an instant swap.
+  ctSyncMealTabState();
+  ctSyncMealIndicator(true);
+  const track = document.getElementById('ct-meal-row');
+  const reduced = ctReducedMotion();
+  clearTimeout(ctMealSwapTimer);
+  if (track && !reduced){
+    track.classList.add('is-swapping');
+    ctMealSwapTimer = setTimeout(() => ctPaintMealTrack(true), 140);
+  } else {
+    ctPaintMealTrack(!reduced);
+  }
   const btn = document.querySelector('#ct-cym-tabs [data-cym-tab="' + CSS.escape(key) + '"]');
-  if (btn) btn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: ctReducedMotion() ? 'auto' : 'smooth' });
+  if (btn) btn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
 }
 
 async function paintCompleteMeal(){
@@ -2014,10 +2103,18 @@ async function paintCompleteMeal(){
   tabsEl.hidden = realTabs.length < 2;
   // data-label feeds a hidden bold copy of the text (see .ct-cym-tab::after) so
   // the capsule keeps one width in both states and the rail never re-flows.
-  tabsEl.innerHTML = realTabs.map((t, i) =>
-    '<button type="button" role="tab" class="ct-cym-tab" id="ct-cym-tab-' + i + '" data-cym-tab="' + esc(t.key) +
-    '" data-label="' + esc(t.label) + '" aria-controls="ct-meal-row"><span class="ct-cym-tab-l">' + esc(t.label) + '</span></button>'
-  ).join('');
+  // Rebuilt only when the categories themselves change. A quantity change
+  // repaints this section too, and re-writing the rail each time would reset
+  // both its scroll position and the pill it carries.
+  const sig = realTabs.map(t => t.key + '\u0001' + t.label).join('\u0002');
+  if (sig !== ctMealTabsSig || !tabsEl.querySelector('.ct-cym-ind')){
+    tabsEl.classList.remove('is-ready');
+    tabsEl.innerHTML = '<span class="ct-cym-ind" aria-hidden="true"></span>' + realTabs.map((t, i) =>
+      '<button type="button" role="tab" class="ct-cym-tab" id="ct-cym-tab-' + i + '" data-cym-tab="' + esc(t.key) +
+      '" data-label="' + esc(t.label) + '" aria-controls="ct-meal-row"><span class="ct-cym-tab-l">' + esc(t.label) + '</span></button>'
+    ).join('');
+    ctMealTabsSig = sig;
+  }
   const from = document.getElementById('ct-cym-from');
   if (from){
     const names = Array.from(new Set(items.map(x => x.resName).filter(Boolean)));
@@ -2028,6 +2125,12 @@ async function paintCompleteMeal(){
   ctPaintMealTrack(false);
   track.scrollLeft = keepScroll;
   section.hidden = false;
+  // The rail has no width until the section is visible, so the pill is placed
+  // on the next frame (and once more after layout settles / fonts swap in).
+  requestAnimationFrame(() => {
+    ctSyncMealIndicator(false);
+    requestAnimationFrame(() => ctSyncMealIndicator(false));
+  });
 }
 ctRetryCompleteMeal();
 
@@ -2046,6 +2149,60 @@ ctRetryCompleteMeal();
     next.focus();
   });
 })();
+
+/* Carousel dragging. Touch is left to the browser on purpose — native inertia
+   and snap beat anything scripted — so this only adds mouse/pen dragging. */
+(function ctBindMealDrag(){
+  const track = document.getElementById('ct-meal-row');
+  if (!track || !window.PointerEvent) return;
+  let active = null, startX = 0, startLeft = 0, moved = 0, suppress = false;
+
+  const stop = () => {
+    if (active === null) return;
+    try { track.releasePointerCapture(active); } catch (e) {}
+    active = null;
+    track.classList.remove('is-dragging');
+  };
+
+  track.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch' || e.button !== 0) return;
+    suppress = false;
+    active = e.pointerId;
+    startX = e.clientX;
+    startLeft = track.scrollLeft;
+    moved = 0;
+  });
+
+  track.addEventListener('pointermove', e => {
+    if (active === null || e.pointerId !== active) return;
+    const dx = e.clientX - startX;
+    if (moved === 0 && Math.abs(dx) < 3) return;          // tolerate a shaky click
+    if (!track.hasPointerCapture(active)){
+      track.setPointerCapture(active);
+      track.classList.add('is-dragging');
+    }
+    moved = Math.max(moved, Math.abs(dx));
+    track.scrollLeft = startLeft - dx;
+    e.preventDefault();
+  });
+
+  ['pointerup', 'pointercancel'].forEach(type => track.addEventListener(type, () => {
+    if (moved > 6) suppress = true;    // a drag must never also "tap" the + button
+    stop();
+  }));
+
+  // Capture phase, so the click dies before the delegated document handler.
+  track.addEventListener('click', e => {
+    if (!suppress) return;
+    suppress = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+})();
+
+/* The pill is positioned in pixels, so re-place it whenever the rail can
+   change width. */
+window.addEventListener('resize', () => ctSyncMealIndicator(false));
 
 let ctMealBusy = false;
 function ctAddMealItem(idx, btn){
@@ -2415,9 +2572,50 @@ function toggleDeliveryInstructions() {
   if (!body || !group || !button) return;
   const expanded = button.getAttribute('aria-expanded') === 'true';
   button.setAttribute('aria-expanded', String(!expanded));
-  body.hidden = expanded;
   group.classList.toggle('is-open', !expanded);
+  ctAnimateGroupBody(body, !expanded);
   syncFooterOffset();
+}
+
+/* Height transition around the existing `hidden` attribute: the attribute is
+   still the single source of truth for collapsed state (and for assistive
+   tech), it is just set after the collapse finishes instead of before it. */
+function ctAnimateGroupBody(body, open) {
+  clearTimeout(body._ctAnim);
+  if (ctReducedMotion()) {
+    body.hidden = !open;
+    body.style.height = '';
+    body.classList.remove('is-anim');
+    return;
+  }
+  const settle = () => {
+    body.style.height = '';
+    body.style.paddingBottom = '';
+    body.classList.remove('is-anim');
+    if (!open) body.hidden = true;
+    syncFooterOffset();
+  };
+  // scrollHeight already includes the body's bottom padding, and .ct-group-body
+  // is border-box, so that figure IS the open height. The padding is animated
+  // alongside it, otherwise a collapsed body would still show its padding.
+  if (open) {
+    body.hidden = false;
+    const pad = getComputedStyle(body).paddingBottom;
+    const full = body.scrollHeight;
+    body.classList.add('is-anim');
+    body.style.height = '0px';
+    body.style.paddingBottom = '0px';
+    void body.offsetHeight;
+    body.style.height = full + 'px';
+    body.style.paddingBottom = pad;
+  } else {
+    body.classList.add('is-anim');
+    body.style.height = body.scrollHeight + 'px';
+    void body.offsetHeight;
+    body.style.height = '0px';
+    body.style.paddingBottom = '0px';
+  }
+  body._ctAnim = setTimeout(settle, 280);
 }
 
 async function applyCouponFromSheet() {
@@ -2430,6 +2628,8 @@ async function applyCouponFromSheet() {
       const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
       ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
       const sub=document.getElementById('coupon-card-sub'); if(sub)sub.textContent=`${data.data.code} applied · Save ₹${ctState.couponDiscount}`;
+      // Visual state only — shown after the backend has actually validated it.
+      document.getElementById('ct-payment-group')?.classList.add('is-applied');
       closeSheet?.('ct-coupon-sheet'); if(typeof renderCart==='function') renderCart();
     } catch(e){if(err){err.hidden=false;err.textContent=e.message||'Coupon could not be applied.';}}
  }
