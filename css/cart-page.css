@@ -1445,3 +1445,240 @@
   @media (prefers-reduced-motion:no-preference){
     .ct-cym{ animation:ctPremiumIn .32s var(--ct-ease) both; }
   }
+
+  /* ==========================================================================
+     EATSWADA CHECKOUT — REFINEMENT PASS (2026-09-24)
+     Visual + interaction only. Appended last so it wins on source order alone:
+     no !important, no selector inflation, nothing deleted above.
+     Colour: every value is an existing checkout token or a shade already used
+     in this sheet. Type: Manrope + the shared --ew-ui-* scale, unchanged.
+     ========================================================================== */
+
+  /* ── 1 · Delivery header ─────────────────────────────────────────────────
+     Restaurant name leads, ETA + destination sit under it on one line. The
+     address is printed once, here; the details card below carries the full
+     address and the contact, not a second copy of this line. */
+  .ct-dh-restaurant{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:-.2px;
+    line-height:1.2;
+    color:var(--ct-ink);
+  }
+  .ct-dh-restaurant:empty{ display:none; }
+  .ct-dh-meta{ margin-top:2px; }
+  .ct-dh-main{ padding:8px 10px; }
+  /* The ETA is the one thing in this row that must always be readable, so the
+     address is the only flex item allowed to give up width. */
+  .ct-dh-meta-icon,
+  .ct-dh-eta,
+  .ct-dh-to,
+  .ct-dh-tag,
+  .ct-dh-divider{ flex:0 0 auto; }
+  .ct-dh-addr{ flex:1 1 auto; min-width:0; max-width:none; }
+
+  /* ── 2 · Zero-fee line ───────────────────────────────────────────────────
+     Deliberately a line, not a banner: one row, no illustration, no gradient. */
+  .ct-fees{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    margin:8px 14px 0; padding:7px 12px;
+    border-radius:999px;
+    background:var(--ct-save-bg);
+    border:1px solid rgba(21,128,61,.14);
+    color:#14663F;
+    font-size:11.5px; font-weight:700; line-height:1.2; letter-spacing:-.05px;
+  }
+  .ct-fees-ic{ flex:0 0 auto; color:var(--ct-save); }
+  .ct-fees-copy{ display:inline-flex; align-items:center; min-width:0; }
+  .ct-fees strong{ font-weight:800; color:#0F5132; margin-right:3px; }
+  .ct-fees-dot{
+    width:3px; height:3px; margin:0 8px; border-radius:50%;
+    background:currentColor; opacity:.4; flex:0 0 auto;
+  }
+
+  /* ── 3 · Cart rows ───────────────────────────────────────────────────────
+     Tighter rhythm, and the last unit's "−" becomes a delete. */
+  .ct-row{ padding:12px 0; }
+  /* The stepper was overflowing its grid column into the name; size the two
+     to each other instead. */
+  .ct-row.has-media{ grid-template-columns:58px 1fr 92px; }
+  .ct-stepper button{ width:32px; height:32px; flex-basis:32px; }
+  .ct-qty{ min-width:24px; }
+  .ct-media-fallback svg{ display:block; }
+  .ct-stepper button{ transition:background-color .15s ease, transform .12s var(--ct-ease); }
+  .ct-stepper button:active{ transform:scale(.92); }
+  .ct-step-glyph{ line-height:1; }
+  .ct-stepper .ct-step-down svg{ display:block; }
+  /* At one unit the glyph changes, not the whole capsule: most carts are full
+     of single items and a red row each would shout. */
+  .ct-stepper.is-last .ct-step-down:active{ background:rgba(220,38,38,.10); color:var(--ct-danger); }
+  .ct-qty.is-bump{ animation:ctQtyBump .26s var(--ct-ease); }
+  @keyframes ctQtyBump{ 0%{ transform:scale(1); } 45%{ transform:scale(1.16); } 100%{ transform:scale(1); } }
+
+  /* Veg / non-veg mark: the shared component from style.css, sized and
+     coloured for checkout only — the markup is untouched. */
+  body.ct-page .nb-veg-mark{
+    box-sizing:border-box; width:14px; height:14px; flex:0 0 14px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1.6px solid var(--ct-save); border-radius:4px; background:var(--ct-surface);
+  }
+  body.ct-page .nb-veg-mark > span{
+    width:7px; height:7px; border-radius:50%; background:var(--ct-save); display:block;
+  }
+  body.ct-page .nb-veg-mark.nonveg{ border-color:var(--ct-danger); }
+  body.ct-page .nb-veg-mark.nonveg > span{ background:var(--ct-danger); }
+
+  .ct-pill-btn{ transition:transform .12s var(--ct-ease), background-color .18s ease; }
+  .ct-pill-btn:active{ transform:scale(.97); }
+
+  /* ── 4 · Complete your meal ──────────────────────────────────────────────
+     The capsules become one rail with a single pill that slides between them;
+     the pill is a real element, so the labels never move. */
+  .ct-cym-tabs{
+    position:relative;
+    margin:14px 0 0;
+    padding:4px;
+    gap:2px;
+    background:#F2F3F5;
+    border-radius:999px;
+    scroll-padding-inline:4px;
+    -ms-overflow-style:none;
+  }
+  /* .ct-cym-tabs sets display:flex, which outranks the UA rule for [hidden]. */
+  .ct-cym-tabs[hidden]{ display:none; }
+  .ct-cym-ind{
+    position:absolute; top:4px; left:0;
+    width:0; height:calc(100% - 8px);
+    border-radius:999px;
+    background:var(--ct-green);
+    opacity:0; pointer-events:none; z-index:0;
+    transform:translate3d(0,0,0);
+    transition:transform .26s var(--ct-ease), width .26s var(--ct-ease), opacity .18s linear;
+  }
+  .ct-cym-tab{
+    position:relative; z-index:1;
+    min-height:36px; padding:0 15px;
+    border:0; background:transparent;
+    color:var(--ct-muted);
+    font-weight:var(--ew-ui-label);
+    /* Slight delay so the label flips colour as the pill passes under it,
+       not before it has left. */
+    transition:color .22s var(--ct-ease) .05s;
+  }
+  /* Before the pill has been measured (and if scripting ever fails to place
+     it) the active capsule is simply tinted — never white on the bare rail. */
+  .ct-cym-tab.is-active{
+    border:0; background:transparent;
+    color:var(--ct-green-deep);
+    font-weight:var(--ew-ui-label);
+  }
+  .ct-cym-tabs.is-ready .ct-cym-tab.is-active{ color:var(--ct-surface); }
+
+  /* Carousel: native inertia on touch, pointer drag on desktop. */
+  .ct-cym-track{
+    -ms-overflow-style:none;
+    transition:opacity .18s var(--ct-ease);
+    cursor:grab;
+  }
+  .ct-cym-track.is-swapping{ opacity:0; }
+  .ct-cym-track.is-dragging{
+    cursor:grabbing; scroll-snap-type:none;
+    user-select:none; -webkit-user-select:none;
+  }
+  .ct-cym-track.is-dragging img,
+  .ct-cym-track.is-dragging .ct-cym-card{ pointer-events:none; }
+  .ct-cym-card{ scroll-snap-align:start; }
+  .ct-cym-add{
+    border-color:rgba(194,24,91,.18);
+    box-shadow:0 3px 10px rgba(28,32,36,.16);
+  }
+
+  /* ── 5 · Payment offers ──────────────────────────────────────────────────
+     The applied state is rendered only after the backend validates a code. */
+  .ct-group-flag{
+    display:none; align-items:center; gap:4px; flex:0 0 auto;
+    margin-right:2px;
+    font-size:11.5px; font-weight:800; letter-spacing:-.05px;
+    color:var(--ct-save);
+  }
+  #ct-payment-group.is-applied .ct-group-flag{ display:inline-flex; }
+  #ct-payment-group.is-applied .ct-group-chev--nav{ display:none; }
+
+  /* ── 6 · Delivery instructions ───────────────────────────────────────────
+     Height is animated around the existing `hidden` attribute (see
+     ctAnimateGroupBody), so the collapsed state is still the attribute. */
+  .ct-group-body{ box-sizing:border-box; overflow:hidden; }
+  .ct-group-body.is-anim{
+    transition:height .26s var(--ct-ease), padding-bottom .26s var(--ct-ease);
+  }
+  .ct-group-head{ transition:background-color .16s ease; }
+  .ct-group-head:active{ background-color:#FAFBFC; }
+  .ct-di-pill{ transition:border-color .16s ease, background-color .16s ease, color .16s ease, transform .12s var(--ct-ease); }
+  .ct-di-pill:active,
+  .ct-chip:active{ transform:scale(.97); }
+
+  /* ── 7 · Delivery details ────────────────────────────────────────────── */
+  .ct-details-row{ min-height:52px; }
+  .ct-details-action{
+    padding:5px 10px; border-radius:999px;
+    background:var(--ct-green-soft);
+    font-size:11px; letter-spacing:.2px;
+  }
+
+  /* ── 8 · Bill ────────────────────────────────────────────────────────────
+     Hero carries the comparison, the rows stay quiet, the total is the anchor. */
+  .ct-bill-hero-top strong{ font-size:19px; letter-spacing:-.4px; }
+  .ct-bill-hero-top s{ font-size:13.5px; font-weight:600; }
+  .ct-bill .ct-bill-total{ border-top:1px solid var(--ct-line-soft); }
+
+  /* ── 9 · Sticky pay bar ─────────────────────────────────────────────────
+     One savings strip, flush to the top edge of the bar. Nothing else repeats
+     the figure. */
+  .ct-footer-save{
+    margin:-10px -14px 0;
+    padding:7px 14px;
+    background:var(--ct-save-bg);
+    color:#14663F;
+    font-size:11.5px; font-weight:800; gap:6px;
+  }
+  .ct-footer-save svg{ flex:0 0 auto; color:var(--ct-save); }
+  /* Content-sized, so "View detailed bill" never wraps at any font metric. */
+  .ct-paybar{ grid-template-columns:auto minmax(0,1fr); }
+  .ct-paybar-link{ white-space:nowrap; }
+  .ct-paybar-chev{ margin-left:1px; }
+  .ct-paybar .ct-cta{
+    justify-content:center; gap:9px;
+    min-height:52px; padding:10px 16px;
+  }
+  .ct-paybar .ct-cta-text{ text-align:center; }
+  .ct-cta-arrow{ flex:0 0 auto; opacity:.9; transition:transform .18s var(--ct-ease); }
+  .ct-cta:active .ct-cta-arrow{ transform:translateX(2px); }
+  .ct-cta.locked .ct-cta-arrow{ display:none; }
+
+  @media (max-width:380px){
+    .ct-fees{ margin-left:11px; margin-right:11px; font-size:11px; }
+    .ct-fees-dot{ margin:0 6px; }
+    .ct-cym-tab{ padding:0 13px; }
+    .ct-dh-restaurant{ font-size:13px; }
+    .ct-row.has-media{ grid-template-columns:54px 1fr 92px; gap:9px; }
+  }
+
+  /* ── 10 · Motion ─────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion:reduce){
+    .ct-cym-ind,
+    .ct-cym-track,
+    .ct-cym-tab,
+    .ct-group-body,
+    .ct-group-body.is-anim,
+    .ct-cta-arrow,
+    .ct-pill-btn,
+    .ct-di-pill,
+    .ct-stepper button{ transition:none; }
+    .ct-cym-track.is-swapping{ opacity:1; }
+    .ct-qty.is-bump{ animation:none; }
+    .ct-pill-btn:active,
+    .ct-di-pill:active,
+    .ct-chip:active,
+    .ct-stepper button:active,
+    .ct-cta:active .ct-cta-arrow{ transform:none; }
+  }
