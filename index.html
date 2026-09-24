@@ -78,9 +78,14 @@
 
   .loc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;margin:0 0 8px;}
   .loc-left{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:var(--hd-ink);}
-  .loc-pin-wrap{flex:0 0 42px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#c95b7a;box-shadow:0 3px 12px rgba(15,23,42,.06);}
-  .loc-pin-wrap i{font-size:17px;color:#fff;}
-  .loc-pin-icon{width:23px;height:23px;display:block;color:#fff;flex:0 0 auto;}
+  .loc-pin-wrap{flex:0 0 42px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.72);box-shadow:0 3px 12px rgba(15,23,42,.06);}
+  .loc-pin-wrap i{font-size:17px;color:var(--hd-accent);}
+  .loc-pin-icon{width:23px;height:23px;display:block;color:var(--hd-accent);flex:0 0 auto;}
+  .hero-header[data-theme="anime"] .loc-pin-wrap{background:rgba(255,255,255,.92);box-shadow:0 3px 12px rgba(15,23,42,.06);}
+  .hero-header[data-theme="anime"] .loc-pin-wrap i{color:#d20a61;}
+  .hero-header[data-theme="pink"] .loc-pin-wrap{background:rgba(255,255,255,.48);}
+  .hero-header[data-theme="lavender"] .loc-pin-wrap,.hero-header[data-theme="magenta"] .loc-pin-wrap{background:rgba(255,255,255,.16);box-shadow:none;}
+  .hero-header[data-theme="lavender"] .loc-pin-wrap i,.hero-header[data-theme="magenta"] .loc-pin-wrap i{color:#fff;}
   .loc-copy{display:flex;flex-direction:column;justify-content:center;min-width:0;line-height:1.08;}
   .loc-name-row{display:flex;align-items:center;gap:6px;min-width:0;}
   .loc-name{font-size:19px;font-weight:800;letter-spacing:-.5px;color:var(--hd-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -631,8 +636,9 @@
     <a class="loc-left tap" href="address.html?view=select" aria-label="Change delivery location">
       <span class="loc-pin-wrap" aria-hidden="true">
         <svg class="loc-pin-icon" viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
-          <path d="M12 21s7-6.02 7-12A7 7 0 1 0 5 9c0 5.98 7 12 7 12Z" fill="currentColor"/>
-          <circle cx="12" cy="9" r="2.5" fill="#c95b7a"/>
+          <path d="M12 21c-3.45-3.17-6.25-6.62-6.25-10.63A6.25 6.25 0 1 1 18.25 10.37C18.25 14.38 15.45 17.83 12 21Z" fill="currentColor"/>
+          <circle cx="12" cy="10.2" r="2.55" fill="#fff"/>
+          <circle cx="12" cy="10.2" r="1.05" fill="currentColor"/>
         </svg>
       </span>
       <span class="loc-copy">
