@@ -1729,3 +1729,765 @@ body.ct-page .ct-cym-media{ width:132px; height:132px; }
   body.ct-page .ct-cym-card{ flex-basis:116px; width:116px; }
   body.ct-page .ct-cym-media{ width:116px; height:116px; }
 }
+
+/* ==========================================================================
+   EATSWADA — FINAL VISUAL POLISH v2
+   VISUAL ONLY.
+   JS, data attributes, IDs, DOM hooks, scrolling, category switching,
+   quantity controls, payment/address/bill logic are intentionally untouched.
+   Uses only existing checkout tokens/colors.
+   ========================================================================== */
+
+/* ── 1. PAGE + SECTION RHYTHM ─────────────────────────────────────────── */
+body.ct-page{
+  background:var(--ct-bg);
+  color:var(--ct-ink);
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+
+body.ct-page .ct-card,
+body.ct-page .ct-group,
+body.ct-page .ct-bill,
+body.ct-page .ct-cym{
+  background:var(--ct-surface);
+  border:1px solid var(--ct-line-soft);
+  border-radius:18px;
+  box-shadow:0 1px 2px rgba(28,32,36,.035), 0 5px 18px rgba(28,32,36,.025);
+}
+
+body.ct-page .ct-card{
+  margin:9px 14px;
+  padding:14px;
+}
+
+body.ct-page .ct-group{
+  margin:9px 14px;
+  overflow:hidden;
+}
+
+body.ct-page .ct-bill{
+  margin:9px 14px;
+}
+
+body.ct-page .ct-cym{
+  margin:10px 14px;
+  padding:14px 14px 15px;
+  overflow:hidden;
+}
+
+/* Keep the page visually connected without making sections float too far apart. */
+body.ct-page .ct-item-card{ margin-bottom:9px; }
+body.ct-page .ct-details{ margin-top:9px; }
+body.ct-page .ct-cancel{ margin-top:13px; }
+
+/* ── 2. DELIVERY HEADER — flatter, cleaner reference language ───────── */
+body.ct-page .ct-delivery-head{
+  padding:8px 12px 9px;
+  background:var(--ct-surface);
+  border-bottom:1px solid var(--ct-line-soft);
+  box-shadow:none;
+  gap:4px;
+}
+
+body.ct-page .ct-dh-back{
+  width:38px;
+  height:38px;
+  flex-basis:38px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+}
+
+body.ct-page .ct-dh-main{
+  min-height:40px;
+  padding:5px 5px 5px 7px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+
+body.ct-page .ct-dh-restaurant{
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:-.15px;
+  color:var(--ct-muted);
+}
+
+body.ct-page .ct-dh-meta{
+  margin-top:2px;
+  gap:4px;
+}
+
+body.ct-page .ct-dh-eta{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:-.2px;
+}
+
+body.ct-page .ct-dh-to,
+body.ct-page .ct-dh-divider{
+  font-size:12px;
+  color:var(--ct-muted);
+}
+
+body.ct-page .ct-dh-tag{
+  font-size:13px;
+  font-weight:800;
+}
+
+body.ct-page .ct-dh-addr{
+  font-size:11.5px;
+  font-weight:600;
+}
+
+body.ct-page .ct-dh-chevron{
+  color:var(--ct-muted);
+}
+
+/* ── 3. ₹0 FEE LINE — quiet, factual, not a promotional banner ───────── */
+body.ct-page .ct-fees{
+  margin:7px 14px 0;
+  min-height:30px;
+  padding:6px 11px;
+  border-radius:999px;
+  background:var(--ct-save-bg);
+  border:1px solid rgba(21,128,61,.12);
+  color:#14663F;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:-.05px;
+}
+
+body.ct-page .ct-fees-ic{
+  width:14px;
+  height:14px;
+}
+
+body.ct-page .ct-fees-dot{
+  width:3px;
+  height:3px;
+  margin:0 7px;
+}
+
+/* ── 4. CART ITEMS — compact premium density ─────────────────────────── */
+body.ct-page .ct-item-card{
+  padding:12px 14px 10px;
+}
+
+body.ct-page .ct-row{
+  padding:12px 0;
+  gap:11px;
+}
+
+body.ct-page .ct-row.has-media{
+  grid-template-columns:56px minmax(0,1fr) 88px;
+}
+
+body.ct-page .ct-media{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+}
+
+body.ct-page .ct-name{
+  font-size:13.5px;
+  font-weight:750;
+  line-height:1.3;
+  letter-spacing:-.1px;
+}
+
+body.ct-page .ct-unit-price{
+  font-size:12px;
+  font-weight:800;
+}
+
+body.ct-page .ct-was-price{
+  font-size:10.5px;
+}
+
+body.ct-page .ct-off-badge{
+  height:18px;
+  padding:0 6px;
+  border-radius:6px;
+  font-size:9px;
+}
+
+body.ct-page .ct-item-total{
+  font-size:14px;
+}
+
+body.ct-page .ct-item-save{
+  font-size:9.5px;
+}
+
+body.ct-page .ct-stepper{
+  border-radius:11px;
+}
+
+body.ct-page .ct-stepper button{
+  width:31px;
+  height:31px;
+  flex-basis:31px;
+  font-size:15px;
+}
+
+body.ct-page .ct-qty{
+  min-width:25px;
+  font-size:12.5px;
+}
+
+body.ct-page .ct-item-actions{
+  padding-top:10px;
+  margin-top:1px;
+  gap:8px;
+}
+
+body.ct-page .ct-pill-btn{
+  min-height:36px;
+  padding:7px 12px;
+  border-radius:11px;
+  font-size:11.5px;
+  font-weight:750;
+}
+
+/* ── 5. ONE ICON LANGUAGE ACROSS THE WHOLE CHECKOUT ─────────────────── */
+body.ct-page .ct-line-ic{
+  width:23px;
+  height:23px;
+  flex:0 0 23px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:var(--ct-green-deep);
+  box-shadow:none;
+  display:grid;
+  place-items:center;
+}
+
+body.ct-page .ct-line-ic.ct-line-ic-accent,
+body.ct-page .ct-line-card.is-set .ct-line-ic{
+  background:transparent;
+  color:var(--ct-green-deep);
+}
+
+body.ct-page .ct-line-ic svg{
+  width:20px;
+  height:20px;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.ct-page .ct-group-head,
+body.ct-page .ct-details-row{
+  gap:11px;
+}
+
+/* ── 6. COMPLETE YOUR MEAL — compact recommendation rail ───────────── */
+body.ct-page .ct-cym{
+  padding:14px 14px 15px;
+}
+
+body.ct-page .ct-cym-head{
+  gap:9px;
+  min-height:24px;
+}
+
+body.ct-page .ct-cym-head .ct-line-ic{
+  width:21px;
+  height:21px;
+  flex-basis:21px;
+}
+
+body.ct-page .ct-cym-head .ct-line-ic svg{
+  width:19px;
+  height:19px;
+}
+
+body.ct-page .ct-cym-title{
+  margin:0;
+  font-size:12.5px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ct-ink);
+}
+
+body.ct-page .ct-cym-from{
+  margin-top:2px;
+  font-size:10.5px;
+  line-height:1.25;
+  font-weight:600;
+  color:var(--ct-muted);
+}
+
+/* The JS still owns the moving indicator. This only changes its appearance. */
+body.ct-page .ct-cym-tabs{
+  position:relative;
+  display:flex;
+  gap:0;
+  margin:11px 0 0;
+  padding:4px;
+  min-height:38px;
+  background:#F2F3F5;
+  border-radius:999px;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scroll-padding-inline:4px;
+}
+
+body.ct-page .ct-cym-ind{
+  top:4px;
+  height:calc(100% - 8px);
+  border-radius:999px;
+  background:var(--ct-surface);
+  box-shadow:0 1px 3px rgba(28,32,36,.08);
+}
+
+body.ct-page .ct-cym-tab{
+  min-height:30px;
+  padding:0 14px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--ct-muted);
+  font-size:11.5px;
+  font-weight:700;
+  line-height:1;
+}
+
+body.ct-page .ct-cym-tab.is-active{
+  border:0;
+  background:transparent;
+  color:var(--ct-green-deep);
+  font-weight:800;
+}
+
+body.ct-page .ct-cym-tabs.is-ready .ct-cym-tab.is-active{
+  color:var(--ct-green-deep);
+}
+
+/* Cards stay compact even when there are only 1–2 real recommendations. */
+body.ct-page .ct-cym-track{
+  display:flex;
+  gap:10px;
+  margin:12px -14px 0;
+  padding:2px 14px 4px;
+  min-height:0;
+  overflow-x:auto;
+  scroll-snap-type:x proximity;
+  scroll-padding-inline:14px;
+  touch-action:pan-y;
+  overscroll-behavior-x:contain;
+}
+
+body.ct-page .ct-cym-card{
+  flex:0 0 116px;
+  width:116px;
+  min-width:116px;
+  scroll-snap-align:start;
+}
+
+body.ct-page .ct-cym-media{
+  width:116px;
+  height:116px;
+  border-radius:13px;
+  overflow:hidden;
+  background:var(--ct-line-soft);
+}
+
+body.ct-page .ct-cym-media img{
+  border-radius:13px;
+}
+
+body.ct-page .ct-cym-badge{
+  left:5px;
+  top:5px;
+  max-width:calc(100% - 10px);
+  padding:3px 6px;
+  border-radius:6px;
+  font-size:9.5px;
+  font-weight:800;
+  line-height:1.15;
+  box-shadow:0 1px 3px rgba(28,32,36,.10);
+}
+
+body.ct-page .ct-cym-veg{
+  left:5px;
+  bottom:5px;
+  padding:2px;
+  border-radius:5px;
+  box-shadow:0 1px 3px rgba(28,32,36,.12);
+}
+
+body.ct-page .ct-cym-add{
+  right:5px;
+  bottom:-10px;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  border:1px solid rgba(194,24,91,.18);
+  background:var(--ct-surface);
+  color:var(--ct-green);
+  box-shadow:0 3px 9px rgba(28,32,36,.14);
+}
+
+body.ct-page .ct-cym-add svg{
+  width:17px;
+  height:17px;
+}
+
+body.ct-page .ct-cym-name{
+  margin-top:15px;
+  min-height:31px;
+  font-size:11.5px;
+  font-weight:750;
+  line-height:1.35;
+  letter-spacing:-.05px;
+}
+
+body.ct-page .ct-cym-price{
+  margin-top:3px;
+  gap:2px 5px;
+}
+
+body.ct-page .ct-cym-now{
+  font-size:11.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-cym-price s,
+body.ct-page .ct-cym-off{
+  font-size:9.5px;
+}
+
+body.ct-page .ct-cym-meta{
+  margin-top:2px;
+  gap:5px;
+}
+
+body.ct-page .ct-cym-note,
+body.ct-page .ct-cym-rating{
+  font-size:9.5px;
+}
+
+/* ── 7. PAYMENT + DELIVERY INSTRUCTIONS — same component family ─────── */
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  margin:9px 14px;
+  border-radius:18px;
+}
+
+body.ct-page #ct-payment-group .ct-group-head,
+body.ct-page #ct-di-group .ct-group-head{
+  min-height:58px;
+  padding:12px 14px;
+}
+
+body.ct-page .ct-group-title{
+  font-size:13px;
+  font-weight:750;
+  line-height:1.25;
+  letter-spacing:-.08px;
+}
+
+body.ct-page .ct-group-sub{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:600;
+  line-height:1.3;
+}
+
+body.ct-page .ct-group-chev{
+  width:17px;
+  height:17px;
+}
+
+body.ct-page .ct-group-flag{
+  font-size:10.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-group-body{
+  padding:0 14px 14px;
+}
+
+/* ── 8. DELIVERY DETAILS ────────────────────────────────────────────── */
+body.ct-page .ct-details{
+  padding:3px 14px;
+}
+
+body.ct-page .ct-details-row{
+  min-height:50px;
+  padding:9px 0;
+}
+
+body.ct-page .ct-details-label{
+  font-size:12.5px;
+  font-weight:750;
+  line-height:1.3;
+}
+
+body.ct-page .ct-details-text{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:600;
+  line-height:1.4;
+}
+
+body.ct-page .ct-details-action{
+  padding:5px 10px;
+  font-size:10.5px;
+  font-weight:800;
+  border-radius:999px;
+}
+
+/* ── 9. BILL — hierarchy without making it oversized ───────────────── */
+body.ct-page .ct-bill{
+  border-radius:18px;
+}
+
+body.ct-page .ct-bill-hero{
+  padding:14px 14px;
+  gap:10px;
+}
+
+body.ct-page .ct-bill-hero-ic{
+  width:30px;
+  height:30px;
+  flex-basis:30px;
+  border-radius:9px;
+  background:transparent;
+  color:var(--ct-green-deep);
+}
+
+body.ct-page .ct-bill-hero-ic svg{
+  width:19px;
+  height:19px;
+  stroke-width:1.8;
+}
+
+body.ct-page .ct-bill-hero-top{
+  font-size:15.5px;
+  font-weight:800;
+  line-height:1.25;
+  letter-spacing:-.25px;
+}
+
+body.ct-page .ct-bill-hero-top strong{
+  font-size:18px;
+  font-weight:800;
+}
+
+body.ct-page .ct-bill-hero-top s{
+  font-size:12px;
+  font-weight:600;
+}
+
+body.ct-page .ct-bill-hero-saved{
+  margin-top:3px;
+  font-size:11px;
+  font-weight:750;
+}
+
+body.ct-page .ct-bill-hero-badge{
+  font-size:7px;
+  padding:5px 7px;
+  border-radius:7px;
+}
+
+body.ct-page .ct-bill-rows{
+  padding:5px 14px 3px;
+}
+
+body.ct-page .ct-bill .ct-bill-row{
+  padding:8px 0;
+  font-size:12.5px;
+}
+
+body.ct-page .ct-bill-label,
+body.ct-page .ct-bill-val{
+  font-size:12.5px;
+}
+
+body.ct-page .ct-bill-band{
+  padding:9px 14px;
+  font-size:11.5px;
+  font-weight:750;
+}
+
+body.ct-page .ct-bill .ct-bill-total{
+  margin:0 14px;
+  padding:12px 0 13px;
+}
+
+body.ct-page .ct-total-label{
+  font-size:14px;
+  font-weight:800;
+}
+
+body.ct-page .ct-bill .ct-total-val{
+  font-size:18px;
+  font-weight:800;
+}
+
+/* ── 10. CANCELLATION POLICY — quiet secondary information ───────────── */
+body.ct-page .ct-cancel{
+  margin:12px 18px 9px;
+  padding:0 2px;
+}
+
+body.ct-page .ct-cancel-title{
+  font-size:12px;
+  font-weight:700;
+  color:var(--ct-muted);
+}
+
+body.ct-page .ct-cancel p{
+  margin:4px 0 0;
+  font-size:10.5px;
+  font-weight:600;
+  line-height:1.5;
+  color:#A1A5AA;
+}
+
+/* ── 11. STICKY PAYMENT BAR — strong CTA, quiet chrome ───────────────── */
+body.ct-page .ct-footer{
+  gap:7px;
+  padding:9px 14px calc(9px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--ct-line-soft);
+  box-shadow:0 -8px 24px rgba(28,32,36,.08);
+}
+
+body.ct-page .ct-footer-save{
+  margin:-9px -14px 0;
+  padding:6px 14px;
+  background:var(--ct-save-bg);
+  color:#14663F;
+  font-size:11px;
+  font-weight:800;
+}
+
+body.ct-page .ct-paybar{
+  gap:9px;
+}
+
+body.ct-page .ct-paybar-amt{
+  font-size:18px;
+  font-weight:800;
+}
+
+body.ct-page .ct-paybar-link{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-paybar .ct-cta{
+  min-height:52px;
+  padding:10px 16px;
+  border-radius:999px;
+  box-shadow:0 6px 17px rgba(194,24,91,.18);
+}
+
+body.ct-page .ct-paybar .ct-cta-text{
+  font-size:14.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-pay-note{
+  font-size:9.5px;
+  font-weight:600;
+}
+
+/* ── 12. RESPONSIVE OPTICAL TUNING ──────────────────────────────────── */
+@media (max-width:380px){
+  body.ct-page .ct-card,
+  body.ct-page .ct-group,
+  body.ct-page .ct-bill,
+  body.ct-page .ct-cym{
+    margin-left:12px;
+    margin-right:12px;
+  }
+
+  body.ct-page .ct-row.has-media{
+    grid-template-columns:52px minmax(0,1fr) 82px;
+    gap:9px;
+  }
+
+  body.ct-page .ct-media{
+    width:52px;
+    height:52px;
+  }
+
+  body.ct-page .ct-cym{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  body.ct-page .ct-cym-track{
+    margin-left:-12px;
+    margin-right:-12px;
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  body.ct-page .ct-cym-card{
+    flex-basis:112px;
+    width:112px;
+    min-width:112px;
+  }
+
+  body.ct-page .ct-cym-media{
+    width:112px;
+    height:112px;
+  }
+
+  body.ct-page .ct-cym-tab{
+    padding-left:12px;
+    padding-right:12px;
+    font-size:11px;
+  }
+}
+
+@media (min-width:381px) and (max-width:412px){
+  body.ct-page .ct-cym-card{
+    flex-basis:116px;
+    width:116px;
+    min-width:116px;
+  }
+
+  body.ct-page .ct-cym-media{
+    width:116px;
+    height:116px;
+  }
+}
+
+@media (min-width:413px){
+  body.ct-page .ct-cym-card{
+    flex-basis:120px;
+    width:120px;
+    min-width:120px;
+  }
+
+  body.ct-page .ct-cym-media{
+    width:120px;
+    height:120px;
+  }
+}
+
+/* Respect reduced-motion without changing any interaction behaviour. */
+@media (prefers-reduced-motion:reduce){
+  body.ct-page .ct-cym-ind,
+  body.ct-page .ct-cym-tab,
+  body.ct-page .ct-cym-add,
+  body.ct-page .ct-group-body,
+  body.ct-page .ct-di-pill,
+  body.ct-page .ct-stepper button{
+    transition:none;
+  }
+}
+
