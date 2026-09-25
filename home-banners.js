@@ -83,7 +83,7 @@
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || 'Order Now';
     const artHtml = image
-      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async"${i === 0 ? ' fetchpriority="high"' : ''}>`
       : '';
 
     return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
@@ -346,38 +346,7 @@
   }, { signal: bag.signal });
 
   // ── Data ────────────────────────────────────────────────────────
-  const BANNER_CACHE_KEY = 'es_home_banners_v2';
-  const BANNER_CACHE_MAX_AGE = 10 * 60 * 1000;
-
-  function readBannerCache() {
-    try {
-      const raw = sessionStorage.getItem(BANNER_CACHE_KEY);
-      if (!raw) return null;
-      const entry = JSON.parse(raw);
-      if (!entry || !Array.isArray(entry.value) || !entry.value.length) return null;
-      if (entry.savedAt && Date.now() - Number(entry.savedAt) > BANNER_CACHE_MAX_AGE) return null;
-      return entry.value;
-    } catch (_) { return null; }
-  }
-
-  function writeBannerCache(value) {
-    try {
-      if (!Array.isArray(value) || !value.length) return;
-      sessionStorage.setItem(BANNER_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), value }));
-    } catch (_) {}
-  }
-
   async function load() {
-    const cached = readBannerCache();
-    if (cached) {
-      banners = cached;
-      build();
-    }
-
-    /* Keep banners out of the first critical network burst. The restaurant
-       feed is the primary Home payload; the banner refresh can follow it. */
-    await new Promise(resolve => setTimeout(resolve, 220));
-
     try {
       const r = await fetch(`${API_BASE}/home-banners`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -385,7 +354,6 @@
       banners = (Array.isArray(j?.data) ? j.data : [])
         .filter(b => b && b.active !== false)
         .sort((a, b) => Number(b.priority || 0) - Number(a.priority || 0));
-      writeBannerCache(banners);
     } catch (e) {
       console.warn('[Eatswada] Header feed unavailable:', e.message);
       banners = [];
