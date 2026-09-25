@@ -612,15 +612,21 @@
     } catch (e) { }
   }
 
-  /* ── Filter actions ─────────────────────────────────────────── */
+  /* ── Filter actions / sheet ─────────────────────────────────── */
+  function animateFilterResult() {
+    var list = el('restaurant-list');
+    if (!list) return;
+    list.classList.remove('filter-result-enter');
+    void list.offsetWidth;
+    list.classList.add('filter-result-enter');
+    window.setTimeout(function () { list.classList.remove('filter-result-enter'); }, 420);
+  }
 
   function toggleFilter(id) {
     if (!filterById(id)) return;
-
     var index = state.filter.active.indexOf(id);
     if (index === -1) state.filter.active.push(id);
     else state.filter.active.splice(index, 1);
-
     invalidateDerivedCache();
     updateURL();
     renderFilterBar();
@@ -631,7 +637,6 @@
   function setSort(id) {
     if (!sortById(id)) return;
     state.filter.sort = id;
-    
     invalidateDerivedCache();
     updateURL();
     renderFilterBar();
@@ -642,7 +647,6 @@
   function clearFilters() {
     state.filter.active = [];
     state.filter.sort = 'recommended';
-    
     invalidateDerivedCache();
     updateURL();
     renderFilterBar();
@@ -650,67 +654,669 @@
     renderSheetBody();
   }
 
-  /* ── Restaurants: load / refresh ────────────────────────────── */
+  var activeSheetTab = 'SORT';
 
-  function applyRestaurants(list) {
-    state.restaurants = list;
-    state.status = list.length ? 'ready' : 'empty';
+  function sheetTabIcon(group) {
+    var icons = {
+      SORT: 'fa-arrow-down-wide-short',
+      'DELIVERY TIME': 'fa-clock',
+      RATING: 'fa-star',
+      PRICE: 'fa-indian-rupee-sign',
+      true: 'fa-tags',
+      'FOOD TYPE': 'fa-leaf'
+    };
+    return icons[group] || 'fa-sliders';
+  }
+
+  function sheetGroups(filters) {
+    var groups = [];
+    filters.forEach(function (f) {
+      if (f.id === 'nearfast') return;
+      var group = f.group || 'OTHER';
+      if (groups.indexOf(group) === -1) groups.push(group);
+    });
+    return groups;
+  }
+
+  function renderSheetTabs(groups) {
+    var tabs = el('filter-sheet-tabs');
+    if (!tabs) return;
+    var names = ['SORT'].concat(groups);
+    if (names.indexOf(activeSheetTab) === -1) activeSheetTab = names[0];
+    tabs.innerHTML = names.map(function (name) {
+      var label = name === 'SORT' ? 'Sort By' :
+        name === 'DELIVERY TIME' ? 'Time' :
+        name === 'FOOD TYPE' ? 'Food Type' :
+        name === 'true' ? 'Offers' :
+        name.charAt(0) + name.slice(1).toLowerCase();
+      return '<button type="button" class="filter-tab' +
+        (activeSheetTab === name ? ' active' : '') +
+        '" data-sheet-tab="' + card.escape(name) + '">' +
+        '<i class="fa-solid ' + sheetTabIcon(name) + '" aria-hidden="true"></i>' +
+        '<span>' + card.escape(label) + '</span></button>';
+    }).join('');
+    tabs.querySelectorAll('[data-sheet-tab]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        activeSheetTab = button.getAttribute('data-sheet-tab');
+        renderSheetBody();
+      });
+    });
+  }
+
+  function optionIcon(filter) {
+    var icons = {
+      nearfast: 'fa-bolt', under30m: 'fa-clock', under45m: 'fa-clock',
+      rating35: 'fa-star', rating45: 'fa-star', rating: 'fa-star',
+      under100: 'fa-indian-rupee-sign', under200: 'fa-indian-rupee-sign',
+      under300: 'fa-indian-rupee-sign', price100to200: 'fa-indian-rupee-sign',
+      priceAbove200: 'fa-indian-rupee-sign', offers: 'fa-tags',
+      veg: 'fa-leaf', nonveg: 'fa-drumstick-bite'
+    };
+    return icons[filter.id] || 'fa-circle-check';
+  }
+
+  function renderSheetBody() {
+    var body = el('filter-sheet-body');
+    if (!body) return;
+    var sorts = supportedSorts();
+    var filters = supportedFilters();
+    var groups = sheetGroups(filters);
+    renderSheetTabs(groups);
+    var html = '';
+
+    if (activeSheetTab === 'SORT') {
+      html += '<section class="filter-section"><h4 class="filter-section-title">Sort by</h4><div class="sort-list">';
+      html += sorts.map(function (sort) {
+        return '<button type="button" class="sort-option' +
+          (state.filter.sort === sort.id ? ' selected' : '') +
+          '" data-sort="' + card.escape(sort.id) + '">' +
+          '<span>' + card.escape(sort.label) + '</span>' +
+          '<i class="fa-solid fa-check check-icon" aria-hidden="true"></i></button>';
+      }).join('');
+      html += '</div></section>';
+    } else {
+      var selected = filters.filter(function (f) {
+        return (f.group || 'OTHER') === activeSheetTab && f.id !== 'nearfast';
+      });
+      if (activeSheetTab === 'DELIVERY TIME') {
+        selected = filters.filter(function (f) {
+          return f.group === 'DELIVERY TIME' || f.id === 'nearfast';
+        });
+      }
+      html += '<section class="filter-section"><h4 class="filter-section-title">' +
+        card.escape(activeSheetTab === 'DELIVERY TIME' ? 'Time' :
+          activeSheetTab === 'FOOD TYPE' ? 'Food type' :
+          activeSheetTab === 'true' ? 'Offers' :
+          activeSheetTab.charAt(0) + activeSheetTab.slice(1).toLowerCase()) +
+        '</h4><div class="filter-grid' + (selected.length >= 3 ? ' three' : '') + '">';
+      html += selected.map(function (filter) {
+        return '<button type="button" class="sheet-option' +
+          (isFilterActive(filter.id) ? ' selected' : '') +
+          '" data-sheet-filter="' + card.escape(filter.id) + '">' +
+          '<i class="fa-solid ' + optionIcon(filter) + ' option-icon" aria-hidden="true"></i>' +
+          '<span>' + card.escape(filter.label) + '</span>' +
+          '<i class="fa-solid fa-check check-icon" aria-hidden="true"></i></button>';
+      }).join('');
+      html += '</div></section>';
+      if (!selected.length) html += '<p class="filter-section-sub">No compatible options are available for the current restaurant data.</p>';
+    }
+
+    body.innerHTML = html;
+    body.querySelectorAll('[data-sort]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        setSort(button.getAttribute('data-sort'));
+        animateFilterResult();
+      });
+    });
+    body.querySelectorAll('[data-sheet-filter]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        toggleFilter(button.getAttribute('data-sheet-filter'));
+        animateFilterResult();
+      });
+    });
+  }
+
+  function openFilterSheet() {
+    var sheet = el('filter-sheet');
+    if (!sheet) return;
+    renderSheetBody();
+    sheet.hidden = false;
+    requestAnimationFrame(function () { sheet.classList.add('open'); });
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterSheet() {
+    var sheet = el('filter-sheet');
+    if (!sheet) return;
+    sheet.classList.remove('open');
+    document.body.style.overflow = '';
+    window.setTimeout(function () { sheet.hidden = true; }, 220);
+  }
+
+  /* ── Categories ─────────────────────────────────────────────── */
+  function ensureCategorySkeleton(scroll) {
+    if (!scroll || scroll.querySelector('.sk')) return;
+    scroll.innerHTML =
+      '<div class="cs-item"><div class="sk cs-ring"></div><div class="sk cs-name"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d3"></div><div class="sk cs-name d3"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d1"></div><div class="sk cs-name d1"></div></div>' +
+      '<div class="cs-item"><div class="sk cs-ring d2"></div><div class="sk cs-name d2"></div></div>';
+  }
+
+  function renderCategories() {
+    var scroll = el('cat-scroll');
+    var section = el('mind-section');
+    if (!scroll) return;
+    if (state.categories.length) {
+      if (section) section.hidden = false;
+      scroll.innerHTML = state.categories.map(function (cat, i) {
+        var image = typeof safeUrl === 'function' ? safeUrl(cat.image) : String(cat.image || '');
+        return '<a class="cat-item' +
+          (state.categoryMode && state.categoryMode.name.toLowerCase() === String(cat.type).toLowerCase() ? ' is-selected' : '') +
+          '" href="#' + encodeURIComponent(cat.type) + '" data-category-name="' + card.escape(cat.type) + '">' +
+          '<span class="cat-ring cat-image-shell"><span class="cat-image-placeholder" aria-hidden="true"></span>' +
+          '<img src="' + card.escape(image) + '" alt="' + card.escape(cat.name) + '" loading="' + (i < 4 ? 'eager' : 'lazy') + '" decoding="async">' +
+          '</span><span class="cat-name">' + card.escape(cat.name) + '</span></a>';
+      }).join('');
+      scroll.querySelectorAll('[data-category-name]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          searchCategory(link.getAttribute('data-category-name') || '');
+        });
+      });
+      return;
+    }
+    if (state.categoryStatus === 'empty') {
+      if (section) section.hidden = true;
+      scroll.innerHTML = '';
+      return;
+    }
+    if (section) section.hidden = false;
+    ensureCategorySkeleton(scroll);
+  }
+
+  function searchCategory(name) {
+    var query = String(name || '').trim();
+    if (query.length < 2) return Promise.resolve();
+    if (state.categoryMode && state.categoryMode.name.toLowerCase() === query.toLowerCase()) {
+      state.categoryMode = null;
+      state.status = state.restaurants.length ? 'ready' : 'empty';
+      invalidateDerivedCache();
+      renderSectionTitle();
+      renderFilterBar();
+      renderRestaurants();
+      renderCategories();
+      return Promise.resolve();
+    }
+    var seq = ++state.categorySearchSeq;
+    state.categoryMode = { name: query, restaurantIds: new Set(), itemByRestaurant: Object.create(null) };
+    state.status = 'loading';
     invalidateDerivedCache();
-    renderSectionTitle();
-    renderFilterBar();
-    renderRestaurants();
+    showSkeleton();
+    return window.API.searchMenuItems(query, 'home').then(function (items) {
+      if (seq !== state.categorySearchSeq) return;
+      var ids = new Set();
+      var byRestaurant = Object.create(null);
+      (Array.isArray(items) ? items : []).forEach(function (item) {
+        var rid = String(item && item.restaurantId || (item && item.restaurant && (item.restaurant.id || item.restaurant._id)) || '');
+        if (!rid) return;
+        ids.add(rid);
+        if (!byRestaurant[rid]) byRestaurant[rid] = item;
+      });
+      state.categoryMode.restaurantIds = ids;
+      state.categoryMode.itemByRestaurant = byRestaurant;
+      state.status = ids.size ? 'ready' : 'empty';
+      invalidateDerivedCache();
+      renderSectionTitle();
+      renderFilterBar();
+      renderRestaurants();
+      renderCategories();
+    }).catch(function (error) {
+      if (seq !== state.categorySearchSeq) return;
+      console.warn('[home] category search failed:', error);
+      state.categoryMode = null;
+      state.status = state.restaurants.length ? 'ready' : 'error';
+      state.errorMessage = error && error.message ? error.message : 'Could not load this category.';
+      renderRestaurants();
+    });
+  }
+
+  function loadCategories() {
+    var cached = window.API.cache.readList(window.API.CACHE_KEYS.categories, CACHE_MAX_AGE_MS);
+    if (cached && cached.length) {
+      state.categories = cached;
+      state.categoryStatus = 'ready';
+      renderCategories();
+    } else {
+      state.categoryStatus = 'loading';
+      renderCategories();
+    }
+    return window.API.getList(window.API.routes.categories).then(function (data) {
+      var categories = (Array.isArray(data) ? data : [])
+        .filter(function (cat) { return cat && cat.isActive !== false && cat.name && cat.image; })
+        .sort(function (a, b) { return Number(a.order || 0) - Number(b.order || 0); })
+        .map(function (cat) { return { name: cat.name, type: cat.name, image: cat.image }; });
+      if (categories.length) {
+        state.categories = categories;
+        state.categoryStatus = 'ready';
+        window.API.cache.writeList(window.API.CACHE_KEYS.categories, categories);
+      } else if (state.categoryStatus !== 'ready') {
+        state.categoryStatus = 'empty';
+      }
+      renderCategories();
+    }).catch(function (error) {
+      console.warn('[home] categories unavailable:', error && error.message ? error.message : error);
+      if (state.categoryStatus !== 'ready') state.categoryStatus = 'loading';
+      renderCategories();
+    });
+  }
+
+  /* ── Restaurants: refresh ──────────────────────────────────── */
+  function allowOutsideBrowse() {
+    try { return new URLSearchParams(window.location.search).get('allowOutside') === '1'; }
+    catch (e) { return false; }
+  }
+
+  function renderSectionTitle() {
+    var title = el('restaurants-title');
+    if (!title) return;
+    if (state.categoryMode) {
+      title.textContent = state.categoryMode.name + ' near you';
+      return;
+    }
+    var hasOffers = state.restaurants.some(function (res) { return !!card.read.offer(res); });
+    title.textContent = hasOffers ? 'Recommended with deals' : 'Restaurants near you';
   }
 
   function maybeRedirectOutsideServiceArea() {
-    if (allowOutsideBrowse()) return;
-    if (state.loc.status !== 'ready' || !state.restaurants.length) return;
+    if (allowOutsideBrowse() || state.loc.status !== 'ready' || !state.restaurants.length) return;
     var coords = card.getCustomerCoordinates();
     if (!coords) return;
-    var allOutside = true;
-    var checked = 0;
+    var checked = 0, allOutside = true;
     state.restaurants.forEach(function (res) {
-      var restaurantCoords = card.read.coordinates(res);
-      if (!restaurantCoords) return;
+      if (!card.read.coordinates(res)) return;
       checked += 1;
       if (card.resolveAvailability(res, coords) !== 'outside_delivery_area') allOutside = false;
     });
-    if (!checked || !allOutside) return;
-    if (window.__esOutsideServiceRedirected) return;
+    if (!checked || !allOutside || window.__esOutsideServiceRedirected) return;
     window.__esOutsideServiceRedirected = true;
-    window.setTimeout(function () {
-      window.location.replace('service-unavailable.html');
-    }, 120);
+    window.setTimeout(function () { window.location.replace('service-unavailable.html'); }, 120);
+  }
+
+  function refresh(isUserInitiated) {
+    if (state.isRefreshing) return Promise.resolve();
+    state.isRefreshing = true;
+    if (isUserInitiated && !state.restaurants.length) {
+      state.status = 'loading';
+      showSkeleton();
+    }
+    return window.API.getList(window.API.routes.restaurants).then(function (data) {
+      var list = (Array.isArray(data) ? data : []).filter(function (res) {
+        return res && (res._id || res.id || res.slug);
+      });
+      state.staleNotice = '';
+      state.errorMessage = '';
+      if (list.length) window.API.cache.writeList(CACHE_KEY, list);
+      else window.API.cache.clear(CACHE_KEY);
+      applyRestaurants(list);
+      renderDeliveryEstimate();
+      renderNotice();
+    }).catch(function (error) {
+      console.error('[home] restaurant load failed:', error);
+      if (state.restaurants.length) {
+        state.staleNotice = 'Showing saved results — couldn\'t refresh.';
+        renderNotice();
+      } else {
+        state.status = 'error';
+        state.errorMessage = error && error.message ? error.message : 'Please try again.';
+        renderRestaurants();
+      }
+      renderNotice();
+    }).then(function () {
+      state.isRefreshing = false;
+      maybePromptForLocation();
+    });
+  }
+
+  function showSkeleton() {
+    var list = el('restaurant-list');
+    if (!list) return;
+    list.innerHTML =
+      '<div class="u99-card-host rs-skeleton" aria-hidden="true"><article class="u99-restaurant-card">' +
+      '<div class="u99-restaurant-head"><div class="u99-card-copy"><div class="u99-discount-line"><span class="sk rsk-line" style="width:36%"></span></div>' +
+      '<h2 class="u99-restaurant-name"><span class="sk rsk-line" style="width:62%"></span></h2>' +
+      '<div class="u99-meta"><span class="sk rsk-line" style="width:52px"></span><span class="sk rsk-line" style="width:70px"></span><span class="sk rsk-line" style="width:88px"></span></div>' +
+      '<div class="u99-free-row"><span class="sk rsk-line" style="width:54%"></span></div></div></div>' +
+      '<div class="u99-carousel-wrap"><div class="u99-carousel"><article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill"></span><span class="sk rsk-add"></span></div><div class="u99-item-name"><span class="sk rsk-line" style="width:80%"></span></div><div class="u99-price-row"><span class="sk rsk-line" style="width:46%"></span></div></article>' +
+      '<article class="u99-item"><div class="u99-item-image"><span class="sk rsk-fill d1"></span><span class="sk rsk-add d1"></span></div><div class="u99-item-name"><span class="sk rsk-line d1" style="width:72%"></span></div><div class="u99-price-row"><span class="sk rsk-line d1" style="width:50%"></span></div></article></div></div></article></div>';
   }
 
   function loadRestaurants() {
     var cached = window.API.cache.readList(CACHE_KEY, CACHE_MAX_AGE_MS);
-
     if (cached) {
       applyRestaurants(cached);
       renderDeliveryEstimate();
+    } else {
+      showSkeleton();
     }
-
     return refresh(false);
   }
 
-  /* other functions below remain unchanged */
+  /* ── Location / profile ─────────────────────────────────────── */
+  function validCoords(lat, lng) {
+    lat = Number(lat); lng = Number(lng);
+    if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180 || (lat === 0 && lng === 0)) return null;
+    return { lat: lat, lng: lng };
+  }
 
-  /* ── Wiring ─────────────────────────────────────────────────── */
+  function readDeviceLocation() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(DEVICE_LOC_KEY) || 'null');
+      if (!saved || !saved.ts || Date.now() - Number(saved.ts) > DEVICE_LOC_MAX_AGE_MS) return null;
+      return validCoords(saved.lat, saved.lng);
+    } catch (e) { return null; }
+  }
 
-  function init() {
-    if (window.CONFIG && window.CONFIG.BRAND_NAME) {
-      document.title = window.CONFIG.BRAND_NAME + ' – Food Near You';
+  function writeDeviceLocation(point) {
+    try { localStorage.setItem(DEVICE_LOC_KEY, JSON.stringify({ lat: point.lat, lng: point.lng, ts: Date.now() })); } catch (e) {}
+  }
+
+  window.EatswadaLocation = {
+    deviceCoordinates: readDeviceLocation,
+    status: function () { return state.loc.status; },
+    request: function () { requestDeviceLocation(); }
+  };
+
+  function readSavedAddress() {
+    try {
+      if (window.EatswadaAddressStore && typeof window.EatswadaAddressStore.getActive === 'function') {
+        var active = window.EatswadaAddressStore.getActive();
+        if (active) return active;
+      }
+      return JSON.parse(localStorage.getItem('nearbite_address') || 'null');
+    } catch (e) { return null; }
+  }
+
+  function addressKey(address) {
+    if (!address) return '';
+    var c = address.location && address.location.coordinates;
+    return JSON.stringify([address._id || '', Array.isArray(c) ? c.join(',') : '', address.tag || '', address.house || '', address.area || '', address.landmark || '', address.city || '']);
+  }
+
+  function uniqueParts(values) {
+    var seen = {}, out = [];
+    values.forEach(function (value) {
+      String(value || '').split(',').forEach(function (part) {
+        var t = part.replace(/\s+/g, ' ').trim(), k = t.toLowerCase();
+        if (t && !seen[k]) { seen[k] = true; out.push(t); }
+      });
+    });
+    return out;
+  }
+
+  function tagLabel(tag) {
+    var t = String(tag || '').trim();
+    if (/^(work|office)$/i.test(t)) return 'Office';
+    if (/^(home|house)$/i.test(t)) return 'Home';
+    return t;
+  }
+
+  function renderSavedAddress() {
+    var nameEl = el('loc-name'), subEl = el('loc-sub');
+    if (!nameEl || !subEl) return;
+    var address = readSavedAddress();
+    if (address) {
+      nameEl.textContent = tagLabel(address.tag) || address.city || 'Delivering to';
+      subEl.textContent = uniqueParts([address.house, address.landmark, address.area, address.city]).join(', ') || 'Saved delivery address';
+      return;
     }
-    
-    parseURL();
+    subEl.textContent = 'Choose your delivery location';
+    nameEl.textContent = state.loc.status === 'ready' && state.loc.source === 'device' ? 'Current location' :
+      state.loc.status === 'locating' ? 'Getting location…' : 'Set delivery location';
+  }
 
+  function promptDismissed() {
+    try { return sessionStorage.getItem(PROMPT_DISMISSED_KEY) === '1'; } catch (e) { return false; }
+  }
+  function markPromptDismissed() {
+    try { sessionStorage.setItem(PROMPT_DISMISSED_KEY, '1'); } catch (e) {}
+  }
+
+  function setLocationStatus(status, source) {
+    state.loc.status = status;
+    state.loc.source = source || null;
+    renderSavedAddress();
+    renderLocationBanner();
+    if (state.status !== 'loading' && status !== 'locating') {
+      invalidateDerivedCache();
+      renderFilterBar();
+      renderRestaurants();
+      maybeRedirectOutsideServiceArea();
+    }
+  }
+
+  function isSignedIn() {
+    try { return !!(localStorage.getItem('nearbite_token') || localStorage.getItem('token')); } catch (e) { return false; }
+  }
+
+  function resolveStoredLocation() {
+    var saved = readSavedAddress();
+    if (card.getAddressCoordinates() || saved) {
+      setLocationStatus('ready', 'address');
+      return;
+    }
+    if (window.EatswadaAddressStore && typeof window.EatswadaAddressStore.hydrate === 'function' && isSignedIn()) {
+      setLocationStatus('locating', 'address');
+      Promise.resolve(window.EatswadaAddressStore.hydrate()).then(function () {
+        var hydrated = readSavedAddress();
+        if (card.getAddressCoordinates() || hydrated) setLocationStatus('ready', 'address');
+        else if (readDeviceLocation()) setLocationStatus('ready', 'device');
+        else setLocationStatus('idle');
+      }).catch(function () { setLocationStatus(readDeviceLocation() ? 'ready' : 'idle', readDeviceLocation() ? 'device' : null); });
+      return;
+    }
+    if (readDeviceLocation()) setLocationStatus('ready', 'device');
+    else setLocationStatus('idle');
+  }
+
+  function revalidateSavedAddress() {
+    var store = window.EatswadaAddressStore;
+    if (store && typeof store.hydrate === 'function' && isSignedIn() && state.loc.source === 'address') store.hydrate();
+  }
+
+  function requestDeviceLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus('unavailable');
+      updateSheetForState();
+      return;
+    }
+    setLocationStatus('locating');
+    updateSheetForState();
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var point = validCoords(position.coords.latitude, position.coords.longitude);
+      if (!point) { setLocationStatus('unavailable'); updateSheetForState(); return; }
+      writeDeviceLocation(point);
+      setLocationStatus('ready', 'device');
+      closeLocationSheet();
+    }, function (error) {
+      var denied = error && error.code === 1;
+      if (denied) markPromptDismissed();
+      setLocationStatus(denied ? 'denied' : 'unavailable');
+      updateSheetForState();
+    }, GPS_OPTIONS);
+  }
+
+  function profileNeedsSetup() {
+    try {
+      var raw = localStorage.getItem('nearbite_user');
+      if (!raw) return false;
+      var user = JSON.parse(raw) || {};
+      return /^(Nearbite|Eatswada) User$/i.test(String(user.name || '').trim()) || !String(user.phone || '').trim();
+    } catch (e) { return false; }
+  }
+
+  function renderProfileSetupBanner() {
+    var host = el('profile-setup-banner');
+    if (!host) return;
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem('eatswada_profile_prompt_dismissed') === '1'; } catch (e) {}
+    if (!profileNeedsSetup() || dismissed) { host.hidden = true; host.innerHTML = ''; return; }
+    host.innerHTML = '<span class="psb-icon"><i class="fa-solid fa-user-pen" aria-hidden="true"></i></span><span class="psb-copy"><span class="psb-title">Finish setting up your profile</span><span class="psb-text">Add your mobile number and password when you are ready.</span></span><button type="button" class="psb-btn" id="profile-setup-btn">Complete</button>';
+    host.hidden = false;
+    var btn = el('profile-setup-btn');
+    if (btn) btn.addEventListener('click', function () { window.location.href = 'complete-profile.html'; });
+  }
+
+  var BANNER_COPY = {
+    idle: { icon: 'fa-location-dot', text: 'Set your location to see delivery availability.', actions: [{ id: 'set', label: 'Set location' }] },
+    locating: { icon: 'fa-circle-notch fa-spin', text: 'Checking which restaurants deliver to you…', actions: [] },
+    denied: { icon: 'fa-location-crosshairs', text: 'Location access is needed to check delivery availability.', actions: [{ id: 'retry', label: 'Try again' }, { id: 'address', label: 'Choose address' }] },
+    unavailable: { icon: 'fa-triangle-exclamation', text: 'Location unavailable. We can\'t check delivery availability right now.', actions: [{ id: 'retry', label: 'Try again' }, { id: 'address', label: 'Choose address' }] }
+  };
+
+  function renderLocationBanner() {
+    var host = el('location-banner');
+    if (!host) return;
+    var copy = BANNER_COPY[state.loc.status];
+    if (!copy) { host.hidden = true; host.innerHTML = ''; return; }
+    host.innerHTML = '<i class="fa-solid ' + copy.icon + ' lb-icon" aria-hidden="true"></i><span class="lb-text">' + card.escape(copy.text) + '</span>' +
+      (copy.actions.length ? '<span class="lb-actions">' + copy.actions.map(function (a) { return '<button type="button" class="lb-btn" data-loc-action="' + a.id + '">' + card.escape(a.label) + '</button>'; }).join('') + '</span>' : '');
+    host.hidden = false;
+    host.querySelectorAll('[data-loc-action]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var action = button.getAttribute('data-loc-action');
+        if (action === 'address') window.location.href = 'address.html?view=select';
+        else if (action === 'retry') requestDeviceLocation();
+        else openLocationSheet();
+      });
+    });
+  }
+
+  var sheetReturnFocus = null;
+  var SHEET_COPY = {
+    ask: { title: 'Allow location to continue', text: 'We use your location to show restaurants that can deliver to you and calculate your delivery distance.', primary: 'Allow location' },
+    locating: { title: 'Getting your location', text: 'This only takes a moment.', primary: 'Getting location…' },
+    denied: { title: 'Location access is needed', text: 'Allow location in your browser settings, or choose a saved address instead.', primary: 'Try again' },
+    unavailable: { title: 'Location unavailable', text: 'We couldn\'t get your location. Try again, or choose a saved address instead.', primary: 'Try again' }
+  };
+
+  function updateSheetForState() {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden) return;
+    var mode = state.loc.status === 'denied' ? 'denied' : state.loc.status === 'unavailable' ? 'unavailable' : state.loc.status === 'locating' ? 'locating' : 'ask';
+    var copy = SHEET_COPY[mode];
+    var title = el('location-sheet-title'), text = el('location-sheet-text'), allow = el('location-allow-btn');
+    if (title) title.textContent = copy.title;
+    if (text) text.textContent = copy.text;
+    if (allow) { allow.textContent = copy.primary; allow.disabled = mode === 'locating'; }
+  }
+
+  function openLocationSheet() {
+    var sheet = el('location-sheet');
+    if (!sheet || !sheet.hidden) return;
+    sheetReturnFocus = document.activeElement;
+    sheet.hidden = false;
+    updateSheetForState();
+    requestAnimationFrame(function () { sheet.classList.add('open'); });
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLocationSheet(dismissedByUser) {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden) return;
+    if (dismissedByUser) markPromptDismissed();
+    sheet.classList.remove('open');
+    document.body.style.overflow = '';
+    window.setTimeout(function () { sheet.hidden = true; }, 220);
+    if (sheetReturnFocus && typeof sheetReturnFocus.focus === 'function') sheetReturnFocus.focus();
+    sheetReturnFocus = null;
+  }
+
+  function maybePromptForLocation() {
+    if (state.loc.status !== 'idle' || promptDismissed() || state.status !== 'ready') return;
+    if (!state.restaurants.some(function (res) { return !!card.read.coordinates(res); })) return;
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+        if (result.state === 'granted') requestDeviceLocation();
+        else if (result.state === 'denied') setLocationStatus('denied');
+        else openLocationSheet();
+      }).catch(openLocationSheet);
+    } else openLocationSheet();
+  }
+
+  function renderDeliveryEstimate() {
+    var node = el('delivery-time-value');
+    if (!node) return;
+    var mins = state.restaurants.map(function (r) { var t = card.read.deliveryTime(r); return t && t.min != null ? Number(t.min) : null; }).filter(function (v) { return Number.isFinite(v) && v > 0; });
+    node.textContent = mins.length ? String(Math.min.apply(null, mins)) : '—';
+  }
+
+  function showProfileInitial() {
+    try {
+      var token = localStorage.getItem('token') || localStorage.getItem('nearbite_token');
+      var raw = localStorage.getItem('nearbite_user');
+      if (!token || !raw) return;
+      var user = JSON.parse(raw), button = document.querySelector('.btn-profile');
+      if (button && user && user.name) button.innerHTML = '<span class="profile-initial">' + card.escape(String(user.name).charAt(0).toUpperCase()) + '</span>';
+    } catch (e) {}
+  }
+
+  function bindLocationSheet() {
+    var sheet = el('location-sheet');
+    if (!sheet) return;
+    sheet.addEventListener('click', function (event) {
+      if (event.target.hasAttribute('data-close-location-sheet')) closeLocationSheet(true);
+    });
+    var allow = el('location-allow-btn');
+    if (allow) allow.addEventListener('click', requestDeviceLocation);
+    document.addEventListener('keydown', function (event) {
+      if (!sheet.hidden && event.key === 'Escape') closeLocationSheet(true);
+    });
+  }
+
+  function bindStaticControls() {
+    var vegBox = el('veg-toggle-btn');
+    if (vegBox) vegBox.addEventListener('click', function () { toggleFilter('veg'); });
+    var sheet = el('filter-sheet');
+    if (sheet) sheet.addEventListener('click', function (event) { if (event.target.hasAttribute('data-close-sheet')) closeFilterSheet(); });
+    var clearBtn = el('filter-sheet-clear');
+    if (clearBtn) clearBtn.addEventListener('click', clearFilters);
+    window.addEventListener('nearbite:address-changed', function () { resolveStoredLocation(); renderSavedAddress(); });
+    window.addEventListener('storage', function (event) {
+      if (event.key === 'nearbite_address' || event.key === 'nearbite_selected_address_id') resolveStoredLocation();
+    });
+  }
+
+  function startSearchPlaceholder() {
+    var placeholder = el('search-placeholder');
+    if (!placeholder) return;
+    var dish = placeholder.querySelector('.search-dish');
+    if (!dish) return;
+    var dishes = ['Biryani', 'Pizza', 'Momos', 'Rolls', 'Chowmein', 'Fried Rice', 'Burger', 'Dosa', 'Noodles', 'Pasta'];
+    var index = 0;
+    function tick() {
+      if (document.hidden) return;
+      index = (index + 1) % dishes.length;
+      dish.classList.remove('is-sliding');
+      void dish.offsetWidth;
+      dish.textContent = '"' + dishes[index] + '"';
+      dish.classList.add('is-sliding');
+      window.setTimeout(tick, 2600);
+    }
+    window.setTimeout(tick, 1800);
+  }
+
+  /* ── Final wiring ───────────────────────────────────────────── */
+  function init() {
+    if (window.CONFIG && window.CONFIG.BRAND_NAME) document.title = window.CONFIG.BRAND_NAME + ' – Food Near You';
+    parseURL();
     bindStaticControls();
     bindLocationSheet();
-
-    /* One location read per page load, before any distance is shown. */
     resolveStoredLocation();
     revalidateSavedAddress();
-
+    renderSavedAddress();
     showProfileInitial();
     renderProfileSetupBanner();
     startSearchPlaceholder();
@@ -718,11 +1324,8 @@
     loadCategories();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 
   window.Home = {
     state: state,
@@ -733,6 +1336,5 @@
     requestLocation: requestDeviceLocation,
     openLocationSheet: openLocationSheet
   };
-
   window.displayRestaurants = renderRestaurants;
 })();
