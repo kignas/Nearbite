@@ -202,10 +202,10 @@
    instead of removing the category and collapsing the rail. */
 #mind-section .cat-image-shell{
   position:relative;
-  overflow:hidden;
+  overflow:visible;
   isolation:isolate;
-  border-radius:50%;
-  background:#F1F3F6;
+  border-radius:0;
+  background:transparent;
 }
 
 #mind-section .cat-image-placeholder{
@@ -215,9 +215,10 @@
   place-items:center;
   z-index:0;
   overflow:hidden;
-  background:linear-gradient(115deg,#F1F3F6 18%,#F7F8FA 38%,#F1F3F6 58%);
+  border-radius:50%;
+  background:#fff;
   background-size:220% 100%;
-  animation:ewCategoryShimmer 1.45s ease-in-out infinite;
+  animation:none;
 }
 
 #mind-section .cat-placeholder-mark{
@@ -246,7 +247,7 @@
   display:block;
   opacity:0;
   transition:opacity .22s ease,transform .22s ease;
-  background:#F1F3F6;
+  background:transparent;
 }
 
 #mind-section .cat-ring img.loaded{
@@ -266,7 +267,7 @@
 
 #mind-section .cat-item.image-failed .cat-image-placeholder{
   animation:none;
-  background:#F1F3F6;
+  background:#fff;
 }
 
 @keyframes ewCategoryShimmer{
