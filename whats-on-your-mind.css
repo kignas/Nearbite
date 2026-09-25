@@ -193,3 +193,87 @@
     line-height:1.2;
   }
 }
+
+
+/* ── Premium category image loading ────────────────────────────────
+   The shell owns the final geometry from the first frame. A quiet,
+   low-contrast shimmer sits underneath the image and disappears only after
+   the browser has decoded it. Failed images leave the same polished shell
+   instead of removing the category and collapsing the rail. */
+#mind-section .cat-image-shell{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  border-radius:50%;
+  background:#F1F3F6;
+}
+
+#mind-section .cat-image-placeholder{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  z-index:0;
+  overflow:hidden;
+  background:linear-gradient(115deg,#F1F3F6 18%,#F7F8FA 38%,#F1F3F6 58%);
+  background-size:220% 100%;
+  animation:ewCategoryShimmer 1.45s ease-in-out infinite;
+}
+
+#mind-section .cat-placeholder-mark{
+  width:34%;
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:#B8C0CA;
+  opacity:.72;
+}
+
+#mind-section .cat-placeholder-mark svg{
+  width:100%;
+  height:100%;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.35;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+#mind-section .cat-ring img{
+  position:relative;
+  z-index:1;
+  display:block;
+  opacity:0;
+  transition:opacity .22s ease,transform .22s ease;
+  background:#F1F3F6;
+}
+
+#mind-section .cat-ring img.loaded{
+  opacity:1;
+}
+
+#mind-section .cat-ring img.failed{
+  display:none;
+}
+
+#mind-section .cat-image-shell:has(img.loaded) .cat-image-placeholder{
+  opacity:0;
+  visibility:hidden;
+  animation:none;
+  transition:opacity .18s ease,visibility 0s linear .18s;
+}
+
+#mind-section .cat-item.image-failed .cat-image-placeholder{
+  animation:none;
+  background:#F1F3F6;
+}
+
+@keyframes ewCategoryShimmer{
+  0%{background-position:120% 0}
+  100%{background-position:-120% 0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #mind-section .cat-image-placeholder{animation:none}
+}
