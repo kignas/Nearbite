@@ -62,6 +62,60 @@
     }, 250);
   };
 
+  /* ── Shared request timeout ────────────────────────────────────
+     Several pages use direct fetch() calls instead of api.js. A cold or
+     unavailable backend must not leave Profile, Orders, Tracking, or Menu
+     pages on an infinite loading skeleton. Preserve caller abort signals
+     while adding a bounded timeout to requests made by page scripts. */
+  if (!window.__nearbiteFetchTimeout) {
+    const nativeFetch = window.fetch.bind(window);
+    const DEFAULT_TIMEOUT_MS = 15000;
+
+    window.fetch = function (input, init) {
+      const options = init ? { ...init } : {};
+      const callerSignal = options.signal || (input && input.signal);
+      const controller = new AbortController();
+      let timedOut = false;
+      let timer = null;
+      let removeCallerAbort = null;
+
+      if (callerSignal) {
+        if (callerSignal.aborted) controller.abort(callerSignal.reason);
+        else {
+          removeCallerAbort = function () {
+            controller.abort(callerSignal.reason);
+          };
+          callerSignal.addEventListener('abort', removeCallerAbort, { once: true });
+        }
+      }
+
+      const timeout = Number(options.timeout || DEFAULT_TIMEOUT_MS);
+      delete options.timeout;
+      options.signal = controller.signal;
+
+      timer = setTimeout(function () {
+        timedOut = true;
+        controller.abort();
+      }, Number.isFinite(timeout) && timeout > 0 ? timeout : DEFAULT_TIMEOUT_MS);
+
+      return nativeFetch(input, options).catch(function (error) {
+        if (timedOut) {
+          const timeoutError = new Error('The server took too long to respond.');
+          timeoutError.name = 'TimeoutError';
+          throw timeoutError;
+        }
+        throw error;
+      }).finally(function () {
+        clearTimeout(timer);
+        if (callerSignal && removeCallerAbort) {
+          callerSignal.removeEventListener('abort', removeCallerAbort);
+        }
+      });
+    };
+
+    window.__nearbiteFetchTimeout = true;
+  }
+
   /* ── Intent-based navigation warming ──────────────────────────
      Do not prefetch several complete HTML documents after every page
      opens. Those requests compete with the page's API calls, fonts and
@@ -89,9 +143,6 @@
       } catch (e) {}
     }
 
-    /* Desktop: warm only after the pointer rests over a same-origin link.
-       Mobile: pointerover is unreliable, so pointerdown warms the link the
-       user is actually about to open. */
     let hoverTimer = null;
     document.addEventListener('pointerover', function (e) {
       if (e.pointerType === 'touch') return;
