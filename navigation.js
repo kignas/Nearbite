@@ -37,25 +37,17 @@
   window.nearbiteSafeBack = function () {
     const page = currentPage();
 
-    // Address has a real contextual parent when opened from Cart.
     if (page === 'address.html' && isCartReturn()) {
       location.replace('cart.html');
       return;
     }
 
     const fallback = PARENT[page] || 'index.html';
-
-    // Always use a deterministic in-app destination.
-    // This avoids history.back() jumping into another site, an old
-    // duplicate page, or a stale authentication/onboarding screen.
     location.replace(fallback);
   };
 
-  // Alias for existing inline handlers.
   window.goBack = window.nearbiteSafeBack;
 
-  // Restaurant currently has an exit animation before history.back().
-  // Keep that visual behavior, but make the final destination deterministic.
   window.premiumBack = function () {
     const elementsToHide = document.querySelectorAll(
       '.res-card, .delivery-strip, .filter-bar, .menu-section, .cat-nav, .closed-warning-card'
@@ -69,36 +61,54 @@
       window.nearbiteSafeBack();
     }, 250);
   };
-})();
 
+  /* ── Fast navigation layer ─────────────────────────────────────
+     Prefetch only the page the user is likely to open. The previous
+     implementation referenced currentPage() from a different IIFE,
+     which threw a ReferenceError and stopped this entire script. */
+  (function () {
+    if (window.__esFastNavigation) return;
+    window.__esFastNavigation = true;
 
-/* ── Fast navigation layer ─────────────────────────────────────
-   Warm likely same-origin pages while the user is reading the current page.
-   This makes the next full-page navigation much less likely to start cold. */
-(function(){
-  if (window.__esFastNavigation) return;
-  window.__esFastNavigation = true;
+    function pageName() {
+      return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    }
 
-  function prefetch(url){
-    try{
-      const u = new URL(url, location.href);
-      if(u.origin !== location.origin || !/\.html$/i.test(u.pathname)) return;
-      if(u.pathname === location.pathname) return;
-      if(document.querySelector('link[rel="prefetch"][href="'+u.href+'"]')) return;
-      const l=document.createElement('link');
-      l.rel='prefetch'; l.href=u.href; l.as='document';
-      document.head.appendChild(l);
-    }catch(e){}
+    function prefetch(url) {
+      try {
+        const u = new URL(url, location.href);
+        if (u.origin !== location.origin || !/\.html$/i.test(u.pathname)) return;
+        if (u.pathname === location.pathname) return;
+        if (document.querySelector('link[rel="prefetch"][href="' + u.href + '"]')) return;
+
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = u.href;
+        link.as = 'document';
+        document.head.appendChild(link);
+      } catch (e) {}
+    }
+
+    const preferred = [
+      'index.html', 'profile.html', 'orders.html', 'cart.html',
+      'address.html', 'search.html'
+    ];
+
+    preferred.forEach(function (page) {
+      if (page !== pageName()) {
+        setTimeout(function () { prefetch(page); }, 900);
+      }
+    });
+
+    document.addEventListener('pointerdown', function (e) {
+      const link = e.target.closest && e.target.closest('a[href]');
+      if (link) prefetch(link.href);
+    }, { passive: true });
+  })();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    }, { once: true });
   }
-
-  // Only warm high-value navigation targets; don't flood mobile connections.
-  const preferred=['index.html','profile.html','orders.html','cart.html','address.html','search.html'];
-  preferred.forEach(function(page){ if(page !== currentPage()) setTimeout(function(){prefetch(page)}, 900); });
-
-  document.addEventListener('pointerdown',function(e){
-    const a=e.target.closest && e.target.closest('a[href]');
-    if(a) prefetch(a.href);
-  },{passive:true});
 })();
-
-if ('serviceWorker' in navigator) window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});
