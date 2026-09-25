@@ -62,25 +62,25 @@
     }, 250);
   };
 
-  /* ── Fast navigation layer ─────────────────────────────────────
-     Prefetch only the page the user is likely to open. The previous
-     implementation referenced currentPage() from a different IIFE,
-     which threw a ReferenceError and stopped this entire script. */
+  /* ── Intent-based navigation warming ──────────────────────────
+     Do not prefetch several complete HTML documents after every page
+     opens. Those requests compete with the page's API calls, fonts and
+     images, especially on mobile connections and cold backend starts. */
   (function () {
     if (window.__esFastNavigation) return;
     window.__esFastNavigation = true;
 
-    function pageName() {
-      return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    }
+    let lastPrefetchUrl = '';
 
     function prefetch(url) {
       try {
         const u = new URL(url, location.href);
         if (u.origin !== location.origin || !/\.html$/i.test(u.pathname)) return;
         if (u.pathname === location.pathname) return;
+        if (u.href === lastPrefetchUrl) return;
         if (document.querySelector('link[rel="prefetch"][href="' + u.href + '"]')) return;
 
+        lastPrefetchUrl = u.href;
         const link = document.createElement('link');
         link.rel = 'prefetch';
         link.href = u.href;
@@ -89,16 +89,23 @@
       } catch (e) {}
     }
 
-    const preferred = [
-      'index.html', 'profile.html', 'orders.html', 'cart.html',
-      'address.html', 'search.html'
-    ];
+    /* Desktop: warm only after the pointer rests over a same-origin link.
+       Mobile: pointerover is unreliable, so pointerdown warms the link the
+       user is actually about to open. */
+    let hoverTimer = null;
+    document.addEventListener('pointerover', function (e) {
+      if (e.pointerType === 'touch') return;
+      const link = e.target.closest && e.target.closest('a[href]');
+      if (!link) return;
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(function () { prefetch(link.href); }, 120);
+    }, { passive: true });
 
-    preferred.forEach(function (page) {
-      if (page !== pageName()) {
-        setTimeout(function () { prefetch(page); }, 900);
-      }
-    });
+    document.addEventListener('pointerout', function (e) {
+      if (e.pointerType === 'touch') return;
+      const link = e.target.closest && e.target.closest('a[href]');
+      if (link && !link.contains(e.relatedTarget)) clearTimeout(hoverTimer);
+    }, { passive: true });
 
     document.addEventListener('pointerdown', function (e) {
       const link = e.target.closest && e.target.closest('a[href]');
