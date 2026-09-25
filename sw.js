@@ -1,4 +1,4 @@
-const CACHE='eatswada-shell-v3';
+const CACHE='eatswada-shell-v4';
 const SHELL=['./','./index.html','./profile.html','./orders.html','./cart.html','./address.html','./address-new.html','./search.html','./category.html','./restaurant.html','./complete-profile.html','./location-onboarding.html','./service-unavailable.html','./config.js','./api.js','./navigation.js','./cart-bar.js','./bottom-tab-bar.js','./favorites.js','./restaurant-card.js','./home.js','./safe-html.js','./style.css','./restaurant-card.css'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -9,7 +9,11 @@ self.addEventListener('fetch',e=>{
     e.respondWith(fetch(r).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy));return res}).catch(()=>caches.match(r).then(x=>x||caches.match('./index.html'))));
     return;
   }
-  if(['script','style','font'].includes(r.destination)){
+  if(r.destination==='script'){
+    e.respondWith(fetch(r).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy));return res}).catch(()=>caches.match(r)));
+    return;
+  }
+  if(['style','font'].includes(r.destination)){
     e.respondWith(caches.match(r).then(x=>x||fetch(r).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy));return res})));
   }
 });

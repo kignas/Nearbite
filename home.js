@@ -913,6 +913,18 @@
     });
   }
 
+  /* ── Restaurants: state application ─────────────────────────── */
+  function applyRestaurants(list) {
+    state.restaurants = Array.isArray(list) ? list : [];
+    state.status = state.restaurants.length ? 'ready' : 'empty';
+    state.errorMessage = '';
+    invalidateDerivedCache();
+    renderSectionTitle();
+    renderFilterBar();
+    renderRestaurants();
+    maybeRedirectOutsideServiceArea();
+  }
+
   /* ── Restaurants: refresh ──────────────────────────────────── */
   function allowOutsideBrowse() {
     try { return new URLSearchParams(window.location.search).get('allowOutside') === '1'; }
