@@ -366,8 +366,6 @@
       : null;
   }
 
-
-
   /* ================================================================
      EXACT 99 STORE RESTAURANT CARD DESIGN
      Visual structure copied from under99card.js. Homepage data/filter/
@@ -396,7 +394,7 @@
   function homeChangeCart(item,r,delta){
     if(item && item.inStock===false && delta>0)return;
     var c=homeGetCart(), existingKey=homeFindCartKey(c,item,r), k=existingKey||homeCartKey(item,r);
-    var e=c[k]||{quantity:0,price:Number(item.price)||0,originalPrice:item.originalPrice??null,resId:homeRestaurantId(r),menuItem:homeItemId(item),image:item.image||'',name:item.name||'Item',isVeg:Boolean(item.isVeg),restaurantName:String(r.name||'')};
+    var e=c[k]||{quantity:0,price:Number(item.price)||0,originalPrice:item.originalPrice!=null?Number(item.originalPrice):null,resId:homeRestaurantId(r),menuItem:homeItemId(item),image:item.image||'',name:item.name||'Item',isVeg:item.isVeg,restaurantName:r&&r.name?String(r.name):''};
     if(!e.restaurantName && r && r.name)e.restaurantName=String(r.name);
     e.quantity=Number(e.quantity||0)+delta;
     if(e.quantity<=0)delete c[k]; else c[k]=e;
@@ -408,15 +406,12 @@
   }
   function homeFormatCount(v){ var n=Number(v); if(!Number.isFinite(n)||n<=0)return ''; if(n>=1000000)return (n/1000000).toFixed(1).replace(/\.0$/,'')+'m'; if(n>=1000)return (n/1000).toFixed(1).replace(/\.0$/,'')+'k'; return String(Math.round(n)); }
   var home99Icon={
-    ratingBadge:'<svg class="u99-rating-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#159A62"/><path d="M12 5.4 13.94 9.33 18.28 9.96 15.14 13.02 15.88 17.34 12 15.3 8.12 17.34 8.86 13.02 5.72 9.96 10.06 9.33Z" fill="#fff"/></svg>',
-    offerSeal:'<svg class="u99-seal" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0.8Q12 0.8 13.3 1.99Q14.59 3.17 16.32 2.88Q18.06 2.58 18.5 4.28Q18.95 5.98 20.57 6.66Q22.19 7.35 21.65 9.02Q21.11 10.69 22.1 12.14Q23.09 13.59 21.73 14.71Q20.37 15.82 20.42 17.58Q20.46 19.33 18.72 19.54Q16.97 19.74 16.06 21.24Q15.16 22.75 13.58 21.97Q12 21.2 10.42 21.97Q8.84 22.75 7.94 21.24Q7.03 19.74 5.28 19.54Q3.54 19.33 3.58 17.58Q3.63 15.82 2.27 14.71Q0.91 13.59 1.9 12.14Q2.89 10.69 2.35 9.02Q1.81 7.35 3.43 6.66Q5.05 5.98 5.5 4.28Q5.94 2.58 7.68 2.88Q9.41 3.17 10.7 1.99Z" fill="#159A62"/><path d="M9 15.2 15 8.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.4" cy="9.4" r="1.55" fill="#fff"/><circle cx="14.6" cy="14.6" r="1.55" fill="#fff"/></svg>',
+    ratingBadge:'<svg class="u99-rating-badge" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#159A62"/><path d="M12 5.4 13.94 9.33 18.28 9.96 15.14 13.02 15.88 17.34 12 15.13 8.12 17.34 8.86 13.02 5.72 9.96 10.06 9.33 12 5.4Z" fill="#fff"/></svg>',
+    offerSeal:'<svg class="u99-seal" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0.8Q12 0.8 13.3 1.99Q14.59 3.17 16.32 2.88Q18.06 2.58 18.5 4.28Q18.95 5.98 20.57 6.66Q22.19 7.35 21.65 9.0Q21.12 10.65 22.25 12.12Q21.12 13.59 21.65 15.24Q22.19 16.89 20.57 17.58Q18.95 18.27 18.5 19.97Q18.06 21.67 16.32 21.37Q14.59 21.08 13.3 22.26Q12 23.45 12 23.45Q12 23.45 11 22.26Q9.71 21.08 7.97 21.37Q6.23 21.67 5.79 19.97Q5.35 18.27 3.73 17.58Q2.11 16.89 2.65 15.24Q3.19 13.59 2.06 12.12Q3.19 10.65 2.65 9.0Q2.11 7.35 3.73 6.66Q5.35 5.98 5.79 4.28Q6.23 2.58 7.97 2.88Q9.71 3.17 11 1.99Q12 0.8 12 0.8Z" fill="#FC8019"/><path d="M8.5 12.4 10.9 14.8 15.7 10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
+    info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
   };
-  /* Production image lifecycle: reserve the box, keep a neutral placeholder
-   * visible until the image has fully loaded AND decoded, then reveal it in
-   * one frame. This prevents progressive/partial image paints from looking
-   * like a broken or half-loaded card. */
+
   function homeImageReady(img){
     if(!img || img.dataset.imageReady==='1') return;
     var reveal=function(){
@@ -446,20 +441,18 @@
     if(fallback) fallback.hidden=false;
   }
 
-  /* Inline image handlers are intentionally exposed through one namespaced
-   * window hook because the card markup is generated as HTML strings. */
   window.__eatswadaHomeImageReady = homeImageReady;
   window.__eatswadaHomeImageError = homeImageError;
 
   function homeImageMarkup(item, priority){
     var src=item && (item.image||item.img||item.imageUrl||item.photo);
-    var fallback='<div class="u99-image-fallback" aria-hidden="true"><svg viewBox="0 0 24 24" role="presentation"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m5.5 17 4.2-4.2 3.1 3.1 2.1-2.1 3.6 3.2"></path></svg></div>';
+    var fallback='<div class="u99-image-fallback" aria-hidden="true"><svg viewBox="0 0 24 24" role="presentation"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="8.5" cy="9" r="2.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M5.5 17.8l4.5-4.8 3.4 3.2 5.1-6.4 5.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>';
     if(!src) return fallback;
     src=typeof safeUrl==='function'?safeUrl(src):src;
     if(!src) return fallback;
     var loading=priority?'eager':'lazy';
-    var fetchPriority=priority?' fetchpriority=\"high\"':'';
-    return '<img src=\"'+esc(src)+'\" alt=\"'+esc(item.name||'Item')+'\" loading=\"'+loading+'\" decoding=\"async\"'+fetchPriority+' onload=\"window.__eatswadaHomeImageReady(this)\" onerror=\"window.__eatswadaHomeImageError(this)\"><div class=\"u99-image-fallback\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" role=\"presentation\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"3\"></rect><circle cx=\"8.5\" cy=\"9\" r=\"1.5\"></circle><path d=\"m5.5 17 4.2-4.2 3.1 3.1 2.1-2.1 3.6 3.2\"></path></svg></div>';
+    var fetchPriority=priority?' fetchpriority="high"':'';
+    return '<img src="'+esc(src)+'" alt="'+esc(item.name||'Item')+'" loading="'+loading+'" decoding="async"'+fetchPriority+' onload="window.__eatswadaHomeImageReady(this)" onerror="window.__eatswadaHomeImageError(this)" class="u99-item-img">'+fallback;
   }
   function homeCustomGroups(item){
     var g=item&&(item.customizations||item.customizationGroups||item.customization||item.customGroups);
@@ -475,7 +468,7 @@
     if(!homeHasCustomization(item))return false;
     var id=homeItemId(item); if(!id)return false;
     window.__ewCust=window.__ewCust||{};
-    window.__ewCust[id]={name:item.name||'Item',price:Number(item.price)||0,resId:homeRestaurantId(r),menuItemId:id,image:item.image||'',isVeg:Boolean(item.isVeg),originalPrice:item.originalPrice==null?null:Number(item.originalPrice),groups:homeCustomGroups(item)};
+    window.__ewCust[id]={name:item.name||'Item',price:Number(item.price)||0,resId:homeRestaurantId(r),menuItemId:id,image:item.image||'',isVeg:Boolean(item.isVeg),originalPrice:item.originalPrice!=null?Number(item.originalPrice):null,groups:homeCustomGroups(item)};
     return true;
   }
   function homeCustomizedQty(item){
@@ -503,7 +496,7 @@
     var discount=item.discountPercent!=null&&Number(item.discountPercent)>0?Math.round(Number(item.discountPercent)):(original?Math.round((1-price/original)*100):null);
     var dietary=item.isVeg?'<span class="u99-dietary" aria-label="Vegetarian"></span>':'<span class="u99-dietary u99-nonveg" aria-label="Non-vegetarian"></span>';
     var popular=(item.isBestseller||item.isRecommended)?'<span class="u99-popular">Popular</span>':'';
-    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item,priority)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-name">'+dietary+'<span>'+esc(item.name||'Item')+'</span></div><div class="u99-price-row"><strong>₹'+price+'</strong>'+(original!=null?'<span class="u99-old-price">₹'+original+'</span>':'')+(discount?'<span class="u99-off">'+discount+'% OFF</span>':'')+'</div></article>';
+    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item,priority)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-copy"><div class="u99-item-name-row"><span class="u99-item-name">'+esc(item.name||'Item')+'</span>'+dietary+'</div><div class="u99-item-price-row"><span class="u99-item-price">₹'+Math.round(price)+'</span>'+(discount?'<span class="u99-item-discount">'+discount+'% off</span>':'')+'</div></div></article>';
   }
   function homeRestaurantOffer(r){
     var raw=String(r.offer||r.offerText||r.discountText||'').trim();
@@ -511,12 +504,6 @@
     if(r.discountPercent!=null&&Number(r.discountPercent)>0)return Math.round(Number(r.discountPercent))+'% LOWER PRICES';
     return 'LOWER PRICES';
   }
-  /*
-   * Homepage restaurant results do not always include the restaurant menu.
-   * The 99 Store page explicitly enriches each restaurant with
-   * GET /api/restaurants/:id/menu before rendering its cards. Do the same
-   * here so the 99 Store card is not left showing "Menu unavailable".
-   */
   function homeFlattenMenuPayload(payload){
     var data=payload && payload.data!=null ? payload.data : payload;
     if(Array.isArray(data)) return data;
@@ -556,11 +543,14 @@
   }
 
   var homeMenuFetchCache=Object.create(null);
+  var homeMenuFetchInFlight=Object.create(null);
   function homeFetchMenu(restaurantId){
     var id=String(restaurantId||'');
     if(!id) return Promise.resolve([]);
     if(homeMenuFetchCache[id]) return homeMenuFetchCache[id];
-    homeMenuFetchCache[id]=fetch('https://eatswada.onrender.com/api/restaurants/'+encodeURIComponent(id)+'/menu',{
+    if(homeMenuFetchInFlight[id]) return homeMenuFetchInFlight[id];
+
+    var pending = fetch('https://eatswada.onrender.com/api/restaurants/'+encodeURIComponent(id)+'/menu',{
       headers:{Accept:'application/json'},cache:'no-store'
     }).then(function(response){
       if(!response.ok) throw new Error('HTTP '+response.status);
@@ -570,123 +560,123 @@
     }).catch(function(error){
       console.warn('[restaurant-card] menu load failed for',id,error);
       return [];
+    }).then(function(menu){
+      homeMenuFetchCache[id]=Promise.resolve(menu);
+      return menu;
+    }).finally(function(){
+      delete homeMenuFetchInFlight[id];
     });
-    return homeMenuFetchCache[id];
+
+    homeMenuFetchInFlight[id]=pending;
+    return pending;
   }
 
-  /* ── Homepage customization sheet ─────────────────────────────── */
-  var homeCustCurrent=null, homeCustEls=null;
-  function homeCustMoney(n){return '₹'+Math.round(Number(n)||0);}
-  function homeCustEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
-  function homeEnsureCustomizeSheet(){
-    if(document.getElementById('u99-cust-sheet'))return;
-    var bd=document.createElement('div'); bd.id='u99-cust-backdrop'; bd.className='u99-cust-backdrop';
-    var sh=document.createElement('div'); sh.id='u99-cust-sheet'; sh.className='u99-cust-sheet'; sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
-    sh.innerHTML='<div class="u99-cust-handle"></div><div class="u99-cust-head"><div><h3 id="u99-cust-title"></h3><p id="u99-cust-base"></p></div><button type="button" class="u99-cust-close" id="u99-cust-close" aria-label="Close">×</button></div><div class="u99-cust-body" id="u99-cust-body"></div><div class="u99-cust-foot"><div class="u99-sheet-qty"><button type="button" id="u99-cust-minus">−</button><span id="u99-cust-qty">1</span><button type="button" id="u99-cust-plus">+</button></div><button type="button" class="u99-cust-add" id="u99-cust-add">Add item</button></div>';
-    document.body.appendChild(bd); document.body.appendChild(sh);
-    homeCustEls={bd:bd,sh:sh,title:document.getElementById('u99-cust-title'),base:document.getElementById('u99-cust-base'),body:document.getElementById('u99-cust-body'),qty:document.getElementById('u99-cust-qty'),add:document.getElementById('u99-cust-add')};
-    bd.addEventListener('click',homeCloseCustomize);
-    document.getElementById('u99-cust-close').addEventListener('click',homeCloseCustomize);
-    document.getElementById('u99-cust-minus').addEventListener('click',function(){if(!homeCustCurrent)return;homeCustCurrent.qty=Math.max(0,homeCustCurrent.qty-1);homeCustEls.qty.textContent=homeCustCurrent.qty;homeRefreshCustomize();});
-    document.getElementById('u99-cust-plus').addEventListener('click',function(){if(!homeCustCurrent)return;homeCustCurrent.qty=Math.min(20,homeCustCurrent.qty+1);homeCustEls.qty.textContent=homeCustCurrent.qty;homeRefreshCustomize();});
-    homeCustEls.add.addEventListener('click',homeConfirmCustomize);
-    homeCustEls.body.addEventListener('change',homeRefreshCustomize);
-    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&homeCustCurrent)homeCloseCustomize();});
-  }
-  function homeOpenCustomize(item,r){
-    if(!homeRegisterCustomization(item,r))return false;
-    homeEnsureCustomizeSheet();
-    var id=homeItemId(item), base=window.__ewCust&&window.__ewCust[id]; if(!base)return false;
-    var cart=homeGetCart(), editKey=null, editEntry=null;
-    Object.keys(cart).forEach(function(k){var e=cart[k]||{};if(!editKey&&String(e.menuItem||'')===String(base.menuItemId||'')&&Array.isArray(e.customizations)){editKey=k;editEntry=e;}});
-    homeCustCurrent={base:base,qty:editEntry?Math.min(20,Math.max(0,Number(editEntry.quantity)||0)):1,editKey:editKey};
-    homeCustEls.title.textContent=base.name; homeCustEls.base.textContent='Base price · '+homeCustMoney(base.price); homeCustEls.qty.textContent=String(homeCustCurrent.qty);
-    var html='';
-    (base.groups||[]).forEach(function(g,gi){
-      var max=Math.max(1,Number(g.maxSelect||1)||1), required=Boolean(g.required), multi=max>1;
-      html+='<section class="u99-cust-group" data-max="'+max+'" data-required="'+(required?'1':'0')+'" data-multi="'+(multi?'1':'0')+'"><div class="u99-cust-group-title">'+homeCustEsc(g.title||'Options')+'</div><div class="u99-cust-rule">'+(required?'<b>Required</b> · ':'')+(multi?'Select up to '+max:'Select 1')+'</div>';
-      (g.options||[]).forEach(function(o){var extra=Number(o.extraPrice||0), pt=extra>0?'+'+homeCustMoney(extra):((required||multi)?'Free':'');html+='<label class="u99-cust-option"><span class="u99-cust-diet '+(o.isVeg!==false?'veg':'nonveg')+'"></span><span class="u99-cust-label">'+homeCustEsc(o.label||'Option')+'</span>'+(pt?'<span class="u99-cust-extra '+(extra?'':'free')+'">'+pt+'</span>':'')+'<input type="'+(multi?'checkbox':'radio')+'" name="u99-cust-g'+gi+'" data-extra="'+extra+'"></label>';});
-      html+='</section>';
-    });
-    homeCustEls.body.innerHTML=html;
-    if(editEntry&&Array.isArray(editEntry.customizations)){
-      var labels={}; editEntry.customizations.forEach(function(x){labels[typeof x==='string'?x:String(x&&x.label||'')]=true;});
-      homeCustEls.body.querySelectorAll('.u99-cust-option').forEach(function(row){var label=row.querySelector('.u99-cust-label');var input=row.querySelector('input');if(label&&input)input.checked=!!labels[label.textContent.trim()];});
-    } else {
-      homeCustEls.body.querySelectorAll('.u99-cust-group[data-required="1"] input[type="radio"]').forEach(function(input,i){if(!input.closest('.u99-cust-group').querySelector('input:checked'))input.checked=true;});
+  var homeMenuDerivedCache=Object.create(null);
+  function homeRestaurantMeta(res, customerCoords) {
+    var id = read.id(res);
+    var coordsKey = customerCoords ? customerCoords.lat.toFixed(5) + ':' + customerCoords.lng.toFixed(5) : 'no-coords';
+    var cacheKey = id + '|' + coordsKey;
+    if (!homeMenuDerivedCache[cacheKey]) {
+      var menu = Array.isArray(res.menu) ? res.menu.slice().sort(function (a, b) {
+        return (Number(a && a.price) || 0) - (Number(b && b.price) || 0);
+      }) : [];
+      var status = resolveAvailability(res, customerCoords);
+      var lowest = null;
+      if (Array.isArray(res.menu) && res.menu.length) {
+        var values = res.menu.map(function (item) {
+          if (!item) return null;
+          var n = Number(item.price);
+          if (Number.isFinite(n) && n > 0) return n;
+          var parsed = parseFloat(String(item.price == null ? '' : item.price).replace(/[^\d.]/g, ''));
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+        }).filter(function (n) { return n != null; });
+        if (values.length) lowest = Math.min.apply(null, values);
+      }
+      homeMenuDerivedCache[cacheKey] = {
+        status: status,
+        unavailable: !!status,
+        menu: menu,
+        items: menu.slice(0, 6),
+        lowestItemPrice: lowest,
+        pureVeg: read.pureVeg(res)
+      };
     }
-    homeRefreshCustomize(); homeCustEls.bd.classList.add('show'); requestAnimationFrame(function(){homeCustEls.sh.classList.add('show');});
-    document.body.classList.add('u99-cust-open');   /* lock page + hide cart bar/help (see CSS) */
-    return true;
+    return homeMenuDerivedCache[cacheKey];
   }
-  function homeRefreshCustomize(){
-    if(!homeCustCurrent||!homeCustEls)return;
-    var extra=0,valid=true;
-    homeCustEls.body.querySelectorAll('.u99-cust-group').forEach(function(group){var multi=group.dataset.multi==='1',max=Number(group.dataset.max)||1,required=group.dataset.required==='1',checked=group.querySelectorAll('input:checked');checked.forEach(function(input){extra+=Number(input.dataset.extra)||0;});if(multi){var full=checked.length>=max;group.querySelectorAll('input[type="checkbox"]').forEach(function(input){if(!input.checked)input.disabled=full;});}if(required&&checked.length<1)valid=false;});
-    homeCustCurrent.unit=Number(homeCustCurrent.base.price)+extra;
-    if(homeCustCurrent.qty===0){homeCustEls.add.disabled=false;homeCustEls.add.textContent='Remove item';}else{homeCustEls.add.disabled=!valid;homeCustEls.add.textContent=valid?(homeCustCurrent.editKey?'Update item':'Add item')+' · '+homeCustMoney(homeCustCurrent.unit*homeCustCurrent.qty):'Select required options';}
-  }
-  function homeConfirmCustomize(){
-    if(!homeCustCurrent||homeCustEls.add.disabled)return;
-    var base=homeCustCurrent.base,cart=homeGetCart();
-    if(homeCustCurrent.qty===0){if(homeCustCurrent.editKey&&cart[homeCustCurrent.editKey])delete cart[homeCustCurrent.editKey];homeSaveCart(cart);document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,removed:true}}));homeCloseCustomize();if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();return;}
-    var flat=[],labels=[];
-    homeCustEls.body.querySelectorAll('.u99-cust-group').forEach(function(group){var title=group.querySelector('.u99-cust-group-title').textContent.trim();group.querySelectorAll('input:checked').forEach(function(input){var row=input.closest('.u99-cust-option'),label=row.querySelector('.u99-cust-label').textContent.trim(),veg=row.querySelector('.u99-cust-diet');flat.push({title:title,label:label,extraPrice:Number(input.dataset.extra)||0,isVeg:veg.classList.contains('veg')});labels.push(label);});});
-    var composite=labels.length?base.name+' ('+labels.join(', ')+')':base.name,unit=Number(homeCustCurrent.unit)||Number(base.price),existing=cart[composite];
-    var entry={quantity:homeCustCurrent.qty,price:unit,originalPrice:(Number(base.originalPrice)>Number(base.price))?Number(base.originalPrice)+(unit-Number(base.price)):null,resId:base.resId,menuItem:base.menuItemId,image:base.image||'',name:composite,isVeg:Boolean(base.isVeg),restaurantName:base.restaurantName||'',customizations:flat};
-    if(homeCustCurrent.editKey&&cart[homeCustCurrent.editKey]){if(homeCustCurrent.editKey===composite){cart[composite].quantity=homeCustCurrent.qty;cart[composite].price=unit;cart[composite].customizations=flat;}else{delete cart[homeCustCurrent.editKey];if(existing){existing.quantity=Number(existing.quantity||0)+homeCustCurrent.qty;existing.price=unit;existing.customizations=flat;}else cart[composite]=entry;}}else if(existing){existing.quantity=Number(existing.quantity||0)+homeCustCurrent.qty;existing.price=unit;existing.customizations=flat;}else cart[composite]=entry;
-    homeSaveCart(cart); document.dispatchEvent(new CustomEvent('eatswada:cart-updated',{detail:{customized:true,item:base}})); if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();
-    var host=document.querySelector('[data-home99-restaurant="'+CSS.escape(base.resId)+'"]'); if(host){var rr=window.__home99Data&&window.__home99Data[base.resId];if(rr)homeSyncCard(host,rr);} homeCloseCustomize();
-  }
-  function homeCloseCustomize(){document.body.classList.remove('u99-cust-open');if(!homeCustEls)return;homeCustEls.sh.classList.remove('show');homeCustEls.bd.classList.remove('show');homeCustCurrent=null;if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();}
 
-  function homeSortedMenu(r){return Array.isArray(r.menu)?r.menu.filter(function(i){return i&&Number(i.price)>0;}).slice().sort(function(a,b){return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||''));}):[];}
+  function homeSortedMenu(r){
+    return Array.isArray(r.menu) ? r.menu.filter(function(i){ return i && Number(i.price)>0; }).slice().sort(function(a,b){ return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||'')); }) : [];
+  }
 
   function homeHydrateMenus(container,list,renderToken){
     var missing=(Array.isArray(list)?list:[]).filter(function(r){
       return r && read.id(r) && !homeSortedMenu(r).length;
     });
     if(!missing.length)return;
-    Promise.all(missing.map(function(r){
-      var id=read.id(r);
-      return homeFetchMenu(id).then(function(menu){
-        if(menu.length) r.menu=menu;
-        return {restaurant:r,menu:menu};
+
+    var queue = missing.slice();
+    function hydrateNext(){
+      if(!queue.length) return Promise.resolve();
+      var batch = queue.splice(0, 4);
+      return Promise.all(batch.map(function(r){
+        var id=read.id(r);
+        return homeFetchMenu(id).then(function(menu){
+          if(menu.length) r.menu=menu;
+          return {restaurant:r, menu:menu};
+        });
+      })).then(function(results){
+        if(renderToken!==window.__home99RenderToken || !container || !document.contains(container))return results;
+        results.forEach(function(result){
+          var r=result.restaurant,id=read.id(r);
+          if(!id)return;
+          window.__home99Data[id]=r;
+          var host=container.querySelector('[data-home99-restaurant="'+CSS.escape(id)+'"]');
+          if(!host)return;
+          var carousel=host.querySelector('.u99-carousel');
+          if(!carousel)return;
+          var menu=homeSortedMenu(r).slice(0,6);
+          carousel.classList.toggle('u99-carousel-empty',!menu.length); carousel.innerHTML=menu.length ? menu.map(function(item){ return homeItemMarkup(item,r); }).join('') : '<div class="u99-no-items">No items available</div>';
+        });
+        return hydrateNext();
       });
-    })).then(function(results){
-      if(renderToken!==window.__home99RenderToken || !container || !document.contains(container))return;
-      results.forEach(function(result){
-        var r=result.restaurant,id=read.id(r);
-        if(!id)return;
-        window.__home99Data[id]=r;
-        var host=container.querySelector('[data-home99-restaurant=\"'+CSS.escape(id)+'\"]');
-        if(!host)return;
-        var carousel=host.querySelector('.u99-carousel');
-        if(!carousel)return;
-        var menu=homeSortedMenu(r).slice(0,6);
-        carousel.classList.toggle('u99-carousel-empty',!menu.length); carousel.innerHTML=menu.length?menu.map(function(item){return homeItemMarkup(item,r);}).join(''):'<div class=\"u99-no-items\">Menu unavailable</div>';
-      });
-    });
+    }
+    hydrateNext();
   }
-  function homeRatingMarkup(r){var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
-  function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
+
+  function homeRatingMarkup(r){var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'New')+'</b>'+(count?'<small>'+count+'</small>':'')+'</span>';
+  }
+  function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-delivery">Free delivery above ₹'+Math.round(Number(v))+'</div>';
+  }
   function homeBuildCard(res,index,customerCoords){
     var id=read.id(res),name=read.name(res);if(!id||!name)return '';
-    var status=resolveAvailability(res,customerCoords),unavailable=!!status,label=unavailable?getAvailabilityLabel(status):'';
-    var cuisine=read.cuisine(res)||'', time=read.deliveryTime(res), delivery=time?time.text:'', menu=homeSortedMenu(res).slice(0,6);
+    var meta = homeRestaurantMeta(res, customerCoords);
+    var status = meta.status;
+    var unavailable = meta.unavailable;
+    var label = unavailable ? getAvailabilityLabel(status) : '';
+    var cuisine=read.cuisine(res)||'', time=read.deliveryTime(res), delivery=time?time.text:'';
+    var menu=meta.items || [];
     var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
-      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name">'+esc(name)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
-      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i,mi){return homeItemMarkup(i,res,index===0 && mi<2);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
+      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name">'+esc(name)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+''+(delivery?'<span class="u99-meta-pill">'+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-meta-pill">'+esc(cuisine)+'</span>':'')+'</div></div></div>'+
+      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i,mi){return homeItemMarkup(i,res,mi===0);}).join(''):'<div class="u99-no-items">No items available</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
     return card;
   }
-  function homeSyncCard(host,r){homeSortedMenu(r).slice(0,6).forEach(function(item){var el=host.querySelector('.u99-item[data-item-id="'+CSS.escape(homeItemId(item))+'"]');if(el){var a=el.querySelector('.u99-item-action');if(a)a.innerHTML=homeAddControl(item,r);}});}
-  /* Re-derive EVERY visible card's +/− controls from the real cart
-     (localStorage nearbite_cart, via homeAddControl → homeQty). This is the
-     single homepage response to any cart change, wherever it originates. */
+
+  function homeSyncCard(host,r){
+    var items = homeSortedMenu(r).slice(0,6);
+    items.forEach(function(item){
+      var itemId = homeItemId(item);
+      var el = host.querySelector('.u99-item[data-item-id="'+CSS.escape(itemId)+'"]');
+      if (!el) return;
+      var actionButton = el.querySelector('[data-home99-action]');
+      if (!actionButton) return;
+      actionButton.outerHTML = homeAddControl(item, r);
+    });
+  }
+
   function homeResyncAllCards(){
     if(!window.__home99Data)return;
     document.querySelectorAll('.u99-card-host[data-home99-restaurant]').forEach(function(host){
@@ -694,42 +684,26 @@
       if(r)homeSyncCard(host,r);
     });
   }
+
   function bindHome99Interactions(){
     if(window.__home99Interactions)return;window.__home99Interactions=true;
-    /* Cart synchronization: any add/remove/qty-change/clear from anywhere —
-       homepage cards, the cart bar, the cart page — dispatches the existing
-       eatswada:cart-updated event; a bfcache "back" fires pageshow; another
-       tab fires storage. All three re-sync every card from the one cart. */
     document.addEventListener('eatswada:cart-updated',homeResyncAllCards);
     window.addEventListener('pageshow',homeResyncAllCards);
     window.addEventListener('storage',function(e){if(!e||e.key===HOME_CART_KEY||e.key===null)homeResyncAllCards();});
-    document.addEventListener('keydown',function(e){var h=e.target.closest&&e.target.closest('.u99-restaurant-head');if(h&&(e.key==='Enter'||e.key===' ')){e.preventDefault();var host=h.closest('.u99-card-host'),id=host&&host.getAttribute('data-home99-restaurant');if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);}});
+    document.addEventListener('keydown',function(e){var h=e.target.closest&&e.target.closest('.u99-restaurant-head');if(h&&(e.key==='Enter'||e.key===' ')){e.preventDefault();var host=h.closest('.u99-card-host');if(host){var id=host.getAttribute('data-home99-restaurant');if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);}}});
     document.addEventListener('click',function(e){
       var el=e.target.closest&&e.target.closest('[data-home99-action]');if(!el)return;var host=el.closest('.u99-card-host');if(!host)return;var id=host.getAttribute('data-home99-restaurant');
       if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
       var action=el.getAttribute('data-home99-action');
-      if(action==='info'){e.preventDefault();e.stopPropagation();var rr=window.__home99Data&&window.__home99Data[id];if(rr&&typeof window.showToast==='function')window.showToast('Free delivery information');return;}
-      if(action==='customize'){e.preventDefault();e.stopPropagation();
-        /* Customisable items should be completed in the real restaurant menu,
-           which already owns the full customization flow. */
-        if(id){window.location.href='restaurant.html?id='+encodeURIComponent(id);}
-        return;
-      }
-      if(action==='add'||action==='plus'||action==='minus'){e.preventDefault();e.stopPropagation();var itemEl=el.closest('.u99-item'),rr=window.__home99Data&&window.__home99Data[id],item=rr&&homeSortedMenu(rr).find(function(x){return homeItemId(x)===itemEl.getAttribute('data-item-id');});if(!item)return;
-        /* First-time add from Home opens the restaurant menu after preserving
-           the existing cart update. Quantity stepper changes stay on Home. */
-        if(action==='add'){
-          homeChangeCart(item,rr,1);
-          if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);
-          return;
-        }
+      if(action==='info'){e.preventDefault();e.stopPropagation();var rr=window.__home99Data&&window.__home99Data[id];if(rr&&typeof window.showToast==='function')window.showToast('Free delivery in this area');return;}
+      if(action==='customize'){e.preventDefault();e.stopPropagation();if(id){window.location.href='restaurant.html?id='+encodeURIComponent(id);}return;}
+      if(action==='add'||action==='plus'||action==='minus'){e.preventDefault();e.stopPropagation();var itemEl=el.closest('.u99-item'),rr=window.__home99Data&&window.__home99Data[id],item=rr&&homeSortedMenu(rr).find(function(x){return homeItemId(x)===itemEl.getAttribute('data-item-id');});
+        if(action==='add'){homeChangeCart(item,rr,1);if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
         homeChangeCart(item,rr,action==='minus'?-1:1);
       }
     });
     document.addEventListener('wheel',function(e){var c=e.target.closest&&e.target.closest('.u99-carousel');if(c&&Math.abs(e.deltaY)>Math.abs(e.deltaX))c.scrollLeft+=e.deltaY;},{passive:true});
   }
-
-  /* ── Card markup ────────────────────────────────────────────── */
 
   function buildCard(res, index, customerCoords) {
     return homeBuildCard(res,index,customerCoords);
@@ -772,8 +746,6 @@
     }
   }
 
-  /* ── Favorites wiring ───────────────────────────────────────── */
-
   var warnedNoFavorites = false;
 
   function warnMissingFavorites() {
@@ -805,8 +777,6 @@
     }
   }
 
-  /* Delegated once on the document, so it survives every re-render
-     (filters, sorting, refresh) without rebinding. */
   document.addEventListener('click', function (e) {
     var target = e.target;
     var button = target && target.closest ? target.closest('.es-fav') : null;
@@ -822,7 +792,6 @@
       return;
     }
 
-    /* Restart the pop even on rapid repeat taps. */
     button.classList.remove('is-pressed');
     void button.offsetWidth;
     button.classList.add('is-pressed');
@@ -831,10 +800,6 @@
   });
 
   window.addEventListener('eatswada:favorites-changed', syncFavoriteButtons);
-
-  /* ── Order button press feedback ────────────────────────────────
-     Two delegated listeners for the whole page, not one per card.
-     Purely visual — the click itself still does exactly what it did. */
 
   function clearOrderPressed() {
     var pressed = document.querySelectorAll('.es-btn-order.is-pressed');
@@ -851,19 +816,9 @@
   document.addEventListener('pointerup', clearOrderPressed, { passive: true });
   document.addEventListener('pointercancel', clearOrderPressed, { passive: true });
 
-  /* ── Image gallery ──────────────────────────────────────────── */
-
-  /* Every initialised gallery owns an interval and an IntersectionObserver.
-     renderList() replaces the list on every filter/sort/refresh, which
-     detaches those galleries — without this they keep their timer alive and
-     hold the detached DOM in memory. Handles for galleries still on the
-     page are left untouched. */
   var galleryHandles = [];
   var pageVisible = !document.hidden;
 
-  /* Gallery autoplay is decorative. Stop every carousel while the tab is
-     backgrounded so low/mid-range phones do not keep interval callbacks and
-     transform work alive unnecessarily. */
   document.addEventListener('visibilitychange', function () {
     pageVisible = !document.hidden;
     for (var i = 0; i < galleryHandles.length; i++) {
@@ -933,8 +888,6 @@
       gallery.addEventListener('touchmove', function (e) {
         if (Math.abs(e.touches[0].clientX - startX) > 10) {
           moved = true;
-          /* A horizontal drag is a swipe, not a press — drop the card's
-             pressed appearance so it does not look tapped mid-swipe. */
           if (card) card.classList.add('is-swiping');
         }
       }, { passive: true });
@@ -955,7 +908,6 @@
         restart();
       }, { passive: true });
 
-      /* Isolation: Prevent card link navigation when swiping or tapping dots */
       gallery.addEventListener('click', function (e) {
         if (gallery.dataset.swiped === '1' || moved) {
           e.preventDefault();
