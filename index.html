@@ -829,6 +829,16 @@
 </script>
 <script src="cart-bar.js"></script>
 <script src="bottom-tab-bar.js"></script>
+<script>
+/* Register the existing shell worker on Home as well. navigation.js is not
+   loaded on this page, so without this small registration returning visitors
+   miss the static-asset cache. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  }, { once: true });
+}
+</script>
 
 </body>
 </html>

@@ -1795,8 +1795,14 @@
     showProfileInitial();
     renderProfileSetupBanner();
     startSearchPlaceholder();
+
+    /* Prioritize the restaurant feed for first paint. Secondary category
+       work starts shortly after the main request, reducing competition for
+       the initial mobile connection without changing the existing data flow. */
     loadRestaurants();
-    loadCategories();
+    window.setTimeout(function () {
+      loadCategories();
+    }, 120);
   }
 
   if (document.readyState === 'loading') {
