@@ -888,6 +888,7 @@
             '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')"' +
             ' onerror="this.classList.add(\'failed\');this.closest(\'.cat-item\').classList.add(\'image-failed\')">' +
+            '<span class="cat-selected-badge" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +
           '</span>' +
           '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
         '</a>';
@@ -900,8 +901,7 @@
           var sameCategory = state.categoryMode &&
             state.categoryMode.name.toLowerCase() === categoryName.toLowerCase();
 
-          /* Restore the existing selected-state hook. The visual treatment
-             itself is CSS-only; no badge/icon is injected. */
+          /* Immediate visual feedback; searchCategory() remains the existing data/filter path. */
           scroll.querySelectorAll('.cat-item.is-selected').forEach(function (item) {
             item.classList.remove('is-selected');
           });
@@ -1797,13 +1797,6 @@
     renderProfileSetupBanner();
     startSearchPlaceholder();
     loadRestaurants();
-
-    // Categories are part of the intended first-screen hierarchy:
-    // hero -> What's on your mind? -> filters -> restaurants.
-    // Start the existing category request immediately so the category strip
-    // does not remain in skeleton state while restaurant cards are already
-    // visible. Cached categories render synchronously inside loadCategories();
-    // network loading still remains asynchronous.
     loadCategories();
   }
 

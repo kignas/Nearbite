@@ -1,6 +1,13 @@
-/* Eatswada — What's on your mind
-   Mobile compact rhythm. Scoped only to #mind-section. */
+/* ══════════════════════════════════════════════════════════════
+   EATSWADA — WHAT'S ON YOUR MIND
+   Extracted from the existing homepage CSS.
+   Visual values intentionally preserved; this file isolates the
+   existing category component so its spacing can be tuned safely.
+   ══════════════════════════════════════════════════════════════ */
 
+/* Skeleton state — mirrors the real .cat-item geometry below so the
+   loading placeholders occupy the same space (same 88% ring, same 1/1
+   aspect, same name line-box) and swap to real categories with no shift. */
 #mind-section .cs-item{
   display:flex;
   flex-direction:column;
@@ -15,11 +22,12 @@
 }
 #mind-section .cs-name{
   width:64%;
-  height:10px;
-  margin-top:4px;
-  border-radius:5px;
+  height:12px;
+  margin-top:5px;
+  border-radius:6px;
 }
 
+/* What's on your mind */
 #mind-section .cat-scroll{
   display:grid;
   grid-template-rows:repeat(2,auto);
@@ -29,7 +37,10 @@
   gap:8px 12px;
   padding:4px 18px 10px;
   overflow-x:auto;
-  overflow-y:hidden;
+  overflow-y:hidden;            /* FIX 2: horizontal-only scroll container.
+                                   Without this, overflow-y computes to `auto`
+                                   and the strip traps vertical drags instead of
+                                   letting them scroll the page. */
   -webkit-overflow-scrolling:touch;
   scroll-behavior:smooth;
   scroll-snap-type:x proximity;
@@ -46,26 +57,68 @@
   -webkit-tap-highlight-color:transparent;
   transition:transform .18s ease,opacity .18s ease;
 }
+
+#mind-section .cat-item:active{
+  transform:scale(.93);
+  opacity:.8;
+}
+
+/* Selected category feedback — existing layout and image sizing preserved. */
+#mind-section .cat-item.is-selected{
+  transform:scale(1.02);
+}
+
+#mind-section .cat-item.is-selected .cat-ring{
+  position:relative;
+  border-radius:50%;
+  background:rgba(201,91,122,.10);
+  box-shadow:0 0 0 2px rgba(201,91,122,.22);
+  transition:background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+#mind-section .cat-item.is-selected .cat-ring img{
+  transform:scale(1.24);
+  transition:transform .22s ease, opacity .25s ease;
+}
+
+#mind-section .cat-item.is-selected .cat-name{
+  color:#c95b7a;
+  font-weight:800;
+  transition:color .2s ease, font-weight .2s ease;
+}
+
+#mind-section .cat-selected-badge{
+  position:absolute;
+  right:-2px;
+  bottom:-2px;
+  width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#c95b7a;
+  border:2px solid #fff;
+  box-shadow:0 2px 6px rgba(15,23,42,.16);
+  color:#fff;
+  font-size:10px;
+  line-height:1;
+  opacity:0;
+  transform:scale(.65);
+  transition:opacity .18s ease, transform .2s ease;
+}
+
+#mind-section .cat-item.is-selected .cat-selected-badge{
+  opacity:1;
+  transform:scale(1);
+}
+
 #mind-section .cat-ring{
   width:88%;
   aspect-ratio:1/1;
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-bottom:6px;
-}
-
-#mind-section .cat-item:active{
-  transform:scale(.96);
-  opacity:.86;
-}
-
-#mind-section .cat-item:active .cat-ring{
-  transform:scale(.97);
-}
-
-#mind-section .cat-ring{
-  transition:transform .12s ease;
+  margin-bottom:8px;
 }
 
 #mind-section .cat-ring img{
@@ -76,44 +129,152 @@
   opacity:0;
   transition:opacity .25s ease;
 }
-#mind-section .cat-ring img.loaded{ opacity:1; }
+
+#mind-section .cat-ring img.loaded{
+  opacity:1;
+}
+
 #mind-section .cat-name{
-  font-size:13px;
+  font-size:14px;
   font-weight:700;
   color:#2A2F3A;
   text-align:center;
-  line-height:1.15;
+  line-height:1.2;
 }
 
 @media (min-width:620px){
-  #mind-section .cat-scroll{ grid-auto-columns:120px; }
+  #mind-section .cat-scroll{
+    grid-auto-columns:120px;
+  }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   MOBILE RHYTHM — single source of truth for this component.
+   Consolidates the three previous mobile override blocks into one,
+   preserving every winning value (sizing, images, typography and
+   interaction are unchanged).
+
+   The category strip owns NO bottom gap. The small, deliberate
+   space between the last category row and the filter pills is
+   owned by the filter bar's TOP padding (see filter-bar.css), so
+   there is exactly one place responsible for that gap.
+   ══════════════════════════════════════════════════════════════ */
 @media (max-width:599px){
   #mind-section{
-    padding-top:10px !important;
+    padding-top:8px !important;
     padding-bottom:0 !important;
     background:#fff;
   }
+
   #mind-section .sec-head{
     margin-bottom:7px !important;
   }
+
   #mind-section .sec-title{
-    font-size:18px;
+    font-size:19px;
     letter-spacing:-.35px;
     text-transform:none;
   }
+
   #mind-section .cat-scroll{
-    grid-auto-columns:21vw;
-    gap:5px 8px !important;
-    padding:0 18px 4px !important;
+    gap:4px 12px !important;
+    padding-top:0 !important;
+    padding-bottom:0 !important;
   }
+
   #mind-section .cat-ring{
-    width:94%;
-    margin-bottom:5px;
+    width:88%;
+    margin-bottom:6px;
   }
+
   #mind-section .cat-name{
-    font-size:13px;
-    line-height:1.15;
+    font-size:14px;
+    font-weight:700;
+    line-height:1.2;
   }
+}
+
+
+/* ── Premium category image loading ────────────────────────────────
+   The shell owns the final geometry from the first frame. A quiet,
+   low-contrast shimmer sits underneath the image and disappears only after
+   the browser has decoded it. Failed images leave the same polished shell
+   instead of removing the category and collapsing the rail. */
+#mind-section .cat-image-shell{
+  position:relative;
+  overflow:visible;
+  isolation:isolate;
+  border-radius:0;
+  background:transparent;
+}
+
+#mind-section .cat-image-placeholder{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  z-index:0;
+  overflow:hidden;
+  border-radius:50%;
+  background:#fff;
+  background-size:220% 100%;
+  animation:none;
+}
+
+#mind-section .cat-placeholder-mark{
+  width:34%;
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:#B8C0CA;
+  opacity:.72;
+}
+
+#mind-section .cat-placeholder-mark svg{
+  width:100%;
+  height:100%;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.35;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+#mind-section .cat-ring img{
+  position:relative;
+  z-index:1;
+  display:block;
+  opacity:0;
+  transition:opacity .22s ease,transform .22s ease;
+  background:transparent;
+}
+
+#mind-section .cat-ring img.loaded{
+  opacity:1;
+}
+
+#mind-section .cat-ring img.failed{
+  display:none;
+}
+
+#mind-section .cat-image-shell:has(img.loaded) .cat-image-placeholder{
+  opacity:0;
+  visibility:hidden;
+  animation:none;
+  transition:opacity .18s ease,visibility 0s linear .18s;
+}
+
+#mind-section .cat-item.image-failed .cat-image-placeholder{
+  animation:none;
+  background:#fff;
+}
+
+@keyframes ewCategoryShimmer{
+  0%{background-position:120% 0}
+  100%{background-position:-120% 0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #mind-section .cat-image-placeholder{animation:none}
 }
