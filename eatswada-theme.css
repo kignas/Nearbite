@@ -961,3 +961,26 @@ html[data-ew-theme="dark"] canvas,
 html[data-ew-theme="dark"] svg {
   filter:none !important;
 }
+
+
+/* ================================================================
+   DARK MODE v4 — browser-style compatibility engine
+   The runtime engine in eatswada-theme.js maps remaining neutral light
+   surfaces/text after normal CSS has rendered. It intentionally avoids
+   page-wide invert/filter so food imagery, artwork and brand accents stay
+   visually intact.
+   ================================================================ */
+html {
+  color-scheme: light dark;
+}
+html[data-ew-theme="light"] {
+  color-scheme: light;
+}
+html[data-ew-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Keep the runtime layer above authored page CSS without affecting layout. */
+html[data-ew-theme="dark"] [data-ew-auto-dark] {
+  /* Rules are generated per element by eatswada-theme.js. */
+}
