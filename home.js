@@ -1798,14 +1798,13 @@
     startSearchPlaceholder();
     loadRestaurants();
 
-    // Categories sit below the hero/search shell. Give the browser one turn to
-    // paint the critical header/hero and start the primary restaurant request
-    // before refreshing categories. Cached categories are still rendered by
-    // loadCategories() when this callback runs.
-    var scheduleCategoryLoad = window.requestIdleCallback || function (cb) {
-      return window.setTimeout(cb, 180);
-    };
-    scheduleCategoryLoad(function () { loadCategories(); }, { timeout: 900 });
+    // Categories are part of the intended first-screen hierarchy:
+    // hero -> What's on your mind? -> filters -> restaurants.
+    // Start the existing category request immediately so the category strip
+    // does not remain in skeleton state while restaurant cards are already
+    // visible. Cached categories render synchronously inside loadCategories();
+    // network loading still remains asynchronous.
+    loadCategories();
   }
 
   if (document.readyState === 'loading') {
