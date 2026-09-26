@@ -900,8 +900,13 @@
           var sameCategory = state.categoryMode &&
             state.categoryMode.name.toLowerCase() === categoryName.toLowerCase();
 
-          // Keep the existing category filtering behavior, but do not add a
-          // selected/pressed visual state to the category card.
+          /* Restore the existing selected-state hook. The visual treatment
+             itself is CSS-only; no badge/icon is injected. */
+          scroll.querySelectorAll('.cat-item.is-selected').forEach(function (item) {
+            item.classList.remove('is-selected');
+          });
+          if (!sameCategory) link.classList.add('is-selected');
+
           searchCategory(categoryName);
         });
       });
