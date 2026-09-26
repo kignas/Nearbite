@@ -294,9 +294,10 @@ async function ctComputeBreakdown(groups, force) {
   let savedAddress = null;
   try { savedAddress = JSON.parse(localStorage.getItem('nearbite_address')); } catch (e) {}
   const customerCoords = normalizeCoords(savedAddress && (savedAddress.location || savedAddress));
-  const rows = [];
-  for (const g of groups) {
-    const info = await getRestaurantLocation(g.resId, force);
+  const infos = await Promise.all(
+    groups.map(async g => ({ g, info: await getRestaurantLocation(g.resId, force) }))
+  );
+  return infos.map(({ g, info }) => {
     const coords = info && info.coords;
     const freeAbove = Number(info?.freeDeliveryAbove || 0);
     const freeEnabled = info?.freeDeliveryEnabled !== false;
@@ -306,7 +307,7 @@ async function ctComputeBreakdown(groups, force) {
       distance = distanceKm(coords, customerCoords);
       const raw = Number(info?.deliveryRadiusKm);
       radius = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 10) : 10;
-      if (distance > radius) { outsideRadius = true; }
+      if (distance > radius) outsideRadius = true;
       else {
         freeDelivery = freeAbove > 0 && g.subtotal >= freeAbove;
         fee = freeDelivery ? 0 : deliveryFeeForDistance(distance);
@@ -315,9 +316,8 @@ async function ctComputeBreakdown(groups, force) {
       freeDelivery = freeAbove > 0 && g.subtotal >= freeAbove;
       fee = freeDelivery ? 0 : 30;
     }
-    rows.push({ ...g, distance, outsideRadius, radius, fee, freeDelivery, freeAbove, freeEnabled, minOrder, codEnabled: info?.codEnabled === true });
-  }
-  return rows;
+    return { ...g, distance, outsideRadius, radius, fee, freeDelivery, freeAbove, freeEnabled, minOrder, codEnabled: info?.codEnabled === true };
+  });
 }
 
 function renderMultiBreakdown(rows) {
@@ -1235,6 +1235,115 @@ function syncFooterOffset() {
   if (height > 0) document.documentElement.style.setProperty('--ct-footer-h', height + 'px');
 }
 
+/* ── Payment result UX / slow-network safety ───────────────────────────── */
+const CT_PAYMENT_CONTEXT_KEY = 'nearbite_payment_context';
+
+function ctSetCheckoutButton(btn, html, disabled) {
+  if (!btn) return;
+  btn.innerHTML = html;
+  btn.style.pointerEvents = disabled ? 'none' : 'auto';
+  btn.disabled = !!disabled;
+  btn.classList.toggle('is-processing', !!disabled);
+}
+
+function ctSavePaymentContext(data) {
+  try {
+    localStorage.setItem(CT_PAYMENT_CONTEXT_KEY, JSON.stringify({
+      ...data,
+      savedAt: Date.now()
+    }));
+  } catch (_) {}
+}
+
+function ctPaymentContextBase(result, primaryOrderId) {
+  return {
+    orderId: primaryOrderId,
+    multiple: !!result?.multiple,
+    orderNumber: result?.data?.orderNumber || '',
+    deliveryOtp: result?.deliveryOtp || '',
+    deliveryOtps: result?.deliveryOtps || {}
+  };
+}
+
+function ctGoPaymentResult(state, extra) {
+  const params = new URLSearchParams();
+  params.set('state', state);
+  window.location.href = `payment-${state}.html?${params.toString()}`;
+}
+
+function ctRestoreCheckoutButton(btn, originalHTML) {
+  ctSetCheckoutButton(btn, originalHTML, false);
+}
+
+async function ctReadPaymentStatus(orderId, token) {
+  const response = await fetch(
+    `${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(orderId)}/status`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
+  );
+  let result = null;
+  try { result = await response.json(); } catch (_) {}
+  if (!response.ok || !result?.success) {
+    const error = new Error(result?.message || `Payment status check failed (${response.status}).`);
+    error.httpStatus = response.status;
+    throw error;
+  }
+  return result.data || {};
+}
+
+/*
+ * Razorpay can return control to the browser before the capture/webhook has
+ * reached our database. Never turn that short race into "payment failed".
+ * We give the backend a bounded window to become authoritative, then send the
+ * customer to a transparent pending-verification screen.
+ */
+async function ctWaitForPaymentStatus(orderId, token, maxMs = 22000) {
+  const started = Date.now();
+  let delay = 1200;
+  while (Date.now() - started < maxMs) {
+    try {
+      const status = await ctReadPaymentStatus(orderId, token);
+      const paymentStatus = String(status.paymentStatus || '').toLowerCase();
+      if (paymentStatus === 'paid' || paymentStatus === 'refunded') return status;
+      if (paymentStatus === 'failed') return status;
+    } catch (error) {
+      // A transient 5xx/network failure should not turn a real payment into a
+      // failure. Continue the bounded verification window.
+      console.warn('[PAYMENT] status poll:', error.message);
+    }
+    await new Promise(resolve => setTimeout(resolve, delay));
+    delay = Math.min(3000, Math.round(delay * 1.35));
+  }
+  return null;
+}
+
+function ctStoreSuccessfulPayment(result) {
+  if (result?.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
+    Object.keys(result.deliveryOtps).forEach(oid => {
+      const otp = result.deliveryOtps[oid];
+      if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
+    });
+  } else if (result?.deliveryOtp && result?.data?._id) {
+    localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
+  }
+}
+
+function ctFinishSuccessfulPayment(result, btn) {
+  ctStoreSuccessfulPayment(result);
+  localStorage.removeItem('nearbite_cart');
+  localStorage.removeItem('nearbite_checkout_key');
+  clearCartExtras();
+
+  ctSavePaymentContext(ctPaymentContextBase(result, result?.data?._id));
+  if (btn) btn.style.pointerEvents = 'none';
+  ctGoPaymentResult('success');
+}
+
+function ctHandleFailedPayment(result, primaryOrderId, btn) {
+  ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId));
+  if (btn) btn.style.pointerEvents = 'auto';
+  ctGoPaymentResult('failed');
+}
+
 /* ── Checkout ───────────────────────────────────────────────────────────── */
 async function placeOrder() {
   const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
@@ -1281,8 +1390,11 @@ async function placeOrder() {
   const btn = document.getElementById('btn-checkout');
   const originalHTML = btn.innerHTML;
 
-  btn.innerHTML = '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Placing order…</span>';
-  btn.style.pointerEvents = 'none';
+  ctSetCheckoutButton(
+    btn,
+    '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Preparing your order…</span>',
+    true
+  );
 
   try {
     const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
@@ -1310,40 +1422,9 @@ async function placeOrder() {
       throw new Error("Your cart data looks corrupted. Please add the items again.");
     }
 
-    // ── Multi-restaurant carts: each restaurant must independently meet its
-    // own minimum order. The backend enforces this authoritatively too, but
-    // checking here means the customer gets a precise, per-restaurant message
-    // BEFORE the order is attempted, instead of a rejection afterwards.
-    // (Single-restaurant carts keep using the existing ctState minimum check
-    // above, so nothing changes for the common case.)
-    const groupsByRes = {};
-    for (const [name, info] of Object.entries(savedCart)) {
-      const rid = info.resId;
-      if (!rid) continue;
-      if (!groupsByRes[rid]) groupsByRes[rid] = { subtotal: 0, name: info.restaurantName || info.resName || '' };
-      groupsByRes[rid].subtotal += Number(info.price || 0) * Number(info.quantity || 0);
-    }
-    const distinctResIds = Object.keys(groupsByRes);
-    if (distinctResIds.length > 1) {
-      const shortfalls = [];
-      for (const rid of distinctResIds) {
-        let info = null;
-        try {
-          const r = await fetch(`${CONFIG.API_BASE_URL}/restaurants/${encodeURIComponent(rid)}`, { cache: 'no-store' });
-          const j = await r.json();
-          if (r.ok && j.success) info = j.data || {};
-        } catch (_) {}
-        const minOrder = Number(info?.minOrder || 0);
-        const rName = (info && info.name) || groupsByRes[rid].name || 'a restaurant';
-        if (minOrder > 0 && groupsByRes[rid].subtotal < minOrder) {
-          const add = Math.ceil(minOrder - groupsByRes[rid].subtotal);
-          shortfalls.push(`${rName}: add ₹${add.toLocaleString('en-IN')} (min ₹${minOrder.toLocaleString('en-IN')})`);
-        }
-      }
-      if (shortfalls.length) {
-        throw new Error('Minimum order not met — ' + shortfalls.join('; ') + '.');
-      }
-    }
+    // Multi-restaurant minimum-order and delivery checks are performed together
+    // by ctComputeBreakdown() below. Keeping one authoritative preflight avoids
+    // duplicate restaurant GET requests on Proceed to Pay.
 
     const subtotal = itemsArray.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
     // The backend is the final authority, but the checkout preview must use
@@ -1352,7 +1433,8 @@ async function placeOrder() {
     const cartGroupsForOrder = ctCartGroups();
     let deliveryFee = 0;
     if (cartGroupsForOrder.length > 1) {
-      await calculateCurrentDelivery({ force: true });
+      // ctComputeBreakdown() already refreshes every restaurant in parallel-safe
+      // order. Do not refresh the first restaurant a second time here.
       const deliveryRows = await ctComputeBreakdown(cartGroupsForOrder, true);
       const unavailableRow = deliveryRows.find(r => r.outsideRadius);
       if (unavailableRow) {
@@ -1430,89 +1512,138 @@ async function placeOrder() {
     }
 
     // UPI orders are finalized only after Razorpay returns and the backend verifies
-    // the signature + captured payment.
-      if (!result.payment?.orderId || !result.payment?.keyId || !window.Razorpay) {
-        throw new Error('Online payment is temporarily unavailable. Please try again.');
-      }
+    // the signature + captured payment. The order is intentionally NOT cleared
+    // until that server-side confirmation succeeds.
+    if (!result.payment?.orderId || !result.payment?.keyId || !window.Razorpay) {
+      throw new Error('Online payment is temporarily unavailable. Please try again.');
+    }
 
-      const primaryOrderId = result.data?._id;
-      const rzp = new Razorpay({
-        key: result.payment.keyId,
-        amount: result.payment.amount,
-        currency: result.payment.currency || 'INR',
-        name: 'Eatswada',
-        description: result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`,
-        order_id: result.payment.orderId,
-        prefill: {
-          name: document.getElementById('checkout-customer-name')?.textContent || '',
-          contact: document.getElementById('checkout-customer-phone')?.textContent || ''
-        },
-        theme: { color: '#0aa66f' },
-        modal: {
-          ondismiss: () => {
-            btn.innerHTML = originalHTML;
-            btn.style.pointerEvents = 'auto';
-            showToast('Payment cancelled. Your cart is still saved.');
-          }
-        },
-        handler: async function (paymentResponse) {
-          try {
-            const verifyResponse = await fetch(`${CONFIG.API_BASE_URL}/payments/verify`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                orderId: primaryOrderId,
-                razorpayPaymentId: paymentResponse.razorpay_payment_id,
-                razorpayOrderId: paymentResponse.razorpay_order_id,
-                razorpaySignature: paymentResponse.razorpay_signature
-              })
-            });
-            const verifyResult = await verifyResponse.json();
-            if (!verifyResponse.ok || !verifyResult.success || verifyResult.paymentStatus !== 'paid') {
-              throw new Error(verifyResult.message || 'Payment could not be verified.');
-            }
+    const primaryOrderId = result.data?._id;
+    ctSetCheckoutButton(
+      btn,
+      '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Opening secure payment…</span>',
+      true
+    );
 
-            localStorage.removeItem('nearbite_cart');
-            localStorage.removeItem('nearbite_checkout_key');
-            clearCartExtras();
-
-            if (result.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
-              Object.keys(result.deliveryOtps).forEach(oid => {
-                const otp = result.deliveryOtps[oid];
-                if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
-              });
-              window.location.href = 'orders.html';
-            } else {
-              if (result.deliveryOtp) localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
-              window.location.href = `track-order.html?id=${encodeURIComponent(result.data._id)}`;
-            }
-          } catch (verifyError) {
-            console.error(verifyError);
-            btn.innerHTML = originalHTML;
-            btn.style.pointerEvents = 'auto';
-            showToast(verifyError.message || 'Payment verification failed. Please contact support.', 'error');
-          }
+    const rzp = new Razorpay({
+      key: result.payment.keyId,
+      amount: result.payment.amount,
+      currency: result.payment.currency || 'INR',
+      name: 'Eatswada',
+      description: result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`,
+      order_id: result.payment.orderId,
+      prefill: {
+        name: document.getElementById('checkout-customer-name')?.textContent || '',
+        contact: document.getElementById('checkout-customer-phone')?.textContent || ''
+      },
+      theme: { color: '#C2185B' },
+      modal: {
+        ondismiss: () => {
+          ctRestoreCheckoutButton(btn, originalHTML);
+          showToast('Payment cancelled. Your cart is still saved.');
         }
-      });
+      },
+      handler: async function (paymentResponse) {
+        // Razorpay has returned success. Keep the CTA in a clear verification
+        // state so a slow backend never looks like a frozen button.
+        ctSetCheckoutButton(
+          btn,
+          '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Verifying payment…</span>',
+          true
+        );
 
-      rzp.on('payment.failed', function (failure) {
-        console.error('Razorpay payment failed:', failure);
-        btn.innerHTML = originalHTML;
-        btn.style.pointerEvents = 'auto';
-        showToast(failure?.error?.description || 'Payment failed. Your cart is still saved.', 'error');
+        const paymentPayload = {
+          orderId: primaryOrderId,
+          razorpayPaymentId: paymentResponse.razorpay_payment_id,
+          razorpayOrderId: paymentResponse.razorpay_order_id,
+          razorpaySignature: paymentResponse.razorpay_signature
+        };
+
+        let verificationResponseReceived = false;
+        try {
+          const verifyResponse = await fetch(`${CONFIG.API_BASE_URL}/payments/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(paymentPayload)
+          });
+
+          verificationResponseReceived = true;
+          let verifyResult = null;
+          try { verifyResult = await verifyResponse.json(); } catch (_) {}
+
+          if (verifyResponse.ok && verifyResult?.success && verifyResult.paymentStatus === 'paid') {
+            ctFinishSuccessfulPayment(result, btn);
+            return;
+          }
+
+          // 409 means Razorpay payment exists but capture may not have reached
+          // the app yet. Poll our server rather than asking for another payment.
+          if (verifyResponse.status === 409 || verifyResponse.status >= 500) {
+            const status = await ctWaitForPaymentStatus(primaryOrderId, token);
+            if (status?.paymentStatus === 'paid') {
+              ctFinishSuccessfulPayment(result, btn);
+              return;
+            }
+            if (status?.paymentStatus === 'failed') {
+              ctHandleFailedPayment(result, primaryOrderId, btn);
+              return;
+            }
+            ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId));
+            ctGoPaymentResult('pending');
+            return;
+          }
+
+          // A definitive client/server validation failure is not a transient
+          // delay. Preserve the order context and offer a safe retry.
+          throw new Error(verifyResult?.message || 'Payment could not be verified.');
+        } catch (verifyError) {
+          console.error('[PAYMENT] verification:', verifyError);
+
+          // A normal 4xx response is a definitive verification failure. A
+          // network/5xx failure is ambiguous, so check the authoritative
+          // payment status before ever telling the customer to pay again.
+          if (verificationResponseReceived) {
+            ctHandleFailedPayment(result, primaryOrderId, btn);
+            return;
+          }
+
+          const status = await ctWaitForPaymentStatus(primaryOrderId, token);
+          if (status?.paymentStatus === 'paid') {
+            ctFinishSuccessfulPayment(result, btn);
+            return;
+          }
+          if (status?.paymentStatus === 'failed') {
+            ctHandleFailedPayment(result, primaryOrderId, btn);
+            return;
+          }
+
+          ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId));
+          ctGoPaymentResult('pending');
+        }
+      }
+    });
+
+    rzp.on('payment.failed', function (failure) {
+      console.error('Razorpay payment failed:', failure);
+      ctSavePaymentContext({
+        ...ctPaymentContextBase(result, primaryOrderId),
+        failureMessage: failure?.error?.description || 'Payment was not completed.'
       });
-      rzp.open();
-      return;
+      ctRestoreCheckoutButton(btn, originalHTML);
+      ctGoPaymentResult('failed');
+    });
+
+    rzp.open();
+    return;
 
   } catch (error) {
     console.error(error);
     showToast(error.message, 'error');
     shakeCheckout();
-    btn.innerHTML = originalHTML;
-    btn.style.pointerEvents = 'auto';
+    ctRestoreCheckoutButton(btn, originalHTML);
   }
 }
 
