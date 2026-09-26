@@ -1,5 +1,5 @@
 /* ================================================================
-   EATSWADA CART ENGINE & FLOATING CART BAR  (v3.1 — single owner)
+   EATSWADA CART ENGINE & FLOATING CART BAR  (v3 — single owner)
    Handles Math, LocalStorage, and the Floating Cart Bar.
 
    ONE owner for every page's cart bar:
@@ -11,9 +11,6 @@
 
    The cart DATA layer (nearbite_cart, updateCart, validation, image dict,
    multi-restaurant drawer) is UNCHANGED. Only the PRESENTATION changed.
-
-   v3.1 is a PERFORMANCE-ONLY pass. No schema, public-API, visual or
-   behavioural changes. See the PERF: comments for each hot path.
    ================================================================ */
 
 (function () {
@@ -26,10 +23,6 @@
 
   const FALLBACK_IMG =
     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=100&q=80';
-
-  const CART_KEY = 'nearbite_cart';
-  const IMG_DICT_KEY = 'es_image_dict';
-  const CHECKOUT_KEY = 'nearbite_checkout_key';
 
   // Cart-bar presentation is page-specific.
   function getCartBarMode() {
@@ -45,74 +38,48 @@
   // 🛡️ CRASH-PROOF STORAGE PARSER
   function safeGetCart() {
     try {
-        const data = localStorage.getItem(CART_KEY);
+        const data = localStorage.getItem('nearbite_cart');
         if (!data || data === "undefined" || data === "null") return {};
         const parsed = JSON.parse(data);
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
         return parsed;
     } catch (e) {
         console.warn("Corrupted cart detected and wiped.");
-        try { localStorage.removeItem(CART_KEY); } catch (e2) {}
+        localStorage.removeItem('nearbite_cart');
         return {};
     }
   }
 
-  /* ── PERF: in-memory caches ─────────────────────────────────────
-     localStorage stays the source of persistence, but JSON.parse is
-     the expensive half and it is now skipped whenever the stored
-     string is byte-identical to the one we already parsed. A raw
-     getItem() is kept as the freshness check so that writes made by
-     OTHER scripts (which do not go through updateCart) are still
-     picked up — correctness first, then speed.
-     ───────────────────────────────────────────────────────────── */
-  let cartRaw = null;   // raw string matching cartObj
-  let cartObj = null;   // parsed cart — READ-ONLY for renderers, never mutated
-  let dictRaw = null;
-  let dictObj = null;
+  /* ── 1. THE MATH ENGINE ────────────────────────────────────────
+     Cart identity is resolved by restaurant + real menu-item ID when
+     available. This also migrates the old Home ID-keyed entry into the
+     normal menu-name key, preventing one physical menu item from appearing
+     twice after Home -> Restaurant navigation.
 
-  function readRaw(key) {
-    try { return localStorage.getItem(key); } catch (e) { return null; }
-  }
+     Customized entries are intentionally excluded from this merge because
+     variants such as "Pizza (Large, Extra Cheese)" are separate cart lines.
+  ─────────────────────────────────────────────────────────────── */
+  function findBaseCartKey(cart, itemName, rId, menuItemId) {
+    if (cart[itemName]) return itemName;
+    if (!menuItemId) return null;
 
-  // Shared, never-mutated cart snapshot for the render path.
-  function getCartCached() {
-    const raw = readRaw(CART_KEY);
-    if (cartObj !== null && raw === cartRaw) return cartObj;
-    cartObj = safeGetCart();
-    cartRaw = readRaw(CART_KEY); // re-read: safeGetCart may have wiped corrupt data
-    return cartObj;
-  }
+    const targetRestaurant = String(rId || '');
+    const targetMenuItem = String(menuItemId || '');
 
-  // Cheap write-through so the next render needs no parse at all.
-  function setCartCache(rawString, obj) {
-    cartRaw = rawString;
-    cartObj = obj;
-  }
-  function invalidateCartCache() {
-    cartRaw = null;
-    cartObj = null;
+    for (const key of Object.keys(cart)) {
+      const entry = cart[key];
+      if (!entry || Number(entry.quantity || 0) <= 0) continue;
+      if (Array.isArray(entry.customizations) && entry.customizations.length) continue;
+
+      const entryRestaurant = String(entry.resId || entry.restaurantId || '');
+      const entryMenuItem = String(entry.menuItem || entry.menuItemId || '');
+
+      if (targetRestaurant && entryRestaurant !== targetRestaurant) continue;
+      if (entryMenuItem && entryMenuItem === targetMenuItem) return key;
+    }
+    return null;
   }
 
-  function getImageDict() {
-    const raw = readRaw(IMG_DICT_KEY);
-    if (dictObj !== null && raw === dictRaw) return dictObj;
-    dictRaw = raw;
-    let parsed = {};
-    try {
-      if (raw && raw !== "undefined" && raw !== "null") {
-        const p = JSON.parse(raw);
-        if (p && typeof p === 'object' && !Array.isArray(p)) parsed = p;
-      }
-    } catch (e) {}
-    dictObj = parsed;
-    return dictObj;
-  }
-  function invalidateImageDict() {
-    dictRaw = null;
-    dictObj = null;
-  }
-
-  /* ── 1. THE MATH ENGINE (Unified Master Version — UNCHANGED) ── */
   window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     let itemName = arg1;
     let change = arg2;
@@ -157,37 +124,57 @@
         return;
     }
 
-    // PERF: writers get their OWN object graph (safeGetCart re-parses), so
-    // mutating it can never corrupt the shared read-only render snapshot.
     let cartMemory = safeGetCart();
 
-    // Update the Payload
-    if (!cartMemory[itemName]) {
-        cartMemory[itemName] = {
+    /* Find an older Home-created ID-keyed line for this exact menu item.
+       Home no longer creates these entries, but existing carts may still
+       contain them. Merge them into the canonical menu-name line on the next
+       menu interaction instead of creating a duplicate. */
+    let cartKey = findBaseCartKey(cartMemory, itemName, rId, menuItemId);
+
+    if (cartKey && cartKey !== itemName && change > 0) {
+        const legacy = cartMemory[cartKey];
+        if (cartMemory[itemName]) {
+            cartMemory[itemName].quantity = Number(cartMemory[itemName].quantity || 0) + Number(legacy.quantity || 0);
+            if (!cartMemory[itemName].image && legacy.image) cartMemory[itemName].image = legacy.image;
+            if (!cartMemory[itemName].restaurantName && legacy.restaurantName) cartMemory[itemName].restaurantName = legacy.restaurantName;
+        } else {
+            cartMemory[itemName] = legacy;
+            cartMemory[itemName].name = itemName;
+        }
+        delete cartMemory[cartKey];
+        cartKey = itemName;
+    } else if (!cartKey) {
+        cartKey = itemName;
+    }
+
+    // Update the canonical payload entry.
+    if (!cartMemory[cartKey]) {
+        cartMemory[cartKey] = {
             quantity: 0, price: parseFloat(price), originalPrice: (Number(originalPrice) > Number(price) ? Number(originalPrice) : null), resId: rId,
             menuItem: menuItemId, image: image, name: itemName, isVeg: isVeg,
             restaurantName: (document.getElementById('res-name')?.textContent || '').trim()
         };
     } else {
-        if (!cartMemory[itemName].menuItem && menuItemId) cartMemory[itemName].menuItem = menuItemId;
-        if (!cartMemory[itemName].image && image) cartMemory[itemName].image = image;
-        if (!cartMemory[itemName].name) cartMemory[itemName].name = itemName;
-        if (!cartMemory[itemName].restaurantName) {
+        if (!cartMemory[cartKey].menuItem && menuItemId) cartMemory[cartKey].menuItem = menuItemId;
+        if (!cartMemory[cartKey].image && image) cartMemory[cartKey].image = image;
+        if (!cartMemory[cartKey].name) cartMemory[cartKey].name = itemName;
+        if (!cartMemory[cartKey].restaurantName) {
             const pageRestaurantName = (document.getElementById('res-name')?.textContent || '').trim();
-            if (pageRestaurantName) cartMemory[itemName].restaurantName = pageRestaurantName;
+            if (pageRestaurantName) cartMemory[cartKey].restaurantName = pageRestaurantName;
         }
-        if (!cartMemory[itemName].originalPrice && Number(originalPrice) > Number(price)) cartMemory[itemName].originalPrice = Number(originalPrice);
+        if (!cartMemory[cartKey].originalPrice && Number(originalPrice) > Number(price)) cartMemory[cartKey].originalPrice = Number(originalPrice);
     }
 
-    cartMemory[itemName].quantity += change;
-    if (cartMemory[itemName].quantity <= 0) delete cartMemory[itemName];
+    cartMemory[cartKey].quantity = Number(cartMemory[cartKey].quantity || 0) + Number(change || 0);
+    if (cartMemory[cartKey].quantity <= 0) delete cartMemory[cartKey];
 
     // 🎯 VISUALLY UPDATE THE CORRECT BUTTON TYPE
     const key = itemName.replace(/\s+/g, '');
     const container = document.getElementById('btn-container-' + key);
 
     if (container) {
-        const qty = cartMemory[itemName] ? cartMemory[itemName].quantity : 0;
+        const qty = cartMemory[cartKey] ? cartMemory[cartKey].quantity : 0;
 
         if (isUnder99Payload) {
             if (qty > 0) {
@@ -200,13 +187,8 @@
         }
     }
 
-    // Save and Trigger Floating Cart Bar.
-    // PERF: the DATA write stays synchronous (unchanged); only the visual
-    // update is coalesced into the next animation frame.
-    const serialized = JSON.stringify(cartMemory);
-    try { localStorage.setItem(CART_KEY, serialized); } catch (e) {}
-    setCartCache(serialized, cartMemory);
-
+    // Save and Trigger Floating Cart Bar
+    localStorage.setItem('nearbite_cart', JSON.stringify(cartMemory));
     // Notify any page that derives UI from the cart (e.g. homepage product
     // cards) via the existing shared event — no separate cart state.
     try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'updateCart', itemName: itemName } })); } catch (e) {}
@@ -229,16 +211,7 @@
       0% { transform: translate(-50%, 0); opacity: 1; }
       100% { transform: translate(-50%, 130%); opacity: 0; }
     }
-    /* PERF: each restartable animation is declared TWICE under two names.
-       Alternating between the two classes restarts the animation because the
-       animation-name changes, which removes the need for a forced reflow
-       (void el.offsetWidth) on every cart update. Keep the pairs identical. */
     @keyframes wcBump {
-      0% { transform: scale(1); }
-      35% { transform: scale(1.12); }
-      100% { transform: scale(1); }
-    }
-    @keyframes wcBumpAlt {
       0% { transform: scale(1); }
       35% { transform: scale(1.12); }
       100% { transform: scale(1); }
@@ -254,18 +227,7 @@
       72% { transform: scale(.995); }
       100% { transform: scale(1); }
     }
-    @keyframes wcPinkPulseAlt {
-      0% { transform: scale(1); }
-      38% { transform: scale(1.024); }
-      72% { transform: scale(.995); }
-      100% { transform: scale(1); }
-    }
     @keyframes wcPinkTextBump {
-      0% { transform: translateY(0); opacity:1; }
-      35% { transform: translateY(-2px); opacity:.86; }
-      100% { transform: translateY(0); opacity:1; }
-    }
-    @keyframes wcPinkTextBumpAlt {
       0% { transform: translateY(0); opacity:1; }
       35% { transform: translateY(-2px); opacity:.86; }
       100% { transform: translateY(0); opacity:1; }
@@ -285,12 +247,7 @@
       width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
-    }
-    /* PERF: promote the bar ONLY while it is actually animating, instead of
-       keeping a permanent compositor layer alive on every page. */
-    #white-cart-root.wc-enter,
-    #white-cart-root.wc-exiting {
-      will-change: transform, opacity;
+      will-change: bottom, transform;
     }
     #white-cart-root.wc-enter {
       animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -300,19 +257,10 @@
     }
     #white-cart-root.wc-pink.wc-cart-update #es-pink-inner {
       animation: wcPinkPulse .32s cubic-bezier(.22,1,.36,1);
-      will-change: transform;
-    }
-    #white-cart-root.wc-pink.wc-cart-update-alt #es-pink-inner {
-      animation: wcPinkPulseAlt .32s cubic-bezier(.22,1,.36,1);
-      will-change: transform;
     }
     #white-cart-root.wc-pink.wc-cart-update .wc-pink-left,
     #white-cart-root.wc-pink.wc-cart-update .wc-pink-cta {
       animation: wcPinkTextBump .28s cubic-bezier(.22,1,.36,1);
-    }
-    #white-cart-root.wc-pink.wc-cart-update-alt .wc-pink-left,
-    #white-cart-root.wc-pink.wc-cart-update-alt .wc-pink-cta {
-      animation: wcPinkTextBumpAlt .28s cubic-bezier(.22,1,.36,1);
     }
     #white-cart-root.wc-exiting {
       animation: slideDownWhiteCart 0.26s ease forwards;
@@ -341,9 +289,7 @@
     }
     .wc-thumb-wrap { position: relative; display: flex; align-items: center; flex-shrink: 0; }
     .wc-image-stack { display: flex; position: relative; height: 36px; min-width: 36px; align-items: center; transition: width 0.3s ease; }
-    /* PERF: explicit transition list instead of "all" — same visible motion,
-       without style-diffing every property on the thumbnails. */
-    .wc-img { width: 36px; height: 36px; border-radius: 18px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; position: absolute; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: transform 0.3s ease, opacity 0.3s ease, left 0.3s ease; }
+    .wc-img { width: 36px; height: 36px; border-radius: 18px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; position: absolute; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; }
     .wc-img:nth-child(1) { left: 0px; z-index: 3; }
     .wc-img:nth-child(2) { left: 12px; z-index: 2; transform: scale(0.95); opacity: 0.95; }
     .wc-img:nth-child(3) { left: 24px; z-index: 1; transform: scale(0.9); opacity: 0.85; }
@@ -355,7 +301,6 @@
       border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.18); z-index: 4;
     }
     .wc-bump { animation: wcBump 0.32s ease; }
-    .wc-bump-alt { animation: wcBumpAlt 0.32s ease; }
 
     .wc-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; justify-content: center; overflow: hidden; }
     .wc-res-name { font-size: 12px; font-weight: 800; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -436,6 +381,7 @@
     }
     #es-pink-inner:active { transform: scale(0.985); }
     #white-cart-root.wc-pink{padding-bottom:env(safe-area-inset-bottom,0px)}
+    #es-pink-inner{will-change:transform}
     .wc-pink-left {
       font-size: 15px; font-weight: 800; color: #ffffff;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
@@ -493,7 +439,7 @@
     if (document.getElementById('wc-styles')) return;
     const s = document.createElement('style');
     s.id = 'wc-styles';
-    s.textContent = CSS; // PERF: textContent skips the HTML parser for a pure CSS payload
+    s.innerHTML = CSS;
     document.head.appendChild(s);
   }
 
@@ -553,40 +499,6 @@
     return CART_BAR_MODE === 'pink' ? makePinkDOM() : makeHomeDOM();
   }
 
-  /* ── PERF: cached element references ──────────────────────────────
-     These nodes are created once and never replaced, so re-querying
-     them on every render was pure waste. Every getter re-queries only
-     if the cached node was detached by another script.
-     ─────────────────────────────────────────────────────────────── */
-  let rootEl = null, countEl = null, badgeEl = null, resEl = null,
-      imgStackEl = null, allupEl = null, stdActionsEl = null, clearActionsEl = null;
-
-  function cacheRefs(root) {
-    rootEl = root || null;
-    if (!rootEl) {
-      countEl = badgeEl = resEl = imgStackEl = allupEl = stdActionsEl = clearActionsEl = null;
-      return;
-    }
-    countEl = document.getElementById('wc-item-count');
-    badgeEl = document.getElementById('wc-qty-badge');
-    resEl = document.getElementById('wc-dynamic-res');
-    imgStackEl = document.getElementById('wc-dynamic-img-stack');
-    allupEl = document.getElementById('wc-allup');
-    stdActionsEl = document.getElementById('wc-standard-actions');
-    clearActionsEl = document.getElementById('wc-clear-actions');
-  }
-
-  function getRoot() {
-    if (rootEl && rootEl.isConnected) return rootEl;
-    cacheRefs(document.getElementById('white-cart-root'));
-    return rootEl;
-  }
-
-  // Write to the DOM only when the displayed value actually changed.
-  function setText(el, value) {
-    if (el && el.textContent !== value) el.textContent = value;
-  }
-
   /* ── Remove any obsolete/legacy cart bars so exactly ONE remains ── */
   function isBottomNav(el) {
     if (!el) return false;
@@ -618,7 +530,6 @@
   let lastTotalQty = null;
   let lastTotalPrice = null;
   let exitTimer = null;
-  let pinkUpdateTimer = null;
   const EXIT_MS = 260;
 
   function prefersReducedMotion() {
@@ -634,18 +545,11 @@
     }
   }
 
-  /* PERF: restart the keyframe by swapping to an identical animation under a
-     different name, instead of `void el.offsetWidth`. Same visible bump, zero
-     forced layout — so rapid +/- tapping never synchronously reflows. */
   function bump(el) {
     if (!el || prefersReducedMotion()) return;
-    if (el.classList.contains('wc-bump')) {
-      el.classList.remove('wc-bump');
-      el.classList.add('wc-bump-alt');
-    } else {
-      el.classList.remove('wc-bump-alt');
-      el.classList.add('wc-bump');
-    }
+    el.classList.remove('wc-bump');
+    void el.offsetWidth;
+    el.classList.add('wc-bump');
   }
 
   function showCartBar(root) {
@@ -656,7 +560,7 @@
       root.style.display = 'block';
       root.classList.remove('wc-enter');
       if (!prefersReducedMotion()) {
-        void root.offsetWidth; // required: restarts the enter animation
+        void root.offsetWidth;
         root.classList.add('wc-enter');
       }
     }
@@ -680,31 +584,49 @@
     }, EXIT_MS);
   }
 
-  /* ── Positioning: keep the cart bar clear ABOVE any bottom navigation ──
-     PERF: the bottom nav is looked up ONCE and cached. The old fallback
-     scan over every element under <body> — which measured computed style,
-     bounding box and rendered text for each one — was unreachable dead code
-     (nothing ever called findBottomNav) and has been deleted.
-     ──────────────────────────────────────────────────────────────────── */
-  const BOTTOM_NAV_ID = 'nearbite-bottom-tabbar';
-  let bottomNav = null;
+  /* ── Positioning: keep the cart bar clear ABOVE any bottom navigation ── */
+  const NAV_SELECTORS = [
+    '.bottom-nav', '#bottom-nav', '.bottomnav', '#bottomnav', '[data-bottom-nav]',
+    '.tab-bar', '.tabbar', '.nav-bottom', '.bottom-navigation', '.es-bottom-nav',
+    '.app-bottom-nav', '.mobile-bottom-nav', 'nav.bottom', 'footer.bottom-nav'
+  ];
+  function findBottomNav() {
+    // Known Eatswada bottom-navigation selectors first.
+    for (const s of NAV_SELECTORS) {
+      const el = document.querySelector(s);
+      if (!el) continue;
+      const cs = getComputedStyle(el);
+      if ((cs.position === 'fixed' || cs.position === 'sticky') &&
+          cs.display !== 'none' && cs.visibility !== 'hidden') {
+        const r = el.getBoundingClientRect();
+        if (r.height > 0 && r.height < 180 && r.bottom >= window.innerHeight - 12) {
+          return el;
+        }
+      }
+    }
 
-  function getBottomNav() {
-    if (bottomNav && bottomNav.isConnected) return bottomNav;
-    bottomNav = document.getElementById(BOTTOM_NAV_ID);
-    return bottomNav;
-  }
-  function resetNavCache() {
-    bottomNav = null;
-    lastBottomValue = null;
-    lastNavClearance = null;
-  }
+    // Fallback for custom/renamed homepage nav containers.
+    const candidates = Array.from(document.querySelectorAll('body *')).filter(el => {
+      const cs = getComputedStyle(el);
+      if (!(cs.position === 'fixed' || cs.position === 'sticky')) return false;
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
 
-  let lastBottomValue = null;   // last string written to style.bottom (home mode)
-  let lastNavClearance = null;  // last value written to --nb-cart-bottom (pink mode)
+      const r = el.getBoundingClientRect();
+      if (r.height <= 0 || r.height > 180) return false;
+      if (r.bottom < window.innerHeight - 12) return false;
+      if (r.width < Math.min(280, window.innerWidth * 0.65)) return false;
+
+      const t = (el.innerText || '').replace(/\s+/g, ' ').toLowerCase();
+      return /home/.test(t) && /99\s*store/.test(t) && /orders?/.test(t);
+    });
+
+    return candidates.sort((a, b) =>
+      a.getBoundingClientRect().height - b.getBoundingClientRect().height
+    )[0] || null;
+  }
 
   function positionCartAboveNav(root) {
-    root = root || getRoot();
+    root = root || document.getElementById('white-cart-root');
     if (!root) return;
 
     /*
@@ -719,40 +641,31 @@
      * Pink 99/menu:
      *   keep the independent bottom placement used by those pages.
      */
-    const nav = getBottomNav();
-    if (!nav) startNavCreationWatch();
-
     if (CART_BAR_MODE === 'home') {
-      // No layout reads at all in home mode: the CSS variable does the work.
-      const value = nav
-        ? 'var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px)))'
-        : '104px'; // Before the nav is created, keep a safe temporary position.
-      if (value === lastBottomValue) return; // PERF: skip redundant style writes
-      lastBottomValue = value;
-      // Let bottom-tab-bar.js remain the single source of truth.
-      root.style.removeProperty('--nb-cart-bottom');
-      root.style.bottom = value;
+      const nav = document.getElementById('nearbite-bottom-tabbar');
+      if (nav) {
+        // Let bottom-tab-bar.js remain the single source of truth.
+        root.style.removeProperty('--nb-cart-bottom');
+        root.style.bottom = 'var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px)))';
+      } else {
+        // Before the nav is created, keep a safe temporary position.
+        root.style.removeProperty('--nb-cart-bottom');
+        root.style.bottom = '104px';
+      }
       return;
     }
 
     // 99 Store / Restaurant Menu: keep their lower placement.
+    const nav = document.getElementById('nearbite-bottom-tabbar');
     if (nav) {
-      // Single layout read, and only ever inside the rAF callback.
       const r = nav.getBoundingClientRect();
-      const clearance = Math.round(Math.max(0, window.innerHeight - r.top)) + 12;
-      if (clearance === lastNavClearance) return; // PERF: skip redundant style writes
-      lastNavClearance = clearance;
-      root.style.setProperty('--nb-cart-bottom', clearance + 'px');
+      const clearance = Math.max(0, window.innerHeight - r.top);
+      root.style.setProperty('--nb-cart-bottom', (Math.round(clearance) + 12) + 'px');
     } else {
-      if (lastNavClearance === 'default') return;
-      lastNavClearance = 'default';
       root.style.setProperty('--nb-cart-bottom', 'calc(16px + env(safe-area-inset-bottom, 0px))');
     }
   }
 
-  /* PERF: ONE shared rAF scheduler for scroll + resize + orientation +
-     observers. At most one position calculation per animation frame, and
-     never a nested frame. */
   let posRAF = null;
   function schedulePos() {
     if (posRAF) return;
@@ -762,73 +675,28 @@
     });
   }
 
-  /* The bottom navigation is created by a separate script and changes its
-     hidden/revealed state by updating --nb-cart-bottom on <html>.
-
-     PERF: the old observer watched the whole body tree and so woke up for
-     every restaurant card, skeleton swap, image load and menu re-render on
-     the page. It is replaced by:
-       • a direct-children-only observer on <body>, disconnected the moment
-         the nav appears (and hard-stopped after NAV_WATCH_MS either way),
-       • a few bounded re-checks for navs created inside a wrapper,
-       • the existing narrow <html> style-attribute observer.        */
-  const NAV_WATCH_MS = 10000;
-  let navCreationObserver = null;
-  let navWatchTimers = [];
-  let rootStyleObserver = null;
-
-  function stopNavCreationWatch() {
-    if (navCreationObserver) { navCreationObserver.disconnect(); navCreationObserver = null; }
-    navWatchTimers.forEach(clearTimeout);
-    navWatchTimers = [];
-  }
-
-  function startNavCreationWatch() {
-    if (CART_BAR_MODE === 'hidden') return;
-    if (navCreationObserver || !document.body) return;
-    if (getBottomNav()) return;
-
-    const check = () => {
-      if (!getBottomNav()) return false;
-      stopNavCreationWatch();
-      schedulePos();
-      return true;
-    };
-
-    navCreationObserver = new MutationObserver(check);
-    navCreationObserver.observe(document.body, { childList: true }); // NOT subtree
-
-    // Safety net for a nav created inside a wrapper element.
-    [0, 100, 400, 1200, 2500].forEach(ms => navWatchTimers.push(setTimeout(check, ms)));
-    navWatchTimers.push(setTimeout(stopNavCreationWatch, NAV_WATCH_MS)); // no observer leak
-  }
-
+  // The bottom navigation is created by a separate script and changes its
+  // hidden/revealed state by updating --nb-cart-bottom on <html>. Watch both
+  // DOM creation and the shared CSS variable so the homepage cart follows it.
   function watchBottomNavigation() {
-    if (CART_BAR_MODE === 'hidden') return;
-    startNavCreationWatch();
-
     if (CART_BAR_MODE !== 'home') return;
-    if (rootStyleObserver) return;
-    // Narrow by design: one element, one attribute.
-    rootStyleObserver = new MutationObserver(() => schedulePos());
-    rootStyleObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
-  }
 
-  /* PERF: listeners registered exactly once, all passive, all funnelled
-     through the single rAF scheduler.
-     `scroll` is bound for the pink bar only — that is the only mode that
-     measures the nav's rect. Home mode follows the nav purely through the
-     shared --nb-cart-bottom CSS variable, so a per-frame scroll callback
-     on the busiest page bought nothing. */
-  let viewportListenersBound = false;
-  function bindViewportListeners() {
-    if (viewportListenersBound || CART_BAR_MODE === 'hidden') return;
-    viewportListenersBound = true;
-    window.addEventListener('resize', schedulePos, { passive: true });
-    window.addEventListener('orientationchange', schedulePos, { passive: true });
-    if (CART_BAR_MODE === 'pink') {
-      window.addEventListener('scroll', schedulePos, { passive: true }); // hide-on-scroll nav
-    }
+    const sync = () => schedulePos();
+    window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('scroll', sync, { passive: true });
+
+    const observer = new MutationObserver(() => {
+      if (document.getElementById('nearbite-bottom-tabbar')) schedulePos();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const rootStyleObserver = new MutationObserver(() => schedulePos());
+    rootStyleObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+
+    // Re-check after all page scripts have had a chance to create the nav.
+    setTimeout(sync, 0);
+    setTimeout(sync, 100);
+    setTimeout(sync, 400);
   }
 
   /* ── Multi-restaurant cart drawer (data logic UNCHANGED) ── */
@@ -845,72 +713,34 @@
     return [...groups.values()];
   }
   function escDrawer(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-  let drawerBackdropEl = null, drawerEl = null, drawerListEl = null, drawerTitleEl = null;
-  let lastDrawerSignature = null;
-
   function ensureCartDrawer(){
-    if (drawerBackdropEl && drawerBackdropEl.isConnected) return;
-    const existing = document.getElementById('ew-cart-drawer-backdrop');
-    if (existing) {
-      drawerBackdropEl = existing;
-      drawerEl = existing.querySelector('#ew-cart-drawer');
-      drawerListEl = existing.querySelector('#ew-cd-list');
-      drawerTitleEl = existing.querySelector('#ew-cd-title');
-      return;
-    }
+    if (document.getElementById('ew-cart-drawer-backdrop')) return;
     const b = document.createElement('div'); b.id = 'ew-cart-drawer-backdrop';
     b.innerHTML = '<section id="ew-cart-drawer" role="dialog" aria-modal="true" aria-label="Your carts"><div class="ew-cd-head"><div class="ew-cd-title" id="ew-cd-title">Your Carts</div><button class="ew-cd-close" type="button" aria-label="Close">×</button></div><div class="ew-cd-list" id="ew-cd-list"></div><div class="ew-cd-footer"><button class="ew-cd-checkout" type="button" id="ew-cd-checkout">Checkout all <span>›</span></button></div></section>';
     document.body.appendChild(b); const d = b.querySelector('#ew-cart-drawer');
-
-    drawerBackdropEl = b;
-    drawerEl = d;
-    drawerListEl = b.querySelector('#ew-cd-list');
-    drawerTitleEl = b.querySelector('#ew-cd-title');
-    lastDrawerSignature = null;
-
     const close = () => { b.classList.remove('show'); d.classList.remove('show'); document.body.style.overflow = ''; };
     b.addEventListener('click', e => { if (e.target === b) close(); });
     b.querySelector('.ew-cd-close').addEventListener('click', close);
     b.querySelector('#ew-cd-checkout').addEventListener('click', () => window.location.href = 'cart.html');
-
-    // PERF: ONE delegated listener for every row, for the life of the page,
-    // instead of re-attaching a listener per button on every rerender.
-    drawerListEl.addEventListener('click', (e) => {
-      const btn = e.target && e.target.closest ? e.target.closest('[data-cd-view]') : null;
-      if (btn) window.location.href = 'cart.html';
-    });
-
     window.__ewCloseCartDrawer = close;
   }
-
-  function isDrawerOpen(){
-    return !!(drawerBackdropEl && drawerBackdropEl.isConnected && drawerBackdropEl.classList.contains('show'));
-  }
-
-  // PERF: rebuild the drawer only when the restaurant groups actually changed.
-  function renderCartDrawer(groups){
+  function renderCartDrawer(){
     ensureCartDrawer();
-    if (!drawerListEl) return;
-    const list = groups || restaurantGroups(getCartCached());
-
-    const signature = list.map(g => g.id + '\u001f' + g.units + '\u001f' + g.name + '\u001f' + g.image).join('\u001e');
-    if (signature === lastDrawerSignature) return;
-    lastDrawerSignature = signature;
-
-    setText(drawerTitleEl, `Your Carts (${list.length})`);
-    drawerListEl.innerHTML = list.length
-      ? list.map(g => {
+    const list = document.getElementById('ew-cd-list');
+    const groups = restaurantGroups(safeGetCart());
+    document.getElementById('ew-cd-title').textContent = `Your Carts (${groups.length})`;
+    list.innerHTML = groups.length
+      ? groups.map(g => {
           const u = Math.round(g.units);
           const img = g.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80';
           return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u === 1 ? 'item' : 'items'}</span></button></div>`;
         }).join('')
       : '<div class="ew-cd-empty">Your cart is empty.</div>';
+    list.querySelectorAll('[data-cd-view]').forEach(btn => btn.addEventListener('click', () => window.location.href = 'cart.html'));
   }
-
   function openRestaurantCarts(){
     ensureCartDrawer(); renderCartDrawer();
-    const b = drawerBackdropEl, d = drawerEl;
+    const b = document.getElementById('ew-cart-drawer-backdrop'), d = document.getElementById('ew-cart-drawer');
     if (!b || !d) return;
     b.classList.add('show'); requestAnimationFrame(() => d.classList.add('show'));
     document.body.style.overflow = 'hidden';
@@ -922,64 +752,31 @@
     openRestaurantCarts();
   }
 
-  /* ── The single cart-bar renderer ───────────────────────────────── */
-  let lastImgUrls = null;
-  let lastStackWidth = null;
-  let hasRendered = false;
-  let lastRenderKey = null;
-  let forceNextRender = false;
-
-  function resetRenderCaches() {
-    lastImgUrls = null;
-    lastStackWidth = null;
-    lastRenderKey = null;
-    hasRendered = false;
-    lastDrawerSignature = null;
-  }
-
-  function renderCartBar() {
+  /* ── The single cart-bar renderer ── */
+  window.updateGlobalCart = function () {
     if (isDismissed || CART_BAR_MODE === 'hidden') return;
 
-    const root = getRoot();
+    const savedCart = safeGetCart();
+    const itemNames = Object.keys(savedCart);
+    const root = document.getElementById('white-cart-root');
     if (!root) return;
 
-    const savedCart = getCartCached();
-    const usesImages = CART_BAR_MODE !== 'pink';
-    if (usesImages) getImageDict();
-
-    /* PERF: the dirty check. `cartRaw` is the exact stored string, so an
-       identical string means an identical rendered result — no totals loop,
-       no grouping, no DOM writes. The image dictionary is folded in because
-       it feeds the home thumbnails. This correctly does NOT skip: clearing,
-       image changes, restaurant-name repair, corrupt-entry repair, or
-       another tab's write, because every one of those changes the string. */
-    const renderKey = (cartRaw === null ? '\u0001' : cartRaw) +
-                      '\u0000' +
-                      (usesImages ? (dictRaw === null ? '' : dictRaw) : '');
-    if (!forceNextRender && hasRendered && renderKey === lastRenderKey) return;
-    forceNextRender = false;
-    lastRenderKey = renderKey;
-    hasRendered = true;
-
-    const itemNames = Object.keys(savedCart);
-    let groups = null;
-    const getGroups = () => (groups || (groups = restaurantGroups(savedCart)));
+    const countEl = document.getElementById('wc-item-count');
 
     // Reset the clear-confirm UI (home only).
-    if (stdActionsEl && clearActionsEl) {
-      if (stdActionsEl.style.display !== 'flex') stdActionsEl.style.display = 'flex';
-      if (clearActionsEl.style.display !== 'none') clearActionsEl.style.display = 'none';
-    }
+    const stdActions = document.getElementById('wc-standard-actions');
+    const clearActions = document.getElementById('wc-clear-actions');
+    if (stdActions && clearActions) { stdActions.style.display = 'flex'; clearActions.style.display = 'none'; }
 
     // Keep the drawer live if it happens to be open.
-    if (isDrawerOpen()) renderCartDrawer(getGroups());
+    if (document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
 
     if (itemNames.length === 0) {
       hideCartBar(root);
       lastTotalQty = null;
       lastTotalPrice = null;
-      lastImgUrls = null;
-      if (allupEl) allupEl.classList.remove('show');
+      const allup = document.getElementById('wc-allup');
+      if (allup) allup.classList.remove('show');
       return;
     }
 
@@ -997,72 +794,56 @@
     const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
     // Price shows ONLY on the pink (99 Store / Restaurant) bar. Home = count only.
     const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
-    setText(countEl, showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText);
+    if (countEl) countEl.innerText = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
 
     const totalChanged = lastTotalQty !== null && (lastTotalQty !== totalQty || lastTotalPrice !== totalPrice);
     if (totalChanged) {
       bump(countEl);
-      if (CART_BAR_MODE === 'pink' && !prefersReducedMotion()) {
-        // PERF: alternate the class to restart the pulse — no forced layout.
-        const useAlt = root.classList.contains('wc-cart-update');
-        root.classList.remove('wc-cart-update', 'wc-cart-update-alt');
-        root.classList.add(useAlt ? 'wc-cart-update-alt' : 'wc-cart-update');
-        if (pinkUpdateTimer) clearTimeout(pinkUpdateTimer); // PERF: clear old timer first
-        pinkUpdateTimer = setTimeout(() => {
-          root.classList.remove('wc-cart-update', 'wc-cart-update-alt');
-          pinkUpdateTimer = null;
-        }, 260);
+      if (CART_BAR_MODE === 'pink') {
+        root.classList.remove('wc-cart-update');
+        void root.offsetWidth;
+        root.classList.add('wc-cart-update');
+        setTimeout(() => root.classList.remove('wc-cart-update'), 260);
       }
     }
 
     // Home-only visuals: image stack, badge, restaurant label, "All ↑".
-    if (usesImages) {
+    if (CART_BAR_MODE !== 'pink') {
+      const badgeEl = document.getElementById('wc-qty-badge');
       if (badgeEl) {
-        const badgeText = totalQty > 99 ? '99+' : String(totalQty);
-        setText(badgeEl, badgeText);
+        badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
         if (lastTotalQty !== null && lastTotalQty !== totalQty) bump(badgeEl);
       }
 
+      const resEl = document.getElementById('wc-dynamic-res');
       const lastItemName = itemNames[itemNames.length - 1];
       const lastItem = savedCart[lastItemName] || {};
-      setText(resEl, lastItem.resName || lastItem.restaurantName || lastItemName);
+      if (resEl) resEl.innerText = lastItem.resName || lastItem.restaurantName || lastItemName;
 
+      const imgStackEl = document.getElementById('wc-dynamic-img-stack');
       if (imgStackEl) {
+        imgStackEl.innerHTML = '';
         const latestThreeNames = itemNames.slice(-3).reverse();
-        const imageDict = getImageDict();
-        const urls = latestThreeNames.map(name => {
+        let imageDict = {};
+        try {
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") imageDict = JSON.parse(dictData);
+        } catch (e) {}
+        latestThreeNames.forEach((name) => {
           const itemData = savedCart[name] || {};
-          return itemData.image || imageDict[name] || FALLBACK_IMG;
+          const imgSrc = itemData.image || imageDict[name] || FALLBACK_IMG;
+          const img = document.createElement('img');
+          img.src = imgSrc; img.alt = ''; img.classList.add('wc-img');
+          imgStackEl.appendChild(img);
         });
-
-        /* PERF: only touch the thumbnails when the three URLs changed, and
-           reuse the existing <img> nodes instead of clearing and rebuilding
-           (which forced a re-decode and a visible flicker every render). */
-        if (!sameUrls(urls, lastImgUrls)) {
-          lastImgUrls = urls;
-          for (let i = 0; i < urls.length; i++) {
-            let img = imgStackEl.children[i];
-            if (!img) {
-              img = document.createElement('img');
-              img.alt = '';
-              img.classList.add('wc-img');
-              imgStackEl.appendChild(img);
-            }
-            if (img.getAttribute('src') !== urls[i]) img.setAttribute('src', urls[i]);
-          }
-          while (imgStackEl.children.length > urls.length) {
-            imgStackEl.removeChild(imgStackEl.children[imgStackEl.children.length - 1]);
-          }
-        }
-
-        const width = urls.length === 1 ? '36px' : urls.length === 2 ? '48px' : '60px';
-        if (width !== lastStackWidth) { lastStackWidth = width; imgStackEl.style.width = width; }
+        imgStackEl.style.width = latestThreeNames.length === 1 ? '36px' : latestThreeNames.length === 2 ? '48px' : '60px';
       }
 
       // "All ↑" appears only when the cart holds items from 2+ restaurants.
-      if (allupEl) {
-        const show = getGroups().length >= 2;
-        if (show !== allupEl.classList.contains('show')) allupEl.classList.toggle('show', show);
+      const allup = document.getElementById('wc-allup');
+      if (allup) {
+        const groups = restaurantGroups(savedCart);
+        if (groups.length >= 2) allup.classList.add('show'); else allup.classList.remove('show');
       }
     }
 
@@ -1070,45 +851,16 @@
     lastTotalPrice = totalPrice;
     positionCartAboveNav(root);
     showCartBar(root);
-  }
-
-  function sameUrls(a, b) {
-    if (!a || !b || a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-    return true;
-  }
-
-  /* PERF: several cart changes in one event-loop turn produce ONE render.
-     The cart DATA is always written immediately in updateCart(); only the
-     paint is batched. Public signature is unchanged: updateGlobalCart(). */
-  let renderQueued = false;
-  function queueCartRender() {
-    if (renderQueued) return;
-    renderQueued = true;
-    requestAnimationFrame(() => {
-      renderQueued = false;
-      renderCartBar();
-    });
-  }
-
-  window.updateGlobalCart = function () {
-    queueCartRender();
   };
 
   /* ── 5. INITIALIZATION ── */
-  let initialized = false;
-
   function init() {
-    if (initialized) return;      // belt-and-braces: never register twice
-    initialized = true;
-
     injectCSS();
     removeLegacyCartBars();
 
     const root = makeDOM();
     if (CART_BAR_MODE === 'hidden') root.style.display = 'none';
     document.body.appendChild(root);
-    cacheRefs(root);
     watchBottomNavigation();
 
     window.__ewOpenCartDrawer = openCartDrawer;
@@ -1116,7 +868,8 @@
     ensureCartDrawer(); // drawer exists in every mode so the home "All ↑" can open it
 
     // "All ↑" → open the restaurant-level cart details.
-    if (allupEl) allupEl.addEventListener('click', (e) => { e.stopPropagation(); openRestaurantCarts(); });
+    const allup = document.getElementById('wc-allup');
+    if (allup) allup.addEventListener('click', (e) => { e.stopPropagation(); openRestaurantCarts(); });
 
     // Capture the food image that was tapped, for the cart-bar thumbnail stack.
     document.addEventListener('click', (e) => {
@@ -1137,33 +890,26 @@
         }
       }
 
-      // PERF: bail out before walking the tree when this click can never
-      // produce a dictionary entry — this runs on EVERY click on the page.
-      if (!foodName) return;
-
       let wrapper = btn;
       let capturedImg = "";
-      let depth = 0;
-      while (wrapper && wrapper !== document.body && depth < 8) { // PERF: bounded walk
+      while (wrapper && wrapper !== document.body) {
         const img = wrapper.querySelector('img');
         if (img && img.src && !img.id.includes('wc-dynamic') && !img.src.includes('.svg')) { capturedImg = img.src; break; }
         wrapper = wrapper.parentElement;
-        depth++;
       }
 
-      if (capturedImg) {
-        // PERF: in-memory dictionary, written through only on a real change.
-        const dict = getImageDict();
-        if (dict[foodName] === capturedImg) return;
+      if (foodName && capturedImg) {
+        let dict = {};
+        try {
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") dict = JSON.parse(dictData);
+        } catch (e) {}
         dict[foodName] = capturedImg;
-        const serialized = JSON.stringify(dict);
-        try { localStorage.setItem(IMG_DICT_KEY, serialized); } catch (err) {}
-        dictRaw = serialized;
-        dictObj = dict;
+        localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
     }, true);
 
-    const wcLeft = root.querySelector('.wc-left');
+    const wcLeft = document.querySelector('#white-cart-root .wc-left');
     if (wcLeft) {
       wcLeft.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = 'cart.html'; }
@@ -1174,43 +920,37 @@
     const closeBtn = document.getElementById('wc-close-btn');
     if (closeBtn) closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (stdActionsEl) stdActionsEl.style.display = 'none';
-      if (clearActionsEl) clearActionsEl.style.display = 'flex';
+      const s = document.getElementById('wc-standard-actions'); const c = document.getElementById('wc-clear-actions');
+      if (s) s.style.display = 'none'; if (c) c.style.display = 'flex';
     });
 
     const cancelClear = document.getElementById('wc-cancel-clear');
     if (cancelClear) cancelClear.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (clearActionsEl) clearActionsEl.style.display = 'none';
-      if (stdActionsEl) stdActionsEl.style.display = 'flex';
+      const s = document.getElementById('wc-standard-actions'); const c = document.getElementById('wc-clear-actions');
+      if (c) c.style.display = 'none'; if (s) s.style.display = 'flex';
     });
 
     const confirmClear = document.getElementById('wc-confirm-clear');
     if (confirmClear) confirmClear.addEventListener('click', (e) => {
       e.stopPropagation();
-      try {
-        localStorage.removeItem(CART_KEY);
-        localStorage.removeItem(CHECKOUT_KEY);
-      } catch (err) {}
+      localStorage.removeItem('nearbite_cart');
+      localStorage.removeItem('nearbite_checkout_key');
       // Same shared event so homepage cards immediately return to "+".
-      try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'clearCart', cleared: true } })); } catch (e2) {}
+      try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'clearCart', cleared: true } })); } catch (e) {}
       isDismissed = false;
-      const r = getRoot();
+      const r = document.getElementById('white-cart-root');
       if (r) { r.classList.remove('wc-enter', 'wc-exiting'); r.style.display = 'none'; }
       lastTotalQty = null;
       lastTotalPrice = null;
-      // PERF/correctness: drop every cached total and snapshot, then run ONE
-      // forced render so the drawer and the "All ↑" capsule are refreshed too.
-      invalidateCartCache();
-      resetRenderCaches();
-      forceNextRender = true;
-      queueCartRender();
     });
 
-    bindViewportListeners();
     positionCartAboveNav(root);
+    window.addEventListener('resize', schedulePos, { passive: true });
+    window.addEventListener('orientationchange', schedulePos, { passive: true });
+    window.addEventListener('scroll', schedulePos, { passive: true }); // hide-on-scroll nav
 
-    renderCartBar(); // first paint is synchronous — no empty-frame flash
+    window.updateGlobalCart();
   }
 
   if (document.readyState === 'loading') {
@@ -1219,38 +959,11 @@
     init();
   }
 
-  // Late safety net for a bottom nav created inside a wrapper after load.
-  window.addEventListener('load', () => {
-    if (getBottomNav()) { stopNavCreationWatch(); schedulePos(); }
-  }, { once: true });
-
-  /* ── Cross-tab sync ──────────────────────────────────────────────
-     Only our own two keys are acted on (e.key === null means the other
-     tab called localStorage.clear()). Refresh the cache, invalidate the
-     snapshot, queue exactly one visual update.
-     Note: this deliberately does NOT re-broadcast 'eatswada:cart-updated',
-     so no other page script's behaviour changes. Add the dispatch here if
-     you ever want homepage cards to resync across tabs too.
-     ─────────────────────────────────────────────────────────────── */
-  window.addEventListener('storage', (e) => {
-    if (!e) return;
-    if (e.key !== null && e.key !== CART_KEY && e.key !== IMG_DICT_KEY) return;
-    invalidateCartCache();
-    invalidateImageDict();
-    forceNextRender = true;
-    queueCartRender();
-  });
-
   window.addEventListener('pageshow', () => {
     isDismissed = false;
     removeLegacyCartBars();
-    // bfcache restore: every cache may be stale, so re-read from scratch.
-    invalidateCartCache();
-    invalidateImageDict();
-    resetNavCache();
-    forceNextRender = true;
     if (window.updateGlobalCart) window.updateGlobalCart();
-    schedulePos();
+    positionCartAboveNav();
   });
 
 })();

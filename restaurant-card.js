@@ -413,54 +413,12 @@
     clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
   };
-  /* Production image lifecycle: reserve the box, keep a neutral placeholder
-   * visible until the image has fully loaded AND decoded, then reveal it in
-   * one frame. This prevents progressive/partial image paints from looking
-   * like a broken or half-loaded card. */
-  function homeImageReady(img){
-    if(!img || img.dataset.imageReady==='1') return;
-    var reveal=function(){
-      if(!img || !img.parentNode) return;
-      img.dataset.imageReady='1';
-      img.classList.add('is-loaded');
-      var box=img.parentNode;
-      box.classList.add('is-image-ready');
-      var fallback=box.querySelector('.u99-image-fallback');
-      if(fallback) fallback.hidden=true;
-    };
-    if(typeof img.decode==='function'){
-      img.decode().then(reveal).catch(reveal);
-    } else {
-      reveal();
-    }
-  }
-
-  function homeImageError(img){
-    if(!img) return;
-    img.onerror=null;
-    var box=img.parentNode;
-    if(!box) return;
-    img.remove();
-    box.classList.remove('is-image-ready');
-    var fallback=box.querySelector('.u99-image-fallback');
-    if(fallback) fallback.hidden=false;
-  }
-
-  /* Inline image handlers are intentionally exposed through one namespaced
-   * window hook because the card markup is generated as HTML strings. */
-  window.__eatswadaHomeImageReady = homeImageReady;
-  window.__eatswadaHomeImageError = homeImageError;
-
-  function homeImageMarkup(item, priority){
+  function homeImageMarkup(item){
     var src=item && (item.image||item.img||item.imageUrl||item.photo);
-    var fallback='<div class="u99-image-fallback" aria-hidden="true"><svg viewBox="0 0 24 24" role="presentation"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m5.5 17 4.2-4.2 3.1 3.1 2.1-2.1 3.6 3.2"></path></svg></div>';
-    if(!src) return fallback;
+    if(!src)return '<div class="u99-image-fallback" aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
     src=typeof safeUrl==='function'?safeUrl(src):src;
-    if(!src) return fallback;
-    src=typeof optimizedImageUrl==='function'?optimizedImageUrl(src, 320):src;
-    var loading=priority?'eager':'lazy';
-    var fetchPriority=priority?' fetchpriority=\"high\"':'';
-    return '<img src=\"'+esc(src)+'\" alt=\"'+esc(item.name||'Item')+'\" loading=\"'+loading+'\" decoding=\"async\"'+fetchPriority+' onload=\"window.__eatswadaHomeImageReady(this)\" onerror=\"window.__eatswadaHomeImageError(this)\"><div class=\"u99-image-fallback\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" role=\"presentation\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"3\"></rect><circle cx=\"8.5\" cy=\"9\" r=\"1.5\"></circle><path d=\"m5.5 17 4.2-4.2 3.1 3.1 2.1-2.1 3.6 3.2\"></path></svg></div>';
+    if(!src)return '<div class="u99-image-fallback" aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
+    return '<img src="'+esc(src)+'" alt="'+esc(item.name||'Item')+'" loading="lazy" decoding="async" onerror="this.hidden=true;var f=this.parentNode&&this.parentNode.querySelector(\'.u99-image-fallback\');if(f)f.hidden=false;"><div class="u99-image-fallback" hidden aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
   }
   function homeCustomGroups(item){
     var g=item&&(item.customizations||item.customizationGroups||item.customization||item.customGroups);
@@ -499,12 +457,12 @@
     if(q>0)return '<div class="u99-stepper"><button type="button" data-home99-action="minus" aria-label="Remove one">−</button><span>'+q+'</span><button type="button" data-home99-action="plus" aria-label="Add one">+</button></div>';
     return '<button type="button" class="u99-add" data-home99-action="add" aria-label="Add '+esc(item.name||'Item')+'">+</button>';
   }
-  function homeItemMarkup(item,r,priority){
+  function homeItemMarkup(item,r){
     var price=Number(item.price)||0, original=item.originalPrice!=null&&Number(item.originalPrice)>price?Number(item.originalPrice):null;
     var discount=item.discountPercent!=null&&Number(item.discountPercent)>0?Math.round(Number(item.discountPercent)):(original?Math.round((1-price/original)*100):null);
     var dietary=item.isVeg?'<span class="u99-dietary" aria-label="Vegetarian"></span>':'<span class="u99-dietary u99-nonveg" aria-label="Non-vegetarian"></span>';
     var popular=(item.isBestseller||item.isRecommended)?'<span class="u99-popular">Popular</span>':'';
-    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item,priority)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-name">'+dietary+'<span>'+esc(item.name||'Item')+'</span></div><div class="u99-price-row"><strong>₹'+price+'</strong>'+(original!=null?'<span class="u99-old-price">₹'+original+'</span>':'')+(discount?'<span class="u99-off">'+discount+'% OFF</span>':'')+'</div></article>';
+    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-name">'+dietary+'<span>'+esc(item.name||'Item')+'</span></div><div class="u99-price-row"><strong>₹'+price+'</strong>'+(original!=null?'<span class="u99-old-price">₹'+original+'</span>':'')+(discount?'<span class="u99-off">'+discount+'% OFF</span>':'')+'</div></article>';
   }
   function homeRestaurantOffer(r){
     var raw=String(r.offer||r.offerText||r.discountText||'').trim();
@@ -679,7 +637,7 @@
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
       '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name">'+esc(name)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
-      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i,mi){return homeItemMarkup(i,res,index===0 && mi<2);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
+      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i){return homeItemMarkup(i,res);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
     return card;
@@ -720,7 +678,11 @@
         /* First-time add from Home opens the restaurant menu after preserving
            the existing cart update. Quantity stepper changes stay on Home. */
         if(action==='add'){
-          homeChangeCart(item,rr,1);
+          /* First-time Home ADD must NOT write to nearbite_cart.
+             The restaurant menu is the single owner of the add flow so the
+             item is created there with its real menu-item identity/name.
+             This prevents Home's ID-keyed cart entry from becoming a second
+             copy of the same item when the customer adds it on the menu. */
           if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);
           return;
         }
