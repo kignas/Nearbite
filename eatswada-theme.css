@@ -1,0 +1,274 @@
+/* ================================================================
+   EATSWADA DARK MODE
+   Visual theme only. Existing layouts, components, APIs and imagery
+   remain unchanged.
+   ================================================================ */
+
+html[data-ew-theme="dark"] {
+  color-scheme: dark;
+  --ew-dark-bg: #0B0D12;
+  --ew-dark-surface: #151820;
+  --ew-dark-surface-2: #1C2029;
+  --ew-dark-text: #F5F7FA;
+  --ew-dark-muted: #A7AFBD;
+  --ew-dark-line: #2B303B;
+}
+
+html[data-ew-theme="dark"],
+html[data-ew-theme="dark"] body {
+  background: var(--ew-dark-bg) !important;
+  color: var(--ew-dark-text) !important;
+}
+
+/* Generic page surfaces */
+html[data-ew-theme="dark"] .card,
+html[data-ew-theme="dark"] .pf-card,
+html[data-ew-theme="dark"] .quick-tile,
+html[data-ew-theme="dark"] .row,
+html[data-ew-theme="dark"] .sheet,
+html[data-ew-theme="dark"] .modal .sheet,
+html[data-ew-theme="dark"] .filter-sheet,
+html[data-ew-theme="dark"] .search-sheet,
+html[data-ew-theme="dark"] .search-panel,
+html[data-ew-theme="dark"] .support-card,
+html[data-ew-theme="dark"] .policy-card,
+html[data-ew-theme="dark"] .order-card,
+html[data-ew-theme="dark"] .restaurant-card {
+  background: var(--ew-dark-surface) !important;
+  color: var(--ew-dark-text) !important;
+  border-color: var(--ew-dark-line) !important;
+}
+
+/* Common text */
+html[data-ew-theme="dark"] h1,
+html[data-ew-theme="dark"] h2,
+html[data-ew-theme="dark"] h3,
+html[data-ew-theme="dark"] h4,
+html[data-ew-theme="dark"] .section-title,
+html[data-ew-theme="dark"] .sec-title,
+html[data-ew-theme="dark"] .page-title,
+html[data-ew-theme="dark"] .row-title,
+html[data-ew-theme="dark"] .sheet h2 {
+  color: var(--ew-dark-text) !important;
+}
+
+html[data-ew-theme="dark"] p,
+html[data-ew-theme="dark"] .row-value,
+html[data-ew-theme="dark"] .muted,
+html[data-ew-theme="dark"] .helper-text,
+html[data-ew-theme="dark"] .section-subtitle {
+  color: var(--ew-dark-muted) !important;
+}
+
+/* Inputs and controls */
+html[data-ew-theme="dark"] input,
+html[data-ew-theme="dark"] textarea,
+html[data-ew-theme="dark"] select,
+html[data-ew-theme="dark"] .input,
+html[data-ew-theme="dark"] .field input,
+html[data-ew-theme="dark"] .field textarea {
+  background: #11141A !important;
+  color: var(--ew-dark-text) !important;
+  border-color: var(--ew-dark-line) !important;
+}
+
+html[data-ew-theme="dark"] input::placeholder,
+html[data-ew-theme="dark"] textarea::placeholder {
+  color: #7E8796 !important;
+}
+
+/* Home: preserve the existing promotional banner artwork/theme. */
+html[data-ew-theme="dark"] .hero-header {
+  --hd-bg: #171A22;
+  --hd-ink: #F7F8FA;
+  --hd-muted: #AAB2C0;
+}
+
+html[data-ew-theme="dark"] .search-box,
+html[data-ew-theme="dark"] .veg-box,
+html[data-ew-theme="dark"] .btn-store,
+html[data-ew-theme="dark"] .btn-profile {
+  background: #11141A !important;
+  color: #F5F7FA !important;
+  border-color: #2B303B !important;
+}
+
+html[data-ew-theme="dark"] .filter-pill,
+html[data-ew-theme="dark"] .filter-button,
+html[data-ew-theme="dark"] .chip {
+  background: #151820 !important;
+  color: #E8ECF2 !important;
+  border-color: #343A46 !important;
+}
+
+html[data-ew-theme="dark"] #restaurants-section,
+html[data-ew-theme="dark"] .section,
+html[data-ew-theme="dark"] .content {
+  background: transparent !important;
+}
+
+/* Profile page */
+html[data-ew-theme="dark"] .header {
+  background: #11141A !important;
+  border-color: var(--ew-dark-line) !important;
+}
+
+html[data-ew-theme="dark"] .pf-card .row + .row::before {
+  background: var(--ew-dark-line) !important;
+}
+
+html[data-ew-theme="dark"] .icon-btn {
+  color: #F5F7FA !important;
+}
+
+html[data-ew-theme="dark"] .pf-card,
+html[data-ew-theme="dark"] .quick-tile,
+html[data-ew-theme="dark"] .row {
+  box-shadow: none !important;
+}
+
+html[data-ew-theme="dark"] .sheet-actions .btn:not(.primary) {
+  background: #1C2029 !important;
+  color: #F5F7FA !important;
+  border-color: var(--ew-dark-line) !important;
+}
+
+/* Branded headers remain branded rather than being flattened. */
+html[data-ew-theme="dark"] .top-bar,
+html[data-ew-theme="dark"] .orders-header,
+html[data-ew-theme="dark"] .app-bar,
+html[data-ew-theme="dark"] .ea-header,
+html[data-ew-theme="dark"] .cat-header,
+html[data-ew-theme="dark"] .topbar,
+html[data-ew-theme="dark"] .ct-header {
+  background: #101A30 !important;
+  color: #fff !important;
+}
+
+/* Dark-mode switch used on Profile. */
+.ew-theme-switch {
+  width: 48px;
+  height: 28px;
+  flex: 0 0 48px;
+  border: 0;
+  border-radius: 999px;
+  padding: 3px;
+  background: #D9DDE4;
+  position: relative;
+  transition: background .18s ease;
+}
+.ew-theme-switch::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18);
+  transform: translateX(0);
+  transition: transform .18s ease;
+}
+.ew-theme-switch.is-on {
+  background: #367E34;
+}
+.ew-theme-switch.is-on::after {
+  transform: translateX(20px);
+}
+html[data-ew-theme="dark"] .ew-theme-switch {
+  background: #367E34;
+}
+
+/* New-user one-time theme prompt */
+.ew-theme-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0,0,0,.58);
+  animation: ewThemeFade .18s ease both;
+}
+.ew-theme-sheet {
+  width: min(100%, 520px);
+  background: #fff;
+  color: #17191E;
+  border-radius: 24px;
+  padding: 24px 18px calc(18px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 40px rgba(0,0,0,.25);
+  animation: ewThemeUp .22s cubic-bezier(.2,.8,.2,1) both;
+}
+.ew-theme-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #F1F3F7;
+  color: #14213D;
+  margin-bottom: 14px;
+}
+.ew-theme-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ew-theme-sheet h2 {
+  margin: 0;
+  font: 800 21px/1.2 Manrope, system-ui, sans-serif;
+  letter-spacing: -.45px;
+}
+.ew-theme-sheet p {
+  margin: 8px 0 18px;
+  color: #69707A;
+  font: 500 14px/1.45 Manrope, system-ui, sans-serif;
+}
+.ew-theme-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ew-theme-choice {
+  min-height: 52px;
+  border-radius: 15px;
+  border: 1px solid #E1E4E9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 700 14px/1 Manrope, system-ui, sans-serif;
+  cursor: pointer;
+}
+.ew-theme-light {
+  background: #F7F8FA;
+  color: #242831;
+}
+.ew-theme-dark {
+  background: #151820;
+  color: #F5F7FA;
+  border-color: #151820;
+}
+.ew-choice-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.ew-theme-intro.is-closing {
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.ew-theme-intro.is-closing .ew-theme-sheet {
+  transform: translateY(12px);
+  transition: transform .18s ease;
+}
+@keyframes ewThemeFade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ewThemeUp { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: translateY(0) } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ew-theme-intro,
+  .ew-theme-sheet { animation: none !important; }
+}

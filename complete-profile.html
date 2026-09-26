@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#F1F5F9">
+  
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<link rel="stylesheet" href="eatswada-theme.css">
+<script src="eatswada-theme.js"></script>
+<meta name="theme-color" content="#F1F5F9">
   <title>Complete your profile · Eatswada</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -348,6 +352,8 @@
         result=await res.json().catch(()=>({}));
         if(!res.ok||!result.success)throw new Error(result.message||'Unable to create your Eatswada account.');
         localStorage.setItem('nearbite_token',result.data.token);localStorage.setItem('token',result.data.token);localStorage.setItem('nearbite_user',JSON.stringify(result.data.user||{}));
+        // New Google account: show the one-time theme choice on the first Home visit.
+        try{localStorage.setItem('eatswada_theme_intro_pending','1')}catch(e){}
         sessionStorage.removeItem('nearbite_google_pending_token');sessionStorage.removeItem('nearbite_google_pending_profile');
       }else{
         const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');

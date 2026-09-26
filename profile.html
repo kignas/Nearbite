@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<link rel="stylesheet" href="eatswada-theme.css">
+<script src="eatswada-theme.js"></script>
 <meta name="theme-color" content="#ffffff">
 <title>Profile · Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -329,6 +333,19 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   <section class="section">
     <h2 class="section-title">More</h2>
     <div class="pf-card">
+      <button class="row" id="themeToggleRow" type="button"
+              data-ew-theme-toggle aria-checked="false" role="switch"
+              aria-label="Toggle dark mode">
+        <span class="row-icon" aria-hidden="true">
+          <svg class="pf-ico" viewBox="0 0 24 24">
+            <path d="M20.4 15.2A8.5 8.5 0 0 1 8.8 3.6 8.5 8.5 0 1 0 20.4 15.2Z"></path>
+          </svg>
+        </span>
+        <span class="row-main"><span class="row-title" style="display:block">Dark mode</span></span>
+        <span class="ew-theme-switch" aria-hidden="true">
+          <span data-ew-theme-state class="pf-sr">Off</span>
+        </span>
+      </button>
       <a class="row is-nav" href="rate-us.html">
         <span class="row-icon"><svg class="pf-ico" aria-hidden="true"><use href="#ew-star"></use></svg></span>
         <span class="row-main"><span class="row-title" style="display:block">Rate your experience</span></span>
