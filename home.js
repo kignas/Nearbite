@@ -888,7 +888,6 @@
             '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')"' +
             ' onerror="this.classList.add(\'failed\');this.closest(\'.cat-item\').classList.add(\'image-failed\')">' +
-            '<span class="cat-selected-badge" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +
           '</span>' +
           '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
         '</a>';
@@ -901,12 +900,8 @@
           var sameCategory = state.categoryMode &&
             state.categoryMode.name.toLowerCase() === categoryName.toLowerCase();
 
-          /* Immediate visual feedback; searchCategory() remains the existing data/filter path. */
-          scroll.querySelectorAll('.cat-item.is-selected').forEach(function (item) {
-            item.classList.remove('is-selected');
-          });
-          if (!sameCategory) link.classList.add('is-selected');
-
+          // Keep the existing category filtering behavior, but do not add a
+          // selected/pressed visual state to the category card.
           searchCategory(categoryName);
         });
       });
