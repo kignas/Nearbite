@@ -82,11 +82,9 @@
       : `<p class="banner-subtitle banner-subtitle--default">Tasty food<br>Happier you. <span class="banner-heart" aria-hidden="true">♥</span></p>`;
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || 'Order Now';
-    const displayImage = typeof optimizedImageUrl === 'function' ? optimizedImageUrl(image, 720) : image;
-    const artLoading = i === 0 ? 'eager' : 'lazy';
-    const artPriority = i === 0 ? ' fetchpriority="high"' : '';
+    const isFirst = i === 0;
     const artHtml = image
-      ? `<img class="header-slide__art" src="${esc(displayImage)}" alt="" aria-hidden="true" loading="${artLoading}" decoding="async"${artPriority}>`
+      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="${isFirst ? 'eager' : 'lazy'}" decoding="async"${isFirst ? ' fetchpriority="high"' : ''}>`
       : '';
 
     return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
@@ -377,10 +375,9 @@
       build();
     }
 
-    /* Keep banners out of the first critical network burst. The restaurant
-       feed is the primary Home payload; the banner refresh can follow it. */
-    await new Promise(resolve => setTimeout(resolve, 220));
-
+    /* The hero is above the fold and is the natural LCP candidate. Start its
+       request immediately instead of intentionally delaying it by 220ms.
+       Restaurant/category requests are still managed by home.js separately. */
     try {
       const r = await fetch(`${API_BASE}/home-banners`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
