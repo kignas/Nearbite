@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Payment Successful – Eatswada</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet"><style>
+:root{--ew-accent:#C2185B;--ew-accent-deep:#A1114B;--ew-ink:#202124;--ew-muted:#6F757B;--ew-line:#ECEDEF;--ew-bg:#F5F5F8}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--ew-bg);color:var(--ew-ink);display:flex;align-items:center;justify-content:center;padding:24px}
+.ew-result{width:min(100%,430px);background:#fff;border:1px solid var(--ew-line);border-radius:24px;padding:30px 22px 22px;box-shadow:0 16px 45px rgba(32,33,36,.09);text-align:center}
+.ew-icon{width:76px;height:76px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(194,24,91,.18);color:var(--ew-accent);background:#FFF1F8}
+.ew-icon svg{width:38px;height:38px}.ew-title{margin:0;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:-.4px}
+.ew-copy{margin:9px auto 0;max-width:34ch;color:var(--ew-muted);font-size:13px;line-height:1.55;font-weight:600}
+.ew-order{margin:18px 0 20px;padding:11px 13px;border:1px solid var(--ew-line);border-radius:13px;background:#FAFBFC;font-size:12px;font-weight:700;color:var(--ew-muted)}
+.ew-order strong{color:var(--ew-ink)}.ew-actions{display:grid;gap:9px}
+.ew-btn{width:100%;min-height:50px;border:0;border-radius:999px;padding:12px 16px;font:800 14px 'Manrope',sans-serif;cursor:pointer}
+.ew-btn-primary{background:var(--ew-accent);color:#fff;box-shadow:0 7px 18px rgba(194,24,91,.22)}
+.ew-btn-primary:active{background:var(--ew-accent-deep);transform:scale(.985)}
+.ew-btn-ghost{background:#F7F8F9;color:var(--ew-ink);border:1px solid var(--ew-line)}
+.ew-note{margin-top:15px;font-size:11px;line-height:1.5;color:var(--ew-muted);font-weight:600}
+.ew-spinner{width:42px;height:42px;border:3px solid #F0D8E3;border-top-color:var(--ew-accent);border-radius:50%;animation:ewspin .8s linear infinite}
+@keyframes ewspin{to{transform:rotate(360deg)}}@keyframes ewpop{0%{transform:scale(.55);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.ew-success .ew-icon{animation:ewpop .55s cubic-bezier(.2,.9,.2,1) both}.ew-check{stroke-dasharray:60;stroke-dashoffset:60;animation:ewcheck .55s .18s ease forwards}
+@keyframes ewcheck{to{stroke-dashoffset:0}}@media (prefers-reduced-motion:reduce){.ew-success .ew-icon,.ew-check{animation:none}.ew-spinner{animation:none}}
+</style></head>
+<body><main class="ew-result ew-success" aria-live="polite">
+<div class="ew-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2.5"/><path class="ew-check" d="m14.5 24.5 6.2 6.1L34 17.8" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<h1 class="ew-title">Payment successful</h1><p class="ew-copy">Your payment has been verified. Your order is now confirmed.</p>
+<div class="ew-order" id="ew-order" hidden>Order <strong id="ew-order-number"></strong></div>
+<div class="ew-actions"><button class="ew-btn ew-btn-primary" id="ew-continue">Continue to order</button></div>
+<p class="ew-note">Please don't close the page while we finish opening your order.</p></main>
+<script>
+(function(){
+const KEY='nearbite_payment_context';let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
+const box=document.getElementById('ew-order'),num=document.getElementById('ew-order-number');
+if(ctx?.orderNumber){num.textContent=ctx.orderNumber;box.hidden=false}
+function go(){if(!ctx?.orderId){location.href='orders.html';return}
+try{if(ctx.multiple&&ctx.deliveryOtps){Object.keys(ctx.deliveryOtps).forEach(id=>{if(ctx.deliveryOtps[id])localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id])})}
+else if(ctx.deliveryOtp)localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp);localStorage.removeItem(KEY)}catch(_){}
+location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId)}
+document.getElementById('ew-continue').addEventListener('click',go);setTimeout(go,1600)
+})();
+</script></body></html>

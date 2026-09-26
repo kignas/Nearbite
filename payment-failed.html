@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Payment Failed – Eatswada</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet"><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="config.js"></script><style>
+:root{--ew-accent:#C2185B;--ew-accent-deep:#A1114B;--ew-ink:#202124;--ew-muted:#6F757B;--ew-line:#ECEDEF;--ew-bg:#F5F5F8}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--ew-bg);color:var(--ew-ink);display:flex;align-items:center;justify-content:center;padding:24px}
+.ew-result{width:min(100%,430px);background:#fff;border:1px solid var(--ew-line);border-radius:24px;padding:30px 22px 22px;box-shadow:0 16px 45px rgba(32,33,36,.09);text-align:center}
+.ew-icon{width:76px;height:76px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(194,24,91,.18);color:var(--ew-accent);background:#FFF1F8}
+.ew-icon svg{width:38px;height:38px}.ew-title{margin:0;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:-.4px}
+.ew-copy{margin:9px auto 0;max-width:34ch;color:var(--ew-muted);font-size:13px;line-height:1.55;font-weight:600}
+.ew-order{margin:18px 0 20px;padding:11px 13px;border:1px solid var(--ew-line);border-radius:13px;background:#FAFBFC;font-size:12px;font-weight:700;color:var(--ew-muted)}
+.ew-order strong{color:var(--ew-ink)}.ew-actions{display:grid;gap:9px}
+.ew-btn{width:100%;min-height:50px;border:0;border-radius:999px;padding:12px 16px;font:800 14px 'Manrope',sans-serif;cursor:pointer}
+.ew-btn-primary{background:var(--ew-accent);color:#fff;box-shadow:0 7px 18px rgba(194,24,91,.22)}
+.ew-btn-primary:active{background:var(--ew-accent-deep);transform:scale(.985)}
+.ew-btn-ghost{background:#F7F8F9;color:var(--ew-ink);border:1px solid var(--ew-line)}
+.ew-note{margin-top:15px;font-size:11px;line-height:1.5;color:var(--ew-muted);font-weight:600}
+.ew-spinner{width:42px;height:42px;border:3px solid #F0D8E3;border-top-color:var(--ew-accent);border-radius:50%;animation:ewspin .8s linear infinite}
+@keyframes ewspin{to{transform:rotate(360deg)}}@keyframes ewpop{0%{transform:scale(.55);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.ew-success .ew-icon{animation:ewpop .55s cubic-bezier(.2,.9,.2,1) both}.ew-check{stroke-dasharray:60;stroke-dashoffset:60;animation:ewcheck .55s .18s ease forwards}
+@keyframes ewcheck{to{stroke-dashoffset:0}}@media (prefers-reduced-motion:reduce){.ew-success .ew-icon,.ew-check{animation:none}.ew-spinner{animation:none}}
+
+.ew-fail .ew-icon{color:#B42318;background:#FFF3F2;border-color:#F6D0CC}.ew-error{margin:14px 0 18px;padding:10px 12px;border-radius:12px;background:#FFF7F6;color:#8E1B12;font-size:11.5px;line-height:1.45;font-weight:700;text-align:left}
+</style></head><body><main class="ew-result ew-fail"><div class="ew-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2.5"/><path d="M17 17l14 14M31 17 17 31" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+<h1 class="ew-title">Payment not completed</h1><p class="ew-copy">Your cart is still saved. You can safely try the payment again.</p><div class="ew-error" id="ew-error" hidden></div>
+<div class="ew-actions"><button class="ew-btn ew-btn-primary" id="ew-retry">Try payment again</button><button class="ew-btn ew-btn-ghost" id="ew-cart">Return to cart</button></div>
+<p class="ew-note">If your bank shows a debit, don't pay again immediately. Use My Orders or wait for the payment status to update.</p></main>
+<script>
+(function(){
+const KEY='nearbite_payment_context',token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
+const errEl=document.getElementById('ew-error'),retry=document.getElementById('ew-retry');
+function showError(m){errEl.textContent=m||'Payment could not be completed.';errEl.hidden=false}
+function busy(on,text){retry.disabled=on;retry.textContent=on?(text||'Opening secure payment…'):'Try payment again';retry.style.opacity=on?'.75':'1'}
+async function status(){if(!ctx?.orderId||!token)return null;try{const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});const j=await r.json();return r.ok&&j.success?j.data:null}catch(_){return null}}
+function success(){location.href='payment-success.html'}
+async function retryPayment(){
+if(!ctx?.orderId){location.href='cart.html';return}if(!token){location.href='login.html';return}
+busy(true);errEl.hidden=true;
+try{
+const response=await fetch(`${CONFIG.API_BASE_URL}/payments/retry`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({orderId:ctx.orderId})});
+const result=await response.json();if(result?.alreadyPaid||result?.paymentStatus==='paid'){success();return}
+if(!response.ok||!result.success||!result.payment?.orderId)throw new Error(result?.message||'Retry is temporarily unavailable.');
+const rzp=new Razorpay({key:result.payment.keyId,amount:result.payment.amount,currency:result.payment.currency||'INR',name:'Eatswada',description:ctx.multiple?'Eatswada multi-restaurant order':`Eatswada order ${ctx.orderNumber||''}`,order_id:result.payment.orderId,theme:{color:'#C2185B'},modal:{ondismiss:()=>busy(false)},handler:async function(p){
+busy(true,'Verifying payment…');try{
+const vr=await fetch(`${CONFIG.API_BASE_URL}/payments/verify`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({orderId:ctx.orderId,razorpayPaymentId:p.razorpay_payment_id,razorpayOrderId:p.razorpay_order_id,razorpaySignature:p.razorpay_signature})});
+const v=await vr.json();if(v?.success&&v.paymentStatus==='paid'){success();return}
+if(vr.status===409||vr.status>=500){const s=await status();if(s?.paymentStatus==='paid'){success();return}}
+throw new Error(v?.message||'Payment verification is still pending.')
+}catch(e){const s=await status();if(s?.paymentStatus==='paid'){success();return}showError(e.message||'Payment verification failed. Please wait before trying again.');busy(false)}
+}});
+rzp.on('payment.failed',f=>{showError(f?.error?.description||'Payment was not completed. Your cart is still saved.');busy(false)});rzp.open()
+}catch(e){showError(e.message||'Could not start payment.');busy(false)}
+}
+retry.addEventListener('click',retryPayment);document.getElementById('ew-cart').addEventListener('click',()=>location.href='cart.html');
+if(!ctx?.orderId)showError('Payment session details were not found. Your cart may still be available.')
+})();
+</script></body></html>

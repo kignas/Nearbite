@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Verifying Payment – Eatswada</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet"><script src="config.js"></script><style>
+:root{--ew-accent:#C2185B;--ew-accent-deep:#A1114B;--ew-ink:#202124;--ew-muted:#6F757B;--ew-line:#ECEDEF;--ew-bg:#F5F5F8}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--ew-bg);color:var(--ew-ink);display:flex;align-items:center;justify-content:center;padding:24px}
+.ew-result{width:min(100%,430px);background:#fff;border:1px solid var(--ew-line);border-radius:24px;padding:30px 22px 22px;box-shadow:0 16px 45px rgba(32,33,36,.09);text-align:center}
+.ew-icon{width:76px;height:76px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(194,24,91,.18);color:var(--ew-accent);background:#FFF1F8}
+.ew-icon svg{width:38px;height:38px}.ew-title{margin:0;font-size:23px;line-height:1.2;font-weight:800;letter-spacing:-.4px}
+.ew-copy{margin:9px auto 0;max-width:34ch;color:var(--ew-muted);font-size:13px;line-height:1.55;font-weight:600}
+.ew-order{margin:18px 0 20px;padding:11px 13px;border:1px solid var(--ew-line);border-radius:13px;background:#FAFBFC;font-size:12px;font-weight:700;color:var(--ew-muted)}
+.ew-order strong{color:var(--ew-ink)}.ew-actions{display:grid;gap:9px}
+.ew-btn{width:100%;min-height:50px;border:0;border-radius:999px;padding:12px 16px;font:800 14px 'Manrope',sans-serif;cursor:pointer}
+.ew-btn-primary{background:var(--ew-accent);color:#fff;box-shadow:0 7px 18px rgba(194,24,91,.22)}
+.ew-btn-primary:active{background:var(--ew-accent-deep);transform:scale(.985)}
+.ew-btn-ghost{background:#F7F8F9;color:var(--ew-ink);border:1px solid var(--ew-line)}
+.ew-note{margin-top:15px;font-size:11px;line-height:1.5;color:var(--ew-muted);font-weight:600}
+.ew-spinner{width:42px;height:42px;border:3px solid #F0D8E3;border-top-color:var(--ew-accent);border-radius:50%;animation:ewspin .8s linear infinite}
+@keyframes ewspin{to{transform:rotate(360deg)}}@keyframes ewpop{0%{transform:scale(.55);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.ew-success .ew-icon{animation:ewpop .55s cubic-bezier(.2,.9,.2,1) both}.ew-check{stroke-dasharray:60;stroke-dashoffset:60;animation:ewcheck .55s .18s ease forwards}
+@keyframes ewcheck{to{stroke-dashoffset:0}}@media (prefers-reduced-motion:reduce){.ew-success .ew-icon,.ew-check{animation:none}.ew-spinner{animation:none}}
+.ew-pending .ew-icon{background:#FFF1F8}.ew-status{margin:18px auto 20px;display:flex;justify-content:center}</style></head>
+<body><main class="ew-result ew-pending" aria-live="polite"><div class="ew-icon" aria-hidden="true"><div class="ew-spinner"></div></div>
+<h1 class="ew-title">Checking your payment</h1><p class="ew-copy">Your payment may have reached the bank already. We're checking Eatswada's server before asking you to pay again.</p>
+<div class="ew-order" id="ew-order" hidden>Order <strong id="ew-order-number"></strong></div><div class="ew-actions"><button class="ew-btn ew-btn-primary" id="ew-orders">View My Orders</button><button class="ew-btn ew-btn-ghost" id="ew-refresh">Check again</button></div>
+<p class="ew-note">Keep this page open for a moment if you just completed UPI payment.</p></main>
+<script>
+(function(){
+const KEY='nearbite_payment_context',token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
+if(ctx?.orderNumber){document.getElementById('ew-order-number').textContent=ctx.orderNumber;document.getElementById('ew-order').hidden=false}
+async function check(){if(!ctx?.orderId||!token)return;try{const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});const j=await r.json();if(!r.ok||!j.success)return;const s=String(j.data?.paymentStatus||'').toLowerCase();if(s==='paid'){location.href='payment-success.html';return}if(s==='failed'){location.href='payment-failed.html'}}catch(_){}}
+document.getElementById('ew-refresh').addEventListener('click',check);document.getElementById('ew-orders').addEventListener('click',()=>location.href=ctx?.multiple?'orders.html':(ctx?.orderId?'track-order.html?id='+encodeURIComponent(ctx.orderId):'orders.html'));check();const timer=setInterval(check,3000);setTimeout(()=>clearInterval(timer),30000)
+})();
+</script></body></html>
