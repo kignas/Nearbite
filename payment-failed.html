@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
-<link rel="stylesheet" href="eatswada-theme.css">
 <script src="eatswada-theme.js"></script>
 <title>Payment Failed – Eatswada</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet"><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="config.js"></script><style>
@@ -25,7 +24,8 @@ body{background:var(--ew-bg);color:var(--ew-ink);display:flex;align-items:center
 @keyframes ewcheck{to{stroke-dashoffset:0}}@media (prefers-reduced-motion:reduce){.ew-success .ew-icon,.ew-check{animation:none}.ew-spinner{animation:none}}
 
 .ew-fail .ew-icon{color:#B42318;background:#FFF3F2;border-color:#F6D0CC}.ew-error{margin:14px 0 18px;padding:10px 12px;border-radius:12px;background:#FFF7F6;color:#8E1B12;font-size:11.5px;line-height:1.45;font-weight:700;text-align:left}
-</style></head><body><main class="ew-result ew-fail"><div class="ew-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2.5"/><path d="M17 17l14 14M31 17 17 31" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+</style><link rel="stylesheet" href="eatswada-theme.css">
+</head><body><main class="ew-result ew-fail"><div class="ew-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2.5"/><path d="M17 17l14 14M31 17 17 31" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></div>
 <h1 class="ew-title">Payment not completed</h1><p class="ew-copy">Your cart is still saved. You can safely try the payment again.</p><div class="ew-error" id="ew-error" hidden></div>
 <div class="ew-actions"><button class="ew-btn ew-btn-primary" id="ew-retry">Try payment again</button><button class="ew-btn ew-btn-ghost" id="ew-cart">Return to cart</button></div>
 <p class="ew-note">If your bank shows a debit, don't pay again immediately. Use My Orders or wait for the payment status to update.</p></main>

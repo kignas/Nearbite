@@ -272,3 +272,407 @@ html[data-ew-theme="dark"] .ew-theme-switch {
   .ew-theme-intro,
   .ew-theme-sheet { animation: none !important; }
 }
+
+
+/* ================================================================
+   DARK MODE v2 — token-first override layer
+   This stylesheet is intentionally loaded LAST in <head>.
+   It remaps each page's existing design tokens instead of replacing
+   layouts/components with guessed generic selectors.
+   ================================================================ */
+
+html[data-ew-theme="dark"] {
+  color-scheme: dark;
+  background: #0B0D12 !important;
+
+  /* Shared design system */
+  --ew-bg:#0B0D12;
+  --ew-surface:#151820;
+  --ew-text:#F5F7FA;
+  --ew-muted:#A7AFBD;
+  --ew-line:#2B303B;
+}
+
+/* Home's own tokens */
+html[data-ew-theme="dark"] body {
+  background:#0B0D12 !important;
+  color:#F5F7FA !important;
+}
+
+/* Home */
+html[data-ew-theme="dark"] body:has(.hero-header) {
+  --page-bg:#0B0D12 !important;
+  --surface:#151820 !important;
+  --text:#F5F7FA !important;
+  --text-soft:#A7AFBD !important;
+  --text-mute:#7F8795 !important;
+  --line:#2B303B !important;
+}
+html[data-ew-theme="dark"] .sec-title,
+html[data-ew-theme="dark"] .section-title,
+html[data-ew-theme="dark"] .cat-name {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .sec-head::after {
+  background:#303642 !important;
+}
+html[data-ew-theme="dark"] .search-box,
+html[data-ew-theme="dark"] .veg-box {
+  background:#151820 !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .search-icon,
+html[data-ew-theme="dark"] .search-text {
+  color:#DDE2EA !important;
+}
+html[data-ew-theme="dark"] .filter-pill {
+  background:#151820 !important;
+  color:#E8ECF2 !important;
+  border-color:#343A46 !important;
+}
+html[data-ew-theme="dark"] .filter-pill.active {
+  background:#202630 !important;
+}
+html[data-ew-theme="dark"] .es-card,
+html[data-ew-theme="dark"] .rs-card {
+  background:#151820 !important;
+  border-color:#2B303B !important;
+  box-shadow:0 6px 18px rgba(0,0,0,.20) !important;
+}
+html[data-ew-theme="dark"] .es-name,
+html[data-ew-theme="dark"] .es-stat-value,
+html[data-ew-theme="dark"] .es-subtitle,
+html[data-ew-theme="dark"] .es-cuisine {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .es-stat-label,
+html[data-ew-theme="dark"] .es-distance {
+  color:#A7AFBD !important;
+}
+html[data-ew-theme="dark"] .es-bottom-row {
+  border-top-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .notice-retry,
+html[data-ew-theme="dark"] .state-block {
+  background:#151820 !important;
+  border-color:#2B303B !important;
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .loc-sheet,
+html[data-ew-theme="dark"] .sheet-panel {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .loc-sheet-title,
+html[data-ew-theme="dark"] .sheet-title {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .loc-sheet-text,
+html[data-ew-theme="dark"] .sheet-group-title {
+  color:#A7AFBD !important;
+}
+
+/* Profile: remap the page's existing variables. */
+html[data-ew-theme="dark"] body:has(.profile-hero) {
+  --soft:#0B0D12 !important;
+  --white:#151820 !important;
+  --ink:#F5F7FA !important;
+  --ink-2:#E9EDF3 !important;
+  --ink-3:#C3CAD5 !important;
+  --muted:#A7AFBD !important;
+  --faint:#7F8795 !important;
+  --icon:#A7AFBD !important;
+  --chev:#8992A0 !important;
+  --line:#2B303B !important;
+  --line-soft:#242934 !important;
+  --ok-soft:#18311B !important;
+  --danger-soft:#3A1E20 !important;
+}
+html[data-ew-theme="dark"] .header,
+html[data-ew-theme="dark"] .pf-card,
+html[data-ew-theme="dark"] .quick-tile,
+html[data-ew-theme="dark"] .row {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .profile-hero {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .row-title,
+html[data-ew-theme="dark"] .row-value,
+html[data-ew-theme="dark"] .section-title {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .row-sub,
+html[data-ew-theme="dark"] .row-main .row-sub {
+  color:#A7AFBD !important;
+}
+html[data-ew-theme="dark"] .row + .row::before,
+html[data-ew-theme="dark"] .pf-card .row + .row::before {
+  background:#2B303B !important;
+}
+
+/* Address flow: actual token names from address-flow.css. */
+html[data-ew-theme="dark"] body.ea-body,
+html[data-ew-theme="dark"] .ea {
+  --address-bg:#0B0D12 !important;
+  --address-card:#151820 !important;
+  --address-text:#F5F7FA !important;
+  --address-text-2:#D3D8E0 !important;
+  --address-muted:#A7AFBD !important;
+  --address-subtle:#7F8795 !important;
+  --address-eyebrow:#9099A7 !important;
+  --address-border:#303642 !important;
+  --address-line:#2B303B !important;
+  --address-icon-bg:#20242D !important;
+  --address-green:#74B054 !important;
+  --address-green-press:#5C954B !important;
+  --address-green-tint:#18311B !important;
+  --address-disabled-bg:#30343D !important;
+  --address-disabled-text:#7F8795 !important;
+}
+html[data-ew-theme="dark"] .ls-view,
+html[data-ew-theme="dark"] .ls-inner,
+html[data-ew-theme="dark"] .ea-main,
+html[data-ew-theme="dark"] .ea-panel,
+html[data-ew-theme="dark"] .ea-form,
+html[data-ew-theme="dark"] .ea-form-body,
+html[data-ew-theme="dark"] .ea-form-foot {
+  background:#0B0D12 !important;
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .ls-search,
+html[data-ew-theme="dark"] .ls-action,
+html[data-ew-theme="dark"] .ls-item,
+html[data-ew-theme="dark"] .ea-box,
+html[data-ew-theme="dark"] .ea-item,
+html[data-ew-theme="dark"] .ea-row,
+html[data-ew-theme="dark"] .ea-band,
+html[data-ew-theme="dark"] .ea-panel {
+  background:#151820 !important;
+  border-color:#303642 !important;
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .ls-search input,
+html[data-ew-theme="dark"] .ea-input,
+html[data-ew-theme="dark"] .ea-textarea {
+  background:#11141A !important;
+  color:#F5F7FA !important;
+  border-color:#303642 !important;
+}
+html[data-ew-theme="dark"] .ls-title,
+html[data-ew-theme="dark"] .ls-item-title,
+html[data-ew-theme="dark"] .ls-item-main,
+html[data-ew-theme="dark"] .ea-title,
+html[data-ew-theme="dark"] .ea-head-primary,
+html[data-ew-theme="dark"] .ea-sec-title,
+html[data-ew-theme="dark"] .ea-row-text {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .ls-item-sub,
+html[data-ew-theme="dark"] .ls-note,
+html[data-ew-theme="dark"] .ea-meta,
+html[data-ew-theme="dark"] .ea-head-secondary,
+html[data-ew-theme="dark"] .ea-sec-note {
+  color:#A7AFBD !important;
+}
+html[data-ew-theme="dark"] .ls-action {
+  box-shadow:none !important;
+}
+
+/* Orders: actual token names in orders.html. */
+html[data-ew-theme="dark"] body:has(.orders-header) {
+  --paper:#0B0D12 !important;
+  --card:#151820 !important;
+  --icon-bg:#20242D !important;
+  --ink-900:#F5F7FA !important;
+  --ink-800:#E9EDF3 !important;
+  --ink-700:#C3CAD5 !important;
+  --ink-500:#A7AFBD !important;
+  --ink-400:#8E98A6 !important;
+  --ink-300:#737D8C !important;
+  --line:#2B303B !important;
+  --brand-tint:#18311B !important;
+  --success-bg:#18311B !important;
+  --danger-bg:#3A1E20 !important;
+  --info-bg:#17253D !important;
+  --amber-bg:#352A18 !important;
+}
+html[data-ew-theme="dark"] .orders-header {
+  background:#101A30 !important;
+  border-bottom-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .order-card,
+html[data-ew-theme="dark"] .empty-card,
+html[data-ew-theme="dark"] .invoice-sheet {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .filter-chips .chip,
+html[data-ew-theme="dark"] .search-wrap,
+html[data-ew-theme="dark"] .filter-chips button {
+  background:#151820 !important;
+  color:#E9EDF3 !important;
+  border-color:#303642 !important;
+}
+html[data-ew-theme="dark"] .invoice-overlay {
+  background:rgba(0,0,0,.72) !important;
+}
+html[data-ew-theme="dark"] .invoice-sheet {
+  box-shadow:0 -12px 40px rgba(0,0,0,.45) !important;
+}
+
+/* Tracking: same page token family as Orders. */
+html[data-ew-theme="dark"] body:has(.app-bar) {
+  --paper:#0B0D12 !important;
+  --card:#151820 !important;
+  --icon-bg:#20242D !important;
+  --ink-900:#F5F7FA !important;
+  --ink-800:#E9EDF3 !important;
+  --ink-700:#C3CAD5 !important;
+  --ink-500:#A7AFBD !important;
+  --ink-400:#8E98A6 !important;
+  --ink-300:#737D8C !important;
+  --line:#2B303B !important;
+  --line-soft:#242934 !important;
+}
+html[data-ew-theme="dark"] .app-bar {
+  background:#101A30 !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .card,
+html[data-ew-theme="dark"] .details-card,
+html[data-ew-theme="dark"] .cancel-card,
+html[data-ew-theme="dark"] .completion-screen {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .ab-title h1,
+html[data-ew-theme="dark"] .ab-title p,
+html[data-ew-theme="dark"] .card h2,
+html[data-ew-theme="dark"] .card h3 {
+  color:#F5F7FA !important;
+}
+
+/* Restaurant/menu: actual card and menu surfaces. */
+html[data-ew-theme="dark"] body:has(.res-card) {
+  background:#0B0D12 !important;
+}
+html[data-ew-theme="dark"] .res-card,
+html[data-ew-theme="dark"] .menu-tabs,
+html[data-ew-theme="dark"] .filter-bar,
+html[data-ew-theme="dark"] .menu-section,
+html[data-ew-theme="dark"] .menu-item-card,
+html[data-ew-theme="dark"] .item-card,
+html[data-ew-theme="dark"] .menu-category {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .res-name,
+html[data-ew-theme="dark"] .menu-tab,
+html[data-ew-theme="dark"] .item-name,
+html[data-ew-theme="dark"] .item-title,
+html[data-ew-theme="dark"] .menu-category-title {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .res-cuisine,
+html[data-ew-theme="dark"] .rating-count,
+html[data-ew-theme="dark"] .meta-chip,
+html[data-ew-theme="dark"] .meta-dot {
+  color:#A7AFBD !important;
+}
+html[data-ew-theme="dark"] .menu-search-field {
+  background:#151820 !important;
+  border-color:#303642 !important;
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .menu-search-input {
+  background:transparent !important;
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .filter-sheet,
+html[data-ew-theme="dark"] .filter-sheet-panel,
+html[data-ew-theme="dark"] .filter-sheet-content {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+}
+
+/* Restaurant card literal surfaces. */
+html[data-ew-theme="dark"] .es-card,
+html[data-ew-theme="dark"] .rs-card {
+  background:#151820 !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .es-card-content,
+html[data-ew-theme="dark"] .es-bottom-row {
+  background:#151820 !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .es-name,
+html[data-ew-theme="dark"] .es-cuisine,
+html[data-ew-theme="dark"] .es-stat-value {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .es-stat-label,
+html[data-ew-theme="dark"] .es-subtitle {
+  color:#A7AFBD !important;
+}
+
+/* Checkout/cart: remap the actual ct-* token family. */
+html[data-ew-theme="dark"] body.ct-page {
+  --ct-bg:#0B0D12 !important;
+  --ct-surface:#151820 !important;
+  --ct-ink:#F5F7FA !important;
+  --ct-ink-2:#C3CAD5 !important;
+  --ct-muted:#A7AFBD !important;
+  --ct-line:#2B303B !important;
+  --ct-line-soft:#242934 !important;
+  --ct-green-soft:#251522 !important;
+  --ct-save-bg:#18311B !important;
+  --ct-danger-bg:#3A1E20 !important;
+}
+html[data-ew-theme="dark"] .ct-delivery-head,
+html[data-ew-theme="dark"] .ct-card,
+html[data-ew-theme="dark"] .ct-cym-card,
+html[data-ew-theme="dark"] .ct-details,
+html[data-ew-theme="dark"] .ct-customer-card,
+html[data-ew-theme="dark"] .ct-bill,
+html[data-ew-theme="dark"] .ct-empty {
+  background:#151820 !important;
+  color:#F5F7FA !important;
+  border-color:#2B303B !important;
+}
+html[data-ew-theme="dark"] .ct-fees,
+html[data-ew-theme="dark"] .ct-cym-tabs,
+html[data-ew-theme="dark"] .ct-chip {
+  background:#20242D !important;
+  color:#DDE2EA !important;
+  border-color:#303642 !important;
+}
+html[data-ew-theme="dark"] .ct-cta {
+  /* Preserve Eatswada's existing pink payment CTA. */
+  color:#fff !important;
+}
+html[data-ew-theme="dark"] .ct-name,
+html[data-ew-theme="dark"] .ct-price,
+html[data-ew-theme="dark"] .ct-bill-total,
+html[data-ew-theme="dark"] .ct-bill-val,
+html[data-ew-theme="dark"] .ct-details-text,
+html[data-ew-theme="dark"] .ct-cym-name {
+  color:#F5F7FA !important;
+}
+html[data-ew-theme="dark"] .ct-muted,
+html[data-ew-theme="dark"] .ct-cym-meta,
+html[data-ew-theme="dark"] .ct-field-help {
+  color:#A7AFBD !important;
+}
+
+/* Don't darken promotional imagery/illustrations. */
+html[data-ew-theme="dark"] img,
+html[data-ew-theme="dark"] svg {
+  filter:none !important;
+}
