@@ -35,58 +35,19 @@
   }
   const CART_BAR_MODE = getCartBarMode();
 
-  // Internal performance cache only. The stored cart format and public API
-  // remain unchanged. The cache is invalidated for cross-tab storage changes
-  // and BFCache restores, and updated immediately by updateCart().
-  let cartCache = null;
-  let cartCacheRaw = null;
-  let cartCacheValid = false;
-  let cartVersion = 0;
-  let imageDictCache = null;
-  let imageDictRaw = null;
-
   // 🛡️ CRASH-PROOF STORAGE PARSER
-  function invalidateCartCache() {
-    cartCacheValid = false;
-    cartCacheRaw = null;
-    cartVersion++;
-  }
-
-  function safeGetCart(forceRead) {
-    if (!forceRead && cartCacheValid && cartCache) return cartCache;
+  function safeGetCart() {
     try {
         const data = localStorage.getItem('nearbite_cart');
-        if (!data || data === "undefined" || data === "null") {
-          cartCache = {}; cartCacheRaw = data || null; cartCacheValid = true;
-          return cartCache;
-        }
-        if (!forceRead && cartCacheValid && data === cartCacheRaw && cartCache) return cartCache;
+        if (!data || data === "undefined" || data === "null") return {};
         const parsed = JSON.parse(data);
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          cartCache = {}; cartCacheRaw = data; cartCacheValid = true;
-          return cartCache;
-        }
-        cartCache = parsed; cartCacheRaw = data; cartCacheValid = true;
-        return cartCache;
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+        return parsed;
     } catch (e) {
         console.warn("Corrupted cart detected and wiped.");
         localStorage.removeItem('nearbite_cart');
-        cartCache = {}; cartCacheRaw = null; cartCacheValid = true;
-        cartVersion++;
-        return cartCache;
+        return {};
     }
-  }
-
-  function readImageDict() {
-    try {
-      const data = localStorage.getItem('es_image_dict');
-      if (!data || data === 'undefined' || data === 'null') return imageDictCache || {};
-      if (imageDictCache && data === imageDictRaw) return imageDictCache;
-      const parsed = JSON.parse(data);
-      imageDictCache = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-      imageDictRaw = data;
-      return imageDictCache;
-    } catch (e) { return imageDictCache || {}; }
   }
 
   /* ── 1. THE MATH ENGINE ────────────────────────────────────────
@@ -227,12 +188,7 @@
     }
 
     // Save and Trigger Floating Cart Bar
-    const serializedCart = JSON.stringify(cartMemory);
-    localStorage.setItem('nearbite_cart', serializedCart);
-    cartCache = cartMemory;
-    cartCacheRaw = serializedCart;
-    cartCacheValid = true;
-    cartVersion++;
+    localStorage.setItem('nearbite_cart', JSON.stringify(cartMemory));
     // Notify any page that derives UI from the cart (e.g. homepage product
     // cards) via the existing shared event — no separate cart state.
     try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'updateCart', itemName: itemName } })); } catch (e) {}
@@ -573,7 +529,6 @@
   let isDismissed = false;
   let lastTotalQty = null;
   let lastTotalPrice = null;
-  let lastRenderedCartVersion = -1;
   let exitTimer = null;
   const EXIT_MS = 260;
 
@@ -635,6 +590,41 @@
     '.tab-bar', '.tabbar', '.nav-bottom', '.bottom-navigation', '.es-bottom-nav',
     '.app-bottom-nav', '.mobile-bottom-nav', 'nav.bottom', 'footer.bottom-nav'
   ];
+  function findBottomNav() {
+    // Known Eatswada bottom-navigation selectors first.
+    for (const s of NAV_SELECTORS) {
+      const el = document.querySelector(s);
+      if (!el) continue;
+      const cs = getComputedStyle(el);
+      if ((cs.position === 'fixed' || cs.position === 'sticky') &&
+          cs.display !== 'none' && cs.visibility !== 'hidden') {
+        const r = el.getBoundingClientRect();
+        if (r.height > 0 && r.height < 180 && r.bottom >= window.innerHeight - 12) {
+          return el;
+        }
+      }
+    }
+
+    // Fallback for custom/renamed homepage nav containers.
+    const candidates = Array.from(document.querySelectorAll('body *')).filter(el => {
+      const cs = getComputedStyle(el);
+      if (!(cs.position === 'fixed' || cs.position === 'sticky')) return false;
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+
+      const r = el.getBoundingClientRect();
+      if (r.height <= 0 || r.height > 180) return false;
+      if (r.bottom < window.innerHeight - 12) return false;
+      if (r.width < Math.min(280, window.innerWidth * 0.65)) return false;
+
+      const t = (el.innerText || '').replace(/\s+/g, ' ').toLowerCase();
+      return /home/.test(t) && /99\s*store/.test(t) && /orders?/.test(t);
+    });
+
+    return candidates.sort((a, b) =>
+      a.getBoundingClientRect().height - b.getBoundingClientRect().height
+    )[0] || null;
+  }
+
   function positionCartAboveNav(root) {
     root = root || document.getElementById('white-cart-root');
     if (!root) return;
@@ -698,7 +688,7 @@
     const observer = new MutationObserver(() => {
       if (document.getElementById('nearbite-bottom-tabbar')) schedulePos();
     });
-    observer.observe(document.body, { childList: true });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     const rootStyleObserver = new MutationObserver(() => schedulePos());
     rootStyleObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
@@ -746,13 +736,7 @@
           return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u === 1 ? 'item' : 'items'}</span></button></div>`;
         }).join('')
       : '<div class="ew-cd-empty">Your cart is empty.</div>';
-    if (!list.__ewDelegatedViewListener) {
-      list.__ewDelegatedViewListener = true;
-      list.addEventListener('click', (e) => {
-        const btn = e.target.closest && e.target.closest('[data-cd-view]');
-        if (btn) window.location.href = 'cart.html';
-      });
-    }
+    list.querySelectorAll('[data-cd-view]').forEach(btn => btn.addEventListener('click', () => window.location.href = 'cart.html'));
   }
   function openRestaurantCarts(){
     ensureCartDrawer(); renderCartDrawer();
@@ -778,7 +762,6 @@
   /* ── The single cart-bar renderer ── */
   window.updateGlobalCart = function () {
     if (isDismissed || CART_BAR_MODE === 'hidden') return;
-    if (lastRenderedCartVersion === cartVersion && document.getElementById('white-cart-root')) return;
 
     const savedCart = safeGetCart();
     const itemNames = Object.keys(savedCart);
@@ -801,8 +784,6 @@
       lastTotalPrice = null;
       const allup = document.getElementById('wc-allup');
       if (allup) allup.classList.remove('show');
-      lastRenderedCartVersion = cartVersion;
-      positionCartAboveNav(root);
       return;
     }
 
@@ -820,7 +801,7 @@
     const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
     // Price shows ONLY on the pink (99 Store / Restaurant) bar. Home = count only.
     const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
-    if (countEl) countEl.textContent = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
+    if (countEl) countEl.innerText = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
 
     const totalChanged = lastTotalQty !== null && (lastTotalQty !== totalQty || lastTotalPrice !== totalPrice);
     if (totalChanged) {
@@ -844,13 +825,17 @@
       const resEl = document.getElementById('wc-dynamic-res');
       const lastItemName = itemNames[itemNames.length - 1];
       const lastItem = savedCart[lastItemName] || {};
-      if (resEl) resEl.textContent = lastItem.resName || lastItem.restaurantName || lastItemName;
+      if (resEl) resEl.innerText = lastItem.resName || lastItem.restaurantName || lastItemName;
 
       const imgStackEl = document.getElementById('wc-dynamic-img-stack');
       if (imgStackEl) {
         imgStackEl.innerHTML = '';
         const latestThreeNames = itemNames.slice(-3).reverse();
-        const imageDict = readImageDict();
+        let imageDict = {};
+        try {
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") imageDict = JSON.parse(dictData);
+        } catch (e) {}
         latestThreeNames.forEach((name) => {
           const itemData = savedCart[name] || {};
           const imgSrc = itemData.image || imageDict[name] || FALLBACK_IMG;
@@ -871,7 +856,6 @@
 
     lastTotalQty = totalQty;
     lastTotalPrice = totalPrice;
-    lastRenderedCartVersion = cartVersion;
     positionCartAboveNav(root);
     showCartBar(root);
   };
@@ -922,12 +906,13 @@
       }
 
       if (foodName && capturedImg) {
-        const dict = readImageDict();
+        let dict = {};
+        try {
+          const dictData = localStorage.getItem('es_image_dict');
+          if (dictData && dictData !== "undefined" && dictData !== "null") dict = JSON.parse(dictData);
+        } catch (e) {}
         dict[foodName] = capturedImg;
-        const serializedDict = JSON.stringify(dict);
-        localStorage.setItem('es_image_dict', serializedDict);
-        imageDictCache = dict;
-        imageDictRaw = serializedDict;
+        localStorage.setItem('es_image_dict', JSON.stringify(dict));
       }
     }, true);
 
@@ -958,7 +943,6 @@
       e.stopPropagation();
       localStorage.removeItem('nearbite_cart');
       localStorage.removeItem('nearbite_checkout_key');
-      invalidateCartCache();
       // Same shared event so homepage cards immediately return to "+".
       try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'clearCart', cleared: true } })); } catch (e) {}
       isDismissed = false;
@@ -982,16 +966,8 @@
     init();
   }
 
-  window.addEventListener('storage', (e) => {
-    if (e.key !== 'nearbite_cart' && e.key !== null && e.key !== 'es_image_dict') return;
-    if (e.key === 'nearbite_cart' || e.key === null) invalidateCartCache();
-    if (e.key === 'es_image_dict' || e.key === null) { imageDictCache = null; imageDictRaw = null; }
-    if (window.updateGlobalCart) window.updateGlobalCart();
-  });
-
   window.addEventListener('pageshow', () => {
     isDismissed = false;
-    invalidateCartCache();
     removeLegacyCartBars();
     if (window.updateGlobalCart) window.updateGlobalCart();
     positionCartAboveNav();
