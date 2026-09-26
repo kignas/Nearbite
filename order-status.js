@@ -229,7 +229,7 @@
     if (ps === 'refunded' || rs === 'completed') { p.label = p.short = 'Refund completed'; p.tone = 'good'; return p; }
     if (rs === 'processing') { p.label = p.short = 'Refund processing'; p.tone = 'warn'; return p; }
     if (rs === 'failed')     { p.label = 'Refund needs attention'; p.short = 'Refund issue'; p.tone = 'bad'; return p; }
-    if (rs)                  { p.label = p.short = 'Refund initiated'; p.tone = 'warn'; return p; }
+    if (rs && rs !== 'none')      { p.label = p.short = 'Refund initiated'; p.tone = 'warn'; return p; }
 
     if (pm === 'cod') {
       if (ps === 'paid') { p.label = 'Paid · Cash on delivery'; p.short = 'Paid'; p.tone = 'good'; }
