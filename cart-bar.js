@@ -746,8 +746,15 @@
     document.body.style.overflow = 'hidden';
   }
   function openCartDrawer(){
-    // Home "View Cart" keeps its original behavior (go to the cart page);
-    // the pink bar opens the multi-restaurant drawer.
+    // Restaurant menu: one tap goes straight to the cart page.
+    // The multi-restaurant drawer is intentionally a Home-only interaction.
+    if (CART_BAR_MODE === 'home' || CART_BAR_MODE === 'hidden' || CART_BAR_MODE === 'pink' && /restaurant/i.test(String(window.location.pathname || ''))) {
+      if (CART_BAR_MODE === 'hidden') return;
+      if (/restaurant/i.test(String(window.location.pathname || ''))) {
+        window.location.href = 'cart.html';
+        return;
+      }
+    }
     if (CART_BAR_MODE !== 'pink') { window.location.href = 'cart.html'; return; }
     openRestaurantCarts();
   }
