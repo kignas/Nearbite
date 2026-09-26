@@ -363,7 +363,7 @@
         return '<a href="restaurant.html?id=' + encodeURIComponent(id) + '" class="res-card">' +
           '<div class="res-img-wrap">' +
             (images.length
-              ? '<img src="' + esc(images[0]) + '" alt="' + esc(name) +
+              ? '<img src="' + esc(typeof optimizedImageUrl === 'function' ? optimizedImageUrl(images[0], 240) : images[0]) + '" alt="' + esc(name) +
                 '" loading="lazy" onerror="this.closest(\'.res-img-wrap\').classList.add(\'no-image\'); this.remove();">'
               : '<div class="res-img-fallback"><i class="fa-solid fa-utensils"></i></div>') +
             (offer ? '<div class="res-offer">' + esc(offer) + '</div>' : '') +

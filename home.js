@@ -885,7 +885,7 @@
           ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
           '<span class="cat-ring cat-image-shell">' +
             '<span class="cat-image-placeholder" aria-hidden="true"><span class="cat-placeholder-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9.5h10M8.5 13h7M9.5 16.5h5M5.5 6.5h13a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17V8a1.5 1.5 0 0 1 1.5-1.5Z"/></svg></span></span>' +
-            '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
+            '<img src="' + card.escape(typeof optimizedImageUrl === 'function' ? optimizedImageUrl(cat.image, 180) : safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
             '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')"' +
             ' onerror="this.classList.add(\'failed\');this.closest(\'.cat-item\').classList.add(\'image-failed\')">' +
             '<span class="cat-selected-badge" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +

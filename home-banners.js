@@ -82,8 +82,11 @@
       : `<p class="banner-subtitle banner-subtitle--default">Tasty food<br>Happier you. <span class="banner-heart" aria-hidden="true">♥</span></p>`;
     const url = safeUrl(b.ctaUrl);
     const cta = b.ctaText || 'Order Now';
+    const displayImage = typeof optimizedImageUrl === 'function' ? optimizedImageUrl(image, 720) : image;
+    const artLoading = i === 0 ? 'eager' : 'lazy';
+    const artPriority = i === 0 ? ' fetchpriority="high"' : '';
     const artHtml = image
-      ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+      ? `<img class="header-slide__art" src="${esc(displayImage)}" alt="" aria-hidden="true" loading="${artLoading}" decoding="async"${artPriority}>`
       : '';
 
     return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">

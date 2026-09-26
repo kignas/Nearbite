@@ -457,6 +457,7 @@
     if(!src) return fallback;
     src=typeof safeUrl==='function'?safeUrl(src):src;
     if(!src) return fallback;
+    src=typeof optimizedImageUrl==='function'?optimizedImageUrl(src, 320):src;
     var loading=priority?'eager':'lazy';
     var fetchPriority=priority?' fetchpriority=\"high\"':'';
     return '<img src=\"'+esc(src)+'\" alt=\"'+esc(item.name||'Item')+'\" loading=\"'+loading+'\" decoding=\"async\"'+fetchPriority+' onload=\"window.__eatswadaHomeImageReady(this)\" onerror=\"window.__eatswadaHomeImageError(this)\"><div class=\"u99-image-fallback\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" role=\"presentation\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"3\"></rect><circle cx=\"8.5\" cy=\"9\" r=\"1.5\"></circle><path d=\"m5.5 17 4.2-4.2 3.1 3.1 2.1-2.1 3.6 3.2\"></path></svg></div>';

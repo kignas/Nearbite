@@ -48,5 +48,59 @@
 
   window.escapeHtml = escapeHtml;
   window.esc = escapeHtml;
+
+  /*
+   * Display-only image optimization.
+   *
+   * This never changes the image URL stored in API/cart data. It only
+   * transforms known image CDNs at the <img src> boundary:
+   * - Cloudinary: automatic format/quality + bounded width
+   * - Unsplash: automatic format/quality + bounded width
+   *
+   * Unknown hosts are returned unchanged so existing image behaviour is
+   * preserved.
+   */
+  function optimizedImageUrl(value, width) {
+    var url = safeUrl(value);
+    if (!url) return '';
+
+    var target = Math.max(64, Math.min(1600, Number(width) || 320));
+
+    try {
+      var u = new URL(url, location.href);
+      var host = u.hostname.toLowerCase();
+
+      // Cloudinary image delivery: resize/compress only at render time.
+      if ((host === 'res.cloudinary.com' || /(^|\.)cloudinary\.com$/i.test(host)) &&
+          /\/image\/upload\//i.test(u.pathname)) {
+        var parts = u.pathname.split('/image/upload/');
+        var transformation = 'f_auto,q_auto,w_' + Math.round(target) + ',c_limit';
+        var after = parts[1] || '';
+        if (!/^(?:[^/]*,)?f_auto(?:,|\/|$)/i.test(after) &&
+            !/^(?:[^/]*,)?q_auto(?:,|\/|$)/i.test(after)) {
+          u.pathname = parts[0] + '/image/upload/' + transformation + '/' + after;
+        } else if (!/(^|,)w_\d+(?:,|$)/i.test(after.split('/')[0] || '')) {
+          u.pathname = parts[0] + '/image/upload/' + transformation + '/' + after;
+        }
+        return u.href;
+      }
+
+      // Unsplash image delivery already supports safe client-side sizing.
+      if (host === 'images.unsplash.com') {
+        u.searchParams.set('auto', 'format');
+        u.searchParams.set('fit', 'crop');
+        u.searchParams.set('w', String(Math.round(target)));
+        u.searchParams.set('q', '80');
+        return u.href;
+      }
+    } catch (e) {
+      // Preserve the original safe URL on any unexpected URL parsing issue.
+    }
+
+    return url;
+  }
+
+  window.optimizedImageUrl = optimizedImageUrl;
+
   window.safeUrl = safeUrl;
 })();

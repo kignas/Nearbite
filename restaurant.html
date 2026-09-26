@@ -744,6 +744,9 @@
         const delay = (globalIdx++ * 0.04).toFixed(2);
         const imageSrc = item.image || item.img || '';
         const displayImage = resolveMenuImage(imageSrc);
+          const displayImageOptimized = displayImage && typeof optimizedImageUrl === 'function'
+            ? optimizedImageUrl(displayImage, 360)
+            : displayImage;
         const inStock = item.inStock !== false;
         const isItemAvailable = inStock && isRestaurantOpen;
 
@@ -805,7 +808,7 @@
               <div class="nb-item-image-wrap${displayImage ? ' is-loading' : ''}">
                 <div class="nb-item-image-placeholder" aria-hidden="true"><i class="fa-solid fa-utensils" aria-hidden="true"></i></div>
                 ${displayImage
-                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(displayImage)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
+                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(displayImageOptimized)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
                   : ''
                 }
                 ${overlayText ? `<div class="nb-item-overlay"><span>${overlayText}</span></div>` : ''}
