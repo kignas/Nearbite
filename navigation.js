@@ -28,6 +28,7 @@
     'support.html': 'orders.html',
     'track-order.html': 'orders.html',
     'legal.html': 'profile.html',
+    'privacy-data.html': 'profile.html',
     'location-onboarding.html': 'index.html',
     'service-unavailable.html': 'index.html',
     'complete-profile.html': 'login.html',

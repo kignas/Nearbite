@@ -280,6 +280,11 @@
         <i class="fa-solid fa-circle-check"></i>
         <span>Your Google account will be linked to this Eatswada profile.</span>
       </div>
+
+      <label style="display:flex;align-items:flex-start;gap:9px;margin:14px 0 2px;font-size:12px;line-height:1.5;color:#667085;cursor:pointer">
+        <input id="age18" type="checkbox" style="margin-top:2px;flex:0 0 auto">
+        <span>I confirm that I am 18 years old or older and will use Eatswada in accordance with applicable law.</span>
+      </label>
     </main>
 
     <div class="cta-wrap">
@@ -320,8 +325,8 @@
   function phoneValid(){return /^[6-9]\d{9}$/.test($('phone').value.replace(/\D/g,''))}
   function passwordValid(){return $('password').value.length>=8}
   function emailValid(){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('email').value.trim())}
-  function syncCta(){$('saveBtn').disabled=!(nameValid()&&phoneValid()&&passwordValid()&&emailValid())}
-  ['name','phone','password','email'].forEach(id=>$(id)?.addEventListener('input',()=>{setFieldError(id,'');showError('');syncCta()}));
+  function syncCta(){$('saveBtn').disabled=!(nameValid()&&phoneValid()&&passwordValid()&&emailValid()&&$('age18').checked)}
+  ['name','phone','password','email'].forEach(id=>$(id)?.addEventListener('input',()=>{setFieldError(id,'');showError('');syncCta()})); $('age18')?.addEventListener('change',syncCta);
 
   function paintGoogleProfile(){
     let profile={}; try{profile=JSON.parse(sessionStorage.getItem('nearbite_google_pending_profile')||'{}')}catch{}
@@ -337,7 +342,7 @@
   async function loadExistingProfile(){
     if(googleMode && pendingGoogleToken){ paintGoogleProfile(); return; }
     const token=sessionToken;
-    try{const r=await fetch(`${API}/users/profile`,{headers:{Authorization:`Bearer ${token}`}});const d=await r.json();if(!r.ok||!d.success)return;const u=d.data||{};$('phone').value=formatPhone(u.phone);if(u.name&&!/^(Nearbite|Eatswada) User$/i.test(u.name))$('name').value=u.name;if(u.email)$('email').value=u.email;}catch(e){console.warn(e)}finally{syncCta()}
+    try{const r=await fetch(`${API}/users/profile`,{headers:{Authorization:`Bearer ${token}`}});const d=await r.json();if(!r.ok||!d.success)return;const u=d.data||{};$('phone').value=formatPhone(u.phone);if(u.adultConfirmedAt)$('age18').checked=true;if(u.name&&!/^(Nearbite|Eatswada) User$/i.test(u.name))$('name').value=u.name;if(u.email)$('email').value=u.email;}catch(e){console.warn(e)}finally{syncCta()}
   }
   function togglePassword(){const i=$('password'),shown=i.type==='text';i.type=shown?'password':'text';if($('pwIcon'))$('pwIcon').className=shown?'fa-solid fa-eye':'fa-solid fa-eye-slash';}
   async function completeProfile(){
@@ -346,11 +351,12 @@
     if(!phoneValid()){setFieldError('phone','Enter a valid 10-digit mobile number.');$('phone').focus();return}
     if(!emailValid()){setFieldError('email','A valid email address is required.');$('email').focus();return}
     if(!passwordValid()){setFieldError('password','Create a password with at least 8 characters.');$('password').focus();return}
+    if(!$('age18').checked){showError('You must confirm that you are 18 years old or older to continue.');$('age18').focus();return}
     $('saveBtn').disabled=true;$('loading').style.display='flex';
     try{
       let result;
       if(googleMode){
-        const res=await fetch(`${CONFIG.API_BASE_URL}/auth/firebase/complete-profile`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:pendingGoogleToken,name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),password:$('password').value})});
+        const res=await fetch(`${CONFIG.API_BASE_URL}/auth/firebase/complete-profile`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:pendingGoogleToken,name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),password:$('password').value,adultConfirmed:$('age18').checked})});
         result=await res.json().catch(()=>({}));
         if(!res.ok||!result.success)throw new Error(result.message||'Unable to create your Eatswada account.');
         localStorage.setItem('nearbite_token',result.data.token);localStorage.setItem('token',result.data.token);localStorage.setItem('nearbite_user',JSON.stringify(result.data.user||{}));
@@ -359,7 +365,7 @@
         sessionStorage.removeItem('nearbite_google_pending_token');sessionStorage.removeItem('nearbite_google_pending_profile');
       }else{
         const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');
-        const res=await fetch(`${API}/users/profile`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),email:$('email').value.trim(),password:$('password').value})});
+        const res=await fetch(`${API}/users/profile`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({name:$('name').value.trim(),phone:'+91'+$('phone').value.replace(/\D/g,''),email:$('email').value.trim(),password:$('password').value,adultConfirmed:$('age18').checked})});
         result=await res.json().catch(()=>({}));if(!res.ok||!result.success)throw new Error(result.message||'Could not save your details. Please try again.');
         if(result.data?.token){ localStorage.setItem('nearbite_token',result.data.token); localStorage.setItem('token',result.data.token); }
         localStorage.setItem('nearbite_user',JSON.stringify(result.data?.user||result.data||{}));

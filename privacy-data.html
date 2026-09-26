@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+  <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+  <script src="eatswada-theme.js"></script>
+  <script src="config.js"></script>
+  <title>Privacy &amp; Data – Eatswada</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
+  <link rel="stylesheet" href="eatswada-theme.css">
+  <style>
+    :root{--pd-brand:#16a34a;--pd-bg:#f5f7f8;--pd-card:#fff;--pd-text:#101828;--pd-muted:#667085;--pd-border:#e4e7ec;--pd-danger:#dc2626}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Manrope,sans-serif;background:var(--pd-bg);color:var(--pd-text);padding-bottom:48px;-webkit-tap-highlight-color:transparent}
+    .pd-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.06)}
+    .pd-back{width:38px;height:38px;border:0;border-radius:50%;background:#f0f2f4;display:grid;place-items:center}
+    .pd-title{font-size:16px;font-weight:800}
+    .pd-wrap{max-width:620px;margin:0 auto;padding:18px 18px 30px}
+    .pd-intro{margin-bottom:14px}.pd-intro h2{font-size:22px;line-height:1.18;font-weight:850}.pd-intro p{margin-top:7px;color:var(--pd-muted);font-size:13px;line-height:1.6}
+    .pd-card{background:var(--pd-card);border:1px solid var(--pd-border);border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 5px 16px rgba(16,24,40,.04)}
+    .pd-card h3{font-size:15px;font-weight:800;margin-bottom:6px}.pd-card p,.pd-card li{font-size:13px;line-height:1.62;color:var(--pd-muted)}.pd-card ul{padding-left:18px;margin-top:8px}.pd-card li{margin-bottom:5px}
+    .pd-btn{width:100%;border:0;border-radius:14px;padding:13px 14px;font:800 13px Manrope,sans-serif;cursor:pointer;background:var(--pd-brand);color:#fff;margin-top:10px}.pd-btn.secondary{background:#eef7f0;color:#146c2e}.pd-btn.danger{background:var(--pd-danger)}.pd-btn:disabled{opacity:.55;cursor:not-allowed}
+    .pd-field{width:100%;border:1px solid var(--pd-border);border-radius:12px;padding:12px 13px;margin-top:9px;font:600 13px Manrope,sans-serif;background:#fff;color:var(--pd-text);outline:none}.pd-field:focus{border-color:var(--pd-brand);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+    .pd-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.pd-note{font-size:11px!important;margin-top:7px}.pd-status{min-height:18px;margin-top:9px;font-size:12px;font-weight:700;color:var(--pd-muted)}.pd-status.ok{color:#15803d}.pd-status.err{color:#b91c1c}
+    .pd-small{font-size:11px;color:var(--pd-muted);line-height:1.55;margin-top:9px}.pd-link{color:var(--pd-brand);font-weight:800;text-decoration:none}
+    .pd-check{display:flex;align-items:flex-start;gap:9px;margin-top:10px;font-size:12px;color:var(--pd-muted);line-height:1.5}.pd-check input{margin-top:2px}
+  </style>
+</head>
+<body>
+  <header class="pd-top">
+    <button class="pd-back" onclick="window.nearbiteSafeBack()" aria-label="Go back">←</button>
+    <div class="pd-title">Privacy &amp; Data</div>
+  </header>
+
+  <main class="pd-wrap">
+    <div class="pd-intro">
+      <h2>Your personal-data controls</h2>
+      <p>Use these controls to access your Eatswada data, request a correction, manage your nominee, raise a privacy grievance, or request account deletion.</p>
+    </div>
+
+    <section class="pd-card">
+      <h3>Download my data</h3>
+      <p>Get a machine-readable copy of the personal data currently available to your signed-in account, including profile, saved addresses, order records, reviews, ratings and notification records held for the account.</p>
+      <button class="pd-btn" id="exportBtn">Download my data</button>
+      <div class="pd-status" id="exportStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="pd-card">
+      <h3>Request a correction</h3>
+      <p>Use this when information held by Eatswada is inaccurate or incomplete and you need help correcting it.</p>
+      <textarea class="pd-field" id="correctionMessage" rows="4" maxlength="2000" placeholder="Tell us what information is incorrect and what it should be changed to."></textarea>
+      <button class="pd-btn secondary" id="correctionBtn">Submit correction request</button>
+      <div class="pd-status" id="correctionStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="pd-card">
+      <h3>Nominee</h3>
+      <p>You may provide another person's details for exercising your rights in case of death or incapacity, where applicable under law.</p>
+      <input class="pd-field" id="nomineeName" maxlength="80" placeholder="Nominee name" autocomplete="name">
+      <div class="pd-row">
+        <input class="pd-field" id="nomineeEmail" maxlength="254" placeholder="Nominee email" autocomplete="email">
+        <input class="pd-field" id="nomineePhone" maxlength="20" placeholder="Nominee mobile" inputmode="tel" autocomplete="tel">
+      </div>
+      <input class="pd-field" id="nomineeRelationship" maxlength="60" placeholder="Relationship">
+      <button class="pd-btn secondary" id="saveNomineeBtn">Save nominee</button>
+      <button class="pd-btn" id="clearNomineeBtn">Clear nominee</button>
+      <div class="pd-status" id="nomineeStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="pd-card" id="grievance">
+      <h3>Privacy grievance</h3>
+      <p>Tell us about a privacy or personal-data concern. We will record the request and use the registered account information to follow up. Grievances are handled within a reasonable period not exceeding the period prescribed by applicable law.</p>
+      <textarea class="pd-field" id="grievanceMessage" rows="4" maxlength="2000" placeholder="Describe the privacy concern or grievance."></textarea>
+      <button class="pd-btn secondary" id="grievanceBtn">Submit grievance</button>
+      <div class="pd-status" id="grievanceStatus" aria-live="polite"></div>
+      <p class="pd-small">You can also email <a class="pd-link" href="mailto:kingasyou2007@gmail.com">kingasyou2007@gmail.com</a>.</p>
+    </section>
+
+    <section class="pd-card">
+      <h3>My request history</h3>
+      <p>See the status of correction and privacy-grievance requests submitted from this account.</p>
+      <div id="requestHistory" class="pd-small">Loading request history…</div>
+      <div class="pd-status" id="historyStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="pd-card" id="delete">
+      <h3>Delete my account</h3>
+      <p>Deleting your account removes account-only records where practicable. Some transaction, security, accounting or dispute records may be retained in a reduced or anonymised form where required or reasonably necessary.</p>
+      <label class="pd-check"><input type="checkbox" id="deleteConfirm"> I understand that account deletion is permanent and may sign me out on all devices.</label>
+      <input class="pd-field" id="deletePhrase" maxlength="30" placeholder="Type DELETE MY ACCOUNT">
+      <button class="pd-btn danger" id="deleteBtn">Permanently delete my account</button>
+      <div class="pd-status" id="deleteStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="pd-card">
+      <h3>How we handle requests</h3>
+      <p>Requests are authenticated using your signed-in account. We may request additional verification when necessary. Active orders or unresolved refunds can temporarily prevent account deletion so that fulfilment and payment records are not disrupted.</p>
+      <p class="pd-small">See the <a class="pd-link" href="legal.html#privacy">Privacy Policy</a> for the broader data-processing notice.</p>
+    </section>
+  </main>
+
+<script>
+(function(){
+  'use strict';
+  var BASE=(window.CONFIG&&window.CONFIG.API_BASE_URL)||'https://eatswada.onrender.com/api';
+  function token(){return localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';}
+  function headers(extra){var h={'Content-Type':'application/json'};var t=token();if(t)h.Authorization='Bearer '+t;return Object.assign(h,extra||{});}
+  function setStatus(id,msg,ok){var el=document.getElementById(id);el.textContent=msg||'';el.className='pd-status'+(ok===true?' ok':ok===false?' err':'');}
+  async function request(path,opts){
+    var res=await fetch(BASE+path,Object.assign({headers:headers()},opts||{}));
+    var raw=await res.text();var data={};try{data=raw?JSON.parse(raw):{};}catch(e){throw new Error('The server returned an unreadable response.');}
+    if(!res.ok||data.success===false)throw new Error(data.message||'Request failed.');
+    return data;
+  }
+  function ensureAuth(){if(!token()){location.replace('login.html');return false;}return true;}
+  if(!ensureAuth())return;
+
+  document.getElementById('exportBtn').onclick=async function(){
+    var b=this; b.disabled=true; setStatus('exportStatus','Preparing your data…');
+    try{var out=await request('/privacy/me/export',{method:'GET'});var blob=new Blob([JSON.stringify(out.data,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='eatswada-personal-data.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setStatus('exportStatus','Your data export is ready.',true);}catch(e){setStatus('exportStatus',e.message,false);}finally{b.disabled=false;}
+  };
+
+  async function submitRequest(type,messageId,statusId,button){
+    var message=document.getElementById(messageId).value.trim();if(message.length<5){setStatus(statusId,'Please describe the request in at least 5 characters.',false);return;}
+    button.disabled=true;setStatus(statusId,'Submitting…');
+    try{var out=await request('/privacy/requests',{method:'POST',body:JSON.stringify({type:type,message:message})});document.getElementById(messageId).value='';setStatus(statusId,'Request '+(out.data&&out.data.requestId?out.data.requestId:'recorded')+'.',true);}catch(e){setStatus(statusId,e.message,false);}finally{button.disabled=false;}
+  }
+  document.getElementById('correctionBtn').onclick=function(){submitRequest('correction','correctionMessage','correctionStatus',this);};
+  document.getElementById('grievanceBtn').onclick=function(){submitRequest('grievance','grievanceMessage','grievanceStatus',this);};
+
+  async function loadNominee(){
+    try{var out=await request('/users/profile',{method:'GET'});var u=out.data&&out.data.user?out.data.user:(out.user||out.data||{});var n=u.dataNominee||u.nominee||null;if(!n)return;document.getElementById('nomineeName').value=n.name||'';document.getElementById('nomineeEmail').value=n.email||'';document.getElementById('nomineePhone').value=n.phone||'';document.getElementById('nomineeRelationship').value=n.relationship||'';}catch(e){}
+  }
+  loadNominee();
+
+  async function loadRequestHistory(){
+    try{
+      var out=await request('/privacy/requests',{method:'GET'});
+      var rows=Array.isArray(out.data)?out.data:[];
+      var box=document.getElementById('requestHistory');
+      if(!rows.length){box.textContent='No correction or privacy-grievance requests found.';return;}
+      box.innerHTML=rows.map(function(r){
+        var label=(r.type==='grievance'?'Privacy grievance':'Correction request');
+        var when=r.createdAt?new Date(r.createdAt).toLocaleString():'';
+        return '<div style="padding:9px 0;border-bottom:1px solid var(--pd-border)"><strong style="color:var(--pd-text)">'+label+'</strong><br><span>'+String(r.requestId||'')+' · '+String(r.status||'').replace(/_/g,' ')+' · '+when+'</span></div>';
+      }).join('');
+    }catch(e){setStatus('historyStatus','Request history could not be loaded.',false);}
+  }
+  loadRequestHistory();
+
+  document.getElementById('saveNomineeBtn').onclick=async function(){
+    var payload={name:document.getElementById('nomineeName').value.trim(),email:document.getElementById('nomineeEmail').value.trim(),phone:document.getElementById('nomineePhone').value.trim(),relationship:document.getElementById('nomineeRelationship').value.trim()};
+    this.disabled=true;setStatus('nomineeStatus','Saving…');try{await request('/privacy/me/nominee',{method:'PUT',body:JSON.stringify(payload)});setStatus('nomineeStatus','Nominee details saved.',true);}catch(e){setStatus('nomineeStatus',e.message,false);}finally{this.disabled=false;}
+  };
+  document.getElementById('clearNomineeBtn').onclick=async function(){
+    if(!confirm('Clear the nominee details?'))return;this.disabled=true;setStatus('nomineeStatus','Clearing…');try{await request('/privacy/me/nominee',{method:'DELETE'});['nomineeName','nomineeEmail','nomineePhone','nomineeRelationship'].forEach(function(id){document.getElementById(id).value='';});setStatus('nomineeStatus','Nominee details cleared.',true);}catch(e){setStatus('nomineeStatus',e.message,false);}finally{this.disabled=false;}
+  };
+
+  document.getElementById('deleteBtn').onclick=async function(){
+    if(!document.getElementById('deleteConfirm').checked){setStatus('deleteStatus','Please confirm that you understand the deletion is permanent.',false);return;}
+    if(document.getElementById('deletePhrase').value.trim().toUpperCase()!=='DELETE MY ACCOUNT'){setStatus('deleteStatus','Type DELETE MY ACCOUNT exactly to continue.',false);return;}
+    if(!confirm('Permanently delete your Eatswada account?'))return;
+    this.disabled=true;setStatus('deleteStatus','Deleting account…');
+    try{await request('/privacy/me',{method:'DELETE',body:JSON.stringify({confirmation:'DELETE MY ACCOUNT'})});
+      ['localStorage','sessionStorage'].forEach(function(storeName){try{var store=window[storeName];var keys=[];for(var i=0;i<store.length;i++){var k=store.key(i);if(k&&(/^(nearbite_|token$)/i.test(k)||/^eatswada_(recent_locations|device_location)$/i.test(k)))keys.push(k);}keys.forEach(function(k){store.removeItem(k);});}catch(e){}});
+      setStatus('deleteStatus','Account deleted. Redirecting…',true);setTimeout(function(){location.replace('login.html?account_deleted=1');},600);
+    }catch(e){setStatus('deleteStatus',e.message,false);this.disabled=false;}
+  };
+})();
+</script>
+<script src="navigation.js"></script>
+</body>
+</html>
