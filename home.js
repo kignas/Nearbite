@@ -1797,7 +1797,15 @@
     renderProfileSetupBanner();
     startSearchPlaceholder();
     loadRestaurants();
-    loadCategories();
+
+    // Categories sit below the hero/search shell. Give the browser one turn to
+    // paint the critical header/hero and start the primary restaurant request
+    // before refreshing categories. Cached categories are still rendered by
+    // loadCategories() when this callback runs.
+    var scheduleCategoryLoad = window.requestIdleCallback || function (cb) {
+      return window.setTimeout(cb, 180);
+    };
+    scheduleCategoryLoad(function () { loadCategories(); }, { timeout: 900 });
   }
 
   if (document.readyState === 'loading') {
