@@ -676,3 +676,288 @@ html[data-ew-theme="dark"] img,
 html[data-ew-theme="dark"] svg {
   filter:none !important;
 }
+
+
+/* ================================================================
+   DARK MODE v3 — browser-level parity layer
+   Goal: reproduce the consistent dark surfaces seen with Samsung
+   Browser's forced-dark rendering, without applying filters to
+   food/product imagery or changing Eatswada's accent colors.
+   ================================================================ */
+
+html[data-ew-theme="dark"] {
+  --ew-v3-bg:#0B0C10;
+  --ew-v3-surface:#1D1D1F;
+  --ew-v3-surface-2:#252629;
+  --ew-v3-text:#F4F4F6;
+  --ew-v3-muted:#A8A9B0;
+  --ew-v3-line:#44454A;
+}
+
+/* ---- Home / feed ------------------------------------------------ */
+html[data-ew-theme="dark"] body:has(#mind-section) {
+  background:#0B0C10 !important;
+  color:#F4F4F6 !important;
+}
+
+html[data-ew-theme="dark"] #mind-section,
+html[data-ew-theme="dark"] #restaurants-section,
+html[data-ew-theme="dark"] .page,
+html[data-ew-theme="dark"] .section,
+html[data-ew-theme="dark"] .filter-layout,
+html[data-ew-theme="dark"] .restaurant-list {
+  background:#0B0C10 !important;
+  color:#F4F4F6 !important;
+}
+
+/* Restaurant cards were the biggest browser-to-browser difference. */
+html[data-ew-theme="dark"] .u99-restaurant-card,
+html[data-ew-theme="dark"] .u99-card-host,
+html[data-ew-theme="dark"] .u99-card-copy,
+html[data-ew-theme="dark"] .u99-item,
+html[data-ew-theme="dark"] .u99-item > *,
+html[data-ew-theme="dark"] .es-card,
+html[data-ew-theme="dark"] .rs-card {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+
+html[data-ew-theme="dark"] .u99-restaurant-head,
+html[data-ew-theme="dark"] .u99-meta,
+html[data-ew-theme="dark"] .u99-free-row,
+html[data-ew-theme="dark"] .u99-price-row,
+html[data-ew-theme="dark"] .u99-discount-line {
+  background:transparent !important;
+}
+
+html[data-ew-theme="dark"] .u99-restaurant-name,
+html[data-ew-theme="dark"] .u99-item-name,
+html[data-ew-theme="dark"] .u99-meta,
+html[data-ew-theme="dark"] .u99-free-row,
+html[data-ew-theme="dark"] .u99-price,
+html[data-ew-theme="dark"] .es-name,
+html[data-ew-theme="dark"] .es-stat-value,
+html[data-ew-theme="dark"] .es-cuisine {
+  color:#F4F4F6 !important;
+}
+
+html[data-ew-theme="dark"] .es-stat-label,
+html[data-ew-theme="dark"] .es-distance,
+html[data-ew-theme="dark"] .u99-sub {
+  color:#A8A9B0 !important;
+}
+
+/* Category labels: prevent the low-contrast dark-on-dark state. */
+html[data-ew-theme="dark"] .cs-name,
+html[data-ew-theme="dark"] .cat-name {
+  color:#D9DBE1 !important;
+}
+
+/* Feed ending/footer */
+html[data-ew-theme="dark"] .ew-feed-end,
+html[data-ew-theme="dark"] .ew-feed-end__sub,
+html[data-ew-theme="dark"] .ew-feed-end__made {
+  background:transparent !important;
+  color:#9B9DA5 !important;
+}
+html[data-ew-theme="dark"] .ew-feed-end__title {
+  color:#9FA1AA !important;
+}
+
+/* Home cart bar must be dark like the browser-level rendering. */
+html[data-ew-theme="dark"] .cart-bar,
+html[data-ew-theme="dark"] .cart-bar-container,
+html[data-ew-theme="dark"] .cart-bar-inner,
+html[data-ew-theme="dark"] #cartBar,
+html[data-ew-theme="dark"] [class*="cart-bar"] {
+  border-color:#44454A !important;
+}
+html[data-ew-theme="dark"] .cart-bar,
+html[data-ew-theme="dark"] .cart-bar-container,
+html[data-ew-theme="dark"] .cart-bar-inner {
+  background:#E9EAEC !important;
+  color:#17181B !important;
+}
+
+/* ---- Address pages ---------------------------------------------- */
+html[data-ew-theme="dark"] body.ea-body,
+html[data-ew-theme="dark"] .ea-app,
+html[data-ew-theme="dark"] .ea,
+html[data-ew-theme="dark"] .ls-view,
+html[data-ew-theme="dark"] .ls-inner {
+  background:#0B0C10 !important;
+  color:#F4F4F6 !important;
+}
+
+html[data-ew-theme="dark"] .ea-header,
+html[data-ew-theme="dark"] .ea-top,
+html[data-ew-theme="dark"] .ea-main,
+html[data-ew-theme="dark"] .ea-panel,
+html[data-ew-theme="dark"] .ea-form,
+html[data-ew-theme="dark"] .ea-form-body,
+html[data-ew-theme="dark"] .ea-form-foot,
+html[data-ew-theme="dark"] .ls-head,
+html[data-ew-theme="dark"] .ls-list,
+html[data-ew-theme="dark"] .ls-results {
+  background:#0B0C10 !important;
+  color:#F4F4F6 !important;
+  border-color:#303136 !important;
+}
+
+html[data-ew-theme="dark"] .ls-search,
+html[data-ew-theme="dark"] .ls-action,
+html[data-ew-theme="dark"] .ls-item,
+html[data-ew-theme="dark"] .ea-box,
+html[data-ew-theme="dark"] .ea-item,
+html[data-ew-theme="dark"] .ea-row,
+html[data-ew-theme="dark"] .ea-band {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+
+html[data-ew-theme="dark"] .ea-title,
+html[data-ew-theme="dark"] .ea-head-primary,
+html[data-ew-theme="dark"] .ea-sec-title,
+html[data-ew-theme="dark"] .ls-title,
+html[data-ew-theme="dark"] .ls-item-title {
+  color:#F4F4F6 !important;
+}
+html[data-ew-theme="dark"] .ea-head-secondary,
+html[data-ew-theme="dark"] .ea-meta,
+html[data-ew-theme="dark"] .ls-item-sub,
+html[data-ew-theme="dark"] .ls-note {
+  color:#A8A9B0 !important;
+}
+
+/* ---- Orders ----------------------------------------------------- */
+html[data-ew-theme="dark"] body:has(.orders-header) {
+  background:#0B0C10 !important;
+}
+html[data-ew-theme="dark"] .orders-content,
+html[data-ew-theme="dark"] #past-orders-container,
+html[data-ew-theme="dark"] #live-orders-container {
+  background:#0B0C10 !important;
+}
+html[data-ew-theme="dark"] .order-card,
+html[data-ew-theme="dark"] .past-card,
+html[data-ew-theme="dark"] .empty-card,
+html[data-ew-theme="dark"] .sk-card {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+html[data-ew-theme="dark"] .past-items,
+html[data-ew-theme="dark"] .past-summary,
+html[data-ew-theme="dark"] .past-footer,
+html[data-ew-theme="dark"] .meta-row {
+  color:#D8DAE0 !important;
+  border-color:#44454A !important;
+}
+html[data-ew-theme="dark"] .search-bar,
+html[data-ew-theme="dark"] .search-wrap,
+html[data-ew-theme="dark"] .filter-chips,
+html[data-ew-theme="dark"] .chip {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+
+/* ---- Tracking --------------------------------------------------- */
+html[data-ew-theme="dark"] body:has(.app-bar) {
+  background:#0B0C10 !important;
+}
+html[data-ew-theme="dark"] .d-body,
+html[data-ew-theme="dark"] .details-card,
+html[data-ew-theme="dark"] .cancel-card,
+html[data-ew-theme="dark"] .info-card,
+html[data-ew-theme="dark"] .help-card,
+html[data-ew-theme="dark"] .rating-card,
+html[data-ew-theme="dark"] .payment-card,
+html[data-ew-theme="dark"] .restaurant-card,
+html[data-ew-theme="dark"] .rider-card,
+html[data-ew-theme="dark"] .completion-screen {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+html[data-ew-theme="dark"] .d-title,
+html[data-ew-theme="dark"] .info-card-title,
+html[data-ew-theme="dark"] .info-card-label,
+html[data-ew-theme="dark"] .restaurant-name,
+html[data-ew-theme="dark"] .rider-name {
+  color:#F4F4F6 !important;
+}
+html[data-ew-theme="dark"] .d-sub,
+html[data-ew-theme="dark"] .info-card-sub,
+html[data-ew-theme="dark"] .restaurant-address,
+html[data-ew-theme="dark"] .rider-kicker {
+  color:#A8A9B0 !important;
+}
+
+/* ---- Cart / checkout -------------------------------------------- */
+html[data-ew-theme="dark"] body.ct-page {
+  background:#0B0C10 !important;
+}
+html[data-ew-theme="dark"] .ct-page,
+html[data-ew-theme="dark"] .ct-group,
+html[data-ew-theme="dark"] .ct-group-body {
+  background:#0B0C10 !important;
+  color:#F4F4F6 !important;
+}
+html[data-ew-theme="dark"] .ct-card,
+html[data-ew-theme="dark"] .ct-item-card,
+html[data-ew-theme="dark"] .ct-details,
+html[data-ew-theme="dark"] .ct-cym,
+html[data-ew-theme="dark"] .ct-bill,
+html[data-ew-theme="dark"] .ct-cym-card {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+html[data-ew-theme="dark"] .ct-fees,
+html[data-ew-theme="dark"] .ct-cym-tabs,
+html[data-ew-theme="dark"] .ct-chip {
+  background:#252629 !important;
+  color:#DDE0E7 !important;
+  border-color:#44454A !important;
+}
+html[data-ew-theme="dark"] .ct-group-title,
+html[data-ew-theme="dark"] .ct-group-sub,
+html[data-ew-theme="dark"] .ct-name,
+html[data-ew-theme="dark"] .ct-price,
+html[data-ew-theme="dark"] .ct-bill-label,
+html[data-ew-theme="dark"] .ct-bill-val,
+html[data-ew-theme="dark"] .ct-total-label,
+html[data-ew-theme="dark"] .ct-total-val {
+  color:#F4F4F6 !important;
+}
+html[data-ew-theme="dark"] .ct-field-help,
+html[data-ew-theme="dark"] .ct-cym-meta,
+html[data-ew-theme="dark"] .ct-muted {
+  color:#A8A9B0 !important;
+}
+
+/* ---- Generic light-surface compatibility ----------------------- */
+/* Only common UI surfaces; never blanket-style images/SVGs. */
+html[data-ew-theme="dark"] .modal,
+html[data-ew-theme="dark"] .sheet,
+html[data-ew-theme="dark"] .filter-sheet,
+html[data-ew-theme="dark"] .filter-sheet-panel,
+html[data-ew-theme="dark"] .filter-sheet-content,
+html[data-ew-theme="dark"] .toast,
+html[data-ew-theme="dark"] .notice-retry,
+html[data-ew-theme="dark"] .state-block {
+  background:#1D1D1F !important;
+  color:#F4F4F6 !important;
+  border-color:#44454A !important;
+}
+
+/* Preserve brand/promo colors and images. */
+html[data-ew-theme="dark"] img,
+html[data-ew-theme="dark"] video,
+html[data-ew-theme="dark"] canvas,
+html[data-ew-theme="dark"] svg {
+  filter:none !important;
+}
