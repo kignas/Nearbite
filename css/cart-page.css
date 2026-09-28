@@ -3053,140 +3053,125 @@ body.ct-page .ct-pay-note{ font-size:11px; }
 }
 
 
-/* ======================================================================
-   EATSWADA — PREMIUM REFERENCE REFINEMENT
-   Scoped to the cart page. Visual-only overrides; no layout or behaviour
-   selectors are changed. Keep strong brand colour for the primary action.
-   ====================================================================== */
+
+/* ==========================================================================
+   EATSWADA — FINAL PREMIUM REFINEMENT
+   Visual-only overrides: card elevation, typography polish, image consistency,
+   and safe scroll positioning beneath the sticky delivery header.
+   Existing markup, IDs, JavaScript hooks, calculations and interactions remain
+   unchanged.
+   ========================================================================== */
 body.ct-page{
-  --ct-bg:#F3F4F7;
-  --ct-surface:#FFFFFF;
-  --ct-line:rgba(31,41,55,.055);
-  --ct-line-soft:rgba(31,41,55,.045);
-  --ct-green-soft:#FFF0F2;
-  --ct-shadow:0 3px 14px rgba(24,32,45,.045), 0 1px 3px rgba(24,32,45,.025);
+  --ct-bg:#F4F5F8;
+  --ct-line:#E9EBEF;
+  --ct-line-soft:#F0F1F4;
+  --ct-shadow:0 1px 2px rgba(24,32,42,.025), 0 7px 22px rgba(24,32,42,.045);
   background:var(--ct-bg);
-  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
 }
 
-/* White surfaces should lift gently from the cool off-white canvas. */
+/* Give the major surfaces quiet depth instead of relying on hard outlines. */
 body.ct-page .ct-card,
 body.ct-page .ct-bill,
-body.ct-page .ct-group,
-body.ct-page .ct-summary,
-body.ct-page .ct-line-card,
+body.ct-page .ct-cym,
 body.ct-page #ct-payment-group,
 body.ct-page #ct-di-group{
-  border-color:rgba(31,41,55,.055);
-  box-shadow:0 4px 18px rgba(31,41,55,.045),0 1px 3px rgba(31,41,55,.025);
-}
-body.ct-page .ct-delivery-head{
-  border-bottom-color:rgba(31,41,55,.045);
-  box-shadow:0 2px 10px rgba(31,41,55,.025);
-}
-body.ct-page .ct-footer{
-  border-top-color:rgba(31,41,55,.055);
-  box-shadow:0 -6px 22px rgba(31,41,55,.065);
+  border-color:rgba(225,229,235,.78);
+  box-shadow:var(--ct-shadow);
 }
 
-/* More deliberate hierarchy: item names and key amounts lead; helper copy recedes. */
-body.ct-page .ct-name,
-body.ct-page .ct-sav-title,
-body.ct-page .ct-details-label,
-body.ct-page .ct-summary-title,
-body.ct-page .ct-line-title{
+/* Keep the cart card and its rows visually calm and consistently separated. */
+body.ct-page .ct-item-card{
+  border-color:rgba(225,229,235,.78);
+  box-shadow:var(--ct-shadow);
+}
+body.ct-page .ct-row{
+  border-bottom-color:#F0F1F4;
+}
+body.ct-page .ct-name{
   color:#252B33;
   font-weight:600;
-  letter-spacing:-.015em;
-}
-body.ct-page .ct-name{font-size:14.5px;line-height:1.38;}
-body.ct-page .ct-custom,
-body.ct-page .ct-line-sub,
-body.ct-page .ct-summary-sub,
-body.ct-page .ct-details-text,
-body.ct-page .ct-cancel p{
-  color:#858C96;
-  font-weight:400;
+  letter-spacing:-.12px;
 }
 body.ct-page .ct-unit-price,
-body.ct-page .ct-item-total,
-body.ct-page .ct-bill-val,
-body.ct-page .ct-total-val,
-body.ct-page .ct-paybar-amt{
+body.ct-page .ct-item-total{
   font-variant-numeric:tabular-nums;
-  letter-spacing:-.025em;
 }
+body.ct-page .ct-custom,
+body.ct-page .ct-sav-sub,
+body.ct-page .ct-cym-from,
+body.ct-page .ct-details-text{
+  color:#858C96;
+}
+
+/* Section labels: refined tracking without the overly wide all-caps effect. */
 body.ct-page .ct-sec-title,
 body.ct-page .ct-cym-title{
-  color:#292F38;
-  font-weight:650;
-  letter-spacing:-.025em;
-}
-body.ct-page .ct-card-head,
-body.ct-page .ct-section-label,
-body.ct-page .ct-tip-title{
-  color:#858C96;
-  letter-spacing:.12em;
+  color:#68717C;
+  font-size:13px;
   font-weight:700;
+  letter-spacing:.105em;
+  line-height:1.35;
+}
+body.ct-page .ct-cym-title{
+  color:#303741;
+  font-size:17px;
+  letter-spacing:-.25px;
+  font-weight:650;
+  text-transform:none;
 }
 
-/* Gentle separators rather than hard grey rules. */
-body.ct-page .ct-row,
-body.ct-page .ct-item-actions,
-body.ct-page .ct-summary-contact,
-body.ct-page .ct-details-row + .ct-details-row,
-body.ct-page .ct-bill-hero,
-body.ct-page .ct-card-head{
-  border-color:rgba(31,41,55,.055);
-}
-body.ct-page .ct-strip,
-body.ct-page .ct-footer-save{
-  background:#EAF8F1;
-  border-color:rgba(21,155,114,.12);
-  color:#318B6D;
-}
-body.ct-page .ct-sav-flag,
-body.ct-page .ct-sav-flag.is-static,
-body.ct-page .ct-bill-hero-saved,
-body.ct-page .ct-now.is-save,
-body.ct-page .ct-bill-val.is-save{
-  color:#398D73;
-}
-body.ct-page .ct-stepper,
-body.ct-page .ct-chip[aria-pressed="true"],
-body.ct-page .ct-di-pill[aria-pressed="true"],
-body.ct-page .ct-summary-change,
-body.ct-page .ct-change{
-  background:#FFF1F3;
-  border-color:rgba(200,77,99,.16);
-}
-body.ct-page .ct-stepper button,
-body.ct-page .ct-qty,
-body.ct-page .ct-chip[aria-pressed="true"],
-body.ct-page .ct-di-pill[aria-pressed="true"],
-body.ct-page .ct-summary-change,
-body.ct-page .ct-change{
-  color:#B9576B;
-}
-
-/* Uniform, quiet image treatment for cart items and recommendations. */
-body.ct-page .ct-media,
+/* Recommendation images share one clean crop and a quiet neutral frame. */
 body.ct-page .ct-cym-media{
-  background:#F5F5F6;
-  border:1px solid rgba(31,41,55,.045);
-  box-shadow:0 1px 3px rgba(31,41,55,.04);
+  background:#F6F7F8;
+  border:1px solid rgba(226,230,235,.8);
+  box-shadow:0 1px 3px rgba(24,32,42,.045);
 }
-body.ct-page .ct-media img,
 body.ct-page .ct-cym-media img{
+  width:100%;
+  height:100%;
   object-fit:cover;
-  background:#F5F5F6;
+  object-position:center;
 }
-body.ct-page .ct-cym-media{border-radius:12px;}
-body.ct-page .ct-cym-media img{border-radius:11px;}
+body.ct-page .ct-cym-add{
+  box-shadow:0 3px 10px rgba(24,32,42,.12);
+}
 
-/* Keep the high-saturation brand treatment reserved for the main action. */
-body.ct-page .ct-paybar .ct-cta{
-  box-shadow:0 5px 15px rgba(11,143,60,.18);
+/* Savings rows and selected controls use softer tinted surfaces. */
+body.ct-page .ct-save-strip{
+  background:#EAF7F1;
+  border-color:#D4EEE2;
+}
+body.ct-page .ct-chip,
+body.ct-page .ct-tab-panel{
+  border-color:#E9EBEF;
+}
+body.ct-page .ct-chip[aria-pressed="true"]{
+  background:#FFF1F4;
+  border-color:#F1D5DD;
+}
+body.ct-page .ct-tip-note{
+  background:#FFF5F7;
+}
+
+/* Sticky-header-aware anchor positioning prevents sections landing underneath it. */
+html:has(body.ct-page){
+  scroll-padding-top:calc(76px + env(safe-area-inset-top));
+}
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group,
+body.ct-page .ct-bill{
+  scroll-margin-top:calc(76px + env(safe-area-inset-top));
+}
+
+/* Keep the sticky delivery header crisp while content scrolls beneath it. */
+body.ct-page .ct-delivery-head{
+  background:rgba(255,255,255,.98);
+  border-bottom:1px solid rgba(230,233,238,.9);
+  box-shadow:0 2px 10px rgba(24,32,42,.035);
+}
+
+/* Small-screen safeguard: retain the existing dimensions and prevent clipping. */
+@media (max-width:380px){
+  body.ct-page .ct-sec-title{ letter-spacing:.09em; }
+  body.ct-page .ct-cym-title{ letter-spacing:-.2px; }
 }
