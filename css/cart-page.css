@@ -2917,3 +2917,226 @@ body.ct-page .ct-cta-sub{font-size:12px; font-weight:500;}
   body.ct-page .ct-cym-media{height:88px;}
   body.ct-page .ct-paybar{grid-template-columns:84px minmax(0,1fr);}
 }
+
+/* ==========================================================================
+   EATSWADA CHECKOUT — RESTAURANT-CARD TYPOGRAPHY ALIGNMENT (2026-09-28)
+   Visual-only typography pass.
+   Uses the same Manrope family and the restaurant-card hierarchy:
+   17px primary / 13px body-metadata / 11px compact labels,
+   with 800 primary emphasis and restrained 500–650 supporting weights.
+   No DOM hooks, IDs, JavaScript behaviour, spacing mechanics or colours
+   are changed here.
+   ========================================================================== */
+
+body.ct-page{
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Primary hierarchy — mirrors .es-name / card title treatment. */
+body.ct-page .ct-sec-title,
+body.ct-page .ct-cym-title{
+  font-size:17px;
+  font-weight:800;
+  line-height:1.28;
+  letter-spacing:-.35px;
+}
+
+body.ct-page .ct-dh-restaurant{
+  font-size:13px;
+  font-weight:650;
+  line-height:1.2;
+  letter-spacing:-.15px;
+}
+
+body.ct-page .ct-dh-eta,
+body.ct-page .ct-dh-tag{
+  font-size:13px;
+  font-weight:800;
+}
+
+body.ct-page .ct-dh-addr{
+  font-size:13px;
+  font-weight:500;
+  line-height:1.3;
+}
+
+/* Main checkout content — same 13px body rhythm as restaurant-card metadata. */
+body.ct-page .ct-name{
+  font-size:13px;
+  font-weight:650;
+  line-height:1.35;
+  letter-spacing:0;
+}
+
+body.ct-page .ct-custom,
+body.ct-page .ct-sav-sub,
+body.ct-page .ct-details-text,
+body.ct-page .ct-cancel p{
+  font-size:11px;
+  font-weight:500;
+  line-height:1.4;
+}
+
+body.ct-page .ct-unit-price,
+body.ct-page .ct-bill-label,
+body.ct-page .ct-bill-val,
+body.ct-page .ct-details-label,
+body.ct-page .ct-tab,
+body.ct-page .ct-di-pill{
+  font-size:13px;
+  line-height:1.35;
+}
+
+body.ct-page .ct-unit-price,
+body.ct-page .ct-bill-val{
+  font-weight:650;
+}
+
+body.ct-page .ct-sav-title{
+  font-size:13px;
+  font-weight:650;
+  line-height:1.35;
+}
+
+body.ct-page .ct-group-flag,
+body.ct-page .ct-tag,
+body.ct-page .ct-restaurant-note-label,
+body.ct-page .ct-cancel-title{
+  font-size:11px;
+  font-weight:800;
+  line-height:1.35;
+}
+
+body.ct-page .ct-tag{
+  letter-spacing:.25px;
+}
+
+body.ct-page .ct-chip-amt{
+  font-size:13px;
+  font-weight:650;
+  line-height:1.2;
+}
+
+body.ct-page .ct-chip-sub{
+  font-size:11px;
+  font-weight:500;
+  line-height:1.2;
+}
+
+body.ct-page .ct-tip-note,
+body.ct-page .ct-strip{
+  font-size:13px;
+  font-weight:500;
+  line-height:1.35;
+}
+
+body.ct-page .ct-tip-note strong{
+  font-weight:800;
+}
+
+body.ct-page .ct-cym-name{
+  font-size:13px;
+  font-weight:500;
+  line-height:1.35;
+}
+
+body.ct-page .ct-cym-now{
+  font-size:13px;
+  font-weight:650;
+}
+
+body.ct-page .ct-cym-price s,
+body.ct-page .ct-cym-off,
+body.ct-page .ct-cym-note{
+  font-size:11px;
+}
+
+body.ct-page .ct-bill-hero-top,
+body.ct-page .ct-bill-hero-top strong{
+  font-size:17px;
+  line-height:1.25;
+}
+
+body.ct-page .ct-bill-hero-top{
+  font-weight:650;
+}
+
+body.ct-page .ct-bill-hero-top strong{
+  font-weight:800;
+  letter-spacing:-.2px;
+}
+
+body.ct-page .ct-bill-hero-saved{
+  font-size:13px;
+  font-weight:500;
+  line-height:1.35;
+}
+
+body.ct-page .ct-total-label{
+  font-size:13px;
+  font-weight:800;
+  line-height:1.3;
+}
+
+body.ct-page .ct-bill .ct-total-val{
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:-.35px;
+}
+
+body.ct-page .ct-paybar-amt{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-.45px;
+}
+
+body.ct-page .ct-paybar-link{
+  font-size:13px;
+  font-weight:650;
+}
+
+body.ct-page .ct-paybar .ct-cta-text{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.05px;
+}
+
+body.ct-page .ct-cta-sub,
+body.ct-page .ct-pay-note{
+  font-size:11px;
+  font-weight:500;
+  line-height:1.3;
+}
+
+/* Compact phones: match the restaurant-card's 17 / 13 / 13 rhythm exactly. */
+@media (max-width:384px){
+  body.ct-page .ct-sec-title,
+  body.ct-page .ct-cym-title{
+    font-size:17px;
+  }
+
+  body.ct-page .ct-name{
+    font-size:13px;
+  }
+
+  body.ct-page .ct-tab{
+    font-size:13px;
+    font-weight:500;
+  }
+
+  body.ct-page .ct-chip-amt{
+    font-size:13px;
+  }
+
+  body.ct-page .ct-chip-sub{
+    font-size:11px;
+  }
+
+  body.ct-page .ct-paybar .ct-cta-text{
+    font-size:13px;
+  }
+}
