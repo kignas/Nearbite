@@ -3142,184 +3142,105 @@ body.ct-page .ct-pay-note{
 }
 
 
-/* ==========================================================================
-   EATSWADA CART / CHECKOUT — REFERENCE TYPOGRAPHY OVERRIDES
-   CSS only. The uploaded file is named .js, but its contents are a stylesheet.
-   Match the supplied food-ordering reference's clean Manrope hierarchy while
-   preserving all markup, interactions, colors, spacing, and layout.
-   ========================================================================== */
+/* Screenshot-guided typography only. Retains existing layout and breakpoints.
+   Manrope is already loaded by cart.html; reference font identity is unverified.
+   No icon-font selectors, structural properties, or application code changed. */
 body.ct-page{
-  --ct-ref-font:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --ct-ref-title:16px;
-  --ct-ref-body:14px;
-  --ct-ref-secondary:12px;
-  --ct-ref-caption:11px;
-  --ct-ref-regular:400;
-  --ct-ref-medium:500;
-  --ct-ref-semibold:600;
-  --ct-ref-bold:700;
-  font-family:var(--ct-ref-font);
-  font-weight:var(--ct-ref-regular);
-  text-rendering:optimizeLegibility;
+  --ct-type-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-family:var(--ct-type-family);
 }
 body.ct-page button,
 body.ct-page input,
 body.ct-page textarea,
-body.ct-page select{
-  font-family:var(--ct-ref-font);
+body.ct-page select,
+body.ct-page .ct-num,
+body.ct-page .ct-off-badge,
+body.ct-page .ct-qty,
+body.ct-page .ct-count,
+body.ct-page .ct-bill-peek-val{
+  font-family:var(--ct-type-family);
 }
 
-/* Restaurant / section titles and food names */
-body.ct-page .ct-dh-restaurant,
-body.ct-page .ct-restaurant-name,
+/* Restrained restaurant label; stronger destination and section labels.
+   Existing font sizes and line boxes retained wherever possible. */
+body.ct-page .ct-dh-restaurant{font-weight:400;letter-spacing:-.1px;}
+body.ct-page .ct-dh-tag{font-weight:700;}
+body.ct-page .ct-restaurant-name{font-weight:600;}
 body.ct-page .ct-sec-title,
-body.ct-page .ct-cym-title,
-body.ct-page .ct-sheet-title{
-  font-size:var(--ct-ref-title);
-  font-weight:var(--ct-ref-semibold);
-  line-height:1.3;
-  letter-spacing:-.15px;
-}
-body.ct-page .ct-name,
+body.ct-page .ct-cym-title{font-weight:700;letter-spacing:.12em;}
+body.ct-page .ct-sheet-title,
+body.ct-page .ct-head-title,
+body.ct-page .ct-empty-title{font-weight:700;letter-spacing:-.2px;}
+body.ct-page .ct-card-head,
+body.ct-page .ct-field-label,
+body.ct-page .ct-tip-title,
+body.ct-page .ct-section-label,
+body.ct-page .ct-restaurant-note-label{font-weight:600;letter-spacing:.06em;}
+
+/* Item names and primary copy: medium weight rather than extra-bold. */
+body.ct-page .ct-name{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-cym-name{font-weight:400;letter-spacing:-.05px;}
 body.ct-page .ct-sav-title,
 body.ct-page .ct-details-label,
-body.ct-page .ct-group-title,
-body.ct-page .ct-summary-title,
-body.ct-page .ct-line-title{
-  font-size:var(--ct-ref-body);
-  font-weight:var(--ct-ref-medium);
-  line-height:1.4;
-  letter-spacing:0;
-}
-body.ct-page .ct-cym-title,
-body.ct-page .ct-sec-title{
-  font-size:15px;
-  font-weight:var(--ct-ref-bold);
-  line-height:1.3;
-  letter-spacing:.12em;
-}
-
-/* Supporting copy, descriptions, addresses and policy text */
+body.ct-page .ct-line-title,
+body.ct-page .ct-group-title{font-weight:500;letter-spacing:-.1px;}
 body.ct-page .ct-custom,
-body.ct-page .ct-restaurant-meta,
-body.ct-page .ct-cym-from,
-body.ct-page .ct-cym-note,
-body.ct-page .ct-cym-rating,
 body.ct-page .ct-sav-sub,
 body.ct-page .ct-details-text,
 body.ct-page .ct-group-sub,
-body.ct-page .ct-summary-sub,
-body.ct-page .ct-summary-phone,
-body.ct-page .ct-dh-addr,
-body.ct-page .ct-cancel p,
+body.ct-page .ct-line-sub,
+body.ct-page .ct-restaurant-meta,
+body.ct-page .ct-restaurant-note-preview,
+body.ct-page .ct-cym-from,
 body.ct-page .ct-tip-note,
 body.ct-page .ct-field-help,
-body.ct-page .ct-pay-note{
-  font-size:var(--ct-ref-secondary);
-  font-weight:var(--ct-ref-regular);
-  line-height:1.45;
-}
-body.ct-page .ct-cancel-title,
-body.ct-page .ct-dh-tag,
-body.ct-page .ct-details-action,
-body.ct-page .ct-line-act,
-body.ct-page .ct-paybar-link{
-  font-size:var(--ct-ref-secondary);
-  font-weight:var(--ct-ref-semibold);
-  line-height:1.35;
-}
-body.ct-page .ct-addr-eyebrow,
-body.ct-page .ct-field-label,
-body.ct-page .ct-tip-title,
-body.ct-page .ct-restaurant-note-label,
-body.ct-page .ct-section-label{
-  font-size:var(--ct-ref-caption);
-  font-weight:var(--ct-ref-bold);
-  line-height:1.3;
-  letter-spacing:.08em;
-}
+body.ct-page .ct-cancel p{font-weight:400;letter-spacing:0;}
+body.ct-page .ct-cancel-title{font-weight:600;}
 
-/* Tabs, controls, coupon actions and checkout buttons */
-body.ct-page .ct-tab,
-body.ct-page .ct-cym-tab,
+/* Preserve the selected tab's hidden width-reserving text twin. */
+body.ct-page .ct-cym-tab{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-cym-tab::after,
+body.ct-page .ct-cym-tab.is-active,
+body.ct-page .ct-cym-tabs.is-ready .ct-cym-tab.is-active{font-weight:700;}
+body.ct-page .ct-tab{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-tab.is-active{font-weight:700;}
 body.ct-page .ct-pill-btn,
 body.ct-page .ct-di-pill,
-body.ct-page .ct-chip,
+body.ct-page .ct-details-action,
+body.ct-page .ct-cym-all,
 body.ct-page .ct-btn,
 body.ct-page .ct-btn-remove,
-body.ct-page .ct-cta-text{
-  font-size:var(--ct-ref-body);
-  font-weight:var(--ct-ref-semibold);
-  line-height:1.3;
-  letter-spacing:0;
-}
-body.ct-page .ct-cta-text{
-  font-size:16px;
-  font-weight:var(--ct-ref-bold);
-}
-body.ct-page .ct-cta-sub,
-body.ct-page .ct-count,
-body.ct-page .ct-tab-count{
-  font-size:var(--ct-ref-caption);
-  font-weight:var(--ct-ref-medium);
-  line-height:1.3;
-  letter-spacing:0;
-}
+body.ct-page .ct-sug,
+body.ct-page .ct-empty-btn{font-weight:600;letter-spacing:0;}
+body.ct-page .ct-qty,
+body.ct-page .ct-chip-amt{font-weight:600;}
+body.ct-page .ct-chip-sub{font-weight:400;}
 
-/* Price ladder: item prices, discounted/original prices, bill and total */
+/* Financial hierarchy; existing strikethrough and tabular numerals retained. */
 body.ct-page .ct-unit-price,
-body.ct-page .ct-item-total,
-body.ct-page .ct-cym-now,
-body.ct-page .ct-bill-label,
-body.ct-page .ct-bill-val,
-body.ct-page .ct-chip-amt{
-  font-size:var(--ct-ref-body);
-  font-weight:var(--ct-ref-medium);
-  line-height:1.3;
-}
-body.ct-page .ct-was-price,
-body.ct-page .ct-bill-hero-top s,
-body.ct-page .ct-bill-val s,
-body.ct-page .ct-cym-price s,
-body.ct-page .ct-chip-sub{
-  font-size:var(--ct-ref-secondary);
-  font-weight:var(--ct-ref-regular);
-  line-height:1.3;
-}
+body.ct-page .ct-item-total{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-was-price{font-weight:600;}
+body.ct-page .ct-cym-now{font-weight:600;}
+body.ct-page .ct-cym-price s{font-weight:400;}
 body.ct-page .ct-off-badge,
-body.ct-page .ct-item-save,
 body.ct-page .ct-cym-off,
-body.ct-page .ct-bill-hero-saved,
-body.ct-page .ct-footer-save{
-  font-size:var(--ct-ref-secondary);
-  font-weight:var(--ct-ref-semibold);
-  line-height:1.35;
-}
-body.ct-page .ct-total-label{
-  font-size:15px;
-  font-weight:var(--ct-ref-semibold);
-  line-height:1.3;
-}
-body.ct-page .ct-total-val,
-body.ct-page .ct-paybar-amt,
-body.ct-page .ct-bill-hero-top strong{
-  font-size:19px;
-  font-weight:var(--ct-ref-bold);
-  line-height:1.2;
-  letter-spacing:-.2px;
-}
-body.ct-page .ct-textarea,
-body.ct-page .ct-input{
-  font-family:var(--ct-ref-font);
-  font-size:16px;
-  font-weight:var(--ct-ref-regular);
-  line-height:1.5;
-}
+body.ct-page .ct-item-save{font-weight:500;letter-spacing:0;}
+body.ct-page .ct-bill-label{font-weight:400;}
+body.ct-page .ct-bill-val,
+body.ct-page .ct-bill .ct-bill-row .ct-now{font-weight:500;}
+body.ct-page .ct-bill-val s,
+body.ct-page .ct-bill-hero-top s{font-weight:400;}
+body.ct-page .ct-bill-hero-top{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-bill-hero-top strong{font-weight:600;letter-spacing:-.1px;}
+body.ct-page .ct-bill-hero-saved{font-weight:400;letter-spacing:0;}
+body.ct-page .ct-total-label{font-weight:600;}
+body.ct-page .ct-bill .ct-total-val{font-weight:700;letter-spacing:-.3px;}
+body.ct-page .ct-paybar-amt{font-weight:800;letter-spacing:-.4px;}
+body.ct-page .ct-paybar-link{font-weight:700;letter-spacing:-.1px;}
+body.ct-page .ct-paybar .ct-cta-text{font-weight:800;letter-spacing:-.2px;}
+body.ct-page .ct-save-strip .ct-save-text{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-sav-flag{font-weight:600;}
 
-@media (max-width:380px){
-  body.ct-page .ct-name{ font-size:14px; }
-  body.ct-page .ct-cta-text{ font-size:15px; }
-  body.ct-page .ct-paybar-amt,
-  body.ct-page .ct-total-val,
-  body.ct-page .ct-bill-hero-top strong{ font-size:18px; }
-}
+/* Keep 16px form text to preserve existing mobile focus behaviour. */
+body.ct-page .ct-input,
+body.ct-page .ct-textarea{font-size:16px;font-weight:400;line-height:1.5;}
