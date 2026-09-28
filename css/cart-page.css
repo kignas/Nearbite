@@ -2492,436 +2492,65 @@ body.ct-page .ct-pay-note{
 }
 
 
-/* PAYMENT PROCESSING STATE — same checkout design tokens. */
-.ct-cta.is-processing{cursor:wait;opacity:.92}
-.ct-cta.is-processing:active{transform:none}
-.ct-cta.is-processing .fa-spin{font-size:13px}
-
-
-/* CHECKOUT REFINEMENT — keep Eatswada typography; no cart-line photos.
-   Complete Your Meal images are deliberately unaffected. */
-body.ct-page .ct-row{
-  grid-template-columns:minmax(0,1fr) var(--ct-right);
-}
-
-/* Restore the global Eatswada type scale in the recommendation rail.
-   The earlier compact overrides made these labels noticeably smaller than
-   the site's Inter/Manrope-compatible UI hierarchy. */
-body.ct-page .ct-cym-title{
-  font-size:16px;
-  line-height:1.25;
-  font-weight:800;
-  letter-spacing:-.35px;
-  text-transform:none;
-}
-body.ct-page .ct-cym-from{font-size:12px;line-height:1.4;}
-body.ct-page .ct-cym-tab{font-size:13px;font-weight:600;}
-body.ct-page .ct-cym-tab.is-active{font-weight:750;}
-body.ct-page .ct-cym-name{font-size:13px;line-height:1.35;font-weight:700;min-height:35px;}
-body.ct-page .ct-cym-now{font-size:13px;font-weight:800;}
-body.ct-page .ct-cym-price s,
-body.ct-page .ct-cym-off{font-size:11px;}
-body.ct-page .ct-cym-note,
-body.ct-page .ct-cym-rating{font-size:11px;}
-
-/* Rider tip: clear red selection with a calm blue supporting note. */
-body.ct-page .ct-tip-title{
-  color:#2563EB;
-  font-size:13px;
-  font-weight:800;
-  letter-spacing:-.1px;
-  text-transform:none;
-}
-body.ct-page .ct-tip-note{
-  display:inline-flex;
-  align-items:center;
-  min-height:30px;
-  margin-top:7px;
-  padding:5px 10px;
-  border-radius:9px;
-  background:#EFF6FF;
-  color:#1D4ED8;
-  font-size:12px;
-  line-height:1.35;
-}
-body.ct-page .ct-chip[aria-pressed="true"]{
-  border-color:#E11D48;
-  background:#FFF1F4;
-  color:#BE123C;
-}
-body.ct-page .ct-chip:focus-visible{outline-color:#2563EB;}
-@media (prefers-reduced-motion:reduce){
-  body.ct-page .ct-chip{transition:none;}
-}
-
-
 /* ==========================================================================
-   EATSWADA CHECKOUT — VISUAL CONSISTENCY PASS
-   Goal: make checkout read as the same Eatswada design system as restaurant
-   menu pages. Existing functionality/API/state/payment logic is untouched.
+   EATSWADA CHECKOUT — SPACING MATCH TO USER REFERENCE
+   Spacing-only overrides. No typography, color, layout behavior or logic.
    ========================================================================== */
-
-body.ct-page{
-  font-family:var(--ew-ui-font, "Manrope", system-ui, sans-serif);
-  color:var(--ct-ink);
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-}
-
-/* Restaurant-page-like typography hierarchy */
-body.ct-page .ct-dh-restaurant{
-  font-size:16px;
-  line-height:1.18;
-  font-weight:700;
-  letter-spacing:-.028em;
-}
-body.ct-page .ct-dh-tag{
-  font-size:14px;
-  line-height:1.15;
-  font-weight:600;
-}
-body.ct-page .ct-dh-addr{
-  font-size:13px;
-  line-height:1.3;
-  font-weight:500;
-}
-
-body.ct-page .ct-name{
-  font-size:15.5px;
-  line-height:1.24;
-  font-weight:700;
-  letter-spacing:-.018em;
-}
-body.ct-page .ct-custom{
-  font-size:12.5px;
-  line-height:1.32;
-  font-weight:500;
-}
-body.ct-page .ct-unit-price{
-  font-size:15px;
-  line-height:1;
-  font-weight:800;
-  letter-spacing:-.02em;
-}
-body.ct-page .ct-was-price{
-  font-size:12.5px;
-  line-height:1;
-  font-weight:500;
-}
-body.ct-page .ct-off-badge{
-  font-size:11px;
-  line-height:1;
-  font-weight:700;
-}
-body.ct-page .ct-item-total{
-  font-size:15px;
-  line-height:1;
-  font-weight:800;
-  letter-spacing:-.02em;
-}
-body.ct-page .ct-qty{
-  font-size:13px;
-  font-weight:600;
-}
-
-body.ct-page .ct-sec-title{
-  font-size:20px;
-  line-height:1.12;
-  font-weight:750;
-  letter-spacing:-.035em;
-}
-
-body.ct-page .ct-cym-title{
-  font-size:18px;
-  line-height:1.16;
-  font-weight:700;
-  letter-spacing:-.03em;
-  text-transform:none;
-}
-body.ct-page .ct-cym-from{
-  font-size:12px;
-  line-height:1.3;
-  font-weight:500;
-}
-body.ct-page .ct-cym-all{
-  font-size:14px;
-  line-height:1.2;
-  font-weight:600;
-}
-body.ct-page .ct-cym-tab{
-  font-size:14px;
-  line-height:1;
-  font-weight:600;
-}
-body.ct-page .ct-cym-name{
-  font-size:13.5px;
-  line-height:1.28;
-  font-weight:600;
-  letter-spacing:-.012em;
-}
-body.ct-page .ct-cym-now{
-  font-size:13px;
-  font-weight:800;
-}
-body.ct-page .ct-cym-price s{
-  font-size:11.5px;
-  font-weight:500;
-}
-body.ct-page .ct-cym-off{
-  font-size:11.5px;
-  font-weight:700;
-}
-body.ct-page .ct-cym-note,
-body.ct-page .ct-cym-rating{
-  font-size:11.5px;
-  font-weight:500;
-}
-body.ct-page .ct-cym-badge{
-  font-size:11px;
-  font-weight:600;
-}
-
-body.ct-page .ct-sav-title{
-  font-size:14px;
-  line-height:1.3;
-  font-weight:500;
-}
-body.ct-page .ct-sav-sub{
-  font-size:12.5px;
-  line-height:1.35;
-  font-weight:500;
-}
-body.ct-page .ct-sav-flag{
-  font-size:13px;
-  font-weight:600;
-}
-
-body.ct-page .ct-tab{
-  font-size:14px;
-  line-height:1;
-  font-weight:600;
-}
-body.ct-page .ct-chip-amt{
-  font-size:14px;
-  line-height:1.15;
-  font-weight:700;
-}
-body.ct-page .ct-chip-sub{
-  font-size:12px;
-  line-height:1.2;
-  font-weight:500;
-}
-body.ct-page .ct-tip-note{
-  font-size:12.5px;
-  line-height:1.35;
-  font-weight:500;
-}
-
-body.ct-page .ct-details-label{
-  font-size:14px;
-  line-height:1.25;
-  font-weight:600;
-}
-body.ct-page .ct-details-text{
-  font-size:12.5px;
-  line-height:1.35;
-  font-weight:500;
-}
-
-body.ct-page .ct-bill-hero-top strong{
-  font-size:20px;
-  line-height:1;
-  font-weight:800;
-  letter-spacing:-.035em;
-}
-body.ct-page .ct-bill-hero-top s{
-  font-size:13px;
-  font-weight:500;
-}
-body.ct-page .ct-total-label{
-  font-size:15px;
-  font-weight:700;
-}
-body.ct-page .ct-total-val{
-  font-size:20px;
-  font-weight:800;
-  letter-spacing:-.03em;
-}
-
-/* ==========================================================================
-   Section rhythm
-   ========================================================================== */
-
 body.ct-page .ct-card{
-  margin-top:12px;
-  margin-bottom:12px;
-  border-radius:18px;
+  margin:12px 24px;
+  padding:18px;
 }
 
-body.ct-page .ct-item-card{
-  padding:14px 16px 13px;
-}
-
-body.ct-page .ct-row{
-  padding:13px 0;
-}
-
-body.ct-page .ct-row + .ct-row{
-  border-top:1px solid var(--ct-line-soft);
-}
-
-body.ct-page .ct-item-actions{
-  gap:9px;
-  padding-top:6px;
-}
-
-body.ct-page .ct-pill-btn{
-  min-height:40px;
-  border-radius:11px;
-  font-size:14px;
-  font-weight:600;
+body.ct-page .ct-group,
+body.ct-page .ct-bill,
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  margin:12px 24px;
 }
 
 body.ct-page .ct-cym{
-  padding:15px 14px 14px;
+  margin:12px 24px;
+  padding:18px 18px 19px;
+}
+
+body.ct-page .ct-item-card{
+  margin-bottom:12px;
+}
+
+body.ct-page .ct-details{
+  margin-top:12px;
+}
+
+body.ct-page .ct-cancel{
+  margin:16px 24px 0;
+}
+
+body.ct-page .ct-section-label{
+  margin:16px 24px 0;
 }
 
 body.ct-page .ct-cym-tabs{
-  margin-top:11px;
-  min-height:40px;
+  margin-top:14px;
 }
 
 body.ct-page .ct-cym-track{
-  margin-top:12px;
-  padding-top:2px;
-  padding-bottom:6px;
-  gap:11px;
+  margin-top:14px;
 }
 
-body.ct-page .ct-cym-card{
-  flex:0 0 124px;
-  width:124px;
-}
-body.ct-page .ct-cym-media{
-  width:124px;
-  height:124px;
-  border-radius:13px;
-}
-body.ct-page .ct-cym-media img{
-  border-radius:13px;
-}
-
-/* Don't create a giant empty feeling when only a few recommendations exist. */
-body.ct-page .ct-cym-track{
-  justify-content:flex-start;
-}
-
-/* Savings */
-body.ct-page .ct-savings{
-  padding:13px 14px 6px;
-}
-body.ct-page .ct-sav-row{
-  min-height:50px;
-}
-
-/* Rider Tip / Instructions */
-body.ct-page .ct-tipcard{
-  padding:13px 12px 12px;
-}
-body.ct-page .ct-tab-panel{
-  padding-top:12px;
-}
-body.ct-page .ct-chip-row{
-  gap:7px;
-}
-body.ct-page .ct-chip{
-  min-height:54px;
-  border-radius:10px;
-}
-body.ct-page .ct-tip-note{
-  margin-top:11px;
-  padding:9px 10px;
-  border-radius:10px;
-}
-
-/* Address + bill */
-body.ct-page .ct-details{
-  padding:5px 14px;
-}
-body.ct-page .ct-details-row{
-  min-height:53px;
-}
-body.ct-page .ct-bill{
-  margin-top:12px;
-  border-radius:18px;
-}
-
-/* Footer */
-body.ct-page .ct-cta{
-  min-height:54px;
-  border-radius:15px;
-}
-body.ct-page .ct-cta-text{
-  font-size:15px;
-  line-height:1.15;
-  font-weight:700;
-  letter-spacing:-.012em;
-}
-body.ct-page .ct-cta-sub{
-  font-size:11px;
-  line-height:1.15;
-  font-weight:500;
-}
-body.ct-page .ct-pay-note{
-  font-size:11px;
-  line-height:1.25;
-  font-weight:500;
-}
-
-/* Keep the checkout's primary interactive language aligned with Eatswada. */
-body.ct-page .ct-tab.is-active,
-body.ct-page .ct-chip[aria-pressed="true"]{
-  background:var(--ct-green);
-  color:#fff;
-  border-color:var(--ct-green);
-}
-body.ct-page .ct-chip[aria-pressed="true"]{
-  background:#FFF0F4;
-  color:var(--ct-green-deep);
-}
-
-/* Keep Complete Your Meal active state in Eatswada pink/red while preserving
-   its sliding indicator animation. */
-body.ct-page .ct-cym-ind{
-  background:var(--ct-green);
-  box-shadow:0 2px 6px rgba(220,39,66,.16);
-}
-body.ct-page .ct-cym-tabs.is-ready .ct-cym-tab.is-active{
-  color:#fff;
-}
-
-/* Existing animation becomes more polished with the corrected hierarchy. */
-@media (prefers-reduced-motion:no-preference){
-  body.ct-page .ct-cym-track.is-in .ct-cym-card{
-    animation:ctCymEatswadaIn .30s var(--ct-ease) both;
-  }
-  @keyframes ctCymEatswadaIn{
-    from{opacity:0;transform:translate3d(14px,0,0) scale(.99)}
-    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
-  }
-
-  body.ct-page .ct-cym-track.is-swapping{
-    transition:opacity .16s var(--ct-ease), transform .16s var(--ct-ease);
-  }
-  body.ct-page .ct-cym-track.is-swapping.is-backward{
-    transform:translate3d(12px,0,0);
-  }
-}
-
-/* Small screens: preserve the same Eatswada scale without clipping. */
 @media (max-width:380px){
-  body.ct-page .ct-cym-card{flex-basis:116px;width:116px;}
-  body.ct-page .ct-cym-media{width:116px;height:116px;}
-  body.ct-page .ct-cym-tab{font-size:13px;padding-left:11px;padding-right:11px;}
-  body.ct-page .ct-chip-amt{font-size:13.5px;}
+  body.ct-page .ct-card,
+  body.ct-page .ct-group,
+  body.ct-page .ct-bill,
+  body.ct-page .ct-cym,
+  body.ct-page #ct-payment-group,
+  body.ct-page #ct-di-group{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  body.ct-page .ct-cancel,
+  body.ct-page .ct-section-label{
+    margin-left:16px;
+    margin-right:16px;
+  }
 }
