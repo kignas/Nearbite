@@ -166,3 +166,143 @@ body.ct-page .ct-cym-badge{
   body.ct-page .ct-cym-media{width:116px;height:116px;}
   body.ct-page .ct-cym-title{font-size:16px;}
 }
+
+/* ==========================================================================
+   COMPLETE YOUR MEAL — visual alignment with the supplied reference
+   This file only. Existing category/add/customization behavior is untouched.
+   ========================================================================== */
+body.ct-page .ct-cym{
+  padding:20px 16px 18px;
+  border-radius:20px;
+  background:#fff;
+}
+body.ct-page .ct-cym-head{
+  align-items:center;
+  margin-bottom:16px;
+}
+body.ct-page .ct-cym-title{
+  color:#858A91;
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:.16em;
+  line-height:1.3;
+  text-transform:uppercase;
+}
+body.ct-page .ct-cym-from{display:none;}
+
+body.ct-page .ct-cym-tabs{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  width:100%;
+  padding:5px;
+  margin:0 0 22px;
+  border:0;
+  border-radius:999px;
+  background:#F3F4F6;
+  overflow:hidden;
+}
+body.ct-page .ct-cym-tab{
+  flex:1 1 0;
+  min-width:0;
+  min-height:54px;
+  padding:0 8px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:#171A20;
+  font-size:15px;
+  font-weight:500;
+  line-height:1.2;
+  white-space:nowrap;
+  box-shadow:none;
+}
+body.ct-page .ct-cym-tab.is-active{
+  background:#080A12;
+  border-color:#080A12;
+  color:#fff;
+  font-weight:700;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+
+body.ct-page .ct-cym-track{
+  gap:16px;
+  padding:0 1px 8px;
+  scroll-padding-inline:1px;
+}
+body.ct-page .ct-cym-card{
+  flex:0 0 clamp(174px, 32vw, 238px);
+  width:clamp(174px, 32vw, 238px);
+}
+body.ct-page .ct-cym-media{
+  width:100%;
+  height:auto;
+  aspect-ratio:1.08 / 1;
+  border:1px solid #E7E9EC;
+  border-radius:15px;
+  background:#F4F4F5;
+  box-shadow:none;
+}
+body.ct-page .ct-cym-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:14px;
+}
+body.ct-page .ct-cym-add{
+  top:8px;
+  right:8px;
+  bottom:auto;
+  width:48px;
+  height:48px;
+  border:1px solid #E0E3E7;
+  border-radius:13px;
+  color:#159B70;
+  box-shadow:0 2px 6px rgba(20,30,40,.12);
+}
+body.ct-page .ct-cym-add svg{width:21px;height:21px;}
+body.ct-page .ct-cym-name{
+  margin-top:10px;
+  min-height:46px;
+  gap:6px;
+  color:#30343B;
+  font-size:15px;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:-.15px;
+}
+body.ct-page .ct-cym-name > *{flex-shrink:0;}
+body.ct-page .ct-cym-price{
+  gap:6px;
+  margin-top:7px;
+}
+body.ct-page .ct-cym-now{
+  color:#30343B;
+  font-size:16px;
+  font-weight:750;
+}
+body.ct-page .ct-cym-price s{font-size:12px;}
+body.ct-page .ct-cym-off{
+  padding:3px 6px;
+  border-radius:5px;
+  font-size:10px;
+}
+body.ct-page .ct-cym-meta{margin-top:6px;font-size:11px;}
+body.ct-page .ct-cym-badge{
+  top:8px;
+  left:8px;
+  border-radius:5px;
+  font-size:10px;
+  padding:4px 7px;
+}
+@media(max-width:420px){
+  body.ct-page .ct-cym{padding:17px 12px 15px;}
+  body.ct-page .ct-cym-title{font-size:14px;letter-spacing:.13em;}
+  body.ct-page .ct-cym-tabs{margin-bottom:17px;}
+  body.ct-page .ct-cym-tab{min-height:46px;padding:0 5px;font-size:13px;}
+  body.ct-page .ct-cym-track{gap:13px;}
+  body.ct-page .ct-cym-card{flex-basis:clamp(158px, 43vw, 190px);width:clamp(158px, 43vw, 190px);}
+  body.ct-page .ct-cym-add{width:40px;height:40px;top:7px;right:7px;}
+  body.ct-page .ct-cym-name{font-size:13px;min-height:38px;}
+  body.ct-page .ct-cym-now{font-size:14px;}
+}
