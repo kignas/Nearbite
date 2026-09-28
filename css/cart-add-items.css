@@ -1,0 +1,74 @@
+/* ==========================================================================
+   PART 04 — ADD ITEMS & COOKING REQUESTS
+   Visual-only refinement. Links, note-sheet triggers, data attributes and
+   all JavaScript behavior remain unchanged.
+   ========================================================================== */
+body.ct-page .ct-item-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px;
+  padding:10px 0 4px;
+}
+body.ct-page .ct-item-actions .ct-pill-btn{
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 13px;
+  border:1px solid #E7E9ED;
+  border-radius:10px;
+  background:#FFFFFF;
+  color:#46505B;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:-.05px;
+  box-shadow:0 2px 7px rgba(31,41,55,.035);
+  text-decoration:none;
+  transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+body.ct-page .ct-item-actions .ct-pill-btn svg{
+  flex:0 0 auto;
+  color:#78828D;
+}
+body.ct-page .ct-item-actions .ct-pill-btn:active{
+  transform:translateY(1px);
+  box-shadow:0 1px 3px rgba(31,41,55,.04);
+}
+body.ct-page .ct-item-actions .ct-pill-btn.ct-restaurant-note-btn{
+  background:#F7F8FA;
+  border-color:#E9EBEF;
+  color:#505A65;
+}
+body.ct-page .ct-item-actions .ct-pill-btn.ct-restaurant-note-btn.is-set{
+  background:#EAF6F0;
+  border-color:#D5EDE1;
+  color:#348466;
+}
+body.ct-page .ct-item-actions .ct-pill-btn.ct-restaurant-note-btn.is-set svg{
+  color:#348466;
+}
+body.ct-page .ct-restaurant-note-preview{
+  margin:7px 0 2px;
+  padding:9px 11px;
+  border:1px solid #E5F0EA;
+  border-radius:9px;
+  background:#F4FAF6;
+  color:#66766D;
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:500;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+body.ct-page .ct-item-actions .ct-pill-btn:focus-visible{
+  outline:2px solid rgba(47,145,112,.38);
+  outline-offset:2px;
+}
+@media (max-width:360px){
+  body.ct-page .ct-item-actions{gap:7px;}
+  body.ct-page .ct-item-actions .ct-pill-btn{padding:0 10px;font-size:11.5px;}
+}

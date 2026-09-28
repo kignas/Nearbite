@@ -3175,3 +3175,67 @@ body.ct-page .ct-delivery-head{
   body.ct-page .ct-sec-title{ letter-spacing:.09em; }
   body.ct-page .ct-cym-title{ letter-spacing:-.2px; }
 }
+
+/* =====================================================================
+   EATSWADA CART REDESIGN — PART 02
+   Savings strip: softer tint, clearer hierarchy and calm elevation.
+   Keeps the existing #ct-footer-save / paintFooterSavings behavior intact.
+   ===================================================================== */
+body.ct-page .ct-save-strip{
+  min-height:46px;
+  margin:0 14px 8px;
+  width:calc(100% - 28px);
+  padding:0 13px;
+  gap:9px;
+  border:1px solid #D8EEE4;
+  border-radius:12px;
+  background:#EFF8F3;
+  color:#39866D;
+  box-shadow:0 2px 8px rgba(31,91,68,.045);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:-.12px;
+  -webkit-tap-highlight-color:transparent;
+}
+body.ct-page .ct-save-strip .ct-save-text{
+  font-size:13px;
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:-.12px;
+  color:#39866D;
+}
+body.ct-page .ct-save-strip .ct-save-spark{
+  width:17px;
+  height:17px;
+  color:#399477;
+  opacity:.9;
+}
+body.ct-page .ct-save-strip .ct-save-chev{
+  width:15px;
+  height:15px;
+  color:#6B9D88;
+  opacity:.9;
+}
+body.ct-page .ct-save-strip:focus-visible{
+  outline:2px solid rgba(57,134,109,.42);
+  outline-offset:2px;
+}
+body.ct-page .ct-save-strip:active{
+  background:#E8F4ED;
+  box-shadow:0 1px 4px rgba(31,91,68,.05);
+}
+@media(max-width:380px){
+  body.ct-page .ct-save-strip{
+    min-height:44px;
+    margin-left:12px;
+    margin-right:12px;
+    width:calc(100% - 24px);
+    padding-left:11px;
+    padding-right:11px;
+  }
+  body.ct-page .ct-save-strip .ct-save-text{font-size:12.5px;}
+}
+
+

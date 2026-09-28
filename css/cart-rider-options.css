@@ -1,0 +1,76 @@
+/* ==========================================================================
+   PART 07 — RIDER TIP / DELIVERY INSTRUCTIONS
+   Smooth directional panel entrance on tab change; state and handlers intact.
+   ========================================================================== */
+body.ct-page #ct-di-group.ct-tipcard{
+  margin:10px 14px;
+  padding:13px;
+  border:1px solid rgba(225,229,235,.82);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 5px 20px rgba(24,32,42,.04);
+}
+body.ct-page #ct-di-group .ct-tabs{
+  position:relative;
+  gap:4px;
+  padding:4px;
+  border:1px solid #EDF0F2;
+  border-radius:13px;
+  background:#F5F7F6;
+}
+body.ct-page #ct-di-group .ct-tab{
+  min-height:39px;
+  border-radius:10px;
+  color:#69737D;
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:650;
+  transition:background-color .22s ease,color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+body.ct-page #ct-di-group .ct-tab.is-active{
+  background:#fff;
+  color:#348466;
+  box-shadow:0 2px 7px rgba(28,45,36,.09),0 0 0 1px rgba(52,132,102,.08);
+}
+body.ct-page #ct-di-group .ct-tab:active{transform:scale(.985);}
+body.ct-page #ct-di-group .ct-tab-panel{
+  padding-top:14px;
+  transform-origin:top center;
+}
+body.ct-page #ct-di-group .ct-tab-panel:not([hidden]){
+  animation:ctTabPanelIn .28s cubic-bezier(.2,.75,.25,1) both;
+}
+body.ct-page #ct-di-group #ct-tip-panel:not([hidden]){
+  --ct-panel-shift:-10px;
+}
+body.ct-page #ct-di-group #ct-di-body:not([hidden]){
+  --ct-panel-shift:10px;
+}
+@keyframes ctTabPanelIn{
+  from{opacity:0;transform:translateX(var(--ct-panel-shift,0)) translateY(2px);}
+  to{opacity:1;transform:translateX(0) translateY(0);}
+}
+body.ct-page #ct-di-group .ct-chip-row{gap:7px;}
+body.ct-page #ct-di-group .ct-chip{
+  border-radius:10px;
+  font-family:inherit;
+  transition:border-color .2s ease,background-color .2s ease,color .2s ease,transform .2s ease;
+}
+body.ct-page #ct-di-group .ct-chip:active,
+body.ct-page #ct-di-group .ct-di-pill:active{transform:scale(.97);}
+body.ct-page #ct-di-group .ct-di-pill{
+  min-height:38px;
+  border-radius:10px;
+  font-family:inherit;
+  transition:border-color .2s ease,background-color .2s ease,color .2s ease,transform .2s ease;
+}
+body.ct-page #ct-di-group .ct-tip-note{
+  border-radius:10px;
+  line-height:1.45;
+}
+@media(prefers-reduced-motion:reduce){
+  body.ct-page #ct-di-group .ct-tab,
+  body.ct-page #ct-di-group .ct-chip,
+  body.ct-page #ct-di-group .ct-di-pill{transition:none;}
+  body.ct-page #ct-di-group .ct-tab-panel:not([hidden]){animation:none;}
+}

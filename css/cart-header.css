@@ -1,0 +1,109 @@
+/* =====================================================================
+   EATSWADA CART REDESIGN — PART 01
+   Delivery header + address hierarchy.
+   Visual-only: preserves existing markup, IDs, handlers and data flow.
+   Homepage typography source: Manrope (same font already loaded by cart).
+   ===================================================================== */
+body.ct-page .ct-delivery-head{
+  min-height:76px;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 11px 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#fff;
+  border:0;
+  box-shadow:0 5px 18px rgba(26,32,44,.045);
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+body.ct-page .ct-dh-back{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  border:1px solid rgba(31,41,55,.055);
+  border-radius:50%;
+  background:#fff;
+  color:#202631;
+  box-shadow:0 2px 9px rgba(24,32,45,.075);
+  transition:background .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+body.ct-page .ct-dh-back:active{
+  background:#F7F8FA;
+  transform:scale(.96);
+  box-shadow:0 1px 4px rgba(24,32,45,.06);
+}
+body.ct-page .ct-dh-main{
+  min-height:48px;
+  min-width:0;
+  padding:4px 2px;
+  gap:8px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+body.ct-page .ct-dh-copy{min-width:0;}
+body.ct-page .ct-dh-restaurant{
+  margin:0;
+  max-width:100%;
+  color:#202631;
+  font-size:15px;
+  font-weight:750;
+  line-height:1.25;
+  letter-spacing:-.35px;
+}
+body.ct-page .ct-dh-meta{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+  margin-top:3px;
+  color:#69717D;
+  font-size:12.5px;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:-.12px;
+}
+body.ct-page .ct-dh-meta-icon{color:#596270;}
+body.ct-page .ct-dh-eta{
+  color:#27303B;
+  font-size:13px;
+  font-weight:750;
+  line-height:1.3;
+  letter-spacing:-.2px;
+}
+body.ct-page .ct-dh-to,
+body.ct-page .ct-dh-divider{
+  color:#A0A6AF;
+  font-size:12px;
+  font-weight:500;
+}
+body.ct-page .ct-dh-tag{
+  color:#27303B;
+  font-size:13px;
+  font-weight:750;
+}
+body.ct-page .ct-dh-addr{
+  min-width:0;
+  max-width:none;
+  margin:0;
+  color:#737B86;
+  font-size:12px;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:-.08px;
+}
+body.ct-page .ct-dh-addr.ct-prompt{
+  color:#168765;
+  font-weight:650;
+}
+body.ct-page .ct-dh-chevron{
+  flex:0 0 auto;
+  margin-left:2px;
+  color:#7C8490;
+}
+@media(max-width:380px){
+  body.ct-page .ct-delivery-head{padding-left:9px;padding-right:12px;gap:7px;}
+  body.ct-page .ct-dh-back{width:40px;height:40px;flex-basis:40px;}
+  body.ct-page .ct-dh-meta{font-size:11.5px;gap:4px;}
+  body.ct-page .ct-dh-addr{font-size:11px;}
+}

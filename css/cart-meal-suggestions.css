@@ -1,0 +1,168 @@
+/* ==========================================================================
+   PART 05 — COMPLETE YOUR MEAL
+   Visual-only refinement. Recommendation data, category switching, horizontal
+   scrolling, add-to-cart and customization handlers are intentionally intact.
+   ========================================================================== */
+body.ct-page .ct-cym{
+  background:#FFFFFF;
+  border:1px solid rgba(225,229,235,.78);
+  border-radius:18px;
+  box-shadow:0 5px 20px rgba(24,32,42,.045);
+}
+body.ct-page .ct-cym-head{
+  align-items:center;
+  gap:11px;
+}
+body.ct-page .ct-cym-title{
+  font-family:inherit;
+  font-size:17px;
+  font-weight:750;
+  line-height:1.3;
+  letter-spacing:-.35px;
+  color:#252D36;
+  text-transform:none;
+}
+body.ct-page .ct-cym-from{
+  margin-top:3px;
+  font-size:11.5px;
+  line-height:1.4;
+  font-weight:500;
+  color:#858D97;
+}
+body.ct-page .ct-cym-tabs{
+  gap:7px;
+  padding-bottom:4px;
+}
+body.ct-page .ct-cym-tab{
+  min-height:33px;
+  padding:0 13px;
+  border:1px solid #E8EBEF;
+  background:#FFFFFF;
+  color:#626C77;
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:600;
+  letter-spacing:0;
+}
+body.ct-page .ct-cym-tab.is-active{
+  background:#EAF6F0;
+  border-color:#D5EDE1;
+  color:#348466;
+  font-weight:750;
+}
+body.ct-page .ct-cym-track{
+  gap:13px;
+  padding-top:3px;
+  padding-bottom:7px;
+  scroll-snap-type:x mandatory;
+}
+body.ct-page .ct-cym-card{
+  flex-basis:126px;
+  width:126px;
+}
+body.ct-page .ct-cym-media{
+  width:126px;
+  height:126px;
+  overflow:hidden;
+  border:1px solid rgba(226,230,235,.85);
+  border-radius:14px;
+  background:#F5F6F7;
+  box-shadow:0 2px 8px rgba(24,32,42,.045);
+}
+body.ct-page .ct-cym-media img{
+  border-radius:13px;
+  object-fit:cover;
+  transition:transform .22s ease;
+}
+body.ct-page .ct-cym-name{
+  display:flex;
+  align-items:flex-start;
+  gap:5px;
+  margin-top:9px;
+  min-height:34px;
+  color:#303842;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:650;
+  line-height:1.4;
+  letter-spacing:-.12px;
+}
+body.ct-page .ct-cym-price{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:5px;
+  font-family:inherit;
+  line-height:1.25;
+}
+body.ct-page .ct-cym-now{
+  color:#252D36;
+  font-size:13px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+body.ct-page .ct-cym-price s{
+  color:#A0A6AE;
+  font-size:10.5px;
+  font-weight:500;
+}
+body.ct-page .ct-cym-off{
+  padding:2px 5px;
+  border-radius:4px;
+  background:#EAF6F0;
+  color:#348466;
+  font-family:inherit;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:0;
+}
+body.ct-page .ct-cym-meta{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:5px;
+  min-height:14px;
+  font-family:inherit;
+  font-size:10px;
+  line-height:1.3;
+}
+body.ct-page .ct-cym-note{
+  color:#858D97;
+  font-size:10px;
+  font-weight:500;
+}
+body.ct-page .ct-cym-rating{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  color:#66716B;
+  font-weight:650;
+}
+body.ct-page .ct-cym-add{
+  width:34px;
+  height:34px;
+  right:8px;
+  bottom:8px;
+  border:1px solid rgba(219,39,66,.13);
+  border-radius:10px;
+  background:#FFFFFF;
+  color:#D9435D;
+  box-shadow:0 3px 10px rgba(24,32,42,.13);
+}
+body.ct-page .ct-cym-add svg{
+  width:17px;
+  height:17px;
+}
+body.ct-page .ct-cym-badge{
+  border-radius:5px;
+  font-family:inherit;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:0;
+}
+@media (max-width:380px){
+  body.ct-page .ct-cym-card{flex-basis:116px;width:116px;}
+  body.ct-page .ct-cym-media{width:116px;height:116px;}
+  body.ct-page .ct-cym-title{font-size:16px;}
+}

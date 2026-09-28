@@ -1,0 +1,81 @@
+/* ==========================================================================
+   PART 08 — DELIVERY ADDRESS & CONTACT
+   Visual-only refinement of the address and customer details rows.
+   ========================================================================== */
+body.ct-page #ct-delivery-details{
+  margin:10px 14px;
+  padding:5px 14px;
+  border:1px solid rgba(225,229,235,.82);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 5px 20px rgba(24,32,42,.04);
+}
+body.ct-page #ct-delivery-details .ct-details-row{
+  min-height:66px;
+  gap:12px;
+  padding:12px 0;
+}
+body.ct-page #ct-delivery-details .ct-line-ic{
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  border-radius:11px;
+  background:#EAF6F0;
+  color:#348466;
+}
+body.ct-page #ct-delivery-details .ct-line-ic svg{
+  width:19px;
+  height:19px;
+}
+body.ct-page #ct-delivery-details .ct-details-copy{
+  display:block;
+  min-width:0;
+}
+body.ct-page #ct-delivery-details .ct-details-label{
+  color:#303842;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  letter-spacing:-.05px;
+}
+body.ct-page #ct-delivery-details .ct-details-text{
+  margin-top:4px;
+  color:#858D97;
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:500;
+  line-height:1.45;
+}
+body.ct-page #ct-delivery-details .ct-details-text.is-empty{
+  color:#348466;
+  font-weight:650;
+}
+body.ct-page #ct-delivery-details .ct-details-action{
+  flex:0 0 auto;
+  padding:7px 11px;
+  border:1px solid #D8EEE3;
+  border-radius:9px;
+  background:#F4FAF6;
+  color:#348466;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:750;
+  line-height:1;
+  transition:background-color .18s ease,transform .18s ease;
+}
+body.ct-page #ct-delivery-details .ct-details-row:active .ct-details-action{
+  background:#EAF6F0;
+  transform:scale(.97);
+}
+body.ct-page #ct-delivery-details .ct-details-row:focus-visible{
+  outline:2px solid #348466;
+  outline-offset:3px;
+  border-radius:10px;
+}
+@media(max-width:380px){
+  body.ct-page #ct-delivery-details{padding:4px 11px;}
+  body.ct-page #ct-delivery-details .ct-details-row{gap:9px;min-height:62px;}
+  body.ct-page #ct-delivery-details .ct-line-ic{width:33px;height:33px;flex-basis:33px;}
+  body.ct-page #ct-delivery-details .ct-details-action{padding:7px 9px;}
+}

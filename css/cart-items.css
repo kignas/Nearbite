@@ -1,0 +1,147 @@
+/* ==========================================================================
+   PART 03 — CART ITEM ROWS
+   Visual-only refinement. Cart rendering, quantities and price calculations
+   remain in js/cart-page.js and are intentionally untouched.
+   ========================================================================== */
+body.ct-page .ct-item-card{
+  padding: 10px 18px 14px;
+  background: var(--ct-surface);
+  border: 1px solid rgba(31,41,55,.045);
+  box-shadow: 0 5px 18px rgba(31,41,55,.045);
+}
+body.ct-page #cart-items-list{
+  padding: 0;
+}
+body.ct-page .ct-restaurant-group + .ct-restaurant-group{
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ct-line-soft);
+}
+body.ct-page .ct-restaurant-head{
+  padding: 8px 0 5px;
+}
+body.ct-page .ct-restaurant-name{
+  color: var(--ct-ink);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.35;
+  letter-spacing: -.2px;
+}
+body.ct-page .ct-restaurant-meta{
+  margin-top: 3px;
+  color: var(--ct-muted);
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.4;
+}
+body.ct-page .ct-restaurant-items .ct-row{
+  grid-template-columns: minmax(0,1fr) 94px;
+  gap: 10px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(31,41,55,.065);
+}
+body.ct-page .ct-restaurant-items .ct-row.has-media{
+  grid-template-columns: 52px minmax(0,1fr) 94px;
+}
+body.ct-page .ct-restaurant-items .ct-row:last-child{
+  border-bottom: 0;
+  padding-bottom: 10px;
+}
+body.ct-page .ct-media{
+  width: 52px;
+  height: 52px;
+  border-radius: 11px;
+  background: #F5F6F7;
+  border: 1px solid rgba(31,41,55,.055);
+}
+body.ct-page .ct-name-row{
+  gap: 7px;
+}
+body.ct-page .ct-name{
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.42;
+  letter-spacing: -.15px;
+  color: var(--ct-ink);
+}
+body.ct-page .ct-custom{
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #858D96;
+}
+body.ct-page .ct-price-line{
+  gap: 7px;
+  margin-top: 7px;
+}
+body.ct-page .ct-unit-price{
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--ct-ink);
+}
+body.ct-page .ct-was-price{
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #A1A7AE;
+}
+body.ct-page .ct-off-badge{
+  height: auto;
+  min-height: 18px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #EAF6F0;
+  color: #399273;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+body.ct-page .ct-right{
+  gap: 9px;
+  min-width: 0;
+}
+body.ct-page .ct-item-total{
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.25px;
+  color: var(--ct-ink);
+}
+body.ct-page .ct-item-save{
+  margin-top: 4px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  color: #399273;
+}
+body.ct-page .ct-stepper{
+  min-height: 34px;
+  border: 1px solid rgba(220,39,66,.14);
+  border-radius: 10px;
+  background: #FFF5F7;
+  box-shadow: 0 2px 7px rgba(31,41,55,.035);
+}
+body.ct-page .ct-stepper button{
+  width: 29px;
+  height: 32px;
+  flex-basis: 29px;
+  color: var(--ct-green);
+  font-size: 15px;
+}
+body.ct-page .ct-qty{
+  min-width: 23px;
+  color: #9E5362;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 750;
+}
+body.ct-page .ct-stepper.is-last .ct-step-down{
+  color: #D94A60;
+}
+@media (max-width: 360px){
+  body.ct-page .ct-item-card{padding-left:14px;padding-right:14px;}
+  body.ct-page .ct-restaurant-items .ct-row{grid-template-columns:minmax(0,1fr) 86px;gap:8px;}
+  body.ct-page .ct-restaurant-items .ct-row.has-media{grid-template-columns:46px minmax(0,1fr) 86px;}
+  body.ct-page .ct-media{width:46px;height:46px;}
+  body.ct-page .ct-stepper button{width:26px;flex-basis:26px;}
+}
