@@ -17,7 +17,7 @@
 
   var BASE =
     (window.CONFIG && window.CONFIG.API_BASE_URL) ||
-    'https://eatswada.onrender.com/api';
+    'https://api.eatswada.com/api';
 
   var DEFAULT_TIMEOUT_MS = 12000;
 
