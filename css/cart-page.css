@@ -2865,382 +2865,328 @@ body.ct-page .ct-pay-note{ gap:6px; margin:0; font-size:12px; font-weight:400; c
   body.ct-page .ct-cym-media{ height:96px; }
 }
 
-
 /* ==========================================================================
-   EATSWADA CHECKOUT — REFERENCE CASCADE FINISH (2026-09-28)
-   Visual-only. Loaded after global UI/theme sheets via cart.html.
-   Keep Manrope's restrained 400/500/600 hierarchy and reference spacing.
+   CHECKOUT REFERENCE — TYPOGRAPHY + SPACING ONLY
+   No colours, behaviour, DOM hooks, icons, or interaction rules are changed.
    ========================================================================== */
-body.ct-page{
-  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  font-synthesis:none;
-  text-rendering:optimizeLegibility;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-body.ct-page :is(.ct-card,.ct-group,.ct-bill,.ct-cym){
-  border-color:#E8EBEF;
-  border-radius:18px;
-  box-shadow:0 1px 2px rgba(31,41,55,.025);
-}
-body.ct-page :is(.ct-sec-title,.ct-cym-title){
-  font-size:18px; font-weight:600; line-height:1.25; letter-spacing:-.35px;
-}
-body.ct-page .ct-cym{padding:14px 14px 13px;}
-body.ct-page .ct-cym-tabs{margin-top:12px;}
-body.ct-page .ct-cym-track{gap:12px; margin-top:12px; padding-bottom:7px;}
-body.ct-page .ct-cym-card{flex:0 0 116px; width:116px; min-width:116px;}
-body.ct-page .ct-cym-media{width:116px; height:92px; border-radius:12px;}
-body.ct-page .ct-cym-media img{width:100%; height:100%; object-fit:cover; border-radius:12px;}
-body.ct-page .ct-cym-name{margin-top:17px; min-height:34px; font-size:13px; font-weight:500; line-height:1.35;}
-body.ct-page .ct-cym-price{margin-top:4px;}
-body.ct-page .ct-cym-now{font-size:13px; font-weight:600;}
-body.ct-page .ct-cym-price s, body.ct-page .ct-cym-off, body.ct-page .ct-cym-note{font-size:11px;}
-body.ct-page .ct-sav-title{font-size:14px; font-weight:500; line-height:1.35;}
-body.ct-page .ct-sav-sub{font-size:12px; line-height:1.35;}
-body.ct-page .ct-sav-row{min-height:54px;}
-body.ct-page .ct-tipcard{padding:14px;}
-body.ct-page .ct-chip{min-height:54px; border-radius:10px;}
-body.ct-page .ct-details-row{min-height:54px;}
-body.ct-page .ct-bill{padding:0;}
-body.ct-page .ct-bill-label, body.ct-page .ct-bill-val{font-size:13px; line-height:1.4;}
-body.ct-page .ct-bill .ct-total-val{font-size:17px; font-weight:600;}
-body.ct-page .ct-footer{padding:11px 14px calc(9px + env(safe-area-inset-bottom));}
-body.ct-page .ct-paybar{grid-template-columns:92px minmax(0,1fr); gap:10px;}
-body.ct-page .ct-paybar-amt{font-size:22px; font-weight:700; letter-spacing:-.45px;}
-body.ct-page .ct-paybar .ct-cta{min-height:54px; border-radius:14px;}
-body.ct-page .ct-paybar .ct-cta-text{font-size:16px; font-weight:600; letter-spacing:-.2px;}
-body.ct-page .ct-cta-sub{font-size:12px; font-weight:500;}
-@media(max-width:380px){
-  body.ct-page .ct-cym-card, body.ct-page .ct-cym-media{width:108px;}
-  body.ct-page .ct-cym-card{flex-basis:108px; min-width:108px;}
-  body.ct-page .ct-cym-media{height:88px;}
-  body.ct-page .ct-paybar{grid-template-columns:84px minmax(0,1fr);}
-}
-
-/* ==========================================================================
-   EATSWADA CHECKOUT — RESTAURANT-CARD TYPOGRAPHY ALIGNMENT (2026-09-28)
-   Visual-only typography pass.
-   Uses the same Manrope family and the restaurant-card hierarchy:
-   17px primary / 13px body-metadata / 11px compact labels,
-   with 800 primary emphasis and restrained 500–650 supporting weights.
-   No DOM hooks, IDs, JavaScript behaviour, spacing mechanics or colours
-   are changed here.
-   ========================================================================== */
-
-body.ct-page{
-  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  font-synthesis:none;
-  text-rendering:optimizeLegibility;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-/* Primary hierarchy — mirrors .es-name / card title treatment. */
-body.ct-page .ct-sec-title,
-body.ct-page .ct-cym-title{
-  font-size:17px;
-  font-weight:800;
-  line-height:1.28;
-  letter-spacing:-.35px;
-}
-
-body.ct-page .ct-dh-restaurant{
-  font-size:13px;
-  font-weight:650;
-  line-height:1.2;
-  letter-spacing:-.15px;
-}
-
-body.ct-page .ct-dh-eta,
-body.ct-page .ct-dh-tag{
-  font-size:13px;
-  font-weight:800;
-}
-
-body.ct-page .ct-dh-addr{
-  font-size:13px;
-  font-weight:500;
-  line-height:1.3;
-}
-
-/* Main checkout content — same 13px body rhythm as restaurant-card metadata. */
-body.ct-page .ct-name{
-  font-size:13px;
-  font-weight:650;
-  line-height:1.35;
-  letter-spacing:0;
-}
-
-body.ct-page .ct-custom,
-body.ct-page .ct-sav-sub,
-body.ct-page .ct-details-text,
-body.ct-page .ct-cancel p{
-  font-size:11px;
-  font-weight:500;
-  line-height:1.4;
-}
-
-body.ct-page .ct-unit-price,
-body.ct-page .ct-bill-label,
-body.ct-page .ct-bill-val,
-body.ct-page .ct-details-label,
-body.ct-page .ct-tab,
-body.ct-page .ct-di-pill{
-  font-size:13px;
-  line-height:1.35;
-}
-
-body.ct-page .ct-unit-price,
-body.ct-page .ct-bill-val{
-  font-weight:650;
-}
-
-body.ct-page .ct-sav-title{
-  font-size:13px;
-  font-weight:650;
-  line-height:1.35;
-}
-
-body.ct-page .ct-group-flag,
-body.ct-page .ct-tag,
-body.ct-page .ct-restaurant-note-label,
-body.ct-page .ct-cancel-title{
-  font-size:11px;
-  font-weight:800;
-  line-height:1.35;
-}
-
-body.ct-page .ct-tag{
-  letter-spacing:.25px;
-}
-
-body.ct-page .ct-chip-amt{
-  font-size:13px;
-  font-weight:650;
-  line-height:1.2;
-}
-
-body.ct-page .ct-chip-sub{
-  font-size:11px;
-  font-weight:500;
-  line-height:1.2;
-}
-
-body.ct-page .ct-tip-note,
-body.ct-page .ct-strip{
-  font-size:13px;
-  font-weight:500;
-  line-height:1.35;
-}
-
-body.ct-page .ct-tip-note strong{
-  font-weight:800;
-}
-
-body.ct-page .ct-cym-name{
-  font-size:13px;
-  font-weight:500;
-  line-height:1.35;
-}
-
-body.ct-page .ct-cym-now{
-  font-size:13px;
-  font-weight:650;
-}
-
-body.ct-page .ct-cym-price s,
-body.ct-page .ct-cym-off,
-body.ct-page .ct-cym-note{
-  font-size:11px;
-}
-
-body.ct-page .ct-bill-hero-top,
-body.ct-page .ct-bill-hero-top strong{
-  font-size:17px;
-  line-height:1.25;
-}
-
-body.ct-page .ct-bill-hero-top{
-  font-weight:650;
-}
-
-body.ct-page .ct-bill-hero-top strong{
-  font-weight:800;
-  letter-spacing:-.2px;
-}
-
-body.ct-page .ct-bill-hero-saved{
-  font-size:13px;
-  font-weight:500;
-  line-height:1.35;
-}
-
-body.ct-page .ct-total-label{
-  font-size:13px;
-  font-weight:800;
-  line-height:1.3;
-}
-
-body.ct-page .ct-bill .ct-total-val{
-  font-size:17px;
-  font-weight:800;
-  letter-spacing:-.35px;
-}
-
-body.ct-page .ct-paybar-amt{
-  font-size:22px;
-  font-weight:800;
-  letter-spacing:-.45px;
-}
-
-body.ct-page .ct-paybar-link{
-  font-size:13px;
-  font-weight:650;
-}
-
-body.ct-page .ct-paybar .ct-cta-text{
-  font-size:13px;
-  font-weight:800;
-  letter-spacing:.05px;
-}
-
-body.ct-page .ct-cta-sub,
-body.ct-page .ct-pay-note{
-  font-size:11px;
-  font-weight:500;
-  line-height:1.3;
-}
-
-/* Compact phones: match the restaurant-card's 17 / 13 / 13 rhythm exactly. */
-@media (max-width:384px){
-  body.ct-page .ct-sec-title,
-  body.ct-page .ct-cym-title{
-    font-size:17px;
-  }
-
-  body.ct-page .ct-name{
-    font-size:13px;
-  }
-
-  body.ct-page .ct-tab{
-    font-size:13px;
-    font-weight:500;
-  }
-
-  body.ct-page .ct-chip-amt{
-    font-size:13px;
-  }
-
-  body.ct-page .ct-chip-sub{
-    font-size:11px;
-  }
-
-  body.ct-page .ct-paybar .ct-cta-text{
-    font-size:13px;
-  }
-}
-
-
-/* Screenshot-guided typography only. Retains existing layout and breakpoints.
-   Manrope is already loaded by cart.html; reference font identity is unverified.
-   No icon-font selectors, structural properties, or application code changed. */
-body.ct-page{
-  --ct-type-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  font-family:var(--ct-type-family);
-}
+body.ct-page,
 body.ct-page button,
 body.ct-page input,
 body.ct-page textarea,
-body.ct-page select,
-body.ct-page .ct-num,
-body.ct-page .ct-off-badge,
-body.ct-page .ct-qty,
-body.ct-page .ct-count,
-body.ct-page .ct-bill-peek-val{
-  font-family:var(--ct-type-family);
+body.ct-page select{
+  font-family:'Manrope','Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 
-/* Restrained restaurant label; stronger destination and section labels.
-   Existing font sizes and line boxes retained wherever possible. */
-body.ct-page .ct-dh-restaurant{font-weight:400;letter-spacing:-.1px;}
-body.ct-page .ct-dh-tag{font-weight:700;}
-body.ct-page .ct-restaurant-name{font-weight:600;}
-body.ct-page .ct-sec-title,
-body.ct-page .ct-cym-title{font-weight:700;letter-spacing:.12em;}
-body.ct-page .ct-sheet-title,
-body.ct-page .ct-head-title,
-body.ct-page .ct-empty-title{font-weight:700;letter-spacing:-.2px;}
-body.ct-page .ct-card-head,
-body.ct-page .ct-field-label,
-body.ct-page .ct-tip-title,
-body.ct-page .ct-section-label,
-body.ct-page .ct-restaurant-note-label{font-weight:600;letter-spacing:.06em;}
+/* Reference rhythm: compact outer gutters with a little more breathing room
+   inside the main content cards. */
+body.ct-page .ct-card,
+body.ct-page .ct-bill,
+body.ct-page .ct-cym,
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  margin-top:10px;
+  margin-bottom:10px;
+}
 
-/* Item names and primary copy: medium weight rather than extra-bold. */
-body.ct-page .ct-name{font-weight:500;letter-spacing:-.1px;}
-body.ct-page .ct-cym-name{font-weight:400;letter-spacing:-.05px;}
+body.ct-page .ct-card{ padding:14px; }
+body.ct-page .ct-item-card{ padding:8px 14px 12px; }
+
+/* Header typography */
+body.ct-page .ct-dh-restaurant{
+  font-size:14px;
+  font-weight:600;
+  line-height:1.2;
+  letter-spacing:-.1px;
+}
+body.ct-page .ct-dh-meta{
+  margin-top:3px;
+  gap:5px;
+  font-size:13px;
+  line-height:1.3;
+}
+body.ct-page .ct-dh-tag{ font-size:14px; font-weight:600; }
+body.ct-page .ct-dh-addr{ font-size:12.5px; font-weight:400; }
+
+/* Cart item rhythm + type */
+body.ct-page .ct-row,
+body.ct-page .ct-row.has-media{
+  gap:10px 12px;
+  padding:14px 0;
+}
+body.ct-page .ct-name{
+  font-size:15px;
+  font-weight:600;
+  line-height:1.32;
+  letter-spacing:-.05px;
+}
+body.ct-page .ct-custom{
+  margin-top:3px;
+  font-size:12.5px;
+  font-weight:400;
+  line-height:1.4;
+}
+body.ct-page .ct-price-line{ margin-top:4px; gap:7px; }
+body.ct-page .ct-unit-price{ font-size:13.5px; font-weight:500; }
+body.ct-page .ct-was-price{ font-size:12px; font-weight:400; }
+body.ct-page .ct-off-badge{ font-size:12px; font-weight:500; }
+body.ct-page .ct-item-total{ font-size:15px; font-weight:600; }
+body.ct-page .ct-qty{ font-size:13.5px; font-weight:600; }
+body.ct-page .ct-stepper button{ font-size:15px; }
+
+body.ct-page .ct-item-actions{
+  gap:9px;
+  padding-top:7px;
+  margin-top:1px;
+}
+body.ct-page .ct-pill-btn{
+  min-height:42px;
+  padding:0 12px;
+  font-size:13.5px;
+  font-weight:500;
+}
+
+/* Section titles: match the spaced uppercase reference labels. */
+body.ct-page .ct-sec-title,
+body.ct-page .ct-cym-title{
+  font-size:15px;
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+/* Complete-your-meal spacing + labels */
+body.ct-page .ct-cym{ padding:16px 14px 14px; }
+body.ct-page .ct-cym-tabs{ margin-top:11px; }
+body.ct-page .ct-cym-tab{
+  min-height:36px;
+  padding:0 14px;
+  font-size:13.5px;
+  font-weight:600;
+}
+body.ct-page .ct-cym-track{
+  gap:11px;
+  margin-top:13px;
+  padding-top:2px;
+  padding-bottom:7px;
+}
+body.ct-page .ct-cym-name{
+  margin-top:17px;
+  min-height:34px;
+  font-size:13px;
+  font-weight:500;
+  line-height:1.35;
+}
+body.ct-page .ct-cym-price{ margin-top:4px; }
+body.ct-page .ct-cym-now{ font-size:13px; font-weight:600; }
+body.ct-page .ct-cym-price s,
+body.ct-page .ct-cym-off,
+body.ct-page .ct-cym-note,
+body.ct-page .ct-cym-rating{ font-size:11px; }
+
+/* Savings corner: slightly taller rows and clearer type hierarchy. */
+body.ct-page .ct-savings{ padding:16px 14px 6px; }
+body.ct-page .ct-savings .ct-sec-title{ padding-bottom:7px; }
+body.ct-page .ct-sav-row{
+  min-height:58px;
+  padding:9px 0;
+  gap:12px;
+}
+body.ct-page .ct-sav-title{
+  font-size:15px;
+  font-weight:500;
+  line-height:1.3;
+}
+body.ct-page .ct-sav-sub{
+  margin-top:2px;
+  font-size:13px;
+  line-height:1.35;
+}
+body.ct-page .ct-sav-flag{ font-size:13px; font-weight:600; }
+
+/* Tabs / option chips */
+body.ct-page .ct-tab{ font-size:13.5px; font-weight:600; }
+body.ct-page .ct-tab-panel{ padding-top:11px; }
+body.ct-page .ct-chip-row{ gap:6px; }
+body.ct-page .ct-chip{ min-height:50px; }
+body.ct-page .ct-chip-amt{ font-size:13.5px; font-weight:600; }
+body.ct-page .ct-chip-sub{ font-size:11.5px; }
+body.ct-page .ct-tip-note{ margin-top:11px; font-size:12px; }
+
+/* Delivery details + bill copy */
+body.ct-page .ct-details-row{ min-height:54px; padding:9px 0; }
+body.ct-page .ct-details-label{ font-size:13.5px; font-weight:500; }
+body.ct-page .ct-details-text{ margin-top:2px; font-size:11.5px; }
+body.ct-page .ct-details-action{ font-size:12px; }
+body.ct-page .ct-bill .ct-bill-row{ padding:9px 0; font-size:13px; }
+body.ct-page .ct-bill-label,
+body.ct-page .ct-bill-val{ font-size:13px; }
+body.ct-page .ct-total-label{ font-size:15px; font-weight:600; }
+body.ct-page .ct-bill .ct-total-val{ font-size:18px; font-weight:700; }
+
+/* Sticky payment bar */
+body.ct-page .ct-footer{ gap:8px; padding:11px 12px calc(8px + env(safe-area-inset-bottom)); }
+body.ct-page .ct-paybar{ gap:11px; }
+body.ct-page .ct-paybar-amt{ font-size:21px; font-weight:700; line-height:1.15; }
+body.ct-page .ct-paybar-link{ margin-top:3px; font-size:12.5px; font-weight:600; }
+body.ct-page .ct-paybar .ct-cta{ min-height:54px; padding:9px 14px; }
+body.ct-page .ct-paybar .ct-cta-text{ font-size:16px; font-weight:700; line-height:1.25; }
+body.ct-page .ct-cta-sub{ font-size:11px; }
+body.ct-page .ct-pay-note{ font-size:11px; }
+
+@media (max-width:380px){
+  body.ct-page .ct-card,
+  body.ct-page .ct-bill,
+  body.ct-page .ct-cym,
+  body.ct-page #ct-payment-group,
+  body.ct-page #ct-di-group{
+    margin-left:12px;
+    margin-right:12px;
+  }
+  body.ct-page .ct-name{ font-size:14.5px; }
+  body.ct-page .ct-pill-btn{ font-size:13px; }
+  body.ct-page .ct-sec-title,
+  body.ct-page .ct-cym-title{ font-size:14px; }
+  body.ct-page .ct-cym-tab{ font-size:13px; padding-left:10px; padding-right:10px; }
+}
+
+
+/* ======================================================================
+   EATSWADA — PREMIUM REFERENCE REFINEMENT
+   Scoped to the cart page. Visual-only overrides; no layout or behaviour
+   selectors are changed. Keep strong brand colour for the primary action.
+   ====================================================================== */
+body.ct-page{
+  --ct-bg:#F3F4F7;
+  --ct-surface:#FFFFFF;
+  --ct-line:rgba(31,41,55,.055);
+  --ct-line-soft:rgba(31,41,55,.045);
+  --ct-green-soft:#FFF0F2;
+  --ct-shadow:0 3px 14px rgba(24,32,45,.045), 0 1px 3px rgba(24,32,45,.025);
+  background:var(--ct-bg);
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* White surfaces should lift gently from the cool off-white canvas. */
+body.ct-page .ct-card,
+body.ct-page .ct-bill,
+body.ct-page .ct-group,
+body.ct-page .ct-summary,
+body.ct-page .ct-line-card,
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  border-color:rgba(31,41,55,.055);
+  box-shadow:0 4px 18px rgba(31,41,55,.045),0 1px 3px rgba(31,41,55,.025);
+}
+body.ct-page .ct-delivery-head{
+  border-bottom-color:rgba(31,41,55,.045);
+  box-shadow:0 2px 10px rgba(31,41,55,.025);
+}
+body.ct-page .ct-footer{
+  border-top-color:rgba(31,41,55,.055);
+  box-shadow:0 -6px 22px rgba(31,41,55,.065);
+}
+
+/* More deliberate hierarchy: item names and key amounts lead; helper copy recedes. */
+body.ct-page .ct-name,
 body.ct-page .ct-sav-title,
 body.ct-page .ct-details-label,
-body.ct-page .ct-line-title,
-body.ct-page .ct-group-title{font-weight:500;letter-spacing:-.1px;}
+body.ct-page .ct-summary-title,
+body.ct-page .ct-line-title{
+  color:#252B33;
+  font-weight:600;
+  letter-spacing:-.015em;
+}
+body.ct-page .ct-name{font-size:14.5px;line-height:1.38;}
 body.ct-page .ct-custom,
-body.ct-page .ct-sav-sub,
-body.ct-page .ct-details-text,
-body.ct-page .ct-group-sub,
 body.ct-page .ct-line-sub,
-body.ct-page .ct-restaurant-meta,
-body.ct-page .ct-restaurant-note-preview,
-body.ct-page .ct-cym-from,
-body.ct-page .ct-tip-note,
-body.ct-page .ct-field-help,
-body.ct-page .ct-cancel p{font-weight:400;letter-spacing:0;}
-body.ct-page .ct-cancel-title{font-weight:600;}
-
-/* Preserve the selected tab's hidden width-reserving text twin. */
-body.ct-page .ct-cym-tab{font-weight:500;letter-spacing:-.1px;}
-body.ct-page .ct-cym-tab::after,
-body.ct-page .ct-cym-tab.is-active,
-body.ct-page .ct-cym-tabs.is-ready .ct-cym-tab.is-active{font-weight:700;}
-body.ct-page .ct-tab{font-weight:500;letter-spacing:-.1px;}
-body.ct-page .ct-tab.is-active{font-weight:700;}
-body.ct-page .ct-pill-btn,
-body.ct-page .ct-di-pill,
-body.ct-page .ct-details-action,
-body.ct-page .ct-cym-all,
-body.ct-page .ct-btn,
-body.ct-page .ct-btn-remove,
-body.ct-page .ct-sug,
-body.ct-page .ct-empty-btn{font-weight:600;letter-spacing:0;}
-body.ct-page .ct-qty,
-body.ct-page .ct-chip-amt{font-weight:600;}
-body.ct-page .ct-chip-sub{font-weight:400;}
-
-/* Financial hierarchy; existing strikethrough and tabular numerals retained. */
+body.ct-page .ct-summary-sub,
+body.ct-page .ct-details-text,
+body.ct-page .ct-cancel p{
+  color:#858C96;
+  font-weight:400;
+}
 body.ct-page .ct-unit-price,
-body.ct-page .ct-item-total{font-weight:500;letter-spacing:-.1px;}
-body.ct-page .ct-was-price{font-weight:600;}
-body.ct-page .ct-cym-now{font-weight:600;}
-body.ct-page .ct-cym-price s{font-weight:400;}
-body.ct-page .ct-off-badge,
-body.ct-page .ct-cym-off,
-body.ct-page .ct-item-save{font-weight:500;letter-spacing:0;}
-body.ct-page .ct-bill-label{font-weight:400;}
+body.ct-page .ct-item-total,
 body.ct-page .ct-bill-val,
-body.ct-page .ct-bill .ct-bill-row .ct-now{font-weight:500;}
-body.ct-page .ct-bill-val s,
-body.ct-page .ct-bill-hero-top s{font-weight:400;}
-body.ct-page .ct-bill-hero-top{font-weight:500;letter-spacing:-.1px;}
-body.ct-page .ct-bill-hero-top strong{font-weight:600;letter-spacing:-.1px;}
-body.ct-page .ct-bill-hero-saved{font-weight:400;letter-spacing:0;}
-body.ct-page .ct-total-label{font-weight:600;}
-body.ct-page .ct-bill .ct-total-val{font-weight:700;letter-spacing:-.3px;}
-body.ct-page .ct-paybar-amt{font-weight:800;letter-spacing:-.4px;}
-body.ct-page .ct-paybar-link{font-weight:700;letter-spacing:-.1px;}
-body.ct-page .ct-paybar .ct-cta-text{font-weight:800;letter-spacing:-.2px;}
-body.ct-page .ct-save-strip .ct-save-text{font-weight:500;letter-spacing:-.1px;}
-body.ct-page .ct-sav-flag{font-weight:600;}
+body.ct-page .ct-total-val,
+body.ct-page .ct-paybar-amt{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.025em;
+}
+body.ct-page .ct-sec-title,
+body.ct-page .ct-cym-title{
+  color:#292F38;
+  font-weight:650;
+  letter-spacing:-.025em;
+}
+body.ct-page .ct-card-head,
+body.ct-page .ct-section-label,
+body.ct-page .ct-tip-title{
+  color:#858C96;
+  letter-spacing:.12em;
+  font-weight:700;
+}
 
-/* Keep 16px form text to preserve existing mobile focus behaviour. */
-body.ct-page .ct-input,
-body.ct-page .ct-textarea{font-size:16px;font-weight:400;line-height:1.5;}
+/* Gentle separators rather than hard grey rules. */
+body.ct-page .ct-row,
+body.ct-page .ct-item-actions,
+body.ct-page .ct-summary-contact,
+body.ct-page .ct-details-row + .ct-details-row,
+body.ct-page .ct-bill-hero,
+body.ct-page .ct-card-head{
+  border-color:rgba(31,41,55,.055);
+}
+body.ct-page .ct-strip,
+body.ct-page .ct-footer-save{
+  background:#EAF8F1;
+  border-color:rgba(21,155,114,.12);
+  color:#318B6D;
+}
+body.ct-page .ct-sav-flag,
+body.ct-page .ct-sav-flag.is-static,
+body.ct-page .ct-bill-hero-saved,
+body.ct-page .ct-now.is-save,
+body.ct-page .ct-bill-val.is-save{
+  color:#398D73;
+}
+body.ct-page .ct-stepper,
+body.ct-page .ct-chip[aria-pressed="true"],
+body.ct-page .ct-di-pill[aria-pressed="true"],
+body.ct-page .ct-summary-change,
+body.ct-page .ct-change{
+  background:#FFF1F3;
+  border-color:rgba(200,77,99,.16);
+}
+body.ct-page .ct-stepper button,
+body.ct-page .ct-qty,
+body.ct-page .ct-chip[aria-pressed="true"],
+body.ct-page .ct-di-pill[aria-pressed="true"],
+body.ct-page .ct-summary-change,
+body.ct-page .ct-change{
+  color:#B9576B;
+}
+
+/* Uniform, quiet image treatment for cart items and recommendations. */
+body.ct-page .ct-media,
+body.ct-page .ct-cym-media{
+  background:#F5F5F6;
+  border:1px solid rgba(31,41,55,.045);
+  box-shadow:0 1px 3px rgba(31,41,55,.04);
+}
+body.ct-page .ct-media img,
+body.ct-page .ct-cym-media img{
+  object-fit:cover;
+  background:#F5F5F6;
+}
+body.ct-page .ct-cym-media{border-radius:12px;}
+body.ct-page .ct-cym-media img{border-radius:11px;}
+
+/* Keep the high-saturation brand treatment reserved for the main action. */
+body.ct-page .ct-paybar .ct-cta{
+  box-shadow:0 5px 15px rgba(11,143,60,.18);
+}
