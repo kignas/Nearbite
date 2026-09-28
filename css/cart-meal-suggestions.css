@@ -1,434 +1,831 @@
 /* ==========================================================================
    EATSWADA — COMPLETE YOUR MEAL
-   Compact mobile-first version.
    Section-only stylesheet.
-   Keeps existing JS/data/interactions untouched.
+   Typography: same Manrope UI system used by the Home page.
+   Data, category generation, add-to-cart and customization behavior stay in JS.
    ========================================================================== */
 
 body.ct-page #ct-meal{
-  width:auto !important;
-  margin:8px 10px !important;
-  padding:14px 14px 15px !important;
-  box-sizing:border-box !important;
-  background:#fff !important;
-  border:1px solid #E8EBEE !important;
-  border-radius:17px !important;
-  box-shadow:0 2px 10px rgba(24,32,42,.035) !important;
-  overflow:hidden !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
+  width:auto;
+  margin:12px 14px;
+  padding:28px 22px 30px;
+  box-sizing:border-box;
+  background:#FFFFFF;
+  border:1px solid #E8EBEE;
+  border-radius:20px;
+  box-shadow:0 5px 20px rgba(24,32,42,.045);
+  overflow:hidden;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif);
 }
 
-/* =========================
-   HEADER
-   ========================= */
-
+/* Header */
 body.ct-page #ct-meal .ct-cym-head{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:10px !important;
-  width:100% !important;
-  margin:0 0 10px !important;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  width:100%;
+  margin:0 0 20px;
 }
-
 body.ct-page #ct-meal .ct-cym-headcopy{
-  min-width:0 !important;
-  flex:1 1 auto !important;
+  min-width:0;
+  flex:1 1 auto;
 }
-
 body.ct-page #ct-meal .ct-cym-title{
-  margin:0 !important;
-  padding:0 !important;
+  margin:0;
+  padding:0;
   color:#868A90 !important;
   font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:14px !important;
+  font-size:17px !important;
   font-weight:800 !important;
-  line-height:1.2 !important;
-  letter-spacing:.125em !important;
+  line-height:1.25 !important;
+  letter-spacing:.155em !important;
   text-transform:uppercase !important;
-  white-space:nowrap !important;
 }
-
 body.ct-page #ct-meal .ct-cym-from{
   display:none !important;
 }
-
 body.ct-page #ct-meal .ct-cym-all{
-  flex:0 0 auto !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:4px !important;
-  margin:0 !important;
-  color:#D2465D !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:13px !important;
-  font-weight:650 !important;
-  line-height:1.2 !important;
-  text-decoration:none !important;
-  white-space:nowrap !important;
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin:0;
+  color:#D2465D;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif);
+  font-size:15px;
+  font-weight:600;
+  line-height:1.3;
+  text-decoration:none;
+  white-space:nowrap;
 }
-
 body.ct-page #ct-meal .ct-cym-all svg{
-  width:13px !important;
-  height:13px !important;
-  stroke-width:2 !important;
+  width:15px;
+  height:15px;
+  stroke-width:2;
 }
 
-/* =========================
-   CATEGORY CAPSULE
-   ========================= */
-
+/* Category capsule */
 body.ct-page #ct-meal .ct-cym-tabs{
   position:relative !important;
   display:flex !important;
   align-items:center !important;
   width:100% !important;
-  min-height:48px !important;
-  height:48px !important;
-  margin:0 0 12px !important;
-  padding:4px !important;
-  gap:3px !important;
+  min-height:64px !important;
+  margin:0 0 30px !important;
+  padding:5px !important;
+  gap:4px !important;
   box-sizing:border-box !important;
   border:0 !important;
   border-radius:999px !important;
   background:#F3F4F6 !important;
   overflow:hidden !important;
 }
-
 body.ct-page #ct-meal .ct-cym-ind{
   position:absolute !important;
   z-index:0 !important;
-  top:4px !important;
+  top:5px !important;
   left:0 !important;
-  height:calc(100% - 8px) !important;
+  height:calc(100% - 10px) !important;
   width:0;
   border-radius:999px !important;
-  background:#D71945 !important;
-  box-shadow:none !important;
+  background:#070A12 !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.08) !important;
   pointer-events:none !important;
 }
-
 body.ct-page #ct-meal .ct-cym-tab{
   position:relative !important;
   z-index:1 !important;
   flex:1 1 0 !important;
   min-width:0 !important;
-  min-height:40px !important;
-  height:40px !important;
+  min-height:54px !important;
   margin:0 !important;
-  padding:0 4px !important;
+  padding:0 10px !important;
   border:0 !important;
   border-radius:999px !important;
   background:transparent !important;
   color:#14171C !important;
   font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:12px !important;
-  font-weight:550 !important;
-  line-height:1.15 !important;
+  font-size:15px !important;
+  font-weight:500 !important;
+  line-height:1.2 !important;
   letter-spacing:0 !important;
-  text-align:center !important;
-  white-space:nowrap !important;
+  text-align:center;
+  white-space:nowrap;
   box-shadow:none !important;
 }
-
 body.ct-page #ct-meal .ct-cym-tab .ct-cym-tab-l{
-  position:relative !important;
-  z-index:2 !important;
+  position:relative;
+  z-index:2;
 }
-
 body.ct-page #ct-meal .ct-cym-tabs.is-ready .ct-cym-tab.is-active,
 body.ct-page #ct-meal .ct-cym-tab.is-active{
   background:transparent !important;
-  color:#fff !important;
+  color:#FFFFFF !important;
   font-weight:700 !important;
 }
-
 body.ct-page #ct-meal .ct-cym-tabs:not(.is-ready) .ct-cym-tab.is-active{
-  background:#D71945 !important;
-  color:#fff !important;
+  background:#070A12 !important;
+  color:#FFFFFF !important;
 }
 
-/* =========================
-   PRODUCT HORIZONTAL RAIL
-   ========================= */
-
+/* Product rail — fixed card geometry so the section does not grow/shrink
+   unpredictably across phones and desktop widths. */
 body.ct-page #ct-meal .ct-cym-track{
   display:flex !important;
   align-items:flex-start !important;
-  gap:12px !important;
+  gap:18px !important;
   width:100% !important;
   margin:0 !important;
-  padding:0 0 1px !important;
+  padding:0 0 8px !important;
   box-sizing:border-box !important;
   overflow-x:auto !important;
   overflow-y:hidden !important;
   scroll-padding-inline:0 !important;
   scroll-snap-type:x mandatory !important;
-  overscroll-behavior-x:contain !important;
-  -webkit-overflow-scrolling:touch !important;
-  scrollbar-width:none !important;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
 }
-
 body.ct-page #ct-meal .ct-cym-track::-webkit-scrollbar{
-  display:none !important;
+  display:none;
 }
-
 body.ct-page #ct-meal .ct-cym-card{
-  flex:0 0 100px !important;
-  width:100px !important;
-  min-width:100px !important;
-  max-width:100px !important;
+  flex:0 0 126px !important;
+  width:126px !important;
+  min-width:126px !important;
   margin:0 !important;
-  padding:0 !important;
-  box-sizing:border-box !important;
-  scroll-snap-align:start !important;
+  scroll-snap-align:start;
+  box-sizing:border-box;
 }
 
-/* =========================
-   PRODUCT IMAGE
-   ========================= */
-
+/* Image */
 body.ct-page #ct-meal .ct-cym-media{
   position:relative !important;
   display:block !important;
-  width:100px !important;
-  height:94px !important;
-  min-height:94px !important;
+  width:126px !important;
+  height:116px !important;
+  min-height:116px !important;
   box-sizing:border-box !important;
   overflow:hidden !important;
   border:1px solid #E5E8EB !important;
-  border-radius:12px !important;
+  border-radius:15px !important;
   background:#F4F4F5 !important;
   box-shadow:none !important;
 }
-
 body.ct-page #ct-meal .ct-cym-media img{
   display:block !important;
   width:100% !important;
   height:100% !important;
-  border-radius:11px !important;
+  border-radius:14px !important;
   object-fit:cover !important;
 }
 
-/* =========================
-   BADGE
-   ========================= */
-
+/* Bestseller badge */
 body.ct-page #ct-meal .ct-cym-badge{
-  position:absolute !important;
-  top:4px !important;
-  left:4px !important;
-  z-index:3 !important;
-  margin:0 !important;
-  padding:3px 5px !important;
-  border:1px solid #E6E8EB !important;
-  border-radius:5px !important;
-  background:#fff !important;
-  color:#B33B51 !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:8px !important;
-  font-weight:750 !important;
-  line-height:1.1 !important;
-  white-space:nowrap !important;
-  box-shadow:0 1px 3px rgba(20,28,36,.08) !important;
+  position:absolute;
+  top:7px;
+  left:7px;
+  z-index:3;
+  margin:0;
+  padding:4px 7px;
+  border:1px solid #E6E8EB;
+  border-radius:5px;
+  background:#FFFFFF;
+  color:#B33B51;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif);
+  font-size:10px;
+  font-weight:750;
+  line-height:1.15;
+  white-space:nowrap;
+  box-shadow:0 1px 3px rgba(20,28,36,.08);
 }
 
-/* =========================
-   ADD BUTTON
-   ========================= */
-
+/* Add button */
 body.ct-page #ct-meal .ct-cym-add{
   position:absolute !important;
-  top:4px !important;
-  right:4px !important;
+  top:7px !important;
+  right:7px !important;
   bottom:auto !important;
-  z-index:4 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  width:32px !important;
-  height:32px !important;
-  box-sizing:border-box !important;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:40px !important;
+  height:40px !important;
+  box-sizing:border-box;
   border:1px solid #E0E3E7 !important;
-  border-radius:9px !important;
-  background:#fff !important;
+  border-radius:12px !important;
+  background:#FFFFFF !important;
   color:#159B70 !important;
-  box-shadow:0 2px 6px rgba(20,30,40,.10) !important;
+  box-shadow:0 2px 7px rgba(20,30,40,.12) !important;
+}
+body.ct-page #ct-meal .ct-cym-add svg{
+  width:20px !important;
+  height:20px !important;
 }
 
+/* Product text */
+body.ct-page #ct-meal .ct-cym-name{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:5px !important;
+  width:100%;
+  min-height:42px !important;
+  margin:10px 0 0 !important;
+  padding:0 !important;
+  color:#30343B !important;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
+  font-size:15px !important;
+  font-weight:500 !important;
+  line-height:1.35 !important;
+  letter-spacing:-.12px !important;
+}
+body.ct-page #ct-meal .ct-cym-name > span:last-child{
+  min-width:0;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+
+/* Veg / non-veg marker stays supplied by the existing renderer. */
+body.ct-page #ct-meal .ct-cym-name > svg,
+body.ct-page #ct-meal .ct-cym-name > i{
+  flex:0 0 auto;
+  margin-top:3px;
+}
+
+/* Price */
+body.ct-page #ct-meal .ct-cym-price{
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:wrap !important;
+  gap:6px !important;
+  margin:7px 0 0 !important;
+  padding:0 !important;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
+  line-height:1.2 !important;
+}
+body.ct-page #ct-meal .ct-cym-now{
+  color:#30343B !important;
+  font-size:16px !important;
+  font-weight:750 !important;
+  letter-spacing:-.2px;
+  font-variant-numeric:tabular-nums;
+}
+body.ct-page #ct-meal .ct-cym-price s{
+  color:#9EA4AA !important;
+  font-size:12px !important;
+  font-weight:500 !important;
+}
+body.ct-page #ct-meal .ct-cym-off{
+  padding:3px 6px !important;
+  border-radius:5px !important;
+  background:#EAF6F0 !important;
+  color:#4A8C77 !important;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
+  font-size:10px !important;
+  font-weight:750 !important;
+  line-height:1.15 !important;
+}
+
+/* Meta line */
+body.ct-page #ct-meal .ct-cym-meta{
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  min-height:14px !important;
+  margin:6px 0 0 !important;
+  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
+  font-size:11px !important;
+  line-height:1.3 !important;
+}
+body.ct-page #ct-meal .ct-cym-note{
+  color:#858D97 !important;
+  font-size:11px !important;
+  font-weight:500 !important;
+}
+body.ct-page #ct-meal .ct-cym-rating{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  color:#66716B;
+  font-weight:650;
+}
+
+/* Phones: preserve the same geometry rather than making cards excessively wide. */
+@media(max-width:430px){
+  body.ct-page #ct-meal{
+    margin-left:12px;
+    margin-right:12px;
+    padding:25px 20px 28px;
+    border-radius:19px;
+  }
+  body.ct-page #ct-meal .ct-cym-head{
+    margin-bottom:18px;
+    gap:10px;
+  }
+  body.ct-page #ct-meal .ct-cym-title{
+    font-size:15px !important;
+    letter-spacing:.14em !important;
+  }
+  body.ct-page #ct-meal .ct-cym-all{
+    font-size:14px;
+    gap:5px;
+  }
+  body.ct-page #ct-meal .ct-cym-tabs{
+    min-height:58px !important;
+    margin-bottom:27px !important;
+    padding:5px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-tab{
+    min-height:48px !important;
+    padding:0 7px !important;
+    font-size:14px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-track{
+    gap:16px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-card{
+    flex-basis:126px !important;
+    width:126px !important;
+    min-width:126px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-media{
+    width:126px !important;
+    height:116px !important;
+    min-height:116px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-name{
+    font-size:14px !important;
+    min-height:39px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-now{
+    font-size:15px !important;
+  }
+}
+
+
+/* ==========================================================================
+   COMPACT REFERENCE LAYOUT — keep Eatswada's existing palette.
+   Brand red is used for the selected category; veg/add accents stay green.
+   This section-only override does not change data or interaction behavior.
+   ========================================================================== */
+body.ct-page #ct-meal{
+  margin:10px 12px !important;
+  padding:16px 16px 18px !important;
+  border-radius:18px !important;
+  box-shadow:0 2px 10px rgba(24,32,42,.035) !important;
+}
+
+/* Compact header */
+body.ct-page #ct-meal .ct-cym-head{
+  gap:10px !important;
+  margin:0 0 12px !important;
+}
+body.ct-page #ct-meal .ct-cym-title{
+  font-size:12px !important;
+  line-height:1.3 !important;
+  letter-spacing:.13em !important;
+}
+body.ct-page #ct-meal .ct-cym-all{
+  gap:5px !important;
+  font-size:13px !important;
+}
+
+/* Slim category rail; preserve category labels generated by the app */
+body.ct-page #ct-meal .ct-cym-tabs{
+  min-height:52px !important;
+  margin:0 0 16px !important;
+  padding:4px !important;
+  gap:3px !important;
+  background:#F3F4F6 !important;
+}
+body.ct-page #ct-meal .ct-cym-ind{
+  top:4px !important;
+  height:calc(100% - 8px) !important;
+  background:#D71945 !important;
+  border-radius:999px !important;
+  box-shadow:none !important;
+}
+body.ct-page #ct-meal .ct-cym-tab{
+  min-height:44px !important;
+  padding:0 5px !important;
+  font-size:12px !important;
+  font-weight:500 !important;
+}
+body.ct-page #ct-meal .ct-cym-tabs:not(.is-ready) .ct-cym-tab.is-active{
+  background:#D71945 !important;
+  color:#FFFFFF !important;
+}
+body.ct-page #ct-meal .ct-cym-tabs.is-ready .ct-cym-tab.is-active,
+body.ct-page #ct-meal .ct-cym-tab.is-active{
+  color:#FFFFFF !important;
+}
+
+/* Short horizontal cards: roughly five products visible on a phone-width rail */
+body.ct-page #ct-meal .ct-cym-track{
+  gap:12px !important;
+  padding:0 0 3px !important;
+  overflow-x:auto !important;
+  overflow-y:hidden !important;
+  scroll-snap-type:x mandatory !important;
+}
+body.ct-page #ct-meal .ct-cym-card{
+  flex:0 0 108px !important;
+  width:108px !important;
+  min-width:108px !important;
+  max-width:108px !important;
+  margin:0 !important;
+  scroll-snap-align:start !important;
+}
+body.ct-page #ct-meal .ct-cym-media{
+  width:108px !important;
+  height:106px !important;
+  min-height:106px !important;
+  aspect-ratio:auto !important;
+  border-radius:12px !important;
+}
+body.ct-page #ct-meal .ct-cym-media img{
+  border-radius:11px !important;
+}
+body.ct-page #ct-meal .ct-cym-badge{
+  top:5px !important;
+  left:5px !important;
+  padding:3px 5px !important;
+  font-size:9px !important;
+}
+body.ct-page #ct-meal .ct-cym-add{
+  top:5px !important;
+  right:5px !important;
+  width:34px !important;
+  height:34px !important;
+  border-radius:10px !important;
+}
 body.ct-page #ct-meal .ct-cym-add svg{
   width:17px !important;
   height:17px !important;
 }
 
-/* =========================
-   PRODUCT NAME
-   ========================= */
+/* Compact name and price stack */
+body.ct-page #ct-meal .ct-cym-name{
+  gap:4px !important;
+  min-height:34px !important;
+  margin:7px 0 0 !important;
+  font-size:12px !important;
+  line-height:1.3 !important;
+  letter-spacing:0 !important;
+}
+body.ct-page #ct-meal .ct-cym-name > span:last-child{
+  -webkit-line-clamp:2 !important;
+}
+body.ct-page #ct-meal .ct-cym-price{
+  gap:5px !important;
+  margin:5px 0 0 !important;
+}
+body.ct-page #ct-meal .ct-cym-now{
+  font-size:13px !important;
+}
+body.ct-page #ct-meal .ct-cym-price s{
+  font-size:10px !important;
+}
+body.ct-page #ct-meal .ct-cym-off{
+  padding:2px 4px !important;
+  font-size:9px !important;
+}
+body.ct-page #ct-meal .ct-cym-meta{
+  min-height:12px !important;
+  margin:4px 0 0 !important;
+  font-size:10px !important;
+}
+body.ct-page #ct-meal .ct-cym-note{
+  font-size:10px !important;
+}
+
+@media(max-width:430px){
+  body.ct-page #ct-meal{
+    margin:10px 10px !important;
+    padding:15px 14px 16px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-head{
+    margin-bottom:11px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-title{
+    font-size:11px !important;
+    letter-spacing:.12em !important;
+  }
+  body.ct-page #ct-meal .ct-cym-all{
+    font-size:12px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-tabs{
+    min-height:48px !important;
+    margin-bottom:14px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-tab{
+    min-height:40px !important;
+    font-size:11px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-card{
+    flex-basis:108px !important;
+    width:108px !important;
+    min-width:108px !important;
+    max-width:108px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-media{
+    width:108px !important;
+    height:104px !important;
+    min-height:104px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-name{
+    min-height:32px !important;
+    font-size:11px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-now{
+    font-size:12px !important;
+  }
+}
+
+
+/* Final size adjustment: target approximately 50% of the reference section's
+   vertical footprint. Width and existing palette are intentionally unchanged. */
+body.ct-page #ct-meal{
+  margin-top:8px !important;
+  margin-bottom:8px !important;
+  padding:10px 14px 11px !important;
+  border-radius:15px !important;
+}
+body.ct-page #ct-meal .ct-cym-head{
+  margin-bottom:7px !important;
+}
+body.ct-page #ct-meal .ct-cym-title{
+  font-size:10px !important;
+  letter-spacing:.11em !important;
+}
+body.ct-page #ct-meal .ct-cym-all{
+  font-size:11px !important;
+}
+body.ct-page #ct-meal .ct-cym-tabs{
+  min-height:34px !important;
+  margin-bottom:9px !important;
+  padding:3px !important;
+}
+body.ct-page #ct-meal .ct-cym-ind{
+  top:3px !important;
+  height:calc(100% - 6px) !important;
+}
+body.ct-page #ct-meal .ct-cym-tab{
+  min-height:28px !important;
+  font-size:10px !important;
+  padding:0 3px !important;
+}
+body.ct-page #ct-meal .ct-cym-track{
+  gap:9px !important;
+  padding-bottom:0 !important;
+}
+body.ct-page #ct-meal .ct-cym-card{
+  flex-basis:76px !important;
+  width:76px !important;
+  min-width:76px !important;
+  max-width:76px !important;
+}
+body.ct-page #ct-meal .ct-cym-media{
+  width:76px !important;
+  height:70px !important;
+  min-height:70px !important;
+  border-radius:9px !important;
+}
+body.ct-page #ct-meal .ct-cym-media img{
+  border-radius:8px !important;
+}
+body.ct-page #ct-meal .ct-cym-badge{
+  top:3px !important;
+  left:3px !important;
+  padding:2px 3px !important;
+  font-size:7px !important;
+}
+body.ct-page #ct-meal .ct-cym-add{
+  top:3px !important;
+  right:3px !important;
+  width:25px !important;
+  height:25px !important;
+  border-radius:7px !important;
+}
+body.ct-page #ct-meal .ct-cym-add svg{
+  width:13px !important;
+  height:13px !important;
+}
+body.ct-page #ct-meal .ct-cym-name{
+  min-height:24px !important;
+  margin-top:4px !important;
+  gap:3px !important;
+  font-size:9px !important;
+  line-height:1.25 !important;
+}
+body.ct-page #ct-meal .ct-cym-price{
+  gap:3px !important;
+  margin-top:3px !important;
+}
+body.ct-page #ct-meal .ct-cym-now{
+  font-size:10px !important;
+}
+body.ct-page #ct-meal .ct-cym-price s{
+  font-size:8px !important;
+}
+body.ct-page #ct-meal .ct-cym-off{
+  padding:1px 3px !important;
+  font-size:7px !important;
+}
+body.ct-page #ct-meal .ct-cym-meta{
+  min-height:9px !important;
+  margin-top:2px !important;
+  font-size:8px !important;
+}
+body.ct-page #ct-meal .ct-cym-note{
+  font-size:8px !important;
+}
+@media(max-width:430px){
+  body.ct-page #ct-meal{
+    margin:8px 10px !important;
+    padding:9px 12px 10px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-title{
+    font-size:9px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-all{
+    font-size:10px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-tabs{
+    min-height:32px !important;
+    margin-bottom:8px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-tab{
+    min-height:26px !important;
+    font-size:9px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-card{
+    flex-basis:76px !important;
+    width:76px !important;
+    min-width:76px !important;
+    max-width:76px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-media{
+    width:76px !important;
+    height:68px !important;
+    min-height:68px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-name{
+    min-height:22px !important;
+    font-size:8px !important;
+  }
+  body.ct-page #ct-meal .ct-cym-now{
+    font-size:9px !important;
+  }
+}
+
+
+/* ==========================================================================
+   EATSWADA — COMPACT MOBILE REFINEMENT
+   Append-only override for the oversized section dimensions above.
+   Keep cart-page.js and all existing interaction hooks unchanged.
+   ========================================================================== */
+
+body.ct-page #ct-meal{
+  margin:8px 12px !important;
+  padding:14px 14px 15px !important;
+  border-radius:17px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-head{
+  gap:10px !important;
+  margin:0 0 10px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-title{
+  font-size:13px !important;
+  line-height:1.25 !important;
+  letter-spacing:.12em !important;
+}
+
+body.ct-page #ct-meal .ct-cym-all{
+  gap:4px !important;
+  font-size:12px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-all svg{
+  width:13px !important;
+  height:13px !important;
+}
+
+/* The previous 64px capsule + 30px bottom margin created avoidable height. */
+body.ct-page #ct-meal .ct-cym-tabs{
+  min-height:46px !important;
+  height:46px !important;
+  margin:0 0 11px !important;
+  padding:4px !important;
+  gap:3px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-ind{
+  top:4px !important;
+  height:calc(100% - 8px) !important;
+}
+
+body.ct-page #ct-meal .ct-cym-tab{
+  min-height:38px !important;
+  height:38px !important;
+  padding:0 5px !important;
+  font-size:11.5px !important;
+  line-height:1.15 !important;
+}
+
+/* Fixed-width horizontal rail; keep the cards compact at every phone width. */
+body.ct-page #ct-meal .ct-cym-track{
+  gap:10px !important;
+  margin:0 !important;
+  padding:0 0 2px !important;
+  min-height:0 !important;
+}
+
+body.ct-page #ct-meal .ct-cym-card{
+  flex:0 0 96px !important;
+  width:96px !important;
+  min-width:96px !important;
+  max-width:96px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-media{
+  width:96px !important;
+  height:90px !important;
+  min-height:90px !important;
+  border-radius:11px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-media img{
+  border-radius:10px !important;
+}
+
+/* Smaller overlay controls, without changing their click targets' behavior. */
+body.ct-page #ct-meal .ct-cym-badge{
+  top:4px !important;
+  left:4px !important;
+  padding:3px 5px !important;
+  font-size:8.5px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-add{
+  top:4px !important;
+  right:4px !important;
+  width:30px !important;
+  height:30px !important;
+  border-radius:9px !important;
+}
+
+body.ct-page #ct-meal .ct-cym-add svg{
+  width:16px !important;
+  height:16px !important;
+}
 
 body.ct-page #ct-meal .ct-cym-name{
-  display:flex !important;
-  align-items:flex-start !important;
-  gap:4px !important;
-  width:100% !important;
-  min-height:31px !important;
+  min-height:29px !important;
   margin:6px 0 0 !important;
-  padding:0 !important;
-  color:#30343B !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:11.5px !important;
-  font-weight:550 !important;
+  gap:4px !important;
+  font-size:11px !important;
   line-height:1.28 !important;
   letter-spacing:0 !important;
 }
 
-body.ct-page #ct-meal .ct-cym-name > span:last-child{
-  min-width:0 !important;
-  display:-webkit-box !important;
-  -webkit-box-orient:vertical !important;
-  -webkit-line-clamp:2 !important;
-  overflow:hidden !important;
-}
-
-body.ct-page #ct-meal .ct-cym-name > svg,
-body.ct-page #ct-meal .ct-cym-name > i{
-  flex:0 0 auto !important;
-  margin-top:2px !important;
-}
-
-/* =========================
-   PRICE
-   ========================= */
-
 body.ct-page #ct-meal .ct-cym-price{
-  display:flex !important;
-  align-items:center !important;
-  flex-wrap:wrap !important;
-  gap:4px !important;
+  gap:3px 4px !important;
   margin:4px 0 0 !important;
-  padding:0 !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  line-height:1.15 !important;
 }
 
 body.ct-page #ct-meal .ct-cym-now{
-  color:#30343B !important;
-  font-size:12.5px !important;
-  font-weight:750 !important;
-  letter-spacing:-.1px !important;
-  font-variant-numeric:tabular-nums !important;
+  font-size:12px !important;
 }
 
-body.ct-page #ct-meal .ct-cym-price s{
-  color:#9EA4AA !important;
-  font-size:9.5px !important;
-  font-weight:500 !important;
+body.ct-page #ct-meal .ct-cym-price s,
+body.ct-page #ct-meal .ct-cym-off,
+body.ct-page #ct-meal .ct-cym-note,
+body.ct-page #ct-meal .ct-cym-rating{
+  font-size:9px !important;
 }
-
-body.ct-page #ct-meal .ct-cym-off{
-  padding:2px 4px !important;
-  border-radius:4px !important;
-  background:#EAF6F0 !important;
-  color:#4A8C77 !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:8px !important;
-  font-weight:750 !important;
-  line-height:1.1 !important;
-}
-
-/* =========================
-   META
-   ========================= */
 
 body.ct-page #ct-meal .ct-cym-meta{
-  display:flex !important;
-  align-items:center !important;
-  gap:5px !important;
-  min-height:10px !important;
   margin:3px 0 0 !important;
-  font-family:var(--ew-ui-font,"Manrope",system-ui,sans-serif) !important;
-  font-size:9px !important;
-  line-height:1.2 !important;
 }
 
-body.ct-page #ct-meal .ct-cym-note{
-  color:#858D97 !important;
-  font-size:9px !important;
-  font-weight:500 !important;
-}
-
-body.ct-page #ct-meal .ct-cym-rating{
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:2px !important;
-  color:#66716B !important;
-  font-weight:650 !important;
-}
-
-/* =========================
-   SMALL PHONES
-   ========================= */
-
-@media (max-width:430px){
-  body.ct-page #ct-meal{
-    margin:8px 10px !important;
-    padding:13px 12px 14px !important;
-    border-radius:16px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-head{
-    margin-bottom:9px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-title{
-    font-size:13px !important;
-    letter-spacing:.115em !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-all{
-    font-size:12px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-tabs{
-    min-height:46px !important;
-    height:46px !important;
-    margin-bottom:11px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-tab{
-    min-height:38px !important;
-    height:38px !important;
-    font-size:11px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-track{
-    gap:10px !important;
-  }
-
+/* Slightly larger rail only on wider screens. */
+@media (min-width:600px){
   body.ct-page #ct-meal .ct-cym-card{
-    flex-basis:94px !important;
-    width:94px !important;
-    min-width:94px !important;
-    max-width:94px !important;
+    flex-basis:108px !important;
+    width:108px !important;
+    min-width:108px !important;
+    max-width:108px !important;
   }
-
   body.ct-page #ct-meal .ct-cym-media{
-    width:94px !important;
-    height:88px !important;
-    min-height:88px !important;
-    border-radius:11px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-media img{
-    border-radius:10px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-name{
-    min-height:29px !important;
-    margin-top:5px !important;
-    font-size:11px !important;
-  }
-
-  body.ct-page #ct-meal .ct-cym-now{
-    font-size:12px !important;
+    width:108px !important;
+    height:100px !important;
+    min-height:100px !important;
   }
 }
