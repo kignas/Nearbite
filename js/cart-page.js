@@ -2155,35 +2155,20 @@ function ctPaintMealTrack(animate){
 let ctMealSwapTimer = 0;
 function ctSelectMealTab(key){
   if (!key || key === ctMealTab) return;
-
-  const currentIndex = ctMealTabs.findIndex(t => t.key === ctMealTab);
-  const nextIndex = ctMealTabs.findIndex(t => t.key === key);
-  const direction = (nextIndex >= 0 && currentIndex >= 0 && nextIndex < currentIndex)
-    ? 'is-backward'
-    : 'is-forward';
-
   ctMealTab = key;
-  // The indicator moves first, then the recommendation rail exits in the
-  // direction of the selection and the replacement cards enter from that side.
+  // The pill leaves first and the cards follow it, so a tap reads as one
+  // continuous movement instead of an instant swap.
   ctSyncMealTabState();
   ctSyncMealIndicator(true);
-
   const track = document.getElementById('ct-meal-row');
   const reduced = ctReducedMotion();
   clearTimeout(ctMealSwapTimer);
-
   if (track && !reduced){
-    track.classList.remove('is-forward', 'is-backward');
-    track.classList.add('is-swapping', direction);
-    ctMealSwapTimer = setTimeout(() => {
-      ctPaintMealTrack(true);
-      track.classList.remove('is-forward', 'is-backward');
-      track.classList.add(direction);
-    }, 170);
+    track.classList.add('is-swapping');
+    ctMealSwapTimer = setTimeout(() => ctPaintMealTrack(true), 140);
   } else {
     ctPaintMealTrack(!reduced);
   }
-
   const btn = document.querySelector('#ct-cym-tabs [data-cym-tab="' + CSS.escape(key) + '"]');
   if (btn) btn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
 }
@@ -2758,24 +2743,7 @@ async function ctEnsureProfile() {
 function ctSelectTipTab(key, focus) {
   const tabs = document.querySelectorAll('#ct-di-group [data-ct-tab]');
   if (!tabs.length) return;
-
-  const panels = {
-    tip: document.getElementById('ct-tip-panel'),
-    di: document.getElementById('ct-di-body')
-  };
-
-  const currentTab = document.querySelector('#ct-di-group [data-ct-tab].is-active');
-  const currentKey = currentTab ? currentTab.getAttribute('data-ct-tab') : 'tip';
-  if (!panels[key]) key = 'tip';
-  if (key === currentKey) {
-    if (focus) currentTab?.focus();
-    return;
-  }
-
-  const entering = panels[key];
-  const leaving = panels[currentKey];
-  const direction = key === 'di' ? 'right' : 'left';
-
+  const panels = { tip: document.getElementById('ct-tip-panel'), di: document.getElementById('ct-di-body') };
   tabs.forEach(tab => {
     const on = tab.getAttribute('data-ct-tab') === key;
     tab.classList.toggle('is-active', on);
@@ -2783,25 +2751,7 @@ function ctSelectTipTab(key, focus) {
     tab.tabIndex = on ? 0 : -1;
     if (on && focus) tab.focus();
   });
-
-  Object.keys(panels).forEach(k => {
-    if (panels[k]) panels[k].hidden = (k !== key);
-  });
-
-  if (!ctReducedMotion()) {
-    entering.classList.remove('ct-panel-enter-left', 'ct-panel-enter-right');
-    void entering.offsetWidth;
-    entering.classList.add(direction === 'right' ? 'ct-panel-enter-right' : 'ct-panel-enter-left');
-    clearTimeout(entering._ctPanelAnim);
-    entering._ctPanelAnim = setTimeout(() => {
-      entering.classList.remove('ct-panel-enter-left', 'ct-panel-enter-right');
-    }, 360);
-  } else {
-    entering.classList.remove('ct-panel-enter-left', 'ct-panel-enter-right');
-  }
-
-  // Keep the checkout footer in sync when the instruction panel is taller.
-  requestAnimationFrame(() => syncFooterOffset());
+  Object.keys(panels).forEach(k => { if (panels[k]) panels[k].hidden = (k !== key); });
 }
 
 /* Legacy accordion entry point. The accordion markup was replaced by tabs, so
