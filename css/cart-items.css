@@ -145,3 +145,54 @@ body.ct-page .ct-stepper.is-last .ct-step-down{
   body.ct-page .ct-media{width:46px;height:46px;}
   body.ct-page .ct-stepper button{width:26px;flex-basis:26px;}
 }
+
+/* FINAL OVERRIDE — keep quantity control and item price in separate,
+   readable space; prevent the price from being pushed off the card. */
+body.ct-page .ct-restaurant-items .ct-row{
+  grid-template-columns:minmax(0,1fr) 150px !important;
+  column-gap:12px !important;
+}
+body.ct-page .ct-restaurant-items .ct-row.has-media{
+  grid-template-columns:52px minmax(0,1fr) 150px !important;
+}
+body.ct-page .ct-right{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:10px !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+body.ct-page .ct-stepper{
+  flex:0 0 auto !important;
+  min-width:70px !important;
+}
+body.ct-page .ct-item-total{
+  flex:0 0 auto !important;
+  min-width:52px !important;
+  text-align:right !important;
+  white-space:nowrap !important;
+}
+@media(max-width:420px){
+  body.ct-page .ct-restaurant-items .ct-row{
+    grid-template-columns:minmax(0,1fr) 128px !important;
+    column-gap:8px !important;
+  }
+  body.ct-page .ct-restaurant-items .ct-row.has-media{
+    grid-template-columns:46px minmax(0,1fr) 128px !important;
+  }
+  body.ct-page .ct-right{gap:7px !important;}
+  body.ct-page .ct-stepper{min-width:68px !important;}
+  body.ct-page .ct-item-total{min-width:48px !important;font-size:14px !important;}
+}
+@media(max-width:360px){
+  body.ct-page .ct-restaurant-items .ct-row{
+    grid-template-columns:minmax(0,1fr) 120px !important;
+  }
+  body.ct-page .ct-restaurant-items .ct-row.has-media{
+    grid-template-columns:42px minmax(0,1fr) 120px !important;
+  }
+  body.ct-page .ct-right{gap:5px !important;}
+  body.ct-page .ct-stepper{min-width:65px !important;}
+  body.ct-page .ct-item-total{min-width:46px !important;font-size:13px !important;}
+}
