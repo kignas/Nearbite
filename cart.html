@@ -19,7 +19,7 @@
 <link href="css/eatswada-ui-system.css?v=20260923-typography" rel="stylesheet"/>
 <link rel="stylesheet" href="eatswada-theme.css">
   <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet">
-<link href="css/cart-page.css?v=20260928-ref2" rel="stylesheet">
+<link href="css/cart-page.css?v=20260928-typography-v4" rel="stylesheet">
 </head>
 <body class="ct-page">
 <div id="cart-has-items">
@@ -53,17 +53,6 @@
 <span id="cart-restaurant-name"></span>
 </span>
 </div>
-<!-- ═══ 1a. SAVINGS STRIP — same ids the JS already paints (paintFooterSavings); shown only when real savings exist. Tapping scrolls to the bill. ═══ -->
-<button aria-label="Show bill details" class="ct-footer-save ct-save-strip" id="ct-footer-save" type="button">
-<svg aria-hidden="true" class="ct-save-spark" fill="none" height="18" viewbox="0 0 24 24" width="18">
-<path d="M12 3.5l1.7 4.6 4.6 1.7-4.6 1.7L12 16.1l-1.7-4.6L5.7 9.8l4.6-1.7L12 3.5Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"></path>
-<path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" fill="currentColor"></path>
-</svg>
-<span class="ct-save-text" id="ct-footer-save-text"></span>
-<svg aria-hidden="true" class="ct-save-chev" fill="none" height="16" viewbox="0 0 24 24" width="16">
-<path d="m7 9 5 5 5-5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</button>
 <!-- ═══ 1b. EATSWADA FEE LINE — slim, factual: this checkout charges
        neither a packaging fee nor a platform fee. Static by design; there is
        no such field in the bill to read from. ═══ -->
@@ -93,70 +82,66 @@
 <!-- ═══ 3. COMPLETE YOUR MEAL — same-restaurant menu, real data only ═══ -->
 <section aria-labelledby="ct-cym-title" class="ct-card ct-cym" hidden="" id="ct-meal">
 <div class="ct-cym-head">
+<span aria-hidden="true" class="ct-line-ic ct-line-ic-accent">
+<svg fill="none" height="21" viewBox="0 0 24 24" width="21"><rect x="4" y="4" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="4" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="14" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M14 14h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</span>
 <div class="ct-cym-headcopy">
 <h2 class="ct-cym-title" id="ct-cym-title">Complete your meal</h2>
 <p class="ct-cym-from" hidden="" id="ct-cym-from"></p>
 </div>
-<a class="ct-cym-all tap" href="index.html" id="ct-addmore">See all<svg aria-hidden="true" fill="none" height="14" viewbox="0 0 24 24" width="14"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></a>
 </div>
 <div aria-label="Suggestion categories" class="ct-cym-tabs" hidden="" id="ct-cym-tabs" role="tablist"></div>
 <div class="ct-cym-track" id="ct-meal-row" role="tabpanel"></div>
 </section>
-<!-- ═══ 4. SAVINGS CORNER — coupon entry (existing sheet) + rows that reflect real cart state only ═══ -->
-<section aria-labelledby="ct-sav-title" class="ct-card ct-savings" id="ct-payment-group">
-<h2 class="ct-sec-title" id="ct-sav-title">Savings corner</h2>
-<button aria-haspopup="dialog" aria-label="Apply coupon code" class="ct-sav-row ct-sav-coupon" id="coupon-card" type="button">
-<span aria-hidden="true" class="ct-sav-ic ct-sav-ic--offer">
-<svg fill="none" height="18" viewBox="0 0 24 24" width="18"><path d="M3.5 12.6V5.5a1 1 0 0 1 1-1h7.1a1 1 0 0 1 .7.3l7.9 7.9a1 1 0 0 1 0 1.4l-6.6 6.6a1 1 0 0 1-1.4 0l-7.9-7.9a1 1 0 0 1-.3-.7Z" fill="currentColor"></path><circle cx="8.2" cy="8.7" fill="#fff" r="1.5"></circle></svg>
+<!-- ═══ 4. PAYMENT OFFERS & MORE — same .ct-group shell as Delivery instructions ═══ -->
+<div class="ct-group ct-group--nav" id="ct-payment-group">
+<button aria-haspopup="dialog" aria-label="Payment offers and more" class="ct-group-head" id="coupon-card" type="button">
+<span aria-hidden="true" class="ct-line-ic ct-line-ic-accent">
+<svg fill="none" height="21" viewBox="0 0 24 24" width="21"><path d="M20 12v7H4V5h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5h5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="m20 5-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 9h3M8 13h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
 </span>
-<span class="ct-sav-copy">
-<span class="ct-sav-title">Apply coupon code</span>
-<span class="ct-sav-sub" id="coupon-card-sub"></span>
+<span class="ct-group-copy">
+<span class="ct-group-title">Payment offers &amp; more</span>
+<span class="ct-group-sub" id="coupon-card-sub">Apply coupon code if any</span>
 </span>
-<span class="ct-group-flag ct-sav-flag" id="coupon-applied-flag">
+<span class="ct-group-flag" id="coupon-applied-flag">
 <svg aria-hidden="true" fill="none" height="13" viewbox="0 0 24 24" width="13">
 <path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
 </svg>Applied</span>
-<svg aria-hidden="true" class="ct-sav-chev" fill="none" height="16" viewbox="0 0 24 24" width="16">
+<svg aria-hidden="true" class="ct-group-chev ct-group-chev--nav" fill="none" height="16" viewbox="0 0 24 24" width="16">
 <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9"></path>
 </svg>
 </button>
-<!-- Item discounts already reflected in the cart prices. Text + visibility come from ctState.itemSavings (paintSavingsCorner); hidden at ₹0. -->
-<div class="ct-sav-row ct-sav-static" hidden="" id="ct-sav-items">
-<span aria-hidden="true" class="ct-sav-ic ct-sav-ic--pct">
-<svg fill="none" height="16" viewBox="0 0 24 24" width="16"><path d="M18 6 6 18" stroke="currentColor" stroke-linecap="round" stroke-width="2.4"></path><circle cx="7.6" cy="7.6" r="2" stroke="currentColor" stroke-width="2.2"></circle><circle cx="16.4" cy="16.4" r="2" stroke="currentColor" stroke-width="2.2"></circle></svg>
+</div>
+<!-- ═══ 5+6. DELIVERY INSTRUCTIONS + RIDER TIP — inline expansion ═══ -->
+<div class="ct-group" id="ct-di-group">
+<button aria-controls="ct-di-body" aria-expanded="false" class="ct-group-head" id="ct-di-toggle" onclick="toggleDeliveryInstructions()" type="button">
+<span aria-hidden="true" class="ct-line-ic ct-line-ic-accent">
+<svg fill="none" height="21" viewBox="0 0 24 24" width="21"><path d="M3 7h11v9H3zM14 10h3.8l3.2 3.2V16H14z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7" cy="17" r="1.8" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="17" r="1.8" stroke="currentColor" stroke-width="1.8"/><path d="M3 11h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
 </span>
-<span class="ct-sav-copy"><span class="ct-sav-title" id="ct-sav-items-text"></span></span>
-<span class="ct-sav-flag is-static">
-<svg aria-hidden="true" fill="none" height="13" viewbox="0 0 24 24" width="13">
-<path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
-</svg>Applied</span>
-</div>
-</section>
-<!-- ═══ 5. RIDER TIP + DELIVERY INSTRUCTIONS — two tabs over the SAME ctState values (tipAmount / deliveryInstructions); switching tabs only shows/hides panels, nothing is reset ═══ -->
-<section class="ct-card ct-tipcard" id="ct-di-group">
-<div aria-label="Rider tip and delivery instructions" class="ct-tabs" role="tablist">
-<button aria-controls="ct-tip-panel" aria-selected="true" class="ct-tab is-active" data-ct-tab="tip" id="ct-tab-tip" role="tab" type="button">Rider Tip</button>
-<button aria-controls="ct-di-body" aria-selected="false" class="ct-tab" data-ct-tab="di" id="ct-tab-di" role="tab" tabindex="-1" type="button"><span id="ct-di-summary">Delivery Instructions</span><span class="ct-tab-count" hidden="" id="ct-di-count"></span></button>
-</div>
-<div aria-labelledby="ct-tab-tip" class="ct-tab-panel" id="ct-tip-panel" role="tabpanel">
-<div aria-label="Rider tip" class="ct-chip-row" id="tip-options" role="group">
-<button aria-pressed="true" class="ct-chip" data-tip="0" type="button"><span class="ct-chip-amt">₹0</span><span class="ct-chip-sub">No tip</span></button>
-<button aria-pressed="false" class="ct-chip" data-tip="10" type="button"><span class="ct-chip-amt">₹10</span><span class="ct-chip-sub">Good</span></button>
-<button aria-pressed="false" class="ct-chip" data-tip="20" type="button"><span class="ct-chip-amt">₹20</span><span class="ct-chip-sub">Great</span></button>
-<button aria-pressed="false" class="ct-chip" data-tip="30" type="button"><span class="ct-chip-amt">₹30</span><span class="ct-chip-sub">Amazing</span></button>
-<button aria-haspopup="dialog" aria-pressed="false" class="ct-chip" data-tip="custom" id="tip-custom-chip" type="button"><span class="ct-chip-amt">Custom</span><span class="ct-chip-sub">Other</span></button>
-</div>
-<p class="ct-tip-note">
-<svg aria-hidden="true" class="ct-tip-gift" fill="none" height="18" viewbox="0 0 24 24" width="18"><rect height="5" rx="1" stroke="currentColor" stroke-width="1.8" width="17" x="3.5" y="8"></rect><path d="M5 13v6.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V13M12 8v12.5" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path><path d="M12 8c-1.2-3.2-4.8-3.6-4.8-1.4C7.2 8 12 8 12 8Zm0 0c1.2-3.2 4.8-3.6 4.8-1.4C16.8 8 12 8 12 8Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.6"></path></svg>
-<span class="ct-tip-note-text">100% goes to your delivery partner</span>
-<svg aria-label="Your full tip goes to your delivery partner" class="ct-tip-info" fill="none" height="16" role="img" viewbox="0 0 24 24" width="16"><title>Your full tip goes to your delivery partner</title><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"></circle><path d="M12 11v5.2M12 7.9v.1" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"></path></svg>
-</p>
-</div>
-<div aria-labelledby="ct-tab-di" class="ct-tab-panel" hidden="" id="ct-di-body" role="tabpanel">
+<span class="ct-group-copy">
+<span class="ct-group-title" id="ct-di-summary">Delivery instructions</span>
+<span class="ct-group-sub">Tell your delivery partner how to reach you</span>
+</span>
+<svg aria-hidden="true" class="ct-group-chev" fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="ct-group-body" hidden="" id="ct-di-body">
 <div aria-label="Delivery instructions" class="ct-di-pills" id="ct-di-pills" role="group"></div>
+<div class="ct-tip-block">
+<div class="ct-tip-title" id="tip-heading">Rider tip</div>
+<p class="ct-tip-note">100% goes to your delivery partner.</p>
+<div aria-labelledby="tip-heading" class="ct-chip-row" id="tip-options" role="group">
+<button aria-pressed="true" class="ct-chip" data-tip="0" type="button">No tip</button>
+<button aria-pressed="false" class="ct-chip" data-tip="10" type="button">₹10</button>
+<button aria-pressed="false" class="ct-chip" data-tip="20" type="button">₹20</button>
+<button aria-pressed="false" class="ct-chip" data-tip="30" type="button">₹30</button>
+<button aria-pressed="false" class="ct-chip" data-tip="50" type="button">₹50</button>
+<button aria-haspopup="dialog" aria-pressed="false" class="ct-chip" data-tip="custom" id="tip-custom-chip" type="button">Custom</button>
 </div>
-</section>
+</div>
+</div>
+</div>
 <!-- ═══ 6. DELIVERY DETAILS — selected address + who the rider calls ═══ -->
 <div class="ct-card ct-details" id="ct-delivery-details">
 <button class="ct-details-row tap" onclick="window.location.href='address.html?return=cart'" type="button">
@@ -234,7 +219,7 @@
 <div class="ct-empty" id="empty-cart">
 <svg aria-hidden="true" class="ct-empty-art" fill="none" viewbox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
 <path d="M22 32h52l-5 44a8 8 0 0 1-8 7H35a8 8 0 0 1-8-7L22 32Z" fill="#EFF2F4" stroke="#CBD3DA" stroke-linejoin="round" stroke-width="3"></path>
-<path d="M36 32v-6a12 12 0 0 1 24 0v6" stroke="#DC2742" stroke-linecap="round" stroke-width="3.5"></path>
+<path d="M36 32v-6a12 12 0 0 1 24 0v6" stroke="#C2185B" stroke-linecap="round" stroke-width="3.5"></path>
 <circle cx="39" cy="55" fill="#CBD3DA" r="3"></circle>
 <circle cx="57" cy="55" fill="#CBD3DA" r="3"></circle>
 <path d="M39 68c4.5-4 13.5-4 18 0" stroke="#CBD3DA" stroke-linecap="round" stroke-width="3"></path>
@@ -247,6 +232,13 @@
 <i class="fa-solid fa-circle-info"></i><span id="addr-toast-text">Add a delivery address first</span>
 </div>
 <div class="ct-footer" id="checkout-footer">
+<div class="ct-footer-save" id="ct-footer-save">
+<svg aria-hidden="true" fill="none" height="14" viewbox="0 0 24 24" width="14">
+<path d="M4.5 8.25a2 2 0 0 1 2-2h8.8l4.2 4.2v5.3a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8.25Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"></path>
+<circle cx="8.5" cy="10" fill="currentColor" r="1.05"></circle>
+</svg>
+<span id="ct-footer-save-text"></span>
+</div>
 <div class="ct-paybar">
 <button aria-label="View detailed bill" class="ct-paybar-left tap" id="ct-view-bill" type="button">
 <span class="ct-paybar-amt" id="checkout-total">₹0</span>
@@ -258,6 +250,9 @@
 </button>
 <button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
 <span class="ct-cta-text" id="checkout-label">Proceed to Pay</span>
+<svg aria-hidden="true" class="ct-cta-arrow" fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="m9 6 6 6-6 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
 </button>
 </div>
 <div class="ct-pay-note">
@@ -350,7 +345,7 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="config.js"></script>
 <script src="cart-bar.js"></script>
-<script src="js/cart-page.js?v=20260928-ref1"></script>
+<script src="js/cart-page.js?v=20260926-pay1"></script>
 <script src="navigation.js"></script>
 </body>
 </html>
