@@ -469,7 +469,7 @@ const CT_EXTRAS_KEY  = 'nearbite_cart_extras';
 const CT_NOTE_MAX    = 250;
 const CT_TIP_MIN     = 1;
 const CT_TIP_MAX     = 1000;     // frontend sanity bound; the backend validates too
-const CT_TIP_PRESETS = [10, 20, 30, 50];
+const CT_TIP_PRESETS = [10, 20, 30];   // ₹0 = "No tip"; anything else is shown on the Custom chip
 
 const CT_NOTE_CFG = {
   restaurantNote: {
@@ -556,6 +556,9 @@ function readCart() {
 
 /* Inline SVG glyphs used inside painted markup. Line weight matches the rest
    of the checkout iconography (1.65–1.8 stroke, round caps). No icon fonts. */
+const CT_ICON_ARROW =
+  '<svg class="ct-cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+  '<path d="M5 12h13m-5-5.5 5.5 5.5-5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const CT_ICON_PLATE =
   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
   '<path d="M7.5 3.5v6.2a2.2 2.2 0 0 0 4.4 0V3.5M9.7 9.7V20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -601,6 +604,11 @@ function customLine(value) {
   return '';
 }
 
+/* Cart rows are compact text rows. Thumbnails are intentionally not rendered
+   here (checkout performance + visual density); the Complete-your-meal cards
+   and every other page keep their images. Flip to true to bring them back. */
+const CT_CART_THUMBS = false;
+
 /* ── Item painting: synchronous, never waits on the network ─────────────── */
 function paintItems(savedCart) {
   const listEl = document.getElementById('cart-items-list');
@@ -631,15 +639,19 @@ function paintItems(savedCart) {
     const quantity = Number(info.quantity || 0);
     const itemTotal = quantity * price;
     const itemSavings = hasDiscount ? quantity * (original - price) : 0;
-    // Checkout line items intentionally render without product photos.
-    // This avoids loading duplicate cart thumbnails; recommendation imagery
-    // in Complete Your Meal remains untouched.
+    const img = itemImage(info);
+    const media = anyMedia ? `
+        <div class="ct-media">
+          <div class="ct-media-fallback">${CT_ICON_PLATE}</div>
+          ${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+        </div>` : '';
     // At one unit the decrement IS the delete, so the control says so. Same
     // data-step="-1", same cartAdjust() path — only the glyph and label change.
     const last = quantity <= 1;
     const custom = customLine(info.customizations);
     return `
-      <div class="ct-row" data-name="${esc(name)}">
+      <div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
+        ${media}
         <div class="ct-info">
           <div class="ct-name-row">${vegMark(info)}<span class="ct-name">${esc(name)}</span></div>
           ${custom ? `<div class="ct-custom">${esc(custom)}</div>` : ''}
@@ -663,7 +675,7 @@ function paintItems(savedCart) {
   };
 
   listEl.innerHTML = groups.map((group, groupIndex) => {
-    const anyMedia = group.items.some(([, info]) => itemImage(info));
+    const anyMedia = CT_CART_THUMBS && group.items.some(([, info]) => itemImage(info));
     const subtotal = group.items.reduce((sum, [, info]) => sum + Number(info.price || 0) * Number(info.quantity || 0), 0);
     const units = group.items.reduce((sum, [, info]) => sum + Number(info.quantity || 0), 0);
     const note = group.resId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(group.resId);
@@ -685,7 +697,7 @@ function paintItems(savedCart) {
           </a>
           <button type="button" class="ct-pill-btn tap ct-restaurant-note-btn${note ? ' is-set' : ''}" data-note-field="${esc(restaurantNoteField(group.resId))}" data-restaurant-id="${esc(group.resId)}" aria-haspopup="dialog">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19h14M7 15l9-9 2 2-9 9H7v-2z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="ct-note-btn-text">${esc(note ? 'Note added' : 'Restaurant note')}</span>
+            <span class="ct-note-btn-text">${esc(note ? 'Request added' : 'Cooking requests')}</span>
           </button>
         </div>
         ${note ? `<div class="ct-restaurant-note-preview" data-note-preview="${esc(group.resId)}">${esc(note)}</div>` : ''}
@@ -802,6 +814,7 @@ function applyTotals() {
   updateBillCompact(total);
   paintSavingsHero();
   paintFooterSavings();
+  paintSavingsCorner();
 }
 
 /* Collapsed summary of the same figures shown in the sheet. */
@@ -993,7 +1006,7 @@ function updateCheckoutCta() {
   if (!ctState.loggedIn) {
     btn.classList.remove('locked');
     btn.setAttribute('aria-disabled', 'false');
-    label.innerHTML = `Log in to order<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
+    label.innerHTML = `Log in to order ${CT_ICON_ARROW}<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
     return;
   }
   if (ctState.multiBelowMin && ctState.multiBelowMin.length) {
@@ -1019,7 +1032,7 @@ function updateCheckoutCta() {
   }
   btn.classList.remove('locked');
   btn.setAttribute('aria-disabled', 'false');
-  label.innerHTML = `Proceed to Pay<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
+  label.innerHTML = `Proceed to Pay ${CT_ICON_ARROW}<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
 }
 
 /* ── Render ─────────────────────────────────────────────────────────────── */
@@ -1797,7 +1810,7 @@ function paintNoteCards() {
     const btn = group.querySelector('.ct-restaurant-note-btn');
     const text = group.querySelector('.ct-note-btn-text');
     if (btn) btn.classList.toggle('is-set', !!note);
-    if (text) text.textContent = note ? 'Note added' : 'Restaurant note';
+    if (text) text.textContent = note ? 'Request added' : 'Cooking requests';
 
     let preview = group.querySelector('.ct-restaurant-note-preview');
     if (note) {
@@ -1860,7 +1873,12 @@ function paintDIPills(){
     ).join('');
   }
   const summary = document.getElementById('ct-di-summary');
-  if (summary) summary.textContent = tokens.length ? ('Delivery instructions · ' + tokens.length + ' added') : 'Delivery instructions';
+  if (summary) summary.textContent = 'Delivery Instructions';
+  const diCount = document.getElementById('ct-di-count');
+  if (diCount) {
+    diCount.textContent = String(tokens.length);
+    diCount.hidden = tokens.length === 0;
+  }
 }
 function toggleDIPill(label){
   const presetLower = CT_DI_PRESETS.map(p => p.label.toLowerCase());
@@ -2060,20 +2078,19 @@ function ctMealCardHtml(it, idx, multi){
   const plus = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
   // Veg/non-veg sits on the image (as the benchmark does), which also frees the
   // full card width for the two-line name.
-  const veg = vegMark(it);
-  const vegChip = veg ? '<span class="ct-cym-veg">' + veg + '</span>' : '';
+  const veg = vegMark(it);   // rendered inline before the name
   const rating = it.rating ? '<span class="ct-cym-rating">' + CT_CYM_STAR + it.rating.toFixed(1) + '</span>' : '';
   const note = it.customizable ? 'Customisable' : (multi ? 'From ' + it.resName : '');
   const meta = (rating || note)
     ? '<div class="ct-cym-meta">' + rating + (note ? '<span class="ct-cym-note">' + esc(note) + '</span>' : '') + '</div>'
     : '';
   return '<article class="ct-cym-card" data-cym-card="' + idx + '">' +
-    '<div class="ct-cym-media">' + CT_CYM_PLATE + media + vegChip +
+    '<div class="ct-cym-media">' + CT_CYM_PLATE + media +
       (it.badge ? '<span class="ct-cym-badge">' + esc(it.badge) + '</span>' : '') +
       '<button type="button" class="ct-cym-add" data-meal-add="' + idx + '" aria-label="' +
         (it.customizable ? 'Customise ' : 'Add ') + esc(it.name) + '">' + plus + '</button>' +
     '</div>' +
-    '<div class="ct-cym-name"><span>' + esc(it.name) + '</span></div>' +
+    '<div class="ct-cym-name">' + veg + '<span>' + esc(it.name) + '</span></div>' +
     '<div class="ct-cym-price"><span class="ct-cym-now">₹' + esc(it.price) + '</span>' + strike + offTag + '</div>' +
     meta +
   '</article>';
@@ -2138,20 +2155,35 @@ function ctPaintMealTrack(animate){
 let ctMealSwapTimer = 0;
 function ctSelectMealTab(key){
   if (!key || key === ctMealTab) return;
+
+  const currentIndex = ctMealTabs.findIndex(t => t.key === ctMealTab);
+  const nextIndex = ctMealTabs.findIndex(t => t.key === key);
+  const direction = (nextIndex >= 0 && currentIndex >= 0 && nextIndex < currentIndex)
+    ? 'is-backward'
+    : 'is-forward';
+
   ctMealTab = key;
-  // The pill leaves first and the cards follow it, so a tap reads as one
-  // continuous movement instead of an instant swap.
+  // The indicator moves first, then the recommendation rail exits in the
+  // direction of the selection and the replacement cards enter from that side.
   ctSyncMealTabState();
   ctSyncMealIndicator(true);
+
   const track = document.getElementById('ct-meal-row');
   const reduced = ctReducedMotion();
   clearTimeout(ctMealSwapTimer);
+
   if (track && !reduced){
-    track.classList.add('is-swapping');
-    ctMealSwapTimer = setTimeout(() => ctPaintMealTrack(true), 140);
+    track.classList.remove('is-forward', 'is-backward');
+    track.classList.add('is-swapping', direction);
+    ctMealSwapTimer = setTimeout(() => {
+      ctPaintMealTrack(true);
+      track.classList.remove('is-forward', 'is-backward');
+      track.classList.add(direction);
+    }, 170);
   } else {
     ctPaintMealTrack(!reduced);
   }
+
   const btn = document.querySelector('#ct-cym-tabs [data-cym-tab="' + CSS.escape(key) + '"]');
   if (btn) btn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
 }
@@ -2421,6 +2453,23 @@ function paintFooterSavings(){
   }
 }
 
+/* Savings corner: one row for the item discounts already reflected in the cart
+   prices. The figure is ctState.itemSavings (MRP − selling price, computed in
+   paintBill) — nothing is calculated or hardcoded here, and the row is hidden
+   when there is no saving. The coupon row is driven by the existing coupon flow. */
+function paintSavingsCorner() {
+  const row = document.getElementById('ct-sav-items');
+  const txt = document.getElementById('ct-sav-items-text');
+  if (!row || !txt) return;
+  const saved = Number(ctState.itemSavings || 0);
+  if (saved > 0 && ctState.units > 0) {
+    txt.textContent = '₹' + saved.toFixed(0) + ' saved on item discounts';
+    row.hidden = false;
+  } else {
+    row.hidden = true;
+  }
+}
+
 function updateNoteCount() {
   const input = document.getElementById('note-input');
   const count = document.getElementById('note-count');
@@ -2528,7 +2577,8 @@ function paintTipChips() {
 
   const customChip = document.getElementById('tip-custom-chip');
   if (customChip) {
-    customChip.textContent = isCustom ? ('₹' + tip) : 'Custom';
+    const customAmt = customChip.querySelector('.ct-chip-amt');
+    (customAmt || customChip).textContent = isCustom ? ('₹' + tip) : 'Custom';
     customChip.setAttribute('aria-label', isCustom
       ? 'Custom tip of ₹' + tip + '. Tap to change.'
       : 'Enter a custom tip amount');
@@ -2702,6 +2752,60 @@ async function ctEnsureProfile() {
   paintCheckoutDeliverySummary();
 }
 
+/* Rider tip / Delivery instructions tabs. Both panels read and write the same
+   ctState values (tipAmount, deliveryInstructions); a tab switch only changes
+   which panel is visible, so nothing is reset or re-fetched. */
+function ctSelectTipTab(key, focus) {
+  const tabs = document.querySelectorAll('#ct-di-group [data-ct-tab]');
+  if (!tabs.length) return;
+
+  const panels = {
+    tip: document.getElementById('ct-tip-panel'),
+    di: document.getElementById('ct-di-body')
+  };
+
+  const currentTab = document.querySelector('#ct-di-group [data-ct-tab].is-active');
+  const currentKey = currentTab ? currentTab.getAttribute('data-ct-tab') : 'tip';
+  if (!panels[key]) key = 'tip';
+  if (key === currentKey) {
+    if (focus) currentTab?.focus();
+    return;
+  }
+
+  const entering = panels[key];
+  const leaving = panels[currentKey];
+  const direction = key === 'di' ? 'right' : 'left';
+
+  tabs.forEach(tab => {
+    const on = tab.getAttribute('data-ct-tab') === key;
+    tab.classList.toggle('is-active', on);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+    if (on && focus) tab.focus();
+  });
+
+  Object.keys(panels).forEach(k => {
+    if (panels[k]) panels[k].hidden = (k !== key);
+  });
+
+  if (!ctReducedMotion()) {
+    entering.classList.remove('ct-panel-enter-left', 'ct-panel-enter-right');
+    void entering.offsetWidth;
+    entering.classList.add(direction === 'right' ? 'ct-panel-enter-right' : 'ct-panel-enter-left');
+    clearTimeout(entering._ctPanelAnim);
+    entering._ctPanelAnim = setTimeout(() => {
+      entering.classList.remove('ct-panel-enter-left', 'ct-panel-enter-right');
+    }, 360);
+  } else {
+    entering.classList.remove('ct-panel-enter-left', 'ct-panel-enter-right');
+  }
+
+  // Keep the checkout footer in sync when the instruction panel is taller.
+  requestAnimationFrame(() => syncFooterOffset());
+}
+
+/* Legacy accordion entry point. The accordion markup was replaced by tabs, so
+   this is a no-op unless those elements are ever restored. */
 function toggleDeliveryInstructions() {
   const body = document.getElementById('ct-di-body');
   const group = document.getElementById('ct-di-group');
@@ -2794,7 +2898,10 @@ document.addEventListener('click', (event) => {
   const noteBtn = target.closest('[data-note-field]');
   if (noteBtn) { openNoteSheet(noteBtn.dataset.noteField); return; }
 
-  if (target.closest('#ct-view-bill')) { document.getElementById('ct-bill')?.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+  if (target.closest('#ct-view-bill, #ct-footer-save')) { document.getElementById('ct-bill')?.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+
+  const tipTab = target.closest('#ct-di-group [data-ct-tab]');
+  if (tipTab) { ctSelectTipTab(tipTab.getAttribute('data-ct-tab')); return; }
 
   if (target.closest('#coupon-card')) { openSheet('ct-coupon-sheet'); return; }
 
@@ -2826,6 +2933,20 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+});
+
+document.addEventListener('keydown', (event) => {
+  const tab = event.target && event.target.closest && event.target.closest('#ct-di-group [data-ct-tab]');
+  if (!tab) return;
+  const order = ['tip', 'di'];
+  const at = order.indexOf(tab.getAttribute('data-ct-tab'));
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    event.preventDefault();
+    ctSelectTipTab(order[(at + (event.key === 'ArrowRight' ? 1 : order.length - 1)) % order.length], true);
+  } else if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    ctSelectTipTab(order[event.key === 'Home' ? 0 : order.length - 1], true);
+  }
 });
 
 document.getElementById('note-input').addEventListener('input', updateNoteCount);
