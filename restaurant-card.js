@@ -665,7 +665,9 @@
     document.addEventListener('keydown',function(e){var h=e.target.closest&&e.target.closest('.u99-restaurant-head');if(h&&(e.key==='Enter'||e.key===' ')){e.preventDefault();var host=h.closest('.u99-card-host'),id=host&&host.getAttribute('data-home99-restaurant');if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);}});
     document.addEventListener('click',function(e){
       var el=e.target.closest&&e.target.closest('[data-home99-action]');if(!el)return;var host=el.closest('.u99-card-host');if(!host)return;var id=host.getAttribute('data-home99-restaurant');
-      if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
+      var currentRestaurant=window.__home99Data&&window.__home99Data[id];
+      if(currentRestaurant&&resolveAvailability(currentRestaurant,getSelectedCustomerCoordinates())==='outside_delivery_area'){e.preventDefault();e.stopPropagation();showAvailabilityToast('Not delivering to your location');return;}
+      if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();var selected=window.__home99Data&&window.__home99Data[id];if(selected&&resolveAvailability(selected,getSelectedCustomerCoordinates())==='outside_delivery_area'){showAvailabilityToast('Not delivering to your location');return;}if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
       var action=el.getAttribute('data-home99-action');
       if(action==='info'){e.preventDefault();e.stopPropagation();var rr=window.__home99Data&&window.__home99Data[id];if(rr&&typeof window.showToast==='function')window.showToast('Free delivery information');return;}
       if(action==='customize'){e.preventDefault();e.stopPropagation();
@@ -700,8 +702,26 @@
 
   function renderList(container, restaurants) {
     if (!container) return 0;
-    var list = Array.isArray(restaurants) ? restaurants : [];
+    var list = Array.isArray(restaurants) ? restaurants.slice() : [];
     var customerCoords = getSelectedCustomerCoordinates();
+    /* Stable availability-first ordering: the nearest restaurant that can
+       serve this address appears first; unavailable restaurants remain visible. */
+    if (customerCoords) {
+      list = list.map(function (res, index) {
+        var status = resolveAvailability(res, customerCoords);
+        var point = read.coordinates(res);
+        return {
+          res: res,
+          index: index,
+          eligible: status !== 'outside_delivery_area',
+          distance: point ? haversineKm(customerCoords, point) : Infinity
+        };
+      }).sort(function (a, b) {
+        if (a.eligible !== b.eligible) return a.eligible ? -1 : 1;
+        if (a.eligible && b.eligible && a.distance !== b.distance) return a.distance - b.distance;
+        return a.index - b.index;
+      }).map(function (entry) { return entry.res; });
+    }
     var unavailable = new Set();
     var rendered = 0;
     window.__home99Data = Object.create(null);

@@ -991,29 +991,39 @@
     catch (e) { return false; }
   }
 
-  /* If the selected location is outside every restaurant's verified delivery
-     radius, show the dedicated service-area page. This is a browsing/service
-     state, not an authentication state. The customer can still choose any
-     location and return to Home with ?allowOutside=1 to explore. */
+  /* Keep customers on Home when no restaurant serves the selected address.
+     Restaurant cards remain visible; availability is rendered per restaurant. */
   function maybeRedirectOutsideServiceArea() {
-    if (allowOutsideBrowse()) return;
-    if (state.loc.status !== 'ready' || !state.restaurants.length) return;
+    var host = el('home-service-area-notice');
     var coords = card.getCustomerCoordinates();
-    if (!coords) return;
-    var allOutside = true;
-    var checked = 0;
-    state.restaurants.forEach(function (res) {
-      var restaurantCoords = card.read.coordinates(res);
-      if (!restaurantCoords) return;
-      checked += 1;
-      if (card.resolveAvailability(res, coords) !== 'outside_delivery_area') allOutside = false;
+    var ready = state.loc.status === 'ready' && !!coords && state.restaurants.length > 0;
+    var available = ready && state.restaurants.some(function (res) {
+      return card.resolveAvailability(res, coords) !== 'outside_delivery_area';
     });
-    if (!checked || !allOutside) return;
-    if (window.__esOutsideServiceRedirected) return;
-    window.__esOutsideServiceRedirected = true;
-    window.setTimeout(function () {
-      window.location.replace('service-unavailable.html');
-    }, 120);
+
+    if (!host) {
+      host = document.createElement('section');
+      host.id = 'home-service-area-notice';
+      host.className = 'home-service-area-notice';
+      host.setAttribute('role', 'status');
+      var list = el('restaurant-list');
+      if (list && list.parentNode) list.parentNode.insertBefore(host, list);
+    }
+    if (!ready || available) {
+      host.hidden = true;
+      host.innerHTML = '';
+      return;
+    }
+    host.hidden = false;
+    host.innerHTML =
+      '<div class="home-service-area-notice__icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>' +
+      '<div><strong>We’re not there yet</strong>' +
+      '<p>We don’t currently deliver to this address. You can still explore restaurants and change your delivery address.</p>' +
+      '<button type="button" class="home-service-area-change" id="home-service-area-change">Change address</button></div>';
+    var change = el('home-service-area-change');
+    if (change) change.addEventListener('click', function () {
+      window.location.href = 'address.html?view=select';
+    });
   }
 
   /* "Recommended with deals" is only true when the data actually carries
@@ -1060,6 +1070,7 @@
 
         applyRestaurants(list);
         renderDeliveryEstimate();
+        maybeRedirectOutsideServiceArea();
         renderNotice();
       })
       .catch(function (error) {

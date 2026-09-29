@@ -1710,3 +1710,18 @@ body.u99-cust-open #nearbite-help-center{ display:none !important; }
   }
 }
 
+
+
+/* Address-specific unavailable state for the homepage's 99-style cards. */
+.u99-restaurant-card.is-unavailable{position:relative;overflow:hidden;}
+.u99-restaurant-card.is-unavailable .u99-restaurant-head,
+.u99-restaurant-card.is-unavailable .u99-carousel-wrap{filter:grayscale(1);opacity:.58;}
+.u99-restaurant-card.is-unavailable .u99-restaurant-head{cursor:not-allowed;}
+.u99-availability-overlay{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(255,255,255,.12);}
+.u99-availability-overlay span{max-width:calc(100% - 32px);padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.96);color:#344054;font-size:12px;font-weight:800;text-align:center;box-shadow:0 4px 14px rgba(15,23,42,.12);}
+.home-service-area-notice{display:flex;align-items:flex-start;gap:12px;margin:12px clamp(16px,4vw,22px) 18px;padding:16px;border:1px solid #f2d6dc;border-radius:16px;background:#fff8f9;color:#202939;}
+.home-service-area-notice[hidden]{display:none!important;}
+.home-service-area-notice__icon{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;background:#fde8ed;color:#c71942;}
+.home-service-area-notice strong{display:block;font-size:15px;font-weight:800;}
+.home-service-area-notice p{margin:5px 0 10px;color:#667085;font-size:13px;line-height:1.5;}
+.home-service-area-change{border:0;background:none;padding:0;color:#c71942;font:inherit;font-size:13px;font-weight:800;text-decoration:underline;cursor:pointer;}
