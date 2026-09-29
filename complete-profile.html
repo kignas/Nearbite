@@ -372,6 +372,8 @@
         localStorage.setItem('nearbite_token',result.data.token);localStorage.setItem('token',result.data.token);localStorage.setItem('nearbite_user',JSON.stringify(result.data.user||{}));
         // New Google account: show the one-time theme choice on the first Home visit.
         try{localStorage.setItem('eatswada_theme_intro_pending','1')}catch(e){}
+        // Dedicated marker for the first-home saved-address prompt.
+        try{localStorage.setItem('eatswada_new_user_location_pending','1')}catch(e){}
         sessionStorage.removeItem('nearbite_google_pending_token');sessionStorage.removeItem('nearbite_google_pending_profile');
       }else{
         const token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');

@@ -1,0 +1,54 @@
+/* First-home saved-address prompt for newly created Eatswada accounts. */
+.ew-location-welcome[hidden] { display: none !important; }
+.ew-location-welcome {
+  position: fixed; inset: 0; z-index: 100010;
+  display: flex; align-items: center; justify-content: center;
+  padding: 22px; background: rgba(17, 24, 39, .58);
+  opacity: 0; transition: opacity .22s ease;
+}
+.ew-location-welcome.is-open { opacity: 1; }
+.ew-location-welcome__card {
+  position: relative; width: min(100%, 390px); overflow: hidden;
+  padding: 28px 22px 22px; border-radius: 24px;
+  background: #fff; color: #202633; text-align: center;
+  box-shadow: 0 24px 70px rgba(0,0,0,.24);
+  transform: translateY(12px) scale(.98); transition: transform .22s ease;
+}
+.ew-location-welcome.is-open .ew-location-welcome__card { transform: translateY(0) scale(1); }
+.ew-location-welcome__close {
+  position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
+  border: 0; border-radius: 50%; background: #f1f2f5; color: #596171;
+  font: inherit; font-size: 21px; line-height: 1; cursor: pointer;
+}
+.ew-location-welcome__art {
+  width: 72px; height: 72px; margin: 2px auto 17px; display: grid;
+  place-items: center; border-radius: 23px; color: #d91f4b;
+  background: #fff0f3; font-size: 30px;
+}
+.ew-location-welcome__eyebrow {
+  margin: 0 0 8px; color: #d91f4b; font-size: 11px; font-weight: 850;
+  letter-spacing: .11em; text-transform: uppercase;
+}
+.ew-location-welcome__title {
+  margin: 0 0 10px; color: #202633; font-size: 23px; line-height: 1.18;
+  font-weight: 850; letter-spacing: -.55px;
+}
+.ew-location-welcome__copy {
+  margin: 0 auto 21px; max-width: 310px; color: #697180;
+  font-size: 14px; line-height: 1.55; font-weight: 500;
+}
+.ew-location-welcome__cta {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; min-height: 52px; padding: 13px 18px; border: 0;
+  border-radius: 15px; background: #e51e4b; color: #fff; text-decoration: none;
+  font: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+  box-shadow: 0 7px 16px rgba(229,30,75,.2);
+}
+.ew-location-welcome__later {
+  display: block; width: 100%; min-height: 44px; margin-top: 7px;
+  border: 0; background: transparent; color: #727987; font: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ew-location-welcome, .ew-location-welcome__card { transition: none; }
+}

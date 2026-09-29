@@ -1087,7 +1087,7 @@
       })
       .then(function () {
         state.isRefreshing = false;
-        maybePromptForLocation();
+        /* Location setup is handled by the new-user address prompt. */
       });
   }
 
@@ -1379,7 +1379,7 @@
           setLocationStatus('ready', 'device');
         } else {
           setLocationStatus('idle');
-          maybePromptForLocation();
+          /* Home no longer auto-opens a browser-permission sheet. */
         }
       });
       return;
@@ -1402,12 +1402,10 @@
   function requestDeviceLocation() {
     if (!navigator.geolocation) {
       setLocationStatus('unavailable');
-      updateSheetForState();
       return;
     }
 
     setLocationStatus('locating');
-    updateSheetForState();
 
     navigator.geolocation.getCurrentPosition(
       function (position) {
@@ -1415,20 +1413,17 @@
 
         if (!point) {
           setLocationStatus('unavailable');
-          updateSheetForState();
-          return;
+              return;
         }
 
         writeDeviceLocation(point);
         setLocationStatus('ready', 'device');
-        closeLocationSheet();
       },
       function (error) {
         var denied = error && error.code === 1;
         if (denied) markPromptDismissed();
         setLocationStatus(denied ? 'denied' : 'unavailable');
-        updateSheetForState();
-      },
+        },
       GPS_OPTIONS
     );
   }
@@ -1524,156 +1519,17 @@
         var action = button.getAttribute('data-loc-action');
         if (action === 'address') window.location.href = 'address.html?view=select';
         else if (action === 'retry') requestDeviceLocation();
-        else openLocationSheet();
+        else window.location.href = 'address.html?view=select';
       });
     });
   }
 
-  /* ── Location sheet ─────────────────────────────────────────── */
-
-  var SHEET_COPY = {
-    ask: {
-      title: 'Allow location to continue',
-      text: 'We use your location to show restaurants that can deliver to you and calculate your delivery distance.',
-      primary: 'Allow location'
-    },
-    locating: {
-      title: 'Getting your location',
-      text: 'This only takes a moment.',
-      primary: 'Getting location…'
-    },
-    denied: {
-      title: 'Location access is needed',
-      text: 'Location access is needed to check delivery availability. You can allow it in your browser settings, or pick a saved address instead.',
-      primary: 'Try again'
-    },
-    unavailable: {
-      title: 'Location unavailable',
-      text: 'We couldn\'t get your location. Try again, or pick a saved address instead.',
-      primary: 'Try again'
-    }
-  };
-
-  var sheetReturnFocus = null;
-
-  function updateSheetForState() {
-    var sheet = el('location-sheet');
-    if (!sheet || sheet.hidden) return;
-
-    var mode = state.loc.status === 'denied' ? 'denied'
-             : state.loc.status === 'unavailable' ? 'unavailable'
-             : state.loc.status === 'locating' ? 'locating'
-             : 'ask';
-
-    var copy = SHEET_COPY[mode];
-    var title = el('location-sheet-title');
-    var text = el('location-sheet-text');
-    var allow = el('location-allow-btn');
-
-    if (title) title.textContent = copy.title;
-    if (text) text.textContent = copy.text;
-    if (allow) {
-      allow.textContent = copy.primary;
-      allow.disabled = mode === 'locating';
-    }
-  }
-
+  /* Home no longer displays the legacy orange permission/help sheet.
+     Address selection is handled by address.html; device location is only
+     requested from an explicit user action. */
+  function maybePromptForLocation() { return; }
   function openLocationSheet() {
-    var sheet = el('location-sheet');
-    if (!sheet || !sheet.hidden) return;
-
-    sheetReturnFocus = document.activeElement;
-    sheet.hidden = false;
-    updateSheetForState();
-
-    requestAnimationFrame(function () { sheet.classList.add('open'); });
-    document.body.style.overflow = 'hidden';
-
-    var allow = el('location-allow-btn');
-    if (allow) allow.focus();
-  }
-
-  function closeLocationSheet(dismissedByUser) {
-    var sheet = el('location-sheet');
-    if (!sheet || sheet.hidden) return;
-
-    if (dismissedByUser) markPromptDismissed();
-
-    sheet.classList.remove('open');
-    document.body.style.overflow = '';
-    setTimeout(function () { sheet.hidden = true; }, 220);
-
-    if (sheetReturnFocus && typeof sheetReturnFocus.focus === 'function') {
-      sheetReturnFocus.focus();
-    }
-    sheetReturnFocus = null;
-  }
-
-  function trapSheetFocus(event) {
-    var sheet = el('location-sheet');
-    if (!sheet || sheet.hidden || event.key !== 'Tab') return;
-
-    var focusable = sheet.querySelectorAll(
-      'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
-    );
-    if (!focusable.length) return;
-
-    var first = focusable[0];
-    var last = focusable[focusable.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
-  function bindLocationSheet() {
-    var sheet = el('location-sheet');
-    if (!sheet) return;
-
-    sheet.addEventListener('click', function (event) {
-      if (event.target.hasAttribute('data-close-location-sheet')) {
-        closeLocationSheet(true);
-      }
-    });
-
-    var allow = el('location-allow-btn');
-    if (allow) allow.addEventListener('click', requestDeviceLocation);
-
-    document.addEventListener('keydown', function (event) {
-      if (sheet.hidden) return;
-      if (event.key === 'Escape') {
-        closeLocationSheet(true);
-        return;
-      }
-      trapSheetFocus(event);
-    });
-  }
-
-  /* Asks only when the answer would change something: no location yet,
-     not already dismissed or denied, and at least one restaurant carries
-     coordinates to compare against. */
-  function maybePromptForLocation() {
-    if (state.loc.status !== 'idle') return;
-    if (promptDismissed()) return;
-    if (state.status !== 'ready') return;
-    if (!state.restaurants.some(function (res) { return !!card.read.coordinates(res); })) return;
-
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'geolocation' })
-        .then(function (result) {
-          if (result.state === 'granted') requestDeviceLocation();  // no popup needed
-          else if (result.state === 'denied') setLocationStatus('denied');
-          else openLocationSheet();
-        })
-        .catch(function () { openLocationSheet(); });
-      return;
-    }
-
-    openLocationSheet();
+    window.location.href = 'address.html?view=select';
   }
 
   /* ── Saved delivery address ─────────────────────────────────── */
@@ -1798,7 +1654,6 @@
     parseURL();
 
     bindStaticControls();
-    bindLocationSheet();
 
     /* One location read per page load, before any distance is shown. */
     resolveStoredLocation();

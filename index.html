@@ -375,54 +375,7 @@
   .state-btn:active { transform: scale(.97); }
   .state-btn:disabled { opacity: .6; cursor: default; }
 
-  /* ══════════════════════════════════════════════════════════════
-     6. LOCATION — permission sheet, status banner, card availability
-     Additive only. Reuses the sheet shell, tokens and type above so
-     the existing Home layout is untouched.
-     ══════════════════════════════════════════════════════════════ */
-  .loc-sheet { position: fixed; inset: 0; z-index: 100002; }
-  .loc-sheet[hidden] { display: none; }
-  .loc-sheet .sheet-backdrop { opacity: 0; transition: opacity .22s ease; }
-  .loc-sheet.open .sheet-backdrop { opacity: 1; }
-  .loc-sheet .sheet-panel {
-    position:absolute; left:0; right:0; bottom:0;
-    background:var(--surface); border-radius:22px 22px 0 0;
-    padding:8px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    max-height:78vh; overflow-y:auto;
-    transform: translateY(100%);
-    transition: transform .24s cubic-bezier(.22,1,.36,1);
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  }
-  .loc-sheet.open .sheet-panel { transform: translateY(0); }
-
-  .loc-sheet-pin {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: #FFF3E8; color: #C2560A;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; margin: 4px 0 12px;
-  }
-  .loc-sheet-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); margin: 0 0 8px; }
-  .loc-sheet-text { font-size: 14px; font-weight: 500; line-height: 1.55; color: var(--text-soft); margin: 0 0 20px; }
-
-  .loc-btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; min-height: 50px; padding: 14px 16px; margin-bottom: 10px;
-    border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 800;
-    cursor: pointer; text-decoration: none; border: none;
-  }
-  .loc-btn:active { transform: scale(.98); }
-  .loc-btn-primary { background: var(--brand); color: #fff; }
-  .loc-btn-primary:disabled { opacity: .65; cursor: default; transform: none; }
-  .loc-btn-secondary { background: var(--surface); color: #333A45; border: 1px solid var(--line); }
-  .loc-btn-quiet {
-    background: transparent; border: none; color: var(--text-mute);
-    font-family: inherit; font-size: 14px; font-weight: 700;
-    width: 100%; min-height: 44px; margin-bottom: 0; cursor: pointer;
-  }
-  .loc-sheet .loc-btn:focus-visible,
-  .loc-sheet .loc-btn-quiet:focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 2px; }
-
-
+  /* Location status banner remains; the legacy permission sheet was removed. */
   /* ── Progressive profile setup ─────────────────────────────── */
   #profile-setup-banner{
     display:flex;align-items:center;gap:12px;margin:0 18px 14px;padding:12px 14px;
@@ -594,26 +547,6 @@
     font-size:var(--ew-text-body);
   }
 
-  /* Location sheet */
-  .loc-sheet-title{
-    font-size:var(--ew-text-card-title);
-    line-height:1.25;
-  }
-  .loc-sheet-text{
-    font-size:var(--ew-text-body-sm);
-    line-height:1.5;
-  }
-  .loc-btn{
-    font-size:var(--ew-text-body);
-  }
-  .loc-btn-quiet{
-    font-size:var(--ew-text-body-sm);
-  }
-  .lb-text,
-  .lb-btn{
-    font-size:var(--ew-text-body-sm);
-  }
-
   /* Keep the existing compact breakpoint hierarchy, using the same scale. */
   @media (max-width:380px){
     .loc-name{font-size:var(--ew-text-card-title);}
@@ -644,6 +577,7 @@
 <meta property="og:description" content="Order food online from restaurants in Maynaguri, West Bengal with EatSwada. Discover nearby restaurants, browse menus and order online."/>
 <meta property="og:url" content="https://eatswada.com/"/>
 <meta name="twitter:card" content="summary"/>
+  <link rel="stylesheet" href="new-user-location-prompt.css?v=1">
 </head>
 
 <body>
@@ -807,19 +741,6 @@
   </div>
 </div>
 
-<div class="loc-sheet" id="location-sheet" role="dialog" aria-modal="true"
-     aria-labelledby="location-sheet-title" aria-describedby="location-sheet-text" hidden>
-  <div class="sheet-backdrop" data-close-location-sheet="1"></div>
-  <div class="sheet-panel">
-    <div class="sheet-grabber"></div>
-    <div class="loc-sheet-pin" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>
-    <h3 class="loc-sheet-title" id="location-sheet-title">Allow location to continue</h3>
-    <p class="loc-sheet-text" id="location-sheet-text">We use your location to show restaurants that can deliver to you and calculate your delivery distance.</p>
-    <button type="button" class="loc-btn loc-btn-primary" id="location-allow-btn">Allow location</button>
-    <a class="loc-btn loc-btn-secondary" id="location-address-btn" href="address.html?view=select">Choose address</a>
-    <button type="button" class="loc-btn-quiet" id="location-sheet-close" data-close-location-sheet="1">Not now</button>
-  </div>
-</div>
 
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
@@ -830,6 +751,7 @@
      authentication, so the header never waits for address.html. -->
 <script src="address-store.js?v=20260922-4"></script>
 <script src="home.js?v=20260926-critical1"></script>
+<script src="new-user-location-prompt.js?v=1"></script>
 <script src="home-banners.js?v=20260926-critical1"></script>
 <script src="search-overlay.js"></script>
 <script>
