@@ -1,0 +1,128 @@
+
+/* Eatswada core-document typography
+   Visual baseline: address-new.html + orders.html + track-order.html.
+   Typography only / subtle interaction polish. */
+:root{
+  --ew-doc-ink:#16191E;
+  --ew-doc-ink2:#3E414A;
+  --ew-doc-muted:#68696B;
+  --ew-doc-faint:#8E8F91;
+  --ew-doc-line:#E5E7E6;
+  --ew-doc-soft:#F1F0F5;
+  --ew-doc-card:#FFFFFF;
+  --ew-doc-brand:#FC8019;
+  --ew-doc-shadow:0 1px 2px rgba(16,24,40,.04);
+  --ew-doc-radius:14px;
+}
+html{ -webkit-text-size-adjust:100%; }
+body{
+  font-family:'Manrope',system-ui,-apple-system,sans-serif !important;
+  font-weight:500 !important;
+  line-height:1.45 !important;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+button,input,textarea,select{font:inherit;}
+a{-webkit-tap-highlight-color:transparent;}
+/* Shared header scale: Orders/Tracking */
+.top-bar,.terms-top,.faq-top,.oh-top,.da-top,.pw-top,.pd-top{
+  min-height:54px;
+}
+.page-title,.title,.terms-top strong,.faq-top h1,.oh-top h1,.da-top h1,.pw-top-title,.pd-title{
+  font-size:16px !important;
+  line-height:20px !important;
+  font-weight:800 !important;
+  letter-spacing:-.2px !important;
+}
+/* Main document rhythm */
+.container,.terms-wrap,.faq-main,.oh-main,.da-main,.pw-main,.pd-wrap{
+  max-width:640px !important;
+}
+/* Large titles: keep them closer to core app scale, not oversized marketing copy */
+.terms-hero h1,.faq-title,.oh-title,.da-title,.pw-title{
+  font-size:24px !important;
+  line-height:29px !important;
+  font-weight:800 !important;
+  letter-spacing:-.6px !important;
+}
+.support-header h2,.hero h1,.hero h2{
+  font-size:20px !important;
+  line-height:26px !important;
+  font-weight:800 !important;
+  letter-spacing:-.35px !important;
+}
+/* Section headings match order cards / address sections */
+.box h2,.terms-card h2,.faq-group-title,.faq-help h2,.oh-section h2,.da-section h2,
+.pw-section h2,.pd-card h3,.section-title{
+  font-size:15px !important;
+  line-height:20px !important;
+  font-weight:800 !important;
+  letter-spacing:-.15px !important;
+}
+.box p,.box li,.terms-card p,.terms-card li,.faq-answer,.oh-section p,.oh-section li,
+.da-section p,.da-section li,.pw-section p,.pw-section li,.pd-card p,
+.support-header p,.support-card p,.meta,.terms-meta,.faq-sub,.oh-updated,.da-updated,
+.pw-updated,.pd-small{
+  font-size:13px !important;
+  line-height:18px !important;
+  font-weight:500;
+}
+.meta,.terms-meta,.faq-sub,.oh-updated,.da-updated,.pw-updated{
+  color:var(--ew-doc-muted);
+}
+label,.label,.field-label,.ea-label{
+  font-size:12px !important;
+  line-height:16px !important;
+  font-weight:700 !important;
+}
+input,textarea,select,.comment,.pd-field{
+  font-size:13px !important;
+  line-height:18px !important;
+}
+.faq-jump summary,.oh-jump summary,.da-jump summary,.pw-jump summary{
+  font-size:14px !important;
+  line-height:19px !important;
+  font-weight:600 !important;
+}
+.faq-jump nav a,.oh-jump nav a,.da-jump nav a,.pw-jump nav a{
+  font-size:13px !important;
+  line-height:18px !important;
+  font-weight:600 !important;
+}
+.faq-item summary{
+  font-size:14px !important;
+  line-height:19px !important;
+  font-weight:700 !important;
+}
+button,.cta,.faq-cta,.oh-cta,.da-cta,.pw-cta,.pd-btn,.submit,.home-btn{
+  font-size:14px !important;
+  line-height:18px !important;
+  font-weight:800 !important;
+}
+/* Core-app card geometry + subtle lift */
+.box,.terms-card,.faq-list,.faq-help,.oh-intro,.oh-section,.da-intro,.da-section,
+.pw-intro,.pw-section,.pd-card,.support-card,.form-card,.hero{
+  border-radius:var(--ew-doc-radius) !important;
+  box-shadow:var(--ew-doc-shadow) !important;
+}
+.terms-card,.box,.oh-intro,.oh-section,.da-intro,.da-section,.pw-intro,.pw-section,.pd-card{
+  border-color:var(--ew-doc-line);
+}
+@keyframes ewDocIn{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+.terms-card,.box,.faq-group,.oh-section,.da-section,.pw-section,.pd-card,.support-card{
+  animation:ewDocIn .28s cubic-bezier(.16,1,.3,1) both;
+}
+.terms-card:nth-of-type(3),.box:nth-of-type(3),.faq-group:nth-of-type(3){animation-delay:.03s}
+.terms-card:nth-of-type(4),.box:nth-of-type(4),.faq-group:nth-of-type(4){animation-delay:.06s}
+@media(max-width:480px){
+  .terms-wrap,.faq-main,.oh-main,.da-main,.pw-main{width:calc(100% - 28px) !important;}
+  .container,.pd-wrap{padding-left:14px !important;padding-right:14px !important;}
+  .terms-hero h1,.faq-title,.oh-title,.da-title,.pw-title{font-size:23px !important;line-height:28px !important;}
+}
+@media(prefers-reduced-motion:reduce){
+  .terms-card,.box,.faq-group,.oh-section,.da-section,.pw-section,.pd-card,.support-card{animation:none;}
+}
