@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Order Help &amp; Issue Reporting | Eatswada</title>
+  <meta name="description" content="Get help with an Eatswada order or report a delivery, item, or payment issue.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="eatswada-theme.css">
+  <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
+  <link rel="stylesheet" href="css/eatswada-secondary-pages.css?v=20260929-brand">
+  <link rel="stylesheet" href="css/eatswada-back-button.css">
+  <link rel="stylesheet" href="css/eatswada-site-footer.css?v=20260929-footer1">
+  <style>
+    :root{--oh-orange:#fc8019;--oh-ink:#17191e;--oh-muted:#68717e;--oh-line:#e7e8ec;--oh-bg:#f6f7f9}
+    *{box-sizing:border-box}html{background:var(--oh-bg);scroll-behavior:smooth}
+    body{margin:0;background:var(--oh-bg);color:var(--oh-ink);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    .oh-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--oh-line)}
+    .oh-top h1{margin:0;font-size:16px;line-height:1.3;font-weight:800;letter-spacing:-.25px}
+    .oh-main{width:min(100% - 32px,760px);margin:0 auto;padding:18px 0 10px}
+    .oh-crumb{display:flex;align-items:center;gap:12px;margin:4px 0 22px;color:#7a818b;font-size:13px;font-weight:600}
+    .oh-crumb a{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;text-decoration:none}
+    .oh-crumb span{padding:8px 14px;border-radius:99px;background:#fff1e8;color:#b9560b}
+    .oh-jump{margin-bottom:28px}.oh-jump summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border:1px solid #eceef1;border-radius:12px;background:#f0f1f3;color:#343943;font-size:14px;font-weight:600;cursor:pointer}
+    .oh-jump summary::-webkit-details-marker{display:none}.oh-jump summary:after{content:"";width:9px;height:9px;border-right:2px solid #747b85;border-bottom:2px solid #747b85;transform:rotate(45deg);margin:0 3px 5px}
+    .oh-jump[open] summary:after{transform:rotate(225deg);margin:5px 3px 0}
+    .oh-jump nav{display:grid;gap:2px;padding:8px;margin-top:6px;background:#fff;border:1px solid var(--oh-line);border-radius:12px}
+    .oh-jump nav a{padding:10px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#454c57}
+    .oh-title{margin:0;font-size:clamp(27px,6vw,34px);line-height:1.18;font-weight:800;letter-spacing:-1.1px}
+    .oh-updated{margin:16px 0 25px;color:#646c77;font-size:14px;font-style:italic;font-weight:500}
+    .oh-intro,.oh-section{background:#fff;border:1px solid var(--oh-line);border-radius:17px;box-shadow:0 3px 12px rgba(20,28,40,.035)}
+    .oh-intro{padding:22px 20px}.oh-eyebrow{display:inline-flex;align-items:center;gap:7px;margin-bottom:12px;color:#b9560b;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .oh-intro h2{margin:0 0 9px;font-size:21px;line-height:1.3;font-weight:800;letter-spacing:-.5px}
+    .oh-intro p,.oh-section p{margin:0;color:#555e6b;font-size:14px;line-height:1.7;font-weight:500}
+    .oh-section{scroll-margin-top:82px;margin-top:16px;padding:20px}
+    .oh-section h2{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:800;letter-spacing:-.35px}
+    .oh-section h2 i{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:#fff1e8;color:var(--oh-orange);font-size:14px}
+    .oh-issues{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+    .oh-issue{display:flex;align-items:center;gap:10px;min-height:62px;padding:12px;border:1px solid var(--oh-line);border-radius:13px;background:#fff;text-decoration:none;color:#343943;font-size:13px;font-weight:700;line-height:1.35;transition:background .15s,transform .15s}
+    .oh-issue i{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:#fff1e8;color:var(--oh-orange);font-size:14px}
+    .oh-issue:active{transform:scale(.98);background:#fff8f2}
+    .oh-issue.wide{grid-column:1/-1}
+    .oh-steps{display:grid;gap:13px;list-style:none;padding:0;margin:14px 0 0;counter-reset:step}
+    .oh-steps li{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}
+    .oh-steps li:before{counter-increment:step;content:counter(step);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#fff1e8;color:#b9560b;font-size:12px;font-weight:800}
+    .oh-steps strong{display:block;margin:1px 0 3px;font-size:14px;font-weight:800}.oh-steps span{display:block;color:#626b77;font-size:13px;line-height:1.6;font-weight:500}
+    .oh-note{margin-top:14px;padding:13px 14px;border-radius:12px;background:#f7f8fa;color:#616a76;font-size:12px;line-height:1.6;font-weight:500}
+    .oh-cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 17px;border-radius:12px;background:var(--oh-orange);color:#fff;text-decoration:none;font-size:14px;font-weight:800;box-shadow:0 5px 14px rgba(252,128,25,.22)}
+    .oh-section .oh-cta{margin-top:14px}
+    @media(min-width:640px){.oh-main{padding-top:24px}.oh-intro{padding:28px}.oh-section{padding:24px}}
+    @media(max-width:360px){.oh-issues{grid-template-columns:1fr}.oh-issue.wide{grid-column:auto}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.oh-issue{transition:none}}
+  </style>
+</head>
+<body>
+<header class="oh-top">
+  <button class="header-back-btn" type="button" onclick="window.nearbiteSafeBack ? window.nearbiteSafeBack() : history.back()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+  <h1>Order Help</h1>
+</header>
+<main class="oh-main">
+  <nav class="oh-crumb" aria-label="Breadcrumb"><a href="index.html" aria-label="Home"><i class="fa-solid fa-house"></i></a><i class="fa-solid fa-chevron-right" style="font-size:10px"></i><span aria-current="page">Order Help</span></nav>
+  <details class="oh-jump"><summary>On this page</summary><nav aria-label="On this page">
+    <a href="#help">Get help with an order</a><a href="#report">Report an issue</a><a href="#details">What to include</a><a href="#contact">Contact support</a>
+  </nav></details>
+  <h1 class="oh-title">Order Help &amp; Issue Reporting</h1>
+  <p class="oh-updated">Last updated on September 29, 2026</p>
+
+  <section class="oh-intro" id="help">
+    <div class="oh-eyebrow"><i class="fa-solid fa-headset"></i> Customer support</div>
+    <h2>Something not right with your order?</h2>
+    <p>We’re here to help with order, item, delivery, and payment concerns. Choose the issue below to prepare an email to Eatswada support. Include your order details so we can understand what happened.</p>
+  </section>
+
+  <section class="oh-section" id="report">
+    <h2><i class="fa-solid fa-triangle-exclamation"></i>What do you need help with?</h2>
+    <p>Select the closest option. This opens your email app with a subject line ready; you can add the details and send it to our support team.</p>
+    <div class="oh-issues">
+      <a class="oh-issue" href="mailto:support@eatswada.com?subject=Order%20issue%3A%20Missing%20item"><i class="fa-solid fa-box-open"></i><span>Missing item</span></a>
+      <a class="oh-issue" href="mailto:support@eatswada.com?subject=Order%20issue%3A%20Wrong%20item"><i class="fa-solid fa-shuffle"></i><span>Wrong item received</span></a>
+      <a class="oh-issue" href="mailto:support@eatswada.com?subject=Order%20issue%3A%20Damaged%20item"><i class="fa-solid fa-box-tissue"></i><span>Damaged or poor-quality item</span></a>
+      <a class="oh-issue" href="mailto:support@eatswada.com?subject=Order%20issue%3A%20Delivery"><i class="fa-solid fa-truck-fast"></i><span>Delivery problem or delay</span></a>
+      <a class="oh-issue wide" href="mailto:support@eatswada.com?subject=Order%20issue%3A%20Payment"><i class="fa-solid fa-credit-card"></i><span>Payment deducted / payment problem</span></a>
+      <a class="oh-issue wide" href="mailto:support@eatswada.com?subject=Order%20issue%3A%20Other"><i class="fa-regular fa-message"></i><span>Something else about my order</span></a>
+    </div>
+  </section>
+
+  <section class="oh-section" id="details">
+    <h2><i class="fa-solid fa-clipboard-list"></i>What information should I include?</h2>
+    <ol class="oh-steps">
+      <li><div><strong>Order ID</strong><span>Find it in the order details in your Eatswada account, if an order was placed.</span></div></li>
+      <li><div><strong>What happened</strong><span>Describe the issue clearly and tell us which item or part of the delivery is affected.</span></div></li>
+      <li><div><strong>Useful evidence</strong><span>If relevant, attach a clear photo or payment reference. Do not include confidential payment information.</span></div></li>
+    </ol>
+    <div class="oh-note">Never share your password, OTP, UPI PIN, CVV, full card number, or payment login details with anyone, including Eatswada support.</div>
+  </section>
+
+  <section class="oh-section" id="contact">
+    <h2><i class="fa-regular fa-envelope"></i>Contact Eatswada support</h2>
+    <p>If you’re unable to use the issue options above, email us directly. Please include your registered email or phone number so we can identify the account, and never include sensitive credentials.</p>
+    <a class="oh-cta" href="mailto:support@eatswada.com?subject=Eatswada%20Order%20Help"><i class="fa-regular fa-envelope"></i>Email support</a>
+    <p style="margin-top:12px;font-size:13px">support@eatswada.com</p>
+    <div class="oh-note">For personal-data access, correction, or account-deletion requests, visit <a href="privacy-data.html"><strong>Privacy &amp; Data</strong></a>. For refund eligibility and terms, see the <a href="refund-policy.html"><strong>Refund &amp; Cancellation Policy</strong></a>.</div>
+  </section>
+</main>
+<footer class="ew-site-footer" aria-label="Eatswada site footer">
+  <div class="ew-footer-inner">
+    <nav class="ew-footer-grid" aria-label="Footer navigation">
+      <section class="ew-footer-group"><h2>Company</h2><ul><li><a href="about.html">About Eatswada</a></li><li><a href="support.html">Contact us</a></li><li><a href="mailto:hello@eatswada.com">General enquiries</a></li></ul></section>
+      <section class="ew-footer-group"><h2>For customers</h2><ul><li><a href="support.html">Help &amp; support</a></li><li><a href="faq.html">FAQs</a></li><li><a href="refund-policy.html">Refunds &amp; cancellations</a></li></ul></section>
+      <section class="ew-footer-group"><h2>For restaurants</h2><ul><li><a href="partner-with-us.html">Partner with us</a></li><li><a href="mailto:hello@eatswada.com?subject=Restaurant%20enquiry">Restaurant enquiries</a></li></ul></section>
+      <section class="ew-footer-group"><h2>Legal &amp; contact</h2><ul><li><a href="terms.html">Terms of Service</a></li><li><a href="legal.html#privacy">Privacy Policy</a></li><li><a href="privacy-data.html">Privacy &amp; Data</a></li><li><a href="refund-policy.html">Refund Policy</a></li><li><a href="mailto:support@eatswada.com">support@eatswada.com</a></li></ul></section>
+    </nav>
+    <div class="ew-footer-brand" aria-label="Eatswada">eats<span>wada</span></div>
+    <div class="ew-footer-bottom"><p>© 2026 Eatswada. All rights reserved.</p><p>Serving Maynaguri, West Bengal.</p></div>
+  </div>
+</footer>
+<script src="navigation.js"></script>
+</body>
+</html>
