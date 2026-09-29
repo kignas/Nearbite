@@ -57,13 +57,21 @@
     modal.setAttribute('role', 'presentation');
     modal.innerHTML =
       '<section class="ew-location-welcome__card" role="dialog" aria-modal="true" aria-labelledby="ewLocationWelcomeTitle" aria-describedby="ewLocationWelcomeCopy">' +
-        '<button class="ew-location-welcome__close" type="button" aria-label="Close">×</button>' +
-        '<div class="ew-location-welcome__art" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>' +
-        '<p class="ew-location-welcome__eyebrow">One quick step</p>' +
-        '<h2 class="ew-location-welcome__title" id="ewLocationWelcomeTitle">Save your delivery address</h2>' +
-        '<p class="ew-location-welcome__copy" id="ewLocationWelcomeCopy">Your location permission helps us find you, but you still need to save a delivery address before you can order.</p>' +
-        '<a class="ew-location-welcome__cta" href="address.html?view=select"><i class="fa-solid fa-map-pin" aria-hidden="true"></i> Set delivery address</a>' +
-        '<button class="ew-location-welcome__later" type="button">I’ll do this later</button>' +
+        '<div class="ew-location-welcome__handle" aria-hidden="true"></div>' +
+        '<div class="ew-location-welcome__top">' +
+          '<div class="ew-location-welcome__copy-wrap">' +
+            '<p class="ew-location-welcome__eyebrow">Make Eatswada yours</p>' +
+            '<h2 class="ew-location-welcome__title" id="ewLocationWelcomeTitle">Where should we deliver?</h2>' +
+          '</div>' +
+          '<button class="ew-location-welcome__close" type="button" aria-label="Close">×</button>' +
+        '</div>' +
+        '<div class="ew-location-welcome__intro">' +
+          '<div class="ew-location-welcome__art" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>' +
+          '<p class="ew-location-welcome__copy" id="ewLocationWelcomeCopy">Save your delivery address once to see restaurants and dishes available near you, and make checkout quicker.</p>' +
+        '</div>' +
+        '<div class="ew-location-welcome__benefit"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>Your address is saved to your Eatswada account.</span></div>' +
+        '<a class="ew-location-welcome__cta" href="address.html?view=select"><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Set delivery address <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>' +
+        '<button class="ew-location-welcome__later" type="button">Maybe later</button>' +
       '</section>';
     document.body.appendChild(modal);
     document.body.style.overflow = 'hidden';

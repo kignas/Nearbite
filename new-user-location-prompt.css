@@ -1,53 +1,77 @@
-/* First-home saved-address prompt for newly created Eatswada accounts. */
+/* Eatswada first-home address prompt — premium mobile bottom sheet. */
 .ew-location-welcome[hidden] { display: none !important; }
 .ew-location-welcome {
   position: fixed; inset: 0; z-index: 100010;
-  display: flex; align-items: center; justify-content: center;
-  padding: 22px; background: rgba(17, 24, 39, .58);
-  opacity: 0; transition: opacity .22s ease;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0; background: rgba(15, 23, 42, .46);
+  opacity: 0; visibility: hidden;
+  transition: opacity .24s ease, visibility .24s ease;
+  overscroll-behavior: contain;
 }
-.ew-location-welcome.is-open { opacity: 1; }
+.ew-location-welcome.is-open { opacity: 1; visibility: visible; }
 .ew-location-welcome__card {
-  position: relative; width: min(100%, 390px); overflow: hidden;
-  padding: 28px 22px 22px; border-radius: 24px;
-  background: #fff; color: #202633; text-align: center;
-  box-shadow: 0 24px 70px rgba(0,0,0,.24);
-  transform: translateY(12px) scale(.98); transition: transform .22s ease;
+  position: relative; width: min(100%, 520px); max-height: min(86dvh, 680px);
+  overflow: auto; overscroll-behavior: contain;
+  padding: 12px 22px calc(22px + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0;
+  background: #fff; color: #202431; text-align: left;
+  box-shadow: 0 -16px 54px rgba(15, 23, 42, .18);
+  transform: translate3d(0, 105%, 0);
+  transition: transform .38s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
 }
-.ew-location-welcome.is-open .ew-location-welcome__card { transform: translateY(0) scale(1); }
-.ew-location-welcome__close {
-  position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
-  border: 0; border-radius: 50%; background: #f1f2f5; color: #596171;
-  font: inherit; font-size: 21px; line-height: 1; cursor: pointer;
+.ew-location-welcome.is-open .ew-location-welcome__card { transform: translate3d(0, 0, 0); }
+.ew-location-welcome__handle {
+  width: 42px; height: 4px; margin: 0 auto 20px;
+  border-radius: 99px; background: #D8DCE3;
 }
-.ew-location-welcome__art {
-  width: 72px; height: 72px; margin: 2px auto 17px; display: grid;
-  place-items: center; border-radius: 23px; color: #d91f4b;
-  background: #fff0f3; font-size: 30px;
-}
+.ew-location-welcome__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.ew-location-welcome__copy-wrap { min-width: 0; }
 .ew-location-welcome__eyebrow {
-  margin: 0 0 8px; color: #d91f4b; font-size: 11px; font-weight: 850;
-  letter-spacing: .11em; text-transform: uppercase;
+  margin: 0 0 7px; color: #C90057; font-size: 10px; font-weight: 900;
+  letter-spacing: .12em; text-transform: uppercase;
 }
 .ew-location-welcome__title {
-  margin: 0 0 10px; color: #202633; font-size: 23px; line-height: 1.18;
-  font-weight: 850; letter-spacing: -.55px;
+  margin: 0; color: #202431; font-size: clamp(21px, 5.6vw, 25px); line-height: 1.2;
+  font-weight: 850; letter-spacing: -.65px;
+}
+.ew-location-welcome__close {
+  flex: 0 0 36px; width: 36px; height: 36px; margin-top: 1px;
+  border: 0; border-radius: 50%; background: #F2F3F6; color: #596171;
+  font: inherit; font-size: 21px; line-height: 1; cursor: pointer;
+}
+.ew-location-welcome__intro { display: flex; align-items: center; gap: 14px; margin: 19px 0 20px; }
+.ew-location-welcome__art {
+  flex: 0 0 66px; width: 66px; height: 66px; display: grid; place-items: center;
+  border-radius: 21px; color: #C90057;
+  background: linear-gradient(145deg, #FFF0F5, #FCE3ED); font-size: 25px;
 }
 .ew-location-welcome__copy {
-  margin: 0 auto 21px; max-width: 310px; color: #697180;
-  font-size: 14px; line-height: 1.55; font-weight: 500;
+  margin: 0; color: #687386; font-size: 13px; line-height: 1.55; font-weight: 550;
 }
+.ew-location-welcome__benefit {
+  display: flex; align-items: center; gap: 10px; margin: 0 0 20px;
+  padding: 12px 13px; border: 1px solid #F0E2E8; border-radius: 14px;
+  background: #FFFAFC; color: #596171; font-size: 12px; line-height: 1.4; font-weight: 650;
+}
+.ew-location-welcome__benefit i { color: #C90057; font-size: 14px; }
 .ew-location-welcome__cta {
-  display: flex; align-items: center; justify-content: center; gap: 9px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; min-height: 52px; padding: 13px 18px; border: 0;
-  border-radius: 15px; background: #e51e4b; color: #fff; text-decoration: none;
-  font: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
-  box-shadow: 0 7px 16px rgba(229,30,75,.2);
+  border-radius: 16px; background: #C90057; color: #fff; text-decoration: none;
+  font: inherit; font-size: 14px; font-weight: 850; cursor: pointer;
+  box-shadow: 0 8px 18px rgba(201, 0, 87, .18);
 }
+.ew-location-welcome__cta:active { transform: scale(.985); }
 .ew-location-welcome__later {
-  display: block; width: 100%; min-height: 44px; margin-top: 7px;
-  border: 0; background: transparent; color: #727987; font: inherit;
-  font-size: 13px; font-weight: 700; cursor: pointer;
+  display: block; width: 100%; min-height: 44px; margin-top: 6px;
+  border: 0; background: transparent; color: #737C8C; font: inherit;
+  font-size: 12px; font-weight: 750; cursor: pointer;
+}
+@media (min-width: 600px) {
+  .ew-location-welcome { align-items: center; padding: 20px; }
+  .ew-location-welcome__card { border-radius: 26px; transform: translate3d(0, 28px, 0); }
+  .ew-location-welcome.is-open .ew-location-welcome__card { transform: translate3d(0, 0, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ew-location-welcome, .ew-location-welcome__card { transition: none; }
