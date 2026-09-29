@@ -44,6 +44,14 @@
     }
 
     const fallback = PARENT[page] || 'index.html';
+
+    // Orders → Home uses the same reverse slide as the bottom navigation.
+    if (page === 'orders.html' || page === 'track-order.html') {
+      if (window.EatswadaPageTransitions) {
+        window.EatswadaPageTransitions.setDirection('back');
+      }
+    }
+
     location.replace(fallback);
   };
 
