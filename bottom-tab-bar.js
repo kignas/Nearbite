@@ -1,14 +1,14 @@
 /* ============================================================
-   NEARBITE — FLOATING ISLAND BOTTOM NAVIGATION
+   EATSWADA — FLOATING ISLAND BOTTOM NAVIGATION
    Home • Orders
-   Universal component for every Nearbite page.
+   Universal component for every Eatswada page.
 
    TRUE floating glass island at every screen width — phone
    included. There is no separate "flush mobile bar" mode; the
    island geometry (side margins, bottom margin, rounded corners,
    frosted glass) is the only mode.
 
-   This bar owns ONLY the 3-column nav. The Cart is a separate
+   This bar owns ONLY the primary 2-column nav. The Cart is a separate
    floating island owned by cart-bar.js, positioned above this
    bar via the shared --nb-cart-bottom custom property (defined
    below, updated live as this bar hides/reveals on scroll).
@@ -19,10 +19,11 @@
      radius, frosted backdrop blur, soft border + shadow
    • Subtle inner capsule highlight on the active tab (icon in
      brand red, label in bold dark ink) — not a full-bleed block
-   • Instant page navigation (no fade/slide transition)
+   • Directional Home ↔ Orders page transition intent
    • Auto hide on downward scroll, auto reveal on upward scroll
    • Android safe-area support
    • Removes legacy Delivery / Dining bars
+   • Removes the temporary 99 Store tab from the primary navigation
    • Publishes --nb-cart-bottom so cart-bar.js stays docked above,
      accounting for this bar's own bottom offset from the screen
      edge (it no longer sits flush at bottom: 0)
@@ -81,6 +82,7 @@
       opacity: 1;
       isolation: isolate;
       overflow: hidden;
+      view-transition-name: ew-bottom-nav;
       transition:
         transform .32s cubic-bezier(.22,1,.36,1),
         opacity .2s ease,
@@ -101,6 +103,7 @@
 
     #nearbite-help-center {
       position: fixed;
+      view-transition-name: ew-help-center;
       right: 14px;
       bottom: calc(var(--nb-tab-bar-bottom-offset) + 10px + env(safe-area-inset-bottom, 0px));
       width: 48px;
@@ -277,11 +280,11 @@
 
     @media (min-width: 600px) {
       #nearbite-bottom-tabbar {
-        max-width: 520px;
+        max-width: 360px;
         min-height: 58px;
       }
       .nb-tab { min-height: 48px; }
-      .nb-tab-pill { min-height: 44px; max-width: 118px; }
+      .nb-tab-pill { min-height: 44px; max-width: 136px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -300,7 +303,6 @@
 
   function getActiveTab() {
     const page = currentPage();
-    if (page === 'under99.html') return 'store';
     if (page === 'orders.html' || page === 'track-order.html') return 'orders';
     return 'home';
   }
@@ -327,8 +329,8 @@
     bar.id = 'nearbite-bottom-tabbar';
     bar.setAttribute('aria-label', 'Main navigation');
 
-    // 2 columns only — Home and Orders. Cart is a separate
-    // floating island (cart-bar.js), not a tab in this grid.
+    // 2 columns only — Home and Orders.
+    // Cart is a separate floating island (cart-bar.js), not a tab.
     const tabs = [
       { id: 'home',   label: 'Home',   href: 'index.html',  icon: 'fa-house' },
       { id: 'orders', label: 'Orders', href: 'orders.html', icon: 'fa-receipt' }
@@ -419,13 +421,24 @@
   }
 
   function setupTapAnimation(bar) {
-    // Keeps the little bounce feedback on tap. Unlike the old page-transition
-    // system, this never calls preventDefault() and never delays the actual
-    // navigation — the link follows through immediately, the bounce just
-    // plays alongside it.
+    // Keep the actual link navigation native. We only record direction
+    // synchronously so the next HTML document can use the same intent.
     bar.addEventListener('click', function (event) {
       const link = event.target.closest('.nb-tab');
       if (!link) return;
+
+      const target = link.dataset.tab;
+      const current = getActiveTab();
+
+      if (window.EatswadaPageTransitions) {
+        if (current === 'home' && target === 'orders') {
+          window.EatswadaPageTransitions.setDirection('forward');
+        } else if (current === 'orders' && target === 'home') {
+          window.EatswadaPageTransitions.setDirection('back');
+        }
+      }
+
+      // Small tactile bounce; never cancel or delay the native navigation.
       link.classList.remove('nb-tap');
       void link.offsetWidth;
       link.classList.add('nb-tap');
@@ -433,7 +446,7 @@
   }
 
 
-    // Separate floating Help Center button — intentionally not part of the 3-column nav.
+    // Separate floating Help Center button — intentionally not part of the 2-column nav.
     if (!document.getElementById('nearbite-help-center')) {
       const help = document.createElement('a');
       help.id = 'nearbite-help-center';
