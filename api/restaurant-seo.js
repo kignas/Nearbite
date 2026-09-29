@@ -72,7 +72,7 @@ module.exports = async function handler(req, res) {
       ' in Maynaguri, West Bengal on EatSwada.';
     const canonical = CANONICAL_ORIGIN + '/restaurant.html?id=' + encodeURIComponent(id);
     const image = safeImage(restaurant.image);
-    const indexEnabled = process.env.SEO_INDEX_RESTAURANTS === 'true';
+    const indexEnabled = false; // STAGING: keep demo restaurants out of search until launch.
     const robots = indexEnabled ? 'index, follow' : 'noindex, nofollow';
     const schema = {
       '@context':'https://schema.org',
