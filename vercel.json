@@ -1,0 +1,33 @@
+{
+  "rewrites": [
+    {
+      "source": "/restaurant.html",
+      "destination": "/api/restaurant-seo"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "api/restaurant-seo.js": {
+      "includeFiles": "restaurant-shell.html"
+    }
+  }
+}
