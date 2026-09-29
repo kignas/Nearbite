@@ -1,0 +1,72 @@
+
+/* Eatswada shared customer-facing footer */
+.ew-site-footer {
+  --ew-footer-bg: #171b24;
+  --ew-footer-muted: #c5cbd4;
+  --ew-footer-heading: #ffffff;
+  --ew-footer-line: rgba(255,255,255,.12);
+  margin-top: 36px;
+  padding: 32px 20px 22px;
+  background: var(--ew-footer-bg);
+  color: var(--ew-footer-muted);
+  font-family: Manrope, system-ui, sans-serif;
+}
+.ew-site-footer * { box-sizing: border-box; }
+.ew-footer-inner { width: min(100%, 1080px); margin: 0 auto; }
+.ew-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px 24px;
+}
+.ew-footer-group h2 {
+  margin: 0 0 13px;
+  color: var(--ew-footer-heading);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.ew-footer-group ul { list-style: none; margin: 0; padding: 0; }
+.ew-footer-group li + li { margin-top: 10px; }
+.ew-footer-group a {
+  color: var(--ew-footer-muted);
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.ew-footer-group a:hover, .ew-footer-group a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: #fc8019;
+  text-underline-offset: 4px;
+}
+.ew-footer-brand {
+  display: flex; align-items: center; justify-content: center;
+  margin: 30px 0 10px;
+  color: #fff; font-size: 27px; line-height: 1.1;
+  font-weight: 800; letter-spacing: -1.3px;
+}
+.ew-footer-brand span { color: #fc8019; }
+.ew-footer-bottom {
+  border-top: 1px solid var(--ew-footer-line);
+  padding-top: 14px;
+  text-align: center;
+  color: #aeb5c0;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.ew-footer-bottom p { margin: 4px 0 0; }
+.ew-footer-bottom a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) {
+  .ew-site-footer { padding: 28px 18px 18px; margin-top: 28px; }
+  .ew-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px 16px; }
+  .ew-footer-group h2 { font-size: 11px; margin-bottom: 10px; }
+  .ew-footer-group li + li { margin-top: 9px; }
+  .ew-footer-group a { font-size: 12px; }
+  .ew-footer-brand { margin-top: 26px; }
+}
+@media (max-width: 360px) {
+  .ew-footer-grid { grid-template-columns: 1fr 1fr; gap: 22px 12px; }
+}
