@@ -1,0 +1,44 @@
+/* Eatswada Home ↔ Orders app-like directional motion */
+@keyframes ewPageEnterFromRight {
+  from { transform: translate3d(22%,0,0); opacity: .72; }
+  to   { transform: translate3d(0,0,0); opacity: 1; }
+}
+@keyframes ewPageEnterFromLeft {
+  from { transform: translate3d(-22%,0,0); opacity: .72; }
+  to   { transform: translate3d(0,0,0); opacity: 1; }
+}
+@keyframes ewPageExitToLeft {
+  from { transform: translate3d(0,0,0); opacity: 1; }
+  to   { transform: translate3d(-22%,0,0); opacity: .72; }
+}
+@keyframes ewPageExitToRight {
+  from { transform: translate3d(0,0,0); opacity: 1; }
+  to   { transform: translate3d(22%,0,0); opacity: .72; }
+}
+.ew-page-enter-forward.ew-page-enter-active {
+  animation: ewPageEnterFromRight 340ms cubic-bezier(.22,1,.36,1) both;
+}
+.ew-page-enter-back.ew-page-enter-active {
+  animation: ewPageEnterFromLeft 340ms cubic-bezier(.22,1,.36,1) both;
+}
+.ew-page-exit-forward.ew-page-exit-active {
+  animation: ewPageExitToLeft 340ms cubic-bezier(.22,1,.36,1) both;
+}
+.ew-page-exit-back.ew-page-exit-active {
+  animation: ewPageExitToRight 340ms cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes ewTabArrive {
+  0% { transform: scale(.88); }
+  55% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.nb-tab-pill.ew-tab-arrive {
+  animation: ewTabArrive 460ms cubic-bezier(.175,.885,.32,1.275) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ew-page-enter-forward.ew-page-enter-active,
+  .ew-page-enter-back.ew-page-enter-active,
+  .ew-page-exit-forward.ew-page-exit-active,
+  .ew-page-exit-back.ew-page-exit-active,
+  .nb-tab-pill.ew-tab-arrive { animation: none !important; }
+}
