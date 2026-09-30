@@ -338,7 +338,6 @@ export default function OrdersScreen() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active' | 'delivered' | 'cancelled' | 'refunded'>('all');
   const [loading, setLoading] = useState(true);
   const [loginRequired, setLoginRequired] = useState(false);
   const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
@@ -395,7 +394,7 @@ export default function OrdersScreen() {
   useEffect(() => {
     setPastLimit(6);
     setSwipedId(null);
-  }, [search, filter]);
+  }, [search]);
 
   const hiddenIds = useMemo(() => {
     try {
@@ -408,32 +407,14 @@ export default function OrdersScreen() {
 
   const visibleOrders = useMemo(() => orders.filter((order) => !hiddenIds.has(order._id)), [hiddenIds, orders]);
 
-  const counts = useMemo(() => {
-    const next = { all: visibleOrders.length, active: 0, delivered: 0, cancelled: 0, refunded: 0 };
-    for (const order of visibleOrders) {
-      const status = api.norm(order.status);
-      if (isActiveOrder(order, api)) next.active += 1;
-      else if (isRefunded(order, api)) next.refunded += 1;
-      else if (status === 'delivered') next.delivered += 1;
-      else if (status === 'cancelled') next.cancelled += 1;
-    }
-    return next;
-  }, [api, visibleOrders]);
-
   const filteredOrders = useMemo(() => {
     const q = search.trim().toLowerCase();
+    if (!q) return visibleOrders;
     return visibleOrders.filter((order) => {
-      if (q) {
-        const matches = [order.restaurantName, order._id, order.orderNumber].some((value) => String(value || '').toLowerCase().includes(q)) || (order.items || []).some((item) => String(item.name || '').toLowerCase().includes(q));
-        if (!matches) return false;
-      }
-      if (filter === 'all') return true;
-      if (filter === 'active') return isActiveOrder(order, api);
-      if (filter === 'refunded') return isRefunded(order, api);
-      if (filter === 'cancelled') return api.norm(order.status) === 'cancelled' && !isRefunded(order, api);
-      return api.norm(order.status) === filter;
+      const matches = [order.restaurantName, order._id, order.orderNumber].some((value) => String(value || '').toLowerCase().includes(q)) || (order.items || []).some((item) => String(item.name || '').toLowerCase().includes(q));
+      return matches;
     });
-  }, [api, filter, search, visibleOrders]);
+  }, [search, visibleOrders]);
 
   const liveOrders = useMemo(() => filteredOrders.filter((order) => isActiveOrder(order, api)), [api, filteredOrders]);
   const pastOrders = useMemo(() => filteredOrders.filter((order) => !isActiveOrder(order, api)), [api, filteredOrders]);
@@ -509,8 +490,7 @@ export default function OrdersScreen() {
     window.location.href = 'login.html';
   };
 
-  const filteredEmpty = Boolean(search.trim() || filter !== 'all');
-  const titleTotal = visibleOrders.length;
+  const filteredEmpty = Boolean(search.trim());
 
   return (
     <div
@@ -537,31 +517,6 @@ export default function OrdersScreen() {
       <OrdersSharedHeader value={search} onChange={setSearch} onClear={() => setSearch('')} />
 
       <main className="orders-content">
-        <section className="ew-orders-title-row">
-          <button type="button" className="header-back-btn tap" onClick={() => navigate('/')} aria-label="Go back"><i className="fa-solid fa-arrow-left" /></button>
-          <div className="ew-orders-heading">
-            <h1>My Orders</h1>
-            <div className="header-stats"><span>{titleTotal} order{titleTotal === 1 ? '' : 's'}</span>{counts.active > 0 ? <><span className="sep" /><span className="stat-live"><span className="pulse-dot-sm" />{counts.active} live</span></> : null}</div>
-          </div>
-        </section>
-
-        <div className="filter-chips ew-react-filter-chips" role="tablist" aria-label="Filter orders">
-          {(['all', 'active', 'delivered', 'cancelled', 'refunded'] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              role="tab"
-              aria-selected={filter === key}
-              className={`chip tap${filter === key ? ' active' : ''}`}
-              data-filter={key}
-              data-count={counts[key] || ''}
-              onClick={() => setFilter(key)}
-            >
-              {key === 'all' ? 'All' : key[0].toUpperCase() + key.slice(1)}
-            </button>
-          ))}
-        </div>
-
         {loading ? <SkeletonOrders /> : loginRequired ? <EmptyOrders loginRequired filtered={false} onExplore={handleLogin} /> : filteredOrders.length === 0 ? <EmptyOrders loginRequired={false} filtered={filteredEmpty} onExplore={() => navigate('/')} /> : (
           <>
             {liveOrders.length ? (
