@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'motion/react';
 import { motion, useReducedMotion } from 'motion/react';
 import HomeHeader from './HomeHeader';
+import OrdersScreen from './OrdersScreen';
 
 type Screen = 'home' | 'orders';
-
-type EatswadaNavMessage = {
-  type: 'EATSWADA_NAVIGATE';
-  to: Screen;
-};
 
 function getScreen(pathname: string): Screen {
   return pathname.replace(/\/+$/, '').endsWith('/orders') ? 'orders' : 'home';
@@ -22,8 +19,7 @@ function HomeScreen() {
         <section className="section" aria-label="Home migration preview">
           <div className="sec-head"><h2 className="sec-title">Home migration preview</h2></div>
           <p className="ew-preview-copy">
-            Home and Orders now share one navigation shell. The existing Home sections
-            will be migrated here in their own stage without changing their data behavior.
+            Home and Orders now share one React navigation shell. Home content stays isolated while the Orders page is migrated component-by-component.
           </p>
         </section>
       </main>
@@ -31,75 +27,19 @@ function HomeScreen() {
   );
 }
 
-function LegacyOrdersScreen({ active, load, onNavigate }: { active: boolean; load: boolean; onNavigate: (to: Screen) => void }) {
-  const frameRef = useRef<HTMLIFrameElement>(null);
-  const [frameReady, setFrameReady] = useState(false);
-
-  const handleLoad = useCallback(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
-    try {
-      const doc = frame.contentDocument;
-      if (!doc) return;
-      if (frame.contentWindow?.location.href !== 'about:blank') setFrameReady(true);
-
-      // Keep the legacy Orders page and its existing behavior, but let the
-      // React shell own the one persistent bottom navigation.
-      if (!doc.getElementById('ew-react-shell-bridge-style')) {
-        const style = doc.createElement('style');
-        style.id = 'ew-react-shell-bridge-style';
-        style.textContent = `
-          #nearbite-bottom-tabbar, #nearbite-help-center { display:none !important; }
-          html, body { overscroll-behavior: contain; }
-        `;
-        doc.head.appendChild(style);
-      }
-
-      const frameWindow = frame.contentWindow as (Window & { nearbiteSafeBack?: () => void }) | null;
-      if (frameWindow) frameWindow.nearbiteSafeBack = () => onNavigate('home');
-
-      if (!doc.documentElement.dataset.ewReactShellBridge) {
-        doc.documentElement.dataset.ewReactShellBridge = '1';
-        doc.addEventListener('click', (event) => {
-          const target = event.target as Element | null;
-          if (!target || typeof target.closest !== 'function') return;
-          const link = target.closest<HTMLAnchorElement>('#nearbite-bottom-tabbar a.nb-tab');
-          if (!link) return;
-          const tab = link.dataset.tab;
-          if (tab !== 'home' && tab !== 'orders') return;
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          onNavigate(tab);
-        }, true);
-      }
-    } catch {
-      // If the legacy page is ever hosted cross-origin, keep its normal behavior.
-    }
-  }, [onNavigate]);
-
-  return (
-    <div className="ew-orders-frame-wrap" aria-hidden={!active}>
-      {!frameReady && load && (
-        <div className="ew-orders-loading" role="status">Loading your orders…</div>
-      )}
-      <iframe
-        ref={frameRef}
-        className="ew-orders-frame"
-        src={load ? '/orders.html?ewReactShell=1' : 'about:blank'}
-        title="Your Eatswada orders"
-        onLoad={handleLoad}
-        tabIndex={active ? 0 : -1}
-      />
-    </div>
-  );
-}
-
 function BottomNavigation({ active }: { active: Screen }) {
   const reduceMotion = useReducedMotion();
+  const [tap, setTap] = useState<{ id: Screen; nonce: number } | null>(null);
+  const tapSequence = useRef(0);
   const tabs = useMemo(() => [
     { id: 'home' as const, label: 'Home', icon: 'fa-house', to: '/' },
     { id: 'orders' as const, label: 'Orders', icon: 'fa-receipt', to: '/orders' },
   ], []);
+
+  const handleTabPress = (id: Screen) => {
+    tapSequence.current += 1;
+    setTap({ id, nonce: tapSequence.current });
+  };
 
   return (
     <nav className="ew-bottom-nav" aria-label="Main navigation">
@@ -111,16 +51,26 @@ function BottomNavigation({ active }: { active: Screen }) {
             to={tab.to}
             className={`ew-nav-tab${selected ? ' is-active' : ''}`}
             aria-current={selected ? 'page' : undefined}
+            onClick={() => handleTabPress(tab.id)}
           >
             <span className="ew-nav-pill">
-              {selected && (
-                <motion.span
-                  className="ew-nav-active-bg"
-                  layoutId="eatswada-active-nav-pill"
-                  transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 34, mass: 0.72 }}
+              {selected ? <motion.span
+                className="ew-nav-active-bg"
+                layoutId="eatswada-active-nav-pill"
+                transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 34, mass: 0.72 }}
+              /> : null}
+              <span className="ew-nav-icon-wrap" aria-hidden="true">
+                {tap?.id === tab.id && !reduceMotion ? <>
+                  <motion.span key={`ring-outer-${tap.nonce}`} className="ew-nav-tap-ring ew-nav-tap-ring--outer" initial={{ scale: 0.55, opacity: 0.48 }} animate={{ scale: 2.35, opacity: 0 }} transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1] }} />
+                  <motion.span key={`ring-inner-${tap.nonce}`} className="ew-nav-tap-ring ew-nav-tap-ring--inner" initial={{ scale: 0.72, opacity: 0.38 }} animate={{ scale: 1.65, opacity: 0 }} transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1], delay: 0.035 }} onAnimationComplete={() => setTap((current) => current?.nonce === tap.nonce ? null : current)} />
+                </> : null}
+                <motion.i
+                  key={tap?.id === tab.id ? `icon-${tap.nonce}` : `icon-${tab.id}`}
+                  className={`fa-solid ${tab.icon}`}
+                  animate={tap?.id === tab.id && !reduceMotion ? { scale: [1, 0.84, 1.16, 1], y: [0, 1.5, -2.5, 0], rotate: [0, -4, 3, 0] } : { scale: 1, y: 0, rotate: 0 }}
+                  transition={{ duration: 0.46, times: [0, 0.28, 0.62, 1], ease: [0.2, 0.8, 0.2, 1] }}
                 />
-              )}
-              <i className={`fa-solid ${tab.icon}`} aria-hidden="true" />
+              </span>
               <span className="ew-nav-label">{tab.label}</span>
             </span>
           </Link>
@@ -132,56 +82,25 @@ function BottomNavigation({ active }: { active: Screen }) {
 
 export default function AppShell() {
   const location = useLocation();
-  const navigate = useNavigate();
   const active = getScreen(location.pathname);
-  const [ordersVisited, setOrdersVisited] = useState(active === 'orders');
   const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (active === 'orders') setOrdersVisited(true);
-  }, [active]);
-
-
-  const navigateFromLegacy = useCallback((to: Screen) => {
-    navigate(to === 'orders' ? '/orders' : '/');
-  }, [navigate]);
-
-  const transition = reduceMotion
-    ? { duration: 0.01 }
-    : { type: 'spring' as const, stiffness: 260, damping: 30, mass: 0.82 };
-
-  const paneStyle = (screen: Screen) => {
-    const isActive = active === screen;
-    const inactiveX = screen === 'home' ? -34 : 34;
-    return {
-      x: isActive ? 0 : inactiveX,
-      opacity: isActive ? 1 : 0,
-      scale: isActive ? 1 : 0.992,
-      pointerEvents: isActive ? 'auto' as const : 'none' as const,
-      zIndex: isActive ? 2 : 1,
-    };
-  };
+  const transition = reduceMotion ? { duration: 0.01 } : { type: 'spring' as const, stiffness: 300, damping: 32, mass: 0.84 };
 
   return (
     <div className="ew-app-shell">
-      <motion.section
-        className="ew-page-pane ew-home-pane"
-        animate={paneStyle('home')}
-        transition={transition}
-        aria-hidden={active !== 'home'}
-      >
-        <HomeScreen />
-      </motion.section>
-
-      <motion.section
-        className="ew-page-pane ew-orders-pane"
-        animate={paneStyle('orders')}
-        transition={transition}
-        aria-hidden={active !== 'orders'}
-      >
-        <LegacyOrdersScreen active={active === 'orders'} load={ordersVisited} onNavigate={navigateFromLegacy} />
-      </motion.section>
-
+      <div className="ew-route-content">
+        <AnimatePresence mode="wait" initial={false}>
+          {active === 'orders' ? (
+            <motion.section key="orders" className="ew-route-pane" initial={{ opacity: 0, x: 26 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={transition}>
+              <div className="ew-react-orders"><OrdersScreen /></div>
+            </motion.section>
+          ) : (
+            <motion.section key="home" className="ew-route-pane" initial={{ opacity: 0, x: -26 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={transition}>
+              <HomeScreen />
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </div>
       <BottomNavigation active={active} />
     </div>
   );

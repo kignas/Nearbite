@@ -1,8 +1,10 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppShell from './AppShell';
 import './legacy-home.css';
 import './app-shell.css';
+import './orders.css';
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
