@@ -13,12 +13,19 @@ export function HomeHeaderTop() {
         <LocationText />
       </a>
       <div className="loc-right">
-        <a className="btn-store tap" href="under99.html" aria-label="Under 99 store">
-          <span className="store-top">UNDER</span>
-          <span className="store-bot">₹99</span>
+        <a className="btn-store-icon tap" href="under99.html" aria-label="Under 99 store">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4.5 7.5h15l-1.2 13h-12.6L4.5 7.5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+            <path d="M8 8V6a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M8.2 12h7.6M8.2 15.5h5.2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          <span>₹99</span>
         </a>
-        <a className="btn-profile tap" href="profile.html" aria-label="Profile">
-          <span className="profile-initial">S</span>
+        <a className="btn-profile-icon tap" href="profile.html" aria-label="Profile">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
         </a>
       </div>
     </div>
