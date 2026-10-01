@@ -121,7 +121,7 @@
 <script>
 (function(){
   'use strict';
-  var BASE=(window.CONFIG&&window.CONFIG.API_BASE_URL)||'https://api.eatswada.com/api';
+  var BASE=(window.CONFIG&&window.CONFIG.API_BASE_URL)||'https://eatswada-staging.onrender.com/api';
   function token(){return localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';}
   function headers(extra){var h={'Content-Type':'application/json'};var t=token();if(t)h.Authorization='Bearer '+t;return Object.assign(h,extra||{});}
   function setStatus(id,msg,ok){var el=document.getElementById(id);el.textContent=msg||'';el.className='pd-status'+(ok===true?' ok':ok===false?' err':'');}

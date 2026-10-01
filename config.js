@@ -2,7 +2,7 @@
    EATSWADA — SINGLE SOURCE OF CONFIGURATION
    ================================================================ */
 const CONFIG = {
-  API_BASE_URL: "https://api.eatswada.com/api",
+  API_BASE_URL: "https://eatswada-staging.onrender.com/api",
   BRAND_NAME: "EatSwada",
   MAPTILER: {
     enabled: true,
