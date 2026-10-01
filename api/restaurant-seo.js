@@ -1,6 +1,6 @@
 const https = require('https');
 
-const API_BASE = 'https://api.eatswada.com/api';
+const API_BASE = 'https://eatswada.onrender.com/api';
 const CANONICAL_ORIGIN = 'https://eatswada.com';
 
 function getJson(url) {
