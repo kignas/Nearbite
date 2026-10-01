@@ -13,7 +13,7 @@
   if(window.__EWSHARED_SEARCH__) return;
   window.__EWSHARED_SEARCH__=true;
 
-  const API='https://eatswada-staging.onrender.com/api';
+  const API='https://eatswada.onrender.com/api';
   const MIN=2;
   let root=null,input=null,body=null,contextLabel=null,clearBtn=null;
   let context='home',restaurantId='';

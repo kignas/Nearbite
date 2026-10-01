@@ -519,7 +519,7 @@
     var id=String(restaurantId||'');
     if(!id) return Promise.resolve([]);
     if(homeMenuFetchCache[id]) return homeMenuFetchCache[id];
-    homeMenuFetchCache[id]=fetch('https://eatswada-staging.onrender.com/api/restaurants/'+encodeURIComponent(id)+'/menu',{
+    homeMenuFetchCache[id]=fetch('https://eatswada.onrender.com/api/restaurants/'+encodeURIComponent(id)+'/menu',{
       headers:{Accept:'application/json'},cache:'no-store'
     }).then(function(response){
       if(!response.ok) throw new Error('HTTP '+response.status);

@@ -11,7 +11,7 @@
   // priority — admin control is preserved.
   // ────────────────────────────────────────────────────────────────
 
-  const API_BASE = String(window.CONFIG?.API_BASE_URL || window.API_BASE_URL || 'https://eatswada-staging.onrender.com/api').replace(/\/$/, '');
+  const API_BASE = String(window.CONFIG?.API_BASE_URL || window.API_BASE_URL || 'https://eatswada.onrender.com/api').replace(/\/$/, '');
 
   const header   = document.getElementById('home-header');
   const viewport = document.getElementById('banner-carousel');
