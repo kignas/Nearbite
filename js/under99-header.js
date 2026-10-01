@@ -20,7 +20,7 @@
   }
   document.addEventListener('DOMContentLoaded',()=>{
     update();
-    document.getElementById('u99-location')?.addEventListener('click',()=>location.href='location-onboarding.html');
+    document.getElementById('u99-location')?.addEventListener('click',()=>location.href="address.html'');
     window.addEventListener('storage',update);
   });
 })();
