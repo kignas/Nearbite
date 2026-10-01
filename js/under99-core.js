@@ -5,8 +5,8 @@
    and reads canonical state. Contract preserved exactly.
    ===================================================================== */
 (() => {
-  const API = 'https://api.eatswada.com/api/restaurants/under99';
-  const HERO_API = 'https://api.eatswada.com/api/home-banners?placement=under99';
+  const API = 'https://eatswada.onrender.com/api/restaurants/under99';
+  const HERO_API = 'https://eatswada.onrender.com/api/home-banners?placement=under99';
   const CART_KEY = 'nearbite_cart';
 
   const state = window.Eatswada99State = {
