@@ -1725,3 +1725,33 @@ body.u99-cust-open #nearbite-help-center{ display:none !important; }
 .home-service-area-notice strong{display:block;font-size:15px;font-weight:800;}
 .home-service-area-notice p{margin:5px 0 10px;color:#667085;font-size:13px;line-height:1.5;}
 .home-service-area-change{border:0;background:none;padding:0;color:#c71942;font:inherit;font-size:13px;font-weight:800;text-decoration:underline;cursor:pointer;}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   DEPTH PASS — soft drop shadows so cards & food tiles lift off the
+   white page. CSS only; appended last so it wins by source order.
+   Shadow hue uses the file's existing slate (16,24,40) so every
+   shadow in the app shares one colour language.
+   Two layers per surface: a tight "contact" shadow + a soft ambient
+   lift. This reads more premium than one flat blur.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Restaurant card — contact + ambient lift ────────────────────── */
+.u99-restaurant-card{
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05),   /* contact: grounds the card */
+              0 4px 12px rgba(16, 24, 40, .06);  /* ambient: the float        */
+}
+
+/* Loading skeleton mirrors the real card so the swap never "pops". */
+.rs-card{
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05),
+              0 4px 12px rgba(16, 24, 40, .06);
+}
+
+/* ── Food tile — gentle lift off the white card.
+   The inset hairline ring stays on the img (earlier rule, protects
+   transparent/white PNGs). This only ADDS the outer drop shadow on
+   the tile box, so nothing else shifts. ──────────────────────────── */
+.u99-item-image{
+  box-shadow: 0 4px 12px rgba(16, 24, 40, .07);
+}
