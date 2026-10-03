@@ -1,4 +1,616 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Restaurant application | Eatswada</title><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
-:root{--green:#367e34;--ink:#17191e;--muted:#6d737d;--line:#e7e9e7;--bg:#f3f5f3}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px Manrope,Arial,sans-serif}.top{position:sticky;top:0;background:#fff;padding:16px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--line);z-index:2}.top a{color:inherit;text-decoration:none}.wrap{max-width:680px;margin:22px auto;padding:0 15px 50px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:14px}.eyebrow{color:var(--green);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.08em}h1{font-size:25px;line-height:1.25;margin:8px 0}p{color:var(--muted);line-height:1.6}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:520px){.grid{grid-template-columns:1fr}}label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,select,textarea{width:100%;border:1px solid #dfe3df;border-radius:11px;padding:13px;font:inherit;background:#fff;color:var(--ink)}textarea{min-height:86px;resize:vertical}.hint{font-size:12px;color:var(--muted)}.btn{display:inline-flex;justify-content:center;align-items:center;border:0;border-radius:12px;background:var(--green);color:white;font-weight:800;padding:14px 18px;text-decoration:none;cursor:pointer;width:100%;margin-top:16px}.btn:disabled{opacity:.6}.status{padding:12px;border-radius:10px;background:#f0f5ef;color:#285d27;display:none;margin-top:12px}.notice{background:#f7f8f7;border-radius:12px;padding:13px;font-size:13px;line-height:1.55}.links{display:flex;justify-content:space-between;gap:12px;margin-top:18px;font-size:13px}.links a{color:var(--green);font-weight:700}
-</style></head><body><header class="top"><a href="partner-with-us.html">← Back</a><strong>Restaurant application</strong></header><main class="wrap"><section class="card"><div class="eyebrow">Partner with Eatswada</div><h1>Tell us about your restaurant</h1><p>Apply using your customer account. Your application is separate from your Vendor dashboard account. Our team will contact you before any Vendor account is created.</p><div class="notice">Use a business phone number and email that are different from your customer account details. Do not enter a password here.</div></section><form id="application"><section class="card"><h2>Business and owner</h2><div class="grid"><div><label>Business type *</label><select name="businessType" required><option value="restaurant">Restaurant</option><option value="cloud_kitchen">Cloud kitchen</option></select></div><div><label>Owner name *</label><input name="ownerName" required maxlength="60"></div></div><label>Restaurant / kitchen name *</label><input name="restaurantName" required maxlength="100"><div class="grid"><div><label>Business phone *</label><input name="phone" type="tel" inputmode="tel" required placeholder="Business contact number"></div><div><label>Business email *</label><input name="email" type="email" required placeholder="Business email"></div></div><label>Cuisine *</label><input name="cuisine" required placeholder="e.g. Bengali, Chinese"><label>Business address *</label><textarea name="address" required maxlength="500"></textarea><label>Short description</label><textarea name="description" maxlength="1000"></textarea></section><section class="card"><h2>Legal and delivery</h2><label>FSSAI license number *</label><input name="fssaiLicenseNumber" required maxlength="100"><label>Delivery arrangement *</label><select name="deliveryMode"><option value="eatswada_rider">Eatswada rider</option><option value="self_delivery">Our own delivery</option></select><div class="grid"><div><label>Latitude *</label><input name="latitude" type="number" step="any" required></div><div><label>Longitude *</label><input name="longitude" type="number" step="any" required></div></div><button class="btn" type="button" id="gps" style="background:#eef5ee;color:#285d27">Use my current location</button><p class="hint">Set the restaurant’s location, not your home location. You can enter coordinates manually if needed.</p></section><section class="card"><h2>Opening hours</h2><p>These are initial hours; Eatswada can confirm them during onboarding.</p><div class="grid"><div><label>Opening time</label><input name="opensAt" type="time" value="10:00"></div><div><label>Closing time</label><input name="closesAt" type="time" value="22:00"></div></div></section><section class="card"><div class="notice">By submitting, you are asking Eatswada to review this business application and contact you at the business details above. Submission or approval does not create a Vendor account or provide dashboard access.</div><button class="btn" id="submit" type="submit">Submit application</button><div class="status" id="message" role="status"></div><div class="links"><a href="application-status.html">Check application status</a><a href="profile.html">Profile</a></div></section></form></main><script>
-(()=>{'use strict';const RENDER_API='https://eatswada.onrender.com/api';const $=id=>document.getElementById(id);const form=$('application');const token=()=>localStorage.getItem('nearbite_token')||localStorage.getItem('token')||'';function msg(t,ok=false){const el=$('message');el.style.display='block';el.style.background=ok?'#eef5ee':'#fff0ed';el.style.color=ok?'#285d27':'#a33b30';el.textContent=t}function headers(){return {'Content-Type':'application/json','Authorization':'Bearer '+token()}}if(!token()){location.replace('login.html?redirect=apply.html');return}$('gps').addEventListener('click',()=>{if(!navigator.geolocation){msg('Location is not available on this device. Enter coordinates manually.');return}navigator.geolocation.getCurrentPosition(p=>{form.elements.latitude.value=p.coords.latitude;form.elements.longitude.value=p.coords.longitude;msg('Location captured. Please confirm it is your business location.',true)},()=>msg('Could not get location. Enter coordinates manually.'),{enableHighAccuracy:true,timeout:12000})});form.addEventListener('submit',async e=>{e.preventDefault();const b=Object.fromEntries(new FormData(form).entries());const cuisine=b.cuisine.split(',').map(x=>x.trim()).filter(Boolean);const hours={};['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(d=>hours[d]={closed:false,opensAt:b.opensAt||'10:00',closesAt:b.closesAt||'22:00'});const payload={businessType:b.businessType,ownerName:b.ownerName,restaurantName:b.restaurantName,email:b.email,phone:b.phone,cuisine,description:b.description,deliveryMode:b.deliveryMode,address:b.address,fssaiLicenseNumber:b.fssaiLicenseNumber,location:{type:'Point',coordinates:[Number(b.longitude),Number(b.latitude)]},openingHours:hours};$('submit').disabled=true;$('submit').textContent='Submitting…';try{const r=await fetch(RENDER_API+'/vendor-applications',{method:'POST',headers:headers(),body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(r.status===401||r.status===403){location.href='login.html?redirect=apply.html';return}if(!r.ok||data.success===false)throw new Error(data.message||'Unable to submit application. Please try again.');msg('Application submitted. The Eatswada team will contact you using your business contact details. You can check your status from the link below.',true);form.reset();$('submit').textContent='Submitted';}catch(err){msg(err.message||'Network error. Please try again.');$('submit').disabled=false;$('submit').textContent='Submit application'}})})();</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#159A62">
+<title>Become an Eatswada Vendor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2024; --ink-soft:#697077; --paper:#F5F7F8; --card:#fff; --line:#E7EAED;
+    --green:#159A62; --green-ink:#0F7A4D; --green-soft:#E6F4EC;
+    --red:#C63A2F; --red-soft:#FBEAE8; --amber:#D97706; --amber-soft:#FEF3C7;
+    --radius:16px;
+  }
+  *{ box-sizing:border-box; }
+  html{ background:var(--paper); }
+  body{
+    margin:0; color:var(--ink); font-family:'Manrope',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at 50% -8%,rgba(21,154,98,.09),transparent 34%),linear-gradient(180deg,#F8FAF9,var(--paper));
+    -webkit-font-smoothing:antialiased;
+  }
+  main{ max-width:820px; margin:0 auto; padding:30px 16px 70px; }
+
+  .brand{ padding:4px 2px 0; margin-bottom:22px; }
+  .eyebrow{ color:var(--green); font-weight:800; letter-spacing:.13em; font-size:11px; text-transform:uppercase; }
+  .brand h1{ font-size:29px; letter-spacing:-.7px; margin:7px 0 6px; }
+  .brand p{ font-size:13px; line-height:1.55; color:var(--ink-soft); margin:0; }
+
+  .card{
+    background:var(--card); border:1px solid rgba(231,234,237,.96); border-radius:22px;
+    padding:24px; box-shadow:0 2px 5px rgba(28,32,36,.035),0 18px 50px rgba(28,32,36,.075);
+    position:relative; overflow:hidden;
+  }
+  .card::before{ content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,var(--green),#34B77F,var(--green)); }
+
+  /* Stepper */
+  .stepper{ display:flex; align-items:center; gap:8px; margin:2px 0 20px; }
+  .stepper .bar{ flex:1; height:6px; border-radius:999px; background:#E9EDEB; overflow:hidden; }
+  .stepper .bar > i{ display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,#1AA66B,#159A62); transition:width .25s ease; }
+  .stepper .label{ font-size:12px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
+  .step-title{ font-size:18px; font-weight:800; letter-spacing:-.3px; margin:0 0 4px; }
+  .step-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 20px; line-height:1.5; }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .field{ margin-bottom:16px; }
+  .field.full{ grid-column:1/-1; }
+  label{ display:block; font-size:13px; font-weight:800; color:#30363B; margin-bottom:7px; }
+  input,textarea,select{
+    width:100%; min-height:48px; border:1px solid #DDE2E5; border-radius:12px; background:#FAFBFB;
+    padding:12px 13px; font:inherit; color:var(--ink);
+    transition:border-color .16s,box-shadow .16s,background .16s;
+  }
+  textarea{ min-height:100px; resize:vertical; }
+  input:hover,textarea:hover,select:hover{ border-color:#C9D2CD; }
+  input:focus,textarea:focus,select:focus{ background:#fff; outline:none; border-color:var(--green); box-shadow:0 0 0 4px rgba(21,154,98,.10); }
+  input:disabled{ opacity:.6; }
+  .hint{ font-size:11px; color:var(--ink-soft); margin-top:6px; line-height:1.5; }
+  .field-error{ display:none; font-size:12px; font-weight:700; color:var(--red); margin-top:6px; }
+  .field.invalid input,.field.invalid textarea{ border-color:var(--red); box-shadow:0 0 0 3px rgba(198,58,47,.08); }
+  .field.invalid .field-error{ display:block; }
+
+  /* Choice cards */
+  .choices{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .choice{
+    text-align:left; cursor:pointer; border:1.5px solid var(--line); background:#fff;
+    border-radius:14px; padding:16px; transition:border-color .15s, background .15s, box-shadow .15s;
+    font-family:inherit; color:var(--ink); width:100%;
+  }
+  .choice:hover{ border-color:#BFD2C8; }
+  .choice.selected{ border-color:var(--green); background:var(--green-soft); box-shadow:0 0 0 3px rgba(21,154,98,.10); }
+  .choice strong{ display:block; font-size:15px; font-weight:800; margin-bottom:4px; }
+  .choice span{ font-size:12px; color:var(--ink-soft); line-height:1.45; }
+
+  .notice{
+    border:1px solid var(--line); background:#FBFCFC; border-radius:14px; padding:14px;
+    font-size:12px; line-height:1.55; color:var(--ink-soft); margin-bottom:16px;
+  }
+  .notice strong{ color:var(--ink); }
+
+  .checkline{ display:flex; align-items:flex-start; gap:11px; padding:13px 0; border-bottom:1px solid var(--line); font-size:13px; line-height:1.5; }
+  .checkline:last-of-type{ border-bottom:0; }
+  .checkline input{ width:19px; height:19px; min-height:auto; margin-top:2px; accent-color:var(--green); flex:none; }
+  .checkline label{ font-weight:600; color:var(--ink); margin:0; }
+  .checkline.invalid{ background:var(--red-soft); border-radius:12px; padding-left:12px; padding-right:12px; }
+  .checkline a{ color:var(--green-ink); font-weight:800; }
+
+  /* Hours */
+  .hours-row{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; align-items:end; border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; background:#FBFCFC; }
+  .hours-row label{ margin:0; font-size:12px; }
+  .hours-row input[type=time]{ min-height:44px; text-align:center; }
+  .hours-row .closed-toggle{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .hours-row .closed-toggle input{ width:18px; height:18px; min-height:auto; accent-color:var(--green); }
+
+  /* Actions */
+  .actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:20px; }
+  .btn{ min-height:48px; border-radius:13px; padding:12px 18px; font-family:inherit; font-weight:800; font-size:14px; cursor:pointer; border:1px solid transparent; transition:transform .14s,box-shadow .14s,border-color .14s,background .14s; }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn:active{ transform:translateY(0); }
+  .btn:disabled{ opacity:.6; cursor:wait; transform:none; }
+  .primary{ background:linear-gradient(180deg,#1AA66B,#159A62); color:#fff; box-shadow:0 7px 18px rgba(21,154,98,.20); }
+  .primary:hover{ box-shadow:0 10px 24px rgba(21,154,98,.25); }
+  .ghost{ background:#fff; border-color:#DCE2DF; color:#30363B; box-shadow:0 1px 2px rgba(28,32,36,.03); }
+  .ghost:hover{ border-color:#BFD2C8; background:#FAFCFB; }
+  .spacer{ flex:1; }
+
+  .message{ display:none; margin-top:16px; padding:13px; border-radius:12px; font-size:13px; line-height:1.5; }
+  .message.show{ display:block; }
+  .message.error{ background:var(--red-soft); border:1px solid #F0C9C5; color:#9F3028; }
+  .message.success{ background:var(--green-soft); border:1px solid #CBE8D9; color:var(--green-ink); }
+
+  .result{ display:none; margin-top:18px; padding:18px; border:1px solid var(--line); background:#FBFCFC; border-radius:14px; }
+  .result.show{ display:block; }
+  .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; font-size:12px; }
+  .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:800; background:var(--amber-soft); color:var(--amber); }
+  .links{ margin-top:18px; text-align:center; line-height:1.9; font-size:13px; color:var(--ink-soft); }
+  .links a{ color:var(--green-ink); font-weight:800; margin:0 8px; text-decoration:none; }
+  :focus-visible{ outline:3px solid rgba(21,154,98,.22); outline-offset:2px; }
+  .panel[hidden]{ display:none; }
+  @media(max-width:620px){
+    main{ padding:20px 12px 60px; }
+    .brand h1{ font-size:25px; }
+    .card{ padding:20px 16px; border-radius:19px; }
+    .grid,.choices{ grid-template-columns:1fr; }
+    .hours-row{ grid-template-columns:1fr; }
+    .actions .btn{ width:100%; }
+    .actions .spacer{ display:none; }
+  }
+  @media(prefers-reduced-motion:reduce){ input,textarea,.btn,.choice{ transition:none!important; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <div class="eyebrow">Partner with Eatswada</div>
+    <h1>Restaurant application</h1>
+    <p>Apply using your customer account. Your application is separate from your Vendor dashboard account. Our team will contact you before any Vendor account is created.</p>
+    <p class="notice" style="margin:12px 0 0">Use a business phone number and email that are different from your customer account details. Do not enter a password here.</p>
+  </div>
+
+  <section class="card">
+    <div class="stepper" aria-hidden="true">
+      <span class="label" id="stepLabel">Step 1 of 8</span>
+      <span class="bar"><i id="stepBar"></i></span>
+    </div>
+
+    <form id="form" novalidate>
+      <!-- STEP 1: BUSINESS TYPE -->
+      <section class="panel" data-panel="0">
+        <h2 class="step-title">Business type</h2>
+        <p class="step-sub">Tell us how this kitchen operates.</p>
+        <div class="choices" id="businessTypeChoices" role="radiogroup" aria-label="Business type">
+          <button type="button" class="choice" data-value="restaurant" role="radio" aria-checked="false">
+            <strong>Restaurant</strong><span>Dine-in or takeaway kitchen with a physical storefront.</span>
+          </button>
+          <button type="button" class="choice" data-value="cloud_kitchen" role="radio" aria-checked="false">
+            <strong>Cloud Kitchen</strong><span>Delivery-only kitchen with no customer seating.</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 2: OWNER INFORMATION -->
+      <section class="panel" data-panel="1" hidden>
+        <h2 class="step-title">Owner information</h2>
+        <p class="step-sub">The contact who owns and operates this kitchen.</p>
+        <div class="grid">
+          <div class="field full" id="f-ownerName">
+            <label for="ownerName">Owner name *</label>
+            <input id="ownerName" maxlength="120" autocomplete="name" required>
+            <div class="field-error">Enter the owner's full name.</div>
+          </div>
+          <div class="field" id="f-phone">
+            <label for="phone">Business phone *</label>
+            <input id="phone" inputmode="tel" placeholder="+919876543210" autocomplete="tel" required>
+            <div class="field-error">Enter a valid mobile number.</div>
+          </div>
+          <div class="field" id="f-email">
+            <label for="email">Business email *</label>
+            <input id="email" type="email" autocomplete="email" placeholder="you@restaurant.com" required>
+            <div class="field-error">Enter a valid email address.</div>
+          </div>
+          <div class="field full" id="f-restaurantName">
+            <label for="restaurantName">Business name *</label>
+            <input id="restaurantName" maxlength="160" required>
+            <div class="field-error">Enter your business name.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: BUSINESS INFORMATION -->
+      <section class="panel" data-panel="2" hidden>
+        <h2 class="step-title">Business information</h2>
+        <p class="step-sub">Where the kitchen is and what it serves.</p>
+        <div class="grid">
+          <div class="field" id="f-cuisine">
+            <label for="cuisine">Cuisine *</label>
+            <input id="cuisine" placeholder="Biryani, Indian" required>
+            <div class="field-error">Add at least one cuisine.</div>
+          </div>
+          <div class="field full" id="f-address">
+            <label for="address">Business address *</label>
+            <input id="address" maxlength="500" required>
+            <div class="field-error">Enter the full business address.</div>
+          </div>
+          <div class="field full" id="f-description">
+            <label for="description">Business description</label>
+            <textarea id="description" maxlength="1000" placeholder="A short description customers will see."></textarea>
+          </div>
+          <div class="field full">
+            <label>Restaurant location *</label>
+            <div class="actions" style="margin-top:0">
+              <button class="btn ghost" id="locationBtn" type="button">📍 Use my current location</button>
+            </div>
+            <div class="hint">Stand at the restaurant when using GPS. Coordinates are required for delivery-distance calculations.</div>
+          </div>
+          <div class="field" id="f-longitude">
+            <label for="longitude">Longitude</label>
+            <input id="longitude" inputmode="decimal" placeholder="Auto-filled" readonly required>
+          </div>
+          <div class="field" id="f-latitude">
+            <label for="latitude">Latitude</label>
+            <input id="latitude" inputmode="decimal" placeholder="Auto-filled" readonly required>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 4: LEGAL VERIFICATION -->
+      <section class="panel" data-panel="3" hidden>
+        <h2 class="step-title">Legal verification</h2>
+        <p class="step-sub">A valid FSSAI number is mandatory to list on Eatswada.</p>
+        <div class="notice">
+          <strong>Verification is manual.</strong> Eatswada reviews your FSSAI number during admin approval.
+          No certificate upload is required at this stage.
+        </div>
+        <div class="field full" id="f-fssai">
+          <label for="fssai">FSSAI license / registration number *</label>
+          <input id="fssai" maxlength="100" placeholder="Enter your FSSAI number" required>
+          <div class="hint">Provide the number issued for this restaurant.</div>
+          <div class="field-error">Enter your FSSAI registration number.</div>
+        </div>
+      </section>
+
+      <!-- STEP 5: DELIVERY CONFIGURATION -->
+      <section class="panel" data-panel="4" hidden>
+        <h2 class="step-title">Delivery configuration</h2>
+        <p class="step-sub">Choose how orders will be delivered. Commercial terms are configured separately by Eatswada after review.</p>
+        <div class="choices" id="deliveryChoices" role="radiogroup" aria-label="Delivery method">
+          <button type="button" class="choice" data-value="self" role="radio" aria-checked="false">
+            <strong>Self delivery</strong><span>Your restaurant handles delivery.</span>
+          </button>
+          <button type="button" class="choice" data-value="eatswada" role="radio" aria-checked="false">
+            <strong>Eatswada delivery</strong><span>An Eatswada rider handles delivery.</span>
+          </button>
+        </div>
+
+
+      </section>
+
+      <!-- STEP 6: RESTAURANT CONFIGURATION -->
+      <section class="panel" data-panel="5" hidden>
+        <h2 class="step-title">Restaurant configuration</h2>
+        <p class="step-sub">Set your weekly opening hours.</p>
+        <div class="notice">
+          Preparation time, maximum active orders, delivery radius and delivery availability are managed by
+          Eatswada during onboarding and in restaurant settings after your account is approved.
+        </div>
+        <div id="hours" style="display:grid;gap:0"></div>
+        <div class="hint">Mark closed days when needed. Opening and closing time cannot be the same.</div>
+      </section>
+
+      <!-- STEP 7: WHAT HAPPENS NEXT -->
+      <section class="panel" data-panel="6" hidden>
+        <h2 class="step-title">What happens next</h2>
+        <p class="step-sub">A quick overview before you submit.</p>
+        <div class="notice">
+          <strong>Application is not Vendor access.</strong> You can use your customer account only to apply and check status. The Eatswada team will contact you using the business email and phone you provide. A separate Vendor account is arranged only after onboarding and contact verification.
+        </div>
+      </section>
+
+      <!-- STEP 8: REVIEW & SUBMIT -->
+      <section class="panel" data-panel="7" hidden>
+        <h2 class="step-title">Review &amp; submit</h2>
+        <p class="step-sub">Confirm your details. You can go back to edit any step.</p>
+        <div id="review" class="notice" style="font-size:13px"></div>
+        <div class="message" id="message"></div>
+        <div class="result" id="result"></div>
+      </section>
+
+      <div class="actions">
+        <button class="btn ghost" id="backBtn" type="button" hidden>← Back</button>
+        <span class="spacer"></span>
+        <button class="btn primary" id="nextBtn" type="button">Continue →</button>
+        <button class="btn primary" id="submitBtn" type="submit" hidden>Submit application</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="links">
+    <a href="profile.html">← Profile</a>
+    <a href="application-status.html">Check application status</a>
+  </div>
+</main>
+
+<script src="./config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var API = 'https://eatswada.onrender.com/api/vendor-applications';
+  var token = function () { return localStorage.getItem('nearbite_token') || localStorage.getItem('token') || ''; };
+  var existingApplication = null;
+  var TOTAL_STEPS = 8;
+  var DAYS = [['monday','Monday'],['tuesday','Tuesday'],['wednesday','Wednesday'],['thursday','Thursday'],['friday','Friday'],['saturday','Saturday'],['sunday','Sunday']];
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var PHONE_RE = /^\+?[0-9][0-9\s-]{7,15}$/;
+
+  var form = document.getElementById('form');
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  var stepLabel = document.getElementById('stepLabel');
+  var stepBar = document.getElementById('stepBar');
+  var backBtn = document.getElementById('backBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var submitBtn = document.getElementById('submitBtn');
+  var messageEl = document.getElementById('message');
+  var resultEl = document.getElementById('result');
+  var reviewEl = document.getElementById('review');
+  var locationBtn = document.getElementById('locationBtn');
+  var v = function (id) { var n = document.getElementById(id); return n ? n.value.trim() : ''; };
+
+  var state = { step: 0, businessType: '', deliveryMode: '', submitted: false, inFlight: false };
+
+  function showMessage(text, type) {
+    messageEl.textContent = text;
+    messageEl.className = 'message show ' + type;
+  }
+  function clearMessage() { messageEl.className = 'message'; messageEl.textContent = ''; }
+
+  function setInvalid(fieldId, invalid) {
+    var f = document.getElementById('f-' + fieldId);
+    if (f) f.classList.toggle('invalid', !!invalid);
+  }
+
+  /* ---------- Hours ---------- */
+  var hoursEl = document.getElementById('hours');
+  DAYS.forEach(function (pair) {
+    var key = pair[0], label = pair[1];
+    hoursEl.insertAdjacentHTML('beforeend',
+      '<div class="hours-row">' +
+        '<div><label style="margin:0 0 6px">' + label + '</label>' +
+        '<label class="closed-toggle"><input type="checkbox" data-closed data-day="' + key + '"> Closed</label></div>' +
+        '<label style="margin:0">Opens<input type="time" data-opens data-day="' + key + '" value="10:00"></label>' +
+        '<label style="margin:0">Closes<input type="time" data-closes data-day="' + key + '" value="22:00"></label>' +
+      '</div>');
+  });
+  hoursEl.querySelectorAll('[data-closed]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      var day = cb.dataset.day;
+      hoursEl.querySelectorAll('[data-day="' + day + '"][data-opens],[data-day="' + day + '"][data-closes]').forEach(function (x) { x.disabled = cb.checked; });
+    });
+  });
+  function getHours() {
+    var out = {};
+    for (var i = 0; i < DAYS.length; i++) {
+      var key = DAYS[i][0];
+      var closed = hoursEl.querySelector('[data-closed][data-day="' + key + '"]').checked;
+      var opens = hoursEl.querySelector('[data-opens][data-day="' + key + '"]').value;
+      var closes = hoursEl.querySelector('[data-closes][data-day="' + key + '"]').value;
+      if (!closed && opens === closes) throw new Error('Opening and closing time cannot be the same on ' + key + '.');
+      out[key] = { closed: closed, opensAt: opens, closesAt: closes };
+    }
+    return out;
+  }
+
+  /* ---------- Choice groups ---------- */
+  function wireChoices(containerId, key) {
+    var container = document.getElementById(containerId);
+    container.querySelectorAll('.choice').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        container.querySelectorAll('.choice').forEach(function (b) { b.classList.remove('selected'); b.setAttribute('aria-checked', 'false'); });
+        btn.classList.add('selected'); btn.setAttribute('aria-checked', 'true');
+        state[key] = btn.dataset.value;
+        saveDraft();
+      });
+    });
+  }
+  wireChoices('businessTypeChoices', 'businessType');
+  wireChoices('deliveryChoices', 'deliveryMode');
+
+  /* ---------- Local correction draft (never persist password) ---------- */
+  var DRAFT_KEY = 'eatswada_vendor_application_draft_v1';
+  function saveDraft() {
+    try {
+      var draft = {};
+      ['ownerName','phone','email','restaurantName','cuisine','description','address','longitude','latitude','fssai'].forEach(function(id){ draft[id] = v(id); });
+      draft.businessType = state.businessType;
+      draft.deliveryMode = state.deliveryMode;
+      draft.hours = {};
+      DAYS.forEach(function(pair){ var k=pair[0]; draft.hours[k] = { closed: hoursEl.querySelector('[data-closed][data-day="'+k+'"]').checked, opensAt: hoursEl.querySelector('[data-opens][data-day="'+k+'"]').value, closesAt: hoursEl.querySelector('[data-closes][data-day="'+k+'"]').value }; });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch (e) { /* Storage may be disabled; form remains usable. */ }
+  }
+  function restoreDraft() {
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY); if (!raw) return;
+      var d = JSON.parse(raw); if (!d || typeof d !== 'object') return;
+      ['ownerName','phone','email','restaurantName','cuisine','description','address','longitude','latitude','fssai'].forEach(function(id){ if (typeof d[id] === 'string') document.getElementById(id).value = d[id]; });
+      if (d.businessType) { state.businessType = d.businessType; var b = document.querySelector('#businessTypeChoices [data-value="'+d.businessType+'"]'); if (b) { b.classList.add('selected'); b.setAttribute('aria-checked','true'); } }
+      if (d.deliveryMode) { state.deliveryMode = d.deliveryMode; var m = document.querySelector('#deliveryChoices [data-value="'+d.deliveryMode+'"]'); if (m) { m.classList.add('selected'); m.setAttribute('aria-checked','true'); } }
+      if (d.hours && typeof d.hours === 'object') DAYS.forEach(function(pair){ var k=pair[0], h=d.hours[k]; if(!h)return; var closed=hoursEl.querySelector('[data-closed][data-day="'+k+'"]'), opens=hoursEl.querySelector('[data-opens][data-day="'+k+'"]'), closes=hoursEl.querySelector('[data-closes][data-day="'+k+'"]'); closed.checked=!!h.closed; opens.value=h.opensAt||'10:00'; closes.value=h.closesAt||'22:00'; opens.disabled=closed.checked; closes.disabled=closed.checked; });
+    } catch (e) { /* Ignore an invalid local draft. */ }
+  }
+  form.addEventListener('input', saveDraft);
+  form.addEventListener('change', saveDraft);
+  restoreDraft();
+
+  /* ---------- Geolocation ---------- */
+  locationBtn.addEventListener('click', function () {
+    if (!('geolocation' in navigator)) { showMessage('Location is not supported by this browser.', 'error'); return; }
+    if (!window.isSecureContext) { showMessage('GPS requires a secure HTTPS page.', 'error'); return; }
+    locationBtn.disabled = true; locationBtn.textContent = '📍 Getting your location…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      document.getElementById('longitude').value = pos.coords.longitude.toFixed(6);
+      document.getElementById('latitude').value = pos.coords.latitude.toFixed(6);
+      locationBtn.disabled = false; locationBtn.textContent = '📍 Location added';
+      setInvalid('longitude', false); setInvalid('latitude', false);
+      showMessage('Restaurant location captured (±' + Math.round(pos.coords.accuracy || 0) + ' m). Verify you are at the restaurant before submitting.', 'success');
+    }, function (err) {
+      locationBtn.disabled = false; locationBtn.textContent = '📍 Use my current location';
+      showMessage(err.code === 1 ? 'Location permission was denied. Allow it in browser settings and try again.' :
+        err.code === 3 ? 'Location request timed out. Please try again.' : 'Could not determine your location. Please try again.', 'error');
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  });
+
+  /* ---------- Validation ---------- */
+  function validateStep(step) {
+    clearMessage();
+    var ok = true;
+
+    if (step === 0) {
+      if (!state.businessType) { ok = false; showMessage('Choose Restaurant or Cloud Kitchen to continue.', 'error'); }
+    } else if (step === 1) {
+      if (!v('ownerName')) { ok = false; setInvalid('ownerName', true); } else setInvalid('ownerName', false);
+      if (!PHONE_RE.test(v('phone'))) { ok = false; setInvalid('phone', true); } else setInvalid('phone', false);
+      if (!EMAIL_RE.test(v('email'))) { ok = false; setInvalid('email', true); } else setInvalid('email', false);
+      if (!v('restaurantName')) { ok = false; setInvalid('restaurantName', true); } else setInvalid('restaurantName', false);
+    } else if (step === 2) {
+      if (!v('cuisine')) { ok = false; setInvalid('cuisine', true); } else setInvalid('cuisine', false);
+      if (!v('address')) { ok = false; setInvalid('address', true); } else setInvalid('address', false);
+      var lon = Number(v('longitude')), lat = Number(v('latitude'));
+      if (!Number.isFinite(lon) || !Number.isFinite(lat) || lon < -180 || lon > 180 || lat < -90 || lat > 90) {
+        ok = false; setInvalid('longitude', true); setInvalid('latitude', true);
+      } else { setInvalid('longitude', false); setInvalid('latitude', false); }
+    } else if (step === 3) {
+      if (!v('fssai')) { ok = false; setInvalid('fssai', true); } else setInvalid('fssai', false);
+    } else if (step === 4) {
+      if (!state.deliveryMode) { ok = false; showMessage('Choose a delivery method to continue.', 'error'); }
+    } else if (step === 5) {
+      try { getHours(); } catch (e) { ok = false; showMessage(e.message, 'error'); }
+    }
+
+    if (!ok && !messageEl.classList.contains('show')) showMessage('Please fix the highlighted fields to continue.', 'error');
+    return ok;
+  }
+
+  /* ---------- Review ---------- */
+  function buildReview() {
+    var hours = getHours();
+    var openDays = DAYS.filter(function (d) { return !hours[d[0]].closed; }).map(function (d) { return d[1].slice(0, 3); }).join(', ') || 'None';
+    var rows = [
+      ['Business type', state.businessType === 'cloud_kitchen' ? 'Cloud Kitchen' : (state.businessType ? 'Restaurant' : '—')],
+      ['Owner', v('ownerName') + ' · ' + v('phone')],
+      ['Email', v('email')],
+      ['Business name', v('restaurantName')],
+      ['Cuisine', v('cuisine')],
+      ['Address', v('address')],
+      ['Description', v('description') || '—'],
+      ['Location', v('latitude') && v('longitude') ? (v('latitude') + ', ' + v('longitude')) : '—'],
+      ['FSSAI', v('fssai')],
+      ['Delivery method', state.deliveryMode === 'self' ? 'Self delivery' : state.deliveryMode === 'eatswada' ? 'Eatswada delivery' : '—'],
+      ['Open days', openDays]
+    ];
+    reviewEl.innerHTML = rows.map(function (r) {
+      return '<div style="display:flex;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px solid var(--line)">' +
+        '<span style="color:var(--ink-soft)">' + r[0] + '</span>' +
+        '<span style="font-weight:700;text-align:right;word-break:break-word">' + escapeHtml(String(r[1])) + '</span></div>';
+    }).join('');
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+
+  /* ---------- Navigation ---------- */
+  function renderStep() {
+    panels.forEach(function (p, i) { p.hidden = i !== state.step; });
+    stepLabel.textContent = 'Step ' + (state.step + 1) + ' of ' + TOTAL_STEPS;
+    stepBar.style.width = (((state.step + 1) / TOTAL_STEPS) * 100) + '%';
+    backBtn.hidden = state.step === 0;
+    nextBtn.hidden = state.step === TOTAL_STEPS - 1;
+    submitBtn.hidden = state.step !== TOTAL_STEPS - 1;
+    if (state.step === TOTAL_STEPS - 1) buildReview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (!validateStep(state.step)) return;
+    if (state.step < TOTAL_STEPS - 1) { state.step++; renderStep(); }
+  });
+  backBtn.addEventListener('click', function () { if (state.step > 0) { state.step--; clearMessage(); renderStep(); } });
+
+  /* ---------- Submit ---------- */
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (state.submitted || state.inFlight) return;
+    if (!validateStep(state.step)) return;
+
+    var payload;
+    try {
+      payload = {
+        ownerName: v('ownerName'),
+        email: v('email').toLowerCase(),
+        phone: v('phone').replace(/[\s-]/g, ''),
+        businessType: state.businessType,
+        restaurantName: v('restaurantName'),
+        cuisine: v('cuisine'),
+        description: v('description'),
+        address: v('address'),
+        fssaiLicenseNumber: v('fssai'),
+        deliveryMode: state.deliveryMode === 'self' ? 'self_delivery' : 'eatswada_rider',
+        openingHours: getHours(),
+        location: { type: 'Point', coordinates: [Number(v('longitude')), Number(v('latitude'))] }
+      };
+    } catch (err) { showMessage(err.message, 'error'); return; }
+
+    state.inFlight = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+    showMessage('Submitting application…', 'success');
+
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 20000);
+    try {
+      var authToken = token();
+      if (!authToken) { location.href = 'login.html?redirect=apply.html'; return; }
+      var res = await fetch(API + (existingApplication ? '/mine' : ''), {
+        method: existingApplication ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: 'Bearer ' + authToken },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      var body = await res.json().catch(function () { return null; });
+      if (!res.ok || !body || !body.success) throw new Error((body && body.message) || 'Could not submit the application.');
+      var a = body.data || {};
+      state.submitted = true;
+      if (a.id) sessionStorage.setItem('eatswada_customer_application_id', a.id);
+      try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+      resultEl.innerHTML =
+        '<strong>' + (existingApplication ? 'Application updated.' : 'Application submitted.') + '</strong>' +
+        '<div style="margin-top:7px">Reference ID: <span class="mono">' + escapeHtml(String(a.id || '—')) + '</span></div>' +
+        '<div style="margin-top:10px"><span class="badge">PENDING REVIEW</span></div>' +
+        '<div style="margin-top:10px;color:var(--ink-soft)">The Eatswada team will contact you using your business contact details. You can check progress from your Profile.</div>' +
+        '<div style="margin-top:12px"><a class="btn ghost" href="application-status.html">View application status</a></div>'; 
+      resultEl.className = 'result show';
+      showMessage(existingApplication ? 'Your updated application has been resubmitted.' : 'Your application is pending review.', 'success');
+      nextBtn.hidden = true;
+      submitBtn.hidden = true;
+    } catch (err) {
+      showMessage(err.name === 'AbortError' ? 'The server took too long to respond. Please try again.' : (err.message || 'Could not submit the application. Please try again.'), 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit application';
+    } finally {
+      clearTimeout(timeout);
+      state.inFlight = false;
+    }
+  });
+
+
+
+  // Load the customer-owned application. Only needs_changes can be edited here.
+  function loadMyApplication() {
+    var authToken = token();
+    if (!authToken) { location.replace('login.html?redirect=apply.html'); return; }
+    fetch(API + '/mine', { headers: { Accept: 'application/json', Authorization: 'Bearer ' + authToken } })
+      .then(function (res) { return res.json().then(function (body) { return {res:res,body:body}; }); })
+      .then(function (result) {
+        if (result.res.status === 404 || (!result.res.ok && result.res.status === 404)) return;
+        if (!result.res.ok || !result.body || result.body.success === false) throw new Error((result.body && result.body.message) || 'Could not check your existing application.');
+        var a = result.body.data || result.body.application || result.body;
+        if (!a || !a.id) return;
+        existingApplication = a;
+        if (a.status !== 'needs_changes') {
+          location.replace('application-status.html');
+          return;
+        }
+        state.businessType = a.businessType || 'restaurant';
+        state.deliveryMode = a.deliveryMode === 'self_delivery' ? 'self' : 'eatswada';
+        ['ownerName','restaurantName','phone','email','cuisine','address','description'].forEach(function (key) { if (a[key] != null && document.getElementById(key)) document.getElementById(key).value = Array.isArray(a[key]) ? a[key].join(', ') : a[key]; });
+        document.getElementById('fssai').value = a.fssaiLicenseNumber || '';
+        if (a.location && Array.isArray(a.location.coordinates)) {
+          document.getElementById('longitude').value = a.location.coordinates[0];
+          document.getElementById('latitude').value = a.location.coordinates[1];
+        }
+        document.querySelectorAll('#businessTypeChoices .choice').forEach(function (b) { var selected=b.dataset.value===state.businessType; b.classList.toggle('selected',selected); b.setAttribute('aria-checked',selected?'true':'false'); });
+        document.querySelectorAll('#deliveryChoices .choice').forEach(function (b) { var selected=b.dataset.value===state.deliveryMode; b.classList.toggle('selected',selected); b.setAttribute('aria-checked',selected?'true':'false'); });
+        if (a.openingHours) DAYS.forEach(function (pair) { var key=pair[0], h=a.openingHours[key]; if(!h)return; var closed=hoursEl.querySelector('[data-closed][data-day="'+key+'"]'), opens=hoursEl.querySelector('[data-opens][data-day="'+key+'"]'), closes=hoursEl.querySelector('[data-closes][data-day="'+key+'"]'); closed.checked=!!h.closed; opens.value=h.opensAt||'10:00'; closes.value=h.closesAt||'22:00'; opens.disabled=closed.checked; closes.disabled=closed.checked; });
+        document.querySelector('.brand h1').textContent = 'Update your application';
+        showMessage('Eatswada requested changes. Update the details and resubmit the same application.', 'success');
+        saveDraft();
+      })
+      .catch(function (err) { showMessage(err.message || 'Could not check your application. Please try again.', 'error'); });
+  }
+
+  renderStep();
+  loadMyApplication();
+})();
+</script>
+</body>
+</html>
