@@ -414,11 +414,15 @@
     info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
   };
   function homeImageMarkup(item){
+    /* Premium peach placeholder renders behind the photo: visible while
+       loading, when the URL is missing, and after a failed load — but the
+       real image fades in over it on success. No broken-image icon, no
+       empty white tile, no layout shift. */
+    var ph=typeof window.ewFoodPlaceholder==='function'?window.ewFoodPlaceholder():'<div class="ew-food-ph" aria-hidden="true"></div>';
     var src=item && (item.image||item.img||item.imageUrl||item.photo);
-    if(!src)return '<div class="u99-image-fallback" aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
-    src=typeof safeUrl==='function'?safeUrl(src):src;
-    if(!src)return '<div class="u99-image-fallback" aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
-    return '<img src="'+esc(src)+'" alt="'+esc(item.name||'Item')+'" loading="lazy" decoding="async" onerror="this.hidden=true;var f=this.parentNode&&this.parentNode.querySelector(\'.u99-image-fallback\');if(f)f.hidden=false;"><div class="u99-image-fallback" hidden aria-hidden="true"><i class="fa-solid fa-utensils"></i></div>';
+    if(src){src=typeof safeUrl==='function'?safeUrl(src):src;}
+    if(!src)return ph;
+    return ph+'<img class="ew-img-fade" src="'+esc(src)+'" alt="'+esc(item.name||'Item')+'" loading="lazy" decoding="async" onload="this.classList.add(\'is-loaded\')" onerror="this.remove()">';
   }
   function homeCustomGroups(item){
     var g=item&&(item.customizations||item.customizationGroups||item.customization||item.customGroups);

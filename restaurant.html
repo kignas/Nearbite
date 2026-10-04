@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
+<link rel="stylesheet" href="food-placeholder.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -823,7 +824,7 @@
 
             <div class="nb-item-media">
               <div class="nb-item-image-wrap${displayImage ? ' is-loading' : ''}">
-                <div class="nb-item-image-placeholder" aria-hidden="true"><i class="fa-solid fa-utensils" aria-hidden="true"></i></div>
+                <div class="nb-item-image-placeholder ew-food-ph" aria-hidden="true"></div>
                 ${displayImage
                   ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(displayImageOptimized)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
                   : ''

@@ -170,6 +170,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
+<link rel="stylesheet" href="food-placeholder.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -378,10 +379,11 @@
 
         return '<a href="restaurant.html?id=' + encodeURIComponent(id) + '" class="res-card">' +
           '<div class="res-img-wrap">' +
+            '<div class="ew-food-ph" aria-hidden="true"></div>' +
             (images.length
-              ? '<img src="' + esc(typeof optimizedImageUrl === 'function' ? optimizedImageUrl(images[0], 240) : images[0]) + '" alt="' + esc(name) +
-                '" loading="lazy" onerror="this.closest(\'.res-img-wrap\').classList.add(\'no-image\'); this.remove();">'
-              : '<div class="res-img-fallback"><i class="fa-solid fa-utensils"></i></div>') +
+              ? '<img class="ew-img-fade" src="' + esc(typeof optimizedImageUrl === 'function' ? optimizedImageUrl(images[0], 240) : images[0]) + '" alt="' + esc(name) +
+                '" loading="lazy" onload="this.classList.add(\'is-loaded\')" onerror="this.remove();">'
+              : '') +
             (offer ? '<div class="res-offer">' + esc(offer) + '</div>' : '') +
           '</div>' +
           '<div class="res-info">' +

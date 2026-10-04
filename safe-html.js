@@ -102,5 +102,20 @@
 
   window.optimizedImageUrl = optimizedImageUrl;
 
+  /*
+   * Reusable premium food-image placeholder (styled by food-placeholder.css).
+   * Returns the peach placeholder layer markup. Place it as the FIRST child
+   * of an image host (the host must be position:relative/absolute) so a
+   * successfully loaded <img> paints over it. Use with an <img> carrying
+   * class "ew-img-fade", onload="this.classList.add('is-loaded')" and
+   * onerror="this.remove()" so the same layer also covers load failures and
+   * missing URLs.
+   */
+  function foodPlaceholderMarkup() {
+    return '<div class="ew-food-ph" aria-hidden="true"></div>';
+  }
+
+  window.ewFoodPlaceholder = foodPlaceholderMarkup;
+
   window.safeUrl = safeUrl;
 })();
