@@ -70,4 +70,7 @@
 .info-open { color: #159A62; font-weight: 800; }
 .info-closed { color: #E40073; font-weight: 800; }
 
-.info-fssai { font-size: 13px; color: #8D949E; }
+/* FSSAI mark: authentic logo only, never the licence number. Sized to sit
+   cleanly alongside the other info rows; hidden by JS when no asset exists. */
+.info-fssai { display: flex; align-items: center; }
+.info-fssai-logo { display: block; height: 46px; width: auto; max-width: 160px; object-fit: contain; }
