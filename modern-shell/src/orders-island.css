@@ -15,10 +15,19 @@
 }.ew-react-orders, .ew-react-orders *{box-sizing:border-box;}.ew-react-orders{-webkit-text-size-adjust:100%;}.ew-react-orders{
   font-family:'Manrope',system-ui,-apple-system,sans-serif;
   background:var(--paper); color:var(--ink-900); margin:0;
+  font-size:15px;
   padding-bottom:calc(104px + env(safe-area-inset-bottom));
   -webkit-tap-highlight-color:transparent; overscroll-behavior-y:contain; line-height:1.45;
   overflow-x:hidden;
-}.ew-react-orders button{font-family:inherit;}.ew-react-orders img{max-width:100%;display:block;}.ew-react-orders .tap{transition:transform .14s var(--ease-out),opacity .14s var(--ease-out);cursor:pointer;}.ew-react-orders .tap:active{transform:scale(.97);opacity:.88;}.ew-react-orders :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px;}
+}/* The host page's global heading rule (style.css h1..h6 { line-height:
+   var(--lh-tight) }) would otherwise tighten headings inside the React
+   screen. The prototype had no such rule, so its headings inherited the
+   screen's 1.45. Restore that inheritance, scoped to the island. */
+.ew-react-orders h1,.ew-react-orders h2,.ew-react-orders h3,
+.ew-react-orders h4,.ew-react-orders h5,.ew-react-orders h6{line-height:inherit;}
+/* The host page also applies line-height:var(--ew-ui-lh-ui) to all buttons;
+   the prototype left buttons at the browser default. Match that. */
+.ew-react-orders button{font-family:inherit;line-height:normal;}.ew-react-orders img{max-width:100%;display:block;}.ew-react-orders .tap{transition:transform .14s var(--ease-out),opacity .14s var(--ease-out);cursor:pointer;}.ew-react-orders .tap:active{transform:scale(.97);opacity:.88;}.ew-react-orders :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px;}
 
 @keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.6);opacity:.35;}}
@@ -90,7 +99,7 @@
 }.ew-react-orders .btn-reorder:active{background:var(--brand-press);}.ew-react-orders .load-more-wrap{display:flex;justify-content:center;padding:4px 0 20px;}.ew-react-orders .load-more-btn{
   display:flex;align-items:center;gap:8px;height:40px;padding:0 18px;border:1px solid var(--ink-200);border-radius:999px;
   background:#fff;color:var(--ink-700);font-size:13px;font-weight:700;
-}.ew-react-orders #scroll-sentinel{height:1px;}.ew-react-orders #empty-orders{display:none;}.ew-react-orders .empty-card{background:#fff;border-radius:var(--r-lg);padding:32px 22px 26px;text-align:center;}.ew-react-orders .empty-illustration{width:88px;height:88px;margin:0 auto 14px;}.ew-react-orders .empty-illustration .spark{display:none;}.ew-react-orders .empty-card h4{margin:0 0 4px;font-size:16px;font-weight:800;color:var(--ink-900);}.ew-react-orders .empty-card p{margin:0;font-size:13px;line-height:19px;color:var(--ink-500);}.ew-react-orders .explore-btn{margin-top:16px;height:40px;padding:0 20px;border:0;border-radius:999px;background:var(--brand);color:#fff;font-size:14px;font-weight:800;}.ew-react-orders .sk-wrapper{display:grid;gap:12px;}.ew-react-orders .sk-card{background:#fff;border-radius:var(--r-lg);overflow:hidden;padding:14px;}.ew-react-orders .sk{background:linear-gradient(90deg,#F1F1F3 0,#E8E8EC 50%,#F1F1F3 100%);background-size:1200px 100%;animation:shimmer 1.3s linear infinite;border-radius:6px;}.ew-react-orders .sk-cover{display:none;}.ew-react-orders .sk-body{display:grid;gap:10px;}.ew-react-orders .sk-avatar{width:48px;height:48px;border-radius:var(--r-sm);}.ew-react-orders .sk-text-1{height:14px;width:55%;margin-bottom:8px;}.ew-react-orders .sk-text-2{height:12px;width:35%;margin-bottom:10px;}.ew-react-orders .sk-box{height:56px;border-radius:var(--r-md);}.ew-react-orders .sk-line{height:12px;width:90%;margin-bottom:8px;}.ew-react-orders .invoice-overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center;background:rgba(17,18,20,.5);}.ew-react-orders .invoice-overlay.open{display:flex;}.ew-react-orders .invoice-sheet{
+}.ew-react-orders #scroll-sentinel{height:1px;}.ew-react-orders #empty-orders{display:none;}.ew-react-orders .empty-card{background:#fff;border-radius:var(--r-lg);padding:32px 22px 26px;text-align:center;}.ew-react-orders .empty-illustration{width:88px;height:88px;margin:0 auto 14px;}.ew-react-orders .empty-illustration .spark{display:none;}.ew-react-orders .empty-card h4{margin:0 0 4px;font-size:16px;font-weight:800;letter-spacing:normal;color:var(--ink-900);}.ew-react-orders .empty-card p{margin:0;font-size:13px;line-height:19px;font-weight:400;color:var(--ink-500);}.ew-react-orders .explore-btn{margin-top:16px;height:40px;padding:0 20px;border:0;border-radius:999px;background:var(--brand);color:#fff;font-size:14px;font-weight:800;}.ew-react-orders .sk-wrapper{display:grid;gap:12px;}.ew-react-orders .sk-card{background:#fff;border-radius:var(--r-lg);overflow:hidden;padding:14px;}.ew-react-orders .sk{background:linear-gradient(90deg,#F1F1F3 0,#E8E8EC 50%,#F1F1F3 100%);background-size:1200px 100%;animation:shimmer 1.3s linear infinite;border-radius:6px;}.ew-react-orders .sk-cover{display:none;}.ew-react-orders .sk-body{display:grid;gap:10px;}.ew-react-orders .sk-avatar{width:48px;height:48px;border-radius:var(--r-sm);}.ew-react-orders .sk-text-1{height:14px;width:55%;margin-bottom:8px;}.ew-react-orders .sk-text-2{height:12px;width:35%;margin-bottom:10px;}.ew-react-orders .sk-box{height:56px;border-radius:var(--r-md);}.ew-react-orders .sk-line{height:12px;width:90%;margin-bottom:8px;}.ew-react-orders .invoice-overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center;background:rgba(17,18,20,.5);}.ew-react-orders .invoice-overlay.open{display:flex;}.ew-react-orders .invoice-sheet{
   position:relative;width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;
   border-radius:20px 20px 0 0;padding:22px 16px calc(16px + env(safe-area-inset-bottom,0));
 }.ew-react-orders .inv-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border:0;border-radius:50%;background:#F4F4F6;font-size:20px;line-height:1;color:var(--ink-500);cursor:pointer;}.ew-react-orders .inv-head{display:flex;align-items:center;justify-content:space-between;padding-right:44px;}.ew-react-orders .inv-brand{font-size:18px;font-weight:800;color:var(--ink-900);letter-spacing:-.3px;}.ew-react-orders .inv-status{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:#F2F2F4;color:var(--ink-700);}.ew-react-orders .inv-status.paid,
@@ -170,11 +179,11 @@
   border-radius:0;background:transparent;box-shadow:none;
 }
 .ew-react-orders .ew-orders-shared-header .loc-pin-icon{width:25px;height:25px;color:#e23744;}
-.ew-react-orders .ew-orders-shared-header .loc-copy{display:flex;flex-direction:column;min-width:0;line-height:1.12;}
+.ew-react-orders .ew-orders-shared-header .loc-copy{display:flex;flex-direction:column;justify-content:center;min-width:0;line-height:1.12;}
 .ew-react-orders .ew-orders-shared-header .loc-name-row{display:flex;align-items:center;gap:6px;min-width:0;}
-.ew-react-orders .ew-orders-shared-header .loc-name{font-size:17px;font-weight:800;letter-spacing:-.3px;color:#202431;}
+.ew-react-orders .ew-orders-shared-header .loc-name{font-size:17px;line-height:1.15;font-weight:800;letter-spacing:-.3px;color:#202431;}
 .ew-react-orders .ew-orders-shared-header .loc-chevron{font-size:10px;color:#7b8491;}
-.ew-react-orders .ew-orders-shared-header .loc-sub{margin-top:4px;max-width:210px;font-size:12px;font-weight:600;color:#727b89;}
+.ew-react-orders .ew-orders-shared-header .loc-sub{margin-top:4px;max-width:210px;font-size:12px;line-height:1.35;font-weight:600;color:#727b89;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ew-react-orders .ew-orders-shared-header .loc-right{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
 /* Keep the same blue store/profile actions as the Home header. */
 .ew-react-orders .ew-orders-shared-header .btn-store-icon,
@@ -188,15 +197,17 @@
 .ew-react-orders .ew-orders-shared-header .btn-store-icon span{color:currentColor;font-size:10px;font-weight:850;line-height:1;}
 .ew-react-orders .ew-orders-shared-header .btn-profile-icon{display:grid;place-items:center;}
 .ew-react-orders .ew-orders-shared-header .btn-profile-icon svg{width:27px;height:27px;display:block;}
-.ew-react-orders .ew-orders-shared-header .search-row{height:52px;margin:0;padding:0;background:transparent;gap:9px;}
+.ew-react-orders .ew-orders-shared-header .search-row{display:flex;align-items:center;position:relative;z-index:6;height:52px;margin:0;padding:0;background:transparent;gap:9px;}
 .ew-react-orders .ew-orders-shared-header .search-box{
+  display:flex;align-items:center;gap:11px;flex:1;min-width:0;overflow:hidden;
   width:100%;height:52px;min-height:52px;box-sizing:border-box;
   padding:0 15px;border:1px solid rgba(15,23,42,.035);border-radius:17px;
   background:#fff;box-shadow:0 6px 17px rgba(15,23,42,.09);
 }
-.ew-react-orders .ew-orders-shared-header .search-icon{color:#263342;font-size:18px;}
+.ew-react-orders .ew-orders-shared-header .search-icon{color:#263342;font-size:18px;flex:0 0 auto;display:block;}
+.ew-react-orders .ew-orders-shared-header .search-mic{border:0;background:transparent;padding:4px 2px;flex:0 0 auto;color:#d20a61;font-size:17px;cursor:pointer;display:grid;place-items:center;}
 .ew-react-orders .ew-orders-shared-header .ew-shared-search-input{
-  font-family:inherit;font-size:14px;font-weight:600;line-height:1.2;color:#252936;
+  font-family:inherit;font-size:14px;font-weight:600;line-height:1.2;color:#252936;padding:1px 2px;
 }
 .ew-react-orders .ew-orders-shared-header .ew-shared-search-input::placeholder{color:#697386;opacity:1;}
 .ew-react-orders .orders-content{padding-top:14px;}
@@ -226,10 +237,36 @@
 
 
 /* ---- Island activation: hidden until the feature flag mounts React. ---- */
-.ew-react-orders{position:relative;height:100dvh;overflow:hidden;}
-.ew-react-orders .ew-orders-screen-content{height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;}
+/* The prototype stacks a full-viewport #f7f7f9 backdrop behind a
+   content-height lavender screen, so the lavender ends where the content
+   ends. Replicate that: the island host is the scroller + backdrop; the React
+   root and screen stay content-height. */
+html.ew-orders-island-active #ew-orders-island{
+  height:100dvh;overflow-y:auto;overflow-x:hidden;background:#f7f7f9;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+}
+.ew-react-orders{position:relative;height:auto;overflow:visible;letter-spacing:normal;-webkit-font-smoothing:auto;-moz-osx-font-smoothing:auto;text-rendering:auto;font-synthesis:weight style small-caps;}
+.ew-react-orders .ew-orders-screen-content{
+  height:auto;overflow:visible;background:#f1f0f5;
+  padding-bottom:calc(94px + env(safe-area-inset-bottom));
+}
+/* Host style.css sets font-synthesis:none on form controls; the prototype does
+   not, so restore the browser default for island buttons/inputs. */
+.ew-react-orders button,.ew-react-orders input,.ew-react-orders textarea,.ew-react-orders select{font-synthesis:weight style small-caps;-webkit-font-smoothing:auto;-moz-osx-font-smoothing:auto;}
 html.ew-orders-island-active body > *{display:none!important;}
 html.ew-orders-island-active #ew-orders-island{display:block!important;}
 /* Keep the shared nav island visible when both islands are enabled, so the
    persistent navigation is not hidden by the rule above. */
 html.ew-orders-island-active #ew-nav-island{display:block!important;}
+
+/* Host style.css applies `main{padding:18px 16px 24px !important}` to every
+   <main>. The prototype had no such rule, so its .orders-content kept its own
+   padding. Restore it (scoped, and with matching !important). */
+html.ew-orders-island-active .ew-react-orders main.orders-content{
+  padding:14px 14px 0 !important;
+}
+@media (max-width:374px){
+  html.ew-orders-island-active .ew-react-orders main.orders-content{
+    padding-left:12px !important;padding-right:12px !important;
+  }
+}
