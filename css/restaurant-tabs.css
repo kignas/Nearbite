@@ -1,0 +1,73 @@
+/* Menu/Info tab switching on the restaurant page.
+   Scoped to the restaurant page only: nothing here touches other pages,
+   the homepage, or the cart. The panes reuse the existing .menu-section
+   layout so the Info content matches the current menu styling. */
+
+.res-pane { touch-action: pan-y; }
+
+.res-pane.is-animating {
+  animation: resPaneIn .26s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+@keyframes resPaneIn {
+  from { opacity: 0; transform: translateX(var(--res-pane-shift, 0)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- Info pane content (built only from the loaded restaurant object) ---- */
+.info-block { padding: 16px 0; border-bottom: 1px solid #ECEEF1; }
+.info-block:last-child { border-bottom: 0; }
+
+.info-title {
+  font-size: 21px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.55px !important;
+  color: var(--ew-ink, #171C25) !important;
+  margin: 0 0 12px !important;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 7px 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #3a4150;
+}
+
+.info-row .info-ic {
+  flex: 0 0 auto;
+  width: 22px;
+  text-align: center;
+  color: #5a626d;
+  font-size: 16px;
+  margin-top: 1px;
+}
+
+.info-row .info-label { color: #8D949E; font-weight: 500; }
+.info-row strong { color: var(--ew-ink, #171C25); font-weight: 800; }
+
+.info-hint { font-size: 13px; color: #8D949E; margin: 6px 0 0; }
+
+.info-hours { margin-top: 4px; }
+
+.info-hrow {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.info-hrow .d { color: #8D949E; }
+.info-hrow .t { color: #343a45; font-weight: 500; }
+.info-hrow.is-today .d,
+.info-hrow.is-today .t { color: var(--ew-ink, #171C25); font-weight: 800; }
+.info-hrow .t.closed { color: #9AA1AB; }
+
+.info-open { color: #159A62; font-weight: 800; }
+.info-closed { color: #E40073; font-weight: 800; }
+
+.info-fssai { font-size: 13px; color: #8D949E; }
