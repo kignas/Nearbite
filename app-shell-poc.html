@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Eatswada App Shell — POC</title>
+<!-- Isolated proof of concept. This page is NOT part of the Eatswada app
+     and does not load or modify any existing page or script. It exists only
+     to host islands/app-shell.js so the persistent-shell architecture can be
+     tested in isolation. -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f7f7f9; }
+</style>
+</head>
+<body>
+<!-- Fallback shown only if the flag is off or the script fails to load.
+     When the shell is active this is hidden by html.ew-app-shell-active. -->
+<div style="font-family: Manrope, system-ui, sans-serif; padding: 24px; color: #5b6472;">
+  <h1 style="font-size: 18px;">Eatswada app-shell POC</h1>
+  <p style="font-size: 14px; line-height: 1.5;">
+    The persistent app shell is <strong>off</strong>. Add
+    <code>?ewAppShell=1</code> to this URL to enable the proof of concept.
+  </p>
+</div>
+
+<script src="islands/app-shell.js" defer></script>
+</body>
+</html>
