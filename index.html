@@ -860,5 +860,10 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+<!-- Phase 2: persistent React nav island (isolated, feature-flagged, off by
+     default). This is only a hidden mount node plus one deferred script tag;
+     no existing homepage content, markup, or styling is changed. -->
+<div id="ew-nav-island" hidden></div>
+<script src="islands/nav-island.js" defer></script>
 </body>
 </html>
