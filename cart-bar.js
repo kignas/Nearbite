@@ -36,16 +36,27 @@
   const CART_BAR_MODE = getCartBarMode();
 
   // 🛡️ CRASH-PROOF STORAGE PARSER
+  // Parses the cart at most once per stored value: repeated reads with no
+  // intervening write reuse the cached object instead of re-parsing JSON.
+  let _cachedCartRaw = null;
+  let _cachedCartObj = null;
   function safeGetCart() {
     try {
         const data = localStorage.getItem('nearbite_cart');
-        if (!data || data === "undefined" || data === "null") return {};
-        const parsed = JSON.parse(data);
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+        if (data === _cachedCartRaw && _cachedCartObj !== null) return _cachedCartObj;
+        let parsed = {};
+        if (data && data !== "undefined" && data !== "null") {
+          const candidate = JSON.parse(data);
+          if (candidate && typeof candidate === 'object' && !Array.isArray(candidate)) parsed = candidate;
+        }
+        _cachedCartRaw = data;
+        _cachedCartObj = parsed;
         return parsed;
     } catch (e) {
         console.warn("Corrupted cart detected and wiped.");
         localStorage.removeItem('nearbite_cart');
+        _cachedCartRaw = null;
+        _cachedCartObj = null;
         return {};
     }
   }
@@ -79,6 +90,8 @@
     }
     return null;
   }
+
+  let _cartRenderRAF = null;
 
   window.updateCart = function(arg1, arg2, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     let itemName = arg1;
@@ -192,7 +205,14 @@
     // Notify any page that derives UI from the cart (e.g. homepage product
     // cards) via the existing shared event — no separate cart state.
     try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'updateCart', itemName: itemName } })); } catch (e) {}
-    if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+    if (typeof window.updateGlobalCart === 'function') {
+      if (!_cartRenderRAF) {
+        _cartRenderRAF = requestAnimationFrame(() => {
+          _cartRenderRAF = null;
+          window.updateGlobalCart();
+        });
+      }
+    }
   };
 
   /* ── Inline icons (no external font dependency) ── */
@@ -247,7 +267,6 @@
       width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
-      will-change: bottom, transform;
     }
     #white-cart-root.wc-enter {
       animation: slideUpWhiteCart 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -262,7 +281,17 @@
     #white-cart-root.wc-pink.wc-cart-update .wc-pink-cta {
       animation: wcPinkTextBump .28s cubic-bezier(.22,1,.36,1);
     }
+    /* Alternate pulse class: swapping between wc-cart-update and this one
+       restarts the animation without a forced layout read. */
+    #white-cart-root.wc-pink.wc-cart-update-alt #es-pink-inner {
+      animation: wcPinkPulse .32s cubic-bezier(.22,1,.36,1);
+    }
+    #white-cart-root.wc-pink.wc-cart-update-alt .wc-pink-left,
+    #white-cart-root.wc-pink.wc-cart-update-alt .wc-pink-cta {
+      animation: wcPinkTextBump .28s cubic-bezier(.22,1,.36,1);
+    }
     #white-cart-root.wc-exiting {
+      will-change: bottom, transform;
       animation: slideDownWhiteCart 0.26s ease forwards;
     }
 
@@ -529,7 +558,9 @@
   let isDismissed = false;
   let lastTotalQty = null;
   let lastTotalPrice = null;
+  let lastItemNamesHash = null;
   let exitTimer = null;
+  let pinkUpdateTimer = null;
   const EXIT_MS = 260;
 
   function prefersReducedMotion() {
@@ -585,45 +616,6 @@
   }
 
   /* ── Positioning: keep the cart bar clear ABOVE any bottom navigation ── */
-  const NAV_SELECTORS = [
-    '.bottom-nav', '#bottom-nav', '.bottomnav', '#bottomnav', '[data-bottom-nav]',
-    '.tab-bar', '.tabbar', '.nav-bottom', '.bottom-navigation', '.es-bottom-nav',
-    '.app-bottom-nav', '.mobile-bottom-nav', 'nav.bottom', 'footer.bottom-nav'
-  ];
-  function findBottomNav() {
-    // Known Eatswada bottom-navigation selectors first.
-    for (const s of NAV_SELECTORS) {
-      const el = document.querySelector(s);
-      if (!el) continue;
-      const cs = getComputedStyle(el);
-      if ((cs.position === 'fixed' || cs.position === 'sticky') &&
-          cs.display !== 'none' && cs.visibility !== 'hidden') {
-        const r = el.getBoundingClientRect();
-        if (r.height > 0 && r.height < 180 && r.bottom >= window.innerHeight - 12) {
-          return el;
-        }
-      }
-    }
-
-    // Fallback for custom/renamed homepage nav containers.
-    const candidates = Array.from(document.querySelectorAll('body *')).filter(el => {
-      const cs = getComputedStyle(el);
-      if (!(cs.position === 'fixed' || cs.position === 'sticky')) return false;
-      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
-
-      const r = el.getBoundingClientRect();
-      if (r.height <= 0 || r.height > 180) return false;
-      if (r.bottom < window.innerHeight - 12) return false;
-      if (r.width < Math.min(280, window.innerWidth * 0.65)) return false;
-
-      const t = (el.innerText || '').replace(/\s+/g, ' ').toLowerCase();
-      return /home/.test(t) && /99\s*store/.test(t) && /orders?/.test(t);
-    });
-
-    return candidates.sort((a, b) =>
-      a.getBoundingClientRect().height - b.getBoundingClientRect().height
-    )[0] || null;
-  }
 
   function positionCartAboveNav(root) {
     root = root || document.getElementById('white-cart-root');
@@ -660,9 +652,15 @@
     if (nav) {
       const r = nav.getBoundingClientRect();
       const clearance = Math.max(0, window.innerHeight - r.top);
-      root.style.setProperty('--nb-cart-bottom', (Math.round(clearance) + 12) + 'px');
+      const newVal = (Math.round(clearance) + 12) + 'px';
+      if (root.style.getPropertyValue('--nb-cart-bottom') !== newVal) {
+        root.style.setProperty('--nb-cart-bottom', newVal);
+      }
     } else {
-      root.style.setProperty('--nb-cart-bottom', 'calc(16px + env(safe-area-inset-bottom, 0px))');
+      const fallback = 'calc(16px + env(safe-area-inset-bottom, 0px))';
+      if (root.style.getPropertyValue('--nb-cart-bottom') !== fallback) {
+        root.style.setProperty('--nb-cart-bottom', fallback);
+      }
     }
   }
 
@@ -679,27 +677,34 @@
   // hidden/revealed state by updating --nb-cart-bottom on <html>. Watch both
   // DOM creation and the shared CSS variable so the homepage cart follows it.
   function watchBottomNavigation() {
-    if (CART_BAR_MODE !== 'home') return;
-
     const sync = () => schedulePos();
-    window.addEventListener('resize', sync, { passive: true });
-    window.addEventListener('scroll', sync, { passive: true });
 
-    const observer = new MutationObserver(() => {
-      if (document.getElementById('nearbite-bottom-tabbar')) schedulePos();
+    // Watch for the shared bottom navigation being created by another script.
+    const bodyObserver = new MutationObserver(() => {
+      if (document.getElementById('nearbite-bottom-tabbar')) {
+        schedulePos();
+        bodyObserver.disconnect();
+      }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    bodyObserver.observe(document.body, { childList: true });
 
+    // The bottom nav publishes its offset by updating --nb-cart-bottom on <html>.
     const rootStyleObserver = new MutationObserver(() => schedulePos());
     rootStyleObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
 
-    // Re-check after all page scripts have had a chance to create the nav.
-    setTimeout(sync, 0);
-    setTimeout(sync, 100);
-    setTimeout(sync, 400);
+    // Re-check after all page scripts have had a chance to create the nav, then
+    // stop the creation observer so a missing nav cannot leak the observer.
+    const check = () => {
+      sync();
+      if (document.getElementById('nearbite-bottom-tabbar')) bodyObserver.disconnect();
+    };
+    setTimeout(check, 0);
+    setTimeout(check, 100);
+    setTimeout(function () { sync(); bodyObserver.disconnect(); }, 400);
   }
 
   /* ── Multi-restaurant cart drawer (data logic UNCHANGED) ── */
+  let _drawerListEl = null;
   function restaurantGroups(savedCart){
     const groups = new Map();
     Object.entries(savedCart || {}).forEach(([key, item]) => {
@@ -722,21 +727,43 @@
     b.addEventListener('click', e => { if (e.target === b) close(); });
     b.querySelector('.ew-cd-close').addEventListener('click', close);
     b.querySelector('#ew-cd-checkout').addEventListener('click', () => window.location.href = 'cart.html');
+    _drawerListEl = b.querySelector('#ew-cd-list');
+    _drawerListEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-cd-view]');
+      if (btn) window.location.href = 'cart.html';
+    });
     window.__ewCloseCartDrawer = close;
   }
   function renderCartDrawer(){
     ensureCartDrawer();
-    const list = document.getElementById('ew-cd-list');
+    const list = _drawerListEl || document.getElementById('ew-cd-list');
     const groups = restaurantGroups(safeGetCart());
-    document.getElementById('ew-cd-title').textContent = `Your Carts (${groups.length})`;
-    list.innerHTML = groups.length
-      ? groups.map(g => {
-          const u = Math.round(g.units);
-          const img = g.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80';
-          return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u === 1 ? 'item' : 'items'}</span></button></div>`;
-        }).join('')
-      : '<div class="ew-cd-empty">Your cart is empty.</div>';
-    list.querySelectorAll('[data-cd-view]').forEach(btn => btn.addEventListener('click', () => window.location.href = 'cart.html'));
+    const newTitle = `Your Carts (${groups.length})`;
+    const titleEl = document.getElementById('ew-cd-title');
+    if (titleEl.textContent !== newTitle) titleEl.textContent = newTitle;
+
+    // Only render if drawer content actually changed
+    if (drawerNeedsRender(groups)) {
+      const newHTML = groups.length
+        ? groups.map(g => {
+            const u = Math.round(g.units);
+            const img = g.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=180&q=80';
+            return `<div class="ew-cd-row"><img class="ew-cd-logo" src="${escDrawer(img)}" alt=""><div class="ew-cd-info"><div class="ew-cd-name">${escDrawer(g.name)}</div><div class="ew-cd-menu">View Menu <span class="ew-cd-arrow">›</span></div></div><button class="ew-cd-view" type="button" data-cd-view="${escDrawer(g.id)}"><strong>View Cart</strong><span>${u} ${u === 1 ? 'item' : 'items'}</span></button></div>`;
+          }).join('')
+        : '<div class="ew-cd-empty">Your cart is empty.</div>';
+      list.innerHTML = newHTML;
+    }
+  }
+
+  // Track drawer state to avoid unnecessary re-renders
+  let _lastDrawerGroupsHash = null;
+  function drawerNeedsRender(groups) {
+    const hash = groups.length + ':' + groups.map(g => `${g.id}:${Math.round(g.units)}`).join('|');
+    if (hash !== _lastDrawerGroupsHash) {
+      _lastDrawerGroupsHash = hash;
+      return true;
+    }
+    return false;
   }
   function openRestaurantCarts(){
     ensureCartDrawer(); renderCartDrawer();
@@ -759,6 +786,21 @@
     openRestaurantCarts();
   }
 
+  /* ── Cached image dictionary ── */
+  let _cachedImageDict = null;
+  let _cachedImageDictKey = null;
+  function getImageDict() {
+    const dictData = localStorage.getItem('es_image_dict');
+    if (dictData === _cachedImageDictKey && _cachedImageDict !== null) return _cachedImageDict;
+    _cachedImageDictKey = dictData;
+    if (dictData && dictData !== "undefined" && dictData !== "null") {
+      try { _cachedImageDict = JSON.parse(dictData); } catch (e) { _cachedImageDict = {}; }
+    } else {
+      _cachedImageDict = {};
+    }
+    return _cachedImageDict;
+  }
+
   /* ── The single cart-bar renderer ── */
   window.updateGlobalCart = function () {
     if (isDismissed || CART_BAR_MODE === 'hidden') return;
@@ -773,7 +815,10 @@
     // Reset the clear-confirm UI (home only).
     const stdActions = document.getElementById('wc-standard-actions');
     const clearActions = document.getElementById('wc-clear-actions');
-    if (stdActions && clearActions) { stdActions.style.display = 'flex'; clearActions.style.display = 'none'; }
+    if (stdActions && clearActions) {
+      if (stdActions.style.display !== 'flex') stdActions.style.display = 'flex';
+      if (clearActions.style.display !== 'none') clearActions.style.display = 'none';
+    }
 
     // Keep the drawer live if it happens to be open.
     if (document.getElementById('ew-cart-drawer-backdrop')?.classList.contains('show')) renderCartDrawer();
@@ -782,8 +827,12 @@
       hideCartBar(root);
       lastTotalQty = null;
       lastTotalPrice = null;
+      lastItemNamesHash = null;
+      _lastDrawerGroupsHash = null;
       const allup = document.getElementById('wc-allup');
-      if (allup) allup.classList.remove('show');
+      if (allup) {
+        if (allup.classList.contains('show')) allup.classList.remove('show');
+      }
       return;
     }
 
@@ -798,19 +847,31 @@
       if (Number.isFinite(p) && p >= 0) { totalPrice += p * safeQty; } else { priceKnown = false; }
     });
 
+    // Early return if nothing changed
+    if (lastTotalQty === totalQty && lastTotalPrice === totalPrice && lastItemNamesHash === itemNames.join(',')) {
+      return;
+    }
+
     const baseCountText = totalQty === 1 ? '1 item' : `${totalQty} items`;
     // Price shows ONLY on the pink (99 Store / Restaurant) bar. Home = count only.
     const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
-    if (countEl) countEl.innerText = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
+    if (countEl) countEl.textContent = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
 
     const totalChanged = lastTotalQty !== null && (lastTotalQty !== totalQty || lastTotalPrice !== totalPrice);
     if (totalChanged) {
-      bump(countEl);
       if (CART_BAR_MODE === 'pink') {
-        root.classList.remove('wc-cart-update');
-        void root.offsetWidth;
-        root.classList.add('wc-cart-update');
-        setTimeout(() => root.classList.remove('wc-cart-update'), 260);
+        // Restart the pulse by swapping between two equivalent classes.
+        // Reading offsetWidth here would force a synchronous layout.
+        const useAlt = root.classList.contains('wc-cart-update');
+        root.classList.remove('wc-cart-update', 'wc-cart-update-alt');
+        root.classList.add(useAlt ? 'wc-cart-update-alt' : 'wc-cart-update');
+        if (pinkUpdateTimer) { clearTimeout(pinkUpdateTimer); pinkUpdateTimer = null; }
+        pinkUpdateTimer = setTimeout(function () {
+          pinkUpdateTimer = null;
+          if (root) root.classList.remove('wc-cart-update', 'wc-cart-update-alt');
+        }, 260);
+      } else {
+        bump(countEl);
       }
     }
 
@@ -818,44 +879,72 @@
     if (CART_BAR_MODE !== 'pink') {
       const badgeEl = document.getElementById('wc-qty-badge');
       if (badgeEl) {
-        badgeEl.textContent = totalQty > 99 ? '99+' : String(totalQty);
-        if (lastTotalQty !== null && lastTotalQty !== totalQty) bump(badgeEl);
+        const newBadgeText = totalQty > 99 ? '99+' : String(totalQty);
+        if (badgeEl.textContent !== newBadgeText) {
+          badgeEl.textContent = newBadgeText;
+          if (lastTotalQty !== null && lastTotalQty !== totalQty) bump(badgeEl);
+        }
       }
 
       const resEl = document.getElementById('wc-dynamic-res');
       const lastItemName = itemNames[itemNames.length - 1];
       const lastItem = savedCart[lastItemName] || {};
-      if (resEl) resEl.innerText = lastItem.resName || lastItem.restaurantName || lastItemName;
+      const newResText = lastItem.resName || lastItem.restaurantName || lastItemName;
+      if (resEl && resEl.textContent !== newResText) resEl.textContent = newResText;
 
       const imgStackEl = document.getElementById('wc-dynamic-img-stack');
       if (imgStackEl) {
-        imgStackEl.innerHTML = '';
+        const imageDict = getImageDict();
         const latestThreeNames = itemNames.slice(-3).reverse();
-        let imageDict = {};
-        try {
-          const dictData = localStorage.getItem('es_image_dict');
-          if (dictData && dictData !== "undefined" && dictData !== "null") imageDict = JSON.parse(dictData);
-        } catch (e) {}
-        latestThreeNames.forEach((name) => {
+        const desiredWidth = latestThreeNames.length === 1 ? '36px' : latestThreeNames.length === 2 ? '48px' : '60px';
+        if (imgStackEl.style.width !== desiredWidth) imgStackEl.style.width = desiredWidth;
+
+        // Reuse existing img nodes where possible
+        const existingImgs = Array.from(imgStackEl.querySelectorAll('img'));
+        const existingSrcs = existingImgs.map(img => img.src);
+        const desiredSrcs = latestThreeNames.map(name => {
           const itemData = savedCart[name] || {};
-          const imgSrc = itemData.image || imageDict[name] || FALLBACK_IMG;
-          const img = document.createElement('img');
-          img.src = imgSrc; img.alt = ''; img.classList.add('wc-img');
-          imgStackEl.appendChild(img);
+          return itemData.image || imageDict[name] || FALLBACK_IMG;
         });
-        imgStackEl.style.width = latestThreeNames.length === 1 ? '36px' : latestThreeNames.length === 2 ? '48px' : '60px';
+
+        // Remove excess imgs (walk the snapshot from the end — no lastChild,
+        // which keeps this working with plain DOM and the test DOM shim).
+        for (let i = existingImgs.length - 1; i >= desiredSrcs.length; i--) {
+          const el = existingImgs[i];
+          if (el && el.parentElement === imgStackEl) imgStackEl.removeChild(el);
+        }
+
+        // Update existing nodes in place and append only genuinely new ones.
+        for (let i = 0; i < desiredSrcs.length; i++) {
+          const existing = existingImgs[i];
+          if (existing) {
+            if (existing.src !== desiredSrcs[i]) existing.src = desiredSrcs[i];
+            continue;
+          }
+          const img = document.createElement('img');
+          img.src = desiredSrcs[i];
+          img.alt = '';
+          img.classList.add('wc-img');
+          imgStackEl.appendChild(img);
+        }
       }
 
       // "All ↑" appears only when the cart holds items from 2+ restaurants.
       const allup = document.getElementById('wc-allup');
       if (allup) {
         const groups = restaurantGroups(savedCart);
-        if (groups.length >= 2) allup.classList.add('show'); else allup.classList.remove('show');
+        const shouldShow = groups.length >= 2;
+        if (shouldShow && !allup.classList.contains('show')) {
+          allup.classList.add('show');
+        } else if (!shouldShow && allup.classList.contains('show')) {
+          allup.classList.remove('show');
+        }
       }
     }
 
     lastTotalQty = totalQty;
     lastTotalPrice = totalPrice;
+    lastItemNamesHash = itemNames.join(',');
     positionCartAboveNav(root);
     showCartBar(root);
   };
@@ -950,12 +1039,18 @@
       if (r) { r.classList.remove('wc-enter', 'wc-exiting'); r.style.display = 'none'; }
       lastTotalQty = null;
       lastTotalPrice = null;
+      lastItemNamesHash = null;
     });
 
     positionCartAboveNav(root);
-    window.addEventListener('resize', schedulePos, { passive: true });
     window.addEventListener('orientationchange', schedulePos, { passive: true });
-    window.addEventListener('scroll', schedulePos, { passive: true }); // hide-on-scroll nav
+    // One resize handler repositions the bar; schedulePos coalesces bursts.
+    window.addEventListener('resize', schedulePos, { passive: true });
+
+    // Only add scroll listener when nav actually exists (pink mode)
+    if (CART_BAR_MODE === 'pink') {
+      window.addEventListener('scroll', schedulePos, { passive: true });
+    }
 
     window.updateGlobalCart();
   }
@@ -972,5 +1067,18 @@
     if (window.updateGlobalCart) window.updateGlobalCart();
     positionCartAboveNav();
   });
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'nearbite_cart' || e.key === null) {
+      if (typeof window.updateGlobalCart === 'function') {
+        window.updateGlobalCart();
+      }
+    }
+  });
+
+  // Export updateGlobalCart for testing access
+  if (typeof window.__esGetUpdateGlobalCart === 'undefined') {
+    window.__esGetUpdateGlobalCart = function() { return window.updateGlobalCart; };
+  }
 
 })();
