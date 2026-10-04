@@ -14,55 +14,20 @@
   <link rel="stylesheet" href="css/eatswada-secondary-pages.css?v=20260929-brand">
   <link rel="stylesheet" href="css/eatswada-back-button.css">
   <link rel="stylesheet" href="css/eatswada-site-footer.css?v=20260929-footer1">
-  <style>
-    :root{--faq-orange:#fc8019;--faq-ink:#17191e;--faq-muted:#68717e;--faq-line:#e7e8ec;--faq-bg:#f6f7f9}
-    *{box-sizing:border-box}html{background:var(--faq-bg);scroll-behavior:smooth}
-    body{margin:0;background:var(--faq-bg);color:var(--faq-ink);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-    .faq-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--faq-line)}
-    .faq-top h1{margin:0;font-size:16px;line-height:1.3;font-weight:800;letter-spacing:-.25px}
-    .faq-main{width:min(100% - 32px,760px);margin:0 auto;padding:18px 0 24px}
-    .faq-crumb{display:flex;align-items:center;gap:12px;margin:4px 0 22px;color:#7a818b;font-size:13px;font-weight:600}
-    .faq-crumb a{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;text-decoration:none}
-    .faq-crumb span{padding:8px 14px;border-radius:99px;background:#fff1e8;color:#b9560b}
-    .faq-jump{margin-bottom:27px}.faq-jump summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border:1px solid #eceef1;border-radius:12px;background:#f0f1f3;color:#343943;font-size:14px;font-weight:600;cursor:pointer}
-    .faq-jump summary::-webkit-details-marker{display:none}.faq-jump summary:after{content:"";width:9px;height:9px;border-right:2px solid #747b85;border-bottom:2px solid #747b85;transform:rotate(45deg);margin:0 3px 5px}
-    .faq-jump[open] summary:after{transform:rotate(225deg);margin:5px 3px 0}
-    .faq-jump nav{display:grid;gap:2px;padding:8px;margin-top:6px;background:#fff;border:1px solid var(--faq-line);border-radius:12px}
-    .faq-jump nav a{padding:10px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#454c57}
-    .faq-title{margin:0;font-size:clamp(28px,6vw,35px);line-height:1.18;font-weight:800;letter-spacing:-1.1px}
-    .faq-sub{margin:12px 0 24px;color:#646c77;font-size:14px;line-height:1.7;font-weight:500}
-    .faq-group{scroll-margin-top:80px;margin-top:19px}
-    .faq-group-title{display:flex;align-items:center;gap:10px;margin:0 0 11px;font-size:17px;font-weight:800;letter-spacing:-.3px}
-    .faq-group-title i{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#fff1e8;color:var(--faq-orange);font-size:14px}
-    .faq-list{overflow:hidden;background:#fff;border:1px solid var(--faq-line);border-radius:15px;box-shadow:0 3px 12px rgba(20,28,40,.035)}
-    .faq-item+.faq-item{border-top:1px solid #eef0f2}
-    .faq-item summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 16px;font-size:14px;line-height:1.5;font-weight:750;cursor:pointer}
-    .faq-item summary::-webkit-details-marker{display:none}
-    .faq-item summary:after{content:"+";display:grid;place-items:center;flex:none;width:25px;height:25px;border-radius:50%;background:#f5f6f7;color:#606874;font-size:18px;font-weight:500}
-    .faq-item[open] summary:after{content:"−";background:#fff1e8;color:#b9560b}
-    .faq-answer{padding:0 16px 17px;color:#59626e;font-size:13px;line-height:1.75;font-weight:500}
-    .faq-answer p{margin:0}.faq-answer p+p{margin-top:9px}.faq-answer a{color:#b9560b;font-weight:700;text-underline-offset:3px}
-    .faq-help{margin-top:22px;padding:20px;border:1px solid #f0d6c3;border-radius:16px;background:#fff8f2}
-    .faq-help h2{margin:0 0 7px;font-size:18px;font-weight:800;letter-spacing:-.4px}
-    .faq-help p{margin:0;color:#626b76;font-size:13px;line-height:1.65}
-    .faq-cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;margin-top:13px;padding:0 16px;border-radius:11px;background:var(--faq-orange);color:#fff;text-decoration:none;font-size:13px;font-weight:800}
-    @media(min-width:640px){.faq-main{padding-top:24px}.faq-item summary{padding:18px 20px}.faq-answer{padding:0 20px 19px}.faq-help{padding:24px}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-  </style>
   <link rel="stylesheet" href="css/eatswada-document-typography.css?v=20260929-core-pages">
 </head>
-<body>
+<body class="ew-doc">
 <header class="faq-top">
   <button class="header-back-btn" type="button" onclick="window.nearbiteSafeBack ? window.nearbiteSafeBack() : history.back()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
   <h1>Frequently Asked Questions</h1>
 </header>
 <main class="faq-main">
   <nav class="faq-crumb" aria-label="Breadcrumb"><a href="index.html" aria-label="Home"><i class="fa-solid fa-house" aria-hidden="true"></i></a><i class="fa-solid fa-chevron-right" aria-hidden="true" style="font-size:10px"></i><span aria-current="page">FAQs</span></nav>
+  <h1 class="faq-title">Frequently Asked Questions</h1>
+  <p class="faq-sub">Quick answers to common questions about ordering with Eatswada. The options available for your order will be shown on the website before you confirm it.</p>
   <details class="faq-jump"><summary>On this page</summary><nav aria-label="On this page">
     <a href="#ordering">Ordering</a><a href="#delivery">Delivery</a><a href="#payments">Payments</a><a href="#issues">Order issues &amp; refunds</a><a href="#account">Account &amp; support</a>
   </nav></details>
-  <h1 class="faq-title">Frequently Asked Questions</h1>
-  <p class="faq-sub">Quick answers to common questions about ordering with Eatswada. The options available for your order will be shown on the website before you confirm it.</p>
 
   <section class="faq-group" id="ordering">
     <h2 class="faq-group-title"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>Ordering</h2>

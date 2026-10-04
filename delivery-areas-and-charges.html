@@ -15,56 +15,20 @@
   <link rel="stylesheet" href="css/eatswada-secondary-pages.css?v=20260929-brand">
   <link rel="stylesheet" href="css/eatswada-back-button.css">
   <link rel="stylesheet" href="css/eatswada-site-footer.css?v=20260929-footer1">
-  <style>
-    :root{--da-orange:#fc8019;--da-ink:#17191e;--da-muted:#68717e;--da-line:#e7e8ec;--da-bg:#f6f7f9}
-    *{box-sizing:border-box}html{background:var(--da-bg);scroll-behavior:smooth}
-    body{margin:0;background:var(--da-bg);color:var(--da-ink);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-    a{color:inherit}
-    .da-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--da-line)}
-    .da-top h1{margin:0;font-size:16px;line-height:1.3;font-weight:800;letter-spacing:-.25px}
-    .da-main{width:min(100% - 32px,760px);margin:0 auto;padding:18px 0 10px}
-    .da-crumb{display:flex;align-items:center;gap:12px;margin:4px 0 22px;color:#7a818b;font-size:13px;font-weight:600}
-    .da-crumb a{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;text-decoration:none}
-    .da-crumb span{padding:8px 14px;border-radius:99px;background:#fff1e8;color:#b9560b}
-    .da-jump{margin-bottom:28px}.da-jump summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border:1px solid #eceef1;border-radius:12px;background:#f0f1f3;color:#343943;font-size:14px;font-weight:600;cursor:pointer}
-    .da-jump summary::-webkit-details-marker{display:none}.da-jump summary:after{content:"";width:9px;height:9px;border-right:2px solid #747b85;border-bottom:2px solid #747b85;transform:rotate(45deg);margin:0 3px 5px}
-    .da-jump[open] summary:after{transform:rotate(225deg);margin:5px 3px 0}
-    .da-jump nav{display:grid;gap:2px;padding:8px;margin-top:6px;background:#fff;border:1px solid var(--da-line);border-radius:12px}
-    .da-jump nav a{padding:10px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#454c57}
-    .da-title{margin:0;font-size:clamp(27px,6vw,34px);line-height:1.18;font-weight:800;letter-spacing:-1.1px}
-    .da-updated{margin:16px 0 25px;color:#646c77;font-size:14px;font-style:italic;font-weight:500}
-    .da-intro,.da-section{background:#fff;border:1px solid var(--da-line);border-radius:17px;box-shadow:0 3px 12px rgba(20,28,40,.035)}
-    .da-intro{padding:22px 20px}.da-eyebrow{display:inline-flex;align-items:center;gap:7px;margin-bottom:12px;color:#b9560b;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-    .da-intro h2{margin:0 0 9px;font-size:21px;line-height:1.3;font-weight:800;letter-spacing:-.5px}
-    .da-intro p,.da-section p{margin:0;color:#555e6b;font-size:14px;line-height:1.7;font-weight:500}
-    .da-section{scroll-margin-top:82px;margin-top:16px;padding:20px}
-    .da-section h2{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:18px;line-height:1.35;font-weight:800;letter-spacing:-.35px}
-    .da-section h2 i{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:#fff1e8;color:var(--da-orange);font-size:14px}
-    .da-area{display:flex;align-items:center;gap:13px;margin-top:15px;padding:15px;border:1px solid #f0d6c3;border-radius:14px;background:#fff8f2}
-    .da-area-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:12px;background:#ffeadb;color:#c65e0c;font-size:17px}
-    .da-area strong{display:block;font-size:15px;font-weight:800;color:#292e36}.da-area span{display:block;margin-top:3px;color:#68717e;font-size:12px;line-height:1.5;font-weight:600}
-    .da-list{display:grid;gap:11px;list-style:none;margin:14px 0 0;padding:0}
-    .da-list li{display:flex;align-items:flex-start;gap:10px;color:#525b67;font-size:14px;line-height:1.65;font-weight:500}
-    .da-list i{margin-top:4px;color:#2e8b57;font-size:14px;flex:none}
-    .da-note{margin-top:14px;padding:13px 14px;border-radius:12px;background:#f7f8fa;color:#616a76;font-size:12px;line-height:1.65;font-weight:500}
-    .da-cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 17px;border-radius:12px;background:var(--da-orange);color:#fff;text-decoration:none;font-size:14px;font-weight:800;box-shadow:0 5px 14px rgba(252,128,25,.22);margin-top:14px}
-    @media(min-width:640px){.da-main{padding-top:24px}.da-intro{padding:28px}.da-section{padding:24px}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-  </style>
   <link rel="stylesheet" href="css/eatswada-document-typography.css?v=20260929-core-pages">
 </head>
-<body>
+<body class="ew-doc">
 <header class="da-top">
   <button class="header-back-btn" type="button" onclick="window.nearbiteSafeBack ? window.nearbiteSafeBack() : history.back()" aria-label="Go back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
   <h1>Delivery Areas &amp; Charges</h1>
 </header>
 <main class="da-main">
   <nav class="da-crumb" aria-label="Breadcrumb"><a href="index.html" aria-label="Home"><i class="fa-solid fa-house" aria-hidden="true"></i></a><i class="fa-solid fa-chevron-right" aria-hidden="true" style="font-size:10px"></i><span aria-current="page">Delivery</span></nav>
+  <h1 class="da-title">Delivery Areas &amp; Charges</h1>
+  <p class="da-updated">Last updated on September 29, 2026</p>
   <details class="da-jump"><summary>On this page</summary><nav aria-label="On this page">
     <a href="#areas">Where we deliver</a><a href="#availability">Check your address</a><a href="#charges">Delivery charges</a><a href="#timing">Delivery estimates</a><a href="#contact">Need help?</a>
   </nav></details>
-  <h1 class="da-title">Delivery Areas &amp; Charges</h1>
-  <p class="da-updated">Last updated on September 29, 2026</p>
 
   <section class="da-intro" id="areas">
     <div class="da-eyebrow"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Eatswada delivery</div>
