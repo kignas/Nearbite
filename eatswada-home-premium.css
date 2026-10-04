@@ -1,0 +1,412 @@
+/* ═══════════════════════════════════════════════════════════════════
+   EATSWADA 2.0 — HOMEPAGE PREMIUM LAYER
+   ------------------------------------------------------------------
+   A single, additive visual layer for the customer homepage (index.html).
+
+   Why a dedicated file
+     eatswada-design-system.css is a cross-page v1 foundation that forces a
+     navy utility header (with !important) on many screens. It is not linked
+     by any page today. This file is intentionally separate so the homepage
+     keeps its pink promotional identity and no other screen is affected.
+
+   Scope and safety
+     • Loaded LAST on index.html, so it refines the existing homepage by
+       source order. It only overrides visual properties of selectors that
+       already exist (header, search, banner, categories, filter pills,
+       restaurant cards, skeletons, empty/error states, feed end).
+     • It introduces no markup, JavaScript, API, cart, auth, routing or data
+       changes. Nothing here can reach business logic.
+
+   Identity
+     • Type: Manrope only (already the product typeface). One scale.
+     • Accent: Eatswada pink (#E5177F) and deep ink (#C2186B), with a soft
+       blush surface (#FFF1F6).
+     • Surfaces: white cards on a white page, one neutral slate shadow
+       colour (16,24,40) so every elevation shares one language.
+     • Corners: cards 24px, media tiles 18px, pills fully rounded.
+
+   Dark theme is owned by Dark Reader (eatswada-theme.js). This file
+   deliberately adds NO page-wide dark colour overrides — that would fight
+   the engine. Surfaces are neutral light values the engine can transform.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Design tokens (homepage) ────────────────────────────────────── */
+:root {
+  --ew-brand:        #E5177F;
+  --ew-brand-ink:    #C2186B;
+  --ew-brand-soft:   #FFF1F6;
+  --ew-ink:          #141B2D;
+  --ew-ink-2:        #475467;
+  --ew-ink-3:        #667085;
+  --ew-line:         #EDF0F4;
+  --ew-line-2:       #E4E8EE;
+  --ew-shadow-card:  0 2px 4px rgba(16, 24, 40, .04), 0 14px 30px -16px rgba(16, 24, 40, .22);
+  --ew-shadow-tile:  0 6px 16px -8px rgba(16, 24, 40, .22);
+  --ew-shadow-float: 0 10px 26px -12px rgba(16, 24, 40, .28);
+  --ew-radius-card:  24px;
+  --ew-radius-tile:  18px;
+  --ew-ease-press:   cubic-bezier(.2, .8, .2, 1);
+}
+
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   1. HERO HEADER — location + search + promotion as one premium shell
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Mobile only: the pink shell keeps its identity and gains depth so it
+   reads designed rather than flat. Desktop keeps the existing inline panel. */
+@media (max-width: 599px) {
+  .hero-header::before {
+    background: linear-gradient(168deg, #FBD3E0 0%, #F9C9D8 46%, #F6C2D4 100%);
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: 0 10px 24px -18px rgba(120, 20, 70, .55);
+  }
+}
+
+/* ── Location row ────────────────────────────────────────────────── */
+.loc-pin-wrap {
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 2px 8px rgba(120, 20, 70, .10), inset 0 0 0 1px rgba(255, 255, 255, .7);
+}
+.loc-name { font-size: 19px; font-weight: 800; letter-spacing: -.5px; color: #23172A; }
+.loc-sub { font-size: 11px; font-weight: 600; letter-spacing: .1px; color: #6B5A66; }
+.loc-chevron { color: #8A7480; }
+
+/* ── Under ₹99 + profile chips ───────────────────────────────────── */
+.btn-store {
+  background: rgba(255, 255, 255, .96);
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 2px 8px rgba(120, 20, 70, .12);
+}
+.store-top { color: #7A6670; letter-spacing: .6px; }
+.store-bot { color: var(--ew-brand-ink); }
+.btn-profile {
+  background: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(120, 20, 70, .12);
+  transition: transform .16s var(--ew-ease-press), box-shadow .16s ease;
+}
+.btn-profile:active { transform: scale(.94); }
+.profile-initial { color: var(--ew-brand-ink); }
+
+/* ── Search ──────────────────────────────────────────────────────── */
+.search-box {
+  border: 1px solid #F3E3EC;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px -12px rgba(120, 20, 70, .35), 0 1px 2px rgba(16, 24, 40, .04);
+  transition: box-shadow .2s ease, border-color .2s ease, transform .16s var(--ew-ease-press);
+}
+.search-box:active { transform: scale(.992); }
+.search-icon { color: var(--ew-brand-ink); }
+.search-text { color: #7B6B76; font-weight: 600; }
+.search-dish { color: #2A2030; font-weight: 700; }
+.veg-box {
+  border: 1px solid #F3E3EC;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px -12px rgba(120, 20, 70, .32), 0 1px 2px rgba(16, 24, 40, .04);
+}
+
+/* ── Banner ──────────────────────────────────────────────────────── */
+.header-slide__panel::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 0;
+}
+.banner-cta {
+  box-shadow: 0 14px 26px -14px rgba(140, 0, 70, .8);
+  transition: transform .16s var(--ew-ease-press), box-shadow .16s ease;
+}
+.banner-cta:active { transform: scale(.97); }
+.banner-dot.is-active { background: var(--ew-brand-ink); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. SECTION HEADINGS
+   ═══════════════════════════════════════════════════════════════════ */
+.sec-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -.35px;
+  color: #1B2233;
+  text-transform: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. CATEGORIES — "What's on your mind?"
+   Existing 2-row geometry is preserved; only surface, depth, type and
+   press feedback are refined. The image drop-shadow follows the PNG
+   alpha, so icons lift off the page without a square box shadow.
+   ═══════════════════════════════════════════════════════════════════ */
+#mind-section .cat-scroll {
+  gap: 6px 14px !important;
+  padding-top: 6px !important;
+  padding-bottom: 10px !important;
+}
+#mind-section .cat-ring img.loaded {
+  filter: drop-shadow(0 4px 7px rgba(16, 24, 40, .16));
+}
+#mind-section .cat-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -.1px;
+  color: #333B4A;
+}
+#mind-section .cat-item { transition: transform .16s var(--ew-ease-press), opacity .16s ease; }
+#mind-section .cat-item:active { transform: scale(.92); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   4. FILTER BAR — fully-rounded premium pills
+   ═══════════════════════════════════════════════════════════════════ */
+#filter-bar .filter-pill {
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--ew-line-2);
+  background: #FFFFFF;
+  color: var(--ew-ink-2);
+  font-size: 13.5px;
+  font-weight: 650;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+#filter-bar .filter-pill.active {
+  background: var(--ew-brand-soft);
+  border-color: var(--ew-brand);
+  color: var(--ew-brand-ink);
+  box-shadow: 0 6px 14px -8px rgba(229, 23, 127, .5);
+}
+#filter-bar .filter-count { background: var(--ew-brand); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   5. RESTAURANT CARDS — the centrepiece
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Card surface: softer radius, hairline border, two-layer elevation. */
+.u99-restaurant-card {
+  border-radius: var(--ew-radius-card);
+  border: 1px solid var(--ew-line);
+  padding: 14px 14px 13px;
+  box-shadow: var(--ew-shadow-card);
+  transition: box-shadow .2s ease, transform .18s var(--ew-ease-press);
+}
+.u99-card-host { margin-bottom: 16px; }
+
+/* Offer line becomes a small premium badge instead of a bare text line. */
+.u99-discount-line {
+  display: inline-block;
+  margin: 0 0 7px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--ew-brand-soft);
+  color: var(--ew-brand-ink);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.u99-restaurant-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -.4px;
+  color: var(--ew-ink);
+  margin-bottom: 5px;
+}
+.u99-meta { font-size: 12.5px; font-weight: 600; color: var(--ew-ink-3); gap: 6px; }
+.u99-rating b { color: var(--ew-ink); }
+.u99-rating-count { color: var(--ew-ink-3); }
+.u99-delivery svg { color: #98A2B3; }
+.u99-cuisine { color: var(--ew-ink-3); }
+.u99-free-row { margin-top: 5px; font-size: 12.5px; color: #2B3648; }
+.u99-free-text { color: #2B3648; }
+
+/* Product rail */
+.u99-carousel-wrap { margin-top: 11px; }
+.u99-carousel { gap: 10px; padding-bottom: 4px; }
+
+/* Product tile: consistent rounded media, hairline ring, soft lift.
+   The ring lives on the img so transparent/white PNGs never dissolve. */
+.u99-item-image {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--ew-radius-tile);
+  background: #EFF2F6;
+  box-shadow: var(--ew-shadow-tile);
+}
+.u99-item-image img,
+.u99-image-fallback {
+  border-radius: var(--ew-radius-tile);
+  background: #EFF2F6;
+  box-shadow: inset 0 0 0 1px rgba(16, 24, 40, .06);
+}
+.u99-popular {
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  background: rgba(255, 255, 255, .97);
+  color: #0E7C4C;
+  box-shadow: 0 3px 8px rgba(16, 24, 40, .12);
+}
+
+/* Add control — brand-filled with a 44px touch target that does not change
+   layout (the hit area is an invisible ::after). */
+.u99-item-action { right: 7px; bottom: 7px; }
+.u99-add {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ew-brand);
+  color: #FFFFFF;
+  font-size: 18px;
+  box-shadow: 0 3px 8px rgba(229, 23, 127, .38), 0 0 0 2.5px #FFFFFF;
+  transition: transform .14s var(--ew-ease-press), box-shadow .14s ease;
+}
+.u99-add::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; }
+.u99-add:active { transform: scale(.9); }
+.u99-add.u99-unavailable { background: #F2F4F7; color: #98A2B3; box-shadow: 0 0 0 2px #fff; }
+.u99-stepper {
+  height: 32px;
+  min-width: 78px;
+  border: 1.6px solid var(--ew-brand);
+  border-radius: 12px;
+  background: var(--ew-brand);
+  box-shadow: 0 3px 8px rgba(229, 23, 127, .34), 0 0 0 2.5px #FFFFFF;
+}
+.u99-stepper button { color: #FFFFFF; font-weight: 800; }
+.u99-stepper span { color: #FFFFFF; }
+
+/* Product copy + price */
+.u99-item-name {
+  margin-top: 10px;
+  min-height: 36px;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -.1px;
+  color: var(--ew-ink);
+}
+.u99-price-row { margin-top: 7px; gap: 6px; }
+.u99-price-row strong { font-size: 17px; font-weight: 800; color: var(--ew-ink); }
+.u99-old-price { font-size: 10.5px; color: #98A2B3; }
+.u99-off {
+  background: var(--ew-brand-soft);
+  color: var(--ew-brand-ink);
+  border-radius: 999px;
+  padding: 5px 7px;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+/* Press feedback on the tappable card head only (never on the + control). */
+.u99-restaurant-head { transition: opacity .14s ease; }
+.u99-restaurant-head:active { opacity: .82; }
+
+/* Unavailable card stays legible, not muddy. */
+.u99-availability-overlay span {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #344054;
+  box-shadow: var(--ew-shadow-float);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   6. LOADING SKELETONS — match the refined card geometry
+   ═══════════════════════════════════════════════════════════════════ */
+.sk { background: linear-gradient(90deg, #E9ECF1 25%, #F5F7FA 50%, #E9ECF1 75%); background-size: 1200px 100%; }
+.rs-card,
+.rs-skeleton .u99-restaurant-card { box-shadow: var(--ew-shadow-card); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   7. EMPTY / ERROR / NOTICE STATES
+   ═══════════════════════════════════════════════════════════════════ */
+.state-block { padding: 40px 24px 48px; }
+.state-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #F4F6F9;
+  color: #98A2B3;
+  font-size: 24px;
+}
+.state-title { font-size: 17px; font-weight: 800; color: #1D2939; margin-bottom: 6px; }
+.state-sub { font-size: 13.5px; color: var(--ew-ink-3); margin-bottom: 18px; }
+.state-btn {
+  min-height: 46px;
+  padding: 12px 28px;
+  border-radius: 14px;
+  background: var(--ew-brand);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 10px 20px -10px rgba(229, 23, 127, .65);
+  transition: transform .14s var(--ew-ease-press), box-shadow .14s ease;
+}
+.state-btn:active { transform: scale(.97); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   8. FEED END — light refinement, structure untouched
+   ═══════════════════════════════════════════════════════════════════ */
+.ew-feed-end__title { color: #9AA0AD; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   9. ACCESSIBILITY — visible focus, honest touch targets
+   ═══════════════════════════════════════════════════════════════════ */
+.search-box:focus-visible,
+.veg-box:focus-visible,
+.btn-store:focus-visible,
+.btn-profile:focus-visible,
+.u99-restaurant-head:focus-visible,
+.u99-add:focus-visible,
+.u99-stepper button:focus-visible,
+#filter-bar .filter-pill:focus-visible,
+#mind-section .cat-item:focus-visible,
+.banner-cta:focus-visible,
+.state-btn:focus-visible {
+  outline: 2px solid var(--ew-brand-ink);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   10. WIDER SCREENS — keep the phone-first composition from stretching
+   ═══════════════════════════════════════════════════════════════════ */
+@media (min-width: 600px) {
+  .hero-header { padding-top: 12px; }
+  .sec-title { font-size: 20px; }
+  .u99-restaurant-name { font-size: 18px; }
+  .u99-item-name { font-size: 15px; }
+}
+
+/* Keep the feed a centred app column instead of stretching cards across a
+   wide viewport. The pink header/banner stays full-bleed; only the content
+   inside <main> is capped. */
+@media (min-width: 700px) {
+  main.page { max-width: 680px; margin-inline: auto; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   11. REDUCED MOTION — honour the user's preference
+   ═══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .search-box,
+  .btn-profile,
+  .banner-cta,
+  .u99-restaurant-card,
+  .u99-add,
+  .u99-restaurant-head,
+  .state-btn,
+  #mind-section .cat-item,
+  #filter-bar .filter-pill {
+    transition: none !important;
+  }
+}
