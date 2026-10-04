@@ -53,7 +53,20 @@ const errEl=document.getElementById('ew-error'),retry=document.getElementById('e
 function showError(m){errEl.textContent=m||'Payment could not be completed.';errEl.hidden=false}
 function busy(on,text){retry.disabled=on;retry.textContent=on?(text||'Opening secure payment…'):'Try payment again';retry.style.opacity=on?'.75':'1';retry.classList.toggle('is-busy',on)}
 async function status(){if(!ctx?.orderId||!token)return null;try{const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});const j=await r.json();return r.ok&&j.success?j.data:null}catch(_){return null}}
-function success(){location.href='payment-success.html'}
+function success(){
+  try {
+    if(ctx?.multiple && ctx.deliveryOtps){
+      Object.keys(ctx.deliveryOtps).forEach(id=>{
+        if(ctx.deliveryOtps[id]) localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id]);
+      });
+    } else if(ctx?.orderId && ctx.deliveryOtp) {
+      localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp);
+    }
+    localStorage.removeItem(KEY);
+  } catch(_) {}
+  if(!ctx?.orderId){location.href='orders.html';return}
+  location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId);
+}
 async function retryPayment(){
 if(!ctx?.orderId){location.href='cart.html';return}if(!token){location.href='login.html';return}
 busy(true);errEl.hidden=true;

@@ -70,7 +70,30 @@
 (function(){
 const KEY='nearbite_payment_context',token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
 if(ctx?.orderNumber){document.getElementById('ew-order-number').textContent=ctx.orderNumber;document.getElementById('ew-order').hidden=false}
-async function check(){if(!ctx?.orderId||!token)return;try{const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});const j=await r.json();if(!r.ok||!j.success)return;const s=String(j.data?.paymentStatus||'').toLowerCase();if(s==='paid'){location.href='payment-success.html';return}if(s==='failed'){location.href='payment-failed.html'}}catch(_){}}
+function goToOrder(){
+  try {
+    if(ctx?.multiple && ctx.deliveryOtps){
+      Object.keys(ctx.deliveryOtps).forEach(id=>{
+        if(ctx.deliveryOtps[id]) localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id]);
+      });
+    } else if(ctx?.orderId && ctx.deliveryOtp) {
+      localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp);
+    }
+    localStorage.removeItem(KEY);
+  } catch(_) {}
+  if(!ctx?.orderId){location.href='orders.html';return}
+  location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId);
+}
+async function check(){
+  if(!ctx?.orderId||!token)return;
+  try{
+    const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
+    const j=await r.json();if(!r.ok||!j.success)return;
+    const s=String(j.data?.paymentStatus||'').toLowerCase();
+    if(s==='paid'){goToOrder();return}
+    if(s==='failed'){location.href='payment-failed.html'}
+  }catch(_){}
+}
 const refreshBtn=document.getElementById('ew-refresh');
 refreshBtn.addEventListener('click',()=>{refreshBtn.disabled=true;refreshBtn.classList.add('is-busy');Promise.resolve(check()).finally(()=>{refreshBtn.disabled=false;refreshBtn.classList.remove('is-busy')})});
 document.getElementById('ew-orders').addEventListener('click',()=>location.href=ctx?.multiple?'orders.html':(ctx?.orderId?'track-order.html?id='+encodeURIComponent(ctx.orderId):'orders.html'));
