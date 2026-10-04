@@ -631,6 +631,12 @@
     return '<div class="info-row"><span class="info-ic"><i class="' + icon + '"></i></span><span>' + html + '</span></div>';
   }
 
+  // Official FSSAI logo asset. The repository contains no such asset, so this
+  // section stays hidden rather than rendering an approximate/fake mark. Drop
+  // the authentic file at this path (or point this constant at it) and the
+  // Info tab renders the logo alone — the licence number is never shown.
+  const FSSAI_LOGO_SRC = 'assets/fssai-logo.png';
+
   function renderRestaurantInfo() {
     const box = document.getElementById('info-content');
     const skeleton = document.getElementById('info-skeleton');
@@ -698,8 +704,11 @@
     if (r.codEnabled === true) svc.push(infoRow('fa-solid fa-indian-rupee-sign', 'Cash on delivery available'));
     parts.push('<div class="info-block"><h3 class="info-title">Services</h3>' + svc.join('') + '</div>');
 
-    const fssai = (r.fssaiLicenseNumber || r.fssai || '').toString().trim();
-    if (fssai) parts.push('<div class="info-block info-fssai">FSSAI Lic No &middot; ' + esc(fssai) + '</div>');
+    // FSSAI mark: authentic logo only. The licence number is intentionally
+    // not rendered here (it remains in the backend and the data object).
+    if (FSSAI_LOGO_SRC) {
+      parts.push('<div class="info-block info-fssai"><img alt="FSSAI licensed" class="info-fssai-logo" loading="lazy" onerror="this.closest(\'.info-fssai\').hidden=true" src="' + esc(FSSAI_LOGO_SRC) + '"></div>');
+    }
 
     box.innerHTML = parts.join('');
     box.style.display = '';
