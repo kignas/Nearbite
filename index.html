@@ -634,8 +634,6 @@
 <link rel="stylesheet" href="filter-bar.css"/>
 <link rel="stylesheet" href="filter-sheet.css"/>
 <link rel="stylesheet" href="eatswada-theme.css">
-<link rel="stylesheet" href="food-placeholder.css">
-<link rel="stylesheet" href="eatswada-home-premium.css">
 
 <meta name="description" content="Order food online from restaurants in Maynaguri, West Bengal with EatSwada. Discover nearby restaurants, browse menus and order online."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -648,6 +646,15 @@
 <meta name="twitter:card" content="summary"/>
   <link rel="stylesheet" href="eatswada-app-transitions.css">
   <script>(function(){try{var d=sessionStorage.getItem('ew_app_nav_direction');if(d==='forward'||d==='back'){document.documentElement.classList.add('ew-dir-'+d);sessionStorage.removeItem('ew_app_nav_direction');}}catch(e){}})();</script>
+<style id="ew-fixes">
+/* 1. Same solid pink on header and banner (fixes colour mismatch) */
+.hero-header::before{background:#f9cbd8 !important;}
+.hero-header[data-theme="anime"],.hero-header[data-theme="pink"]{--hd-bg:#f9cbd8 !important;}
+.header-slide[data-theme="anime"],.header-slide[data-theme="pink"]{background:#f9cbd8 !important;}
+.header-slide__panel,.header-slide__panel::before,.header-slide__panel::after{background:transparent !important;}
+/* 2. Smaller section headings */
+.sec-title,#restaurants-title,#mind-section .sec-title{font-size:16px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.2px !important;}
+</style>
 </head>
 
 <body>
@@ -860,10 +867,5 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<!-- Phase 2: persistent React nav island (isolated, feature-flagged, off by
-     default). This is only a hidden mount node plus one deferred script tag;
-     no existing homepage content, markup, or styling is changed. -->
-<div id="ew-nav-island" hidden></div>
-<script src="islands/nav-island.js" defer></script>
 </body>
 </html>
