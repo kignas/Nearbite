@@ -5,12 +5,14 @@ import { fileURLToPath } from 'node:url';
 // Isolated React + Motion islands for Eatswada. Each island is a single
 // self-contained IIFE emitted into ../islands/ and referenced by the
 // existing HTML behind a feature flag. No SPA shell, no iframe, no dev
-// tooling shipped. Select the island with ISLAND=orders|nav.
-const island = process.env.ISLAND === 'nav' ? 'nav' : 'orders';
+// tooling shipped. Select the island with ISLAND=orders|nav|shell.
+const island =
+  process.env.ISLAND === 'nav' ? 'nav' : process.env.ISLAND === 'shell' ? 'shell' : 'orders';
 
 const entries = {
   orders: { file: 'orders-island.tsx', name: 'EatswadaOrdersIsland', out: 'orders-island' },
   nav: { file: 'nav-island.tsx', name: 'EatswadaNavIsland', out: 'nav-island' },
+  shell: { file: 'app-shell.tsx', name: 'EatswadaAppShell', out: 'app-shell' },
 } as const;
 
 const entry = fileURLToPath(new URL(`./src/${entries[island].file}`, import.meta.url));

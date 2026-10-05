@@ -5,10 +5,11 @@
   "type": "module",
   "description": "Isolated React + Motion island build for Eatswada. Emits a single self-contained bundle into ../islands/. Never used at runtime; the site remains HTML/CSS/vanilla-JS.",
   "scripts": {
-    "build": "tsc --noEmit && npm run clean && npm run build:orders && npm run build:nav",
+    "build": "tsc --noEmit && npm run clean && npm run build:orders && npm run build:nav && npm run build:shell",
     "build:orders": "ISLAND=orders vite build",
     "build:nav": "ISLAND=nav vite build",
-    "clean": "node -e \"require('fs').rmSync('../islands',{recursive:true,force:true})\""
+    "build:shell": "ISLAND=shell vite build",
+    "clean": "node -e \"const fs=require('fs');for(const f of ['orders-island.js','nav-island.js','app-shell.js'])fs.rmSync('../islands/'+f,{force:true})\""
   },
   "dependencies": {
     "motion": "^12.23.24",
