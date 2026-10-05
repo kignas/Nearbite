@@ -19,8 +19,8 @@
 
    Identity
      • Type: Manrope only (already the product typeface). One scale.
-     • Accent: Eatswada pink (#E5177F) and deep ink (#C2186B), with a soft
-       blush surface (#FFF1F6).
+     • Accent: the active header theme (--hd-primary / --hd-on-light),
+       with a soft themed surface (--hd-soft).
      • Surfaces: white cards on a white page, one neutral slate shadow
        colour (16,24,40) so every elevation shares one language.
      • Corners: cards 24px, media tiles 18px, pills fully rounded.
@@ -32,9 +32,9 @@
 
 /* ── Design tokens (homepage) ────────────────────────────────────── */
 :root {
-  --ew-brand:        #E5177F;
-  --ew-brand-ink:    #C2186B;
-  --ew-brand-soft:   #FFF1F6;
+  --ew-brand:        var(--hd-primary);
+  --ew-brand-ink:    var(--hd-on-light);
+  --ew-brand-soft:   var(--hd-soft);
   --ew-ink:          #141B2D;
   --ew-ink-2:        #475467;
   --ew-ink-3:        #667085;
@@ -58,38 +58,37 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
    reads designed rather than flat. Desktop keeps the existing inline panel. */
 @media (max-width: 599px) {
   .hero-header::before {
-    background: #F9C9D8;
+    background: var(--hd-primary);
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
-    box-shadow: 0 10px 24px -18px rgba(120, 20, 70, .55);
+    box-shadow: 0 10px 24px -18px rgba(15, 23, 42, .28);
   }
 }
 
 /* Same solid pink on the header shell and the banner slide, so the colour
    matches above and below the search bar (also in dark mode). */
-.header-slide[data-theme="anime"],
-.header-slide[data-theme="pink"] { background: #F9C9D8; }
+.header-slide { background: var(--hd-primary); }
 
 /* ── Location row ────────────────────────────────────────────────── */
 .loc-pin-wrap {
   background: rgba(255, 255, 255, .92);
-  box-shadow: 0 2px 8px rgba(120, 20, 70, .10), inset 0 0 0 1px rgba(255, 255, 255, .7);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .08), inset 0 0 0 1px rgba(255, 255, 255, .7);
 }
-.loc-name { font-size: 19px; font-weight: 800; letter-spacing: -.5px; color: #23172A; }
-.loc-sub { font-size: 11px; font-weight: 600; letter-spacing: .1px; color: #6B5A66; }
-.loc-chevron { color: #8A7480; }
+.loc-name { font-size: 19px; font-weight: 800; letter-spacing: -.5px; color: var(--hd-ink); }
+.loc-sub { font-size: 11px; font-weight: 600; letter-spacing: .1px; color: var(--hd-muted); }
+.loc-chevron { color: var(--hd-muted); }
 
 /* ── Under ₹99 + profile chips ───────────────────────────────────── */
 .btn-store {
   background: rgba(255, 255, 255, .96);
   border: 1px solid rgba(255, 255, 255, .9);
-  box-shadow: 0 2px 8px rgba(120, 20, 70, .12);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .10);
 }
-.store-top { color: #7A6670; letter-spacing: .6px; }
+.store-top { color: var(--hd-muted); letter-spacing: .6px; }
 .store-bot { color: var(--ew-brand-ink); }
 .btn-profile {
   background: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(120, 20, 70, .12);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .10);
   transition: transform .16s var(--ew-ease-press), box-shadow .16s ease;
 }
 .btn-profile:active { transform: scale(.94); }
@@ -97,19 +96,19 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 
 /* ── Search ──────────────────────────────────────────────────────── */
 .search-box {
-  border: 1px solid #F3E3EC;
+  border: 1px solid var(--ew-border, #E5E5E5);
   border-radius: 18px;
-  box-shadow: 0 8px 20px -12px rgba(120, 20, 70, .35), 0 1px 2px rgba(16, 24, 40, .04);
+  box-shadow: 0 8px 20px -12px rgba(15, 23, 42, .18), 0 1px 2px rgba(16, 24, 40, .04);
   transition: box-shadow .2s ease, border-color .2s ease, transform .16s var(--ew-ease-press);
 }
 .search-box:active { transform: scale(.992); }
 .search-icon { color: var(--ew-brand-ink); }
-.search-text { color: #7B6B76; font-weight: 600; }
-.search-dish { color: #2A2030; font-weight: 700; }
+.search-text { color: var(--ew-text-soft, #6B7280); font-weight: 600; }
+.search-dish { color: var(--ew-text, #171717); font-weight: 700; }
 .veg-box {
-  border: 1px solid #F3E3EC;
+  border: 1px solid var(--ew-border, #E5E5E5);
   border-radius: 18px;
-  box-shadow: 0 8px 20px -12px rgba(120, 20, 70, .32), 0 1px 2px rgba(16, 24, 40, .04);
+  box-shadow: 0 8px 20px -12px rgba(15, 23, 42, .16), 0 1px 2px rgba(16, 24, 40, .04);
 }
 
 /* ── Banner ──────────────────────────────────────────────────────── */
@@ -180,9 +179,9 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   background: var(--ew-brand-soft);
   border-color: var(--ew-brand);
   color: var(--ew-brand-ink);
-  box-shadow: 0 6px 14px -8px rgba(229, 23, 127, .5);
+  box-shadow: 0 6px 14px -8px rgba(15, 23, 42, .18);
 }
-#filter-bar .filter-count { background: var(--ew-brand); }
+#filter-bar .filter-count { background: var(--ew-brand); color: var(--hd-ink, #fff); }
 
 /* ═══════════════════════════════════════════════════════════════════
    5. RESTAURANT CARDS — the centrepiece
@@ -252,7 +251,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   font-weight: 800;
   letter-spacing: .2px;
   background: rgba(255, 255, 255, .97);
-  color: #0E7C4C;
+  color: var(--hd-on-light,#4E8C10);
   box-shadow: 0 3px 8px rgba(16, 24, 40, .12);
 }
 
@@ -268,7 +267,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   background: var(--ew-brand);
   color: #FFFFFF;
   font-size: 18px;
-  box-shadow: 0 3px 8px rgba(229, 23, 127, .38), 0 0 0 2.5px #FFFFFF;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, .22), 0 0 0 2.5px #FFFFFF;
   transition: transform .14s var(--ew-ease-press), box-shadow .14s ease;
 }
 .u99-add::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; }
@@ -280,7 +279,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   border: 1.6px solid var(--ew-brand);
   border-radius: 12px;
   background: var(--ew-brand);
-  box-shadow: 0 3px 8px rgba(229, 23, 127, .34), 0 0 0 2.5px #FFFFFF;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, .20), 0 0 0 2.5px #FFFFFF;
 }
 .u99-stepper button { color: #FFFFFF; font-weight: 800; }
 .u99-stepper span { color: #FFFFFF; }
@@ -353,7 +352,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 800;
-  box-shadow: 0 10px 20px -10px rgba(229, 23, 127, .65);
+  box-shadow: 0 10px 20px -10px rgba(15, 23, 42, .30);
   transition: transform .14s var(--ew-ease-press), box-shadow .14s ease;
 }
 .state-btn:active { transform: scale(.97); }

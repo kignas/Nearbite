@@ -5,9 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
+<script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#F7F7F9">
 <title>My Orders – Nearbite | EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,16 +21,16 @@
 /* ============================================================
    EATSWADA · ORDERS
    Same tokens as the Address flow (address-flow.css): Manrope,
-   #367E34 green, #F1F0F5 page, white 14 px cards, 1 px borders.
+   the active header theme, #F1F0F5 page, white 14 px cards, 1 px borders.
    ============================================================ */
 :root{
-  --brand:#367E34; --brand-press:#2C6A2B; --brand-tint:#EEF5EE; --brand-soft:#74B054;
+  --brand:var(--hd-on-light,#4E8C10); --brand-press:var(--hd-active,#5BA117); --brand-tint:var(--hd-soft,#F1FADF); --brand-soft:var(--hd-accent,#79D51F);
   --ink-900:#16191E; --ink-800:#1F232A; --ink-700:#3E414A; --ink-500:#68696B;
   --ink-400:#8E8F91; --ink-300:#B6B8BD; --ink-200:#D9DADC;
   --line:#E5E7E6; --paper:#F1F0F5; --card:#FFFFFF; --icon-bg:#F2F2F2;
-  --success:#367E34; --success-bg:#EEF5EE;
+  --success:var(--ew-success,#1F9D5A); --success-bg:var(--ew-success-soft,#E7F6EE);
   --danger:#C8453B; --danger-bg:#FBEDEB;
-  --info:#2F6FEB; --info-bg:#EEF3FE;
+  --info:var(--ew-info,#2563EB); --info-bg:#EEF3FE;
   --amber:#B26A12; --amber-bg:#FFF6E8;
   --shadow-xs:0 1px 2px rgba(16,24,40,.04);
   --shadow-sm:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.03);
@@ -181,7 +182,7 @@ img{max-width:100%;display:block;}
 .live-actions{display:flex;align-items:center;gap:8px;padding:12px 14px 14px;}
 .track-btn{
   flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:42px;border:0;border-radius:999px;
-  background:var(--brand);color:#fff;font-size:14px;font-weight:800;letter-spacing:-.1px;text-decoration:none;
+  background:var(--brand);color:var(--hd-ink,#fff);font-size:14px;font-weight:800;letter-spacing:-.1px;text-decoration:none;
 }
 .track-btn:active{background:var(--brand-press);}
 .icon-btn{
@@ -236,7 +237,7 @@ img{max-width:100%;display:block;}
 .ghost-btn:active{background:#F4F4F6;}
 .btn-reorder{
   display:inline-flex;align-items:center;gap:7px;flex:none;height:36px;padding:0 16px;border:0;border-radius:999px;
-  background:var(--brand);color:#fff;font-size:13px;font-weight:800;
+  background:var(--brand);color:var(--hd-ink,#fff);font-size:13px;font-weight:800;
 }
 .btn-reorder:active{background:var(--brand-press);}
 
@@ -255,7 +256,7 @@ img{max-width:100%;display:block;}
 .empty-illustration .spark{display:none;}
 .empty-card h4{margin:0 0 4px;font-size:16px;font-weight:800;color:var(--ink-900);}
 .empty-card p{margin:0;font-size:13px;line-height:19px;color:var(--ink-500);}
-.explore-btn{margin-top:16px;height:40px;padding:0 20px;border:0;border-radius:999px;background:var(--brand);color:#fff;font-size:14px;font-weight:800;}
+.explore-btn{margin-top:16px;height:40px;padding:0 20px;border:0;border-radius:999px;background:var(--brand);color:var(--hd-ink,#fff);font-size:14px;font-weight:800;}
 
 /* ---------- Skeleton ---------- */
 .sk-wrapper{display:grid;gap:12px;}
@@ -296,7 +297,7 @@ img{max-width:100%;display:block;}
 .inv-actions{display:flex;gap:10px;margin-top:16px;}
 .inv-btn{flex:1;height:46px;border-radius:999px;font-weight:800;font-size:14px;border:0;cursor:pointer;}
 .inv-btn.ghost{background:#fff;border:1px solid var(--ink-200);color:var(--ink-700);}
-.inv-btn.solid{background:var(--brand);color:#fff;}
+.inv-btn.solid{background:var(--brand);color:var(--hd-ink,#fff);}
 
 /* ---------- Toast ---------- */
 .od-toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:#1B1C1F;color:#fff;font-size:13px;font-weight:600;padding:10px 14px;border-radius:10px;z-index:1100;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:88%;text-align:center;}
@@ -330,6 +331,7 @@ img{max-width:100%;display:block;}
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
   <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet">
+<link rel="stylesheet" href="eatswada-header-theme.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -340,15 +342,13 @@ img{max-width:100%;display:block;}
 <meta property="og:description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta property="og:url" content="https://eatswada.com/orders.html"/>
 <meta name="twitter:card" content="summary"/>
-  <link rel="stylesheet" href="eatswada-app-transitions.css">
-  <script>(function(){try{var d=sessionStorage.getItem('ew_app_nav_direction');if(d==='forward'||d==='back'){document.documentElement.classList.add('ew-dir-'+d);sessionStorage.removeItem('ew_app_nav_direction');}}catch(e){}})();</script>
 </head>
 
 <body>
 
 <div id="ptr-indicator"><div class="ptr-ring"></div></div>
 
-<header class="orders-header">
+<header class="orders-header ew-themed-header">
   <div class="header-top">
     <button onclick="window.nearbiteSafeBack()" class="header-back-btn tap" aria-label="Go back"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="header-titles">
@@ -396,12 +396,12 @@ img{max-width:100%;display:block;}
     <div class="empty-card">
       <div class="empty-illustration">
         <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="60" cy="103" rx="34" ry="7" fill="#367E34" opacity="0.08"/>
+          <ellipse cx="60" cy="103" rx="34" ry="7" style="fill:var(--hd-primary,#79D51F)" opacity="0.08"/>
           <path d="M32 46 L36 30 C37 26 40 24 44 24 L76 24 C80 24 83 26 84 30 L88 46 Z" fill="#DDEBDC"/>
-          <rect x="28" y="46" width="64" height="46" rx="12" fill="#367E34"/>
-          <rect x="28" y="46" width="64" height="14" rx="7" fill="#2C6A2B"/>
+          <rect x="28" y="46" width="64" height="46" rx="12" style="fill:var(--hd-primary,#79D51F)"/>
+          <rect x="28" y="46" width="64" height="14" rx="7" style="fill:var(--hd-active,#5BA117)"/>
           <circle cx="60" cy="72" r="12" fill="#EEF5EE"/>
-          <path d="M55 72 L58.5 76 L66 68" stroke="#367E34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M55 72 L58.5 76 L66 68" style="stroke:var(--hd-primary,#79D51F)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
       </div>
@@ -945,7 +945,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script src="navigation.js"></script>
   <script src="bottom-tab-bar.js"></script>
-<script src="eatswada-app-transitions.js"></script>
 <div class="invoice-overlay" id="invoice-overlay">
   <div class="invoice-sheet">
     <button class="inv-close no-print" onclick="closeInvoice()" aria-label="Close">&times;</button>

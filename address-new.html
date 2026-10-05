@@ -5,9 +5,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
+<script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#F1F5F9">
 <title>Set delivery address · Delivery address · Eatswada | EatSwada</title>
 
@@ -28,11 +29,11 @@
 /* ===== Eatswada onboarding design system — identical in login.html,
    complete-profile.html, location-onboarding.html and address.html ===== */
 :root{
-  --brand:#FC8019;
-  --brand-dark:#E96F0A;
-  --brand-tint:#FFF4EC;
-  --brand-ink:#C85E0D;
-  --brand-soft:#FFCBB7;
+  --brand:var(--hd-primary,#79D51F);
+  --brand-dark:var(--hd-active,#5BA117);
+  --brand-tint:var(--hd-soft,#F1FADF);
+  --brand-ink:var(--hd-on-light,#4E8C10);
+  --brand-soft:var(--hd-line,#CDEBDB);
   --pill:#16181C;
   --bg:#F1F5F9;
   --ink:#1A1D21;
@@ -117,7 +118,7 @@ body.ea-body{
 }
 .ea-empty i{font-size:24px;color:#CBD0D6;display:block;margin-bottom:11px}
 .ea-empty b{display:block;font-size:15px;color:var(--ink);margin-bottom:4px;font-weight:800}
-.ea-empty-cta{margin-top:15px;border:0;background:var(--brand);color:#fff;border-radius:13px;padding:12px 19px;font-size:13px;font-weight:800;cursor:pointer}
+.ea-empty-cta{margin-top:15px;border:0;background:var(--brand);color:var(--hd-ink,#fff);border-radius:13px;padding:12px 19px;font-size:13px;font-weight:800;cursor:pointer}
 
 .ea-fab{
   position:fixed;left:0;right:0;bottom:0;z-index:40;
@@ -210,7 +211,7 @@ body.ea-body{
   transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
 }
 .ea-input::placeholder,.ea-area::placeholder{color:#AEB4BC;font-weight:500}
-.ea-input:focus,.ea-area:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(252,128,25,.10)}
+.ea-input:focus,.ea-area:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 16%, transparent)}
 .ea-input[readonly]{background:#F1F3F6;color:var(--ink-2)}
 .ea-input.invalid,.ea-area.invalid{border-color:#F0A5A5;background:#FFFAFA}
 .ea-area{min-height:80px;resize:none;padding-top:12px}
@@ -246,12 +247,12 @@ body.ea-body{
 .ea-form-foot{padding:9px 14px calc(11px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
 .ea-save{
   display:block;width:100%;max-width:532px;margin:auto;min-height:50px;
-  border:0;border-radius:14px;background:var(--brand);color:#fff;
+  border:0;border-radius:14px;background:var(--brand);color:var(--hd-ink,#fff);
   font-size:15px;font-weight:800;letter-spacing:-.2px;
   cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s ease;
 }
 .ea-save:not(:disabled):active{background:var(--brand-dark)}
-.ea-save:disabled{background:var(--brand-soft);color:#fff;opacity:.85;cursor:not-allowed}
+.ea-save:disabled{background:var(--hd-soft,#F1FADF);color:var(--hd-ink,#fff);opacity:.85;cursor:not-allowed}
 
 .ea-toast{
   position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));
@@ -276,6 +277,7 @@ body.ea-body{
 <link rel="stylesheet" href="address-v3.css?v=20260922-3">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
+<link rel="stylesheet" href="eatswada-header-theme.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>

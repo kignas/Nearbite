@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#159A62">
+<meta name="theme-color" content="#79D51F">
 <title>Become an Eatswada Vendor</title>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
+<link rel="stylesheet" href="eatswada-header-theme.css">
+<script src="eatswada-header-theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#1C2024; --ink-soft:#697077; --paper:#F5F7F8; --card:#fff; --line:#E7EAED;
-    --green:#159A62; --green-ink:#0F7A4D; --green-soft:#E6F4EC;
+    --green:var(--hd-on-light,#4E8C10); --green-ink:var(--hd-on-light,#4E8C10); --green-soft:var(--hd-soft,#F1FADF);
     --red:#C63A2F; --red-soft:#FBEAE8; --amber:#D97706; --amber-soft:#FEF3C7;
     --radius:16px;
   }
@@ -18,7 +21,7 @@
   html{ background:var(--paper); }
   body{
     margin:0; color:var(--ink); font-family:'Manrope',system-ui,-apple-system,sans-serif;
-    background:radial-gradient(circle at 50% -8%,rgba(21,154,98,.09),transparent 34%),linear-gradient(180deg,#F8FAF9,var(--paper));
+    background:radial-gradient(circle at 50% -8%,rgba(15,23,42,.09),transparent 34%),linear-gradient(180deg,#F8FAF9,var(--paper));
     -webkit-font-smoothing:antialiased;
   }
   main{ max-width:820px; margin:0 auto; padding:30px 16px 70px; }
@@ -33,12 +36,12 @@
     padding:24px; box-shadow:0 2px 5px rgba(28,32,36,.035),0 18px 50px rgba(28,32,36,.075);
     position:relative; overflow:hidden;
   }
-  .card::before{ content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,var(--green),#34B77F,var(--green)); }
+  .card::before{ content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,var(--green),var(--hd-hover,#6ABB1B),var(--green)); }
 
   /* Stepper */
   .stepper{ display:flex; align-items:center; gap:8px; margin:2px 0 20px; }
   .stepper .bar{ flex:1; height:6px; border-radius:999px; background:#E9EDEB; overflow:hidden; }
-  .stepper .bar > i{ display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,#1AA66B,#159A62); transition:width .25s ease; }
+  .stepper .bar > i{ display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,var(--hd-hover,#6ABB1B),var(--hd-primary,#79D51F)); transition:width .25s ease; }
   .stepper .label{ font-size:12px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
   .step-title{ font-size:18px; font-weight:800; letter-spacing:-.3px; margin:0 0 4px; }
   .step-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 20px; line-height:1.5; }
@@ -54,7 +57,7 @@
   }
   textarea{ min-height:100px; resize:vertical; }
   input:hover,textarea:hover,select:hover{ border-color:#C9D2CD; }
-  input:focus,textarea:focus,select:focus{ background:#fff; outline:none; border-color:var(--green); box-shadow:0 0 0 4px rgba(21,154,98,.10); }
+  input:focus,textarea:focus,select:focus{ background:#fff; outline:none; border-color:var(--green); box-shadow:0 0 0 4px rgba(15,23,42,.10); }
   input:disabled{ opacity:.6; }
   .hint{ font-size:11px; color:var(--ink-soft); margin-top:6px; line-height:1.5; }
   .field-error{ display:none; font-size:12px; font-weight:700; color:var(--red); margin-top:6px; }
@@ -69,7 +72,7 @@
     font-family:inherit; color:var(--ink); width:100%;
   }
   .choice:hover{ border-color:#BFD2C8; }
-  .choice.selected{ border-color:var(--green); background:var(--green-soft); box-shadow:0 0 0 3px rgba(21,154,98,.10); }
+  .choice.selected{ border-color:var(--green); background:var(--green-soft); box-shadow:0 0 0 3px rgba(15,23,42,.10); }
   .choice strong{ display:block; font-size:15px; font-weight:800; margin-bottom:4px; }
   .choice span{ font-size:12px; color:var(--ink-soft); line-height:1.45; }
 
@@ -99,8 +102,8 @@
   .btn:hover{ transform:translateY(-1px); }
   .btn:active{ transform:translateY(0); }
   .btn:disabled{ opacity:.6; cursor:wait; transform:none; }
-  .primary{ background:linear-gradient(180deg,#1AA66B,#159A62); color:#fff; box-shadow:0 7px 18px rgba(21,154,98,.20); }
-  .primary:hover{ box-shadow:0 10px 24px rgba(21,154,98,.25); }
+  .primary{ background:linear-gradient(180deg,var(--hd-hover,#6ABB1B),var(--hd-primary,#79D51F)); color:var(--hd-ink,#0F172A); box-shadow:0 7px 18px rgba(15,23,42,.20); }
+  .primary:hover{ box-shadow:0 10px 24px rgba(15,23,42,.25); }
   .ghost{ background:#fff; border-color:#DCE2DF; color:#30363B; box-shadow:0 1px 2px rgba(28,32,36,.03); }
   .ghost:hover{ border-color:#BFD2C8; background:#FAFCFB; }
   .spacer{ flex:1; }
@@ -116,7 +119,7 @@
   .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:800; background:var(--amber-soft); color:var(--amber); }
   .links{ margin-top:18px; text-align:center; line-height:1.9; font-size:13px; color:var(--ink-soft); }
   .links a{ color:var(--green-ink); font-weight:800; margin:0 8px; text-decoration:none; }
-  :focus-visible{ outline:3px solid rgba(21,154,98,.22); outline-offset:2px; }
+  :focus-visible{ outline:3px solid rgba(15,23,42,.22); outline-offset:2px; }
   .panel[hidden]{ display:none; }
   @media(max-width:620px){
     main{ padding:20px 12px 60px; }

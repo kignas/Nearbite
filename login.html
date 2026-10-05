@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
+<script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#F1F5F9">
   <title>Log in · Eatswada | EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,9 +21,9 @@
     /* ===== Eatswada onboarding design system — identical in login.html,
        complete-profile.html, location-onboarding.html and address.html ===== */
     :root{
-      --brand:#C2185B;
-      --brand-dark:#A1114B;
-      --brand-tint:#FFF1F8;
+      --brand:var(--hd-on-light,#4E8C10);
+      --brand-dark:var(--hd-active,#5BA117);
+      --brand-tint:var(--hd-soft,#F1FADF);
       --brand-ink:#A5164C;
       --brand-soft:#E4A9C0;
       --bg:#F1F5F9;
@@ -357,6 +358,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="config.js"></script>
 <link rel="stylesheet" href="eatswada-theme.css">
+<link rel="stylesheet" href="eatswada-header-theme.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>

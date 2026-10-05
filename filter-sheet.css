@@ -29,8 +29,8 @@
 .filter-tabs::-webkit-scrollbar{display:none;}
 .filter-tab{width:100%;min-height:78px;border:0;border-left:3px solid transparent;background:#fff;color:#7a818c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:9px 7px;font:700 11px/1.15 'Manrope',sans-serif;text-align:center;cursor:pointer;}
 .filter-tab i{font-size:18px;color:#9ba2ad;}
-.filter-tab.active{background:#fff7f9;border-left-color:#d20a61;color:#252d3a;}
-.filter-tab.active i{color:#d20a61;}
+.filter-tab.active{background:var(--hd-soft,#F1FADF);border-left-color:var(--hd-on-light,#4E8C10);color:#252d3a;}
+.filter-tab.active i{color:var(--hd-on-light,#4E8C10);}
 
 .filter-content{min-width:0;overflow-y:auto;overflow-x:hidden;padding:18px 16px 24px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
 .filter-content::-webkit-scrollbar{width:4px;}
@@ -42,28 +42,28 @@
 .filter-section-sub{margin:-4px 0 10px;padding:0 2px;font:600 11px/1.4 'Manrope',sans-serif;color:#9299a4;}
 
 .sort-current{width:100%;min-height:58px;border:0;border-radius:15px;background:#f5f6fa;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:700 14px/1 'Manrope',sans-serif;color:#353d4b;text-align:left;}
-.sort-current .current-value{color:#d20a61;}
+.sort-current .current-value{color:var(--hd-on-light,#4E8C10);}
 .sort-current i{color:#a0a6b0;font-size:11px;}
 .filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
 .filter-grid.three{grid-template-columns:repeat(3,minmax(0,1fr));}
 .sheet-option{min-height:62px;border:1px solid #e4e7ec;border-radius:15px;background:#fff;box-shadow:0 3px 9px rgba(15,23,42,.055);font:700 13px/1.2 'Manrope',sans-serif;color:#343c49;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;cursor:pointer;}
-.sheet-option i.option-icon{font-size:17px;color:#159a62;}
+.sheet-option i.option-icon{font-size:17px;color:var(--ew-success,#1F9D5A);}
 .sheet-option i.check-icon{position:absolute;right:9px;top:9px;font-size:11px;color:#fff;opacity:0;}
 .sheet-option{position:relative;}
-.sheet-option.selected{border-color:#d20a61;background:#fff6f9;box-shadow:0 0 0 1px rgba(210,10,97,.08);color:#b90055;}
+.sheet-option.selected{border-color:var(--hd-on-light,#4E8C10);background:var(--hd-soft,#F1FADF);box-shadow:0 0 0 1px rgba(15,23,42,.08);color:var(--hd-on-light,#4E8C10);}
 .sheet-option.selected i.check-icon{opacity:1;}
-.sheet-option.selected i.option-icon{color:#d20a61;}
+.sheet-option.selected i.option-icon{color:var(--hd-on-light,#4E8C10);}
 
 .sort-list{display:flex;flex-direction:column;gap:8px;}
 .sort-option{width:100%;min-height:52px;border:1px solid #e4e7ec;border-radius:14px;background:#fff;padding:0 14px;display:flex;align-items:center;justify-content:space-between;font:700 13px/1.2 'Manrope',sans-serif;color:#343c49;cursor:pointer;}
-.sort-option.selected{border-color:#d20a61;background:#fff6f9;color:#c00059;}
-.sort-option .check-icon{opacity:0;color:#d20a61;font-size:12px;}
+.sort-option.selected{border-color:var(--hd-on-light,#4E8C10);background:var(--hd-soft,#F1FADF);color:var(--hd-on-light,#4E8C10);}
+.sort-option .check-icon{opacity:0;color:var(--hd-on-light,#4E8C10);font-size:12px;}
 .sort-option.selected .check-icon{opacity:1;}
 
 .sheet-footer{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid #e9ebef;background:rgba(255,255,255,.98);flex:0 0 auto;}
 .sheet-close-btn,.sheet-done{height:52px;border-radius:14px;font:800 14px/1 'Manrope',sans-serif;cursor:pointer;}
 .sheet-close-btn{border:0;background:#fff;color:#4e5662;}
-.sheet-done{border:0;background:#d20a61;color:#fff;box-shadow:0 8px 18px rgba(210,10,97,.18);}
+.sheet-done{border:0;background:var(--hd-on-light,#4E8C10);color:#fff;box-shadow:0 8px 18px rgba(15,23,42,.18);}
 
 @media(max-width:380px){
   .filter-sheet .sheet-panel{height:90vh;border-radius:20px 20px 0 0;}

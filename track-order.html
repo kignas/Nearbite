@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
+<script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#ffffff">
   <title>Track order – Eatswada | EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,18 +22,18 @@
   <style>
     /* ============================================================
        EATSWADA · ORDER TRACKING
-       Same tokens as the Address flow and Orders: Manrope, #367E34
+       Same tokens as the Address flow and Orders: Manrope, the header theme
        green, #F1F0F5 page, white 14 px cards, restrained motion.
        ============================================================ */
     :root {
       --font: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --brand:#367E34; --brand-press:#2C6A2B; --brand-tint:#EEF5EE; --brand-soft:#74B054;
+      --brand:var(--hd-on-light,#4E8C10); --brand-press:var(--hd-active,#5BA117); --brand-tint:var(--hd-soft,#F1FADF); --brand-soft:var(--hd-accent,#79D51F);
       --ink-900:#16191E; --ink-800:#1F232A; --ink-700:#3E414A; --ink-500:#68696B;
       --ink-400:#8E8F91; --ink-300:#B6B8BD; --ink-200:#D9DADC;
       --line:#E5E7E6; --line-soft:#F0F0F2; --paper:#F1F0F5; --card:#FFFFFF; --icon-bg:#F2F2F4;
-      --success:#367E34; --success-light:#EEF5EE;
+      --success:var(--ew-success,#1F9D5A); --success-light:var(--ew-success-soft,#E7F6EE);
       --danger:#C8453B; --danger-light:#FBEDEB;
-      --info:#2F6FEB; --info-light:#EEF3FE;
+      --info:var(--ew-info,#2563EB); --info-light:#EEF3FE;
       --amber:#B26A12; --amber-light:#FFF6E8;
       --shadow-xs: 0 1px 2px rgba(16,24,40,.04);
       --shadow-pop: 0 8px 28px rgba(16,24,40,.16);
@@ -329,6 +330,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
+<link rel="stylesheet" href="eatswada-header-theme.css">
   <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
@@ -831,7 +833,8 @@
           .filter(p => Array.isArray(p) && p.length >= 2 && Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])))
           .map(p => [Number(p[1]), Number(p[0])]) : [];
         const routePts = road.length >= 2 ? road : [riderLL, homeLL];
-        const style = { color:'#367E34', weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' };
+        const hd = (name, fb) => (getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fb);
+        const style = { color: hd('--hd-on-light', '#4E8C10'), weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' };
         if (!routeLine) routeLine = L.polyline(routePts, style).addTo(map);
         else { routeLine.setLatLngs(routePts); routeLine.setStyle(style); }
       }
@@ -1182,7 +1185,7 @@
       const layer = document.getElementById('confetti-layer');
       if (!layer) return;
       layer.innerHTML = '';
-      const colors = ['#367E34', '#74B054', '#E5A100', '#2F6FEB', '#C8453B'];
+      const colors = [hd('--hd-primary', '#79D51F'), hd('--hd-on-light', '#4E8C10'), '#E5A100', hd('--ew-info', '#2563EB'), hd('--ew-error', '#DC2626')];
       for (let i = 0; i < 26; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';

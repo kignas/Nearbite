@@ -5,9 +5,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
+<script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#ffffff">
 <title>Set delivery location · Eatswada | EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,9 +28,9 @@
    icon pink while the pin was green. One token set now drives the page.
    ================================================================ */
 :root{
-  --brand:#367E34;--brand-dark:#2C6A2B;--brand-tint:#EEF5EE;--brand-ink:#2C6A2B;
+  --brand:var(--hd-on-light,#4E8C10);--brand-dark:var(--hd-active,#5BA117);--brand-tint:var(--hd-soft,#F1FADF);--brand-ink:var(--hd-on-light,#4E8C10);
   --ink:#16191E;--ink-2:#3E414A;--muted:#68696B;--label:#8E8F91;
-  --line:#D9DADC;--soft:#F6F6F8;--field:#FBFBFC;--ok:#367E34;
+  --line:#D9DADC;--soft:#F6F6F8;--field:#FBFBFC;--ok:var(--ew-success,#1F9D5A);
   --disabled-bg:#DEDDE2;--disabled-text:#989BA0;
   --shadow-float:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.06);
   --shadow-sheet:0 4px 24px rgba(16,24,40,.14),0 1px 3px rgba(16,24,40,.06);
@@ -215,6 +216,7 @@ body{animation:none}
 </style>
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
+<link rel="stylesheet" href="eatswada-header-theme.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>

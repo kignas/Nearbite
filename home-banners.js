@@ -43,12 +43,6 @@
 
   const safeUrl = v => { v = String(v || '').trim(); return (v.startsWith('/') && !v.startsWith('//')) || /^https:\/\//i.test(v) ? v : ''; };
   const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
-  const theme = v => ['anime', 'pink', 'lavender', 'magenta'].includes(v) ? v : 'pink';
-
-  // Resolve the admin-controlled theme safely. Older versions of this file
-  // called resolveTheme()/safeCssBackground() without defining them, which
-  // stopped build() before any banner could be rendered.
-  const resolveTheme = b => theme(String(b?.headerTheme || b?.theme || 'pink').toLowerCase());
   const safeCssBackground = v => {
     const value = String(v || '').trim();
     // Background is currently not used as the primary visual theme, but keep
@@ -58,7 +52,6 @@
 
   // ── Rendering ───────────────────────────────────────────────────
   function slideHtml(b, i) {
-    const t = resolveTheme(b);
     const image = safeUrl(b.mobileImage) || safeUrl(b.image) || safeUrl(b.mobileImageUrl) || safeUrl(b.imageUrl) || '';
     safeCssBackground(b.background);
     // Title: first line in the theme ink, any following lines in the accent
@@ -87,7 +80,7 @@
       ? `<img class="header-slide__art" src="${esc(image)}" alt="" aria-hidden="true" loading="${isFirst ? 'eager' : 'lazy'}" decoding="async"${isFirst ? ' fetchpriority="high"' : ''}>`
       : '';
 
-    return `<article class="header-slide" data-theme="${t}" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
+    return `<article class="header-slide" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
       <div class="header-slide__panel">
         <div class="header-slide__copy">
           ${b.badgeText ? `<span class="banner-badge">${esc(b.badgeText)}</span>` : ''}
@@ -103,7 +96,7 @@
 
   function build() {
     // No active banners → single safe fallback slide (no swipe/autoplay).
-    const list = banners.length ? banners : [{ headerTheme: 'pink' }];
+    const list = banners.length ? banners : [{}];
     track.innerHTML = list.map(slideHtml).join('');
 
     const count = n();
@@ -134,11 +127,9 @@
     track.style.transform = `translate3d(${-px}px,0,0)`;
   }
   function applyHeaderTheme() {
-    const b = banners[active];
-    header.dataset.theme = resolveTheme(b);
-    // The banner's legacy `background` field must not override the visual theme.
-    // The active header theme is the single source of truth for the shell.
-    header.style.removeProperty('--hd-bg');
+    // The header color is owned by the centralized header theme system
+    // (eatswada-header-theme.js / data-ew-header). Banner records no longer
+    // carry a per-slide color theme, so there is nothing to apply here.
     // Search placeholder is owned by home.js. Do not let banner data
     // replace #search-placeholder because that destroys .search-dish and
     // stops the rotating search animation.
