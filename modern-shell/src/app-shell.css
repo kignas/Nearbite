@@ -1,0 +1,69 @@
+/* =====================================================================
+   Eatswada persistent app-shell — scoped styles (flagged)
+   ---------------------------------------------------------------------
+   Only active under html.ew-app-shell-active, so the flag-OFF document is
+   byte-for-byte unaffected. Nothing here uses a broad `body > *` hide rule:
+   the adopted Home nodes are moved into the shell, and Orders is an
+   independent fixed layer, so no page-level hiding is required.
+   ===================================================================== */
+
+/* Lift the existing cart bar above the persistent nav using the shared
+   variable cart-bar.js already reads. Nothing else is restyled. */
+html.ew-app-shell-active {
+  --nb-cart-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+#ew-app-shell {
+  position: relative;
+}
+
+/* Shared route wrapper. Both screens stay mounted and cross-fade; the shell
+   never unmounts Home, so the adopted DOM nodes keep their identity. */
+.ew-app-route {
+  transition: opacity .18s ease-out;
+}
+
+/* Home: static wrapper, NO overflow container, so Home keeps scrolling on
+   the documentElement/window exactly as before. */
+.ew-app-home {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+}
+.ew-app-home[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+/* Orders: its own scroller so it keeps a separate scroll position, and its
+   sticky header sticks within this box. */
+.ew-app-orders {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f7f7f9;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+.ew-app-orders[aria-hidden="true"] {
+  visibility: hidden;
+}
+/* Keep the last order card clear of the fixed bottom navigation. */
+.ew-app-orders .ew-orders-screen-content {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+}
+
+/* The nav host is reused from the island styles; it only needs to be
+   visible when the shell is active and to sit above the Orders layer. */
+.ew-app-shell-active .ew-app-nav-host {
+  display: block;
+  z-index: 990;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ew-app-route {
+    transition: none !important;
+  }
+}
