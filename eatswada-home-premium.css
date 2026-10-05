@@ -58,12 +58,17 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
    reads designed rather than flat. Desktop keeps the existing inline panel. */
 @media (max-width: 599px) {
   .hero-header::before {
-    background: linear-gradient(168deg, #FBD3E0 0%, #F9C9D8 46%, #F6C2D4 100%);
+    background: #F9C9D8;
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
     box-shadow: 0 10px 24px -18px rgba(120, 20, 70, .55);
   }
 }
+
+/* Same solid pink on the header shell and the banner slide, so the colour
+   matches above and below the search bar (also in dark mode). */
+.header-slide[data-theme="anime"],
+.header-slide[data-theme="pink"] { background: #F9C9D8; }
 
 /* ── Location row ────────────────────────────────────────────────── */
 .loc-pin-wrap {
@@ -128,9 +133,9 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
    2. SECTION HEADINGS
    ═══════════════════════════════════════════════════════════════════ */
 .sec-title {
-  font-size: 19px;
+  font-size: 16px !important;
   font-weight: 800;
-  letter-spacing: -.35px;
+  letter-spacing: -.2px;
   color: #1B2233;
   text-transform: none;
 }
@@ -382,7 +387,7 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
    ═══════════════════════════════════════════════════════════════════ */
 @media (min-width: 600px) {
   .hero-header { padding-top: 12px; }
-  .sec-title { font-size: 20px; }
+  .sec-title { font-size: 17px !important; }
   .u99-restaurant-name { font-size: 18px; }
   .u99-item-name { font-size: 15px; }
 }
