@@ -18,9 +18,9 @@
 
 /* ---------------------------------------------------------------- tokens -- */
 :root{
-  --ew-doc-brand:var(--hd-on-light,#4E8C10);
-  --ew-doc-brand-ink:var(--hd-on-light,#4E8C10);
-  --ew-doc-brand-soft:var(--hd-soft,#F1FADF);
+  --ew-doc-brand:var(--hd-on-light,#C13A50);
+  --ew-doc-brand-ink:var(--hd-on-light,#C13A50);
+  --ew-doc-brand-soft:var(--hd-soft,#FDEBEE);
   --ew-doc-ink:#16191E;
   --ew-doc-ink2:#3E414A;
   --ew-doc-body:#565E69;
@@ -32,14 +32,14 @@
   --ew-doc-card:#FFFFFF;
   --ew-doc-page:#F6F7F9;
   --ew-doc-green:#2E8B57;
-  --ew-doc-warn:#B45309;
-  --ew-doc-danger:#DC2626;
+  --ew-doc-warn:var(--ew-warning,#D99A2B);
+  --ew-doc-danger:#D64545;
   --ew-doc-radius:16px;
   --ew-doc-radius-lg:18px;
   --ew-doc-radius-sm:12px;
   --ew-doc-shadow:0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.03);
   --ew-doc-shadow-card:0 1px 2px rgba(16,24,40,.035), 0 6px 20px rgba(16,24,40,.045);
-  --ew-doc-focus:0 0 0 3px color-mix(in srgb, var(--hd-primary,#79D51F) 28%, transparent);
+  --ew-doc-focus:0 0 0 3px color-mix(in srgb, var(--hd-primary,#E9546B) 28%, transparent);
   --ew-doc-header-h:56px;
 }
 
@@ -59,7 +59,7 @@ body.ew-doc *{ box-sizing:border-box; }
 body.ew-doc a{ -webkit-tap-highlight-color:transparent; }
 button,input,textarea,select{ font:inherit; }
 body.ew-doc :focus-visible{
-  outline:2px solid var(--hd-primary,#79D51F);
+  outline:2px solid var(--hd-primary,#E9546B);
   outline-offset:2px;
   border-radius:8px;
 }
@@ -460,7 +460,7 @@ body.ew-doc :focus-visible{
   font-weight:800 !important;
   letter-spacing:-.1px;
   cursor:pointer;
-  box-shadow:0 4px 14px color-mix(in srgb, var(--hd-primary,#79D51F) 30%, transparent);
+  box-shadow:0 4px 14px color-mix(in srgb, var(--hd-primary,#E9546B) 30%, transparent);
   transition:transform .14s cubic-bezier(.16,1,.3,1),filter .14s ease,box-shadow .14s ease;
 }
 .da-cta:active,.oh-cta:active,.faq-cta:active,.pw-cta:active,
@@ -507,7 +507,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
 
 /* Status and small helper text */
 .pd-status{ min-height:18px; margin-top:9px; color:var(--ew-doc-muted); font-size:12.5px !important; line-height:1.4 !important; font-weight:700; }
-.pd-status.ok{ color:#15803D; }
+.pd-status.ok{ color:var(--ew-success,#23956D); }
 .pd-status.err{ color:#B91C1C; }
 .pd-note{ margin-top:7px !important; }
 
@@ -944,7 +944,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
 .support-card.btn-call{ border-color:#F2D9BC; background:#FFF8F0; }
 .support-card.btn-call i{ color:var(--ew-doc-brand); }
 .support-card.btn-call h3{ color:#9A3412; }
-.support-card.btn-call p{ color:var(--ew-info,#2563EB); }
+.support-card.btn-call p{ color:var(--ew-info,#4C7FF0); }
 .support-card.btn-email{ border-color:var(--ew-doc-line); background:#fff; }
 .support-card.btn-email i{ color:var(--ew-doc-ink2); }
 .support-card.btn-email h3{ color:var(--ew-doc-ink); }
