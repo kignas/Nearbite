@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta name="color-scheme" content="light dark"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
@@ -76,7 +76,7 @@ try{
 const response=await fetch(`${CONFIG.API_BASE_URL}/payments/retry`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({orderId:ctx.orderId})});
 const result=await response.json();if(result?.alreadyPaid||result?.paymentStatus==='paid'){success();return}
 if(!response.ok||!result.success||!result.payment?.orderId)throw new Error(result?.message||'Retry is temporarily unavailable.');
-const rzp=new Razorpay({key:result.payment.keyId,amount:result.payment.amount,currency:result.payment.currency||'INR',name:'Eatswada',description:ctx.multiple?'Eatswada multi-restaurant order':`Eatswada order ${ctx.orderNumber||''}`,order_id:result.payment.orderId,theme:{color:(window.EatswadaHeaderTheme&&window.EatswadaHeaderTheme.primary())||'#79D51F'},modal:{ondismiss:()=>busy(false)},handler:async function(p){
+const rzp=new Razorpay({key:result.payment.keyId,amount:result.payment.amount,currency:result.payment.currency||'INR',name:'Eatswada',description:ctx.multiple?'Eatswada multi-restaurant order':`Eatswada order ${ctx.orderNumber||''}`,order_id:result.payment.orderId,theme:{color:(window.EatswadaHeaderTheme&&window.EatswadaHeaderTheme.primary())||'#E9546B'},modal:{ondismiss:()=>busy(false)},handler:async function(p){
 busy(true,'Verifying payment…');try{
 const vr=await fetch(`${CONFIG.API_BASE_URL}/payments/verify`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({orderId:ctx.orderId,razorpayPaymentId:p.razorpay_payment_id,razorpayOrderId:p.razorpay_order_id,razorpaySignature:p.razorpay_signature})});
 const v=await vr.json();if(v?.success&&v.paymentStatus==='paid'){success();return}

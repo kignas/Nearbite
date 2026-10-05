@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
@@ -27,13 +27,13 @@
        ============================================================ */
     :root {
       --font: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --brand:var(--hd-on-light,#4E8C10); --brand-press:var(--hd-active,#5BA117); --brand-tint:var(--hd-soft,#F1FADF); --brand-soft:var(--hd-accent,#79D51F);
+      --brand:var(--hd-on-light,#C13A50); --brand-press:var(--hd-active,#C13A50); --brand-tint:var(--hd-soft,#FDEBEE); --brand-soft:var(--hd-accent,#E9546B);
       --ink-900:#16191E; --ink-800:#1F232A; --ink-700:#3E414A; --ink-500:#68696B;
       --ink-400:#8E8F91; --ink-300:#B6B8BD; --ink-200:#D9DADC;
       --line:#E5E7E6; --line-soft:#F0F0F2; --paper:#F1F0F5; --card:#FFFFFF; --icon-bg:#F2F2F4;
-      --success:var(--ew-success,#1F9D5A); --success-light:var(--ew-success-soft,#E7F6EE);
+      --success:var(--ew-success,#23956D); --success-light:var(--ew-success-soft,#E7F6EE);
       --danger:#C8453B; --danger-light:#FBEDEB;
-      --info:var(--ew-info,#2563EB); --info-light:#EEF3FE;
+      --info:var(--ew-info,#4C7FF0); --info-light:#EEF3FE;
       --amber:#B26A12; --amber-light:#FFF6E8;
       --shadow-xs: 0 1px 2px rgba(16,24,40,.04);
       --shadow-pop: 0 8px 28px rgba(16,24,40,.16);
@@ -834,7 +834,7 @@
           .map(p => [Number(p[1]), Number(p[0])]) : [];
         const routePts = road.length >= 2 ? road : [riderLL, homeLL];
         const hd = (name, fb) => (getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fb);
-        const style = { color: hd('--hd-on-light', '#4E8C10'), weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' };
+        const style = { color: hd('--hd-on-light', '#C13A50'), weight:4, opacity:.75, dashArray: road.length >= 2 ? null : '2 8' };
         if (!routeLine) routeLine = L.polyline(routePts, style).addTo(map);
         else { routeLine.setLatLngs(routePts); routeLine.setStyle(style); }
       }
@@ -1185,7 +1185,7 @@
       const layer = document.getElementById('confetti-layer');
       if (!layer) return;
       layer.innerHTML = '';
-      const colors = [hd('--hd-primary', '#79D51F'), hd('--hd-on-light', '#4E8C10'), '#E5A100', hd('--ew-info', '#2563EB'), hd('--ew-error', '#DC2626')];
+      const colors = [hd('--hd-primary', '#E9546B'), hd('--hd-on-light', '#C13A50'), '#E5A100', hd('--ew-info', '#4C7FF0'), hd('--ew-error', '#D64545')];
       for (let i = 0; i < 26; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';

@@ -74,7 +74,7 @@
     {
       id: 'nearfast',
       label: 'Near & Fast',
-      icon: '<i class="fa-solid fa-bolt" style="color:#16a34a"></i> ',
+      icon: '<i class="fa-solid fa-bolt" style="color:var(--ew-success,#23956D)"></i> ',
       group: 'QUICK FILTERS',
       showInBar: true,
       supported: function (list) {

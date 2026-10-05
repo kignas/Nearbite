@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
   
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['green','pink','red'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'green';}catch(e){document.documentElement.dataset.ewHeader='green';}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
@@ -23,7 +23,7 @@
        complete-profile.html, location-onboarding.html and address.html ===== */
     :root{
       --brand:#388E3C;
-      --brand-dark:#2E7D32;
+      --brand-dark:var(--hd-active,#C13A50);
       --brand-tint:#EEF8EF;
       --brand-ink:#347A37;
       --brand-soft:#A8D5AA;
@@ -34,8 +34,8 @@
       --muted:#6B7280;
       --line:#E4E5E8;
       --field:#FCFCFD;
-      --green:#16A34A;
-      --danger:#DC2626;
+      --green:var(--ew-success,#23956D);
+      --danger:#D64545;
       --font:'Manrope',system-ui,-apple-system,sans-serif;
     }
     html,body,button,input,textarea,select{font-family:var(--font)}

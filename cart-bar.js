@@ -192,9 +192,9 @@
 
         if (isUnder99Payload) {
             if (qty > 0) {
-                container.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--hd-line,#CDEBDB);border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(15,23,42,0.12);"><button onclick="updateCart('${originalPayload}', -1)" style="width:24px;height:100%;border:none;background:transparent;color:var(--hd-on-light,#4E8C10);font-weight:800;font-size:16px;cursor:pointer;">−</button><span style="font-size:13px;font-weight:800;color:var(--hd-on-light,#4E8C10);">${qty}</span><button onclick="updateCart('${originalPayload}', 1)" style="width:24px;height:100%;border:none;background:transparent;color:var(--hd-on-light,#4E8C10);font-weight:800;font-size:14px;cursor:pointer;">+</button></div>`;
+                container.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--hd-line,#F6CDD4);border-radius:8px;width:72px;height:32px;overflow:hidden;box-shadow:0 2px 6px rgba(15,23,42,0.12);"><button onclick="updateCart('${originalPayload}', -1)" style="width:24px;height:100%;border:none;background:transparent;color:var(--hd-on-light,#C13A50);font-weight:800;font-size:16px;cursor:pointer;">−</button><span style="font-size:13px;font-weight:800;color:var(--hd-on-light,#C13A50);">${qty}</span><button onclick="updateCart('${originalPayload}', 1)" style="width:24px;height:100%;border:none;background:transparent;color:var(--hd-on-light,#C13A50);font-weight:800;font-size:14px;cursor:pointer;">+</button></div>`;
             } else {
-                container.innerHTML = `<button onclick="updateCart('${originalPayload}', 1)" style="width:72px;height:32px;background:#fff;border:1px solid var(--hd-line,#CDEBDB);border-radius:8px;color:var(--hd-on-light,#4E8C10);font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
+                container.innerHTML = `<button onclick="updateCart('${originalPayload}', 1)" style="width:72px;height:32px;background:#fff;border:1px solid var(--hd-line,#F6CDD4);border-radius:8px;color:var(--hd-on-light,#C13A50);font-weight:800;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;">ADD</button>`;
             }
         } else if (typeof window.makeBtnHTML === 'function') {
             container.innerHTML = window.makeBtnHTML(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice);
@@ -499,7 +499,7 @@
             <button type="button" class="wc-close" id="wc-close-btn" aria-label="Clear cart"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
           </div>
           <div id="wc-clear-actions" style="display: none; gap: 8px; align-items: center;">
-            <button type="button" class="wc-btn" id="wc-confirm-clear" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+            <button type="button" class="wc-btn" id="wc-confirm-clear" style="background: linear-gradient(135deg, #ef4444 0%, #D64545 100%);">
               <span class="wc-btn-title">Clear Cart</span>
               <span class="wc-btn-sub">Remove all items</span>
             </button>
