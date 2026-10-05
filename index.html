@@ -865,5 +865,12 @@ if ('serviceWorker' in navigator) {
      no existing homepage content, markup, or styling is changed. -->
 <div id="ew-nav-island" hidden></div>
 <script src="islands/nav-island.js" defer></script>
+
+<!-- Flagged persistent React app-shell (off by default). With
+     ?ewAppShell=1 the shell adopts the existing Home DOM and renders the
+     real OrdersScreen in this same document, so the Motion pill travels
+     without a reload. Without the flag this script does nothing. -->
+<div id="ew-app-shell-root" hidden></div>
+<script src="islands/app-shell.js" defer></script>
 </body>
 </html>

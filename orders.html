@@ -342,6 +342,19 @@ img{max-width:100%;display:block;}
 <meta name="twitter:card" content="summary"/>
   <link rel="stylesheet" href="eatswada-app-transitions.css">
   <script>(function(){try{var d=sessionStorage.getItem('ew_app_nav_direction');if(d==='forward'||d==='back'){document.documentElement.classList.add('ew-dir-'+d);sessionStorage.removeItem('ew_app_nav_direction');}}catch(e){}})();</script>
+  <script>
+  /* Direct-Orders compatibility for the persistent shell. Only the flagged
+     URL is canonicalised into the shell entrypoint (index.html) with the
+     Orders screen selected, so Home and Orders share one document/React
+     shell. A normal /orders.html visit (flag absent) is untouched. */
+  (function () {
+    try {
+      var params = new URLSearchParams(location.search);
+      if (params.get('ewAppShell') !== '1') return;
+      location.replace('index.html' + location.search + '#orders');
+    } catch (e) {}
+  })();
+  </script>
 </head>
 
 <body>
