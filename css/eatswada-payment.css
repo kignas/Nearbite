@@ -7,17 +7,17 @@
    Presentation only. Every element id, class hook and script behaviour used
    by the payment logic lives in the HTML files and is unchanged here.
 
-   Accent: Eatswada brand orange #FC8019.
+   Accent: the active header theme (--hd-*).
    Semantic illustration colours: success green · failure red · verifying orange.
    Dark mode is handled by the app's Dark Reader integration (same as the
    rest of Eatswada), so no hand-written dark overrides are added here.
    ============================================================================ */
 
 :root{
-  --pay-accent:#FC8019;
-  --pay-accent-deep:#E26F0A;
-  --pay-accent-soft:#FFF3E8;
-  --pay-accent-line:rgba(252,128,25,.22);
+  --pay-accent:var(--hd-on-light,#4E8C10);
+  --pay-accent-deep:var(--hd-active,#5BA117);
+  --pay-accent-soft:var(--hd-soft,#F1FADF);
+  --pay-accent-line:rgba(15,23,42,.14);
 
   --pay-success:#1F9D5A;
   --pay-success-soft:#E9F7EF;
@@ -301,12 +301,12 @@ body{
   transition:transform .16s var(--pay-ease),filter .16s ease,background-color .16s ease,box-shadow .16s ease,opacity .16s ease;
 }
 .ew-btn:active:not([disabled]){ transform:scale(.982); }
-.ew-btn:focus-visible{ outline:3px solid rgba(252,128,25,.35); outline-offset:2px; }
+.ew-btn:focus-visible{ outline:3px solid var(--hd-primary,#79D51F); outline-offset:2px; }
 .ew-btn[disabled]{ cursor:default; opacity:.65; }
 .ew-btn-primary{
   background:var(--pay-accent);
   color:#fff;
-  box-shadow:0 10px 22px -8px rgba(252,128,25,.55);
+  box-shadow:0 10px 22px -8px color-mix(in srgb, var(--pay-accent,#79D51F) 55%, transparent);
 }
 .ew-btn-primary:hover:not([disabled]){ filter:brightness(1.04); }
 .ew-btn-ghost{

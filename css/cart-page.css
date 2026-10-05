@@ -15,10 +15,10 @@
      ========================================================================== */
 
   :root{
-    /* Eatswada Pink/Red primary brand color (primary actions, active states) */
-    --ct-green:      #DC2742;
-    --ct-green-deep: #C21F39;
-    --ct-green-soft: #FBE7ED;
+    /* Primary actions follow the active header theme (see eatswada-header-theme.css). */
+    --ct-green:      var(--hd-on-light,#4E8C10);
+    --ct-green-deep: var(--hd-active,#5BA117);
+    --ct-green-soft: var(--hd-soft,#F1FADF);
     
     /* Text colors */
     --ct-ink:        #1F2937;   /* Primary text */
@@ -141,7 +141,7 @@
     display:inline-flex; align-items:center; gap:3px;
     font-size:11.5px; font-weight:800; letter-spacing:.3px;
     color:var(--ct-green); background:var(--ct-green-soft);
-    border:1px solid rgba(220,39,66,.18);
+    border:1px solid rgba(15,23,42,0.12);
     padding:6px 10px; border-radius:999px; white-space:nowrap;
   }
 
@@ -218,7 +218,7 @@
   .ct-stepper{
     display:inline-flex; align-items:center;
     background:var(--ct-green-soft);
-    border:1px solid rgba(220,39,66,.25);
+    border:1px solid rgba(15,23,42,0.17);
     border-radius:10px; overflow:hidden;
   }
   .ct-stepper button{
@@ -228,7 +228,7 @@
     display:flex; align-items:center; justify-content:center;
     transition:background .15s ease;
   }
-  .ct-stepper button:active{ background:rgba(220,39,66,.12); }
+  .ct-stepper button:active{ background:rgba(15,23,42,0.08); }
   .ct-stepper button:focus-visible{ outline:2px solid var(--ct-green); outline-offset:-2px; }
   .ct-qty{
     min-width:26px; text-align:center;
@@ -245,7 +245,7 @@
     border:1px solid rgba(21,154,98,.16);
     font-size:11.5px; font-weight:700; line-height:1.35; color:#0F5F3D;
   }
-  .ct-strip i{ font-size:13px; flex:0 0 auto; color:#159A62; }
+  .ct-strip i{ font-size:13px; flex:0 0 auto; color:var(--ew-success,#1F9D5A); }
   .ct-strip.is-error{ background:var(--ct-danger-bg); border-color:#F6C9C9; color:#9F1D1D; }
   .ct-strip.is-error i{ color:var(--ct-danger); }
   .ct-strip.is-neutral{ background:#F6F7F8; border-color:var(--ct-line); color:var(--ct-muted); }
@@ -293,10 +293,10 @@
     line-height:1.55; margin:8px auto 24px; max-width:36ch;
   }
   .ct-empty-btn{
-    background:var(--ct-green); color:#fff; border:none;
+    background:var(--ct-green); color:var(--hd-ink,#fff); border:none;
     padding:14px 26px; border-radius:13px;
     font-size:14.5px; font-weight:800; letter-spacing:.2px;
-    box-shadow:0 6px 16px rgba(220,39,66,.24);
+    box-shadow:0 6px 16px rgba(15,23,42,0.16);
   }
 
   /* ── Footer ───────────────────────────────────────────────────────── */
@@ -331,7 +331,7 @@
   .payment-method-option.selected{
     border-color:var(--ct-green);
     background:var(--ct-green-soft);
-    box-shadow:0 3px 12px rgba(220,39,66,.12);
+    box-shadow:0 3px 12px rgba(15,23,42,0.08);
   }
   .ct-pay-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .upi-icon{
@@ -347,14 +347,14 @@
   .ct-cta{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     width:100%; min-height:54px; padding:13px 18px;
-    background:var(--ct-green); color:#fff; border:none;
+    background:var(--ct-green); color:var(--hd-ink,#fff); border:none;
     border-radius:var(--ct-r-md);
-    box-shadow:0 6px 18px rgba(220,39,66,.26);
+    box-shadow:0 6px 18px rgba(15,23,42,0.17);
     cursor:pointer;
     transition:transform .1s var(--ct-ease), background .2s ease, box-shadow .2s ease;
   }
   .ct-cta:active{ transform:scale(.98); background:var(--ct-green-deep); }
-  .ct-cta:focus-visible{ outline:3px solid rgba(220,39,66,.4); outline-offset:2px; }
+  .ct-cta:focus-visible{ outline:3px solid rgba(15,23,42,0.26); outline-offset:2px; }
   .ct-cta-text{
     font-size:14px; font-weight:800; letter-spacing:.3px;
     text-align:left; line-height:1.2;
@@ -464,12 +464,12 @@
     color:var(--ct-green-deep);
   }
 
-  /* ── Add more items (action → magenta) ───────────────────────────── */
+  /* ── Add more items (primary action → header theme) ─────────────── */
   .ct-addmore{
     display:inline-flex; align-items:center; gap:8px;
     margin:12px 14px 0; padding:10px 15px;
     background:var(--ct-green-soft); color:var(--ct-green);
-    border:1px solid rgba(220,39,66,.18); border-radius:11px;
+    border:1px solid rgba(15,23,42,0.12); border-radius:11px;
     font-size:12.5px; font-weight:800; letter-spacing:.2px;
     text-decoration:none;
   }
@@ -515,11 +515,11 @@
   .ct-pill-btn{
     display:inline-flex; align-items:center; gap:7px; text-decoration:none;
     font:inherit; font-size:12px; font-weight:700; color:var(--ct-green);
-    background:var(--ct-green-soft); border:1px solid rgba(220,39,66,.16);
+    background:var(--ct-green-soft); border:1px solid rgba(15,23,42,0.11);
     border-radius:999px; padding:8px 14px; cursor:pointer;
   }
   .ct-pill-btn svg{ color:var(--ct-green); }
-  .ct-pill-btn.is-set{ background:var(--ct-green); border-color:var(--ct-green); color:#fff; }
+  .ct-pill-btn.is-set{ background:var(--ct-green); border-color:var(--ct-green); color:var(--hd-ink,#fff); }
   .ct-pill-btn.is-set svg{ color:#fff; }
 
   /* ── Grouped expandable section (delivery instructions + rider tip) ── */
@@ -557,9 +557,9 @@
   .ct-bill-hero-badge{
     flex:0 0 auto; align-self:flex-start; text-align:center; transform:rotate(3deg);
     font-size:8.5px; font-weight:900; letter-spacing:.5px; line-height:1.25;
-    color:#fff; background:linear-gradient(135deg,#DC2742,#DC2742);
+    color:var(--hd-ink,#fff); background:linear-gradient(135deg,var(--hd-primary,#79D51F),var(--hd-hover,#6ABB1B));
     border-radius:5px; padding:6px 10px; text-transform:uppercase;
-    box-shadow:0 3px 8px rgba(220,39,66,.28);
+    box-shadow:0 3px 8px rgba(15,23,42,0.18);
   }
   .ct-bill-hero-badge span{ display:block; font-size:7px; font-weight:800; letter-spacing:1px; opacity:.9; }
 
@@ -723,7 +723,7 @@
   }
   .ct-textarea:focus, .ct-input:focus{
     outline:none; border-color:var(--ct-green); background:#fff;
-    box-shadow:0 0 0 3px rgba(220,39,66,.12);
+    box-shadow:0 0 0 3px rgba(15,23,42,0.08);
   }
   .ct-field-foot{
     display:flex; align-items:flex-start; justify-content:space-between;
@@ -757,8 +757,8 @@
   .ct-btn:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
   .ct-btn-ghost{ background:#F4F6F7; border-color:var(--ct-line); color:var(--ct-ink-2); }
   .ct-btn-primary{
-    background:var(--ct-green); color:#fff;
-    box-shadow:0 5px 14px rgba(220,39,66,.22);
+    background:var(--ct-green); color:var(--hd-ink,#fff);
+    box-shadow:0 5px 14px rgba(15,23,42,0.15);
   }
   .ct-btn-primary:active{ background:var(--ct-green-deep); }
   .ct-btn-remove{
@@ -992,7 +992,7 @@
   .ct-restaurant-items .ct-row:first-child{padding-top:8px;}
   .ct-restaurant-items .ct-row:last-child{padding-bottom:10px;}
   .ct-group-actions{padding-top:10px;margin-top:0;}
-  .ct-restaurant-note-btn.is-set{background:var(--ct-green);border-color:var(--ct-green);color:#fff;}
+  .ct-restaurant-note-btn.is-set{background:var(--ct-green);border-color:var(--ct-green);color:var(--hd-ink,#fff);}
   .ct-restaurant-note-btn.is-set svg{color:#fff;}
   .ct-restaurant-note-preview{
     margin:8px 0 0;padding:9px 11px;border-radius:10px;
@@ -1132,40 +1132,40 @@
   /* Payment offers opens a sheet, so its chevron points forward and never rotates. */
   .ct-group-chev--nav{ transform:none; }
 
-  /* Requested red accent: free-delivery strip + Proceed to Pay. */
+  /* Free-delivery strip + Proceed to Pay use the header theme accent. */
   .ct-strip:not(.is-error):not(.is-neutral){
-    background:#FFF5F8;
-    border-color:rgba(220,39,66,.18);
-    color:#C21F39;
+    background:var(--ct-green-soft);
+    border-color:rgba(15,23,42,0.12);
+    color:var(--ct-green-deep);
   }
   .ct-strip:not(.is-error):not(.is-neutral) i,
   .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{
-    color:#DC2742;
+    color:var(--ct-green);
   }
 
   .ct-paybar .ct-cta{
-    background:#DC2742;
-    box-shadow:0 5px 14px rgba(220,39,66,.22);
+    background:var(--ct-green);
+    box-shadow:0 5px 14px rgba(15,23,42,0.15);
   }
   .ct-paybar .ct-cta:active{
-    background:#C21F39;
+    background:var(--ct-green-deep);
   }
 
-  /* Real Eatswada accent: no green CTA on checkout. */
+  /* Checkout CTA follows the selected header theme. */
   .ct-paybar .ct-cta{
-    background:#DC2742;
-    box-shadow:0 5px 14px rgba(220,39,66,.22);
+    background:var(--ct-green);
+    box-shadow:0 5px 14px rgba(15,23,42,0.15);
     border-radius:999px;
   }
-  .ct-paybar .ct-cta:active{background:#C21F39;}
+  .ct-paybar .ct-cta:active{background:var(--ct-green-deep);}
 
   /* Delivery status uses the same restrained pink accent. */
   .ct-strip:not(.is-error):not(.is-neutral){
-    background:#FFF5F8;
-    border-color:rgba(220,39,66,.18);
-    color:#C21F39;
+    background:var(--ct-green-soft);
+    border-color:rgba(15,23,42,0.12);
+    color:var(--ct-green-deep);
   }
-  .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{color:#DC2742;}
+  .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{color:var(--ct-green);}
 
   /* Do not show the normal free-delivery nudge strip. */
   #free-delivery-nudge{
@@ -1283,7 +1283,7 @@
   .ct-paybar-left{min-width:0;padding:4px 0;background:transparent;border:0;text-align:left;}
   .ct-paybar-amt{display:block;font-size:18px;font-weight:800;line-height:1.1;color:var(--ct-ink);}
   .ct-paybar-link{display:block;margin-top:3px;font-size:10.5px;font-weight:750;color:var(--ct-green);}
-  .ct-cta{min-height:56px;padding:12px 18px;border-radius:16px;box-shadow:0 7px 20px rgba(220,39,66,.22);}
+  .ct-cta{min-height:56px;padding:12px 18px;border-radius:16px;box-shadow:0 7px 20px rgba(15,23,42,0.15);}
   .ct-cta-text{font-size:15px;letter-spacing:-.15px;}
   .ct-pay-note{font-size:10.5px;color:var(--ct-muted);}
 
@@ -1419,7 +1419,7 @@
   .ct-cym-track.is-in .ct-cym-card:nth-child(n+4){ animation-delay:.09s; }
   @keyframes ctCymIn{ from{ opacity:0; transform:translateX(8px); } to{ opacity:1; transform:none; } }
   .ct-cym-card.is-added{ opacity:.45; transform:scale(.97); }
-  .ct-cym-card.is-added .ct-cym-add{ background:var(--ct-green); color:var(--ct-surface); border-color:var(--ct-green); transform:scale(1.06); }
+  .ct-cym-card.is-added .ct-cym-add{ background:var(--ct-green); color:var(--hd-ink,#fff); border-color:var(--ct-green); transform:scale(1.06); }
 
   /* Delivery details — address + contact. */
   .ct-details{ padding-top:4px; padding-bottom:4px; }
@@ -1598,7 +1598,7 @@
   .ct-cym-track.is-dragging .ct-cym-card{ pointer-events:none; }
   .ct-cym-card{ scroll-snap-align:start; }
   .ct-cym-add{
-    border-color:rgba(220,39,66,.18);
+    border-color:rgba(15,23,42,0.12);
     box-shadow:0 3px 10px rgba(28,32,36,.16);
   }
 
@@ -2138,7 +2138,7 @@ body.ct-page .ct-cym-add{
   width:32px;
   height:32px;
   border-radius:50%;
-  border:1px solid rgba(220,39,66,.18);
+  border:1px solid rgba(15,23,42,0.12);
   background:var(--ct-surface);
   color:var(--ct-green);
   box-shadow:0 3px 9px rgba(28,32,36,.14);
@@ -2399,7 +2399,7 @@ body.ct-page .ct-paybar .ct-cta{
   min-height:52px;
   padding:10px 16px;
   border-radius:999px;
-  box-shadow:0 6px 17px rgba(220,39,66,.18);
+  box-shadow:0 6px 17px rgba(15,23,42,0.12);
 }
 
 body.ct-page .ct-paybar .ct-cta-text{
@@ -2627,7 +2627,7 @@ body.ct-page .ct-item-total{ font-size:14px; font-weight:500; color:var(--ct-ink
 body.ct-page .ct-item-save{ display:none; }
 body.ct-page .ct-stepper{
   display:inline-flex; align-items:center;
-  background:#FEF5F8; border:1px solid #F8D3DC; border-radius:8px; box-shadow:none;
+  background:var(--ct-green-soft); border:1px solid var(--hd-line,#CDEBDB); border-radius:8px; box-shadow:none;
 }
 body.ct-page .ct-stepper button{
   width:28px; height:32px; flex:0 0 28px; background:transparent; border:0;
@@ -2643,9 +2643,9 @@ body.ct-page .ct-pill-btn{
   border:1px solid var(--ct-line); border-radius:10px; background:#F9FAFB; color:var(--ct-ink-2);
   font-size:14px; font-weight:500; white-space:nowrap; box-shadow:none;
 }
-body.ct-page .ct-item-actions .ct-pill-btn:first-child{ flex:0 0 38%; background:#FFF5F8; border-color:#F8D3DC; color:var(--ct-green); }
+body.ct-page .ct-item-actions .ct-pill-btn:first-child{ flex:0 0 38%; background:var(--ct-green-soft); border-color:var(--hd-line,#CDEBDB); color:var(--ct-green); }
 body.ct-page .ct-pill-btn svg{ flex:0 0 auto; }
-body.ct-page .ct-pill-btn.is-set{ color:var(--ct-green); border-color:#F8D3DC; background:#FFF5F8; }
+body.ct-page .ct-pill-btn.is-set{ color:var(--ct-green); border-color:var(--hd-line,#CDEBDB); background:var(--ct-green-soft); }
 body.ct-page .ct-note-btn-text{ overflow:hidden; text-overflow:ellipsis; }
 body.ct-page .ct-restaurant-note-preview{ margin-top:8px; font-size:12px; font-weight:400; color:var(--ct-muted); }
 
@@ -2680,7 +2680,7 @@ body.ct-page .ct-cym-media{ height:80px; border-radius:10px; overflow:visible; }
 body.ct-page .ct-cym-media img{ border-radius:10px; }
 body.ct-page .ct-cym-add{
   right:4px; bottom:-14px; width:28px; height:28px;
-  border:1px solid rgba(220,39,66,.35); background:var(--ct-surface); color:var(--ct-green);
+  border:1px solid rgba(15,23,42,0.23); background:var(--ct-surface); color:var(--ct-green);
   box-shadow:0 1px 3px rgba(31,41,55,.12);
 }
 body.ct-page .ct-cym-add svg{ width:15px; height:15px; }
@@ -2745,7 +2745,7 @@ body.ct-page .ct-tab{
   font:inherit; font-size:14px; font-weight:500; color:var(--ct-ink-2); white-space:nowrap; cursor:pointer;
   transition:background-color .18s ease, color .18s ease;
 }
-body.ct-page .ct-tab.is-active{ background:var(--ct-green); color:#fff; }
+body.ct-page .ct-tab.is-active{ background:var(--ct-green); color:var(--hd-ink,#fff); }
 body.ct-page .ct-tab:focus-visible{ outline:2px solid var(--ct-green); outline-offset:2px; }
 body.ct-page .ct-tab > span:first-child{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
 body.ct-page .ct-tab-count{
@@ -2770,7 +2770,7 @@ body.ct-page .ct-chip[aria-pressed="true"]{ border-color:var(--ct-green); backgr
 body.ct-page .ct-chip[aria-pressed="true"] .ct-chip-sub{ color:var(--ct-green); }
 body.ct-page .ct-tip-note{
   display:flex; align-items:center; gap:8px; margin:12px 0 0; padding:8px 12px;
-  background:#FFF5F8; border-radius:8px; color:var(--ct-green);
+  background:var(--ct-green-soft); border-radius:8px; color:var(--ct-green);
   font-size:13px; font-weight:400; line-height:1.3;
 }
 body.ct-page .ct-tip-note-text{ flex:1; min-width:0; }
@@ -2802,10 +2802,10 @@ body.ct-page .ct-bill-hero-top{ font-size:15px; font-weight:500; }
 body.ct-page .ct-bill-hero-top strong{ font-size:15px; font-weight:600; }
 body.ct-page .ct-bill-hero-saved{ font-size:13px; font-weight:400; color:var(--ct-save); }
 body.ct-page .ct-bill-hero-badge{ font-weight:600; transform:none; background:var(--ct-green); box-shadow:none; }
-body.ct-page .ct-bill-band{ background:#FFF5F8; }
+body.ct-page .ct-bill-band{ background:var(--ct-green-soft); }
 body.ct-page .ct-bill-hero-top s,
 body.ct-page .ct-bill-val s{ font-weight:400; color:#9CA3AF; }
-body.ct-page .ct-strip:not(.is-error):not(.is-neutral){ background:#FFF5F8; border-color:#F8D3DC; color:var(--ct-green); }
+body.ct-page .ct-strip:not(.is-error):not(.is-neutral){ background:var(--ct-green-soft); border-color:var(--hd-line,#CDEBDB); color:var(--ct-green); }
 body.ct-page .ct-bill-label,
 body.ct-page .ct-bill-val{ font-size:13px; font-weight:400; }
 body.ct-page .ct-bill .ct-bill-row .ct-now{ font-weight:500; }
@@ -2831,7 +2831,7 @@ body.ct-page .ct-paybar-link{
 }
 body.ct-page .ct-paybar .ct-cta{
   display:block; text-align:center; min-height:52px; padding:8px 12px;
-  border-radius:12px; background:var(--ct-green); color:#fff; box-shadow:none;
+  border-radius:12px; background:var(--ct-green); color:var(--hd-ink,#fff); box-shadow:none;
 }
 body.ct-page .ct-paybar .ct-cta:active{ background:var(--ct-green-deep); }
 body.ct-page .ct-paybar .ct-cta.locked{ background:#E3E6E9; color:#98A0A8; }

@@ -67,8 +67,8 @@
 .info-hrow.is-today .t { color: var(--ew-ink, #171C25); font-weight: 800; }
 .info-hrow .t.closed { color: #9AA1AB; }
 
-.info-open { color: #159A62; font-weight: 800; }
-.info-closed { color: #E40073; font-weight: 800; }
+.info-open { color: var(--ew-success,#1F9D5A); font-weight: 800; }
+.info-closed { color: var(--ew-error,#DC2626); font-weight: 800; }
 
 /* FSSAI mark: authentic logo only, never the licence number. Sized to sit
    cleanly alongside the other info rows; hidden by JS when no asset exists. */
@@ -84,15 +84,15 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: var(--ew-pink, #E40073);
-  background: var(--ew-pink-soft, #FFF0F7);
-  border: 1px solid rgba(228, 0, 115, .16);
+  color: var(--hd-on-light,#4E8C10);
+  background: var(--hd-soft,#F1FADF);
+  border: 1px solid rgba(15,23,42,.12);
   box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: transform .15s ease, box-shadow .15s ease;
 }
-.info-phone-btn:hover { box-shadow: 0 3px 10px rgba(228, 0, 115, .18); transform: translateY(-1px); }
+.info-phone-btn:hover { box-shadow: 0 3px 10px rgba(15,23,42,.16); transform: translateY(-1px); }
 .info-phone-btn:active { transform: scale(.94); }
-.info-phone-btn:focus-visible { outline: 2px solid var(--ew-pink, #E40073); outline-offset: 2px; }
+.info-phone-btn:focus-visible { outline: 2px solid var(--hd-on-light,#4E8C10); outline-offset: 2px; }
 .info-phone-btn svg { display: block; }

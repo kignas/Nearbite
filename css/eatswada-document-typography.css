@@ -10,7 +10,7 @@
    Cart, Checkout or any other customer page.
 
    Typography baseline reference: address-new.html · orders.html · track-order.html
-   Brand accent: #FC8019 · Font: Manrope (unchanged)
+   Brand accent: the active header theme · Font: Manrope (unchanged)
 
    This file is presentation only. No IDs, form hooks, API calls, event
    handlers or business content live here.
@@ -18,9 +18,9 @@
 
 /* ---------------------------------------------------------------- tokens -- */
 :root{
-  --ew-doc-brand:#FC8019;
-  --ew-doc-brand-ink:#B9560B;
-  --ew-doc-brand-soft:#FFF1E8;
+  --ew-doc-brand:var(--hd-on-light,#4E8C10);
+  --ew-doc-brand-ink:var(--hd-on-light,#4E8C10);
+  --ew-doc-brand-soft:var(--hd-soft,#F1FADF);
   --ew-doc-ink:#16191E;
   --ew-doc-ink2:#3E414A;
   --ew-doc-body:#565E69;
@@ -39,7 +39,7 @@
   --ew-doc-radius-sm:12px;
   --ew-doc-shadow:0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.03);
   --ew-doc-shadow-card:0 1px 2px rgba(16,24,40,.035), 0 6px 20px rgba(16,24,40,.045);
-  --ew-doc-focus:0 0 0 3px rgba(252,128,25,.20);
+  --ew-doc-focus:0 0 0 3px color-mix(in srgb, var(--hd-primary,#79D51F) 28%, transparent);
   --ew-doc-header-h:56px;
 }
 
@@ -59,7 +59,7 @@ body.ew-doc *{ box-sizing:border-box; }
 body.ew-doc a{ -webkit-tap-highlight-color:transparent; }
 button,input,textarea,select{ font:inherit; }
 body.ew-doc :focus-visible{
-  outline:2px solid rgba(252,128,25,.55);
+  outline:2px solid var(--hd-primary,#79D51F);
   outline-offset:2px;
   border-radius:8px;
 }
@@ -460,7 +460,7 @@ body.ew-doc :focus-visible{
   font-weight:800 !important;
   letter-spacing:-.1px;
   cursor:pointer;
-  box-shadow:0 4px 14px rgba(252,128,25,.22);
+  box-shadow:0 4px 14px color-mix(in srgb, var(--hd-primary,#79D51F) 30%, transparent);
   transition:transform .14s cubic-bezier(.16,1,.3,1),filter .14s ease,box-shadow .14s ease;
 }
 .da-cta:active,.oh-cta:active,.faq-cta:active,.pw-cta:active,
@@ -637,7 +637,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
   text-decoration:none;
   box-shadow:var(--ew-doc-shadow);
 }
-.toc-chip:hover,.toc-chip:active{ border-color:#F2C79E; color:var(--ew-doc-brand-ink); }
+.toc-chip:hover,.toc-chip:active{ border-color:var(--ew-border,#E5E5E5); color:var(--ew-doc-brand-ink); }
 
 .legal-section{
   background:#fff;
@@ -880,7 +880,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
   color:var(--ew-doc-brand);
   font-size:14px;
 }
-.oh-issue:hover{ border-color:#F2C79E; background:#FFFDFB; }
+.oh-issue:hover{ border-color:var(--ew-border,#E5E5E5); background:#FFFDFB; }
 .oh-issue:active{ transform:scale(.985); background:#FFF8F2; }
 .oh-issue.wide{ grid-column:1/-1; }
 
@@ -944,7 +944,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
 .support-card.btn-call{ border-color:#F2D9BC; background:#FFF8F0; }
 .support-card.btn-call i{ color:var(--ew-doc-brand); }
 .support-card.btn-call h3{ color:#9A3412; }
-.support-card.btn-call p{ color:#C2410C; }
+.support-card.btn-call p{ color:var(--ew-info,#2563EB); }
 .support-card.btn-email{ border-color:var(--ew-doc-line); background:#fff; }
 .support-card.btn-email i{ color:var(--ew-doc-ink2); }
 .support-card.btn-email h3{ color:var(--ew-doc-ink); }
@@ -979,7 +979,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
   transition:transform .15s ease,border-color .15s ease;
 }
 .issue-btn i{ display:block; margin-bottom:8px; color:var(--ew-doc-brand); font-size:19px; }
-.issue-btn:active{ transform:scale(.97); border-color:#F2C79E; }
+.issue-btn:active{ transform:scale(.97); border-color:var(--ew-border,#E5E5E5); }
 .issue-wide{ grid-column:span 2; }
 .faq-chips{
   display:flex;
@@ -1002,7 +1002,7 @@ label,.label,.field-label,.ea-label{ font-size:12px !important; line-height:16px
   text-decoration:none;
   box-shadow:var(--ew-doc-shadow);
 }
-.faq-chip:hover,.faq-chip:active{ border-color:#F2C79E; color:var(--ew-doc-brand-ink); }
+.faq-chip:hover,.faq-chip:active{ border-color:var(--ew-border,#E5E5E5); color:var(--ew-doc-brand-ink); }
 .faq-category{ margin-bottom:22px; scroll-margin-top:78px; }
 .faq-category h3{ margin:0 0 10px; color:var(--ew-doc-brand-ink); font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
 .faq-category .faq-item{ margin-bottom:10px; background:#fff; border:1px solid var(--ew-doc-line); border-radius:14px; box-shadow:var(--ew-doc-shadow); overflow:hidden; }
