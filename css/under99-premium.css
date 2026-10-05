@@ -1,0 +1,290 @@
+/* =====================================================================
+   99 STORE — PREMIUM VISUAL LAYER  (loaded last)
+   ---------------------------------------------------------------------
+   Consolidates the Under-₹99 surface into one production-grade look:
+   a cohesive raspberry header/hero on a warm-neutral page, restrained
+   accents (burgundy offers, deal gold, semantic green/red), and even,
+   food-first cards. Pure presentation: no DOM, state, API or cart changes.
+
+   Loaded after every other under99 stylesheet so it can settle the
+   accumulated "visual pass" overrides without editing them.
+   ===================================================================== */
+
+/* ── Page base: warm premium neutral (content stays neutral) ───────── */
+.u99-page,
+.u99-filter-rail { background: var(--ew-bg, #FAF9F6); }
+
+body {
+  background: var(--ew-bg, #FAF9F6);
+  color: var(--ew-text, #17191B);
+}
+
+.u99-page { padding-top: 2px; }
+
+/* ── Header + hero: one cohesive raspberry sheet ───────────────────── */
+.u99-header {
+  margin: 0 0 10px;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--hd-primary, #E9546B) 88%, #fff) 0%,
+    var(--hd-primary, #E9546B) 52%,
+    var(--hd-accent, #9E1535) 100%);
+  box-shadow: 0 8px 24px -12px color-mix(in srgb, var(--hd-accent, #9E1535) 55%, transparent);
+}
+
+.u99-topbar { padding-bottom: 6px; }
+
+.u99-circle-btn,
+.u99-location {
+  box-shadow: 0 3px 12px rgba(80, 12, 40, .16);
+  border: 1px solid rgba(255, 255, 255, .55);
+}
+.u99-circle-btn:active { background: #F4F4F2; }
+.u99-location:active { background: #FCFCFB; }
+.u99-location-name { letter-spacing: -.3px; }
+.u99-location-sub { color: var(--ew-text-soft, #697178); }
+
+/* Hero: tone-on-tone on the raspberry family; white type, burgundy accent. */
+.u99-hero { min-height: 152px; border-radius: 0 0 20px 20px; }
+.u99-hero::before {
+  width: 190px; height: 190px; right: -54px; top: -84px;
+  background: rgba(255, 255, 255, .14);
+}
+.u99-hero-copy { width: 60%; padding: 20px 0 18px 22px; }
+.u99-kicker {
+  font-size: 12.5px; font-weight: 800; letter-spacing: 1.6px;
+  text-transform: uppercase; color: rgba(255, 255, 255, .88);
+}
+.u99-price { color: #fff; letter-spacing: -3px; margin-top: 2px; }
+.u99-price .currency { font-size: 32px; letter-spacing: -1px; }
+.u99-price .number { font-size: 62px; }
+.u99-sub {
+  margin-top: 9px; font-size: 11.5px; font-weight: 600;
+  color: rgba(255, 255, 255, .9);
+}
+.u99-hero-art { filter: drop-shadow(0 10px 16px rgba(60, 8, 30, .28)); }
+
+/* Legacy pink fallback (used only when no banner art) → raspberry family. */
+.u99-hero-fallback {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--hd-primary, #E9546B) 88%, #fff) 0%,
+    var(--hd-primary, #E9546B) 52%,
+    var(--hd-accent, #9E1535) 100%);
+}
+
+/* ── Filter rail: refined capsule chips ────────────────────────────── */
+.u99-filter-rail {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ew-border, #E6E5E2);
+}
+.u99-filter {
+  height: 36px !important;
+  font-size: 12.5px !important;
+  padding: 0 13px;
+  border: 1px solid var(--ew-border, #E6E5E2);
+  background: var(--ew-surface, #FFFFFF);
+  color: var(--ew-text, #17191B);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(20, 22, 30, .05);
+}
+.u99-filter-icon { height: 36px !important; padding: 0 14px; }
+.u99-filter.active,
+.u99-filter.featured {
+  background: var(--hd-soft, #FDEBEE);
+  border-color: var(--hd-line, #F6CDD4);
+  color: var(--hd-on-light, #C13A50);
+}
+.u99-percent { background: var(--hd-primary, #E9546B); color: #fff; }
+
+/* ── Price capsule: warm track, raspberry thumb ────────────────────── */
+.u99-price-seg {
+  height: 42px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+  padding: 3px;
+  background: #F1F0EC;
+  border: 1px solid #E9E7E2;
+}
+.u99-price-thumb {
+  top: 3px; left: 3px; bottom: 3px;
+  background: var(--hd-primary, #E9546B);
+  box-shadow: 0 4px 12px -3px color-mix(in srgb, var(--hd-primary, #E9546B) 65%, transparent);
+}
+.u99-price-tab { color: #4A4F57; font-weight: 700; }
+.u99-price-tab.active { color: #fff; }
+.u99-price-tab + .u99-price-tab::before { background: #DAD8D3; }
+
+/* ── Section head + sort ───────────────────────────────────────────── */
+.u99-products-title { font-size: 19px; letter-spacing: -.4px; color: var(--ew-text, #17191B); }
+.u99-sort {
+  height: 36px;
+  border: 1px solid var(--ew-border, #E6E5E2);
+  background: var(--ew-surface, #FFFFFF);
+  color: var(--ew-text, #17191B);
+  font-weight: 700;
+}
+
+/* ── Product grid: even, food-first cards ──────────────────────────── */
+.u99-product-grid { column-gap: 12px; row-gap: 22px; }
+.u99-product-card { display: flex; flex-direction: column; }
+.u99-product-image {
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  background: #F3F2EF;
+  box-shadow: 0 1px 2px rgba(20, 22, 30, .05), 0 0 0 1px rgba(20, 22, 30, .04);
+  overflow: hidden;
+}
+.u99-product-image img,
+.u99-product-image .u99-item-img {
+  border-radius: 16px;
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1), opacity .32s ease;
+}
+@media (hover: hover) {
+  .u99-product-card:hover .u99-item-img { transform: scale(1.045); }
+}
+.u99-badge {
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 9.5px;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+  box-shadow: 0 3px 10px rgba(20, 22, 30, .14);
+}
+.u99-badge.bestseller { background: var(--hd-primary, #E9546B); color: #fff; }
+.u99-badge:not(.bestseller) { background: #fff; color: var(--ew-success, #23956D); }
+.u99-food-marker {
+  width: 20px; height: 20px; border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(20, 22, 30, .14);
+}
+.u99-rating-badge {
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(20, 22, 30, .16);
+}
+
+/* Body typography */
+.u99-product-body { padding: 9px 2px 0; }
+.u99-restaurant-name {
+  font-size: 11px; font-weight: 700; letter-spacing: .3px;
+  text-transform: uppercase; color: var(--ew-text-soft, #697178);
+}
+.u99-name-row { gap: 6px; margin-top: 3px; align-items: flex-start; }
+.u99-name-marker { margin-top: 3px; align-self: flex-start; }
+.u99-product-name {
+  font-size: 15.5px; line-height: 1.24; letter-spacing: -.2px;
+  font-weight: 800; color: var(--ew-text, #17191B);
+  -webkit-line-clamp: 2; min-height: 39px;
+}
+
+/* Price row — deal price in raspberry, struck MRP, soft discount chip. */
+.u99-product-price-row { margin-top: 8px; gap: 6px; align-items: baseline; }
+.u99-current-price {
+  font-size: 16px; font-weight: 900; letter-spacing: -.4px;
+  color: var(--ew-text, #17191B);
+}
+.u99-current-price.deal { color: var(--hd-primary, #E9546B); }
+.u99-old-price { color: #9AA0A9; font-size: 12px; font-weight: 600; }
+.u99-discount {
+  padding: 3px 7px; border-radius: 7px;
+  background: var(--hd-soft, #FDEBEE);
+  color: var(--hd-on-light, #C13A50);
+  font-size: 10px; font-weight: 900; letter-spacing: .1px;
+}
+
+/* Add control — white circle, raspberry outline; stepper matches. */
+.u99-add-btn {
+  border: 1.5px solid var(--hd-primary, #E9546B);
+  background: #fff;
+  color: var(--hd-primary, #E9546B);
+  box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--hd-primary, #E9546B) 60%, transparent);
+}
+.u99-stepper {
+  background: #fff;
+  border: 1.5px solid var(--hd-primary, #E9546B);
+  box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--hd-primary, #E9546B) 55%, transparent);
+}
+.u99-step-btn,
+.u99-step-qty { color: var(--hd-primary, #E9546B); }
+
+/* ── Sheets (filters / sort / item) ────────────────────────────────── */
+.u99-filter-sheet,
+.u99-sort-sheet,
+.u99-item-sheet {
+  border-radius: 24px 24px 0 0;
+  background: var(--ew-surface, #FFFFFF);
+  box-shadow: 0 -14px 44px rgba(14, 17, 25, .20);
+}
+.u99-sheet-grab { background: #E2E3E7; }
+.u99-filter-title { font-size: 19px; letter-spacing: -.4px; }
+.u99-filter-label {
+  font-size: 12px; letter-spacing: .4px; text-transform: uppercase;
+  color: var(--ew-text-soft, #697178);
+}
+.u99-apply {
+  background: var(--hd-primary, #E9546B);
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--hd-primary, #E9546B) 70%, transparent);
+}
+.u99-clear { border-radius: 14px; }
+.u99-item-add { background: var(--hd-primary, #E9546B); border-radius: 14px; }
+
+/* ── Toast + empty state ───────────────────────────────────────────── */
+.u99-toast {
+  background: #1B1D22;
+  border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(14, 17, 25, .30);
+}
+.u99-empty strong { font-size: 17px; letter-spacing: -.3px; }
+.u99-clear-filters {
+  border: 1.5px solid var(--hd-primary, #E9546B);
+  color: var(--hd-primary, #E9546B);
+  font-weight: 800;
+}
+
+/* ── Dark mode: same hierarchy, neutral foundation only ────────────── */
+html[data-ew-theme="dark"] {
+  --u99-bg: #111315;
+  --u99-surface: #181B1D;
+  --u99-surface-2: #1E2225;
+  --u99-surface-3: #202427;
+  --u99-ink: #F5F5F2;
+  --u99-text-secondary: #C3C7CC;
+  --u99-muted: #A8ADB2;
+  --u99-subtle: #7E848A;
+  --u99-border: #2A2E31;
+  --u99-border-strong: #343A3E;
+}
+html[data-ew-theme="dark"] body,
+html[data-ew-theme="dark"] .u99-page,
+html[data-ew-theme="dark"] .u99-filter-rail { background: var(--u99-bg); }
+html[data-ew-theme="dark"] .u99-filter,
+html[data-ew-theme="dark"] .u99-sort,
+html[data-ew-theme="dark"] .u99-product-image { background: var(--u99-surface); }
+html[data-ew-theme="dark"] .u99-product-image { box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
+html[data-ew-theme="dark"] .u99-price-seg { background: #1E2225; border-color: #2A2E31; }
+html[data-ew-theme="dark"] .u99-filter-sheet,
+html[data-ew-theme="dark"] .u99-sort-sheet,
+html[data-ew-theme="dark"] .u99-item-sheet { background: var(--u99-surface); }
+
+/* ── Skeleton matches the final card geometry (no layout jump) ─────── */
+.u99-skel-card { aspect-ratio: 4 / 3; border-radius: 16px; }
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 430px) {
+  .u99-hero { min-height: 148px; }
+  .u99-hero-copy { padding: 18px 0 16px 20px; }
+  .u99-price .currency { font-size: 30px; }
+  .u99-price .number { font-size: 58px; }
+  .u99-product-name { font-size: 15px; min-height: 37px; }
+}
+@media (max-width: 370px) {
+  .u99-product-grid { column-gap: 10px; row-gap: 20px; }
+  .u99-product-name { font-size: 14.5px; min-height: 36px; }
+  .u99-current-price { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .u99-product-image img,
+  .u99-product-image .u99-item-img { transition: opacity .2s ease; }
+  .u99-product-card:hover .u99-item-img { transform: none; }
+}
