@@ -13,13 +13,13 @@
   'use strict';
 
   var KEY = 'eatswada_header_theme';
-  var DEFAULT = 'raspberry';
+  var DEFAULT = 'oxblood';
 
   // Order defines the picker order. Only primary colors are declared here;
   // every other token (hover/active/soft/ink/muted/accent/on-light/cta) lives
   // in eatswada-header-theme.css so future themes stay CSS-only.
   var THEMES = [
-    { id: 'raspberry', label: 'Raspberry', primary: '#E9546B' }
+    { id: 'oxblood', label: 'Oxblood', primary: '#5D0D18' }
     // { id: 'future-theme-4', label: '...', primary: '#...' }
     // { id: 'future-theme-5', label: '...', primary: '#...' }
     // { id: 'future-theme-6', label: '...', primary: '#...' }
@@ -90,7 +90,7 @@
       try {
         v = getComputedStyle(document.documentElement).getPropertyValue('--hd-primary').trim();
       } catch (_) {}
-      return v || '#E9546B';
+      return v || '#5D0D18';
     }
   };
 
