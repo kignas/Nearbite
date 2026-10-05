@@ -426,15 +426,15 @@
   /* ── Progressive profile setup ─────────────────────────────── */
   #profile-setup-banner{
     display:flex;align-items:center;gap:12px;margin:0 18px 14px;padding:12px 14px;
-    background:#FFF7FB;border:1px solid #F2D8E6;border-radius:12px;
+    background:#F3F6FF;border:1px solid #D6DFFA;border-radius:12px;
   }
   #profile-setup-banner[hidden]{display:none}
   .psb-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
-    background:#FCE7F3;color:#B80057;flex:0 0 auto;font-size:12px}
+    background:#E1E8FF;color:#2B50CF;flex:0 0 auto;font-size:12px}
   .psb-copy{min-width:0;flex:1}
   .psb-title{font-size:13px;font-weight:800;color:#273043;line-height:1.25}
   .psb-text{font-size:11.5px;font-weight:500;color:#6B7280;line-height:1.4;margin-top:2px}
-  .psb-btn{border:0;background:transparent;color:#B80057;font-family:inherit;font-size:12.5px;line-height:1.2;font-weight:800;
+  .psb-btn{border:0;background:transparent;color:#2B50CF;font-family:inherit;font-size:12.5px;line-height:1.2;font-weight:800;
     padding:10px 2px 10px 6px;white-space:nowrap;text-decoration:underline;cursor:pointer}
 
   /* ── Location status banner (above the restaurant list) ── */
@@ -647,13 +647,56 @@
   <link rel="stylesheet" href="eatswada-app-transitions.css">
   <script>(function(){try{var d=sessionStorage.getItem('ew_app_nav_direction');if(d==='forward'||d==='back'){document.documentElement.classList.add('ew-dir-'+d);sessionStorage.removeItem('ew_app_nav_direction');}}catch(e){}})();</script>
 <style id="ew-fixes">
-/* 1. Same solid pink on header and banner (fixes colour mismatch) */
-.hero-header::before{background:#f9cbd8 !important;}
-.hero-header[data-theme="anime"],.hero-header[data-theme="pink"]{--hd-bg:#f9cbd8 !important;}
-.header-slide[data-theme="anime"],.header-slide[data-theme="pink"]{background:#f9cbd8 !important;}
-.header-slide__panel,.header-slide__panel::before,.header-slide__panel::after{background:transparent !important;}
-/* 2. Smaller section headings */
+/* ===== EatSwada blue theme (replaces pink) ===== */
+:root{--ew-blue:#2B50CF;--ew-blue-deep:#1F3FB0;--ew-yellow:#F4DC4A;--ew-navy:#0F1F4D;}
+
+/* Header shell + banner use ONE solid blue so they always match */
+.hero-header::before{background:var(--ew-blue) !important;box-shadow:0 16px 30px -20px rgba(15,31,77,.7);}
+.hero-header[data-theme]{--hd-bg:var(--ew-blue) !important;--hd-ink:#fff !important;--hd-muted:rgba(255,255,255,.78) !important;--hd-accent:var(--ew-yellow) !important;}
+.header-slide[data-theme]{background:var(--ew-blue) !important;--sl-ink:#fff;--sl-muted:rgba(255,255,255,.9);--sl-accent:var(--ew-yellow);--sl-cta-bg:#fff;--sl-cta-ink:var(--ew-navy);}
+.header-slide__panel,.header-slide__panel::before{background:transparent !important;}
+/* soft glow behind the food photo */
+.header-slide__panel::after{background:radial-gradient(circle at 72% 55%,rgba(255,255,255,.16),rgba(255,255,255,0) 58%) !important;width:100% !important;}
+
+/* Location row */
+.loc-name{color:#fff !important;}
+.loc-sub,.loc-chevron{color:rgba(255,255,255,.78) !important;}
+.hero-header .loc-pin-wrap{background:var(--ew-yellow) !important;box-shadow:0 4px 12px rgba(15,31,77,.28) !important;}
+.hero-header .loc-pin-wrap i,.hero-header .loc-pin-wrap svg{color:var(--ew-navy) !important;}
+.hero-header .btn-store{background:rgba(255,255,255,.14) !important;border:1px solid rgba(255,255,255,.28) !important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:none !important;}
+.store-top{color:rgba(255,255,255,.8) !important;}
+.store-bot{color:var(--ew-yellow) !important;}
+.hero-header .btn-profile{background:#fff !important;box-shadow:0 4px 12px rgba(15,31,77,.28) !important;}
+.profile-initial{color:var(--ew-blue) !important;}
+
+/* Search + veg: white pills with depth */
+.hero-header .search-box,.hero-header .veg-box{background:#fff !important;box-shadow:0 8px 22px -6px rgba(10,24,90,.45) !important;}
+.search-icon,.search-mic{color:var(--ew-blue) !important;}
+
+/* Banner text + button */
+.banner-title,.banner-title-accent{text-shadow:0 2px 0 rgba(15,31,77,.18);}
+.banner-cta{box-shadow:0 8px 18px -6px rgba(10,24,90,.5) !important;font-weight:900;}
+.hero-header .banner-dot{background:rgba(255,255,255,.45) !important;}
+.hero-header .banner-dot.is-active{background:var(--ew-yellow) !important;}
+
+/* Premium yellow offer strip (mobile) */
+.ew-strip{display:none;}
+@media (max-width:599px){
+  .banner-wrap{border-radius:0 !important;}
+  .hero-header::before{border-bottom-left-radius:30px !important;border-bottom-right-radius:30px !important;}
+  .ew-strip{display:flex;align-items:center;justify-content:center;gap:10px;position:relative;z-index:3;
+    width:calc(100% + 40px);margin:0 -20px;height:34px;background:var(--ew-yellow);color:var(--ew-navy);
+    font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;border-radius:0 0 30px 30px;}
+  .ew-strip::before,.ew-strip::after{content:"";width:26px;height:1px;background:rgba(15,31,77,.45);}
+}
+@media (max-width:380px){.ew-strip{width:calc(100% + 28px);margin:0 -14px;}}
+
+/* Section headings: smaller, with a blue accent bar */
 .sec-title,#restaurants-title,#mind-section .sec-title{font-size:16px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.2px !important;}
+.sec-title::before{content:"";display:inline-block;width:4px;height:15px;border-radius:3px;background:var(--ew-blue);margin-right:8px;vertical-align:-2px;}
+
+/* Remaining pink bits in this file */
+.psb-btn{color:var(--ew-blue) !important;}
 </style>
 </head>
 
@@ -724,6 +767,7 @@
     </div>
     <div class="banner-controls" id="banner-controls" role="tablist" aria-label="Choose promotion" hidden></div>
   </div>
+  <div class="ew-strip" aria-hidden="true">Nearby restaurants &middot; Maynaguri</div>
 </header>
 
 <main class="page">
