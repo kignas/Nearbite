@@ -7,7 +7,7 @@
    cards, borders, shadows, icons, imagery and interactions are shared.
 
    Hierarchy (see .agents/skills/eatswada-multi-header-color-system/):
-     PRIMARY    oxblood     — header, primary CTAs, cart bar, checkout
+     PRIMARY    raspberry   — header, primary CTAs, cart bar, checkout
      SECONDARY  food red    — strong secondary actions / active controls
      ACCENT     burgundy    — offers, badges, promotional emphasis
      NEUTRAL    vanilla/white/charcoal — the majority of the app
@@ -65,28 +65,28 @@
    cta-bg/ink  primary hero call-to-action pair
 
    The primary family intentionally covers the whole Eatswada UI color
-   hierarchy (oxblood primary, restrained secondary, gold accent,
+   hierarchy (raspberry primary, food-red secondary, burgundy accent,
    deal gold), so a future header theme can shift all of them together
    without any component rewrite.                                       */
 
-/* Default = the current Eatswada oxblood/gold hierarchy.
-   Unknown or removed header-theme values also resolve here. */
+/* Default = the Eatswada raspberry hierarchy (also used when the
+   attribute is missing or unknown). */
 :root,
-html[data-ew-header="oxblood"] {
-  --hd-primary: #5D0D18;
-  --hd-hover: #721323;
-  --hd-active: #3E0710;
-  --hd-soft: #F4E8EA;
+html[data-ew-header="raspberry"] {
+  --hd-primary: #E9546B;
+  --hd-hover: #D8435C;
+  --hd-active: #C13A50;
+  --hd-soft: #FDEBEE;
   --hd-ink: #FFFFFF;
-  --hd-muted: rgba(255, 255, 255, .72);
-  --hd-accent: #EBCB8B;
-  --hd-accent-ink: #5D0D18;
-  --hd-on-light: #5D0D18;
-  --hd-line: #E7D5D8;
-  --hd-cta-bg: #EBCB8B;
-  --hd-cta-ink: #3E0710;
-  --hd-secondary: #7A1F2B;
-  --hd-secondary-soft: #F4E8EA;
+  --hd-muted: rgba(255, 255, 255, .82);
+  --hd-accent: #9E1535;
+  --hd-accent-ink: #FFFFFF;
+  --hd-on-light: #C13A50;
+  --hd-line: #F6CDD4;
+  --hd-cta-bg: #9E1535;
+  --hd-cta-ink: #FFFFFF;
+  --hd-secondary: #E23744;
+  --hd-secondary-soft: #FCE9EA;
   --hd-deal: #F2C94C;
 
   /* Stable aliases used by shared components. They resolve to the active

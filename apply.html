@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#E9546B">
 <title>Become an Eatswada Vendor</title>
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
 <link rel="stylesheet" href="eatswada-header-theme.css">
 <script src="eatswada-header-theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,7 +311,7 @@
 (function () {
   'use strict';
 
-  var API = 'https://api.eatswada.com/api/vendor-applications';
+  var API = 'https://eatswada.onrender.com/api/vendor-applications';
   var token = function () { return localStorage.getItem('nearbite_token') || localStorage.getItem('token') || ''; };
   var existingApplication = null;
   var TOTAL_STEPS = 8;

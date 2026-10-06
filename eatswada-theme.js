@@ -25,7 +25,7 @@
     catch (_) { return LIGHT; }
   }
 
-  function ensureColorSchemeMeta() {
+  function ensureColorSchemeMeta(theme) {
     let meta = document.querySelector('meta[name="color-scheme"]');
     if (!meta) {
       meta = document.createElement('meta');
@@ -34,7 +34,9 @@
       if (first) document.head.insertBefore(meta, first);
       else if (document.head) document.head.appendChild(meta);
     }
-    meta.content = 'light dark';
+    // Default is light. Only advertise `dark` once the user has chosen dark,
+    // so a first-time visitor's OS dark preference cannot leak into the UI.
+    meta.content = theme === DARK ? 'light dark' : 'light';
   }
 
   function darkReaderFixes() {
@@ -135,7 +137,7 @@
     const root = document.documentElement;
     root.dataset.ewTheme = value;
     root.style.colorScheme = value;
-    ensureColorSchemeMeta();
+    ensureColorSchemeMeta(value);
 
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', value === DARK ? '#181A1B' : '#FFFFFF');
@@ -212,7 +214,7 @@
     });
   }
 
-  ensureColorSchemeMeta();
+  ensureColorSchemeMeta(getTheme());
   // First paint: state only. Dark Reader is then enabled immediately.
   applyTheme(getTheme());
 
