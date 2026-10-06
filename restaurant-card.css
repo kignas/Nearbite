@@ -1755,3 +1755,39 @@ body.u99-cust-open #nearbite-help-center{ display:none !important; }
 .u99-item-image{
   box-shadow: 0 4px 12px rgba(16, 24, 40, .07);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   FOOD IMAGE PLACEHOLDER + SMOOTH FADE-IN (same system as restaurant.html)
+   ------------------------------------------------------------------
+   restaurant-card.js already writes:
+     <div class="ew-food-ph"></div>  +  <img class="ew-img-fade" ...>
+   Flow: skeleton -> card with image frame + placeholder -> photo fades in.
+   - Structure rules below only position the placeholder inside the
+     image frame (safe even if food-placeholder.css is also loaded).
+   - The peach look uses :where() = zero specificity, so it is only a
+     fallback. If food-placeholder.css is loaded, ITS look wins and the
+     home cards match restaurant.html exactly.
+   ═══════════════════════════════════════════════════════════════════ */
+.u99-item-image .ew-food-ph{
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+}
+:where(.u99-item-image .ew-food-ph){
+  background:linear-gradient(135deg,#FFF3E8 0%,#FFE4D0 100%);
+}
+
+/* Photo sits on top of the placeholder, invisible until it has loaded. */
+.u99-item-image img.ew-img-fade{
+  opacity:0;
+  transition:opacity .4s ease;
+}
+.u99-item-image img.ew-img-fade.is-loaded{
+  opacity:1;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .u99-item-image img.ew-img-fade{ transition:none; }
+}
