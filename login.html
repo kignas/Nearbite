@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
@@ -560,9 +560,30 @@
       return user || {};
     }
     async function finishGoogleLogin(firebaseUser){
-      const idToken=await firebaseUser.getIdToken();
-      const res=await fetch(`${AUTH_API}/firebase`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
-      const data=await res.json().catch(()=>({}));
+      // 1) Obtain the ID token. Firebase authentication already succeeded here,
+      //    so a failure is a retryable local problem — never "you are logged out".
+      let idToken;
+      try{ idToken=await firebaseUser.getIdToken(); }
+      catch(_){
+        const err=new Error('We could not confirm your Google session. Please try again.');
+        err.code='token-unavailable';
+        throw err;
+      }
+
+      // 2) Exchange the verified token for an Eatswada session. A network
+      //    failure is reported as retryable, not as a logout.
+      let res,data;
+      try{
+        res=await fetch(`${AUTH_API}/firebase`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+        data=await res.json().catch(()=>({}));
+      }catch(_){
+        const err=new Error("Can't reach the server. Check your connection and try again.");
+        err.code='network';
+        throw err;
+      }
+
+      // 3) New Google user → complete the Eatswada profile. The verified token
+      //    is carried to the next step; it is never placed in a URL.
       if(data.code==='PROFILE_REQUIRED'){
         sessionStorage.setItem('nearbite_google_pending_token',idToken);
         sessionStorage.setItem('nearbite_google_pending_profile',JSON.stringify(data.data?.profile||{name:firebaseUser.displayName||'',email:firebaseUser.email||'',avatar:firebaseUser.photoURL||''}));
@@ -570,7 +591,14 @@
         window.location.href='complete-profile.html?google=1';
         return;
       }
-      if(!res.ok || !data.success) throw new Error(data.message||'Google authentication failed.');
+
+      // 4) The backend rejected the exchange. Surface its safe message instead
+      //    of silently bouncing back to the login form.
+      if(!res.ok || !data.success){
+        throw new Error(data.message||'Google authentication failed. Please try again.');
+      }
+
+      // 5) Existing, complete user → normal authenticated destination.
       const session=persistSession(data);
       const requested=localStorage.getItem('nearbite_after_login')||'index.html';
       routeAfterAuthentication(session.user,requested);
@@ -579,6 +607,9 @@
       const banner=document.getElementById('step1Banner'),text=document.getElementById('step1BannerText'); hideBanner(banner);
       if(!initFirebase()){ showBanner(banner,text,'Google Sign-In is not configured yet.'); return; }
       const btn=document.getElementById('googleSignInBtn'); if(btn)btn.disabled=true;
+      // Show the callback gate BEFORE the popup opens so the login form is not
+      // painted while getIdToken() + POST /api/auth/firebase + navigation run.
+      showAuthGate();
       try{
         const provider=new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({prompt:'select_account'});
@@ -586,8 +617,9 @@
         try{ result=await firebase.auth().signInWithPopup(provider); }
         catch(e){
           if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') {
-            // Mark the redirect as pending BEFORE leaving the page. This flag is
-            // what login.html reads on the way back, before it renders anything.
+            // Keep the gate up and mark the redirect as pending BEFORE leaving
+            // the page. This flag is what login.html reads on the way back,
+            // before it renders anything. The redirect is started exactly once.
             markGoogleRedirectPending();
             try{ await firebase.auth().signInWithRedirect(provider); }
             catch(redirectError){ revealLoginForm(''); throw redirectError; }
@@ -596,7 +628,13 @@
           throw e;
         }
         await finishGoogleLogin(result.user);
-      }catch(e){ console.error(e); showBanner(banner,text,e.code==='auth/popup-closed-by-user'?'Google sign-in was cancelled.':(e.message||'Google sign-in failed.')); }
+      }catch(e){
+        console.error(e);
+        // Cancellation or any recoverable failure: drop the gate so the login
+        // form is usable again, and tell the customer what happened.
+        revealLoginForm('');
+        showBanner(banner,text,e.code==='auth/popup-closed-by-user'?'Google sign-in was cancelled.':(e.message||'Google sign-in failed.'));
+      }
       finally{ if(btn)btn.disabled=false; }
     }
     /* ============================================================
@@ -629,6 +667,11 @@
         sessionStorage.setItem(GOOGLE_REDIRECT_KEY,'1');
         localStorage.setItem(GOOGLE_REDIRECT_KEY,'1');
       }catch(e){}
+      document.documentElement.classList.add('auth-callback');
+    }
+    // Show the callback gate without marking a redirect as pending. Used on the
+    // popup path so the login form is hidden while the token exchange runs.
+    function showAuthGate(){
       document.documentElement.classList.add('auth-callback');
     }
     function revealLoginForm(message){

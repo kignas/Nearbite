@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
   
-<script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
+<script>(function(){try{var t=localStorage.getItem('eatswada_theme');if(t==='dark')document.documentElement.dataset.ewTheme='dark';var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];document.documentElement.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
@@ -18,6 +18,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <style>
     /* ===== Eatswada onboarding design system — identical in login.html,
        complete-profile.html, location-onboarding.html and address.html ===== */
@@ -333,14 +335,53 @@
   const API = CONFIG.API_BASE_URL;
   const $ = id => document.getElementById(id);
   const googleMode = new URLSearchParams(location.search).get('google') === '1';
-  const pendingGoogleToken = sessionStorage.getItem('nearbite_google_pending_token') || '';
+  let pendingGoogleToken = sessionStorage.getItem('nearbite_google_pending_token') || '';
   const sessionToken = localStorage.getItem('nearbite_token') || localStorage.getItem('token') || '';
+  // Resolves once the Google hand-off has been validated (or immediately when
+  // no validation is needed). Page boot waits on this so loadExistingProfile
+  // never runs before the verified token is available.
+  let authReady = Promise.resolve();
 
   // Profile is now progressive. This page can be opened from Home/Profile as
   // well as the legacy Google onboarding link. Location/address are separate
   // delivery concerns and are never forced here.
   if(!googleMode && !sessionToken) window.location.replace('login.html');
-  if(googleMode && !pendingGoogleToken && !sessionToken) window.location.replace('login.html');
+  if(googleMode && !pendingGoogleToken && !sessionToken){
+    // A freshly authenticated Firebase user may be present even when the
+    // temporary sessionStorage hand-off token is missing (e.g. the store was
+    // unavailable across the navigation). Firebase is the source of truth: ask
+    // it for a live user and a fresh ID token, and only fall back to login when
+    // there is genuinely no Firebase user and no Eatswada session.
+    authReady = guardGoogleProfileCompletion();
+  }
+
+  function initFirebaseAuth(){
+    try{
+      if(!window.firebase || !firebase.apps || firebase.apps.length) return !!(window.firebase && firebase.apps && firebase.apps.length);
+      const cfg=(window.CONFIG && CONFIG.FIREBASE) || window.FIREBASE_CONFIG || null;
+      if(!cfg || !cfg.apiKey || !cfg.projectId) return false;
+      firebase.initializeApp(cfg);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  async function guardGoogleProfileCompletion(){
+    if(initFirebaseAuth()){
+      try{
+        const user=await new Promise(resolve=>{
+          const unsub=firebase.auth().onAuthStateChanged(u=>{ try{unsub();}catch(e){} resolve(u||null); });
+          setTimeout(()=>{ try{unsub();}catch(e){} resolve(firebase.auth().currentUser||null); },2500);
+        });
+        if(user){
+          const idToken=await user.getIdToken();
+          pendingGoogleToken=idToken;
+          sessionStorage.setItem('nearbite_google_pending_token',idToken);
+          return; // authenticated — continue the Google profile-completion flow
+        }
+      }catch(e){ /* fall through to the login redirect below */ }
+    }
+    window.location.replace('login.html');
+  }
 
   function formatPhone(raw){
     const d=String(raw||'').replace(/\D/g,'').slice(-10);
@@ -369,6 +410,9 @@
     syncCta();
   }
   async function loadExistingProfile(){
+    // Wait for the Google hand-off check so a freshly verified token is in
+    // place before deciding how to paint the page.
+    try{ await authReady; }catch(e){}
     if(googleMode && pendingGoogleToken){ paintGoogleProfile(); return; }
     const token=sessionToken;
     try{const r=await fetch(`${API}/users/profile`,{headers:{Authorization:`Bearer ${token}`}});const d=await r.json();if(!r.ok||!d.success)return;const u=d.data||{};$('phone').value=formatPhone(u.phone);if(u.adultConfirmedAt)$('age18').checked=true;if(u.name&&!/^(Nearbite|Eatswada) User$/i.test(u.name))$('name').value=u.name;if(u.email)$('email').value=u.email;}catch(e){console.warn(e)}finally{syncCta()}
