@@ -1,5 +1,5 @@
 const CACHE='eatswada-shell-v5';
-const SHELL=['./','./index.html','./profile.html','./orders.html','./cart.html','./address.html','./address-new.html','./search.html','./category.html','./restaurant.html','./complete-profile.html','./location-onboarding.html','./service-unavailable.html','./config.js','./api.js','./navigation.js','./cart-bar.js','./bottom-tab-bar.js','./favorites.js','./restaurant-card.js','./home.js','./safe-html.js','./seo.js','./style.css','./restaurant-card.css'];
+const SHELL=['./','./index.html','./profile.html','./orders.html','./cart.html','./address.html','./address-new.html','./search.html','./category.html','./restaurant.html','./complete-profile.html','./location-onboarding.html','./config.js','./api.js','./navigation.js','./cart-bar.js','./bottom-tab-bar.js','./favorites.js','./restaurant-card.js','./home.js','./safe-html.js','./seo.js','./style.css','./restaurant-card.css'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{
