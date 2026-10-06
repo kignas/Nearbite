@@ -910,36 +910,6 @@
     renderRestaurants();
   }
 
-  function allowOutsideBrowse() {
-    try { return new URLSearchParams(window.location.search).get('allowOutside') === '1'; }
-    catch (e) { return false; }
-  }
-
-  /* If the selected location is outside every restaurant's verified delivery
-     radius, show the dedicated service-area page. This is a browsing/service
-     state, not an authentication state. The customer can still choose any
-     location and return to Home with ?allowOutside=1 to explore. */
-  function maybeRedirectOutsideServiceArea() {
-    if (allowOutsideBrowse()) return;
-    if (state.loc.status !== 'ready' || !state.restaurants.length) return;
-    var coords = card.getCustomerCoordinates();
-    if (!coords) return;
-    var allOutside = true;
-    var checked = 0;
-    state.restaurants.forEach(function (res) {
-      var restaurantCoords = card.read.coordinates(res);
-      if (!restaurantCoords) return;
-      checked += 1;
-      if (card.resolveAvailability(res, coords) !== 'outside_delivery_area') allOutside = false;
-    });
-    if (!checked || !allOutside) return;
-    if (window.__esOutsideServiceRedirected) return;
-    window.__esOutsideServiceRedirected = true;
-    window.setTimeout(function () {
-      window.location.replace('service-unavailable.html');
-    }, 120);
-  }
-
   /* "Recommended with deals" is only true when the data actually carries
      offers, so the heading follows the data instead of asserting it. */
   function renderSectionTitle() {
@@ -1263,7 +1233,6 @@
     if (state.status !== 'loading' && status !== 'locating') {
       renderFilterBar();   // the Distance sort appears once a location exists
       renderRestaurants(); // re-reads the coordinates and re-decides every card
-      maybeRedirectOutsideServiceArea();
     }
   }
 
