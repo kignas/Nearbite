@@ -74,7 +74,7 @@
     {
       id: 'nearfast',
       label: 'Near & Fast',
-      icon: '<i class="fa-solid fa-bolt" style="color:var(--ew-success,#23956D)"></i> ',
+      icon: '<i class="fa-solid fa-bolt" style="color:#16a34a"></i> ',
       group: 'QUICK FILTERS',
       showInBar: true,
       supported: function (list) {
@@ -500,32 +500,13 @@
     bar.hidden = false;
 
     bar.querySelectorAll('[data-filter]').forEach(function (button) {
-      button.addEventListener('click', function (event) {
-        var filterId = button.getAttribute('data-filter');
-        button.style.setProperty('--filter-ripple-x', (event.clientX - button.getBoundingClientRect().left) + 'px');
-        button.style.setProperty('--filter-ripple-y', (event.clientY - button.getBoundingClientRect().top) + 'px');
-        button.classList.remove('is-rippling');
-        void button.offsetWidth;
-        button.classList.add('is-rippling');
-
-        window.setTimeout(function () {
-          toggleFilter(filterId);
-          animateFilterResult();
-        }, 170);
+      button.addEventListener('click', function () {
+        toggleFilter(button.getAttribute('data-filter'));
       });
     });
 
     var sheetBtn = el('filter-sheet-btn');
-    if (sheetBtn) {
-      sheetBtn.addEventListener('click', function (event) {
-        sheetBtn.style.setProperty('--filter-ripple-x', (event.clientX - sheetBtn.getBoundingClientRect().left) + 'px');
-        sheetBtn.style.setProperty('--filter-ripple-y', (event.clientY - sheetBtn.getBoundingClientRect().top) + 'px');
-        sheetBtn.classList.remove('is-rippling');
-        void sheetBtn.offsetWidth;
-        sheetBtn.classList.add('is-rippling');
-        window.setTimeout(openFilterSheet, 130);
-      });
-    }
+    if (sheetBtn) sheetBtn.addEventListener('click', openFilterSheet);
 
     syncVegToggle();
   }
@@ -581,42 +562,6 @@
     } catch (e) { }
   }
 
-  /* ── Filter interaction feedback ──────────────────────────────
-     The existing filter state/rendering stays unchanged. These helpers only
-     give the tap a short, visible ripple/press window before the result
-     re-renders, so Android taps do not feel like they jump instantly. */
-  function playFilterTap(button, action) {
-    if (!button) {
-      action();
-      return;
-    }
-
-    var rect = button.getBoundingClientRect();
-    var x = Math.max(0, Math.min(rect.width, (window.event && window.event.clientX) - rect.left));
-    var y = Math.max(0, Math.min(rect.height, (window.event && window.event.clientY) - rect.top));
-
-    button.style.setProperty('--filter-ripple-x', x + 'px');
-    button.style.setProperty('--filter-ripple-y', y + 'px');
-    button.classList.remove('is-rippling');
-    void button.offsetWidth;
-    button.classList.add('is-rippling');
-
-    window.setTimeout(function () {
-      action();
-    }, 170);
-  }
-
-  function animateFilterResult() {
-    var list = el('restaurant-list');
-    if (!list) return;
-    list.classList.remove('filter-result-enter');
-    void list.offsetWidth;
-    list.classList.add('filter-result-enter');
-    window.setTimeout(function () {
-      list.classList.remove('filter-result-enter');
-    }, 420);
-  }
-
   /* ── Filter actions ─────────────────────────────────────────── */
 
   function toggleFilter(id) {
@@ -627,9 +572,20 @@
     else state.filter.active.splice(index, 1);
 
     updateURL();
+
+    /*
+     * Update the Veg switch immediately from the new filter state.
+     * This keeps the visual ON/OFF state deterministic even if a later
+     * restaurant re-render takes longer or hits an empty-result branch.
+     */
+    if (id === 'veg') syncVegToggle();
+
     renderFilterBar();
     renderRestaurants();
     renderSheetBody();
+
+    /* Final sync after all rendering has completed. */
+    if (id === 'veg') syncVegToggle();
   }
 
   function setSort(id) {
@@ -746,32 +702,14 @@
     body.innerHTML = html;
 
     body.querySelectorAll('[data-sort]').forEach(function (button) {
-      button.addEventListener('click', function (event) {
-        button.style.setProperty('--filter-ripple-x', (event.clientX - button.getBoundingClientRect().left) + 'px');
-        button.style.setProperty('--filter-ripple-y', (event.clientY - button.getBoundingClientRect().top) + 'px');
-        button.classList.remove('is-rippling');
-        void button.offsetWidth;
-        button.classList.add('is-rippling');
-
-        window.setTimeout(function () {
-          setSort(button.getAttribute('data-sort'));
-          animateFilterResult();
-        }, 170);
+      button.addEventListener('click', function () {
+        setSort(button.getAttribute('data-sort'));
       });
     });
 
     body.querySelectorAll('[data-sheet-filter]').forEach(function (button) {
-      button.addEventListener('click', function (event) {
-        button.style.setProperty('--filter-ripple-x', (event.clientX - button.getBoundingClientRect().left) + 'px');
-        button.style.setProperty('--filter-ripple-y', (event.clientY - button.getBoundingClientRect().top) + 'px');
-        button.classList.remove('is-rippling');
-        void button.offsetWidth;
-        button.classList.add('is-rippling');
-
-        window.setTimeout(function () {
-          toggleFilter(button.getAttribute('data-sheet-filter'));
-          animateFilterResult();
-        }, 170);
+      button.addEventListener('click', function () {
+        toggleFilter(button.getAttribute('data-sheet-filter'));
       });
     });
   }
@@ -878,17 +816,13 @@
     if (state.categories.length) {
       if (section) section.hidden = false;
       scroll.innerHTML = state.categories.map(function (cat, i) {
-        return '<a class="cat-item' +
-          (state.categoryMode && state.categoryMode.name.toLowerCase() === String(cat.type).toLowerCase() ? ' is-selected' : '') +
-          '" href="#' + encodeURIComponent(cat.type) +
+        return '<a class="cat-item" href="#' + encodeURIComponent(cat.type) +
           '" data-category-name="' + card.escape(cat.type) + '"' +
           ' style="animation: cardFadeUp .28s ease forwards ' + Math.min(i, 8) * 0.03 + 's; opacity:0;">' +
-          '<span class="cat-ring cat-image-shell">' +
-            '<span class="cat-image-placeholder" aria-hidden="true"><span class="cat-placeholder-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9.5h10M8.5 13h7M9.5 16.5h5M5.5 6.5h13a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17V8a1.5 1.5 0 0 1 1.5-1.5Z"/></svg></span></span>' +
-            '<img src="' + card.escape(String(safeUrl(cat.image)||'').replace('/upload/','/upload/f_auto,q_auto,w_200/')) + '" alt="' + card.escape(cat.name) +
-            '" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')"' +
-            ' onerror="this.classList.add(\'failed\');this.closest(\'.cat-item\').classList.add(\'image-failed\')">' +
-            '<span class="cat-selected-badge" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +
+          '<span class="cat-ring">' +
+            '<img src="' + card.escape(safeUrl(cat.image)) + '" alt="' + card.escape(cat.name) +
+            '" loading="lazy" onload="this.classList.add(\'loaded\')"' +
+            ' onerror="this.closest(\'.cat-item\').remove()">' +
           '</span>' +
           '<span class="cat-name">' + card.escape(cat.name) + '</span>' +
         '</a>';
@@ -897,17 +831,7 @@
       scroll.querySelectorAll('[data-category-name]').forEach(function (link) {
         link.addEventListener('click', function (event) {
           event.preventDefault();
-          var categoryName = link.getAttribute('data-category-name') || '';
-          var sameCategory = state.categoryMode &&
-            state.categoryMode.name.toLowerCase() === categoryName.toLowerCase();
-
-          /* Immediate visual feedback; searchCategory() remains the existing data/filter path. */
-          scroll.querySelectorAll('.cat-item.is-selected').forEach(function (item) {
-            item.classList.remove('is-selected');
-          });
-          if (!sameCategory) link.classList.add('is-selected');
-
-          searchCategory(categoryName);
+          searchCategory(link.getAttribute('data-category-name') || '');
         });
       });
       return;
@@ -991,39 +915,29 @@
     catch (e) { return false; }
   }
 
-  /* Keep customers on Home when no restaurant serves the selected address.
-     Restaurant cards remain visible; availability is rendered per restaurant. */
+  /* If the selected location is outside every restaurant's verified delivery
+     radius, show the dedicated service-area page. This is a browsing/service
+     state, not an authentication state. The customer can still choose any
+     location and return to Home with ?allowOutside=1 to explore. */
   function maybeRedirectOutsideServiceArea() {
-    var host = el('home-service-area-notice');
+    if (allowOutsideBrowse()) return;
+    if (state.loc.status !== 'ready' || !state.restaurants.length) return;
     var coords = card.getCustomerCoordinates();
-    var ready = state.loc.status === 'ready' && !!coords && state.restaurants.length > 0;
-    var available = ready && state.restaurants.some(function (res) {
-      return card.resolveAvailability(res, coords) !== 'outside_delivery_area';
+    if (!coords) return;
+    var allOutside = true;
+    var checked = 0;
+    state.restaurants.forEach(function (res) {
+      var restaurantCoords = card.read.coordinates(res);
+      if (!restaurantCoords) return;
+      checked += 1;
+      if (card.resolveAvailability(res, coords) !== 'outside_delivery_area') allOutside = false;
     });
-
-    if (!host) {
-      host = document.createElement('section');
-      host.id = 'home-service-area-notice';
-      host.className = 'home-service-area-notice';
-      host.setAttribute('role', 'status');
-      var list = el('restaurant-list');
-      if (list && list.parentNode) list.parentNode.insertBefore(host, list);
-    }
-    if (!ready || available) {
-      host.hidden = true;
-      host.innerHTML = '';
-      return;
-    }
-    host.hidden = false;
-    host.innerHTML =
-      '<div class="home-service-area-notice__icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>' +
-      '<div><strong>We’re not there yet</strong>' +
-      '<p>We don’t currently deliver to this address. You can still explore restaurants and change your delivery address.</p>' +
-      '<button type="button" class="home-service-area-change" id="home-service-area-change">Change address</button></div>';
-    var change = el('home-service-area-change');
-    if (change) change.addEventListener('click', function () {
-      window.location.href = 'address.html?view=select';
-    });
+    if (!checked || !allOutside) return;
+    if (window.__esOutsideServiceRedirected) return;
+    window.__esOutsideServiceRedirected = true;
+    window.setTimeout(function () {
+      window.location.replace('service-unavailable.html');
+    }, 120);
   }
 
   /* "Recommended with deals" is only true when the data actually carries
@@ -1070,7 +984,6 @@
 
         applyRestaurants(list);
         renderDeliveryEstimate();
-        maybeRedirectOutsideServiceArea();
         renderNotice();
       })
       .catch(function (error) {
@@ -1087,7 +1000,7 @@
       })
       .then(function () {
         state.isRefreshing = false;
-        /* Location setup is handled by the new-user address prompt. */
+        maybePromptForLocation();
       });
   }
 
@@ -1379,7 +1292,7 @@
           setLocationStatus('ready', 'device');
         } else {
           setLocationStatus('idle');
-          /* Home no longer auto-opens a browser-permission sheet. */
+          maybePromptForLocation();
         }
       });
       return;
@@ -1402,10 +1315,12 @@
   function requestDeviceLocation() {
     if (!navigator.geolocation) {
       setLocationStatus('unavailable');
+      updateSheetForState();
       return;
     }
 
     setLocationStatus('locating');
+    updateSheetForState();
 
     navigator.geolocation.getCurrentPosition(
       function (position) {
@@ -1413,17 +1328,20 @@
 
         if (!point) {
           setLocationStatus('unavailable');
-              return;
+          updateSheetForState();
+          return;
         }
 
         writeDeviceLocation(point);
         setLocationStatus('ready', 'device');
+        closeLocationSheet();
       },
       function (error) {
         var denied = error && error.code === 1;
         if (denied) markPromptDismissed();
         setLocationStatus(denied ? 'denied' : 'unavailable');
-        },
+        updateSheetForState();
+      },
       GPS_OPTIONS
     );
   }
@@ -1519,17 +1437,156 @@
         var action = button.getAttribute('data-loc-action');
         if (action === 'address') window.location.href = 'address.html?view=select';
         else if (action === 'retry') requestDeviceLocation();
-        else window.location.href = 'address.html?view=select';
+        else openLocationSheet();
       });
     });
   }
 
-  /* Home no longer displays the legacy orange permission/help sheet.
-     Address selection is handled by address.html; device location is only
-     requested from an explicit user action. */
-  function maybePromptForLocation() { return; }
+  /* ── Location sheet ─────────────────────────────────────────── */
+
+  var SHEET_COPY = {
+    ask: {
+      title: 'Allow location to continue',
+      text: 'We use your location to show restaurants that can deliver to you and calculate your delivery distance.',
+      primary: 'Allow location'
+    },
+    locating: {
+      title: 'Getting your location',
+      text: 'This only takes a moment.',
+      primary: 'Getting location…'
+    },
+    denied: {
+      title: 'Location access is needed',
+      text: 'Location access is needed to check delivery availability. You can allow it in your browser settings, or pick a saved address instead.',
+      primary: 'Try again'
+    },
+    unavailable: {
+      title: 'Location unavailable',
+      text: 'We couldn\'t get your location. Try again, or pick a saved address instead.',
+      primary: 'Try again'
+    }
+  };
+
+  var sheetReturnFocus = null;
+
+  function updateSheetForState() {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden) return;
+
+    var mode = state.loc.status === 'denied' ? 'denied'
+             : state.loc.status === 'unavailable' ? 'unavailable'
+             : state.loc.status === 'locating' ? 'locating'
+             : 'ask';
+
+    var copy = SHEET_COPY[mode];
+    var title = el('location-sheet-title');
+    var text = el('location-sheet-text');
+    var allow = el('location-allow-btn');
+
+    if (title) title.textContent = copy.title;
+    if (text) text.textContent = copy.text;
+    if (allow) {
+      allow.textContent = copy.primary;
+      allow.disabled = mode === 'locating';
+    }
+  }
+
   function openLocationSheet() {
-    window.location.href = 'address.html?view=select';
+    var sheet = el('location-sheet');
+    if (!sheet || !sheet.hidden) return;
+
+    sheetReturnFocus = document.activeElement;
+    sheet.hidden = false;
+    updateSheetForState();
+
+    requestAnimationFrame(function () { sheet.classList.add('open'); });
+    document.body.style.overflow = 'hidden';
+
+    var allow = el('location-allow-btn');
+    if (allow) allow.focus();
+  }
+
+  function closeLocationSheet(dismissedByUser) {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden) return;
+
+    if (dismissedByUser) markPromptDismissed();
+
+    sheet.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(function () { sheet.hidden = true; }, 220);
+
+    if (sheetReturnFocus && typeof sheetReturnFocus.focus === 'function') {
+      sheetReturnFocus.focus();
+    }
+    sheetReturnFocus = null;
+  }
+
+  function trapSheetFocus(event) {
+    var sheet = el('location-sheet');
+    if (!sheet || sheet.hidden || event.key !== 'Tab') return;
+
+    var focusable = sheet.querySelectorAll(
+      'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusable.length) return;
+
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function bindLocationSheet() {
+    var sheet = el('location-sheet');
+    if (!sheet) return;
+
+    sheet.addEventListener('click', function (event) {
+      if (event.target.hasAttribute('data-close-location-sheet')) {
+        closeLocationSheet(true);
+      }
+    });
+
+    var allow = el('location-allow-btn');
+    if (allow) allow.addEventListener('click', requestDeviceLocation);
+
+    document.addEventListener('keydown', function (event) {
+      if (sheet.hidden) return;
+      if (event.key === 'Escape') {
+        closeLocationSheet(true);
+        return;
+      }
+      trapSheetFocus(event);
+    });
+  }
+
+  /* Asks only when the answer would change something: no location yet,
+     not already dismissed or denied, and at least one restaurant carries
+     coordinates to compare against. */
+  function maybePromptForLocation() {
+    if (state.loc.status !== 'idle') return;
+    if (promptDismissed()) return;
+    if (state.status !== 'ready') return;
+    if (!state.restaurants.some(function (res) { return !!card.read.coordinates(res); })) return;
+
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' })
+        .then(function (result) {
+          if (result.state === 'granted') requestDeviceLocation();  // no popup needed
+          else if (result.state === 'denied') setLocationStatus('denied');
+          else openLocationSheet();
+        })
+        .catch(function () { openLocationSheet(); });
+      return;
+    }
+
+    openLocationSheet();
   }
 
   /* ── Saved delivery address ─────────────────────────────────── */
@@ -1654,6 +1711,7 @@
     parseURL();
 
     bindStaticControls();
+    bindLocationSheet();
 
     /* One location read per page load, before any distance is shown. */
     resolveStoredLocation();
@@ -1663,15 +1721,7 @@
     renderProfileSetupBanner();
     startSearchPlaceholder();
     loadRestaurants();
-
-    // Categories sit below the hero/search shell. Give the browser one turn to
-    // paint the critical header/hero and start the primary restaurant request
-    // before refreshing categories. Cached categories are still rendered by
-    // loadCategories() when this callback runs.
-    var scheduleCategoryLoad = window.requestIdleCallback || function (cb) {
-      return window.setTimeout(cb, 180);
-    };
-    scheduleCategoryLoad(function () { loadCategories(); }, { timeout: 900 });
+    loadCategories();
   }
 
   if (document.readyState === 'loading') {
