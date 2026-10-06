@@ -30,7 +30,6 @@
     'legal.html': 'profile.html',
     'privacy-data.html': 'profile.html',
     'location-onboarding.html': 'index.html',
-    'service-unavailable.html': 'index.html',
     'complete-profile.html': 'login.html',
     'address-new.html': 'index.html'
   };
