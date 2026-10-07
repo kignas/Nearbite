@@ -275,6 +275,7 @@
     .help-item { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--line); background: #fff; font-size: 13px; font-weight: 700; color: var(--ink-800); text-decoration: none; text-align: left; }
     .help-item i { color: var(--ink-400); font-size: 13px; width: 14px; text-align: center; }
     .help-item.danger { color: var(--danger); } .help-item.danger i { color: var(--danger); }
+    .cancel-window-note { margin-top: 8px; font-size: 11px; line-height: 16px; color: var(--ink-500); }
 
     /* ---------- rating ---------- */
     .rating-card { display: none; padding: 16px 14px; text-align: center; }
@@ -577,6 +578,7 @@
   <script src="order-status.js?v=20260926-1"></script>
   <script>
     let pollInterval;
+    let customerCancelTimer = null;
     // ── Customer push notifications are owned by push.js. ────────────────
     // Do not create a second local Notification here: FCM foreground messages
     // are surfaced once by push.js, while background messages are handled by
@@ -870,6 +872,26 @@
       const OS = window.EatswadaOrderStatus;
       const info = OS.info(order);
       const head = OS.headline(order);
+
+      // Customer-facing delivery countdown: once the order is handed to the
+      // delivery flow, show a 7:00 -> 0:00 countdown. This is display-only;
+      // backend ETA/rider data remains unchanged.
+      const statusNow = OS.norm(order.status);
+      const deliveryStage = ['assigned', 'picked_up', 'out_for_delivery', 'otp_verified'].includes(statusNow);
+      if (deliveryStage && head.etaValue) {
+        const countdownKey = String(order._id || order.id || '');
+        if (!window.__ewDeliveryCountdown || window.__ewDeliveryCountdown.key !== countdownKey) {
+          window.__ewDeliveryCountdown = { key: countdownKey, end: Date.now() + 7 * 60 * 1000 };
+        }
+        const remaining = Math.max(0, window.__ewDeliveryCountdown.end - Date.now());
+        const totalSeconds = Math.ceil(remaining / 1000);
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        head.etaValue = mins + ':' + String(secs).padStart(2, '0');
+        head.etaLabel = 'Arriving in';
+        head.overdue = false;
+      }
+
       const hero = document.getElementById('hero-bg');
       hero.style.display = 'flex';
       hero.classList.toggle('cancelled', info.group === 'cancelled');
@@ -893,6 +915,13 @@
         etaBox.hidden = true;
         etaTime.textContent = '';
       }
+    }
+
+    // Refresh the customer-facing 7-minute countdown every second.
+    if (!window.__ewDeliveryCountdownTimer) {
+      window.__ewDeliveryCountdownTimer = setInterval(function () {
+        if (currentOrder) renderStatusCard(currentOrder);
+      }, 1000);
     }
 
     let lastTimelineHtml = '';
@@ -1056,6 +1085,7 @@
       const status = OS.norm(order.status);
 
       if (status === 'cancelled') {
+        clearCustomerCancelTimer();
         clearInterval(pollInterval);
         renderStatusCard(order);
         const reason = String(order.cancelReason || '').trim();
@@ -1068,6 +1098,7 @@
       }
 
       if (status === 'delivered') {
+        clearCustomerCancelTimer();
         clearInterval(pollInterval);
         document.getElementById('hero-bg').style.display = 'none';
         timelineCard.style.display = 'none';
@@ -1113,13 +1144,49 @@
         }
       }
 
-      // Cancel is offered only before the kitchen starts preparing. isCancellable
-      // is the backend's source of truth (flipped false at 'preparing' and beyond).
-      if (order.isCancellable && ['pending', 'placed', 'confirmed'].includes(status)) {
-        helpCancelBtn.style.display = 'flex';
+      // Customer cancellation is available only during the first 30 seconds
+      // after placement. The backend remains authoritative; this timer is UI only.
+      if (status === 'placed' && order.isCancellable) {
+        startCustomerCancelTimer(order);
+      } else {
+        clearCustomerCancelTimer();
+        helpCancelBtn.style.display = 'none';
       }
 
       updateLiveMap(order);
+    }
+
+    function clearCustomerCancelTimer() {
+      if (customerCancelTimer) { clearInterval(customerCancelTimer); customerCancelTimer = null; }
+    }
+
+    function startCustomerCancelTimer(order) {
+      clearCustomerCancelTimer();
+      const btn = document.getElementById('help-cancel');
+      if (!btn) return;
+      const status = OS.norm(order?.status);
+      if (status !== 'placed' || order?.isCancellable === false) {
+        btn.style.display = 'none';
+        return;
+      }
+      const rawDeadline = order.customerCancellationDeadline || (order.createdAt ? new Date(new Date(order.createdAt).getTime() + 30000).toISOString() : '');
+      const deadline = rawDeadline ? new Date(rawDeadline).getTime() : 0;
+      if (!deadline || !Number.isFinite(deadline)) { btn.style.display = 'none'; return; }
+
+      const render = () => {
+        const remaining = Math.max(0, deadline - Date.now());
+        if (remaining <= 0) {
+          clearCustomerCancelTimer();
+          btn.style.display = 'none';
+          return;
+        }
+        const seconds = Math.ceil(remaining / 1000);
+        btn.style.display = 'flex';
+        btn.innerHTML = '<i class="fa-solid fa-ban"></i> Cancel order <span aria-hidden="true">· ' + seconds + 's</span>';
+        btn.setAttribute('aria-label', 'Cancel order. ' + seconds + ' seconds remaining');
+      };
+      render();
+      customerCancelTimer = setInterval(render, 250);
     }
 
     function renderCancellation(order) {
@@ -1246,7 +1313,7 @@
             : '';
           const body = `
             ${refundLine}
-            <p class="sheet-note">This can't be undone, and you can only cancel before the restaurant starts preparing your food.</p>
+            <p class="sheet-note">This can't be undone. Customer cancellation is available only during the first 30 seconds after the order is placed.</p>
             <textarea id="cancel-reason-input" class="cancel-reason-input" rows="2" maxlength="200" placeholder="Reason (optional)"></textarea>
             <button class="sheet-cta tap danger" id="confirm-cancel-btn"><i class="fa-solid fa-ban"></i> Yes, cancel order</button>
             <button class="sheet-cta-ghost tap" id="keep-order-btn">Keep my order</button>
