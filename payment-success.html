@@ -66,9 +66,16 @@ const KEY='nearbite_payment_context';let ctx=null;try{ctx=JSON.parse(localStorag
 const box=document.getElementById('ew-order'),num=document.getElementById('ew-order-number');
 if(ctx?.orderNumber){num.textContent=ctx.orderNumber;box.hidden=false}
 let done=false;
-function go(){if(done)return;done=true;if(!ctx?.orderId){location.href='orders.html';return}
-try{if(ctx.multiple&&ctx.deliveryOtps){Object.keys(ctx.deliveryOtps).forEach(id=>{if(ctx.deliveryOtps[id])localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id])})}
-else if(ctx.deliveryOtp)localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp);localStorage.removeItem(KEY)}catch(_){}
+function go(){if(done)return;done=true;
+try{if(ctx?.multiple&&ctx.deliveryOtps){Object.keys(ctx.deliveryOtps).forEach(id=>{if(ctx.deliveryOtps[id])localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id])})}
+else if(ctx?.deliveryOtp&&ctx?.orderId)localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp)}catch(_){}
+/* No order id available (e.g. the page was refreshed after the context was
+   consumed). Stay on this confirmation screen instead of falling through to
+   the Orders list, which would look like the payment never completed. */
+if(!ctx?.orderId)return;
+/* Keep the context until we actually leave, so refresh/back can still resolve
+   the order; only clear it once we navigate to the order view. */
+try{localStorage.removeItem(KEY)}catch(_){}
 location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId)}
 document.getElementById('ew-continue').addEventListener('click',go);setTimeout(go,3600)
 })();

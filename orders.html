@@ -944,7 +944,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script src="navigation.js"></script>
-  <script src="bottom-tab-bar.js"></script>
 <div class="invoice-overlay" id="invoice-overlay">
   <div class="invoice-sheet">
     <button class="inv-close no-print" onclick="closeInvoice()" aria-label="Close">&times;</button>
@@ -955,15 +954,9 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
-<!-- Phase 1: React Orders island (isolated, feature-flagged, off by default).
-     The vanilla Orders page above stays intact and is used whenever the
-     island is disabled, the flag is off, or JavaScript fails. -->
-<div id="ew-orders-island" hidden></div>
-<script src="islands/orders-island.js" defer></script>
-<!-- Phase 3: persistent React nav island (same component/bundle as index.html,
-     feature-flagged, off by default). Hidden mount node plus one deferred
-     script tag only; no existing Orders content, markup, or styling changed. -->
-<div id="ew-nav-island" hidden></div>
-<script src="islands/nav-island.js" defer></script>
+<!-- Phase 1/3 React islands were referenced here but their bundles
+     (islands/orders-island.js, islands/nav-island.js) are not part of this
+     build. The vanilla Orders page above is the only implementation; the dead
+     mount nodes and script tags were removed to stop 404 requests. -->
 </body>
 </html>

@@ -1692,7 +1692,10 @@ body.u99-cust-open #nearbite-help-center{ display:none !important; }
   }
 
   .u99-carousel {
-    min-height: calc((100vw - 42px) / 1.75 + 57px);
+    /* Was calc((100vw - 42px) / 1.75 + 57px) — orphaned once the final mobile
+       card moved to a shallower image + ~30vw tiles, leaving 91–135px of blank
+       space inside each card. Content now defines the rail height. */
+    min-height: 0;
   }
 
   .u99-carousel.u99-carousel-empty {
@@ -1702,7 +1705,8 @@ body.u99-cust-open #nearbite-help-center{ display:none !important; }
 
 @media (max-width: 370px) {
   .u99-carousel {
-    min-height: calc((100vw - 40px) / 1.75 + 55px);
+    /* Was calc((100vw - 40px) / 1.75 + 55px) — same orphaned reservation. */
+    min-height: 0;
   }
 
   .u99-carousel.u99-carousel-empty {
