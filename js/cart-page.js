@@ -1535,6 +1535,7 @@ async function placeOrder() {
     );
 
     const rzp = new Razorpay({
+      timeout: 300,
       key: result.payment.keyId,
       amount: result.payment.amount,
       currency: result.payment.currency || 'INR',
