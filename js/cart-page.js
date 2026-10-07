@@ -225,7 +225,7 @@ async function calculateCurrentDelivery(options) {
   const needsHydration = force || ctAddrHydratedFor !== selectedAddressId;
   if (token && selectedAddressId && needsHydration) {
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+      const response = await fetch(`${CONFIG.API_BASE_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
       const result = await response.json();
       if (response.ok && result.success) {
         ctCaptureProfile(result.data);
@@ -1151,7 +1151,7 @@ async function loadAddress() {
   // browser's localStorage. Hydrate the local cart UI from their saved profile.
   if (token && !hasAddress()) {
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/users/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await response.json();
@@ -2725,7 +2725,7 @@ async function ctEnsureProfile() {
     return;
   }
   try {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/profile`, {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/users/profile`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store'
     });
