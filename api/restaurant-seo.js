@@ -54,7 +54,7 @@ module.exports = async function handler(req, res) {
 
     const host = (req.headers && req.headers.host) || 'eatswada.com';
     const protocol = (req.headers && req.headers['x-forwarded-proto']) || 'https';
-    const shellUrl = protocol + '://' + host + '/restaurant-shell.html';
+    const shellUrl = protocol + '://' + host + '/restaurant-shell';
     const shellResponse = await new Promise((resolve, reject) => {
       https.get(shellUrl, response => {
         let body = '';
@@ -105,7 +105,7 @@ module.exports = async function handler(req, res) {
       '<meta property="og:url" content="' + esc(canonical) + '">',
       image ? '<meta property="og:image" content="' + esc(image) + '">' : '',
       '<script type="application/ld+json">' + JSON.stringify(schema).replace(/</g,'\\u003c') + '</script>',
-      '<script>try{history.replaceState(null,"",location.pathname+"?id=' + encodeURIComponent(id) + location.hash)}catch(e){}</script>'
+      '<script>try{history.replaceState(null,"",location.pathname+"?id=' + encodeURIComponent(id) + '"+location.hash)}catch(e){}</script>'
     ].filter(Boolean).join('\n');
     output = output.replace(/<\/head>/i, inject + '\n</head>');
     return send(res, 200, output, {'X-Robots-Tag': robots});
