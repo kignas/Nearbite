@@ -7,17 +7,16 @@
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta content="same-origin" name="view-transition"/>
 <title>Menu – EatSwada</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
-
-
+<link rel="preconnect" href="https://api.eatswada.com" crossorigin>
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 <link href="css/eatswada-typography.css" rel="stylesheet"/>
 <link href="style.css" rel="stylesheet"/>
 
@@ -34,32 +33,14 @@
   <link rel="stylesheet" href="css/step4-menu-geometry.css">
 <link rel="stylesheet" href="search-overlay.css">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
+<link rel="stylesheet" href="food-placeholder.css">
+<link rel="stylesheet" href="css/restaurant-tabs.css">
 
-
-
-
-
-
-
-
-
-
-<script src="seo.js" defer></script>
-
-<meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
-<meta name="robots" content="noindex, nofollow"/>
-<link rel="canonical" href="https://eatswada.com/restaurant-shell.html"/>
-<meta property="og:type" content="website"/>
-<meta property="og:site_name" content="EatSwada"/>
-<meta property="og:title" content="Menu – EatSwada"/>
-<meta property="og:description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
-<meta property="og:url" content="https://eatswada.com/restaurant-shell.html"/>
 <meta name="twitter:card" content="summary"/>
 </head>
 <body>
@@ -147,12 +128,13 @@
 <div class="order-hint" hidden="" id="order-hint"></div>
 </div>
 </div>
-<div aria-label="Restaurant sections" class="menu-tabs" role="tablist">
-<button aria-selected="true" class="menu-tab active" role="tab" type="button">Menu</button>
-<button class="menu-tab" onclick="openRestaurantDetails();" role="tab" type="button">Info</button>
+<div aria-label="Restaurant sections" class="menu-tabs" id="res-tabs" role="tablist">
+<button aria-controls="menu-pane" aria-selected="true" class="menu-tab active" id="res-tab-menu" onclick="switchResTab('menu');" role="tab" type="button">Menu</button>
+<button aria-controls="info-pane" aria-selected="false" class="menu-tab" id="res-tab-info" onclick="switchResTab('info');" role="tab" type="button">Info</button>
 </div>
 <div class="cat-nav-sentinel" id="cat-nav-sentinel"></div>
 <div aria-hidden="true" class="cat-nav" id="cat-nav"><div class="cat-nav-inner" id="cat-nav-inner"></div></div>
+<div class="res-pane" id="menu-pane" role="tabpanel" aria-labelledby="res-tab-menu">
 <div class="filter-bar" id="restaurant-filter-bar">
 <button aria-label="Open filters and sorting" class="advanced-filter-btn" id="advanced-filter-btn" onclick="openFilterSheet()" type="button">
 <i aria-hidden="true" class="fa-solid fa-sliders"></i>
@@ -237,6 +219,21 @@
 <i aria-hidden="true" class="fa-solid fa-sliders" id="empty-filter-icon"></i>
 <p id="empty-filter-title">No dishes match these filters</p>
 <p id="empty-filter-sub">Try changing your filters.</p>
+</div>
+</div>
+</div>
+<div class="res-pane" hidden id="info-pane" role="tabpanel" aria-labelledby="res-tab-info">
+<div class="menu-section">
+<div class="info-skeleton" id="info-skeleton">
+<div class="skeleton" style="height:22px;width:52%;margin-bottom:14px;border-radius:8px;"></div>
+<div class="skeleton" style="height:15px;width:74%;margin-bottom:10px;border-radius:8px;"></div>
+<div class="skeleton" style="height:15px;width:40%;margin-bottom:24px;border-radius:8px;"></div>
+<div class="skeleton" style="height:16px;width:34%;margin-bottom:14px;border-radius:8px;"></div>
+<div class="skeleton" style="height:15px;width:100%;margin-bottom:11px;border-radius:8px;"></div>
+<div class="skeleton" style="height:15px;width:92%;margin-bottom:11px;border-radius:8px;"></div>
+<div class="skeleton" style="height:15px;width:96%;border-radius:8px;"></div>
+</div>
+<div id="info-content" style="display:none"></div>
 </div>
 </div>
 <script src="config.js"></script>
@@ -554,9 +551,175 @@
     return typeof restaurant.distance === 'string' ? restaurant.distance : '';
   }
 
+  /* The Info tab used to navigate to restaurant-details.html. It now swaps the
+     content area in place, using only the restaurant object already fetched by
+     loadRestaurantPage(). The URL and history are never touched, so the menu
+     state (cart, customizations, expanded categories, scroll) is preserved. */
+  let activeResTab = 'menu';
+  let infoRenderedFor = null;
+  let menuScrollY = 0;
+
+  function switchResTab(tab, opts) {
+    tab = tab === 'info' ? 'info' : 'menu';
+    if (tab === activeResTab) return;
+    const options = opts || {};
+
+    if (tab === 'info') menuScrollY = window.scrollY; // remember where the menu was
+    activeResTab = tab;
+    const menuPane = document.getElementById('menu-pane');
+    const infoPane = document.getElementById('info-pane');
+    if (!menuPane || !infoPane) return;
+
+    const menuBtn = document.getElementById('res-tab-menu');
+    const infoBtn = document.getElementById('res-tab-info');
+    const setActive = (btn, on) => {
+      if (!btn) return;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    };
+    setActive(menuBtn, tab === 'menu');
+    setActive(infoBtn, tab === 'info');
+
+    if (tab === 'info') renderRestaurantInfo();
+
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fromMenu = tab === 'info';
+    menuPane.hidden = fromMenu;
+    infoPane.hidden = !fromMenu;
+    if (!reduce) {
+      // Direction follows the gesture: swipe left (Menu -> Info) slides the
+      // new pane in from the right; swipe right (Info -> Menu) from the left.
+      const shift = fromMenu ? '24px' : '-24px';
+      menuPane.style.setProperty('--res-pane-shift', shift);
+      infoPane.style.setProperty('--res-pane-shift', shift);
+      const shown = fromMenu ? infoPane : menuPane;
+      shown.classList.remove('is-animating');
+      void shown.offsetWidth; // restart the keyframe
+      shown.classList.add('is-animating');
+    }
+    if (options.focus) {
+      const target = tab === 'info' ? infoBtn : menuBtn;
+      if (target) target.focus({ preventScroll: true });
+    }
+    if (tab === 'menu') {
+      // Restore the menu's scroll position in case the (shorter) Info pane
+      // clamped it while it was shown.
+      requestAnimationFrame(() => {
+        if (activeResTab === 'menu') window.scrollTo(0, menuScrollY);
+      });
+    }
+  }
+
+  function restaurantTimeStr(h) {
+    if (!h) return null;
+    if (h.closed === true) return { closed: true };
+    const o = h.opensAt || h.open || h.from, cl = h.closesAt || h.close || h.to;
+    if (o && cl) return { open: String(o), close: String(cl) };
+    return null;
+  }
+
+  function infoRow(icon, html) {
+    return '<div class="info-row"><span class="info-ic"><i class="' + icon + '"></i></span><span>' + html + '</span></div>';
+  }
+
+  // Official FSSAI logo asset. The repository contains no such asset, so this
+  // section stays hidden rather than rendering an approximate/fake mark. Drop
+  // the authentic file at this path (or point this constant at it) and the
+  // Info tab renders the logo alone — the licence number is never shown.
+  const FSSAI_LOGO_SRC = 'assets/fssai-logo.png';
+
+  function renderRestaurantInfo() {
+    const box = document.getElementById('info-content');
+    const skeleton = document.getElementById('info-skeleton');
+    const r = currentRestaurant;
+    if (!box) return;
+    if (!r) {
+      if (skeleton) skeleton.style.display = 'block';
+      return;
+    }
+    if (infoRenderedFor === r) return; // render once per loaded restaurant
+
+    const esc = escapeMenuHtml;
+    const parts = [];
+    const name = r.name || 'Restaurant';
+    const cuisine = cuisineText(r);
+    const cost = Number(r.costForOne || r.priceForOne || r.averageCostForOne || r.costPerPerson);
+
+    parts.push('<div class="info-block"><h3 class="info-title">' + esc(name) + '</h3>');
+    if (cuisine) parts.push(infoRow('fa-solid fa-utensils', esc(cuisine)));
+    if (Number.isFinite(cost) && cost > 0) parts.push(infoRow('fa-solid fa-indian-rupee-sign', '&#8377;' + cost + ' for one'));
+    const addr = r.address || (r.location && r.location.address) || '';
+    if (addr) parts.push(infoRow('fa-solid fa-location-dot', esc(addr)));
+    const phone = (r.phone || r.contactNumber || '').toString().trim();
+    if (phone) {
+      const tel = esc(String(phone).replace(/[^0-9+]/g, ''));
+      // The number is never shown; only a tappable call button is rendered.
+      parts.push(
+        '<div class="info-row info-row-phone">' +
+          '<a class="info-phone-btn" href="tel:' + tel + '" aria-label="Call restaurant" title="Call restaurant" rel="nofollow">' +
+            '<svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' +
+            '</svg>' +
+          '</a>' +
+        '</div>'
+      );
+    }
+    const rcoords = restaurantCoords(r);
+    if (rcoords) {
+      const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(rcoords.lat + ',' + rcoords.lng);
+      parts.push('<div class="info-row"><span class="info-ic"><i class="fa-solid fa-diamond-turn-right"></i></span><span><a href="' + esc(mapsUrl) + '" target="_blank" rel="noopener">Get directions</a></span></div>');
+    }
+    parts.push('</div>');
+
+    const hours = r.openingHours || r.hours || null;
+    if (hours && typeof hours === 'object') {
+      const days = [['monday', 'Monday'], ['tuesday', 'Tuesday'], ['wednesday', 'Wednesday'], ['thursday', 'Thursday'], ['friday', 'Friday'], ['saturday', 'Saturday'], ['sunday', 'Sunday']];
+      const todayKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][new Date().getDay()];
+      let any = false;
+      const rows = days.map(function (d) {
+        const t = restaurantTimeStr(hours[d[0]]);
+        let text = 'Hours not available', cls = 'closed';
+        if (t && t.closed) text = 'Closed';
+        else if (t) { text = esc(t.open) + ' - ' + esc(t.close); cls = ''; any = true; }
+        return '<div class="info-hrow ' + (d[0] === todayKey ? 'is-today' : '') + '"><span class="d">' + d[1] + '</span><span class="t ' + cls + '">' + text + '</span></div>';
+      }).join('');
+      if (any) {
+        const open = (r.availability && typeof r.availability.isOpen === 'boolean') ? r.availability.isOpen
+          : (typeof r.isOpen === 'boolean' ? r.isOpen : true);
+        const todayT = restaurantTimeStr(hours[todayKey]);
+        const status = open
+          ? '<span class="info-open">Open now</span>' + (todayT && todayT.close ? ' &bull; Closes ' + esc(todayT.close) : '')
+          : '<span class="info-closed">Closed now</span>' + (todayT && todayT.open ? ' &bull; Opens ' + esc(todayT.open) : '');
+        parts.push('<div class="info-block"><h3 class="info-title">Opening hours</h3><div class="info-row">' + status + '</div><div class="info-hours">' + rows + '</div></div>');
+      }
+    }
+
+    const svc = [infoRow('fa-solid fa-bag-shopping', 'Provides delivery')];
+    const freeAbove = Number(r.freeDeliveryAbove);
+    if (r.freeDeliveryEnabled !== false && Number.isFinite(freeAbove) && freeAbove > 0) {
+      svc.push(infoRow('fa-solid fa-motorcycle', 'Free delivery on orders above &#8377;' + freeAbove));
+    }
+    const radius = Number(r.deliveryRadiusKm);
+    if (Number.isFinite(radius) && radius > 0) svc.push(infoRow('fa-solid fa-location-dot', 'Delivers within ' + radius + ' km'));
+    if (r.codEnabled === true) svc.push(infoRow('fa-solid fa-indian-rupee-sign', 'Cash on delivery available'));
+    parts.push('<div class="info-block"><h3 class="info-title">Services</h3>' + svc.join('') + '</div>');
+
+    // FSSAI mark: authentic logo only. The licence number is intentionally
+    // not rendered here (it remains in the backend and the data object).
+    if (FSSAI_LOGO_SRC) {
+      parts.push('<div class="info-block info-fssai"><img alt="FSSAI licensed" class="info-fssai-logo" loading="lazy" onerror="this.closest(\'.info-fssai\').hidden=true" src="' + esc(FSSAI_LOGO_SRC) + '"></div>');
+    }
+
+    box.innerHTML = parts.join('');
+    box.style.display = '';
+    if (skeleton) skeleton.style.display = 'none';
+    infoRenderedFor = r;
+  }
+
   function openRestaurantDetails() {
-    if (!currentResId) return;
-    window.location.href = 'restaurant-details.html?id=' + encodeURIComponent(currentResId);
+    // Kept for backward compatibility with any existing caller; it now opens
+    // the in-page Info tab instead of navigating away.
+    switchResTab('info');
   }
 
   function toggleRestaurantFavorite() {
@@ -835,7 +998,7 @@
 
             <div class="nb-item-media">
               <div class="nb-item-image-wrap${displayImage ? ' is-loading' : ''}">
-                <div class="nb-item-image-placeholder" aria-hidden="true"><i class="fa-solid fa-utensils" aria-hidden="true"></i></div>
+                <div class="nb-item-image-placeholder ew-food-ph" aria-hidden="true"></div>
                 ${displayImage
                   ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(displayImageOptimized)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
                   : ''
@@ -1436,6 +1599,53 @@
   });
 
   document.addEventListener('DOMContentLoaded', loadRestaurantPage);
+
+  /* Menu/Info tab gestures: horizontal swipe on touch, arrow keys on desktop.
+     Only a decisive horizontal swipe switches panes, so vertical menu scrolling
+     is never hijacked. Nothing here changes the URL or history. */
+  (function initResTabGestures() {
+    const tabs = document.getElementById('res-tabs');
+    if (!tabs) return;
+    const menuPane = document.getElementById('menu-pane');
+    const infoPane = document.getElementById('info-pane');
+
+    let startX = 0, startY = 0, tracking = false, fired = false;
+
+    function onStart(e) {
+      if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+      const t = e.touches[0];
+      startX = t.clientX; startY = t.clientY;
+      tracking = true; fired = false;
+    }
+    function onMove(e) {
+      if (!tracking || fired || !e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - startX, dy = t.clientY - startY;
+      if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      fired = true;
+      if (dx < 0) {
+        if (activeResTab === 'menu') switchResTab('info');
+      } else if (activeResTab === 'info') {
+        switchResTab('menu');
+      }
+    }
+    function onEnd() { tracking = false; fired = false; }
+
+    if (menuPane) menuPane.addEventListener('touchstart', onStart, { passive: true });
+    if (infoPane) infoPane.addEventListener('touchstart', onStart, { passive: true });
+    if (menuPane) menuPane.addEventListener('touchmove', onMove, { passive: true });
+    if (infoPane) infoPane.addEventListener('touchmove', onMove, { passive: true });
+    if (menuPane) menuPane.addEventListener('touchend', onEnd, { passive: true });
+    if (infoPane) infoPane.addEventListener('touchend', onEnd, { passive: true });
+
+    tabs.addEventListener('keydown', function (e) {
+      const key = e.key;
+      if (key !== 'ArrowLeft' && key !== 'ArrowRight') return;
+      e.preventDefault();
+      if (key === 'ArrowLeft') switchResTab('menu', { focus: true });
+      else switchResTab('info', { focus: true });
+    });
+  })();
 
   function toggleCategory(headerEl) {
     headerEl.classList.toggle('collapsed');
