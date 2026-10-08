@@ -3,6 +3,9 @@ const https = require('https');
 const API_BASE = 'https://api.eatswada.com/api';
 const CANONICAL_ORIGIN = 'https://eatswada.com';
 
+// Restaurants that must NEVER be indexed by Google (test / demo restaurants).
+const NEVER_INDEX_IDS = ['6ac5cbd0933976c30865d23e']; // Eatswada 2 (test)
+
 function getJson(url) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { accept: 'application/json' } }, (res) => {
@@ -73,7 +76,7 @@ module.exports = async function handler(req, res) {
     const canonical = CANONICAL_ORIGIN + '/restaurant?id=' + encodeURIComponent(id);
     const image = safeImage(restaurant.image);
     const indexEnabled = false; // STAGING: keep demo restaurants out of search until launch.
-    const robots = indexEnabled ? 'index, follow' : 'noindex, nofollow';
+    const robots = (indexEnabled && NEVER_INDEX_IDS.indexOf(id) === -1) ? 'index, follow' : 'noindex, nofollow';
     const schema = {
       '@context':'https://schema.org',
       '@type':'Restaurant',
