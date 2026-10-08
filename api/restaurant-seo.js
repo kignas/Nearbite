@@ -14,7 +14,7 @@ function getJson(url) {
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          return reject(new Error('Upstream API returned ' + res.statusCode));
+          const err = new Error('Upstream API returned ' + res.statusCode); err.statusCode = res.statusCode; return reject(err);
         }
         try { resolve(JSON.parse(body)); } catch (e) { reject(e); }
       });
@@ -113,6 +113,10 @@ module.exports = async function handler(req, res) {
     output = output.replace(/<\/head>/i, inject + '\n</head>');
     return send(res, 200, output, {'X-Robots-Tag': robots});
   } catch (error) {
+    if (error && (error.statusCode === 404 || error.statusCode === 400)) {
+      return send(res, 404, '<!doctype html><title>Restaurant unavailable | EatSwada</title><h1>Restaurant unavailable</h1>',
+        {'X-Robots-Tag':'noindex, nofollow'});
+    }
     return send(res, 502,
       '<!doctype html><title>Temporarily unavailable | EatSwada</title><h1>Restaurant page temporarily unavailable</h1><p>Please try again.</p>',
       {'X-Robots-Tag':'noindex, nofollow'});
