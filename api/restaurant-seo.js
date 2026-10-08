@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
       ' in Maynaguri, West Bengal on EatSwada.';
     const canonical = CANONICAL_ORIGIN + '/restaurant?id=' + encodeURIComponent(id);
     const image = safeImage(restaurant.image);
-    const indexEnabled = false; // STAGING: keep demo restaurants out of search until launch.
+    const indexEnabled = true; // LIVE: restaurants listed here can be indexed (NEVER_INDEX_IDS are still blocked).
     const robots = (indexEnabled && NEVER_INDEX_IDS.indexOf(id) === -1) ? 'index, follow' : 'noindex, nofollow';
     const schema = {
       '@context':'https://schema.org',
@@ -96,7 +96,7 @@ module.exports = async function handler(req, res) {
     };
 
     let output = shellResponse;
-    output = output.replace(/<title[^>]*>[\s\S]*?<\/title>/i, '<title>' + esc(name + ' | EatSwada') + '</title>');
+    output = output.replace(/<title[^>]*>[\s\S]*?<\/title>/i, '<title>' + esc(/^eatswada/i.test(name) ? name + ' \u2013 Order Food Online in Maynaguri' : name + ' \u2013 Order Online in Maynaguri | EatSwada') + '</title>');
     const inject = [
       '<meta name="description" content="' + esc(desc) + '">',
       '<meta name="robots" content="' + robots + '">',
