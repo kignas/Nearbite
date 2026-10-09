@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Storage check</title>
+<style>
+  body{font:15px/1.5 system-ui,sans-serif;margin:0;padding:16px;background:#fff;color:#111}
+  h1{font-size:18px;margin:0 0 12px}
+  h2{font-size:15px;margin:18px 0 6px;border-bottom:1px solid #ddd;padding-bottom:4px}
+  pre{white-space:pre-wrap;word-break:break-all;background:#f4f4f4;padding:10px;border-radius:8px;margin:0}
+</style>
+</head>
+<body>
+<h1>Eatswada storage check</h1>
+<p>Take a screenshot of this whole page and send it. Nothing here shows passwords or tokens, only names and sizes.</p>
+<pre id="out">Checking...</pre>
+<script>
+(async function () {
+  var out = document.getElementById('out');
+  var lines = [];
+  function mb(n) { return (n / 1048576).toFixed(2) + ' MB'; }
+  function add(t) { lines.push(t); out.textContent = lines.join('\n'); }
+
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      var e = await navigator.storage.estimate();
+      add('== TOTAL ==');
+      add('Used: ' + mb(e.usage || 0));
+      if (e.usageDetails) {
+        Object.keys(e.usageDetails).forEach(function (k) {
+          add('  ' + k + ': ' + mb(e.usageDetails[k]));
+        });
+      } else {
+        add('  (no breakdown available on this browser)');
+      }
+    }
+  } catch (err) { add('estimate failed: ' + err.message); }
+
+  try {
+    add('');
+    add('== CACHE STORAGE ==');
+    var names = await caches.keys();
+    if (!names.length) add('  (none)');
+    for (var i = 0; i < names.length; i++) {
+      var c = await caches.open(names[i]);
+      var reqs = await c.keys();
+      var total = 0, opaque = 0, rows = [];
+      for (var j = 0; j < reqs.length; j++) {
+        var res = await c.match(reqs[j]);
+        var size = 0;
+        if (res && res.type === 'opaque') { opaque++; }
+        else if (res) { try { size = (await res.clone().blob()).size; } catch (x) {} }
+        total += size;
+        rows.push({ u: reqs[j].url.replace(location.origin, ''), s: size });
+      }
+      rows.sort(function (a, b) { return b.s - a.s; });
+      add(names[i] + ': ' + reqs.length + ' files, ' + mb(total) + (opaque ? ', ' + opaque + ' opaque' : ''));
+      rows.slice(0, 5).forEach(function (r) { add('    ' + mb(r.s) + '  ' + r.u); });
+    }
+  } catch (err) { add('cache check failed: ' + err.message); }
+
+  try {
+    add('');
+    add('== LOCAL STORAGE (biggest keys) ==');
+    var keys = [];
+    for (var k = 0; k < localStorage.length; k++) {
+      var key = localStorage.key(k);
+      keys.push({ k: key, n: (localStorage.getItem(key) || '').length });
+    }
+    keys.sort(function (a, b) { return b.n - a.n; });
+    if (!keys.length) add('  (empty)');
+    keys.slice(0, 8).forEach(function (r) { add('  ' + (r.n / 1024).toFixed(1) + ' KB  ' + r.k); });
+  } catch (err) { add('localStorage check failed: ' + err.message); }
+
+  try {
+    add('');
+    add('== INDEXEDDB ==');
+    if (indexedDB.databases) {
+      var dbs = await indexedDB.databases();
+      if (!dbs.length) add('  (none)');
+      dbs.forEach(function (d) { add('  ' + d.name); });
+    } else { add('  (not listable on this browser)'); }
+  } catch (err) { add('indexedDB check failed: ' + err.message); }
+
+  add('');
+  add('Done.');
+})();
+</script>
+</body>
+</html>
