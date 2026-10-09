@@ -236,6 +236,35 @@
 <div id="info-content" style="display:none"></div>
 </div>
 </div>
+<script>
+/* Menu photos: request a smaller Cloudinary copy (same picture, far fewer bytes).
+   Only defined here if no other script has already provided it. */
+if (typeof window.optimizedImageUrl !== 'function') {
+  window.optimizedImageUrl = function (url, width) {
+    try {
+      if (typeof url !== 'string') return url;
+      if (url.indexOf('res.cloudinary.com') === -1 || url.indexOf('/image/upload/') === -1) return url;
+      if (/\/image\/upload\/[^/]*(f_auto|q_auto|w_\d+)/.test(url)) return url;
+      return url.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_' + (width || 360) + '/');
+    } catch (e) { return url; }
+  };
+}
+window.ewLoadVisibleImages = function(root, margin){
+    var imgs=(root||document).querySelectorAll('img[data-src]');
+    if(!imgs.length)return;
+    function load(img){var s=img.getAttribute('data-src');if(!s)return;img.removeAttribute('data-src');img.src=s;}
+    if(!('IntersectionObserver' in window)){for(var k=0;k<imgs.length;k++)load(imgs[k]);return;}
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting)return;
+        io.unobserve(en.target);
+        var inner=en.target.querySelectorAll('img[data-src]');
+        for(var j=0;j<inner.length;j++)load(inner[j]);
+      });
+    },{rootMargin:margin||'150px 0px'});
+    for(var i=0;i<imgs.length;i++)io.observe(imgs[i].parentElement||imgs[i]);
+  };
+</script>
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
 <script src="api.js"></script>
@@ -897,6 +926,8 @@
     try { cartMemory = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) {}
 
     let globalIdx = 0;
+    /* Menus with 30+ items load photos only as they scroll into view. */
+    const ewBigMenu = groups.reduce((n, g) => n + g.items.length, 0) >= 30;
 
     menuContainer.innerHTML = groups.map(group => {
       const catId = categoryDomId(group.name);
@@ -1000,7 +1031,7 @@
               <div class="nb-item-image-wrap${displayImage ? ' is-loading' : ''}">
                 <div class="nb-item-image-placeholder ew-food-ph" aria-hidden="true"></div>
                 ${displayImage
-                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" src="${escapeMenuHtml(displayImageOptimized)}" alt="${escapeMenuHtml(item.name)}" loading="lazy" decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
+                  ? `<img class="nb-item-image ${!isItemAvailable ? 'is-unavailable' : ''}" ${ewBigMenu ? 'data-src' : 'src'}="${escapeMenuHtml(displayImageOptimized)}" alt="${escapeMenuHtml(item.name)}" ${ewBigMenu ? '' : 'loading="lazy"'} decoding="async" onload="this.classList.add('is-loaded'); this.closest('.nb-item-image-wrap').classList.remove('is-loading');" onerror="this.closest('.nb-item-image-wrap').classList.remove('is-loading'); this.remove();">`
                   : ''
                 }
                 ${overlayText ? `<div class="nb-item-overlay"><span>${overlayText}</span></div>` : ''}
@@ -1028,6 +1059,7 @@
 
     document.getElementById('menu-skeleton').style.display = 'none';
     menuContainer.style.display = 'block';
+    if (ewBigMenu && typeof window.ewLoadVisibleImages === 'function') window.ewLoadVisibleImages(menuContainer, '150px 0px');
     setupScrollSpy(categories);
     syncVegFilterAvailability();
   }

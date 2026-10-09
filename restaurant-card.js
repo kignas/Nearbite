@@ -413,16 +413,45 @@
     clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 7.5v5l3.2 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     info:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.7v5.2M12 7.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
   };
-  function homeImageMarkup(item){
+  /* Ask Cloudinary for a smaller, compressed copy of an image (same picture,
+     same look, far fewer bytes). Other URLs, or ones already resized, are
+     returned unchanged. */
+  function ewOptimizeImg(url, width){
+    try{
+      if(typeof url!=='string')return url;
+      if(url.indexOf('res.cloudinary.com')===-1||url.indexOf('/image/upload/')===-1)return url;
+      if(/\/image\/upload\/[^/]*(f_auto|q_auto|w_\d+)/.test(url))return url;
+      return url.replace('/image/upload/','/image/upload/f_auto,q_auto,w_'+width+'/');
+    }catch(e){return url;}
+  }
+  /* Big menus (30+ items): photos load only when they scroll into view. */
+  var EW_BIG_MENU=30;
+  var ewLazyLoadImages=function(root, margin){
+    var imgs=(root||document).querySelectorAll('img[data-src]');
+    if(!imgs.length)return;
+    function load(img){var s=img.getAttribute('data-src');if(!s)return;img.removeAttribute('data-src');img.src=s;}
+    if(!('IntersectionObserver' in window)){for(var k=0;k<imgs.length;k++)load(imgs[k]);return;}
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting)return;
+        io.unobserve(en.target);
+        var inner=en.target.querySelectorAll('img[data-src]');
+        for(var j=0;j<inner.length;j++)load(inner[j]);
+      });
+    },{rootMargin:margin||'150px 0px'});
+    for(var i=0;i<imgs.length;i++)io.observe(imgs[i].parentElement||imgs[i]);
+  };
+  function homeImageMarkup(item,r){
     /* Premium peach placeholder renders behind the photo: visible while
        loading, when the URL is missing, and after a failed load — but the
        real image fades in over it on success. No broken-image icon, no
        empty white tile, no layout shift. */
     var ph=typeof window.ewFoodPlaceholder==='function'?window.ewFoodPlaceholder():'<div class="ew-food-ph" aria-hidden="true"></div>';
     var src=item && (item.image||item.img||item.imageUrl||item.photo);
-    if(src){src=typeof safeUrl==='function'?safeUrl(src):src;}
+    if(src){src=typeof safeUrl==='function'?safeUrl(src):src;src=ewOptimizeImg(src,320);}
     if(!src)return ph;
-    return ph+'<img class="ew-img-fade" src="'+esc(src)+'" alt="'+esc(item.name||'Item')+'" loading="lazy" decoding="async" onload="this.classList.add(\'is-loaded\')" onerror="this.remove()">';
+    var big=!!(r&&Array.isArray(r.menu)&&r.menu.length>=EW_BIG_MENU);
+    return ph+'<img class="ew-img-fade" '+(big?'data-src="':'src="')+esc(src)+'" alt="'+esc(item.name||'Item')+'" '+(big?'':'loading="lazy" ')+'decoding="async" onload="this.classList.add(\'is-loaded\')" onerror="this.remove()">';
   }
   function homeCustomGroups(item){
     var g=item&&(item.customizations||item.customizationGroups||item.customization||item.customGroups);
@@ -466,7 +495,7 @@
     var discount=item.discountPercent!=null&&Number(item.discountPercent)>0?Math.round(Number(item.discountPercent)):(original?Math.round((1-price/original)*100):null);
     var dietary=item.isVeg?'<span class="u99-dietary" aria-label="Vegetarian"></span>':'<span class="u99-dietary u99-nonveg" aria-label="Non-vegetarian"></span>';
     var popular=(item.isBestseller||item.isRecommended)?'<span class="u99-popular">Popular</span>':'';
-    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-name">'+dietary+'<span>'+esc(item.name||'Item')+'</span></div><div class="u99-price-row"><strong>₹'+price+'</strong>'+(original!=null?'<span class="u99-old-price">₹'+original+'</span>':'')+(discount?'<span class="u99-off">'+discount+'% OFF</span>':'')+'</div></article>';
+    return '<article class="u99-item" data-item-id="'+esc(homeItemId(item))+'"><div class="u99-item-image">'+homeImageMarkup(item,r)+popular+'<div class="u99-item-action">'+homeAddControl(item,r)+'</div></div><div class="u99-item-name">'+dietary+'<span>'+esc(item.name||'Item')+'</span></div><div class="u99-price-row"><strong>₹'+price+'</strong>'+(original!=null?'<span class="u99-old-price">₹'+original+'</span>':'')+(discount?'<span class="u99-off">'+discount+'% OFF</span>':'')+'</div></article>';
   }
   function homeRestaurantOffer(r){
     var raw=String(r.offer||r.offerText||r.discountText||'').trim();
@@ -628,6 +657,7 @@
         if(!carousel)return;
         var menu=homeSortedMenu(r).slice(0,6);
         carousel.classList.toggle('u99-carousel-empty',!menu.length); carousel.innerHTML=menu.length?menu.map(function(item){return homeItemMarkup(item,r);}).join(''):'<div class=\"u99-no-items\">Menu unavailable</div>';
+        ewLazyLoadImages(carousel,'150px 150px');
       });
     });
   }
@@ -737,7 +767,16 @@
       return markup;
     }).join('');
     window.__unavailableRestaurantIds=unavailable;
-    container.innerHTML=html;
+    /* If the cards are exactly what is already on screen, keep the existing
+       DOM. Replacing it would destroy every <img> and make all the photos
+       reload and fade in again. */
+    if(container.__ewLastHtml===html && container.querySelector('.u99-card-host')){
+      /* keep current cards and their already-loaded images */
+    }else{
+      container.innerHTML=html;
+      container.__ewLastHtml=html;
+      ewLazyLoadImages(container,'150px 150px');
+    }
     bindHome99Interactions();
     homeHydrateMenus(container,list,renderToken);
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(function(){syncFavoriteButtons();});
