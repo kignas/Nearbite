@@ -77,7 +77,7 @@
     const cta = b.ctaText || 'Order Now';
     const isFirst = i === 0;
     const artHtml = image
-      ? `<img class="header-slide__art" src="${esc(image.replace('/upload/','/upload/f_auto,q_auto,w_800/'))}" alt="" aria-hidden="true" loading="${isFirst ? 'eager' : 'lazy'}" decoding="async"${isFirst ? ' fetchpriority="high"' : ''}>`
+      ? `<img class="header-slide__art" src="${esc(image.replace('/upload/','/upload/f_auto,q_auto:eco,w_700/'))}" alt="" aria-hidden="true" loading="${isFirst ? 'eager' : 'lazy'}" decoding="async"${isFirst ? ' fetchpriority="high"' : ''}>`
       : '';
 
     return `<article class="header-slide" role="group" aria-roledescription="slide" aria-label="Banner ${i + 1}">
