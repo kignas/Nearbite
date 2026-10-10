@@ -317,7 +317,7 @@
 
   function formatAvailabilityTime(value) {
     if (typeof value !== 'string') return '';
-    var match = value.trim().match(/^(\\d{1,2}):(\\d{2})$/);
+    var match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
     if (!match) return '';
     var hour = Number(match[1]), minute = Number(match[2]);
     if (hour > 23 || minute > 59) return '';
@@ -327,13 +327,38 @@
   }
 
   function getAvailabilityLabel(status, res) {
-    if (status === 'closed_today') return 'Closed Today';
     if (status === 'outside_delivery_area') return 'Not delivering to your location';
+
     var availability = res && res.availability || {};
+    var operational = res && res.operational || {};
+    var next = operational.nextOpening || null;
+
+    // Prefer the backend's computed schedule, which can distinguish a later
+    // opening today from the next opening on another day.
+    if (next) {
+      var nextTime = formatAvailabilityTime(next.time) ||
+        (typeof next.formattedTime === 'string' ? next.formattedTime : '');
+      var day = String(next.day || '').toLowerCase();
+      if (nextTime) {
+        if (day === 'today') return 'Closed • Opens at ' + nextTime;
+        if (day === 'tomorrow') return 'Closed Today • Opens tomorrow at ' + nextTime;
+        if (day) return 'Closed Today • Opens ' + day + ' at ' + nextTime;
+      }
+      if (typeof next.message === 'string' && next.message.trim()) {
+        return 'Closed • ' + next.message.trim();
+      }
+    }
+
     var opensAt = formatAvailabilityTime(availability.opensAt);
-    if (opensAt) return 'Closed • Opens at ' + opensAt;
+    if (opensAt) {
+      return status === 'closed_today'
+        ? 'Closed Today • Opens tomorrow at ' + opensAt
+        : 'Closed • Opens at ' + opensAt;
+    }
+    if (status === 'closed_today') return 'Closed Today';
     return 'Temporarily Closed';
   }
+
 
   function showAvailabilityToast(label) {
     var toast = document.getElementById('es-availability-toast');
