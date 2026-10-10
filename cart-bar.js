@@ -848,8 +848,16 @@
       if (Number.isFinite(p) && p >= 0) { totalPrice += p * safeQty; } else { priceKnown = false; }
     });
 
-    // Early return if nothing changed
+    // Early return if totals are unchanged, but still restore visibility.
+    // The customization sheet temporarily hides this root with inline display:none;
+    // without these calls an unchanged cart would remain hidden after the sheet closes.
     if (lastTotalQty === totalQty && lastTotalPrice === totalPrice && lastItemNamesHash === itemNames.join(',')) {
+      // Only do recovery work when another UI (e.g. the customization sheet)
+      // has explicitly hidden the root; ordinary no-op renders stay zero-write.
+      if (root.style.display === 'none' || root.style.display === '') {
+        positionCartAboveNav(root);
+        showCartBar(root);
+      }
       return;
     }
 

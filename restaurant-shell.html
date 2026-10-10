@@ -414,14 +414,68 @@ window.ewLoadVisibleImages = function(root, margin){
           btn.appendChild(badge);
         }
         badge.textContent = qty;
+        // Keep a direct decrement control in sync after every cart mutation.
+        if (!btn.parentElement || !btn.parentElement.classList.contains('nb-custom-cart-control')) {
+          var parent = btn.parentElement;
+          if (parent) {
+            var wrap = document.createElement('div');
+            wrap.className = 'nb-custom-cart-control';
+            var remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'nb-custom-remove';
+            remove.textContent = '−';
+            remove.setAttribute('aria-label', 'Remove one ' + base.name + ' from cart');
+            remove.onclick = function(){ window.ewRemoveCustomizedCartUnit(id); };
+            parent.insertBefore(wrap, btn);
+            wrap.appendChild(remove);
+            wrap.appendChild(btn);
+          }
+        }
       } else {
         btn.classList.remove('has-cart-qty');
         if (badge) badge.remove();
+        var wrapper = btn.parentElement;
+        if (wrapper && wrapper.classList.contains('nb-custom-cart-control')) {
+          var outer = wrapper.parentElement;
+          if (outer) outer.insertBefore(btn, wrapper);
+          wrapper.remove();
+        }
       }
 
       btn.setAttribute('aria-label', 'Customise ' + base.name + (qty > 0 ? ', ' + qty + ' in cart' : ''));
     });
   }
+
+  // Remove one customized unit from the matching menu item without changing
+  // the customization schema or the shared cart writer used by ordinary items.
+  window.ewRemoveCustomizedCartUnit = function(menuItemId) {
+    var base = window.__ewCust && window.__ewCust[menuItemId];
+    if (!base) return;
+    var cart = {};
+    try { cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {}; } catch (e) { cart = {}; }
+    var keys = Object.keys(cart);
+    var match = null;
+    // Prefer the last matching customized variant, preserving all other variants.
+    for (var i = keys.length - 1; i >= 0; i--) {
+      var key = keys[i], entry = cart[key] || {};
+      var entryId = String(entry.menuItem == null ? '' : entry.menuItem);
+      var sameId = entryId && entryId === String(menuItemId);
+      var sameName = key === base.name || key.indexOf(base.name + ' (') === 0;
+      if ((sameId || sameName) && Number(entry.quantity || 0) > 0) { match = key; break; }
+    }
+    if (!match) return;
+    var entry = cart[match];
+    // Reuse the existing shared cart writer so checkout invalidation, cart events,
+    // restaurant availability rules, and the global cart renderer remain canonical.
+    if (typeof window.updateCart === 'function') {
+      window.updateCart(match, -1, Number(entry.price) || 0, entry.resId || entry.restaurantId,
+        true, entry.menuItem || entry.menuItemId, entry.image, entry.isVeg, entry.originalPrice);
+    } else {
+      console.warn('[restaurant] shared cart updater is unavailable; item was not removed');
+      return;
+    }
+    try { refreshCustomizedCartQuantities(); } catch (e) { console.warn('[restaurant] custom cart count refresh failed:', e); }
+  };
 
   window.makeBtnHTML = function(itemName, qty, price, rId, inStock, menuItemId, image, isVeg, originalPrice) {
     const safeName = jsArg(itemName);
@@ -439,7 +493,11 @@ window.ewLoadVisibleImages = function(root, margin){
     // enough to show how many customized units are already in the cart.
     if (isItemAvailable && window.__ewCust && window.__ewCust[menuItemId]) {
       const customQty = getCustomizedCartQuantity(itemName, menuItemId);
-      return `<button onclick="ewOpenCustomize(${safeMenuItemId})" class="nb-add-btn nb-add-btn--cust${customQty > 0 ? ' has-cart-qty' : ''}" data-menu-item-id="${escapeMenuHtml(String(menuItemId || ''))}" aria-label="Customise ${escapeMenuHtml(itemName)}${customQty > 0 ? ', ' + customQty + ' in cart' : ''}">ADD <span class="nb-add-plus" aria-hidden="true">+</span>${customQty > 0 ? `<span class="nb-custom-qty" aria-hidden="true">${customQty}</span>` : ''}</button>`;
+      const addButton = `<button onclick="ewOpenCustomize(${safeMenuItemId})" class="nb-add-btn nb-add-btn--cust${customQty > 0 ? ' has-cart-qty' : ''}" data-menu-item-id="${escapeMenuHtml(String(menuItemId || ''))}" aria-label="Customise ${escapeMenuHtml(itemName)}${customQty > 0 ? ', ' + customQty + ' in cart' : ''}">ADD <span class="nb-add-plus" aria-hidden="true">+</span>${customQty > 0 ? `<span class="nb-custom-qty" aria-hidden="true">${customQty}</span>` : ''}</button>`;
+      if (customQty > 0) {
+        return `<div class="nb-custom-cart-control"><button type="button" class="nb-custom-remove" onclick="ewRemoveCustomizedCartUnit(${safeMenuItemId})" aria-label="Remove one ${escapeMenuHtml(itemName)} from cart">−</button>${addButton}</div>`;
+      }
+      return addButton;
     }
 
     if (qty > 0) {
@@ -1715,11 +1773,31 @@ window.ewLoadVisibleImages = function(root, margin){
       '<div class="ewcs-body" id="ewcs-body"></div>'+
       '<div class="ewcs-foot"><div class="ewcs-qty"><button id="ewcs-minus" aria-label="Decrease">−</button><span id="ewcs-qty">1</span><button id="ewcs-plus" aria-label="Increase">+</button></div><button class="ewcs-add" id="ewcs-add">Add item</button></div>';
     document.body.appendChild(bd); document.body.appendChild(sh);
-    el = { bd:bd, sh:sh, title:document.getElementById('ewcs-title'), body:document.getElementById('ewcs-body'), qty:document.getElementById('ewcs-qty'), add:document.getElementById('ewcs-add'), minus:document.getElementById('ewcs-minus'), plus:document.getElementById('ewcs-plus') };
+    el = { bd:bd, sh:sh, title:document.getElementById('ewcs-title'), body:document.getElementById('ewcs-body'), qty:document.getElementById('ewcs-qty'), add:document.getElementById('ewcs-add') };
     bd.addEventListener('click', close);
     document.getElementById('ewcs-close').addEventListener('click', close);
-    el.minus.addEventListener('click', function(){ if (!cur || cur.qty <= 1) return; cur.qty--; el.qty.textContent=cur.qty; refresh(); });
-    el.plus.addEventListener('click', function(){ if (!cur || cur.qty >= 20) return; cur.qty++; el.qty.textContent=cur.qty; refresh(); });
+    var minusButton = document.getElementById('ewcs-minus');
+    var plusButton = document.getElementById('ewcs-plus');
+    function animatePopupQty(direction) {
+      if (!el || !el.qty || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+      el.qty.classList.remove('ewcs-qty-slide-up', 'ewcs-qty-slide-down');
+      void el.qty.offsetWidth;
+      el.qty.classList.add(direction === 'up' ? 'ewcs-qty-slide-up' : 'ewcs-qty-slide-down');
+    }
+    minusButton.addEventListener('click', function(){
+      if (!cur || cur.qty <= 1) return;
+      cur.qty = Math.max(1, cur.qty - 1);
+      el.qty.textContent = cur.qty;
+      animatePopupQty('down');
+      refresh();
+    });
+    plusButton.addEventListener('click', function(){
+      if (!cur || cur.qty >= 20) return;
+      cur.qty = Math.min(20, cur.qty + 1);
+      el.qty.textContent = cur.qty;
+      animatePopupQty('up');
+      refresh();
+    });
     el.add.addEventListener('click', confirmAdd);
     el.body.addEventListener('change', refresh);
   }
@@ -1742,9 +1820,6 @@ window.ewLoadVisibleImages = function(root, margin){
     (base.groups||[]).forEach(function(g, gi){
       var max = Number(g.maxSelect||1)||1;
       var required = !!g.required;
-      // Portion/size choices commonly store the final variant price in extraPrice,
-      // unlike toppings/add-ons where extraPrice is added to the base price.
-      var portionPrice = /portion|size/i.test(String(g.title||''));
       var multi = max > 1;
       var rule = multi ? ('Select up to '+max) : (required ? 'Required · Select 1' : 'Select 1');
       html += '<div class="ewcs-group" data-gi="'+gi+'" data-max="'+max+'" data-required="'+(required?1:0)+'" data-multi="'+(multi?1:0)+'" data-title="'+esc(g.title)+'">'+
@@ -1752,13 +1827,13 @@ window.ewLoadVisibleImages = function(root, margin){
         '<div class="ewcs-grule">'+(required?'<span class="req">Required</span> · ':'')+esc(multi?('Select up to '+max):'Select 1')+'</div>';
       (g.options||[]).forEach(function(o, oi){
         var extra = Number(o.extraPrice||0);
-        var priceTxt = extra>0 ? ((portionPrice ? '' : '+')+money(extra)) : (required||multi ? 'Free' : '');
+        var priceTxt = extra>0 ? ('+'+money(extra)) : (required||multi ? 'Free' : '');
         var checkedDefault = (!multi && required && oi===0) ? 'checked' : '';
         html += '<label class="ewcs-opt">'+
             '<span class="veg '+(o.isVeg!==false?'v':'n')+'"></span>'+
             '<span class="lbl">'+esc(o.label)+'</span>'+
             (priceTxt?'<span class="pr '+(extra>0?'':'free')+'">'+priceTxt+'</span>':'')+
-            '<input type="'+(multi?'checkbox':'radio')+'" name="ewcs-g'+gi+'" value="'+oi+'" data-extra="'+extra+'" data-portion-price="'+(portionPrice?'1':'0')+'" '+checkedDefault+'>'+
+            '<input type="'+(multi?'checkbox':'radio')+'" name="ewcs-g'+gi+'" value="'+oi+'" data-extra="'+extra+'" '+checkedDefault+'>'+
           '</label>';
       });
       html += '</div>';
@@ -1771,17 +1846,13 @@ window.ewLoadVisibleImages = function(root, margin){
 
   function refresh(){
     if (!cur) return;
-    var extra = 0, selectedPortionPrice = null, valid = true;
+    var extra = 0, valid = true;
     el.body.querySelectorAll('.ewcs-group').forEach(function(grp){
       var multi = grp.getAttribute('data-multi')==='1';
       var max = Number(grp.getAttribute('data-max'))||1;
       var required = grp.getAttribute('data-required')==='1';
       var checked = grp.querySelectorAll('input:checked');
-      checked.forEach(function(c){
-        var value = Number(c.getAttribute('data-extra'))||0;
-        if (c.getAttribute('data-portion-price')==='1') selectedPortionPrice = value;
-        else extra += value;
-      });
+      checked.forEach(function(c){ extra += Number(c.getAttribute('data-extra'))||0; });
       // enforce max on multi by disabling unchecked when full
       if (multi){
         var full = checked.length >= max;
@@ -1789,10 +1860,8 @@ window.ewLoadVisibleImages = function(root, margin){
       }
       if (required && checked.length < 1) valid = false;
     });
-    var unit = (selectedPortionPrice !== null ? selectedPortionPrice : Number(cur.base.price)) + extra;
+    var unit = Number(cur.base.price) + extra;
     el.add.disabled = !valid;
-    if (el.minus) { el.minus.disabled = cur.qty <= 1; el.minus.setAttribute('aria-disabled', cur.qty <= 1 ? 'true' : 'false'); el.minus.style.opacity = cur.qty <= 1 ? '.4' : '1'; el.minus.style.cursor = cur.qty <= 1 ? 'not-allowed' : 'pointer'; }
-    if (el.plus) { el.plus.disabled = cur.qty >= 20; el.plus.setAttribute('aria-disabled', cur.qty >= 20 ? 'true' : 'false'); el.plus.style.opacity = cur.qty >= 20 ? '.4' : '1'; el.plus.style.cursor = cur.qty >= 20 ? 'not-allowed' : 'pointer'; }
     el.add.textContent = valid ? ('Add item · '+money(unit*cur.qty)) : 'Select required options';
     cur._unit = unit;
   }
