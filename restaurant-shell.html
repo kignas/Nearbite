@@ -783,9 +783,15 @@ window.ewLoadVisibleImages = function(root, margin){
         const open = (r.availability && typeof r.availability.isOpen === 'boolean') ? r.availability.isOpen
           : (typeof r.isOpen === 'boolean' ? r.isOpen : true);
         const todayT = restaurantTimeStr(hours[todayKey]);
+        const availability = r.availability || {};
+        const nextOpen = availability.opensAt || (todayT && todayT.open);
+        const closedToday = availability.closedReason === 'closed_today';
+        const nextOpenLabel = nextOpen ? formatTime(nextOpen) : '';
         const status = open
           ? '<span class="info-open">Open now</span>' + (todayT && todayT.close ? ' &bull; Closes ' + esc(todayT.close) : '')
-          : '<span class="info-closed">Closed now</span>' + (todayT && todayT.open ? ' &bull; Opens ' + esc(todayT.open) : '');
+          : closedToday
+            ? '<span class="info-closed">Closed today</span>' + (availability.opensAt ? ' &bull; Opens tomorrow at ' + esc(nextOpenLabel) : '')
+            : '<span class="info-closed">Closed now</span>' + (nextOpen ? ' &bull; Opens at ' + esc(nextOpenLabel) : '');
         parts.push('<div class="info-block"><h3 class="info-title">Opening hours</h3><div class="info-row">' + status + '</div><div class="info-hours">' + rows + '</div></div>');
       }
     }

@@ -315,9 +315,23 @@
     return 'unavailable';
   }
 
-  function getAvailabilityLabel(status) {
+  function formatAvailabilityTime(value) {
+    if (typeof value !== 'string') return '';
+    var match = value.trim().match(/^(\\d{1,2}):(\\d{2})$/);
+    if (!match) return '';
+    var hour = Number(match[1]), minute = Number(match[2]);
+    if (hour > 23 || minute > 59) return '';
+    var suffix = hour >= 12 ? 'PM' : 'AM';
+    var displayHour = hour % 12 || 12;
+    return displayHour + ':' + String(minute).padStart(2, '0') + ' ' + suffix;
+  }
+
+  function getAvailabilityLabel(status, res) {
     if (status === 'closed_today') return 'Closed Today';
     if (status === 'outside_delivery_area') return 'Not delivering to your location';
+    var availability = res && res.availability || {};
+    var opensAt = formatAvailabilityTime(availability.opensAt);
+    if (opensAt) return 'Closed • Opens at ' + opensAt;
     return 'Temporarily Closed';
   }
 
@@ -665,7 +679,7 @@
   function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
   function homeBuildCard(res,index,customerCoords){
     var id=read.id(res),name=read.name(res);if(!id||!name)return '';
-    var status=resolveAvailability(res,customerCoords),unavailable=!!status,label=unavailable?getAvailabilityLabel(status):'';
+    var status=resolveAvailability(res,customerCoords),unavailable=!!status,label=unavailable?getAvailabilityLabel(status,res):'';
     var cuisine=read.cuisine(res)||'', time=read.deliveryTime(res), delivery=time?time.text:'', menu=homeSortedMenu(res).slice(0,6);
     var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+

@@ -384,11 +384,24 @@
     const open = (r.availability && typeof r.availability.isOpen === 'boolean') ? r.availability.isOpen
                : (typeof r.isOpen === 'boolean' ? r.isOpen : true);
     const todayT = timeStr(src[todayKey]);
+    const availability = r.availability || {};
+    const nextOpen = availability.opensAt || (todayT && todayT.open);
+    const closedToday = availability.closedReason === 'closed_today';
+    const displayTime = function(value) {
+      if (typeof value !== 'string') return '';
+      const match = value.trim().match(/^(\\d{1,2}):(\\d{2})$/);
+      if (!match) return value;
+      const hour = Number(match[1]), minute = Number(match[2]);
+      if (hour > 23 || minute > 59) return value;
+      return (hour % 12 || 12) + ':' + String(minute).padStart(2, '0') + ' ' + (hour >= 12 ? 'PM' : 'AM');
+    };
     let html;
     if (open) {
       html = '<span class="open">Open now</span>' + (todayT && todayT.close ? ' • Closes ' + todayT.close : '');
+    } else if (closedToday) {
+      html = '<span class="closed">Closed today</span>' + (availability.opensAt ? ' • Opens tomorrow at ' + esc(displayTime(availability.opensAt)) : '');
     } else {
-      html = '<span class="closed">Closed now</span>' + (todayT && todayT.open ? ' • Opens ' + todayT.open : '');
+      html = '<span class="closed">Closed now</span>' + (nextOpen ? ' • Opens at ' + esc(displayTime(nextOpen)) : '');
     }
     $('#hours-status').innerHTML = html;
 
