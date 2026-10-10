@@ -2063,7 +2063,17 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 :root{--ewcs-green:var(--ew-success,#23956D);--ewcs-green-ink:var(--ew-success,#23956D);--ewcs-green-soft:var(--ew-success-soft,#E6F4EC);--ewcs-ink:#101828;--ewcs-ink-3:#697077;--ewcs-line:#E7EAED;}
 .nb-add-btn--cust .nb-add-plus{font-size:12px!important;margin-left:1px!important;opacity:.85!important}
 .nb-add-btn--cust{position:relative!important;padding-left:15px!important;padding-right:15px!important}
-.nb-add-btn--cust.has-cart-qty{padding-right:34px!important}
+ .nb-add-btn--cust.has-cart-qty{padding-right:34px!important}
+/* Customized menu items retain the existing ADD sheet while exposing a direct
+   one-unit remove control whenever a matching variant is already in the cart. */
+.nb-custom-cart-control{display:flex;align-items:center;justify-content:flex-end;gap:5px;width:100%;}
+.nb-custom-cart-control .nb-custom-remove{width:28px;height:34px;flex:none;border:1.5px solid var(--ew-pink,#D94B70);border-radius:9px;background:#fff;color:var(--ew-pink,#D94B70);font-size:21px;line-height:1;font-weight:800;cursor:pointer;touch-action:manipulation;}
+.nb-custom-cart-control .nb-add-btn--cust{min-width:0!important;}
+.ewcs-qty-slide-up{animation:ewcsQtySlideUp .22s ease-out;}
+.ewcs-qty-slide-down{animation:ewcsQtySlideDown .22s ease-out;}
+@keyframes ewcsQtySlideUp{from{opacity:.25;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ewcsQtySlideDown{from{opacity:.25;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.ewcs-qty-slide-up,.ewcs-qty-slide-down{animation:none!important}}
 .nb-custom-qty{position:absolute!important;right:7px!important;top:50%!important;transform:translateY(-50%)!important;min-width:22px!important;height:22px!important;padding:0 5px!important;border-radius:999px!important;background:var(--ew-success,#23956D)!important;color:#fff!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:11px!important;font-weight:800!important;line-height:1!important;box-shadow:0 1px 2px rgba(16,24,40,.12)!important}
 .ewcs-backdrop{position:fixed;inset:0;z-index:900;background:rgba(16,24,40,.5);opacity:0;pointer-events:none;transition:opacity .2s}
 .ewcs-backdrop.show{opacity:1;pointer-events:auto}
