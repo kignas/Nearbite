@@ -26,13 +26,14 @@
 <link href="css/cart-coupons.css?v=20260928-sections" rel="stylesheet"/>
 <link href="css/cart-rider-options.css?v=20260928-sections" rel="stylesheet"/>
 <link href="css/cart-delivery-details.css?v=20260928-sections" rel="stylesheet"/>
-<link href="css/cart-bill-summary.css?v=20260928-sections" rel="stylesheet"/>
 <link href="css/eatswada-ui-system.css?v=20260923-typography" rel="stylesheet"/>
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
   <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet"/>
   <!-- Final, cart-scoped visual and interaction refinements. Load after legacy cart sheets. -->
   <link href="css/cart-premium-refinement.css?v=20261016" rel="stylesheet"/>
+  <!-- Final bill-summary styling loads last so its reference-inspired layout is not overwritten. -->
+  <link href="css/cart-bill-summary.css?v=20261016-bill-v2" rel="stylesheet"/>
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -240,9 +241,9 @@
 <div class="ct-bill-hero-badge" hidden="" id="bill-hero-badge"><span>Everyday</span>Lowest Prices</div>
 </div>
 <div class="ct-bill-rows">
-<div class="ct-bill-row">
-<span class="ct-bill-label">Item Total</span>
-<span class="ct-bill-val"><s hidden="" id="bill-mrp">₹0</s><span class="ct-now" id="bill-subtotal">₹0</span></span>
+<div class="ct-bill-row ct-bill-row--item-total">
+<span class="ct-bill-label">Item total</span>
+<span class="ct-bill-val ct-bill-price-pair"><s aria-label="Original item total" hidden="" id="bill-mrp">₹0</s><span aria-label="Offer item total" class="ct-now" id="bill-subtotal">₹0</span></span>
 </div>
 <div class="ct-bill-sep"></div>
 <div class="ct-bill-row">
@@ -251,6 +252,15 @@
 </div>
 <div class="ct-bill-cap" id="bill-free-delivery-row" style="display:none;"><span id="bill-free-delivery-val">FREE Delivery on your order!</span></div>
 <div id="bill-per-restaurant" style="display:none;"></div>
+<!-- Transparent fee rows: these fees are not charged in the current checkout. Do not display fictitious crossed-out reference fees. -->
+<div class="ct-bill-row ct-bill-row--zero-fee" id="bill-platform-fee-row">
+<span class="ct-bill-label">Platform fee</span>
+<span class="ct-bill-val is-free" id="bill-platform-fee-val">₹0</span>
+</div>
+<div class="ct-bill-row ct-bill-row--zero-fee" id="bill-packaging-fee-row">
+<span class="ct-bill-label">Packaging fee</span>
+<span class="ct-bill-val is-free" id="bill-packaging-fee-val">₹0</span>
+</div>
 <!-- Real backend discount, if any is ever applied. Hidden while ₹0 — never faked. -->
 <div class="ct-bill-row" id="bill-discount-row" style="display:none;">
 <span class="ct-bill-label">Extra discount for you</span>
