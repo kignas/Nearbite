@@ -835,6 +835,18 @@ window.ewLoadVisibleImages = function(root, margin){
 
   function renderRestaurantHeader(restaurant) {
     currentRestaurant = restaurant;   // used by the minimum-order hint
+    // Publish only the restaurant delivery settings needed by the shared cart-bar presentation.
+    try {
+      const root = document.documentElement;
+      const freeDeliveryAbove = Number(
+        restaurant.freeDeliveryAbove || restaurant.freeDeliveryThreshold ||
+        restaurant.freeDeliveryMinimum || restaurant.freeDeliveryMinOrder || 0
+      );
+      root.dataset.ewRestaurantId = String(restaurant._id || restaurant.id || restaurant.resId || '');
+      root.dataset.ewFreeDeliveryEnabled = restaurant.freeDeliveryEnabled === false ? 'false' : 'true';
+      root.dataset.ewFreeDeliveryAbove = Number.isFinite(freeDeliveryAbove) && freeDeliveryAbove > 0 ? String(freeDeliveryAbove) : '';
+      if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
+    } catch (e) { /* cart-bar presentation must never interrupt restaurant rendering */ }
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
     const restaurantName = restaurant.name || 'Restaurant';

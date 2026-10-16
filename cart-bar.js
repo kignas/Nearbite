@@ -390,37 +390,51 @@
     #wc-allup:active { transform: translateX(-50%) scale(0.96); }
     #wc-allup svg { width: 12px; height: 12px; }
 
-    /* ─────────────  99 STORE + RESTAURANT (solid pink) cart bar  ───────────── */
+    /* ─────────────  99 STORE + RESTAURANT (two-tier red cart bar) ───────────── */
     #white-cart-root.wc-pink {
-      width: min(720px, calc(100vw - 40px));   /* ~20px side margins */
+      width: min(720px, calc(100vw - 40px));
       max-width: calc(100vw - 40px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     #es-pink-inner {
-      all: unset;
-      box-sizing: border-box; width: 100%;
-      height: 56px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 0 18px;
-      background: #EC168C;                       /* solid pink, no gradient/glow */
-      color: #ffffff;
-      border-radius: 16px;                       /* rounded rectangle, NOT a capsule */
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12);   /* subtle only */
+      all: unset; box-sizing: border-box; width: 100%; display: flex;
+      flex-direction: column; overflow: hidden;
+      background: #C93650; color: #fff;
+      border: 1px solid rgba(255,255,255,.16); border-radius: 27px;
+      box-shadow: 0 7px 22px rgba(193,58,80,.24);
       font-family: 'Manrope', system-ui, -apple-system, sans-serif;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
-      transition: transform 0.1s ease;
+      transition: transform .12s ease, box-shadow .18s ease;
     }
-    #es-pink-inner:active { transform: scale(0.985); }
-    #white-cart-root.wc-pink{padding-bottom:env(safe-area-inset-bottom,0px)}
-    #es-pink-inner{will-change:transform}
+    #es-pink-inner:active { transform: scale(.99); }
+    #es-pink-inner { will-change: transform; }
+    .wc-pink-message {
+      display: flex; align-items: center; gap: 9px; min-height: 42px;
+      padding: 10px 20px; background: rgba(125, 18, 42, .24);
+      color: #fff; font-size: 14px; line-height: 1.25; font-weight: 750;
+    }
+    .wc-pink-message svg { width: 18px; height: 18px; flex: 0 0 auto; }
+    .wc-pink-main {
+      min-height: 64px; display: flex; align-items: center;
+      justify-content: space-between; gap: 12px; padding: 12px 20px;
+    }
     .wc-pink-left {
-      font-size: 15px; font-weight: 800; color: #ffffff;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+      min-width: 0; color: #fff; font-size: 17px; line-height: 1.25;
+      font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
     }
     .wc-pink-cta {
-      display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto;
-      font-size: 15px; font-weight: 800; color: #ffffff;
+      display: inline-flex; align-items: center; justify-content: flex-end;
+      gap: 9px; flex: 0 0 auto; color: #fff; font-size: 17px; font-weight: 850;
+      white-space: nowrap;
     }
-    .wc-pink-cta svg { width: 18px; height: 18px; }
+    .wc-pink-cta svg { width: 25px; height: 25px; }
+    @media (min-width: 600px) {
+      .wc-pink-message { min-height: 48px; padding: 12px 24px; font-size: 16px; }
+      .wc-pink-main { min-height: 72px; padding: 14px 24px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 19px; }
+      .wc-pink-cta svg { width: 28px; height: 28px; }
+    }
 
     /* Multi-restaurant cart drawer — used by pink bar and home "All ↑" */
     #ew-cart-drawer-backdrop{position:fixed;inset:0;z-index:100001;display:none;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
@@ -446,7 +460,11 @@
       #white-cart-root { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
       #white-cart-root.wc-pink { width: calc(100vw - 32px); max-width: calc(100vw - 32px); }
       #white-cart-container { padding: 7px; height: 58px; }
-      #es-pink-inner { height: 54px; padding: 0 14px; }
+      #es-pink-inner { height: auto; padding: 0; border-radius: 23px; }
+      .wc-pink-message { min-height: 38px; padding: 9px 14px; font-size: 12px; }
+      .wc-pink-main { min-height: 56px; padding: 10px 14px; gap: 8px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 14px; }
+      .wc-pink-cta svg { width: 21px; height: 21px; }
       .wc-pink-left, .wc-pink-cta { font-size: 14px; }
       .wc-img { width: 34px; height: 34px; }
       .wc-image-stack { height: 34px; min-width: 34px; }
@@ -518,8 +536,14 @@
     wrap.innerHTML = `
       <button type="button" id="es-pink-inner" aria-label="View cart"
         onclick="window.__ewOpenCartDrawer ? window.__ewOpenCartDrawer() : (window.location.href='cart.html')">
-        <span class="wc-pink-left" id="wc-item-count" aria-live="polite">0 items</span>
-        <span class="wc-pink-cta">View Cart ${CART_SVG}</span>
+        <span class="wc-pink-message" id="wc-delivery-message" aria-live="polite">
+          <span class="wc-delivery-message-icon" aria-hidden="true">✦</span>
+          <span id="wc-delivery-message-text">Your cart is ready</span>
+        </span>
+        <span class="wc-pink-main">
+          <span class="wc-pink-left" id="wc-item-count" aria-live="polite">0 items</span>
+          <span class="wc-pink-cta">View Cart ${CART_SVG}</span>
+        </span>
       </button>
     `;
     return wrap;
@@ -802,6 +826,47 @@
     return _cachedImageDict;
   }
 
+  function updateRestaurantDeliveryMessage(savedCart, totalQty) {
+    if (CART_BAR_MODE !== 'pink') return;
+    const message = document.getElementById('wc-delivery-message-text');
+    if (!message) return;
+    const root = document.documentElement;
+    const data = root && root.dataset ? root.dataset : {};
+    const enabled = data.ewFreeDeliveryEnabled !== 'false';
+    const threshold = Number(data.ewFreeDeliveryAbove || 0);
+    const restaurantId = String(data.ewRestaurantId || '');
+    if (!enabled || !Number.isFinite(threshold) || threshold <= 0) {
+      message.textContent = totalQty > 0 ? 'Your order is ready to review' : 'Your cart is ready';
+      return;
+    }
+
+    // Evaluate free delivery against this restaurant's food subtotal, not fees.
+    let subtotal = 0;
+    let hasRestaurantItems = false;
+    Object.keys(savedCart).forEach(key => {
+      const item = savedCart[key] || {};
+      const itemRestaurantId = String(item.resId || item.restaurantId || '');
+      const sameRestaurant = restaurantId
+        ? itemRestaurantId === restaurantId
+        : Object.keys(savedCart).length === 1 || !itemRestaurantId;
+      if (!sameRestaurant) return;
+      const qty = Number(item.quantity);
+      const price = Number(item.price);
+      if (Number.isFinite(qty) && qty > 0 && Number.isFinite(price) && price >= 0) {
+        subtotal += qty * price;
+        hasRestaurantItems = true;
+      }
+    });
+    if (!hasRestaurantItems) {
+      message.textContent = 'Your order is ready to review';
+    } else if (subtotal >= threshold) {
+      message.textContent = 'Yay! You’ve unlocked Free Delivery';
+    } else {
+      const remaining = Math.max(0, threshold - subtotal);
+      message.textContent = `Add ${formatCurrency(remaining)} more for Free Delivery`;
+    }
+  }
+
   /* ── The single cart-bar renderer ── */
   window.updateGlobalCart = function () {
     if (isDismissed || CART_BAR_MODE === 'hidden') return;
@@ -852,6 +917,7 @@
     // The customization sheet temporarily hides this root with inline display:none;
     // without these calls an unchanged cart would remain hidden after the sheet closes.
     if (lastTotalQty === totalQty && lastTotalPrice === totalPrice && lastItemNamesHash === itemNames.join(',')) {
+      updateRestaurantDeliveryMessage(savedCart, totalQty);
       // Only do recovery work when another UI (e.g. the customization sheet)
       // has explicitly hidden the root; ordinary no-op renders stay zero-write.
       if (root.style.display === 'none' || root.style.display === '') {
@@ -865,6 +931,7 @@
     // Price shows ONLY on the pink (99 Store / Restaurant) bar. Home = count only.
     const showPrice = (CART_BAR_MODE === 'pink') && priceKnown && totalPrice > 0;
     if (countEl) countEl.textContent = showPrice ? `${baseCountText} · ${formatCurrency(totalPrice)}` : baseCountText;
+    updateRestaurantDeliveryMessage(savedCart, totalQty);
 
     const totalChanged = lastTotalQty !== null && (lastTotalQty !== totalQty || lastTotalPrice !== totalPrice);
     if (totalChanged) {
