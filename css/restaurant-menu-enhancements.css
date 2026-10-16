@@ -59,3 +59,28 @@
 @media(max-width:380px){.ew-menu-quick-filters{padding-left:14px!important;padding-right:14px!important}.ew-filter-chip{min-height:38px!important;padding:0 12px!important;font-size:12px!important;}}
 
 .ew-search-focus-item{background:#fff5f6!important;outline:2px solid rgba(190,48,75,.28)!important;outline-offset:5px!important;border-radius:12px!important;transition:background .25s ease,outline-color .25s ease!important;}
+
+
+/* Search opens inline on this restaurant menu and filters the currently loaded menu. */
+.menu-search-inline{display:flex;align-items:center;gap:10px;padding:12px 18px 14px;background:#fff;border-bottom:1px solid #eceef1;position:relative;z-index:8;}
+.menu-search-inline[hidden]{display:none!important;}
+.menu-search-inline-field{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:48px;padding:0 13px;border:1.5px solid #d7dbe1;border-radius:13px;background:#f7f8fa;color:#8b929d;box-sizing:border-box;}
+.menu-search-inline-field:focus-within{border-color:var(--hd-primary,#C13A50);background:#fff;box-shadow:0 0 0 3px rgba(193,58,80,.08);}
+.menu-search-inline-field>i{font-size:16px;flex:none;}
+.menu-search-inline-field input{width:100%;min-width:0;height:100%;border:0;outline:0;background:transparent;color:#20242d;font:500 15px/1.2 Manrope,system-ui,sans-serif;}
+.menu-search-inline-field input::placeholder{color:#9299a4;opacity:1;}
+.menu-search-inline-field input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;}
+.menu-search-clear{width:28px;height:28px;flex:none;border:0;border-radius:50%;display:grid;place-items:center;background:#e9ebef;color:#666e79;padding:0;}
+.menu-search-clear[hidden]{display:none!important;}
+.menu-search-cancel{flex:none;border:0;background:transparent;color:var(--hd-primary,#C13A50);font:700 14px/1 Manrope,system-ui,sans-serif;padding:10px 0 10px 2px;}
+body.menu-search-open .menu-search-trigger{background:#fff0f3;color:var(--hd-primary,#C13A50);}
+@media(max-width:380px){.menu-search-inline{padding:10px 14px 12px;gap:8px}.menu-search-inline-field{height:44px;padding:0 11px}.menu-search-inline-field input{font-size:14px}.menu-search-cancel{font-size:13px}}
+
+/* Customisable item quantity: keep minus, ADD+, and count visually separate. */
+.nb-custom-cart-control{display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;}
+.nb-custom-cart-control .nb-custom-remove{width:34px!important;min-width:34px!important;max-width:34px!important;height:36px!important;min-height:36px!important;max-height:36px!important;flex:0 0 34px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;border:1.5px solid var(--hd-on-light,#C13A50)!important;border-radius:10px!important;background:#fff!important;color:var(--hd-on-light,#C13A50)!important;font-size:19px!important;font-weight:700!important;line-height:1!important;box-shadow:0 2px 6px rgba(20,24,32,.08)!important;}
+.nb-custom-cart-control .nb-add-btn--cust{position:relative!important;width:84px!important;min-width:84px!important;max-width:84px!important;flex:0 0 84px!important;height:36px!important;min-height:36px!important;max-height:36px!important;padding:0 5px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:2px!important;white-space:nowrap!important;}
+.nb-add-btn--cust.has-cart-qty{padding-right:5px!important;}
+.nb-add-btn--cust .nb-custom-qty{position:static!important;inset:auto!important;transform:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:none!important;min-width:17px!important;width:auto!important;height:17px!important;min-height:17px!important;padding:0 4px!important;margin-left:3px!important;border-radius:999px!important;background:#18875b!important;color:#fff!important;font-size:10px!important;font-weight:800!important;line-height:1!important;box-shadow:none!important;}
+.nb-add-btn--cust .nb-custom-qty.ewcs-qty-slide-up,.nb-add-btn--cust .nb-custom-qty.ewcs-qty-slide-down{animation-duration:180ms!important;}
+@media(max-width:380px){.nb-custom-cart-control .nb-custom-remove{width:32px!important;min-width:32px!important;max-width:32px!important;flex-basis:32px!important}.nb-custom-cart-control .nb-add-btn--cust{width:80px!important;min-width:80px!important;max-width:80px!important;flex-basis:80px!important}}
