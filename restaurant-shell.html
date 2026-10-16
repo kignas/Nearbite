@@ -31,7 +31,6 @@
 <link href="css/legacy-inline.css" rel="stylesheet"/><link href="css/header.css" rel="stylesheet"/><link href="css/restaurant-info.css" rel="stylesheet"/><link href="css/rating-meta.css" rel="stylesheet"/><link href="css/delivery-banner.css" rel="stylesheet"/><link href="css/filters.css" rel="stylesheet"/><link href="css/menu.css" rel="stylesheet"/><link href="css/cart.css" rel="stylesheet"/><link href="css/step1-geometry.css" rel="stylesheet"/>  <link rel="stylesheet" href="css/step3-typography.css">
   <link rel="stylesheet" href="css/step3-navigation-fix.css">
   <link rel="stylesheet" href="css/step4-menu-geometry.css">
-<link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-1">
 <link rel="stylesheet" href="search-overlay.css">
 
 
@@ -41,6 +40,7 @@
 <link rel="stylesheet" href="eatswada-header-theme.css">
 <link rel="stylesheet" href="food-placeholder.css">
 <link rel="stylesheet" href="css/restaurant-tabs.css">
+<link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-2">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -57,23 +57,13 @@
 <i class="fa-solid fa-arrow-left"></i>
 </button>
 <div class="top-actions">
-<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
+<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="openRestaurantSearchPage()" type="button">
 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
 </button>
 <button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
 </button>
 </div>
-</div>
-<div class="menu-search-row" hidden="" id="menu-search-row">
-<div class="menu-search-field">
-<i aria-hidden="true" class="fa-solid fa-magnifying-glass"></i>
-<input aria-label="Search dishes in this menu" autocomplete="off" class="menu-search-input" id="menu-search-input" oninput="onMenuSearchInput()" placeholder="Search dishes in this menu" type="search"/>
-<button aria-label="Clear search" class="menu-search-clear" hidden="" id="menu-search-clear" onclick="clearMenuSearch()" type="button">
-<i class="fa-solid fa-xmark"></i>
-</button>
-</div>
-<button class="menu-search-cancel" onclick="closeMenuSearch()" type="button">Cancel</button>
 </div>
 <div class="res-card">
 <div class="res-card-body">
@@ -139,62 +129,14 @@
 <div class="cat-nav-sentinel" id="cat-nav-sentinel"></div>
 <div aria-hidden="true" class="cat-nav" id="cat-nav"><div class="cat-nav-inner" id="cat-nav-inner"></div></div>
 <div class="res-pane" id="menu-pane" role="tabpanel" aria-labelledby="res-tab-menu">
-<div class="filter-bar" id="restaurant-filter-bar">
-<button aria-label="Open filters and sorting" class="advanced-filter-btn" id="advanced-filter-btn" onclick="openFilterSheet()" type="button">
-<i aria-hidden="true" class="fa-solid fa-sliders"></i>
-<span>Filters</span>
-<span class="filter-count-badge" hidden="" id="filter-count-badge">0</span>
-</button>
-<div class="veg-toggle-row" id="quick-filter-row">
-<button aria-label="Show only vegetarian dishes" aria-pressed="false" class="veg-chip veg-type" id="filter-veg" onclick="toggleFilter('veg')" type="button"><span aria-hidden="true" class="veg-dot-icon"></span>Veg</button>
-<button aria-label="Show only non-vegetarian dishes" aria-pressed="false" class="veg-chip nonveg-type" id="filter-nonveg" onclick="toggleFilter('nonveg')" type="button"><span aria-hidden="true" class="veg-dot-icon"></span>Non-veg</button>
-</div>
-</div>
-<div aria-hidden="true" class="filter-sheet-backdrop" id="filter-sheet-backdrop" onclick="closeFilterSheet(event)">
-<section aria-labelledby="filter-sheet-title" aria-modal="true" class="filter-sheet" onclick="event.stopPropagation()" role="dialog">
-<div aria-hidden="true" class="filter-sheet-handle"></div>
-<div class="filter-sheet-head">
-<h2 id="filter-sheet-title">Filters and Sorting</h2>
-<button aria-label="Close filters" class="filter-sheet-close" onclick="closeFilterSheet()" type="button">
-<i class="fa-solid fa-xmark"></i>
-</button>
-</div>
-<div class="filter-sheet-body">
-<div class="filter-group">
-<h3>Sort by</h3>
-<div class="filter-options">
-<button class="sheet-option" data-sort="price-asc" onclick="setDraftSort('price-asc')" type="button">Price - low to high</button>
-<button class="sheet-option" data-sort="price-desc" onclick="setDraftSort('price-desc')" type="button">Price - high to low</button>
-</div>
-</div>
-<div class="filter-group">
-<h3>Veg/Non-veg preference</h3>
-<div class="filter-options">
-<button class="sheet-option diet-veg" data-diet="veg" onclick="setDraftDiet('veg')" type="button">
-<span class="sheet-diet-icon veg-icon"><span></span></span>Veg
-            </button>
-<button class="sheet-option diet-egg" data-diet="egg" onclick="setDraftDiet('egg')" type="button">
-<span class="sheet-diet-icon egg-icon"><i class="fa-solid fa-egg"></i></span>Egg
-            </button>
-<button class="sheet-option diet-nonveg" data-diet="nonveg" onclick="setDraftDiet('nonveg')" type="button">
-<span class="sheet-diet-icon nonveg-icon"><span></span></span>Non-veg
-            </button>
-</div>
-</div>
-<div class="filter-group">
-<h3>Top picks</h3>
-<div class="filter-options">
-<button class="sheet-option" data-top-pick="reordered" onclick="toggleDraftReordered()" type="button">
-<i class="fa-solid fa-rotate-right reorder-icon"></i>Highly reordered
-            </button>
-</div>
-</div>
-</div>
-<div class="filter-sheet-footer">
-<button class="clear-filter-btn" onclick="clearAllFilters()" type="button">Clear All</button>
-<button class="apply-filter-btn" id="apply-filter-btn" onclick="applySheetFilters()" type="button">Apply <span id="apply-filter-count">(0)</span></button>
-</div>
-</section>
+<div class="filter-bar ew-menu-quick-filters" id="restaurant-filter-bar" aria-label="Quick menu filters">
+  <div class="ew-filter-chip-row" id="quick-filter-row">
+    <button class="ew-filter-chip" id="filter-popular" type="button" aria-pressed="false" onclick="toggleMenuQuickFilter('popular')">Popular</button>
+    <button class="ew-filter-chip" id="filter-rating" type="button" aria-pressed="false" onclick="toggleMenuQuickFilter('rating')">4.0+ rating</button>
+    <button class="ew-filter-chip" id="filter-price" type="button" aria-pressed="false" onclick="toggleMenuQuickFilter('price')">₹99–₹149</button>
+    <button aria-label="Show only vegetarian dishes" aria-pressed="false" class="veg-chip veg-type ew-filter-chip diet-chip" id="filter-veg" onclick="toggleFilter('veg')" type="button"><span aria-hidden="true" class="veg-dot-icon"></span>Veg</button>
+    <button aria-label="Show only non-vegetarian dishes" aria-pressed="false" class="veg-chip nonveg-type ew-filter-chip diet-chip" id="filter-nonveg" onclick="toggleFilter('nonveg')" type="button"><span aria-hidden="true" class="veg-dot-icon"></span>Non-veg</button>
+  </div>
 </div>
 <div class="menu-section">
 <div id="menu-skeleton">
@@ -1075,11 +1017,13 @@ window.ewLoadVisibleImages = function(root, margin){
         const isCustomisable = item.isCustomisable === true || item.customisable === true || ewHasCustom;
 
         return `
-          <div class="menu-item nb-menu-item"
+          <div class="menu-item nb-menu-item" data-menu-item-id="${escapeMenuHtml(String(item._id || item.id || ''))}"
                data-veg="${item.isVeg ? 'true' : 'false'}"
                data-veg-known="${vegKnown ? 'true' : 'false'}"
                data-egg="${item.isEgg === true || item.egg === true || item.diet === 'egg' ? 'true' : 'false'}"
                data-reordered="${item.highlyReordered === true || item.isHighlyReordered === true || item.reordered === true || item.isReordered === true ? 'true' : 'false'}"
+               data-price="${Number(cleanPrice) || 0}"
+               data-popular="${item.isPopular === true || item.popular === true || item.bestSeller === true || item.isBestSeller === true ? 'true' : 'false'}"
                style="animation-delay:${delay}s;">
 
             <div class="nb-item-main">
@@ -1228,6 +1172,18 @@ window.ewLoadVisibleImages = function(root, margin){
       }
 
       renderMenu(groups, resId);
+      const focusItemId = new URLSearchParams(window.location.search).get('focusItem');
+      if (focusItemId) {
+        setTimeout(() => {
+          const target = Array.from(document.querySelectorAll('.menu-item[data-menu-item-id]'))
+            .find(el => el.dataset.menuItemId === focusItemId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.classList.add('ew-search-focus-item');
+            setTimeout(() => target.classList.remove('ew-search-focus-item'), 1800);
+          }
+        }, 120);
+      }
 
       if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
       renderOrderHint();
@@ -1423,6 +1379,34 @@ window.ewLoadVisibleImages = function(root, margin){
      ══════════════════════════════════════════════════════════ */
 
   let menuSearchQuery = '';
+  const quickMenuFilters = { popular: false, rating: false, price: false };
+
+  function toggleMenuQuickFilter(name) {
+    if (!Object.prototype.hasOwnProperty.call(quickMenuFilters, name)) return;
+    quickMenuFilters[name] = !quickMenuFilters[name];
+    const btn = document.getElementById(name === 'popular' ? 'filter-popular' : name === 'rating' ? 'filter-rating' : 'filter-price');
+    if (btn) {
+      btn.classList.toggle('active', quickMenuFilters[name]);
+      btn.setAttribute('aria-pressed', quickMenuFilters[name] ? 'true' : 'false');
+    }
+    applyAllMenuFilters();
+  }
+
+  function isPopularMenuItem(item) {
+    if (item.dataset.popular === 'true' || item.dataset.reordered === 'true') return true;
+    const badges = item.querySelector('.nb-item-tag-row, .nb-item-badge');
+    return !!badges && /popular|best.?seller|highly reordered/i.test(badges.textContent || '');
+  }
+
+  function itemPrice(item) {
+    const dataPrice = Number(item.dataset.price);
+    if (Number.isFinite(dataPrice) && dataPrice > 0) return dataPrice;
+    return Number((item.querySelector('.nb-item-current-price')?.textContent || '').replace(/[^\d.]/g, '')) || 0;
+  }
+
+  function itemRating(item) {
+    return Number((item.querySelector('.nb-item-rating-value')?.textContent || '').trim()) || 0;
+  }
 
   function itemSearchText(item) {
     const title = item.querySelector('.nb-item-title');
@@ -1447,6 +1431,9 @@ window.ewLoadVisibleImages = function(root, margin){
       // than being silently classified as non-veg.
       if (show && sheetApplied.diet) show = itemDiet(item) === sheetApplied.diet;
       if (show && sheetApplied.reordered) show = isHighlyReordered(item);
+      if (show && quickMenuFilters.popular) show = isPopularMenuItem(item);
+      if (show && quickMenuFilters.rating) show = itemRating(item) >= 4;
+      if (show && quickMenuFilters.price) { const price = itemPrice(item); show = price >= 99 && price <= 149; }
 
       item.classList.toggle('hidden-by-filter', !show);
       if (show) visible++;
@@ -1493,7 +1480,16 @@ window.ewLoadVisibleImages = function(root, margin){
     box.style.display = 'block';
   }
 
-  /* ── In-menu search ─────────────────────────────────────── */
+  /* Search opens a dedicated page scoped to this restaurant. It does not mutate cart state. */
+  function openRestaurantSearchPage() {
+    const id = currentResId || new URLSearchParams(window.location.search).get('id');
+    if (!id) return;
+    const params = new URLSearchParams({ scope: 'restaurant', restaurantId: String(id) });
+    window.location.href = 'search.html?' + params.toString();
+  }
+  window.openRestaurantSearchPage = openRestaurantSearchPage;
+
+  /* ── Legacy inline search functions retained for compatibility ── */
 
   function toggleMenuSearch() {
     const row = document.getElementById('menu-search-row');

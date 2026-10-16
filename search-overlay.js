@@ -17,6 +17,7 @@
   const MIN=2;
   let root=null,input=null,body=null,contextLabel=null,clearBtn=null;
   let context='home',restaurantId='';
+  let explicitContext=null,explicitRestaurantId='';
   let debounceTimer=0,requestSeq=0,aborter=null;
 
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -30,6 +31,7 @@
   };
 
   function detectContext(){
+    if(explicitContext) return {scope:explicitContext,restaurantId:explicitRestaurantId};
     const path=location.pathname.toLowerCase();
     if(path.endsWith('/under99.html') || path.endsWith('/under99')) return {scope:'under99',restaurantId:''};
     const params=new URLSearchParams(location.search);
@@ -96,10 +98,15 @@
     if(root) root.style.removeProperty('--ew-search-vh');
   }
 
-  function open(prefill=''){
+  function open(prefill='', options={}){
     ensureStyles(); refs();
+    if(options && typeof options==='object') {
+      explicitContext = ['home','under99','restaurant'].includes(options.context) ? options.context : null;
+      explicitRestaurantId = String(options.restaurantId || '');
+    }
     const c=detectContext();context=c.scope;restaurantId=c.restaurantId;
     if(contextLabel) contextLabel.textContent=contextText();
+    root.classList.toggle('is-full-page', location.pathname.toLowerCase().endsWith('/search.html'));
     root.classList.add('is-open');root.setAttribute('aria-hidden','false');document.body.classList.add('ew-search-open');
     input.value=prefill||'';
     updateClearButton();
@@ -153,16 +160,19 @@
     body.innerHTML='<div class="ew-search-list">'+items.map((item,i)=>{
       const restaurant=item.restaurant||{};
       const image=item.image||item.imageUrl||restaurant.image||restaurant.imageUrl||'';
+      const price = item.price ?? item.sellingPrice ?? item.discountedPrice;
+      const desc = item.description || item.desc || '';
       return `<button class="ew-search-result" type="button" data-result-index="${i}">
         ${image?`<img class="ew-search-thumb" src="${esc(image)}" alt="" loading="lazy" decoding="async">`:`<span class="ew-search-thumb" aria-hidden="true"></span>`}
-        <span class="ew-search-copy"><span class="ew-search-name">${esc(item.name||'Dish')}</span><span class="ew-search-meta">Dish</span></span>
+        <span class="ew-search-copy"><span class="ew-search-name">${esc(item.name||'Dish')}</span><span class="ew-search-meta">${price!=null && Number.isFinite(Number(price)) ? '₹'+esc(Number(price).toLocaleString('en-IN'))+' · ' : ''}${esc(desc || 'Available at this restaurant')}</span></span>
       </button>`;
     }).join('')+`</div>`;
     body.querySelectorAll('[data-result-index]').forEach((btn)=>btn.addEventListener('click',()=>openResult(items[Number(btn.dataset.resultIndex)])));
   }
 
   function openResult(item){
-    const rid=item?.restaurantId||item?.restaurant?.id;
+    const ridRaw=item?.restaurantId||item?.restaurant?._id||item?.restaurant?.id;
+    const rid=ridRaw && typeof ridRaw==='object' ? (ridRaw._id||ridRaw.id||'') : ridRaw;
     const iid=item?.id||item?._id;
     if(!rid) return;
     close();
@@ -170,7 +180,7 @@
     // No item is added to cart merely by selecting a search result.
     const qs=new URLSearchParams({id:String(rid)});
     if(iid) qs.set('focusItem',String(iid));
-    location.href=`restaurant.html?${qs.toString()}`;
+    location.href=`restaurant-shell.html?${qs.toString()}`;
   }
 
 
@@ -181,7 +191,16 @@
       e.preventDefault();e.stopPropagation();open();
     },true);
     document.addEventListener('click',(e)=>{
-      const closeBtn=e.target.closest('[data-search-close]');if(closeBtn){e.preventDefault();close();}
+      const closeBtn=e.target.closest('[data-search-close]');if(closeBtn){
+        e.preventDefault();
+        if(root && root.classList.contains('is-full-page')) {
+          if(context==='restaurant' && restaurantId) location.href=`restaurant-shell.html?id=${encodeURIComponent(restaurantId)}`;
+          else if(history.length>1) history.back();
+          else location.href='index.html';
+          return;
+        }
+        close();
+      }
     });
     document.addEventListener('input',(e)=>{if(e.target!==input) return; updateClearButton(); scheduleSearch(false);});
     document.addEventListener('click',(e)=>{if(e.target.closest('#ew-search-clear')){e.preventDefault(); input.value=''; updateClearButton(); renderIdle(); input.focus({preventScroll:true});}});
@@ -208,7 +227,7 @@
   window.closeEatswadaSearch=close;
   // search.html calls EatswadaSearch.open({context,query}); accepts a plain string too.
   window.EatswadaSearch={
-    open:o=>open(o&&typeof o==='object'?(o.query||o.prefill||''):(o||'')),
+    open:o=>open(o&&typeof o==='object'?(o.query||o.prefill||''):(o||''),o&&typeof o==='object'?o:{}),
     close
   };
 })();

@@ -39,8 +39,12 @@
 <body style="margin:0;background:#fff;font-family:Inter,system-ui,sans-serif">
 <script>
 document.addEventListener('DOMContentLoaded',function(){
-  const q=new URLSearchParams(location.search).get('q')||'';
-  window.EatswadaSearch?.open({context:'home',query:q});
+  const params=new URLSearchParams(location.search);
+  const q=params.get('q')||'';
+  const scope=params.get('scope')==='restaurant'?'restaurant':(params.get('scope')==='under99'?'under99':'home');
+  const restaurantId=params.get('restaurantId')||params.get('id')||'';
+  document.body.classList.add('ew-search-page');
+  window.EatswadaSearch?.open({context:scope,restaurantId,query:q});
 });
 </script>
 </body>
