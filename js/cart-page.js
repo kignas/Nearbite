@@ -2824,15 +2824,18 @@ function paintCheckoutDeliverySummary() {
     const rid = getCartRestaurantId(readCart() || {});
     const cached = (rid && ctResCache.id === rid && ctResCache.data) ? ctResCache.data : null;
     const eta = cached ? ctEtaText(cached) : '';
-    // Never let "unavailable" become the headline — the line reads "{eta} to {tag}",
-    // so a missing ETA falls back to a calm "Delivery to {tag}".
-    etaEl.textContent = eta || 'Delivery';
+    // Display only a real estimate supplied by restaurant data. Never invent
+    // a delivery window; keep a clear fallback while the restaurant is loading.
+    etaEl.textContent = eta || (rid ? 'Checking delivery time…' : 'Delivery time unavailable');
     if (!eta && rid) {
       getRestaurantLocation(rid).then(r => {
         const t = r ? ctEtaText(r) : '';
         const el = document.getElementById('checkout-eta');
-        if (el) el.textContent = t || 'Delivery';
-      }).catch(() => {});
+        if (el) el.textContent = t || 'Delivery time unavailable';
+      }).catch(() => {
+        const el = document.getElementById('checkout-eta');
+        if (el) el.textContent = 'Delivery time unavailable';
+      });
     }
   }
 
@@ -2847,14 +2850,6 @@ function paintCheckoutDeliverySummary() {
     addressDisplay.textContent = addressText.replace(/,\s*[^,]+$/, '');
   }
 
-  const shownTag = /^(work|office)$/i.test(tag) ? 'Office' : tag;   // display only
-  const dTag = document.getElementById('ct-details-tag');
-  const dAddr = document.getElementById('ct-details-address');
-  if (dTag) dTag.textContent = shownTag || 'your address';
-  if (dAddr) {
-    dAddr.textContent = addressText || 'Add a delivery address to continue';
-    dAddr.classList.toggle('is-empty', !addressText);
-  }
   const contact = ctCustomerContact();
   const nameEl = document.getElementById('checkout-customer-name');
   const phoneEl = document.getElementById('checkout-customer-phone');
