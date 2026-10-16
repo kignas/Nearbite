@@ -739,10 +739,21 @@ function paintBill(savedCart) {
   // The aggregate saved amount is surfaced in the bill hero, not a separate row.
   const mrpEl = document.getElementById('bill-mrp');
   if (mrpEl) {
-    if (savings > 0) { mrpEl.textContent = '₹' + originalCartTotal.toFixed(0); mrpEl.hidden = false; }
-    else mrpEl.hidden = true;
+    // Only show the crossed-out amount when it came from a genuine higher
+    // originalPrice value on one or more cart items. Never synthesize an MRP.
+    if (savings > 0) {
+      mrpEl.textContent = '₹' + originalCartTotal.toFixed(0);
+      mrpEl.hidden = false;
+      mrpEl.setAttribute('aria-label', 'Original item total ₹' + originalCartTotal.toFixed(0));
+    } else {
+      mrpEl.hidden = true;
+      mrpEl.removeAttribute('aria-label');
+    }
   }
-  if (subEl) subEl.classList.toggle('is-save', savings > 0);
+  if (subEl) {
+    subEl.classList.toggle('is-save', savings > 0);
+    subEl.setAttribute('aria-label', (savings > 0 ? 'Offer item total ₹' : 'Item total ₹') + subtotal);
+  }
 
   ctState.itemSavings = savings;
   ctState.originalCartTotal = originalCartTotal;
