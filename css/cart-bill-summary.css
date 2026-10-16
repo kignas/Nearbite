@@ -1,81 +1,110 @@
 /* ==========================================================================
-   PART 09 — BILL SUMMARY
-   Visual-only refinement; all bill values and visibility remain JS-driven.
+   BILL SUMMARY + PAYMENT BAR
+   Visual-only; every bill value, row visibility and the payment handler stay
+   JS-driven. Colours come from the existing --ct-* / --hd-* tokens.
    ========================================================================== */
 body.ct-page #ct-bill{
-  margin:12px 14px;
-  border:1px solid #E7EBEF;
+  margin:10px 14px;
+  border:1px solid var(--ct-line);
   border-radius:18px;
-  background:#fff;
-  box-shadow:0 6px 22px rgba(24,32,42,.045);
+  background:var(--ct-surface);
+  box-shadow:0 5px 20px rgba(24,32,42,.04);
 }
 body.ct-page #ct-bill .ct-bill-hero{
   align-items:center;
   gap:12px;
-  padding:16px 15px;
-  background:linear-gradient(180deg,#FBFDFC 0%,#FFFFFF 100%);
+  padding:14px 15px;
+  background:var(--ct-surface);
 }
 body.ct-page #ct-bill .ct-bill-hero-ic{
   width:36px;height:36px;flex-basis:36px;
   border-radius:11px;
-  background:var(--ew-success-soft,#EAF6F0);color:var(--ew-success,#23956D);
+  background:var(--ct-primary-soft);color:var(--ct-primary);
 }
 body.ct-page #ct-bill .ct-bill-hero-ic svg{width:20px;height:20px;}
+/* Header total is a summary; the closing "To Pay" below carries the emphasis. */
 body.ct-page #ct-bill .ct-bill-hero-top{
   display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;
-  font-family:inherit;font-size:15px;font-weight:700;
-  line-height:1.35;letter-spacing:-.2px;color:#303842;
+  font-family:inherit;font-size:14px;font-weight:700;
+  line-height:1.35;letter-spacing:-.2px;color:var(--ct-ink-2);
 }
 body.ct-page #ct-bill .ct-bill-hero-top strong{
-  font-size:19px;font-weight:800;letter-spacing:-.45px;color:#202A33;
+  font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--ct-ink);
+  font-variant-numeric:tabular-nums;
 }
 body.ct-page #ct-bill .ct-bill-hero-saved{
-  margin-top:4px;font-family:inherit;font-size:11px;font-weight:700;line-height:1.4;
+  margin-top:4px;font-family:inherit;font-size:11.5px;font-weight:700;line-height:1.4;
 }
 body.ct-page #ct-bill .ct-bill-rows{padding:2px 15px 12px;}
 body.ct-page #ct-bill .ct-bill-row{
-  margin-top:0;min-height:37px;gap:12px;
-  font-family:inherit;font-size:12px;line-height:1.4;
+  margin-top:0;min-height:38px;gap:12px;
+  font-family:inherit;font-size:13px;line-height:1.4;
 }
 body.ct-page #ct-bill .ct-bill-label{
-  color:#737D88;font-size:12px;font-weight:500;
+  color:var(--ct-ink-2);font-size:13px;font-weight:500;
 }
 body.ct-page #ct-bill .ct-bill-val{
-  color:#303842;font-size:12px;font-weight:650;
-  font-variant-numeric:tabular-nums;
+  color:var(--ct-ink);font-size:13px;font-weight:650;
+  text-align:right;font-variant-numeric:tabular-nums;
 }
 body.ct-page #ct-bill .ct-bill-sep{
-  margin:4px 0 7px;border-top:1px solid #F0F2F4;
+  margin:4px 0 7px;border-top:1px solid var(--ct-line-soft);
 }
 body.ct-page #ct-bill .ct-bill-cap{
   margin:3px 0 5px;padding:7px 9px;border-radius:8px;
-  background:var(--ew-success-soft,#EFF8F2);color:var(--ew-success,#23956D);font-size:11px;font-weight:700;
+  background:var(--ct-save-bg);color:var(--ct-save);font-size:11.5px;font-weight:700;
 }
+/* Quiet neutral note instead of a tinted promo band. */
 body.ct-page #ct-bill .ct-bill-band{
-  margin:0 15px;padding:9px 10px;
-  border-radius:9px;background:#F6F8F7;
-  color:#65736B;text-align:center;
-  font-family:inherit;font-size:10px;font-weight:650;letter-spacing:.15px;
+  margin:0 15px;padding:8px 10px;
+  border-radius:9px;background:var(--ct-line-soft);
+  color:var(--ct-muted);text-align:center;
+  font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.1px;
 }
 body.ct-page #ct-bill .ct-bill-total{
-  margin:12px 15px 0;padding:13px 0 15px;
-  border-top:1px solid #E9EDF0;
+  margin:12px 15px 0;padding:14px 0 16px;
+  border-top:1px solid var(--ct-line);
+  align-items:baseline;
 }
 body.ct-page #ct-bill .ct-total-label{
-  font-family:inherit;font-size:13px;font-weight:750;color:#303842;
+  font-family:inherit;font-size:15px;font-weight:800;color:var(--ct-ink);
 }
 body.ct-page #ct-bill .ct-total-val{
-  font-family:inherit;font-size:21px;font-weight:800;
-  letter-spacing:-.55px;color:#202A33;font-variant-numeric:tabular-nums;
+  font-family:inherit;font-size:22px;font-weight:800;
+  letter-spacing:-.5px;color:var(--ct-ink);font-variant-numeric:tabular-nums;
 }
 body.ct-page #ct-bill .ct-bill-hero-badge{
   transform:none;border-radius:7px;padding:6px 8px;
   font-family:inherit;font-size:8px;line-height:1.25;letter-spacing:.25px;
 }
 @media(max-width:380px){
-  body.ct-page #ct-bill{margin-left:11px;margin-right:11px;}
-  body.ct-page #ct-bill .ct-bill-hero{padding:14px 12px;gap:9px;}
+  body.ct-page #ct-bill{margin-left:10px;margin-right:10px;}
+  body.ct-page #ct-bill .ct-bill-hero{padding:12px;gap:9px;}
   body.ct-page #ct-bill .ct-bill-rows{padding-left:12px;padding-right:12px;}
   body.ct-page #ct-bill .ct-bill-total{margin-left:12px;margin-right:12px;}
   body.ct-page #ct-bill .ct-bill-band{margin-left:12px;margin-right:12px;}
+}
+
+/* ---- Fixed payment bar -------------------------------------------------
+   Slightly shorter than before. Height is measured at runtime into
+   --ct-footer-h by the existing script, so content is never covered.
+   Bottom padding keeps the Android gesture-bar safe area. */
+body.ct-page .ct-footer{
+  gap:6px;
+  padding:10px 12px calc(8px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--ct-line);
+  box-shadow:0 -4px 16px rgba(24,32,42,.07);
+}
+body.ct-page .ct-paybar{gap:12px;}
+body.ct-page .ct-paybar-amt{
+  font-size:21px;font-weight:800;line-height:1.1;
+  letter-spacing:-.4px;font-variant-numeric:tabular-nums;
+}
+body.ct-page .ct-paybar-link{margin-top:3px;font-size:12px;font-weight:600;}
+body.ct-page .ct-paybar .ct-cta{min-height:52px;padding:8px 14px;}
+body.ct-page .ct-paybar .ct-cta-text{font-size:16px;font-weight:700;}
+body.ct-page .ct-pay-note{font-size:11px;line-height:1.3;font-weight:500;color:var(--ct-muted);}
+@media(max-width:380px){
+  body.ct-page .ct-paybar-amt{font-size:19px;}
+  body.ct-page .ct-paybar .ct-cta-text{font-size:15px;}
 }

@@ -51,8 +51,8 @@ body.ct-page .ct-media{
   width: 52px;
   height: 52px;
   border-radius: 11px;
-  background: #F5F6F7;
-  border: 1px solid rgba(31,41,55,.055);
+  background: var(--ct-line-soft);
+  border: 1px solid var(--ct-line-soft);
 }
 body.ct-page .ct-name-row{
   gap: 7px;
@@ -69,7 +69,7 @@ body.ct-page .ct-custom{
   margin-top: 4px;
   font-size: 11.5px;
   line-height: 1.45;
-  color: #858D96;
+  color: var(--ct-muted);
 }
 body.ct-page .ct-price-line{
   gap: 7px;
@@ -79,6 +79,7 @@ body.ct-page .ct-unit-price{
   font-size: 13px;
   font-weight: 750;
   color: var(--ct-ink);
+  font-variant-numeric: tabular-nums;
 }
 body.ct-page .ct-was-price{
   font-size: 11.5px;
@@ -106,6 +107,7 @@ body.ct-page .ct-item-total{
   font-weight: 800;
   letter-spacing: -.25px;
   color: var(--ct-ink);
+  font-variant-numeric: tabular-nums;
 }
 body.ct-page .ct-item-save{
   margin-top: 4px;
@@ -115,28 +117,29 @@ body.ct-page .ct-item-save{
   color: #399273;
 }
 body.ct-page .ct-stepper{
-  min-height: 34px;
-  border: 1px solid rgba(220,39,66,.14);
+  min-height: 38px;
+  border: 1px solid var(--ct-primary-soft);
   border-radius: 10px;
-  background: #FFF5F7;
-  box-shadow: 0 2px 7px rgba(31,41,55,.035);
+  background: var(--ct-primary-soft);
+  box-shadow: none;
 }
 body.ct-page .ct-stepper button{
-  width: 29px;
-  height: 32px;
-  flex-basis: 29px;
-  color: var(--ct-green);
+  width: 30px;
+  height: 36px;
+  flex-basis: 30px;
+  color: var(--ct-primary);
   font-size: 15px;
 }
 body.ct-page .ct-qty{
   min-width: 23px;
-  color: #9E5362;
+  color: var(--ct-ink);
+  font-variant-numeric: tabular-nums;
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 750;
 }
 body.ct-page .ct-stepper.is-last .ct-step-down{
-  color: #D94A60;
+  color: var(--ct-primary);
 }
 @media (max-width: 360px){
   body.ct-page .ct-item-card{padding-left:14px;padding-right:14px;}
