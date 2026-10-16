@@ -84,3 +84,63 @@ body.ct-page .ct-dh-chevron {
   body.ct-page .ct-dh-tag,
   body.ct-page .ct-dh-addr { font-size: 10.5px; }
 }
+
+
+/* Dedicated delivery estimate card: ETA lives below the compact header,
+   never inside the restaurant/address row. */
+body.ct-page .ct-delivery-estimate {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 10px 14px 12px;
+  padding: 12px 14px;
+  min-height: 64px;
+  box-sizing: border-box;
+  border: 1px solid rgba(225, 229, 235, .9);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff 0%, #fbfcfb 100%);
+  box-shadow: 0 4px 14px rgba(24, 32, 42, .035);
+}
+body.ct-page .ct-delivery-estimate-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: var(--ew-success, #23956D);
+  background: var(--ew-success-soft, #EAF6F0);
+}
+body.ct-page .ct-delivery-estimate-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+}
+body.ct-page .ct-delivery-estimate-title {
+  color: var(--ct-muted, #727984);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: .15px;
+}
+body.ct-page .ct-delivery-estimate .ct-dh-eta {
+  color: var(--ct-ink, #252A32);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 380px) {
+  body.ct-page .ct-delivery-estimate {
+    margin: 8px 10px 10px;
+    padding: 10px 12px;
+    min-height: 58px;
+  }
+  body.ct-page .ct-delivery-estimate-icon {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+  }
+}
