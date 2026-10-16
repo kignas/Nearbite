@@ -1,15 +1,23 @@
-/* Eatswada restaurant menu refinements — additive styles only. */
+/* Eatswada restaurant menu refinements — final overrides loaded last. */
 
-/* Search is restaurant-scoped: it reuses the existing menu filter engine. */
+/* Search is a dedicated restaurant-scoped page, not an inline row over the title. */
 #menu-search-btn.menu-search-trigger{display:inline-flex!important;align-items:center;justify-content:center;}
 .menu-search-trigger i{font-size:17px;}
-.menu-search-row{position:sticky!important;top:58px!important;z-index:40!important;}
 
-/* Larger, more legible food photos while preserving the text/media row layout. */
-.nb-item-media{width:124px!important;min-width:124px!important;flex:0 0 124px!important;}
-.nb-item-image-wrap{width:124px!important;height:128px!important;}
+/* Larger, more legible food photos with the add control neatly attached to the image. */
+.nb-menu-item{height:auto!important;min-height:154px!important;padding:14px 0!important;gap:14px!important;align-items:flex-start!important;}
+.nb-item-media{width:132px!important;min-width:132px!important;max-width:132px!important;flex:0 0 132px!important;align-items:stretch!important;}
+.nb-item-image-wrap{width:132px!important;height:112px!important;border-radius:14px!important;overflow:hidden!important;}
 .nb-item-image,.nb-item-image-wrap img{width:100%!important;height:100%!important;object-fit:cover!important;}
-.nb-item-cta{margin-top:-28px!important;}
+.nb-item-cta{width:100%!important;height:36px!important;margin-top:-19px!important;display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important;z-index:5!important;}
+.nb-add-btn,.nb-qty{width:104px!important;min-width:104px!important;max-width:104px!important;height:36px!important;min-height:36px!important;max-height:36px!important;border-radius:11px!important;padding:0 8px!important;box-sizing:border-box!important;}
+.nb-custom-cart-control{display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:100%!important;}
+.nb-custom-cart-control .nb-custom-remove{width:34px!important;min-width:34px!important;height:36px!important;min-height:36px!important;border:1.5px solid var(--hd-on-light,#C13A50)!important;border-radius:10px!important;background:#fff!important;color:var(--hd-on-light,#C13A50)!important;font-size:19px!important;font-weight:700!important;box-shadow:0 2px 6px rgba(20,24,32,.08)!important;}
+.nb-custom-cart-control .nb-add-btn--cust{width:66px!important;min-width:66px!important;max-width:66px!important;padding:0 6px!important;}
+.nb-add-btn--cust.has-cart-qty{padding-right:6px!important;}
+.nb-custom-qty{position:absolute!important;right:4px!important;top:50%!important;transform:translateY(-50%)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:19px!important;height:19px!important;padding:0 4px!important;border-radius:50%!important;background:#18875b!important;color:#fff!important;font-size:11px!important;line-height:1!important;}
+.nb-item-customisable{margin-top:6px!important;text-align:center!important;font-size:11px!important;line-height:1.2!important;}
+.nb-item-customisable-spacer{visibility:hidden!important;}
 
 /* Small quantity movement on add/remove. Honors the device motion preference. */
 @keyframes ewMenuQtyUp{0%{transform:translateY(5px);opacity:.65}65%{transform:translateY(-3px);opacity:1}100%{transform:translateY(0);opacity:1}}
@@ -25,12 +33,29 @@
 .restaurant-menu-disclaimer ul{margin:0;padding-left:18px;}
 .restaurant-menu-disclaimer li{padding:3px 0;}
 
-@media(max-width:380px){
-  .nb-item-media{width:112px!important;min-width:112px!important;flex-basis:112px!important;}
-  .nb-item-image-wrap{width:112px!important;height:116px!important;}
-  .nb-menu-item{gap:10px!important;}
+@media(max-width:390px){
+  .nb-menu-item{gap:10px!important;min-height:146px!important;padding:12px 0!important;}
+  .nb-item-media{width:120px!important;min-width:120px!important;max-width:120px!important;flex-basis:120px!important;}
+  .nb-item-image-wrap{width:120px!important;height:104px!important;}
+  .nb-add-btn,.nb-qty{width:98px!important;min-width:98px!important;max-width:98px!important;}
 }
-@media(max-width:340px){
-  .nb-item-media{width:104px!important;min-width:104px!important;flex-basis:104px!important;}
-  .nb-item-image-wrap{width:104px!important;height:108px!important;}
+@media(max-width:350px){
+  .nb-item-media{width:108px!important;min-width:108px!important;max-width:108px!important;flex-basis:108px!important;}
+  .nb-item-image-wrap{width:108px!important;height:96px!important;}
+  .nb-add-btn,.nb-qty{width:90px!important;min-width:90px!important;max-width:90px!important;}
+  .nb-custom-cart-control .nb-custom-remove{width:30px!important;min-width:30px!important;}
+  .nb-custom-cart-control .nb-add-btn--cust{width:58px!important;min-width:58px!important;max-width:58px!important;}
 }
+
+
+/* Compact horizontal quick filters; the old Filters sheet is removed from the UI. */
+.ew-menu-quick-filters{display:block!important;overflow:hidden!important;padding:10px 18px!important;background:#fff!important;}
+.ew-filter-chip-row{display:flex!important;align-items:center!important;gap:9px!important;overflow-x:auto!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important;padding:1px 0 4px!important;white-space:nowrap!important;}
+.ew-filter-chip-row::-webkit-scrollbar{display:none!important;}
+.ew-filter-chip{flex:0 0 auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-height:40px!important;padding:0 15px!important;border:1px solid #e0e2e6!important;border-radius:22px!important;background:#fff!important;color:#3f4650!important;font:700 13px/1.1 Manrope,system-ui,sans-serif!important;box-shadow:0 1px 2px rgba(16,24,40,.03)!important;}
+.ew-filter-chip.active{border-color:var(--hd-primary,#C13A50)!important;background:#fff0f3!important;color:var(--hd-primary,#C13A50)!important;box-shadow:inset 0 0 0 1px var(--hd-primary,#C13A50)!important;}
+.ew-filter-chip.diet-chip{min-height:40px!important;padding:0 14px!important;}
+.ew-filter-chip .veg-dot-icon{margin-right:1px!important;}
+@media(max-width:380px){.ew-menu-quick-filters{padding-left:14px!important;padding-right:14px!important}.ew-filter-chip{min-height:38px!important;padding:0 12px!important;font-size:12px!important;}}
+
+.ew-search-focus-item{background:#fff5f6!important;outline:2px solid rgba(190,48,75,.28)!important;outline-offset:5px!important;border-radius:12px!important;transition:background .25s ease,outline-color .25s ease!important;}
