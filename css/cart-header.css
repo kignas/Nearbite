@@ -1,9 +1,8 @@
 /* =====================================================================
-   EATSWADA CART — DELIVERY HEADER
-   Visual-only. The back button is NOT styled here: .ct-dh-back is part of
-   the shared control in eatswada-back-button.css (40px circle, shared with
-   Orders / Tracking / Address). The old checkout-only 44px rules that
-   conflicted with it were removed.
+   EATSWADA CART REDESIGN — PART 01
+   Delivery header + address hierarchy.
+   Visual-only: preserves existing markup, IDs, handlers and data flow.
+   Homepage typography source: Manrope (same font already loaded by cart).
    ===================================================================== */
 body.ct-page .ct-delivery-head{
   min-height:76px;
@@ -11,10 +10,26 @@ body.ct-page .ct-delivery-head{
   display:flex;
   align-items:center;
   gap:10px;
-  background:var(--ct-surface);
+  background:#fff;
   border:0;
   box-shadow:0 5px 18px rgba(26,32,44,.045);
   font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+body.ct-page .ct-dh-back{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  border:1px solid rgba(31,41,55,.055);
+  border-radius:50%;
+  background:#fff;
+  color:#202631;
+  box-shadow:0 2px 9px rgba(24,32,45,.075);
+  transition:background .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+body.ct-page .ct-dh-back:active{
+  background:#F7F8FA;
+  transform:scale(.96);
+  box-shadow:0 1px 4px rgba(24,32,45,.06);
 }
 body.ct-page .ct-dh-main{
   min-height:48px;
@@ -24,17 +39,13 @@ body.ct-page .ct-dh-main{
   border:0;
   border-radius:12px;
   background:transparent;
-  font-family:inherit;
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 body.ct-page .ct-dh-copy{min-width:0;}
 body.ct-page .ct-dh-restaurant{
-  display:block;
   margin:0;
   max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:var(--ct-ink);
+  color:#202631;
   font-size:15px;
   font-weight:750;
   line-height:1.25;
@@ -45,18 +56,16 @@ body.ct-page .ct-dh-meta{
   align-items:center;
   gap:5px;
   min-width:0;
-  overflow:hidden;
-  white-space:nowrap;
   margin-top:3px;
-  color:var(--ct-muted);
+  color:#69717D;
   font-size:12.5px;
   font-weight:500;
   line-height:1.35;
   letter-spacing:-.12px;
 }
-body.ct-page .ct-dh-meta-icon{flex:0 0 auto;color:var(--ct-ink-2);}
+body.ct-page .ct-dh-meta-icon{color:#596270;}
 body.ct-page .ct-dh-eta{
-  color:var(--ct-ink);
+  color:#27303B;
   font-size:13px;
   font-weight:750;
   line-height:1.3;
@@ -64,44 +73,37 @@ body.ct-page .ct-dh-eta{
 }
 body.ct-page .ct-dh-to,
 body.ct-page .ct-dh-divider{
-  flex:0 0 auto;
   color:#A0A6AF;
   font-size:12px;
   font-weight:500;
 }
 body.ct-page .ct-dh-tag{
-  flex:0 0 auto;
-  color:var(--ct-ink);
+  color:#27303B;
   font-size:13px;
   font-weight:750;
 }
-/* Address takes the remaining width and ellipsizes instead of overlapping. */
 body.ct-page .ct-dh-addr{
-  flex:1 1 0;
   min-width:0;
   max-width:none;
   margin:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:var(--ct-muted);
+  color:#737B86;
   font-size:12px;
   font-weight:500;
   line-height:1.35;
   letter-spacing:-.08px;
 }
-/* "Add delivery address" is an action prompt, not a success state. */
 body.ct-page .ct-dh-addr.ct-prompt{
-  color:var(--ct-primary);
+  color:#168765;
   font-weight:650;
 }
 body.ct-page .ct-dh-chevron{
   flex:0 0 auto;
   margin-left:2px;
-  color:var(--ct-muted);
+  color:#7C8490;
 }
 @media(max-width:380px){
   body.ct-page .ct-delivery-head{padding-left:9px;padding-right:12px;gap:7px;}
+  body.ct-page .ct-dh-back{width:40px;height:40px;flex-basis:40px;}
   body.ct-page .ct-dh-meta{font-size:11.5px;gap:4px;}
   body.ct-page .ct-dh-addr{font-size:11px;}
 }

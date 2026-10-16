@@ -6,14 +6,14 @@
 body.ct-page .ct-savings{
   margin:10px 14px;
   padding:15px;
-  border:1px solid var(--ct-line);
+  border:1px solid rgba(225,229,235,.82);
   border-radius:18px;
-  background:var(--ct-surface);
+  background:#fff;
   box-shadow:0 5px 20px rgba(24,32,42,.04);
 }
 body.ct-page #ct-sav-title{
   margin:0 0 12px;
-  color:var(--ct-ink);
+  color:#252D36;
   font-family:inherit;
   font-size:15px;
   font-weight:800;
@@ -27,18 +27,18 @@ body.ct-page .ct-sav-row{
   width:100%;
   min-height:62px;
   padding:11px 12px;
-  border:1px solid var(--ct-line);
+  border:1px solid #E9ECEF;
   border-radius:13px;
-  background:var(--ct-surface);
-  color:var(--ct-ink);
+  background:#fff;
+  color:#303842;
   text-align:left;
   font-family:inherit;
   box-shadow:none;
   transition:background .18s ease,border-color .18s ease;
 }
-body.ct-page .ct-sav-row:active{background:var(--ct-line-soft);}
+body.ct-page .ct-sav-row:active{background:#F8FAF9;}
 body.ct-page .ct-sav-row:focus-visible{
-  outline:2px solid var(--ct-primary);
+  outline:2px solid var(--ew-success,#23956D);
   outline-offset:2px;
 }
 body.ct-page .ct-sav-ic{
@@ -48,18 +48,13 @@ body.ct-page .ct-sav-ic{
   height:36px;
   flex:0 0 36px;
   border-radius:11px;
-  background:var(--ct-primary-soft);
-  color:var(--ct-primary);
-}
-/* Real item savings are a positive state, so they keep success green. */
-body.ct-page .ct-sav-ic--pct{
-  background:var(--ct-save-bg);
-  color:var(--ct-save);
+  background:var(--ew-success-soft,#EAF6F0);
+  color:var(--ew-success,#23956D);
 }
 body.ct-page .ct-sav-copy{flex:1;min-width:0;}
 body.ct-page .ct-sav-title{
   display:block;
-  color:var(--ct-ink);
+  color:#303842;
   font-size:13px;
   line-height:1.35;
   font-weight:750;
@@ -68,8 +63,8 @@ body.ct-page .ct-sav-title{
 body.ct-page .ct-sav-sub{
   display:block;
   margin-top:3px;
-  color:var(--ct-muted);
-  font-size:11.5px;
+  color:#858D97;
+  font-size:11px;
   line-height:1.35;
   font-weight:500;
 }
@@ -77,15 +72,15 @@ body.ct-page .ct-sav-flag{
   flex:0 0 auto;
   font-size:10.5px;
   font-weight:750;
-  color:var(--ct-save);
-  background:var(--ct-save-bg);
-  border:1px solid var(--ct-save-bg);
+  color:var(--ew-success,#23956D);
+  background:var(--ew-success-soft,#EAF6F0);
+  border:1px solid #D8EEE3;
   border-radius:999px;
   padding:5px 8px;
 }
 body.ct-page .ct-sav-chev{
   flex:0 0 auto;
-  color:var(--ct-muted);
+  color:#929AA3;
 }
 body.ct-page .ct-sav-row.is-applied,
 body.ct-page .ct-sav-row.applied{
