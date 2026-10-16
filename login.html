@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
-<meta name="theme-color" content="#F1F5F9">
+<meta name="theme-color" content="#FFD92F">
   <title>Log in · Eatswada | EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,7 +337,7 @@
 
 <script>
   /* Google redirect callback gate.
-     Runs before <body> is parsed, so it decides what the very first paint
+     Runs before <body class="login-redesign"> is parsed, so it decides what the very first paint
      shows. The flag is written synchronously right before we hand the
      browser to Google, and read synchronously here on the way back. No
      flag (normal visit, refresh, deep link) => the login page renders
@@ -359,6 +359,134 @@
 <script src="config.js"></script>
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
+
+<style id="eatswada-login-visual-redesign">
+  /* Visual-only customer login redesign. Authentication styles/handlers remain in the original file. */
+  :root { color-scheme: light; --login-yellow:#FFD92F; --login-yellow-deep:#FFC928; --login-burgundy:#8F0D2A; --login-burgundy-dark:#70091F; --login-cream:#FFF7E7; --login-ink:#3A1015; }
+  html:has(body.login-redesign), html:has(body.login-redesign) body { background:var(--login-yellow) !important; }
+  body.login-redesign {
+    min-height:100dvh; min-height:100svh; display:flex; flex-direction:column; align-items:center;
+    overflow-x:hidden; overflow-y:auto; background:var(--login-yellow) !important; color:var(--login-ink) !important;
+    font-family:Manrope,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+  }
+  body.login-redesign .hero-section {
+    width:100%; max-width:500px; min-height:0; flex:0 0 auto; position:relative;
+    display:flex; flex-direction:column; justify-content:flex-start; align-items:center;
+    padding:calc(8px + env(safe-area-inset-top)) 18px 0; margin:0 auto;
+    overflow:visible; text-align:center; background:var(--login-yellow) !important;
+  }
+  body.login-redesign .hero-btn-skip {
+    z-index:2; top:calc(12px + env(safe-area-inset-top)); right:18px; padding:6px 11px;
+    border:1px solid rgba(143,13,42,.22); background:rgba(255,247,231,.78); color:var(--login-burgundy);
+    border-radius:999px; font-size:11px; font-weight:800;
+  }
+  body.login-redesign .slide-content, body.login-redesign .carousel-dots { display:none !important; }
+  body.login-redesign .login-hero-art-wrap {
+    width:min(100%,440px); height:clamp(205px,36vh,365px); display:flex; align-items:center; justify-content:center;
+    margin:0 auto; overflow:hidden; flex:none;
+  }
+  body.login-redesign .login-hero-art {
+    display:block; width:100%; height:100%; object-fit:contain; object-position:center; user-select:none;
+    -webkit-user-drag:none; filter:drop-shadow(0 7px 2px rgba(101,35,12,.06));
+  }
+  body.login-redesign .login-hero-copy { width:100%; max-width:440px; margin:0 auto; padding:0 2px; }
+  body.login-redesign .login-hero-title {
+    color:#401016; font-family:Georgia,"Times New Roman",serif; font-size:clamp(27px,7.3vw,37px);
+    font-weight:900; line-height:1.01; letter-spacing:-1.15px; text-wrap:balance;
+  }
+  body.login-redesign .login-hero-title span {
+    display:inline-block; margin-top:3px; padding:1px 9px 5px; color:var(--login-burgundy);
+    background:var(--login-cream); border-radius:13px 18px 12px 20px; transform:rotate(-.7deg);
+  }
+  body.login-redesign .login-hero-subtitle {
+    margin:10px auto 0; max-width:360px; font-size:clamp(12px,3.5vw,14px); line-height:1.4;
+    font-weight:700; color:#502323;
+  }
+  body.login-redesign .bottom-sheet {
+    width:100%; max-width:500px; flex:1 0 auto; min-height:0; margin:0 auto;
+    padding:clamp(16px,2.6vh,25px) 24px calc(20px + env(safe-area-inset-bottom));
+    border:0; border-radius:0; background:var(--login-yellow) !important;
+  }
+  body.login-redesign .step-container { width:100%; }
+  body.login-redesign .step-container.active { display:block; }
+  body.login-redesign #step1 > .brand-mark, body.login-redesign #step2 .brand-mark,
+  body.login-redesign #step3 .brand-mark, body.login-redesign #step4 .brand-mark,
+  body.login-redesign #authCallback .brand-mark { display:none !important; }
+  body.login-redesign #step1 .sheet-header { display:none; }
+  body.login-redesign #step1Banner { margin:0 0 12px; border-radius:14px; }
+  body.login-redesign .auth-choice-view { display:grid; grid-template-columns:1fr; gap:11px; }
+  body.login-redesign .social-btn, body.login-redesign #googleSignInBtn {
+    min-height:58px; width:100%; display:flex; align-items:center; justify-content:center; gap:11px;
+    border:1px solid rgba(255,255,255,.22); border-radius:999px; background:var(--login-burgundy) !important;
+    color:#fff !important; font-size:15px; font-weight:800; letter-spacing:-.15px;
+    box-shadow:0 5px 0 rgba(105,9,30,.12); transition:transform .15s ease,opacity .15s ease;
+  }
+  body.login-redesign #googleSignInBtn:active, body.login-redesign .password-mode-btn:active { transform:scale(.99); }
+  body.login-redesign #googleSignInBtn svg { width:25px; height:25px; flex:none; background:#fff; border-radius:50%; padding:3px; }
+  body.login-redesign .password-mode-btn {
+    min-height:58px; width:100%; display:flex; align-items:center; justify-content:center; gap:12px;
+    border:1.5px solid var(--login-burgundy); border-radius:999px; background:var(--login-cream) !important;
+    color:var(--login-burgundy) !important; font-size:15px; font-weight:800; cursor:pointer;
+  }
+  body.login-redesign .password-mode-btn i { font-size:19px; }
+  body.login-redesign .legal-text {
+    max-width:380px; margin:clamp(15px,2.2vh,23px) auto 0; color:#60343A !important;
+    font-size:11px; line-height:1.65; font-weight:600; text-align:center;
+  }
+  body.login-redesign .legal-text a { color:var(--login-burgundy) !important; text-decoration:underline; text-underline-offset:2px; }
+  body.login-redesign .password-login-view[hidden], body.login-redesign .auth-choice-view[hidden] { display:none !important; }
+  body.login-redesign .password-login-view { padding-top:1px; }
+  body.login-redesign .password-view-back {
+    min-height:34px; margin:0 0 10px; display:inline-flex; align-items:center; gap:7px;
+    padding:0 2px; border:0; background:transparent; color:var(--login-burgundy); font-size:13px; font-weight:800; cursor:pointer;
+  }
+  body.login-redesign .password-view-title { margin:0 0 16px; color:var(--login-ink); font-size:22px; font-weight:900; letter-spacing:-.5px; }
+  body.login-redesign .auth-label { color:#633942; font-weight:800; }
+  body.login-redesign .auth-field, body.login-redesign .phone-box {
+    background:#FFFDF7 !important; border-color:rgba(143,13,42,.25) !important; border-radius:15px;
+  }
+  body.login-redesign .auth-field:focus, body.login-redesign .phone-box:focus-within {
+    border-color:var(--login-burgundy) !important; box-shadow:0 0 0 3px rgba(143,13,42,.10) !important;
+  }
+  body.login-redesign .btn-primary, body.login-redesign .verify-otp-btn {
+    background:var(--login-burgundy) !important; color:#fff !important; border-radius:999px; min-height:54px;
+  }
+  body.login-redesign .btn-primary:disabled, body.login-redesign .verify-otp-btn:disabled { background:#BA8790 !important; }
+  body.login-redesign .auth-link, body.login-redesign .resend-btn { color:var(--login-burgundy) !important; }
+  body.login-redesign .divider { color:#83555B; }
+  body.login-redesign .divider::before, body.login-redesign .divider::after { background:rgba(143,13,42,.20); }
+  body.login-redesign .btn-back-otp { border-color:rgba(143,13,42,.22); color:var(--login-burgundy); background:var(--login-cream); }
+  body.login-redesign #step2, body.login-redesign #step3, body.login-redesign #step4 { color:var(--login-ink); }
+  body.login-redesign .sheet-title, body.login-redesign .otp-title { color:var(--login-ink); }
+  body.login-redesign .sheet-sub, body.login-redesign .otp-sub, body.login-redesign .auth-note { color:#72474D; }
+  html.auth-callback #authCallback { background:var(--login-yellow) !important; }
+  html.auth-callback #authCallback .auth-callback-title { color:var(--login-ink); }
+  html.auth-callback #authCallback .auth-callback-sub { color:#72474D; }
+  html.auth-callback #authCallback .auth-callback-spinner { border-color:rgba(143,13,42,.16); border-top-color:var(--login-burgundy); }
+  html.auth-callback #authCallback .auth-callback-exit { color:var(--login-burgundy); }
+  @media (min-width:700px) {
+    body.login-redesign { justify-content:center; }
+    body.login-redesign .hero-section { padding-top:20px; }
+    body.login-redesign .login-hero-art-wrap { height:min(38vh,370px); }
+    body.login-redesign .bottom-sheet { flex:0 0 auto; padding-bottom:24px; }
+  }
+  @media (max-height:720px) {
+    body.login-redesign .login-hero-art-wrap { height:clamp(170px,29vh,250px); }
+    body.login-redesign .login-hero-title { font-size:clamp(25px,6.3vw,32px); }
+    body.login-redesign .bottom-sheet { padding-top:13px; }
+    body.login-redesign .social-btn, body.login-redesign #googleSignInBtn, body.login-redesign .password-mode-btn { min-height:51px; }
+    body.login-redesign .legal-text { margin-top:12px; }
+  }
+  @media (max-width:365px) {
+    body.login-redesign .hero-section { padding-left:13px; padding-right:13px; }
+    body.login-redesign .bottom-sheet { padding-left:18px; padding-right:18px; }
+    body.login-redesign .login-hero-art-wrap { height:clamp(190px,32vh,285px); }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    body.login-redesign .social-btn, body.login-redesign .password-mode-btn { transition:none; }
+  }
+</style>
+
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -382,59 +510,48 @@
     <button type="button" class="auth-callback-exit tap" onclick="revealLoginForm('')">Return to login</button>
   </div>
 
-  <div class="hero-section">
-    <button class="hero-btn-skip tap" onclick="window.location.href='index.html'" aria-label="Skip introduction">Skip</button>
-
-    <div class="slide-content active" id="slide0">
-      <div class="hero-title">Lightning Fast<br>Delivery</div>
-      <img class="hero-img" src="https://cdn-icons-png.flaticon.com/512/2956/2956820.png" alt="Delivery">
+  <section class="hero-section login-hero" aria-labelledby="loginWelcomeTitle">
+    <button class="hero-btn-skip tap" type="button" onclick="window.location.href='index.html'" aria-label="Skip introduction">Skip</button>
+    <div class="login-hero-art-wrap">
+      <img class="login-hero-art" src="eatswada-login-hero.webp" alt="Illustrated Maynaguri map with food locations, a delivery rider, biryani and momos" fetchpriority="high" decoding="async">
     </div>
-    <div class="slide-content" id="slide1">
-      <div class="hero-title">Best Deals in<br>Maynaguri</div>
-      <img class="hero-img" src="https://cdn-icons-png.flaticon.com/512/3225/3225219.png" alt="Deals">
+    <div class="login-hero-copy">
+      <h1 id="loginWelcomeTitle" class="login-hero-title">Your cravings,<br><span>our neighbourhood.</span></h1>
+      <p class="login-hero-subtitle">Good food, delivered around Maynaguri.</p>
     </div>
-    <div class="slide-content" id="slide2">
-      <div class="hero-title">Real-Time<br>Order Tracking</div>
-      <img class="hero-img" src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Tracking">
-    </div>
-
-    <div class="carousel-dots">
-      <div class="dot active" id="dot0"></div>
-      <div class="dot" id="dot1"></div>
-      <div class="dot" id="dot2"></div>
-    </div>
-  </div>
+  </section>
 
   <div class="bottom-sheet">
 
     <div id="step1" class="step-container active">
-      <div class="brand-mark">Eatswada</div>
-      <div class="sheet-header">
-        <h1 class="sheet-title">Welcome to Eatswada</h1>
-        <div class="sheet-sub">Log in or create your account to continue</div>
-      </div>
-
       <div id="step1Banner" class="banner-error" role="alert" aria-live="assertive">
         <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
         <span id="step1BannerText"></span>
       </div>
 
-      <label class="auth-label" for="loginIdentifierInput">Email or mobile number</label>
-      <input class="auth-field" id="loginIdentifierInput" type="text" inputmode="email" maxlength="120" placeholder="Email or 10-digit mobile number" autocomplete="username">
-      <label class="auth-label" for="loginPasswordInput">Password</label>
-      <input class="auth-field" id="loginPasswordInput" type="password" minlength="8" maxlength="128" placeholder="Your password" autocomplete="current-password">
-      <button id="passwordLoginBtn" class="btn-primary tap" onclick="passwordLogin()">Log in</button>
-      <button type="button" class="auth-link tap" onclick="showForgotPassword()">Forgot password?</button>
+      <div id="authChoiceView" class="auth-choice-view">
+        <button id="googleSignInBtn" class="social-btn tap" type="button" onclick="signInWithGoogle()">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <button id="showPasswordLoginBtn" class="password-mode-btn tap" type="button" onclick="showPasswordLoginForm()">
+          <i class="fa-solid fa-lock" aria-hidden="true"></i> Login with password
+        </button>
+      </div>
 
-      <div class="divider"><span class="divider-text">or</span></div>
-
-      <button id="googleSignInBtn" class="social-btn tap" type="button" onclick="signInWithGoogle()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-        Continue with Google
-      </button>
+      <div id="passwordLoginView" class="password-login-view" hidden>
+        <button class="password-view-back tap" type="button" onclick="showAuthChoices()"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to sign-in options</button>
+        <h2 class="password-view-title">Log in with password</h2>
+        <label class="auth-label" for="loginIdentifierInput">Email or mobile number</label>
+        <input class="auth-field" id="loginIdentifierInput" type="text" inputmode="email" maxlength="120" placeholder="Email or 10-digit mobile number" autocomplete="username">
+        <label class="auth-label" for="loginPasswordInput">Password</label>
+        <input class="auth-field" id="loginPasswordInput" type="password" minlength="8" maxlength="128" placeholder="Your password" autocomplete="current-password">
+        <button id="passwordLoginBtn" class="btn-primary tap" type="button" onclick="passwordLogin()">Log in</button>
+        <button type="button" class="auth-link tap" onclick="showForgotPassword()">Forgot password?</button>
+      </div>
 
       <div class="legal-text">
-        By continuing, you can review how Eatswada handles account, order, delivery and security data.<br>
+        By continuing, you agree to our Terms of Service and Privacy Policy.<br>
         <a href="legal.html#terms">Terms of Service</a> &nbsp;<a href="legal.html#privacy">Privacy Policy</a>
       </div>
     </div>
@@ -511,7 +628,22 @@
       const el=document.getElementById(id); if(el) el.classList.add('active');
       window.scrollTo({top:320,behavior:'smooth'});
     }
-    function showLogin(){ showOnlyStep('step1'); hideBanner(document.getElementById('step1Banner')); }
+    function showAuthChoices(){
+      const choices=document.getElementById('authChoiceView');
+      const passwordView=document.getElementById('passwordLoginView');
+      if(choices) choices.hidden=false;
+      if(passwordView) passwordView.hidden=true;
+      hideBanner(document.getElementById('step1Banner'));
+    }
+    function showPasswordLoginForm(){
+      const choices=document.getElementById('authChoiceView');
+      const passwordView=document.getElementById('passwordLoginView');
+      if(choices) choices.hidden=true;
+      if(passwordView) passwordView.hidden=false;
+      hideBanner(document.getElementById('step1Banner'));
+      setTimeout(()=>document.getElementById('loginIdentifierInput')?.focus(),120);
+    }
+    function showLogin(){ showOnlyStep('step1'); showAuthChoices(); hideBanner(document.getElementById('step1Banner')); }
     function showForgotPassword(){
       const id=document.getElementById('loginIdentifierInput').value.trim();
       const email=id.includes('@')?id:'';
