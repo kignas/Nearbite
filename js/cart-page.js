@@ -101,36 +101,47 @@ let ctResCache = { id: null, data: null };
 function ctEtaText(restaurant) {
   if (!restaurant || typeof restaurant !== 'object') return '';
 
-  // Read the ETA from the backend restaurant record without inventing a value.
+  // Match the delivery-time fields already used by restaurant-card.js and
+  // restaurant-shell.html. The API endpoint was correct; the previous parser
+  // missed estimatedDeliveryMin / estimatedDeliveryMax and the `time` field.
+  const positiveNumber = (...values) => {
+    for (const value of values) {
+      if (value === null || value === undefined || value === '') continue;
+      const n = Number(value);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+    return null;
+  };
+
   const sources = [restaurant, restaurant.delivery, restaurant.deliveryInfo,
                    restaurant.deliveryDetails, restaurant.timings]
     .filter(v => v && typeof v === 'object');
 
   for (const source of sources) {
-    const direct = source.deliveryTime != null ? source.deliveryTime
-                 : source.deliveryTimeText != null ? source.deliveryTimeText
-                 : source.estimatedDeliveryTime != null ? source.estimatedDeliveryTime
-                 : source.eta != null ? source.eta
-                 : source.etaText;
+    // These are the canonical fields used elsewhere in Eatswada's frontend.
+    const min = positiveNumber(source.estimatedDeliveryMin, source.deliveryTimeMin,
+                               source.minMinutes, source.deliveryTimeMinutes);
+    const max = positiveNumber(source.estimatedDeliveryMax, source.deliveryTimeMax,
+                               source.maxMinutes, source.avgDeliveryTime,
+                               source.averageDeliveryTime);
 
-    if (typeof direct === 'string' && direct.trim()) {
-      const text = direct.trim().replace(/-/g, '–');
-      return /min|hr|hour/i.test(text) ? text : text + ' mins';
+    if (min !== null && max !== null) {
+      return Math.round(min) + '–' + Math.round(Math.max(min, max)) + ' mins';
     }
+    if (max !== null) return Math.round(max) + ' mins';
+    if (min !== null) return Math.round(min) + ' mins';
 
-    const pair = (direct && typeof direct === 'object') ? direct : source;
-    const min = Number(pair.deliveryTimeMin != null ? pair.deliveryTimeMin :
-                       pair.minMinutes != null ? pair.minMinutes : pair.min);
-    const max = Number(pair.deliveryTimeMax != null ? pair.deliveryTimeMax :
-                       pair.maxMinutes != null ? pair.maxMinutes : pair.max);
-    if (Number.isFinite(min) && min > 0 && Number.isFinite(max) && max > 0 && max >= min) {
-      return Math.round(min) + '–' + Math.round(max) + ' mins';
+    const direct = [source.time, source.deliveryTime, source.deliveryTimeText,
+                    source.estimatedDeliveryTime, source.eta, source.etaText]
+      .find(value => value !== null && value !== undefined && String(value).trim());
+
+    if (typeof direct === 'string') {
+      const text = direct.trim().replace(/\s*-\s*/g, '–');
+      return /min|mins|minute|hr|hour/i.test(text) ? text : text + ' mins';
     }
-
-    const single = Number(typeof direct === 'number' ? direct :
-      source.deliveryTimeMinutes != null ? source.deliveryTimeMinutes :
-      source.avgDeliveryTime != null ? source.avgDeliveryTime : source.averageDeliveryTime);
-    if (Number.isFinite(single) && single > 0) return Math.round(single) + ' mins';
+    if (typeof direct === 'number' && Number.isFinite(direct) && direct > 0) {
+      return Math.round(direct) + ' mins';
+    }
   }
   return '';
 }
