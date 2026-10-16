@@ -703,6 +703,7 @@ function paintItems(savedCart) {
         ${note ? `<div class="ct-restaurant-note-preview" data-note-preview="${esc(group.resId)}">${esc(note)}</div>` : ''}
       </section>`;
   }).join('');
+  listEl.setAttribute('aria-busy', 'false');
 
   // Keep hidden machine-readable values in sync; the brand name is never shown here.
   const first = entries[0]?.[1] || {};
@@ -1045,6 +1046,8 @@ async function renderCart() {
   const clearBtn = document.getElementById('btn-clear-cart');
 
   if (!savedCart || Object.keys(savedCart).length === 0) {
+    document.body.classList.remove('ct-loading-cart', 'ct-loading-delivery');
+    document.getElementById('cart-items-list')?.setAttribute('aria-busy', 'false');
     ctDeliveryReq++;                       // cancel any in-flight refresh
     clearTimeout(ctDeliveryTimer);
     // A note/tip belongs to a cart. No cart, no extras.
@@ -1064,11 +1067,13 @@ async function renderCart() {
 
   paintItems(savedCart);   // instant
   paintBill(savedCart);    // instant
+  document.body.classList.remove('ct-loading-cart');
   paintCompleteMeal();
   syncFooterOffset();
   ctProfileRefreshedThisPass = false;   // new pass: the delivery calc below may refresh /profile
   await refreshDelivery(); // network, guarded
   paintCheckoutDeliverySummary();
+  document.body.classList.remove('ct-loading-delivery');
   await ctEnsureProfile();
 }
 
@@ -2182,7 +2187,20 @@ async function paintCompleteMeal(){
   const seq = ++ctMealSeq;
   const cart = readCart() || {};
   const groups = ctCartGroups();
-  if (!groups.length){ section.hidden = true; return; }
+  if (!groups.length){
+    section.classList.remove('is-loading');
+    section.setAttribute('aria-busy', 'false');
+    section.hidden = true;
+    return;
+  }
+
+  // Show the skeleton only on the first menu load. During quantity changes or
+  // repaints, keep the already-rendered recommendations visible until fresh
+  // menu data arrives so the carousel does not flash back to placeholders.
+  const hasExistingCards = !!track.querySelector('.ct-cym-card');
+  section.hidden = false;
+  section.classList.toggle('is-loading', !hasExistingCards);
+  section.setAttribute('aria-busy', hasExistingCards ? 'false' : 'true');
 
   const inCart = ctInCartTest(cart);
   const cartEntries = Object.values(cart).filter(Boolean);
@@ -2227,7 +2245,14 @@ async function paintCompleteMeal(){
     });
   }
   if (seq !== ctMealSeq) return;
-  if (!items.length){ section.hidden = true; ctMealItems = []; ctMealTabs = []; return; }
+  if (!items.length){
+    section.classList.remove('is-loading');
+    section.setAttribute('aria-busy', 'false');
+    section.hidden = true;
+    ctMealItems = [];
+    ctMealTabs = [];
+    return;
+  }
 
   const byScore = (a, b) => items[b]._score - items[a]._score || items[a].price - items[b].price;
   const tabs = [];
@@ -2267,9 +2292,11 @@ async function paintCompleteMeal(){
     from.hidden = names.length !== 1;
   }
   const keepScroll = track.scrollLeft;
+  section.hidden = false;
+  section.classList.remove('is-loading');
+  section.setAttribute('aria-busy', 'false');
   ctPaintMealTrack(false);
   track.scrollLeft = keepScroll;
-  section.hidden = false;
   // The rail has no width until the section is visible, so the pill is placed
   // on the next frame (and once more after layout settles / fonts swap in).
   requestAnimationFrame(() => {
