@@ -1,0 +1,36 @@
+/* Eatswada restaurant menu refinements — additive styles only. */
+
+/* Search is restaurant-scoped: it reuses the existing menu filter engine. */
+#menu-search-btn.menu-search-trigger{display:inline-flex!important;align-items:center;justify-content:center;}
+.menu-search-trigger i{font-size:17px;}
+.menu-search-row{position:sticky!important;top:58px!important;z-index:40!important;}
+
+/* Larger, more legible food photos while preserving the text/media row layout. */
+.nb-item-media{width:124px!important;min-width:124px!important;flex:0 0 124px!important;}
+.nb-item-image-wrap{width:124px!important;height:128px!important;}
+.nb-item-image,.nb-item-image-wrap img{width:100%!important;height:100%!important;object-fit:cover!important;}
+.nb-item-cta{margin-top:-28px!important;}
+
+/* Small quantity movement on add/remove. Honors the device motion preference. */
+@keyframes ewMenuQtyUp{0%{transform:translateY(5px);opacity:.65}65%{transform:translateY(-3px);opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes ewMenuQtyDown{0%{transform:translateY(-4px);opacity:.65}65%{transform:translateY(2px);opacity:1}100%{transform:translateY(0);opacity:1}}
+.ew-menu-qty-up{animation:ewMenuQtyUp 240ms cubic-bezier(.2,.75,.25,1) both;}
+.ew-menu-qty-down{animation:ewMenuQtyDown 240ms cubic-bezier(.2,.75,.25,1) both;}
+.nb-add-btn.ew-menu-qty-up,.nb-add-btn.ew-menu-qty-down,.nb-qty-val.ew-menu-qty-up,.nb-qty-val.ew-menu-qty-down{will-change:transform,opacity;}
+@media(prefers-reduced-motion:reduce){.ew-menu-qty-up,.ew-menu-qty-down{animation:none!important;}}
+
+/* Clear, compact disclaimer at the end of the menu. */
+.restaurant-menu-disclaimer{margin:22px 0 0;padding:18px 16px 22px;background:#F5F5F8;color:#707783;border-top:1px solid #E8E9ED;font-size:12px;line-height:1.55;}
+.restaurant-menu-disclaimer h2{margin:0 0 9px;color:#4B515B;font-size:13px;font-weight:800;letter-spacing:.01em;}
+.restaurant-menu-disclaimer ul{margin:0;padding-left:18px;}
+.restaurant-menu-disclaimer li{padding:3px 0;}
+
+@media(max-width:380px){
+  .nb-item-media{width:112px!important;min-width:112px!important;flex-basis:112px!important;}
+  .nb-item-image-wrap{width:112px!important;height:116px!important;}
+  .nb-menu-item{gap:10px!important;}
+}
+@media(max-width:340px){
+  .nb-item-media{width:104px!important;min-width:104px!important;flex-basis:104px!important;}
+  .nb-item-image-wrap{width:104px!important;height:108px!important;}
+}
