@@ -487,6 +487,50 @@
   }
 </style>
 
+<style id="eatswada-login-polish">
+  /* Design polish only. No authentication logic, IDs or handlers are touched. */
+  body.login-redesign .hero-section{padding:calc(10px + env(safe-area-inset-top)) 20px 0}
+
+  /* Skip: sits in its own row above the art, no longer covering the image */
+  body.login-redesign .hero-btn-skip{
+    position:relative; top:auto; right:auto; align-self:flex-end;
+    margin:0 0 10px; padding:7px 15px; font-size:12px; background:var(--login-cream);
+  }
+
+  /* Hero art: framed rounded card so the image edges look intentional */
+  body.login-redesign .login-hero-art-wrap{
+    width:min(100%,440px); width:min(100%,440px,calc(36svh * 1.082));
+    height:auto; aspect-ratio:941 / 870;
+    border:4px solid var(--login-cream); border-radius:28px;
+    background:var(--login-yellow-deep); overflow:hidden;
+    box-shadow:0 18px 32px -16px rgba(112,9,31,.45), 0 3px 0 rgba(112,9,31,.10);
+  }
+  body.login-redesign .login-hero-art{width:100%; height:100%; object-fit:cover; filter:none}
+
+  /* Headline: breathing room under the art */
+  body.login-redesign .login-hero-copy{margin-top:22px}
+  body.login-redesign .login-hero-title{font-size:clamp(28px,8vw,38px); line-height:1.1}
+  body.login-redesign .login-hero-title span{
+    margin-top:6px; padding:2px 12px 7px;
+    box-shadow:0 4px 0 rgba(143,13,42,.12);
+  }
+  body.login-redesign .login-hero-subtitle{margin-top:14px; font-size:clamp(13px,3.8vw,15px)}
+
+  /* Sheet: legal text sits at the bottom, no big empty yellow gap */
+  body.login-redesign .bottom-sheet{
+    display:flex; flex-direction:column;
+    padding:22px 24px calc(22px + env(safe-area-inset-bottom));
+  }
+  body.login-redesign #step1.active{display:flex; flex-direction:column; flex:1 1 auto}
+  body.login-redesign .auth-choice-view{gap:12px}
+  body.login-redesign .legal-text{margin-top:auto; padding-top:22px; font-size:11.5px}
+  body.login-redesign .legal-sep{margin:0 8px; opacity:.55}
+
+  /* Keyboard / accessibility focus ring */
+  body.login-redesign button:focus-visible,
+  body.login-redesign a:focus-visible{outline:3px solid var(--login-burgundy); outline-offset:3px}
+</style>
+
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -552,7 +596,7 @@
 
       <div class="legal-text">
         By continuing, you agree to our Terms of Service and Privacy Policy.<br>
-        <a href="legal.html#terms">Terms of Service</a> &nbsp;<a href="legal.html#privacy">Privacy Policy</a>
+        <a href="legal.html#terms">Terms of Service</a><span class="legal-sep" aria-hidden="true">&middot;</span><a href="legal.html#privacy">Privacy Policy</a>
       </div>
     </div>
 
