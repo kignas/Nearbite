@@ -9,7 +9,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#FFD92F">
 <title>Set delivery location · Eatswada | EatSwada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -217,6 +217,72 @@ body{animation:none}
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
+
+<style id="eatswada-location-login-match">
+  /* Colour/design match with login.html. Map, GPS, search and confirm logic untouched. */
+  :root{
+    --login-yellow:#FFD92F; --login-yellow-deep:#FFC928; --login-burgundy:#8F0D2A;
+    --login-burgundy-dark:#70091F; --login-cream:#FFF7E7; --login-ink:#3A1015;
+    --brand:#8F0D2A !important; --brand-dark:#70091F !important; --brand-tint:#FFE98A !important;
+    --brand-ink:#8F0D2A !important; --ink:#3A1015 !important; --ink-2:#502323 !important;
+    --muted:#72474D !important; --label:#633942 !important;
+    --line:rgba(143,13,42,.25) !important; --soft:#FFE36B !important; --field:#FFFDF7 !important;
+    --disabled-bg:#BA8790 !important; --disabled-text:#fff !important;
+    --shadow-float:0 2px 0 rgba(112,9,31,.10), 0 8px 18px -8px rgba(112,9,31,.35);
+    --shadow-sheet:0 -6px 30px rgba(112,9,31,.22), 0 3px 0 rgba(112,9,31,.08);
+  }
+
+  /* Top bar */
+  .back{background:var(--login-cream); border-color:rgba(143,13,42,.25); color:var(--login-burgundy)}
+  .back:active{background:var(--login-yellow)}
+  .location-search-row{background:var(--login-cream); border-color:rgba(143,13,42,.25)}
+  .location-search-row:focus-within{border-color:var(--login-burgundy); box-shadow:0 0 0 3px rgba(143,13,42,.12), var(--shadow-float)}
+  .location-search-row .search-ico{color:var(--login-burgundy)}
+  #locationSearch::placeholder{color:#8A6A6F}
+  .location-search-clear{background:#F6E3C2; color:var(--login-burgundy)}
+  .location-results, .location-search-status{background:var(--login-cream)}
+  .location-result{background:var(--login-cream); color:var(--login-ink)}
+  .location-result i{color:var(--login-burgundy)}
+  .location-result small{color:#72474D}
+  .location-result+.location-result::before{background:rgba(143,13,42,.14)}
+  .location-result:active{background:var(--login-yellow)}
+
+  /* Current-location pill */
+  .current-pill{background:var(--login-cream); border-color:rgba(143,13,42,.30); color:var(--login-burgundy); font-weight:800;
+    box-shadow:0 2px 0 rgba(112,9,31,.10), 0 8px 16px -8px rgba(112,9,31,.40)}
+  .current-pill:active{background:var(--login-yellow)}
+
+  /* Bottom sheet */
+  .sheet{background:var(--login-cream); border-radius:24px}
+  .sheet-band{background:var(--login-yellow); min-height:38px}
+  .sheet-title{color:var(--login-burgundy); font-weight:800; letter-spacing:-.2px}
+  .sheet-sub{color:#633942}
+  .address{color:#72474D}
+  .addr-primary{color:var(--login-ink)}
+  .addr-secondary{color:#72474D}
+  .addr-meta{color:#633942}
+  .addr-meta.is-gps{color:#23805F}
+  .warn{background:#FEF2F2; border-color:#FBD5D5; color:#B42318}
+  .loc-progress{background:rgba(255,217,47,.35); color:#502323}
+  .loc-spinner{border-color:rgba(143,13,42,.16); border-top-color:var(--login-burgundy)}
+  .btn{background:var(--login-cream); border-color:var(--login-burgundy); color:var(--login-burgundy)}
+  .btn.primary{background:var(--login-burgundy); border-color:var(--login-burgundy); color:#fff; box-shadow:0 5px 0 rgba(105,9,30,.14)}
+  .btn.primary:disabled{background:#BA8790; border-color:#BA8790; color:#fff; box-shadow:none}
+
+  /* Location gate (modal) */
+  .lg-backdrop{background:rgba(58,16,21,.55)}
+  .lg-modal{background:var(--login-cream); border-radius:26px 26px 0 0; box-shadow:0 -8px 30px rgba(58,16,21,.30)}
+  .lg-icon{background:var(--login-yellow); color:var(--login-burgundy); border-radius:16px}
+  .lg-modal h2{color:var(--login-ink); font-weight:900}
+  .lg-modal p{color:#72474D; font-weight:600}
+  .lg-steps{background:rgba(255,217,47,.35); color:#502323}
+  .lg-steps b{color:var(--login-burgundy)}
+  .lg-btn{background:var(--login-cream); border:1.5px solid var(--login-burgundy); color:var(--login-burgundy); font-weight:800}
+  .lg-btn.primary{background:var(--login-burgundy); border-color:var(--login-burgundy); color:#fff; box-shadow:0 5px 0 rgba(105,9,30,.14)}
+  .lg-btn:not(.primary):active{background:var(--login-yellow)}
+  .lg-btn.link{background:transparent; border:0; box-shadow:none; color:var(--login-burgundy); text-decoration:underline; text-underline-offset:3px}
+  .back:focus-visible,.current-pill:focus-visible,.btn:focus-visible,.location-result:focus-visible,.lg-btn:focus-visible{outline:3px solid var(--login-burgundy); outline-offset:3px}
+</style>
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
