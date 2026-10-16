@@ -264,7 +264,7 @@
       position: fixed !important; left: 50% !important; transform: translateX(-50%) !important;
       /* IMPORTANT: inherit the bottom-nav component's shared variable.
          Do not create an inline --nb-cart-bottom on this element. */
-      bottom: var(--nb-cart-bottom, calc(16px + env(safe-area-inset-bottom, 0px))) !important;
+      bottom: var(--nb-cart-bottom, calc(5px + env(safe-area-inset-bottom, 0px))) !important;
       width: min(720px, calc(100vw - 24px)); max-width: calc(100vw - 24px);
       z-index: 100000; display: none;
       transition: bottom .32s cubic-bezier(.22,1,.36,1);
@@ -392,15 +392,15 @@
 
     /* ─────────────  99 STORE + RESTAURANT (two-tier red cart bar) ───────────── */
     #white-cart-root.wc-pink {
-      width: min(720px, calc(100vw - 40px));
-      max-width: calc(100vw - 40px);
+      width: min(560px, calc(100vw - 32px));
+      max-width: calc(100vw - 32px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     #es-pink-inner {
       all: unset; box-sizing: border-box; width: 100%; display: flex;
       flex-direction: column; overflow: hidden;
       background: #C93650; color: #fff;
-      border: 1px solid rgba(255,255,255,.16); border-radius: 27px;
+      border: 1px solid rgba(255,255,255,.16); border-radius: 20px;
       box-shadow: 0 7px 22px rgba(193,58,80,.24);
       font-family: 'Manrope', system-ui, -apple-system, sans-serif;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -409,31 +409,31 @@
     #es-pink-inner:active { transform: scale(.99); }
     #es-pink-inner { will-change: transform; }
     .wc-pink-message {
-      display: flex; align-items: center; gap: 9px; min-height: 42px;
-      padding: 10px 20px; background: rgba(125, 18, 42, .24);
-      color: #fff; font-size: 14px; line-height: 1.25; font-weight: 750;
+      display: flex; align-items: center; gap: 7px; min-height: 30px;
+      padding: 6px 13px; background: rgba(125, 18, 42, .24);
+      color: #fff; font-size: 12px; line-height: 1.2; font-weight: 750;
     }
-    .wc-pink-message svg { width: 18px; height: 18px; flex: 0 0 auto; }
+    .wc-pink-message svg { width: 15px; height: 15px; flex: 0 0 auto; }
     .wc-pink-main {
-      min-height: 64px; display: flex; align-items: center;
-      justify-content: space-between; gap: 12px; padding: 12px 20px;
+      min-height: 48px; display: flex; align-items: center;
+      justify-content: space-between; gap: 10px; padding: 8px 13px;
     }
     .wc-pink-left {
-      min-width: 0; color: #fff; font-size: 17px; line-height: 1.25;
+      min-width: 0; color: #fff; font-size: 14px; line-height: 1.2;
       font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       font-variant-numeric: tabular-nums;
     }
     .wc-pink-cta {
       display: inline-flex; align-items: center; justify-content: flex-end;
-      gap: 9px; flex: 0 0 auto; color: #fff; font-size: 17px; font-weight: 850;
+      gap: 7px; flex: 0 0 auto; color: #fff; font-size: 14px; font-weight: 850;
       white-space: nowrap;
     }
-    .wc-pink-cta svg { width: 25px; height: 25px; }
+    .wc-pink-cta svg { width: 20px; height: 20px; }
     @media (min-width: 600px) {
-      .wc-pink-message { min-height: 48px; padding: 12px 24px; font-size: 16px; }
-      .wc-pink-main { min-height: 72px; padding: 14px 24px; }
-      .wc-pink-left, .wc-pink-cta { font-size: 19px; }
-      .wc-pink-cta svg { width: 28px; height: 28px; }
+      .wc-pink-message { min-height: 34px; padding: 7px 16px; font-size: 13px; }
+      .wc-pink-main { min-height: 52px; padding: 9px 16px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 15px; }
+      .wc-pink-cta svg { width: 21px; height: 21px; }
     }
 
     /* Multi-restaurant cart drawer — used by pink bar and home "All ↑" */
@@ -458,14 +458,14 @@
     /* Narrow phones (≈360px and below) */
     @media (max-width: 360px) {
       #white-cart-root { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
-      #white-cart-root.wc-pink { width: calc(100vw - 32px); max-width: calc(100vw - 32px); }
+      #white-cart-root.wc-pink { width: calc(100vw - 24px); max-width: calc(100vw - 24px); }
       #white-cart-container { padding: 7px; height: 58px; }
-      #es-pink-inner { height: auto; padding: 0; border-radius: 23px; }
-      .wc-pink-message { min-height: 38px; padding: 9px 14px; font-size: 12px; }
-      .wc-pink-main { min-height: 56px; padding: 10px 14px; gap: 8px; }
-      .wc-pink-left, .wc-pink-cta { font-size: 14px; }
+      #es-pink-inner { height: auto; padding: 0; border-radius: 18px; }
+      .wc-pink-message { min-height: 28px; padding: 5px 11px; font-size: 11px; }
+      .wc-pink-main { min-height: 44px; padding: 7px 11px; gap: 7px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 13px; }
       .wc-pink-cta svg { width: 21px; height: 21px; }
-      .wc-pink-left, .wc-pink-cta { font-size: 14px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 13px; }
       .wc-img { width: 34px; height: 34px; }
       .wc-image-stack { height: 34px; min-width: 34px; }
       .wc-btn { padding: 0 10px; height: 42px; }
@@ -682,7 +682,7 @@
         root.style.setProperty('--nb-cart-bottom', newVal);
       }
     } else {
-      const fallback = 'calc(16px + env(safe-area-inset-bottom, 0px))';
+      const fallback = 'calc(5px + env(safe-area-inset-bottom, 0px))';
       if (root.style.getPropertyValue('--nb-cart-bottom') !== fallback) {
         root.style.setProperty('--nb-cart-bottom', fallback);
       }
