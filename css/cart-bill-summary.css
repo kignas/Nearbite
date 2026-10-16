@@ -1,81 +1,225 @@
 /* ==========================================================================
    PART 09 — BILL SUMMARY
-   Visual-only refinement; all bill values and visibility remain JS-driven.
+   Reference-inspired bill hierarchy using real cart prices and actual fees.
+   Loaded after cart-premium-refinement.css so these focused rules take effect.
    ========================================================================== */
-body.ct-page #ct-bill{
-  margin:12px 14px;
-  border:1px solid #E7EBEF;
-  border-radius:18px;
-  background:#fff;
-  box-shadow:0 6px 22px rgba(24,32,42,.045);
+body.ct-page #ct-bill {
+  margin: 12px 14px;
+  overflow: hidden;
+  border: 1px solid #E7E8EC;
+  border-radius: 21px;
+  background: #FFFFFF;
+  box-shadow: 0 7px 24px rgba(26, 24, 30, .055);
 }
-body.ct-page #ct-bill .ct-bill-hero{
-  align-items:center;
-  gap:12px;
-  padding:16px 15px;
-  background:linear-gradient(180deg,#FBFDFC 0%,#FFFFFF 100%);
+
+body.ct-page #ct-bill [hidden] { display: none !important; }
+
+/* Headline: total first, with savings only when cart data proves a discount. */
+body.ct-page #ct-bill .ct-bill-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 17px 16px 15px;
+  background: linear-gradient(180deg, #FFFCF5 0%, #FFFFFF 100%);
+  border-bottom: 1px solid #F0EDF0;
 }
-body.ct-page #ct-bill .ct-bill-hero-ic{
-  width:36px;height:36px;flex-basis:36px;
-  border-radius:11px;
-  background:var(--ew-success-soft,#EAF6F0);color:var(--ew-success,#23956D);
+body.ct-page #ct-bill .ct-bill-hero-ic {
+  display: flex;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ct-primary, #690D27) 9%, #FFFFFF);
+  color: var(--ct-primary, #690D27);
 }
-body.ct-page #ct-bill .ct-bill-hero-ic svg{width:20px;height:20px;}
-body.ct-page #ct-bill .ct-bill-hero-top{
-  display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;
-  font-family:inherit;font-size:15px;font-weight:700;
-  line-height:1.35;letter-spacing:-.2px;color:#303842;
+body.ct-page #ct-bill .ct-bill-hero-ic svg { width: 21px; height: 21px; }
+body.ct-page #ct-bill .ct-bill-hero-copy { flex: 1 1 auto; min-width: 0; }
+body.ct-page #ct-bill .ct-bill-hero-top {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  color: #4B4650;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -.2px;
 }
-body.ct-page #ct-bill .ct-bill-hero-top strong{
-  font-size:19px;font-weight:800;letter-spacing:-.45px;color:#202A33;
+body.ct-page #ct-bill .ct-bill-hero-top s {
+  color: #92909A;
+  font-size: 12px;
+  font-weight: 550;
+  text-decoration-thickness: 1.5px;
 }
-body.ct-page #ct-bill .ct-bill-hero-saved{
-  margin-top:4px;font-family:inherit;font-size:11px;font-weight:700;line-height:1.4;
+body.ct-page #ct-bill .ct-bill-hero-top strong {
+  color: var(--ct-ink, #24212A);
+  font-size: 22px;
+  font-weight: 850;
+  letter-spacing: -.65px;
+  font-variant-numeric: tabular-nums;
 }
-body.ct-page #ct-bill .ct-bill-rows{padding:2px 15px 12px;}
-body.ct-page #ct-bill .ct-bill-row{
-  margin-top:0;min-height:37px;gap:12px;
-  font-family:inherit;font-size:12px;line-height:1.4;
+body.ct-page #ct-bill .ct-bill-hero-saved {
+  margin-top: 4px;
+  color: var(--ct-save, #277A52);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
 }
-body.ct-page #ct-bill .ct-bill-label{
-  color:#737D88;font-size:12px;font-weight:500;
+body.ct-page #ct-bill .ct-bill-hero-badge {
+  flex: 0 0 auto;
+  align-self: center;
+  max-width: 88px;
+  padding: 7px 9px;
+  border: 1px solid rgba(105, 13, 39, .11);
+  border-radius: 9px;
+  background: #FFF5DC;
+  color: #690D27;
+  box-shadow: none;
+  transform: none;
+  text-align: center;
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1.3;
+  letter-spacing: .35px;
+  text-transform: uppercase;
 }
-body.ct-page #ct-bill .ct-bill-val{
-  color:#303842;font-size:12px;font-weight:650;
-  font-variant-numeric:tabular-nums;
+body.ct-page #ct-bill .ct-bill-hero-badge span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .7px;
+  opacity: .8;
 }
-body.ct-page #ct-bill .ct-bill-sep{
-  margin:4px 0 7px;border-top:1px solid #F0F2F4;
+
+/* Item total and charges: easy-to-scan left labels, tabular aligned values. */
+body.ct-page #ct-bill .ct-bill-rows { padding: 7px 16px 12px; }
+body.ct-page #ct-bill .ct-bill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  margin: 0;
+  padding: 8px 0;
+  color: #35323B;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
 }
-body.ct-page #ct-bill .ct-bill-cap{
-  margin:3px 0 5px;padding:7px 9px;border-radius:8px;
-  background:var(--ew-success-soft,#EFF8F2);color:var(--ew-success,#23956D);font-size:11px;font-weight:700;
+body.ct-page #ct-bill .ct-bill-label {
+  min-width: 0;
+  color: #6F7079;
+  font-size: 13px;
+  font-weight: 550;
 }
-body.ct-page #ct-bill .ct-bill-band{
-  margin:0 15px;padding:9px 10px;
-  border-radius:9px;background:#F6F8F7;
-  color:#65736B;text-align:center;
-  font-family:inherit;font-size:10px;font-weight:650;letter-spacing:.15px;
+body.ct-page #ct-bill .ct-bill-label.is-dashed {
+  border-bottom: 1px dashed #C9CBD1;
+  padding-bottom: 2px;
 }
-body.ct-page #ct-bill .ct-bill-total{
-  margin:12px 15px 0;padding:13px 0 15px;
-  border-top:1px solid #E9EDF0;
+body.ct-page #ct-bill .ct-bill-val {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #34313A;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-body.ct-page #ct-bill .ct-total-label{
-  font-family:inherit;font-size:13px;font-weight:750;color:#303842;
+body.ct-page #ct-bill .ct-bill-price-pair s,
+body.ct-page #ct-bill .ct-bill-val s {
+  color: #92929A;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration-thickness: 1.5px;
 }
-body.ct-page #ct-bill .ct-total-val{
-  font-family:inherit;font-size:21px;font-weight:800;
-  letter-spacing:-.55px;color:#202A33;font-variant-numeric:tabular-nums;
+body.ct-page #ct-bill .ct-bill-price-pair .ct-now { color: #34313A; font-weight: 750; }
+body.ct-page #ct-bill .ct-bill-price-pair .ct-now.is-save { color: var(--ct-save, #277A52); font-weight: 850; }
+body.ct-page #ct-bill .ct-bill-val.is-free,
+body.ct-page #ct-bill .ct-bill-val.is-save { color: var(--ct-save, #277A52); font-weight: 800; }
+body.ct-page #ct-bill .ct-bill-val.is-off { color: #A23B43; }
+body.ct-page #ct-bill .ct-bill-sep { margin: 3px 0 5px; border-top: 1px solid #ECECF0; }
+body.ct-page #ct-bill .ct-bill-row--zero-fee { min-height: 36px; padding-top: 5px; padding-bottom: 5px; }
+body.ct-page #ct-bill .ct-bill-row--zero-fee .ct-bill-label { font-size: 12.5px; }
+body.ct-page #ct-bill .ct-bill-row--zero-fee .ct-bill-val { color: var(--ct-save, #277A52); font-size: 12.5px; font-weight: 800; }
+body.ct-page #ct-bill .ct-bill-cap {
+  margin: 3px 0 5px;
+  padding: 8px 10px;
+  border: 1px solid #F0E3E8;
+  border-radius: 10px;
+  background: #FFF8FA;
+  color: var(--ct-primary, #690D27);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
 }
-body.ct-page #ct-bill .ct-bill-hero-badge{
-  transform:none;border-radius:7px;padding:6px 8px;
-  font-family:inherit;font-size:8px;line-height:1.25;letter-spacing:.25px;
+body.ct-page #ct-bill #bill-per-restaurant { padding: 1px 0 5px; }
+
+/* Reassurance band and final amount use the brand palette, not mock savings. */
+body.ct-page #ct-bill .ct-bill-band {
+  margin: 0 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(105, 13, 39, .08);
+  border-radius: 10px;
+  background: #FFF8FA;
+  color: #690D27;
+  text-align: center;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.4;
+  letter-spacing: -.05px;
 }
-@media(max-width:380px){
-  body.ct-page #ct-bill{margin-left:11px;margin-right:11px;}
-  body.ct-page #ct-bill .ct-bill-hero{padding:14px 12px;gap:9px;}
-  body.ct-page #ct-bill .ct-bill-rows{padding-left:12px;padding-right:12px;}
-  body.ct-page #ct-bill .ct-bill-total{margin-left:12px;margin-right:12px;}
-  body.ct-page #ct-bill .ct-bill-band{margin-left:12px;margin-right:12px;}
+body.ct-page #ct-bill .ct-bill-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 13px 16px 0;
+  padding: 14px 0 17px;
+  border-top: 1px solid #E9E8ED;
+}
+body.ct-page #ct-bill .ct-total-label {
+  color: #2F2C35;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+}
+body.ct-page #ct-bill .ct-total-val {
+  color: var(--ct-ink, #24212A);
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -.8px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 420px) {
+  body.ct-page #ct-bill { margin-left: 12px; margin-right: 12px; border-radius: 19px; }
+  body.ct-page #ct-bill .ct-bill-hero { gap: 10px; padding: 15px 13px 13px; }
+  body.ct-page #ct-bill .ct-bill-hero-ic { flex-basis: 35px; width: 35px; height: 35px; border-radius: 11px; }
+  body.ct-page #ct-bill .ct-bill-hero-top { font-size: 14px; }
+  body.ct-page #ct-bill .ct-bill-hero-top strong { font-size: 21px; }
+  body.ct-page #ct-bill .ct-bill-hero-badge { max-width: 76px; padding: 6px 7px; font-size: 7.5px; }
+  body.ct-page #ct-bill .ct-bill-rows { padding: 6px 13px 11px; }
+  body.ct-page #ct-bill .ct-bill-row { min-height: 39px; gap: 8px; }
+  body.ct-page #ct-bill .ct-bill-label { font-size: 12.5px; }
+  body.ct-page #ct-bill .ct-bill-val { gap: 6px; font-size: 12.5px; }
+  body.ct-page #ct-bill .ct-bill-band { margin-inline: 13px; padding: 9px 9px; font-size: 10.5px; }
+  body.ct-page #ct-bill .ct-bill-total { margin-inline: 13px; padding: 13px 0 15px; }
+  body.ct-page #ct-bill .ct-total-val { font-size: 24px; }
+}
+
+@media (max-width: 350px) {
+  body.ct-page #ct-bill .ct-bill-hero-badge { display: none; }
+  body.ct-page #ct-bill .ct-bill-hero-top strong { font-size: 20px; }
 }
