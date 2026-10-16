@@ -392,15 +392,15 @@
 
     /* ─────────────  99 STORE + RESTAURANT (two-tier red cart bar) ───────────── */
     #white-cart-root.wc-pink {
-      width: min(560px, calc(100vw - 32px));
-      max-width: calc(100vw - 32px);
+      width: min(520px, calc(100vw - 40px));
+      max-width: calc(100vw - 40px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     #es-pink-inner {
       all: unset; box-sizing: border-box; width: 100%; display: flex;
       flex-direction: column; overflow: hidden;
       background: #C93650; color: #fff;
-      border: 1px solid rgba(255,255,255,.16); border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.16); border-radius: 16px;
       box-shadow: 0 7px 22px rgba(193,58,80,.24);
       font-family: 'Manrope', system-ui, -apple-system, sans-serif;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -409,31 +409,31 @@
     #es-pink-inner:active { transform: scale(.99); }
     #es-pink-inner { will-change: transform; }
     .wc-pink-message {
-      display: flex; align-items: center; gap: 7px; min-height: 30px;
-      padding: 6px 13px; background: rgba(125, 18, 42, .24);
+      display: flex; align-items: center; gap: 6px; min-height: 26px;
+      padding: 4px 11px; background: rgba(125, 18, 42, .24);
       color: #fff; font-size: 12px; line-height: 1.2; font-weight: 750;
     }
-    .wc-pink-message svg { width: 15px; height: 15px; flex: 0 0 auto; }
+    .wc-pink-message svg { width: 13px; height: 13px; flex: 0 0 auto; }
     .wc-pink-main {
-      min-height: 48px; display: flex; align-items: center;
-      justify-content: space-between; gap: 10px; padding: 8px 13px;
+      min-height: 42px; display: flex; align-items: center;
+      justify-content: space-between; gap: 8px; padding: 6px 11px;
     }
     .wc-pink-left {
-      min-width: 0; color: #fff; font-size: 14px; line-height: 1.2;
+      min-width: 0; color: #fff; font-size: 13px; line-height: 1.2;
       font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       font-variant-numeric: tabular-nums;
     }
     .wc-pink-cta {
       display: inline-flex; align-items: center; justify-content: flex-end;
-      gap: 7px; flex: 0 0 auto; color: #fff; font-size: 14px; font-weight: 850;
+      gap: 6px; flex: 0 0 auto; color: #fff; font-size: 13px; font-weight: 850;
       white-space: nowrap;
     }
-    .wc-pink-cta svg { width: 20px; height: 20px; }
+    .wc-pink-cta svg { width: 18px; height: 18px; }
     @media (min-width: 600px) {
-      .wc-pink-message { min-height: 34px; padding: 7px 16px; font-size: 13px; }
-      .wc-pink-main { min-height: 52px; padding: 9px 16px; }
-      .wc-pink-left, .wc-pink-cta { font-size: 15px; }
-      .wc-pink-cta svg { width: 21px; height: 21px; }
+      .wc-pink-message { min-height: 29px; padding: 5px 13px; font-size: 12px; }
+      .wc-pink-main { min-height: 46px; padding: 7px 13px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 14px; }
+      .wc-pink-cta svg { width: 19px; height: 19px; }
     }
 
     /* Multi-restaurant cart drawer — used by pink bar and home "All ↑" */
@@ -458,13 +458,13 @@
     /* Narrow phones (≈360px and below) */
     @media (max-width: 360px) {
       #white-cart-root { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
-      #white-cart-root.wc-pink { width: calc(100vw - 24px); max-width: calc(100vw - 24px); }
+      #white-cart-root.wc-pink { width: calc(100vw - 28px); max-width: calc(100vw - 28px); }
       #white-cart-container { padding: 7px; height: 58px; }
-      #es-pink-inner { height: auto; padding: 0; border-radius: 18px; }
-      .wc-pink-message { min-height: 28px; padding: 5px 11px; font-size: 11px; }
-      .wc-pink-main { min-height: 44px; padding: 7px 11px; gap: 7px; }
-      .wc-pink-left, .wc-pink-cta { font-size: 13px; }
-      .wc-pink-cta svg { width: 21px; height: 21px; }
+      #es-pink-inner { height: auto; padding: 0; border-radius: 15px; }
+      .wc-pink-message { min-height: 24px; padding: 4px 9px; font-size: 10px; }
+      .wc-pink-main { min-height: 38px; padding: 6px 9px; gap: 6px; }
+      .wc-pink-left, .wc-pink-cta { font-size: 12px; }
+      .wc-pink-cta svg { width: 17px; height: 17px; }
       .wc-pink-left, .wc-pink-cta { font-size: 13px; }
       .wc-img { width: 34px; height: 34px; }
       .wc-image-stack { height: 34px; min-width: 34px; }
@@ -677,7 +677,7 @@
     if (nav) {
       const r = nav.getBoundingClientRect();
       const clearance = Math.max(0, window.innerHeight - r.top);
-      const newVal = (Math.round(clearance) + 12) + 'px';
+      const newVal = (Math.round(clearance) + 8) + 'px';
       if (root.style.getPropertyValue('--nb-cart-bottom') !== newVal) {
         root.style.setProperty('--nb-cart-bottom', newVal);
       }
