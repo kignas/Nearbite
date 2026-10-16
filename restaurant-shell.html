@@ -40,7 +40,7 @@
 <link rel="stylesheet" href="eatswada-header-theme.css">
 <link rel="stylesheet" href="food-placeholder.css">
 <link rel="stylesheet" href="css/restaurant-tabs.css">
-<link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-2">
+<link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-3">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -57,13 +57,21 @@
 <i class="fa-solid fa-arrow-left"></i>
 </button>
 <div class="top-actions">
-<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="openRestaurantSearchPage()" type="button">
+<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
 </button>
 <button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
 </button>
 </div>
+</div>
+<div class="menu-search-inline" id="menu-search-row" hidden>
+  <label class="menu-search-inline-field" for="menu-search-input">
+    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    <input id="menu-search-input" type="search" inputmode="search" autocomplete="off" placeholder="Search dishes in this menu" oninput="onMenuSearchInput()" />
+    <button type="button" id="menu-search-clear" class="menu-search-clear" aria-label="Clear search" onclick="clearMenuSearch()" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+  </label>
+  <button type="button" class="menu-search-cancel" onclick="closeMenuSearch()">Cancel</button>
 </div>
 <div class="res-card">
 <div class="res-card-body">
@@ -1480,13 +1488,8 @@ window.ewLoadVisibleImages = function(root, margin){
     box.style.display = 'block';
   }
 
-  /* Search opens a dedicated page scoped to this restaurant. It does not mutate cart state. */
-  function openRestaurantSearchPage() {
-    const id = currentResId || new URLSearchParams(window.location.search).get('id');
-    if (!id) return;
-    const params = new URLSearchParams({ scope: 'restaurant', restaurantId: String(id) });
-    window.location.href = 'search.html?' + params.toString();
-  }
+  /* Backwards-compatible name: restaurant search stays on this menu page. */
+  function openRestaurantSearchPage() { toggleMenuSearch(); }
   window.openRestaurantSearchPage = openRestaurantSearchPage;
 
   /* ── Legacy inline search functions retained for compatibility ── */
