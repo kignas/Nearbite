@@ -30,7 +30,9 @@
 <link href="css/eatswada-ui-system.css?v=20260923-typography" rel="stylesheet"/>
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
-  <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet">
+  <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet"/>
+  <!-- Final, cart-scoped visual and interaction refinements. Load after legacy cart sheets. -->
+  <link href="css/cart-premium-refinement.css?v=20261016" rel="stylesheet"/>
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -42,7 +44,7 @@
 <meta property="og:url" content="https://eatswada.com/cart.html"/>
 <meta name="twitter:card" content="summary"/>
 </head>
-<body class="ct-page">
+<body class="ct-page ct-loading-cart ct-loading-delivery">
 <div id="cart-has-items">
 <!-- ═══ 1. DELIVERY HEADER (ETA + address) — replaces the old title bar ═══ -->
 <div aria-live="polite" class="ct-delivery-head" id="delivery-eta-card">
@@ -97,7 +99,23 @@
 </div>
 <!-- ═══ 2. CART ITEM + inline actions (Add Items · Restaurant note) ═══ -->
 <div class="ct-card ct-item-card">
-<div aria-live="polite" id="cart-items-list"></div>
+<div aria-live="polite" aria-busy="true" id="cart-items-list">
+  <div class="ct-loading-cart-skeleton" aria-hidden="true">
+    <div class="ct-loading-item-row">
+      <div class="ct-loading-copy">
+        <span class="ct-loading-line ct-loading-line--title"></span>
+        <span class="ct-loading-line ct-loading-line--subtitle"></span>
+        <span class="ct-loading-line ct-loading-line--price"></span>
+      </div>
+      <div class="ct-loading-right">
+        <span class="ct-loading-line ct-loading-line--total"></span>
+        <span class="ct-loading-stepper"><i></i><i></i><i></i></span>
+      </div>
+    </div>
+    <div class="ct-loading-actions"><span></span><span></span></div>
+    <span class="ct-loading-line ct-loading-line--note"></span>
+  </div>
+</div>
 </div>
 <div aria-live="polite" class="ct-strip" id="free-delivery-nudge" role="status" style="display:none;">
 <svg aria-hidden="true" class="ct-strip-icon" fill="none" height="18" id="nudge-icon" viewbox="0 0 24 24" width="18">
@@ -119,6 +137,15 @@
 <p class="ct-cym-from" hidden="" id="ct-cym-from"></p>
 </div>
 <a class="ct-cym-all tap" href="index.html" id="ct-addmore">See all<svg aria-hidden="true" fill="none" height="14" viewbox="0 0 24 24" width="14"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></a>
+</div>
+<div class="ct-cym-skeleton" aria-hidden="true">
+  <div class="ct-cym-skeleton-tabs"><i></i><i></i><i></i><i></i></div>
+  <div class="ct-cym-skeleton-track">
+    <div class="ct-cym-skeleton-card"><i class="ct-cym-skeleton-image"></i><i class="ct-cym-skeleton-text"></i><i class="ct-cym-skeleton-price"></i></div>
+    <div class="ct-cym-skeleton-card"><i class="ct-cym-skeleton-image"></i><i class="ct-cym-skeleton-text"></i><i class="ct-cym-skeleton-price"></i></div>
+    <div class="ct-cym-skeleton-card"><i class="ct-cym-skeleton-image"></i><i class="ct-cym-skeleton-text"></i><i class="ct-cym-skeleton-price"></i></div>
+    <div class="ct-cym-skeleton-card"><i class="ct-cym-skeleton-image"></i><i class="ct-cym-skeleton-text"></i><i class="ct-cym-skeleton-price"></i></div>
+  </div>
 </div>
 <div aria-label="Suggestion categories" class="ct-cym-tabs" hidden="" id="ct-cym-tabs" role="tablist"></div>
 <div class="ct-cym-track" id="ct-meal-row" role="tabpanel"></div>
@@ -371,7 +398,7 @@
 <script async src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="config.js"></script>
 <script src="cart-bar.js"></script>
-<script src="js/cart-page.js?v=20260928-ref1"></script>
+<script src="js/cart-page.js?v=20261016-premium"></script>
 <script src="navigation.js"></script>
 </body>
 </html>
