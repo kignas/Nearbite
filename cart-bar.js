@@ -390,12 +390,12 @@
     #wc-allup:active { transform: translateX(-50%) scale(0.96); }
     #wc-allup svg { width: 12px; height: 12px; }
 
-    /* ─────────────  99 STORE + RESTAURANT (two-tier red cart bar) ───────────── */
     #white-cart-root.wc-pink {
-      width: min(520px, calc(100vw - 40px));
-      max-width: calc(100vw - 40px);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
+  width: min(520px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
     #es-pink-inner {
       all: unset; box-sizing: border-box; width: 100%; display: flex;
       flex-direction: column; overflow: hidden;
