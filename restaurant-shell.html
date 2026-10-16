@@ -31,6 +31,7 @@
 <link href="css/legacy-inline.css" rel="stylesheet"/><link href="css/header.css" rel="stylesheet"/><link href="css/restaurant-info.css" rel="stylesheet"/><link href="css/rating-meta.css" rel="stylesheet"/><link href="css/delivery-banner.css" rel="stylesheet"/><link href="css/filters.css" rel="stylesheet"/><link href="css/menu.css" rel="stylesheet"/><link href="css/cart.css" rel="stylesheet"/><link href="css/step1-geometry.css" rel="stylesheet"/>  <link rel="stylesheet" href="css/step3-typography.css">
   <link rel="stylesheet" href="css/step3-navigation-fix.css">
   <link rel="stylesheet" href="css/step4-menu-geometry.css">
+<link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-1">
 <link rel="stylesheet" href="search-overlay.css">
 
 
@@ -56,6 +57,9 @@
 <i class="fa-solid fa-arrow-left"></i>
 </button>
 <div class="top-actions">
+<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
+<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+</button>
 <button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
 </button>
@@ -220,6 +224,15 @@
 <p id="empty-filter-title">No dishes match these filters</p>
 <p id="empty-filter-sub">Try changing your filters.</p>
 </div>
+</div>
+<div class="restaurant-menu-disclaimer" role="note" aria-label="Menu disclaimer">
+  <h2>Disclaimer</h2>
+  <ul>
+    <li>Menu items, prices, availability, and offers are provided by the restaurant and may change without prior notice.</li>
+    <li>Food images are for representation only. The actual dish, portion size, and presentation may vary.</li>
+    <li>Ingredient and allergen information should be confirmed directly with the restaurant before ordering.</li>
+    <li>Any nutritional information, where shown, is indicative and may vary by ingredients and preparation.</li>
+  </ul>
 </div>
 </div>
 <div class="res-pane" hidden id="info-pane" role="tabpanel" aria-labelledby="res-tab-info">
@@ -835,18 +848,6 @@ window.ewLoadVisibleImages = function(root, margin){
 
   function renderRestaurantHeader(restaurant) {
     currentRestaurant = restaurant;   // used by the minimum-order hint
-    // Publish only the restaurant delivery settings needed by the shared cart-bar presentation.
-    try {
-      const root = document.documentElement;
-      const freeDeliveryAbove = Number(
-        restaurant.freeDeliveryAbove || restaurant.freeDeliveryThreshold ||
-        restaurant.freeDeliveryMinimum || restaurant.freeDeliveryMinOrder || 0
-      );
-      root.dataset.ewRestaurantId = String(restaurant._id || restaurant.id || restaurant.resId || '');
-      root.dataset.ewFreeDeliveryEnabled = restaurant.freeDeliveryEnabled === false ? 'false' : 'true';
-      root.dataset.ewFreeDeliveryAbove = Number.isFinite(freeDeliveryAbove) && freeDeliveryAbove > 0 ? String(freeDeliveryAbove) : '';
-      if (typeof window.updateGlobalCart === 'function') window.updateGlobalCart();
-    } catch (e) { /* cart-bar presentation must never interrupt restaurant rendering */ }
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
     const restaurantName = restaurant.name || 'Restaurant';
