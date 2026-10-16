@@ -34,7 +34,7 @@
   <link href="css/cart-premium-refinement.css?v=20261016" rel="stylesheet"/>
   <!-- Final bill-summary styling loads last so its reference-inspired layout is not overwritten. -->
   <link href="css/cart-bill-summary.css?v=20261016-original-price" rel="stylesheet"/>
-  <link href="css/cart-checkout-header-refinement.css?v=20261016-v1" rel="stylesheet"/>
+  <link href="css/cart-checkout-header-refinement.css?v=20261016-v2" rel="stylesheet"/>
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -49,7 +49,7 @@
 <body class="ct-page ct-loading-cart ct-loading-delivery">
 <div id="cart-has-items">
 <!-- ═══ 1. DELIVERY HEADER (ETA + address) — replaces the old title bar ═══ -->
-<div aria-live="polite" class="ct-delivery-head" id="delivery-eta-card">
+<div class="ct-delivery-head" id="delivery-eta-card">
 <button aria-label="Go back" class="ct-dh-back tap" onclick="window.nearbiteSafeBack()">
 <svg aria-hidden="true" fill="none" height="22" viewbox="0 0 24 24" width="22">
 <path d="M15 5.5 8.5 12l6.5 6.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9"></path>
@@ -58,13 +58,6 @@
 <button aria-label="Change delivery address" class="ct-dh-main tap" id="address-block" onclick="window.location.href='address.html?return=cart'" type="button">
 <span class="ct-dh-copy">
 <span class="ct-dh-restaurant" id="ct-dh-restaurant"></span>
-<span class="ct-dh-delivery-line">
-<svg aria-hidden="true" class="ct-dh-delivery-icon" fill="none" height="15" viewbox="0 0 24 24" width="15">
-<circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"></circle>
-<path d="M12 7.5v4.8l3.1 1.8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path>
-</svg>
-<span class="ct-dh-eta" id="checkout-eta">Checking delivery time…</span>
-</span>
 <span class="ct-dh-address-line">
 <svg aria-hidden="true" class="ct-dh-address-icon" fill="none" height="15" viewbox="0 0 24 24" width="15">
 <path d="M19 10c0 5-7 10-7 10S5 15 5 10a7 7 0 1 1 14 0Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"></path>
@@ -83,6 +76,19 @@
 <span id="cart-restaurant-name"></span>
 </span>
 </div>
+<!-- Dedicated delivery estimate section: kept outside the compact restaurant/address header. -->
+<section aria-live="polite" aria-atomic="true" class="ct-delivery-estimate" id="ct-delivery-estimate">
+  <span class="ct-delivery-estimate-icon" aria-hidden="true">
+    <svg fill="none" height="20" viewBox="0 0 24 24" width="20">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"></circle>
+      <path d="M12 7.5v4.8l3.1 1.8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path>
+    </svg>
+  </span>
+  <span class="ct-delivery-estimate-copy">
+    <span class="ct-delivery-estimate-title">Estimated delivery</span>
+    <span class="ct-dh-eta" id="checkout-eta">Checking delivery time…</span>
+  </span>
+</section>
 <!-- ═══ 1a. SAVINGS STRIP — same ids the JS already paints (paintFooterSavings); shown only when real savings exist. Tapping scrolls to the bill. ═══ -->
 <button aria-label="Show bill details" class="ct-footer-save ct-save-strip" id="ct-footer-save" type="button">
 <svg aria-hidden="true" class="ct-save-spark" fill="none" height="18" viewbox="0 0 24 24" width="18">
