@@ -1078,6 +1078,10 @@ async function renderCart() {
 
   paintItems(savedCart);   // instant
   paintBill(savedCart);    // instant
+  // Older cart rows may predate originalPrice persistence. Recover a crossed-out
+  // price only when the current menu record proves the same selling price and
+  // a genuinely higher MRP; this never delays the checkout's first paint.
+  void ctHydrateCartOriginalPrices(savedCart);
   document.body.classList.remove('ct-loading-cart');
   paintCompleteMeal();
   syncFooterOffset();
@@ -2046,6 +2050,121 @@ async function ctMenuForRestaurant(rid){
   let groups = ctMenuGroupsFromRestaurant(rest);
   if (!groups.length) groups = await ctFetchMenu(rid);
   return { groups, open };
+}
+
+/* Recover missing MRP metadata for pre-existing cart entries. The menu record
+   is treated as the source of truth: prices must match before any original
+   price is copied into the cart. Portion-priced customizations are only given
+   an MRP when that exact option exposes its own originalPrice, or the parent
+   item price exactly matches the selected cart price. */
+let ctOriginalPriceHydrationRunning = false;
+function ctParseMenuPrice(value){
+  if (typeof value === 'number') return Number.isFinite(value) ? value : NaN;
+  const parsed = parseFloat(String(value == null ? '' : value).replace(/[^\d.-]/g, ''));
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+function ctPricesMatch(a, b){
+  return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 0.011;
+}
+function ctMenuOriginalForCartEntry(info, raw){
+  if (!info || !raw) return null;
+  const cartPrice = ctParseMenuPrice(info.price);
+  if (!(cartPrice > 0)) return null;
+  const rawPrice = ctParseMenuPrice(raw.price != null ? raw.price : (raw.sellingPrice != null ? raw.sellingPrice : raw.finalPrice));
+  const rawOriginal = ctParseMenuPrice(raw.originalPrice);
+  if (!(rawPrice > 0)) return null;
+
+  const customizations = Array.isArray(info.customizations) ? info.customizations : [];
+  const portion = customizations.find(c => c && String(c.pricingMode || '').toLowerCase() === 'portion');
+  const extras = customizations
+    .filter(c => c && String(c.pricingMode || '').toLowerCase() !== 'portion')
+    .reduce((sum, c) => sum + Math.max(0, ctParseMenuPrice(c.extraPrice) || 0), 0);
+
+  if (portion){
+    // If the backend stores MRP on a specific portion option, use only that
+    // option and only when its selling price reconciles with this cart line.
+    const rawGroups = Array.isArray(raw.customizations) ? raw.customizations : [];
+    const wantedTitle = String(portion.title || '').trim().toLowerCase();
+    const wantedLabel = String(portion.label || '').trim().toLowerCase();
+    const group = rawGroups.find(g => g && String(g.pricingMode || '').toLowerCase() === 'portion' &&
+      (!wantedTitle || String(g.title || '').trim().toLowerCase() === wantedTitle) &&
+      Array.isArray(g.options) && g.options.some(o => String(o && o.label || '').trim().toLowerCase() === wantedLabel));
+    const option = group && group.options.find(o => String(o && o.label || '').trim().toLowerCase() === wantedLabel);
+    if (option){
+      const optionPrice = ctParseMenuPrice(option.extraPrice != null ? option.extraPrice : (option.price != null ? option.price : option.sellingPrice));
+      const optionOriginal = ctParseMenuPrice(option.originalPrice);
+      if (optionOriginal > optionPrice && ctPricesMatch(optionPrice + extras, cartPrice)) return optionOriginal + extras;
+    }
+    // Some older menu records price the portion identically to the parent
+    // item. Only in that exact-price case does the parent's MRP apply safely.
+    if (!extras && ctPricesMatch(rawPrice, cartPrice) && rawOriginal > rawPrice) return rawOriginal;
+    return null;
+  }
+
+  // For ordinary items and add-on customizations, reconcile the final selling
+  // amount against the menu base price plus the selected add-ons before using
+  // the menu's originalPrice. No percentages or MRP values are synthesized.
+  if (ctPricesMatch(rawPrice + extras, cartPrice) && rawOriginal > rawPrice){
+    return rawOriginal + extras;
+  }
+  return null;
+}
+async function ctHydrateCartOriginalPrices(initialCart){
+  if (ctOriginalPriceHydrationRunning) return;
+  const cart = initialCart && typeof initialCart === 'object' ? initialCart : {};
+  const candidates = Object.entries(cart).filter(([, info]) => {
+    const price = ctParseMenuPrice(info && info.price);
+    const original = ctParseMenuPrice(info && info.originalPrice);
+    return info && info.menuItem && info.resId && price > 0 && !(original > price);
+  });
+  if (!candidates.length) return;
+  ctOriginalPriceHydrationRunning = true;
+  try {
+    const byRestaurant = new Map();
+    candidates.forEach(([key, info]) => {
+      const rid = String(info.resId);
+      if (!byRestaurant.has(rid)) byRestaurant.set(rid, []);
+      byRestaurant.get(rid).push([key, info]);
+    });
+    const recovered = new Map();
+    await Promise.all(Array.from(byRestaurant.entries()).map(async ([rid, rows]) => {
+      const menu = await ctMenuForRestaurant(rid);
+      const rawItems = (menu.groups || []).flatMap(group => Array.isArray(group.items) ? group.items : []);
+      rows.forEach(([key, info]) => {
+        const id = String(info.menuItem || '');
+        const raw = rawItems.find(item => item && String(item._id || item.id || item.menuItem || item.menuItemId || '') === id);
+        const original = ctMenuOriginalForCartEntry(info, raw);
+        if (original && original > ctParseMenuPrice(info.price)) {
+          recovered.set(key, { original, price: ctParseMenuPrice(info.price), menuItem: id, resId: rid });
+        }
+      });
+    }));
+    if (!recovered.size) return;
+
+    // Merge into the newest cart snapshot so a quantity tap during the request
+    // cannot be overwritten by stale data. Only price metadata is changed.
+    const latest = readCart() || {};
+    let changed = false;
+    recovered.forEach((meta, key) => {
+      const line = latest[key];
+      if (!line || String(line.menuItem || line.menuItemId || '') !== meta.menuItem ||
+          String(line.resId || line.restaurantId || '') !== meta.resId ||
+          !ctPricesMatch(ctParseMenuPrice(line.price), meta.price) ||
+          ctParseMenuPrice(line.originalPrice) > meta.price) return;
+      line.originalPrice = meta.original;
+      changed = true;
+    });
+    if (changed){
+      try { localStorage.setItem('nearbite_cart', JSON.stringify(latest)); }
+      catch (error) { console.warn('[checkout] Could not persist recovered original prices:', error); return; }
+      // Repaint the item line and bill so both consume the same recovered data.
+      repaintCart();
+    }
+  } catch (error) {
+    console.warn('[checkout] Could not recover original menu prices:', error);
+  } finally {
+    ctOriginalPriceHydrationRunning = false;
+  }
 }
 
 /* Ordering only — capsule labels are always the menu's own category names.
