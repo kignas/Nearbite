@@ -133,3 +133,75 @@ body.ew-search-open #white-cart-root{z-index:100002!important}
 @media(prefers-reduced-motion:reduce){
   .ss-diet-chip,.ss-diet-chip.pop{animation:none;transition:none}
 }
+
+/* ---- dish detail sheet ---- */
+.ds{position:fixed;inset:0;z-index:100100}
+.ds[hidden]{display:none}
+body.ew-dish-open{overflow:hidden}
+.ds-bd{position:absolute;inset:0;background:rgba(23,27,36,.5);opacity:0;transition:opacity .28s ease}
+.ds.is-in .ds-bd{opacity:1}
+.ds-sheet{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;max-height:90vh;max-height:90dvh;background:#fff;color:var(--ss-ink);border-radius:24px 24px 0 0;overflow:hidden;box-shadow:0 -10px 40px rgba(23,27,36,.22);transform:translate3d(0,105%,0);transition:transform .46s cubic-bezier(.34,1.32,.5,1);will-change:transform}
+.ds.is-in .ds-sheet{transform:none}
+.ds:not(.is-in) .ds-sheet{transition-duration:.26s;transition-timing-function:cubic-bezier(.4,0,1,1)}
+.ds-grab{position:absolute;top:0;left:0;right:0;z-index:3;height:28px;display:flex;align-items:center;justify-content:center;touch-action:none}
+.ds-grab span{width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.92);box-shadow:0 1px 4px rgba(23,27,36,.35)}
+.ds-x{position:absolute;top:14px;right:14px;z-index:4;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:#fff;color:var(--ss-ink);font-size:15px;box-shadow:0 2px 10px rgba(23,27,36,.25);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ds-x:active{transform:scale(.92)}
+.ds-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* photo + skeleton */
+.ds-hero{position:relative;width:100%;aspect-ratio:16/11;max-height:46vh;overflow:hidden;background:#F2F3F5}
+.ds-hero.is-empty{aspect-ratio:auto;height:150px;display:flex;align-items:center;justify-content:center;color:#C3C8D0;font-size:34px}
+.ds-img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.06);transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.3,1)}
+.ds-img.is-loaded{opacity:1;transform:none}
+.ds-img.is-off{filter:grayscale(1)}
+.ds-skel{position:absolute;inset:0;z-index:0;display:none;background:linear-gradient(100deg,#F2F3F5 30%,#E4E7EB 50%,#F2F3F5 70%);background-size:220% 100%;animation:ds-shimmer 1.15s linear infinite}
+.ds-hero.is-loading .ds-skel{display:block}
+@keyframes ds-shimmer{from{background-position:120% 0}to{background-position:-100% 0}}
+.ds-flag{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:22px 8px 10px;background:linear-gradient(transparent,rgba(23,27,36,.72));color:#fff;font-size:13px;font-weight:700;text-align:center}
+
+/* text */
+.ds-info{padding:18px 20px 22px}
+.ds-info>*{animation:ds-rise .5s cubic-bezier(.2,.8,.3,1) both}
+.ds-info>*:nth-child(1){animation-delay:.12s}
+.ds-info>*:nth-child(2){animation-delay:.17s}
+.ds-info>*:nth-child(3){animation-delay:.22s}
+.ds-info>*:nth-child(4){animation-delay:.27s}
+.ds-info>*:nth-child(5){animation-delay:.32s}
+.ds-info>*:nth-child(6){animation-delay:.37s}
+@keyframes ds-rise{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:none}}
+.ds-badge{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:6px;background:#FDF1DC;color:#9A6A12;font-size:12px;font-weight:700;line-height:1.2}
+.ds-title-row{display:flex;align-items:flex-start;gap:10px}
+.ds-title-row .ss-veg{margin-top:5px}
+.ds-name{margin:0;font-size:22px;line-height:1.25;font-weight:800;letter-spacing:-.3px}
+.ds-price{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ds-now{font-size:20px;font-weight:800}
+.ds-was{font-size:15px;color:var(--ss-mute)}
+.ds-off{padding:3px 8px;border-radius:999px;background:var(--ss-tint);color:var(--ss-accent);font-size:12px;font-weight:700}
+.ds-cat{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--ss-mute)}
+.ds-desc{margin:12px 0 0;font-size:15px;line-height:1.5;color:#4A505B}
+.ds-cust{margin:14px 0 0;padding:10px 12px;border-radius:12px;background:#F4F5F7;font-size:13px;color:var(--ss-mute)}
+.ds-cust i{margin-right:6px}
+
+/* footer with the add button */
+.ds-foot{flex:none;display:flex;justify-content:center;padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ss-line);background:#fff}
+.ds-cta{display:flex;justify-content:center;width:100%}
+.ds-cta .nb-add-btn{position:relative;margin:0;min-width:98px;height:38px;padding:0 18px;border:1.5px solid var(--ss-accent);border-radius:12px;background:#fff;color:var(--ss-accent);font:inherit;font-size:14.5px;font-weight:800;letter-spacing:.2px;box-shadow:0 4px 12px rgba(23,27,36,.12);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s ease}
+.ds-cta .nb-add-btn:active{transform:scale(.96)}
+.ds-cta .nb-add-btn.is-disabled,.ds-cta .nb-add-btn:disabled{border-color:#D5D8DE;color:#9AA0AA;box-shadow:none;cursor:default}
+.ds-cta .nb-qty{display:inline-flex;align-items:center;justify-content:space-between;min-width:98px;height:38px;border-radius:12px;background:var(--ss-accent);color:#fff;box-shadow:0 4px 12px rgba(23,27,36,.16)}
+.ds-cta .nb-qty.is-disabled{opacity:.6}
+.ds-cta .nb-qty-btn{width:34px;height:38px;padding:0;border:0;background:transparent;color:#fff;font:inherit;font-size:19px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ds-cta .nb-qty-val{min-width:22px;text-align:center;font-size:14.5px;font-weight:800}
+.ds-cta .nb-custom-cart-control{display:inline-flex;align-items:center;gap:6px}
+.ds-cta .nb-custom-remove{width:34px;height:38px;padding:0;border:1.5px solid var(--ss-accent);border-radius:12px;background:#fff;color:var(--ss-accent);font:inherit;font-size:19px;font-weight:700;cursor:pointer}
+/* larger buttons in the sheet (after the shared rules so they win) */
+.ds-cta .nb-add-btn,.ds-cta .nb-qty{min-width:160px;height:46px}
+.ds-cta .nb-qty-btn{height:46px;width:52px}
+.ds-x:focus-visible,.ds-cta button:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
+
+@media(prefers-reduced-motion:reduce){
+  .ds-bd,.ds-sheet,.ds-img{transition:none}
+  .ds-info>*{animation:none}
+  .ds-skel{animation:none}
+}
