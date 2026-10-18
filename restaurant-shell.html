@@ -44,6 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=1">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -1008,6 +1009,7 @@ window.ewLoadVisibleImages = function(root, margin){
     const menuContainer = document.getElementById('menu-container');
     const navInner = document.getElementById('cat-nav-inner');
     const categories = groups.map(group => group.name);
+    window.__ewSearchData = { groups: groups, resId: resId }; // read by the search page
 
     navInner.innerHTML = categories.map((cat, i) => {
       const catId = categoryDomId(cat);
@@ -1620,22 +1622,524 @@ window.ewLoadVisibleImages = function(root, margin){
 
   /* ── Legacy inline search functions retained for compatibility ── */
 
-  function toggleMenuSearch() {
-    const row = document.getElementById('menu-search-row');
-    if (!row) return;
-    if (row.hidden) openMenuSearch(); else closeMenuSearch();
+  /* ══════════════════════════════════════════════════════════
+     MENU SEARCH PAGE
+     A full-screen page that slides up over the menu. It searches the menu
+     data already loaded by renderMenu (window.__ewSearchData), so it needs no
+     API call, and it never touches the filter state or the menu list.
+     Dishes are added from inside it with the same makeBtnHTML / updateCart /
+     ewOpenCustomize the menu uses; the buttons here are refreshed whenever
+     the cart changes.
+     ══════════════════════════════════════════════════════════ */
+  const SS_RECENT_MAX = 5;
+  let ssBuilt = false, ssOpen = false, ssPushed = false, ssItems = [], ssQuery = '', ssAfter = null, ssRefreshT = null, ssDiet = null;
+
+  function ssIsOpen() { return ssOpen; }
+
+  function ssNorm(s) {
+    return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
   }
 
-  function openMenuSearch() {
-    const row = document.getElementById('menu-search-row');
-    const input = document.getElementById('menu-search-input');
-    const btn = document.getElementById('menu-search-btn');
-    if (!row) return;
-    row.hidden = false;
-    document.body.classList.add('menu-search-open');
-    if (btn) btn.setAttribute('aria-expanded', 'true');
-    if (input) setTimeout(() => input.focus(), 60);
+  function ssRecentKey() {
+    const d = window.__ewSearchData;
+    const id = (d && d.resId) || (currentRestaurant && (currentRestaurant._id || currentRestaurant.id)) || 'x';
+    return 'ew_menu_recent_' + id;
   }
+  function ssGetRecent() {
+    try {
+      const a = JSON.parse(localStorage.getItem(ssRecentKey()) || '[]');
+      return Array.isArray(a) ? a.filter(function (x) { return typeof x === 'string' && x; }).slice(0, SS_RECENT_MAX) : [];
+    } catch (e) { return []; }
+  }
+  function ssSaveRecent(q) {
+    q = String(q || '').trim();
+    if (q.length < 2) return;
+    try {
+      const a = ssGetRecent().filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); });
+      a.unshift(q);
+      localStorage.setItem(ssRecentKey(), JSON.stringify(a.slice(0, SS_RECENT_MAX)));
+    } catch (e) {}
+  }
+  function ssClearRecent() {
+    try { localStorage.removeItem(ssRecentKey()); } catch (e) {}
+    ssRender();
+  }
+
+  function ssLoadItems() {
+    ssItems = [];
+    const d = window.__ewSearchData;
+    if (!d || !Array.isArray(d.groups)) return;
+    let idx = 0;
+    d.groups.forEach(function (g) {
+      (g.items || []).forEach(function (item) {
+        const price = typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^\d.]/g, '')) || 0;
+        const rawOrig = Number(item.originalPrice);
+        const original = Number.isFinite(rawOrig) && rawOrig > price ? rawOrig : null;
+        const desc = typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim()
+          : (typeof item.description === 'string' ? item.description.trim() : '');
+        const badge = item.badge || item.tag ||
+          (item.isBestseller === true || item.bestseller === true ? 'Bestseller' : '') ||
+          (item.isMustTry === true || item.mustTry === true ? 'Must Try' : '');
+        const imageRaw = item.image || item.img || '';
+        ssItems.push({
+          item: item, cat: g.name, idx: idx++, price: price, original: original, desc: desc, badge: badge,
+          imageRaw: imageRaw, img: resolveMenuImage(imageRaw),
+          popular: item.isPopular === true || item.popular === true || item.bestSeller === true || item.isBestSeller === true ||
+            /best.?seller|popular|must try|reorder/i.test(String(badge)),
+          nameN: ssNorm(item.name), descN: ssNorm(desc), catN: ssNorm(g.name),
+          nameW: ssWords(ssNorm(item.name)), restW: ssWords(ssNorm(desc) + ' ' + ssNorm(g.name))
+        });
+      });
+    });
+  }
+
+  /* Starts-with beats word-start beats contains beats category/description.
+     Every word typed must match somewhere. Ties keep menu order. */
+
+  function ssWords(s) {
+    return s.split(/[\s\-_,.&/()+:;!?'"]+/).filter(Boolean);
+  }
+
+  /* Edit distance where swapping two neighbouring letters counts as one
+     mistake ("wnigs" -> "wings"). Gives up early once past `max`. */
+  function ssDist(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    const al = a.length, bl = b.length;
+    let prev2 = null, prev = new Array(bl + 1), cur = new Array(bl + 1);
+    for (let j = 0; j <= bl; j++) prev[j] = j;
+    for (let i = 1; i <= al; i++) {
+      cur[0] = i;
+      let rowMin = cur[0];
+      for (let j = 1; j <= bl; j++) {
+        const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+        let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        if (i > 1 && j > 1 && a.charCodeAt(i - 1) === b.charCodeAt(j - 2) && a.charCodeAt(i - 2) === b.charCodeAt(j - 1)) {
+          v = Math.min(v, prev2[j - 2] + 1);
+        }
+        cur[j] = v;
+        if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return max + 1;
+      prev2 = prev; prev = cur; cur = new Array(bl + 1);
+    }
+    return prev[bl];
+  }
+
+  /* One slip for words of 4-7 letters, two for 8+. Shorter words must be
+     exact. A word also matches when its start does ("chik" -> "chicken"),
+     so close matches still work while the person is mid-word. */
+  function ssFuzzyWord(t, words) {
+    const max = t.length >= 8 ? 2 : (t.length >= 4 ? 1 : 0);
+    if (!max) return false;
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      if (ssDist(t, w, max) <= max) return true;
+      if (w.length > t.length && ssDist(t, w.slice(0, t.length), max) <= max) return true;
+    }
+    return false;
+  }
+
+  /* Egg dishes count as neither veg nor non-veg, like the menu filter. */
+  function ssVisible(diet) {
+    if (!diet) return ssItems;
+    return ssItems.filter(function (e) {
+      const it = e.item;
+      if (typeof it.isVeg !== 'boolean') return false;
+      if (it.isEgg === true || it.egg === true || it.diet === 'egg') return false;
+      return diet === 'veg' ? it.isVeg === true : it.isVeg === false;
+    });
+  }
+
+  /* Starts-with beats word-start beats contains beats category/description.
+     Every word typed must match somewhere. Ties keep menu order. Only when
+     nothing matches exactly does it fall back to close (typo) matches.
+     Returns { list, fuzzy, tokens }. */
+  function ssSearch(q, diet) {
+    const qn = ssNorm(q);
+    const tokens = qn.split(' ').filter(Boolean);
+    if (!tokens.length) return { list: [], fuzzy: false, tokens: tokens };
+    const pool = ssVisible(diet);
+
+    function run(fuzzy) {
+      const out = [];
+      pool.forEach(function (e) {
+        let total = 0, ok = true;
+        for (let i = 0; i < tokens.length; i++) {
+          const t = tokens[i];
+          let s;
+          if (e.nameN.indexOf(t) === 0) s = 0;
+          else if ((' ' + e.nameN).indexOf(' ' + t) !== -1) s = 1;
+          else if (e.nameN.indexOf(t) !== -1) s = 2;
+          else if ((' ' + e.catN + ' ' + e.descN).indexOf(t) !== -1) s = 3;
+          else if (fuzzy && ssFuzzyWord(t, e.nameW)) s = 4;
+          else if (fuzzy && ssFuzzyWord(t, e.restW)) s = 5;
+          else { ok = false; break; }
+          total += s;
+        }
+        if (!ok) return;
+        let score = total / tokens.length;
+        if (e.nameN.indexOf(qn) === 0) score = -1; // the whole phrase starts the name
+        out.push({ e: e, score: score });
+      });
+      out.sort(function (a, b) { return a.score - b.score || a.e.idx - b.e.idx; });
+      return out.map(function (x) { return x.e; });
+    }
+
+    let list = run(false), fuzzy = false;
+    if (!list.length) { list = run(true); fuzzy = list.length > 0; }
+    return { list: list, fuzzy: fuzzy, tokens: tokens };
+  }
+
+  /* Bold the letters the person typed inside the dish name. */
+  function ssHighlight(name, tokens) {
+    name = String(name == null ? '' : name);
+    const esc = escapeMenuHtml;
+    const lower = name.toLowerCase();
+    if (!tokens || !tokens.length || lower.length !== name.length) return esc(name);
+    const marks = new Array(name.length).fill(false);
+    tokens.forEach(function (t) {
+      if (!t) return;
+      let i = lower.indexOf(t);
+      while (i !== -1) {
+        for (let k = i; k < i + t.length; k++) marks[k] = true;
+        i = lower.indexOf(t, i + t.length);
+      }
+    });
+    let out = '', open = false;
+    for (let k = 0; k < name.length; k++) {
+      if (marks[k] && !open) { out += '<mark class="ss-hl">'; open = true; }
+      else if (!marks[k] && open) { out += '</mark>'; open = false; }
+      out += esc(name[k]);
+    }
+    return open ? out + '</mark>' : out;
+  }
+
+  function ssSetDiet(d, btn) {
+    ssDiet = d || null;
+    document.querySelectorAll('#ss-root .ss-diet-chip').forEach(function (b) {
+      const on = b.getAttribute('data-diet') === ssDiet;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (btn) {
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      btn.classList.add('pop');
+    }
+    ssRender();
+    const body = document.getElementById('ss-body');
+    if (body) body.scrollTop = 0;
+  }
+
+  function ssCartQty(name) {
+    try {
+      const c = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+      return c[name] ? Number(c[name].quantity) || 0 : 0;
+    } catch (e) { return 0; }
+  }
+  function ssCtaHTML(e) {
+    const it = e.item;
+    const resId = window.__ewSearchData && window.__ewSearchData.resId;
+    return window.makeBtnHTML(it.name, ssCartQty(it.name), e.price, resId, it.inStock !== false, it._id, e.imageRaw, it.isVeg, e.original);
+  }
+
+  function ssThumb(e, cls) {
+    const src = e.img ? (typeof optimizedImageUrl === 'function' ? optimizedImageUrl(e.img, 360) : e.img) : '';
+    return '<div class="' + cls + '">' +
+      (src ? '<img src="' + escapeMenuHtml(src) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">'
+           : '<i class="fa-solid fa-utensils" aria-hidden="true"></i>') +
+      '</div>';
+  }
+
+  function ssVegMark(it) {
+    if (typeof it.isVeg !== 'boolean') return '';
+    return '<span class="ss-veg ' + (it.isVeg ? 'is-veg' : 'is-nonveg') + '" role="img" aria-label="' + (it.isVeg ? 'Veg' : 'Non-veg') + '"><span></span></span>';
+  }
+
+  function ssCardHTML(e, tokens) {
+    const esc = escapeMenuHtml, it = e.item;
+    const inStock = it.inStock !== false;
+    const avail = inStock && isRestaurantOpen;
+    const flag = !isRestaurantOpen ? 'Unavailable' : (!inStock ? 'Out of stock' : '');
+    const custom = !!(window.__ewCust && window.__ewCust[it._id]);
+    const off = e.original ? Math.round((1 - e.price / e.original) * 100) : 0;
+    let img = ssThumb(e, 'ss-img' + (avail ? '' : ' is-off'));
+    if (flag) img = img.replace(/<\/div>$/, '<span class="ss-flag">' + flag + '</span></div>');
+    return '<article class="ss-card' + (custom ? ' has-cust' : '') + '" data-i="' + e.idx + '">' +
+      '<div class="ss-main">' +
+        (e.badge ? '<span class="ss-badge">' + esc(e.badge) + '</span>' : '') +
+        '<div class="ss-title-row">' + ssVegMark(it) + '<h3 class="ss-name">' + ssHighlight(it.name, tokens) + '</h3></div>' +
+        '<div class="ss-price"><span class="ss-now">₹' + e.price + '</span>' +
+          (e.original ? '<s class="ss-was">₹' + e.original + '</s><span class="ss-off">' + off + '% OFF</span>' : '') + '</div>' +
+        '<p class="ss-cat">in ' + esc(e.cat) + '</p>' +
+        (e.desc ? '<p class="ss-desc">' + esc(e.desc) + '</p>' : '') +
+      '</div>' +
+      '<div class="ss-media">' + img +
+        '<div class="ss-cta">' + ssCtaHTML(e) + '</div>' +
+        (custom ? '<span class="ss-cust">Customisable</span>' : '') +
+      '</div>' +
+    '</article>';
+  }
+
+
+  function ssRecentHTML() {
+    const esc = escapeMenuHtml;
+    const recent = ssGetRecent();
+    if (!recent.length) return '';
+    return '<section class="ss-sec"><div class="ss-sec-head"><h2>Recent searches</h2><button type="button" class="ss-link" data-act="clear-recent">Clear</button></div><div class="ss-chips">' +
+      recent.map(function (q) {
+        return '<button type="button" class="ss-chip" data-act="q" data-q="' + esc(q) + '"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>' + esc(q) + '</button>';
+      }).join('') + '</div></section>';
+  }
+
+  function ssPopHTML(title) {
+    const esc = escapeMenuHtml;
+    const pop = ssVisible(ssDiet).filter(function (e) { return e.popular; }).slice(0, 8);
+    if (!pop.length) return '';
+    return '<section class="ss-sec"><div class="ss-sec-head"><h2>' + title + '</h2></div><div class="ss-pop">' +
+      pop.map(function (e) {
+        return '<button type="button" class="ss-pop-card" data-act="q" data-q="' + esc(e.item.name) + '">' +
+          ssThumb(e, 'ss-pop-img') +
+          '<span class="ss-pop-name">' + esc(e.item.name) + '</span>' +
+          '<span class="ss-pop-price">₹' + e.price + '</span></button>';
+      }).join('') + '</div></section>';
+  }
+
+  function ssCatsHTML() {
+    const esc = escapeMenuHtml;
+    const cats = [];
+    ssVisible(ssDiet).forEach(function (e) {
+      let c = cats.filter(function (x) { return x.name === e.cat; })[0];
+      if (!c) { c = { name: e.cat, n: 0 }; cats.push(c); }
+      c.n++;
+    });
+    if (!cats.length) return '';
+    return '<section class="ss-sec"><div class="ss-sec-head"><h2>Browse the menu</h2></div><div class="ss-cats">' +
+      cats.map(function (c) {
+        return '<button type="button" class="ss-cat-row" data-act="cat" data-cat="' + esc(categoryDomId(c.name)) + '"><span class="ss-cat-name">' + esc(c.name) + '</span><span class="ss-cat-n">' + c.n + '</span><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>';
+      }).join('') + '</div></section>';
+  }
+
+  function ssIdleHTML() {
+    const h = ssRecentHTML() + ssPopHTML('Popular dishes') + ssCatsHTML();
+    if (h) return h;
+    return '<div class="ss-empty"><i class="fa-solid fa-utensils" aria-hidden="true"></i><p class="ss-empty-t">No ' + (ssDiet === 'veg' ? 'veg' : 'non-veg') + ' dishes on this menu</p>' +
+      '<button type="button" class="ss-empty-btn" data-act="clear-diet">Show all dishes</button></div>';
+  }
+
+
+  function ssRender() {
+    const body = document.getElementById('ss-body');
+    const input = document.getElementById('ss-input');
+    const clear = document.querySelector('#ss-root .ss-clear');
+    if (!body || !input) return;
+    if (clear) clear.hidden = !input.value;
+    const q = ssQuery.trim();
+    if (!ssItems.length) {
+      body.innerHTML = '<div class="ss-empty"><i class="fa-solid fa-utensils" aria-hidden="true"></i><p class="ss-empty-t">Menu is still loading</p><p class="ss-empty-s">Try again in a moment.</p></div>';
+      return;
+    }
+    if (!q) { body.innerHTML = ssIdleHTML(); return; }
+
+    const r = ssSearch(q, ssDiet);
+    if (!r.list.length) {
+      // If a diet toggle is what emptied the list, say so and offer the way out.
+      const blockedByDiet = !!ssDiet && ssSearch(q, null).list.length > 0;
+      const dietName = ssDiet === 'veg' ? 'veg' : 'non-veg';
+      const title = blockedByDiet ? 'No ' + dietName + ' dishes found for “' + escapeMenuHtml(q) + '”'
+                                  : 'No dishes found for “' + escapeMenuHtml(q) + '”';
+      const sub = blockedByDiet ? 'Other dishes match. Turn off the ' + (ssDiet === 'veg' ? 'Veg' : 'Non-veg') + ' filter to see them.'
+                                : 'Check the spelling or try a shorter word.';
+      const btn = blockedByDiet
+        ? '<button type="button" class="ss-empty-btn" data-act="clear-diet">Show all dishes</button>'
+        : '<button type="button" class="ss-empty-btn" data-act="clear-q">Clear search</button>';
+      body.innerHTML = '<div class="ss-empty is-short"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>' +
+        '<p class="ss-empty-t">' + title + '</p><p class="ss-empty-s">' + sub + '</p>' + btn + '</div>' +
+        (ssPopHTML('Popular dishes') || ssCatsHTML());
+      return;
+    }
+    const kind = ssDiet === 'veg' ? 'veg ' : (ssDiet === 'nonveg' ? 'non-veg ' : '');
+    body.innerHTML = '<p class="ss-count" aria-live="polite">' + r.list.length + ' ' + kind + (r.list.length === 1 ? 'dish' : 'dishes') +
+      (r.fuzzy ? ' · close matches for “' + escapeMenuHtml(q) + '”' : '') + '</p>' +
+      r.list.map(function (e) { return ssCardHTML(e, r.tokens); }).join('');
+  }
+
+  function ssSetQuery(q, save) {
+    const input = document.getElementById('ss-input');
+    if (!input) return;
+    input.value = q;
+    ssQuery = q;
+    if (save) ssSaveRecent(q);
+    ssRender();
+    const body = document.getElementById('ss-body');
+    if (body) body.scrollTop = 0;
+  }
+
+  function ssBuild() {
+    if (ssBuilt) return;
+    ssBuilt = true;
+    const root = document.createElement('div');
+    root.className = 'ss';
+    root.id = 'ss-root';
+    root.hidden = true;
+    root.setAttribute('role', 'dialog');
+    root.setAttribute('aria-modal', 'true');
+    root.setAttribute('aria-label', 'Search dishes');
+    root.innerHTML =
+      '<div class="ss-top">' +
+        '<button type="button" class="ss-back" aria-label="Close search"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>' +
+        '<label class="ss-field"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>' +
+          '<input id="ss-input" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search dishes">' +
+          '<button type="button" class="ss-clear" aria-label="Clear search" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>' +
+        '</label>' +
+      '</div>' +
+      '<div class="ss-diet" role="group" aria-label="Diet">' +
+        '<button type="button" class="ss-diet-chip" data-diet="veg" aria-pressed="false"><span class="ss-veg is-veg" aria-hidden="true"><span></span></span>Veg</button>' +
+        '<button type="button" class="ss-diet-chip" data-diet="nonveg" aria-pressed="false"><span class="ss-veg is-nonveg" aria-hidden="true"><span></span></span>Non-veg</button>' +
+      '</div>' +
+      '<div class="ss-body" id="ss-body"></div>';
+    document.body.appendChild(root);
+
+    const input = root.querySelector('#ss-input');
+    const body = root.querySelector('#ss-body');
+
+    root.querySelector('.ss-back').addEventListener('click', function () { ewCloseSearch(); });
+    root.querySelector('.ss-diet').addEventListener('click', function (ev) {
+      const b = ev.target.closest('[data-diet]');
+      if (!b) return;
+      const d = b.getAttribute('data-diet');
+      ssSetDiet(ssDiet === d ? null : d, b);
+    });
+    root.querySelector('.ss-clear').addEventListener('click', function () { ssSetQuery('', false); input.focus({ preventScroll: true }); });
+    input.addEventListener('input', function () {
+      ssQuery = input.value;
+      ssRender();
+      body.scrollTop = 0;
+    });
+    input.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); ssSaveRecent(input.value); input.blur(); }
+    });
+    // Dragging the results dismisses the keyboard. (Not on touchstart: the
+    // layout would jump under the finger and swallow the tap.)
+    body.addEventListener('touchmove', function () { if (document.activeElement === input) input.blur(); }, { passive: true });
+
+    body.addEventListener('click', function (ev) {
+      const act = ev.target.closest('[data-act]');
+      if (act) {
+        const a = act.getAttribute('data-act');
+        if (a === 'q') { ssSetQuery(act.getAttribute('data-q') || '', true); input.blur(); }
+        else if (a === 'clear-recent') ssClearRecent();
+        else if (a === 'clear-q') { ssSetQuery('', false); input.focus({ preventScroll: true }); }
+        else if (a === 'clear-diet') ssSetDiet(null);
+        else if (a === 'cat') ssGoCategory(act.getAttribute('data-cat'));
+        return;
+      }
+      // Adding or customising from the results counts as a successful search.
+      if (ev.target.closest('.ss-card .nb-add-btn, .ss-card .nb-qty-btn, .ss-card .nb-custom-remove')) ssSaveRecent(ssQuery);
+    });
+  }
+
+  /* Keep the dish buttons in the results in step with the cart. */
+  function ssHook() {
+    if (window.__ssHooked) return;
+    window.__ssHooked = true;
+    ['updateCart', 'updateGlobalCart', 'ewRemoveCustomizedCartUnit'].forEach(function (name) {
+      const orig = window[name];
+      if (typeof orig !== 'function') return;
+      window[name] = function () {
+        const r = orig.apply(this, arguments);
+        if (r && typeof r.then === 'function') r.then(ssScheduleRefresh, function () {});
+        ssScheduleRefresh();
+        return r;
+      };
+    });
+  }
+  function ssScheduleRefresh() {
+    if (!ssOpen) return;
+    clearTimeout(ssRefreshT);
+    requestAnimationFrame(ssRefreshCtas);
+    ssRefreshT = setTimeout(ssRefreshCtas, 250);
+  }
+  function ssRefreshCtas() {
+    if (!ssOpen) return;
+    document.querySelectorAll('#ss-body .ss-card').forEach(function (card) {
+      const e = ssItems[Number(card.getAttribute('data-i'))];
+      const box = card.querySelector('.ss-cta');
+      if (!e || !box) return;
+      const html = ssCtaHTML(e);
+      if (box.__ssHtml !== html) { box.innerHTML = html; box.__ssHtml = html; }
+    });
+  }
+
+  function ewOpenSearch() {
+    if (ssOpen) return;
+    ssBuild();
+    ssHook();
+    ssLoadItems();
+    const root = document.getElementById('ss-root');
+    const input = document.getElementById('ss-input');
+    const btn = document.getElementById('menu-search-btn');
+    const name = currentRestaurant && currentRestaurant.name;
+    input.value = '';
+    ssQuery = '';
+    input.placeholder = name ? 'Search in ' + name : 'Search dishes';
+    ssSetDiet(null);
+    document.getElementById('ss-body').scrollTop = 0;
+    ssOpen = true;
+    root.hidden = false;
+    void root.offsetWidth; // let the slide-up start from its closed position
+    root.classList.add('is-in');
+    document.body.classList.add('ew-search-open');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    try { history.pushState({ ewSearch: true }, ''); ssPushed = true; } catch (e) { ssPushed = false; }
+    input.focus({ preventScroll: true }); // inside the tap, so the keyboard opens
+  }
+
+  /* Closing goes through history.back() so the phone's Back button and the
+     arrow behave the same; popstate (below) does the actual closing. */
+  function ewCloseSearch(after) {
+    if (!ssOpen) return;
+    ssAfter = typeof after === 'function' ? after : null;
+    if (ssPushed && history.state && history.state.ewSearch) {
+      history.back();
+      setTimeout(function () { if (ssOpen) ssFinishClose(); }, 500);
+    } else {
+      ssFinishClose();
+    }
+  }
+  function ssFinishClose() {
+    if (!ssOpen) return;
+    ssOpen = false;
+    ssPushed = false;
+    const root = document.getElementById('ss-root');
+    const input = document.getElementById('ss-input');
+    const btn = document.getElementById('menu-search-btn');
+    const after = ssAfter;
+    ssAfter = null;
+    if (input) input.blur();
+    if (root) root.classList.remove('is-in');
+    document.body.classList.remove('ew-search-open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () {
+      if (!ssOpen && root) root.hidden = true;
+      if (after) after();
+    }, reduce ? 0 : 270);
+  }
+  window.addEventListener('popstate', function () { if (ssOpen) ssFinishClose(); });
+
+  function ssGoCategory(id) {
+    ewCloseSearch(function () {
+      if (activeResTab !== 'menu') switchResTab('menu');
+      setTimeout(function () { scrollToCategory(id); }, 60);
+    });
+  }
+
+  /* The old inline search row is no longer opened; search is the full-screen
+     page (ewOpenSearch). closeMenuSearch below stays for old callers. */
+  function toggleMenuSearch() { ewOpenSearch(); }
+
+  function openMenuSearch() { ewOpenSearch(); }
 
   function closeMenuSearch() {
     const row = document.getElementById('menu-search-row');
@@ -1835,6 +2339,7 @@ window.ewLoadVisibleImages = function(root, margin){
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
+    if (ssIsOpen()) { ewCloseSearch(); return; }
     const sheet = document.getElementById('filter-sheet-backdrop');
     if (sheet && sheet.classList.contains('open')) { closeFilterSheet(); return; }
     const row = document.getElementById('menu-search-row');
