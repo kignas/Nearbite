@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
-<link rel="stylesheet" href="css/restaurant-search-page.css?v=1">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=2">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -2095,6 +2095,202 @@ window.ewLoadVisibleImages = function(root, margin){
     });
   }
 
+
+  /* ══════════════════════════════════════════════════════════
+     DISH DETAIL SHEET
+     Tap a dish (menu or search results) and a sheet springs up with a bigger
+     photo, the full description and the same add / quantity button the menu
+     uses. The photo shows a shimmering skeleton until it has loaded.
+     Phone Back closes it (it pushes one history entry, like the search page).
+     ══════════════════════════════════════════════════════════ */
+  let dsBuilt = false, dsOpen = false, dsPushed = false, dsEntry = null, dsHooked = false, dsRefreshT = null;
+
+  function dsFindById(id) {
+    const d = window.__ewSearchData;
+    if (!id || !d || !Array.isArray(d.groups)) return null;
+    for (let gi = 0; gi < d.groups.length; gi++) {
+      const items = d.groups[gi].items || [];
+      for (let i = 0; i < items.length; i++) {
+        if (String(items[i]._id || items[i].id || '') === id) return { item: items[i], cat: d.groups[gi].name };
+      }
+    }
+    return null;
+  }
+
+  function dsMakeEntry(item, cat) {
+    const price = typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^\d.]/g, '')) || 0;
+    const rawOrig = Number(item.originalPrice);
+    const desc = typeof item.desc === 'string' && item.desc.trim() ? item.desc.trim()
+      : (typeof item.description === 'string' ? item.description.trim() : '');
+    const badge = item.badge || item.tag ||
+      (item.isBestseller === true || item.bestseller === true ? 'Bestseller' : '') ||
+      (item.isMustTry === true || item.mustTry === true ? 'Must Try' : '');
+    const imageRaw = item.image || item.img || '';
+    return { item: item, cat: cat, price: price, original: Number.isFinite(rawOrig) && rawOrig > price ? rawOrig : null,
+      desc: desc, badge: badge, imageRaw: imageRaw, img: resolveMenuImage(imageRaw) };
+  }
+
+  function dsHTML(e) {
+    const esc = escapeMenuHtml, it = e.item;
+    const inStock = it.inStock !== false;
+    const avail = inStock && isRestaurantOpen;
+    const flag = !isRestaurantOpen ? 'Unavailable' : (!inStock ? 'Out of stock' : '');
+    const custom = !!(window.__ewCust && window.__ewCust[it._id]);
+    const off = e.original ? Math.round((1 - e.price / e.original) * 100) : 0;
+    const src = e.img ? (typeof optimizedImageUrl === 'function' ? optimizedImageUrl(e.img, 720) : e.img) : '';
+    const hero = src
+      ? '<div class="ds-hero is-loading"><div class="ds-skel" aria-hidden="true"></div>' +
+          '<img class="ds-img' + (avail ? '' : ' is-off') + '" src="' + esc(src) + '" alt="' + esc(it.name) + '" decoding="async" ' +
+          'onload="this.classList.add(\'is-loaded\');this.parentNode.classList.remove(\'is-loading\')" ' +
+          'onerror="this.parentNode.classList.remove(\'is-loading\');this.parentNode.classList.add(\'is-empty\');this.remove()">' +
+          (flag ? '<span class="ds-flag">' + flag + '</span>' : '') + '</div>'
+      : '<div class="ds-hero is-empty"><i class="fa-solid fa-utensils" aria-hidden="true"></i>' + (flag ? '<span class="ds-flag">' + flag + '</span>' : '') + '</div>';
+    return '<div class="ds-grab" aria-hidden="true"><span></span></div>' +
+      '<button type="button" class="ds-x" aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>' +
+      '<div class="ds-scroll">' + hero +
+        '<div class="ds-info">' +
+          (e.badge ? '<span class="ds-badge">' + esc(e.badge) + '</span>' : '') +
+          '<div class="ds-title-row">' + ssVegMark(it) + '<h2 class="ds-name">' + esc(it.name) + '</h2></div>' +
+          '<div class="ds-price"><span class="ds-now">₹' + e.price + '</span>' +
+            (e.original ? '<s class="ds-was">₹' + e.original + '</s><span class="ds-off">' + off + '% OFF</span>' : '') + '</div>' +
+          (e.cat ? '<p class="ds-cat">in ' + esc(e.cat) + '</p>' : '') +
+          (e.desc ? '<p class="ds-desc">' + esc(e.desc) + '</p>' : '') +
+          (custom ? '<p class="ds-cust"><i class="fa-solid fa-sliders" aria-hidden="true"></i> Customisable: choose your options when you add it</p>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="ds-foot"><div class="ds-cta">' + ssCtaHTML(e) + '</div></div>';
+  }
+
+  function dsBuild() {
+    if (dsBuilt) return;
+    dsBuilt = true;
+    const root = document.createElement('div');
+    root.className = 'ds';
+    root.id = 'ds-root';
+    root.hidden = true;
+    root.innerHTML = '<div class="ds-bd"></div><div class="ds-sheet" role="dialog" aria-modal="true" aria-label="Dish details"></div>';
+    document.body.appendChild(root);
+    const sheet = root.querySelector('.ds-sheet');
+
+    root.querySelector('.ds-bd').addEventListener('click', function () { dsClose(); });
+    sheet.addEventListener('click', function (ev) {
+      if (ev.target.closest('.ds-x')) { dsClose(); return; }
+      // The customise sheet opens on top of the page, so step this one out of the way first.
+      if (ev.target.closest('.nb-add-btn--cust')) dsClose();
+    });
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && dsOpen) dsClose(); });
+
+    // Drag the handle down to dismiss.
+    let y0 = null, dy = 0;
+    sheet.addEventListener('touchstart', function (ev) {
+      if (!ev.target.closest('.ds-grab')) { y0 = null; return; }
+      y0 = ev.touches[0].clientY; dy = 0;
+      sheet.style.transition = 'none';
+    }, { passive: true });
+    sheet.addEventListener('touchmove', function (ev) {
+      if (y0 == null) return;
+      dy = Math.max(0, ev.touches[0].clientY - y0);
+      sheet.style.transform = 'translate3d(0,' + dy + 'px,0)';
+    }, { passive: true });
+    function endDrag() {
+      if (y0 == null) return;
+      y0 = null;
+      sheet.style.transition = '';
+      sheet.style.transform = '';
+      if (dy > 90) dsClose();
+    }
+    sheet.addEventListener('touchend', endDrag);
+    sheet.addEventListener('touchcancel', endDrag);
+  }
+
+  function dsHook() {
+    if (dsHooked) return;
+    dsHooked = true;
+    ['updateCart', 'updateGlobalCart', 'ewRemoveCustomizedCartUnit'].forEach(function (name) {
+      const orig = window[name];
+      if (typeof orig !== 'function') return;
+      window[name] = function () {
+        const r = orig.apply(this, arguments);
+        if (r && typeof r.then === 'function') r.then(dsScheduleRefresh, function () {});
+        dsScheduleRefresh();
+        return r;
+      };
+    });
+  }
+  function dsScheduleRefresh() {
+    if (!dsOpen) return;
+    clearTimeout(dsRefreshT);
+    requestAnimationFrame(dsRefreshCta);
+    dsRefreshT = setTimeout(dsRefreshCta, 250);
+  }
+  function dsRefreshCta() {
+    if (!dsOpen || !dsEntry) return;
+    const box = document.querySelector('#ds-root .ds-cta');
+    if (!box) return;
+    const html = ssCtaHTML(dsEntry);
+    if (box.__dsHtml !== html) { box.innerHTML = html; box.__dsHtml = html; }
+  }
+
+  function dsOpenSheet(e) {
+    if (dsOpen || !e) return;
+    dsBuild();
+    dsHook();
+    dsEntry = e;
+    const root = document.getElementById('ds-root');
+    const sheet = root.querySelector('.ds-sheet');
+    sheet.innerHTML = dsHTML(e);
+    const cta = sheet.querySelector('.ds-cta');
+    if (cta) cta.__dsHtml = cta.innerHTML;
+    dsOpen = true;
+    root.hidden = false;
+    void root.offsetWidth; // let the spring start from its closed position
+    root.classList.add('is-in');
+    document.body.classList.add('ew-dish-open');
+    try { history.pushState({ ewDish: true }, ''); dsPushed = true; } catch (err) { dsPushed = false; }
+    const x = sheet.querySelector('.ds-x');
+    if (x) x.focus({ preventScroll: true });
+  }
+
+  function dsClose() {
+    if (!dsOpen) return;
+    if (dsPushed && history.state && history.state.ewDish) {
+      history.back();
+      setTimeout(function () { if (dsOpen) dsFinish(); }, 500);
+    } else {
+      dsFinish();
+    }
+  }
+  function dsFinish() {
+    if (!dsOpen) return;
+    dsOpen = false;
+    dsPushed = false;
+    dsEntry = null;
+    const root = document.getElementById('ds-root');
+    if (root) root.classList.remove('is-in');
+    document.body.classList.remove('ew-dish-open');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () { if (!dsOpen && root) root.hidden = true; }, reduce ? 0 : 300);
+  }
+  window.addEventListener('popstate', function () { if (dsOpen) dsFinish(); });
+
+  // Tap a dish in the menu or in the search results (not its buttons).
+  document.addEventListener('click', function (ev) {
+    if (dsOpen) return;
+    const t = ev.target;
+    if (!t.closest || t.closest('button, a, input, .nb-item-cta, .ss-cta, .ds')) return;
+    const mi = t.closest('.menu-item[data-menu-item-id]');
+    if (mi) {
+      const f = dsFindById(mi.getAttribute('data-menu-item-id'));
+      if (f) dsOpenSheet(dsMakeEntry(f.item, f.cat));
+      return;
+    }
+    const sc = t.closest('#ss-body .ss-card[data-i]');
+    if (sc) {
+      const e = ssItems[Number(sc.getAttribute('data-i'))];
+      if (e) dsOpenSheet(e);
+    }
+  });
+
   function ewOpenSearch() {
     if (ssOpen) return;
     ssBuild();
@@ -2150,7 +2346,7 @@ window.ewLoadVisibleImages = function(root, margin){
       if (after) after();
     }, reduce ? 0 : 270);
   }
-  window.addEventListener('popstate', function () { if (ssOpen) ssFinishClose(); });
+  window.addEventListener('popstate', function () { if (ssOpen && !dsOpen) ssFinishClose(); });
 
   function ssGoCategory(id) {
     ewCloseSearch(function () {
