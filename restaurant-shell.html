@@ -43,6 +43,7 @@
 <link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-3">
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
+<link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -175,6 +176,7 @@
 <i aria-hidden="true" class="fa-solid fa-sliders" id="empty-filter-icon"></i>
 <p id="empty-filter-title">No dishes match these filters</p>
 <p id="empty-filter-sub">Try changing your filters.</p>
+<button class="empty-filter-clear" hidden id="empty-filter-clear" onclick="resetAllMenuFilters()" type="button">Clear filters</button>
 </div>
 </div>
 <div class="restaurant-menu-disclaimer" role="note" aria-label="Menu disclaimer">
@@ -264,7 +266,8 @@ window.ewLoadVisibleImages = function(root, margin){
       ? sheetApplied.diet : null;
     syncQuickChips();
     updateFilterBadge();
-    applyAllMenuFilters();
+    ewChipFeedback(document.getElementById('filter-' + type));
+    applyFiltersAnimated();
   }
 
   function syncQuickChips() {
@@ -1429,7 +1432,7 @@ window.ewLoadVisibleImages = function(root, margin){
 
     syncQuickChips();
     updateFilterBadge();
-    applyAllMenuFilters();
+    applyFiltersAnimated();
     closeFilterSheet();
   }
 
@@ -1451,7 +1454,72 @@ window.ewLoadVisibleImages = function(root, margin){
       btn.classList.toggle('active', quickMenuFilters[name]);
       btn.setAttribute('aria-pressed', quickMenuFilters[name] ? 'true' : 'false');
     }
-    applyAllMenuFilters();
+    ewChipFeedback(btn);
+    applyFiltersAnimated();
+  }
+
+  /* Tap feedback: a quick pop, and an active chip that is cut off by the edge
+     of the chip row is slid into view. */
+  function ewChipFeedback(btn) {
+    if (!btn) return;
+    btn.classList.remove('ew-chip-pop');
+    void btn.offsetWidth; // restart the keyframe
+    btn.classList.add('ew-chip-pop');
+    const row = btn.parentElement;
+    if (row && row.scrollWidth > row.clientWidth + 2 && btn.classList.contains('active')) {
+      const b = btn.getBoundingClientRect(), r = row.getBoundingClientRect();
+      if (b.right > r.right - 8 || b.left < r.left + 8) {
+        row.scrollBy({ left: (b.left + b.width / 2) - (r.left + r.width / 2), behavior: 'smooth' });
+      }
+    }
+  }
+
+  /* Filters are applied to the list immediately (so state, badges and the
+     empty message are always correct), while the list itself is covered by the
+     menu skeleton for a beat and then fades back in. Rapid taps simply extend
+     the skeleton. Search typing does not use this - it calls
+     applyAllMenuFilters directly so results never flicker per keystroke. */
+  let ewFilterSkelTimer = null;
+  function applyFiltersAnimated() {
+    const pane = document.getElementById('menu-pane');
+    const container = document.getElementById('menu-container');
+    const skel = document.getElementById('menu-skeleton');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rendered = !!container && container.childElementCount > 0 && container.style.display !== 'none';
+    const alreadyFiltering = !!pane && pane.classList.contains('ew-filtering');
+    const h = (rendered && !alreadyFiltering) ? container.offsetHeight : 0; // measure before the swap
+    const visible = applyAllMenuFilters();
+    if (!rendered || !skel || !pane || reduce) return visible;
+
+    if (!alreadyFiltering) {
+      skel.style.minHeight = Math.min(h, 900) + 'px'; // keeps the page from jumping
+      skel.style.display = 'block';
+      pane.classList.add('ew-filtering');
+    }
+    clearTimeout(ewFilterSkelTimer);
+    ewFilterSkelTimer = setTimeout(function () {
+      skel.style.display = 'none';
+      skel.style.minHeight = '';
+      pane.classList.remove('ew-filtering');
+      container.classList.remove('ew-filter-reveal');
+      void container.offsetWidth;
+      container.classList.add('ew-filter-reveal');
+    }, 420);
+    return visible;
+  }
+
+  function resetAllMenuFilters() {
+    Object.keys(quickMenuFilters).forEach(function (k) {
+      quickMenuFilters[k] = false;
+      const b = document.getElementById(k === 'popular' ? 'filter-popular' : k === 'rating' ? 'filter-rating' : 'filter-price');
+      if (b) { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); }
+    });
+    sheetApplied.diet = null;
+    sheetApplied.reordered = false;
+    activeFilter = null;
+    syncQuickChips();
+    updateFilterBadge();
+    applyFiltersAnimated();
   }
 
   function isPopularMenuItem(item) {
@@ -1539,6 +1607,10 @@ window.ewLoadVisibleImages = function(root, margin){
     if (icon)  icon.className = iconClass;
     if (title) title.textContent = titleText;
     if (sub)   sub.textContent = subText;
+    const clearBtn = document.getElementById('empty-filter-clear');
+    if (clearBtn) {
+      clearBtn.hidden = !(quickMenuFilters.popular || quickMenuFilters.rating || quickMenuFilters.price || sheetApplied.diet || sheetApplied.reordered);
+    }
     box.style.display = 'block';
   }
 
