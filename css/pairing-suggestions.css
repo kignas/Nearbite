@@ -1,26 +1,29 @@
-/* "You will love pairing it with" strip - additive, scoped to .ew-pair */
-.ew-pair{position:relative;grid-column:1/-1;box-sizing:border-box;background:#f4f5fb;padding:20px 16px 18px;margin:14px 0 6px;border-radius:0;animation:ewPairIn .22s ease-out}
-.ew-pair::before{content:"";position:absolute;top:-10px;right:15%;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:11px solid #f4f5fb}
+/* "You will love pairing it with" strip - additive, scoped to .ew-pair
+   Premium refresh: warm-tinted rounded panel, white product tiles, brand-red accents. */
+.ew-pair{--ew-pair-accent:var(--hd-primary,#C13A50);--ew-pair-line:#f1e2e5;position:relative;grid-column:1/-1;box-sizing:border-box;background:linear-gradient(180deg,#fff6f7 0%,#fffafa 100%);border:1px solid var(--ew-pair-line);border-radius:22px;padding:16px 0 16px 16px;margin:16px 0 8px;box-shadow:0 10px 28px -12px rgba(120,30,50,.16);animation:ewPairIn .26s cubic-bezier(.2,.75,.25,1)}
+.ew-pair::before{content:"";position:absolute;top:-8px;right:15%;width:14px;height:14px;background:#fff6f7;border-top:1px solid var(--ew-pair-line);border-left:1px solid var(--ew-pair-line);border-top-left-radius:4px;transform:rotate(45deg)}
 @keyframes ewPairIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.ew-pair{animation:none}}
-.ew-pair-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 14px}
-.ew-pair-title{margin:0;font-size:20px;font-weight:600;color:#1c1c1c;letter-spacing:-.2px}
-.ew-pair-close{border:0;background:transparent;font-size:22px;line-height:1;color:#8a8a95;padding:2px 6px;cursor:pointer}
-.ew-pair-row{display:flex;gap:14px;overflow-x:auto;overscroll-behavior-x:contain;padding:0 2px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ew-pair-head{display:flex;align-items:center;justify-content:space-between;padding:0 12px 12px 2px}
+.ew-pair-title{margin:0;display:flex;align-items:center;gap:7px;font-size:16px;font-weight:700;color:#24181b;letter-spacing:-.2px;line-height:1.25}
+.ew-pair-title::before{content:"\2726";font-size:13px;line-height:1;color:var(--ew-pair-accent)}
+.ew-pair-close{display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:50%;background:rgba(36,24,27,.06);font-size:15px;line-height:1;color:#6f6468;padding:0;cursor:pointer;transition:background .15s ease}
+.ew-pair-close:active{background:rgba(36,24,27,.12)}
+.ew-pair-row{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;padding:2px 16px 4px 2px;scroll-padding-left:2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .ew-pair-row::-webkit-scrollbar{display:none}
-.ew-pair-card{flex:0 0 clamp(160px,45vw,220px);scroll-snap-align:start}
-.ew-pair-img{position:relative;width:100%;aspect-ratio:1/.8;border-radius:18px;overflow:hidden;background:#e4e5ee}
+.ew-pair-card{flex:0 0 clamp(146px,41vw,184px);box-sizing:border-box;scroll-snap-align:start;background:#fff;border:1px solid #f3e8ea;border-radius:18px;padding:8px 8px 11px;box-shadow:0 4px 14px -6px rgba(60,20,30,.14)}
+.ew-pair-img{position:relative;width:100%;aspect-ratio:1/.82;border-radius:13px;overflow:hidden;background:#f3e9eb}
 .ew-pair-img img{width:100%;height:100%;object-fit:cover;display:block}
-.ew-pair-veg{position:absolute;left:10px;bottom:10px;width:20px;height:20px;border-radius:5px;background:#fff;border:2px solid #2e9e4f;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
-.ew-pair-veg::after{content:"";width:9px;height:9px;border-radius:50%;background:#2e9e4f}
+.ew-pair-veg{position:absolute;left:7px;top:7px;width:17px;height:17px;border-radius:4px;background:#fff;border:1.5px solid #2e9e4f;display:flex;align-items:center;justify-content:center;box-sizing:border-box;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.ew-pair-veg::after{content:"";width:7px;height:7px;border-radius:50%;background:#2e9e4f}
 .ew-pair-veg.nonveg{border-color:#a0522d}.ew-pair-veg.nonveg::after{background:#a0522d;border-radius:0;clip-path:polygon(50% 0,100% 100%,0 100%)}
-.ew-pair-act{position:absolute;right:10px;bottom:10px}
-.ew-pair-add{position:relative;min-width:88px;height:38px;border:1.5px solid rgba(215,25,69,.55);border-radius:10px;background:#fff;color:#D71945;font-weight:700;font-size:16px;cursor:pointer;padding:0 20px 0 14px;letter-spacing:.2px;box-shadow:0 2px 6px rgba(0,0,0,.14)}
-.ew-pair-add span{position:absolute;right:7px;top:4px;font-size:13px;line-height:1;font-weight:700}
-.ew-pair-step{display:flex;align-items:center;justify-content:space-between;min-width:88px;height:38px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.14);background:#D71945;color:#fff;font-weight:700;font-size:15px}
-.ew-pair-step button{border:0;background:transparent;color:#fff;font-size:18px;width:30px;height:38px;cursor:pointer}
-.ew-pair-name{margin:10px 2px 0;font-size:15px;font-weight:500;color:#1c1c1c;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.ew-pair-price{margin:3px 2px 0;font-size:13px;color:#777}
+.ew-pair-act{position:absolute;right:7px;bottom:7px}
+.ew-pair-add{position:relative;min-width:72px;height:32px;border:1px solid var(--ew-pair-accent);border-radius:10px;background:#fff;color:var(--ew-pair-accent);font-weight:800;font-size:13px;cursor:pointer;padding:0 16px 0 11px;letter-spacing:.3px;box-shadow:0 4px 10px -2px rgba(0,0,0,.2)}
+.ew-pair-add span{position:absolute;right:6px;top:4px;font-size:11px;line-height:1;font-weight:800}
+.ew-pair-step{display:flex;align-items:center;justify-content:space-between;min-width:78px;height:32px;border-radius:10px;box-shadow:0 4px 10px -2px rgba(193,58,80,.4);background:var(--ew-pair-accent);color:#fff;font-weight:800;font-size:13px}
+.ew-pair-step button{border:0;background:transparent;color:#fff;font-size:17px;width:26px;height:32px;cursor:pointer}
+.ew-pair-name{margin:10px 3px 0;font-size:14px;font-weight:600;color:#24181b;line-height:1.3;letter-spacing:-.1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ew-pair-price{margin:4px 3px 0;font-size:13px;font-weight:700;color:#5d5155}
 
 /* Menu list: customisable item already in cart -> one tidy "- 1 +" pill (was a separate "-" box next to "ADD + (1)").
    Styling only; the buttons and their click handlers are untouched. */
