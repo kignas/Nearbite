@@ -25,13 +25,51 @@
     });
     return out;
   }
+  /* What kind of food is this? (name first, category as a hint) */
+  var KINDS = [
+    ['drink',   /\b(drink|beverage|cola|coke|pepsi|sprite|fanta|thums|soda|juice|lassi|shake|smoothie|coffee|tea|chai|mojito|lemonade|nimbu|water|mocktail|buttermilk|chaas|cold ?drink|soft ?drink)\b/],
+    ['dessert', /\b(dessert|sweet|ice ?cream|brownie|cake|pudding|gulab|jamun|rasgulla|rasmalai|mishti|kulfi|falooda|sundae|halwa|pastry)\b/],
+    ['bread',   /\b(naan|roti|paratha|kulcha|chapati|tandoori roti|lachha|puri|bread|garlic bread|bun)\b/],
+    ['soup',    /\b(soup)\b/],
+    ['side',    /\b(raita|salad|papad|fries|dip|sauce|chutney|pickle|achar|sambar|extra|side|curd|dahi|onion rings|coleslaw)\b/],
+    ['rice',    /\b(rice|biryani|biriyani|pulao|pulav|noodle|noodles|chowmein|chow mein|hakka|maggi|pasta|khichdi|thali|meal)\b/],
+    ['starter', /\b(starter|chilli|chili|manchurian|lollipop|wings|pakora|pakoda|65|crispy|popcorn|tikka|kebab|kabab|tandoori|fry|fried|dry|finger|nuggets|spring roll|momo|momos|fish fry|tangdi)\b/],
+    ['snack',   /\b(burger|pizza|sandwich|roll|wrap|frankie|puff|patty|toast|hot ?dog|dosa|idli|vada|uttapam|pav|samosa|chaat)\b/],
+    ['main',    /\b(curry|gravy|masala|korma|paneer|butter|dal|dhal|kadai|kadhai|bhuna|do pyaza|handi|rezala|kosha|jhol|sabji|sabzi|bharta)\b/]
+  ];
   function kindOf(entry) {
-    var t = (entry.cat + ' ' + entry.item.name).toLowerCase();
-    if (/drink|beverage|shake|coke|cola|juice|lassi|soda|coffee|tea\b|cold|mojito|water/.test(t)) return 'drink';
-    if (/dessert|sweet|ice ?cream|brownie|cake|pudding|gulab|rasgulla|mishti/.test(t)) return 'dessert';
-    if (/side|fries|raita|bread|naan|roti|paratha|salad|dip|sauce|papad|extra/.test(t)) return 'side';
+    var name = String(entry.item.name || '').toLowerCase();
+    var cat = String(entry.cat || '').toLowerCase();
+    var k, r;
+    for (k = 0; k < KINDS.length; k++) if (KINDS[k][1].test(name)) return KINDS[k][0];
+    for (k = 0; k < KINDS.length; k++) if (KINDS[k][1].test(cat)) return KINDS[k][0];
     return 'main';
   }
+  /* What goes well with what: for the item just added, how much we want each kind. */
+  var WANT = {
+    starter: { drink: 5, rice: 4, soup: 3, bread: 1, dessert: 2, side: 2 },
+    rice:    { starter: 5, side: 4, drink: 4, soup: 2, dessert: 2, main: 2 },
+    main:    { bread: 5, rice: 4, drink: 3, side: 3, dessert: 2 },
+    bread:   { main: 5, starter: 3, side: 3, drink: 2, dessert: 1 },
+    snack:   { drink: 5, side: 4, dessert: 2, starter: 1 },
+    soup:    { starter: 4, rice: 4, drink: 2, bread: 1 },
+    side:    { main: 3, rice: 3, starter: 2, drink: 3 },
+    drink:   { snack: 4, starter: 3, side: 2, dessert: 3 },
+    dessert: { drink: 3 }
+  };
+  /* Specific dish pairings: [what was added, what pairs with it, bonus] */
+  var PAIRS = [
+    [/biryani|biriyani|pulao|pulav/, /raita|salad|coke|cola|soft drink|thums|sprite|chicken|egg|kebab|tikka|gulab|firni|phirni/, 4],
+    [/dosa|idli|vada|uttapam/, /coffee|chai|tea|lassi|sambar|chutney|vada|idli|dosa/, 3],
+    [/momo/, /soup|chilli|chili|drink|coke|cola|dip/, 3],
+    [/pizza/, /garlic bread|coke|cola|dip|fries|pepsi|sprite/, 3],
+    [/burger|sandwich|roll|wrap|frankie/, /fries|coke|cola|shake|pepsi|sprite|nugget/, 3],
+    [/chowmein|noodle|fried rice|hakka|maggi/, /manchurian|chilli|chili|lollipop|soup|spring roll|crispy|dry|momo|coke|cola/, 3],
+    [/manchurian|chilli|chili|lollipop|wings|pakora|crispy|popcorn|65|fry|dry/, /fried rice|noodle|chowmein|hakka|soup|coke|cola|sprite|pepsi|thums/, 3],
+    [/^(?!.*(dosa|idli|vada|uttapam|noodle|chowmein|maggi|rice)).*(paneer|curry|masala|butter|korma|kadai|\bdal\b|gravy|handi|bhuna)/, /naan|roti|paratha|kulcha|lachha|rice|pulao|jeera/, 4],
+    [/kebab|tikka|tandoori|kabab/, /naan|roti|paratha|salad|raita|coke|cola|mint/, 3],
+    [/thali|meal/, /gulab|rasgulla|sweet|lassi|buttermilk|papad|raita/, 2]
+  ];
   function cartQty(item) {
     var cart = readCart(), id = idOf(item), name = item.name, n = 0;
     Object.keys(cart).forEach(function (k) {
@@ -43,28 +81,48 @@
   function findEntryById(id) { return allItems().filter(function (e) { return idOf(e.item) === String(id); })[0] || null; }
   function findEntryByName(name) { return allItems().filter(function (e) { return e.item.name === name; })[0] || null; }
 
+  function baseKey(name) { return String(name).toLowerCase().replace(/\(.*?\)/g, '').replace(/[^a-z0-9 ]/g, ' ').trim().split(/\s+/).slice(0, 2).join(' '); }
+  function isReordered(it) { return it.highlyReordered === true || it.isHighlyReordered === true || it.reordered === true || it.isReordered === true; }
+  function isPopular(it) { return it.isPopular === true || it.popular === true || it.bestSeller === true || it.isBestSeller === true || it.isBestseller === true || it.bestseller === true; }
+
   function pick(main) {
-    var mainId = idOf(main.item), mainPrice = priceOf(main.item), cart = readCart();
-    var all = allItems(), cartKinds = {};
-    all.forEach(function (e) { if (cartQty(e.item) > 0) cartKinds[kindOf(e)] = true; });
+    var mainId = idOf(main.item), mainName = String(main.item.name).toLowerCase(), mainPrice = priceOf(main.item);
+    var mainKind = kindOf(main), want = WANT[mainKind] || { drink: 4, side: 3, dessert: 2, rice: 2 };
+    var all = allItems(), cartKinds = {}, cartKeys = {};
+    all.forEach(function (e) { if (cartQty(e.item) > 0) { cartKinds[kindOf(e)] = (cartKinds[kindOf(e)] || 0) + 1; cartKeys[baseKey(e.item.name)] = true; } });
     var mainVeg = main.item.isVeg === true;
-    var scored = [];
+    var cands = [];
     all.forEach(function (e) {
-      var it = e.item;
-      if (idOf(it) === mainId || it.name === main.item.name) return;
+      var it = e.item, nm = String(it.name).toLowerCase();
+      if (idOf(it) === mainId || nm === mainName) return;
       if (it.inStock === false) return;
       if (mainVeg && it.isVeg === false) return;
-      var k = kindOf(e), s = 0;
-      if (cartQty(it) > 0) return;
-      if (k !== 'main' && !cartKinds[k]) s += 3;
-      if (e.cat !== main.cat) s += 1;
-      if (priceOf(it) <= mainPrice) s += 1;
-      if (it.isPopular === true || it.popular === true || it.bestSeller === true || it.isBestSeller === true) s += 1;
-      if (k === 'main' && e.cat === main.cat) return;
-      scored.push({ e: e, s: s });
+      if (cartQty(it) > 0) return;                       /* already in cart */
+      if (baseKey(it.name) === baseKey(main.item.name)) return;   /* same dish, other variant */
+      if (cartKeys[baseKey(it.name)]) return;
+      var k = kindOf(e), s = want[k] || 0, pairBonus = 0;
+      PAIRS.forEach(function (r) { if (r[0].test(mainName) && r[1].test(nm)) pairBonus += r[2]; });
+      if (!s && !pairBonus) return;                      /* does not go with this dish (or is just another of the same) */
+      s += pairBonus;
+      if (cartKinds[k]) s -= 2 * cartKinds[k];           /* cart already has a drink / bread / ... */
+      var pr = priceOf(it);
+      if (pr > 0 && mainPrice > 0) {                     /* add-ons are usually not far more expensive than the main */
+        if (pr <= mainPrice) s += 0.5; else if (pr > mainPrice * 2) s -= 2;
+      }
+      if (isReordered(it)) s += 1.5;
+      if (isPopular(it)) s += 1;
+      if (e.cat === main.cat && k === mainKind) s -= 1;
+      cands.push({ it: it, k: k, s: s });
     });
-    scored.sort(function (a, b) { return b.s - a.s; });
-    return scored.slice(0, MAX).map(function (x) { return x.e.item; });
+    /* pick the best, but keep a mix (not 6 drinks) */
+    var out = [], used = {};
+    while (out.length < MAX && cands.length) {
+      var bi = -1, bs = -1e9;
+      cands.forEach(function (c, i) { var sc = c.s - 1.5 * (used[c.k] || 0); if (sc > bs) { bs = sc; bi = i; } });
+      if (bi < 0 || bs <= 0) break;
+      var c = cands.splice(bi, 1)[0]; used[c.k] = (used[c.k] || 0) + 1; out.push(c.it);
+    }
+    return out;
   }
 
   function imgUrl(it) {
@@ -132,6 +190,10 @@
     var e = findEntryById(t.getAttribute('data-id'));
     if (!e) return;
     if (a === 'inc' && window.__ewCust && window.__ewCust[idOf(e.item)] && typeof window.ewOpenCustomize === 'function') { pendingCustId = idOf(e.item); window.ewOpenCustomize(idOf(e.item)); return; }
+    if (a === 'dec' && window.__ewCust && window.__ewCust[idOf(e.item)] && typeof window.ewRemoveCustomizedCartUnit === 'function') {
+      /* customised items live under composite cart keys - use the page's own remover */
+      window.ewRemoveCustomizedCartUnit(idOf(e.item)); refreshButtons(); return;
+    }
     callCart(e.item, a === 'inc' ? 1 : -1);
   });
 
