@@ -111,14 +111,15 @@ body.ew-search-open #white-cart-root{z-index:100002!important}
   .ss,.ss-field,.ss-chip,.ss-pop-card,.ss-card .nb-add-btn{transition:none}
 }
 
-/* ---- diet toggles ---- */
-.ss-diet{flex:none;display:flex;gap:8px;padding:0 14px 10px}
-.ss-diet-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--ss-line);border-radius:999px;background:#fff;color:var(--ss-ink);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .12s ease}
-.ss-diet-chip:active{transform:scale(.95)}
+/* ---- diet toggles (inside the search field) ---- */
+.ss-field{padding-right:8px}
+.ss-diet{flex:none;display:flex;align-items:center;gap:6px;margin-left:2px;padding-left:8px;border-left:1px solid #DADDE2}
+.ss-diet-chip{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border:1.5px solid transparent;border-radius:10px;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .18s ease,border-color .18s ease,transform .12s ease}
+.ss-diet-chip:active{transform:scale(.92)}
 .ss-diet-chip.pop{animation:ss-pop .34s cubic-bezier(.3,1.5,.5,1)}
-@keyframes ss-pop{0%{transform:scale(.92)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
-.ss-diet-chip.is-on[data-diet="veg"]{border-color:#1D8F62;background:#E7F6EE;color:#1D8F62}
-.ss-diet-chip.is-on[data-diet="nonveg"]{border-color:#C23B3B;background:#FDECEC;color:#C23B3B}
+@keyframes ss-pop{0%{transform:scale(.88)}55%{transform:scale(1.1)}100%{transform:scale(1)}}
+.ss-diet-chip.is-on[data-diet="veg"]{border-color:#1D8F62;background:#E7F6EE}
+.ss-diet-chip.is-on[data-diet="nonveg"]{border-color:#C23B3B;background:#FDECEC}
 .ss-diet-chip:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
 
 /* ---- matched letters ---- */
@@ -126,6 +127,8 @@ body.ew-search-open #white-cart-root{z-index:100002!important}
 
 /* ---- empty result with suggestions underneath ---- */
 .ss-empty.is-short{padding:40px 16px 8px}
+.ss-best{padding-bottom:0;border-bottom:0}
+.ss-best .ss-sec-head{margin-bottom:0}
 
 @media(prefers-reduced-motion:reduce){
   .ss-diet-chip,.ss-diet-chip.pop{animation:none;transition:none}
