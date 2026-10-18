@@ -42,6 +42,7 @@
 <link rel="stylesheet" href="css/restaurant-tabs.css">
 <link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-3">
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
+<link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -649,14 +650,15 @@ window.ewLoadVisibleImages = function(root, margin){
     if (!reduce) {
       // Direction follows the gesture: swipe left (Menu -> Info) slides the
       // new pane in from the right; swipe right (Info -> Menu) from the left.
-      const shift = fromMenu ? '24px' : '-24px';
+      const shift = fromMenu ? '40px' : '-40px';
       menuPane.style.setProperty('--res-pane-shift', shift);
       infoPane.style.setProperty('--res-pane-shift', shift);
       const shown = fromMenu ? infoPane : menuPane;
-      shown.classList.remove('is-animating');
+      shown.classList.remove('is-animating', 'ew-pane-in');
       void shown.offsetWidth; // restart the keyframe
-      shown.classList.add('is-animating');
+      shown.classList.add('ew-pane-in');
     }
+    if (window.ewSyncTabIndicator) window.ewSyncTabIndicator();
     if (options.focus) {
       const target = tab === 'info' ? infoBtn : menuBtn;
       if (target) target.focus({ preventScroll: true });
@@ -678,15 +680,35 @@ window.ewLoadVisibleImages = function(root, margin){
     return null;
   }
 
-  function infoRow(icon, html) {
-    return '<div class="info-row"><span class="info-ic"><i class="' + icon + '"></i></span><span>' + html + '</span></div>';
+  // Official FSSAI logo asset. If the file is missing the section hides itself
+  // (see .inf-fssai[hidden] in restaurant-info-premium.css). The licence number
+  // is never shown here.
+  const FSSAI_LOGO_SRC = 'assets/fssai-logo.png';
+
+  // "22:00" -> "10:00 PM". Values that are already formatted pass through.
+  function infoTime(v) {
+    const t = String(v == null ? '' : v).trim();
+    return /^\d{1,2}:\d{2}$/.test(t) ? formatTime(t) : t;
   }
 
-  // Official FSSAI logo asset. The repository contains no such asset, so this
-  // section stays hidden rather than rendering an approximate/fake mark. Drop
-  // the authentic file at this path (or point this constant at it) and the
-  // Info tab renders the logo alone — the licence number is never shown.
-  const FSSAI_LOGO_SRC = 'assets/fssai-logo.png';
+  function infoSvc(icon, html) {
+    return '<div class="inf-svc"><span class="inf-svc-ic"><i class="' + icon + '" aria-hidden="true"></i></span><span class="inf-svc-tx">' + html + '</span></div>';
+  }
+
+  function shareRestaurantInfo(btn) {
+    const r = currentRestaurant || {};
+    const data = { title: (r.name || 'Restaurant') + ' on EatSwada', url: location.href };
+    const label = btn && btn.querySelector('span');
+    if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(data.url).then(function () {
+        if (!label) return;
+        const old = label.textContent;
+        label.textContent = 'Link copied';
+        setTimeout(function () { label.textContent = old; }, 1600);
+      }).catch(function () {});
+    }
+  }
 
   function renderRestaurantInfo() {
     const box = document.getElementById('info-content');
@@ -700,80 +722,110 @@ window.ewLoadVisibleImages = function(root, margin){
     if (infoRenderedFor === r) return; // render once per loaded restaurant
 
     const esc = escapeMenuHtml;
-    const parts = [];
     const name = r.name || 'Restaurant';
     const cuisine = cuisineText(r);
     const cost = Number(r.costForOne || r.priceForOne || r.averageCostForOne || r.costPerPerson);
-
-    parts.push('<div class="info-block"><h3 class="info-title">' + esc(name) + '</h3>');
-    if (cuisine) parts.push(infoRow('fa-solid fa-utensils', esc(cuisine)));
-    if (Number.isFinite(cost) && cost > 0) parts.push(infoRow('fa-solid fa-indian-rupee-sign', '&#8377;' + cost + ' for one'));
     const addr = r.address || (r.location && r.location.address) || '';
-    if (addr) parts.push(infoRow('fa-solid fa-location-dot', esc(addr)));
     const phone = (r.phone || r.contactNumber || '').toString().trim();
-    if (phone) {
-      const tel = esc(String(phone).replace(/[^0-9+]/g, ''));
-      // The number is never shown; only a tappable call button is rendered.
-      parts.push(
-        '<div class="info-row info-row-phone">' +
-          '<a class="info-phone-btn" href="tel:' + tel + '" aria-label="Call restaurant" title="Call restaurant" rel="nofollow">' +
-            '<svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' +
-            '</svg>' +
-          '</a>' +
-        '</div>'
-      );
-    }
     const rcoords = restaurantCoords(r);
-    if (rcoords) {
-      const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(rcoords.lat + ',' + rcoords.lng);
-      parts.push('<div class="info-row"><span class="info-ic"><i class="fa-solid fa-diamond-turn-right"></i></span><span><a href="' + esc(mapsUrl) + '" target="_blank" rel="noopener">Get directions</a></span></div>');
-    }
-    parts.push('</div>');
+    const availability = r.availability || {};
 
+    /* ---- opening hours + open/closed status ---- */
     const hours = r.openingHours || r.hours || null;
+    let hoursHtml = '';
+    let statusOpen = (typeof availability.isOpen === 'boolean') ? availability.isOpen
+      : (typeof r.isOpen === 'boolean' ? r.isOpen : null);
+    let statusSub = '';
     if (hours && typeof hours === 'object') {
       const days = [['monday', 'Monday'], ['tuesday', 'Tuesday'], ['wednesday', 'Wednesday'], ['thursday', 'Thursday'], ['friday', 'Friday'], ['saturday', 'Saturday'], ['sunday', 'Sunday']];
       const todayKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][new Date().getDay()];
       let any = false;
-      const rows = days.map(function (d) {
+      const rowsData = days.map(function (d) {
         const t = restaurantTimeStr(hours[d[0]]);
-        let text = 'Hours not available', cls = 'closed';
-        if (t && t.closed) text = 'Closed';
-        else if (t) { text = esc(t.open) + ' - ' + esc(t.close); cls = ''; any = true; }
-        return '<div class="info-hrow ' + (d[0] === todayKey ? 'is-today' : '') + '"><span class="d">' + d[1] + '</span><span class="t ' + cls + '">' + text + '</span></div>';
-      }).join('');
+        let text = 'Hours not available', cls = 'is-na';
+        if (t && t.closed) { text = 'Closed'; cls = 'is-closed'; }
+        else if (t) { text = infoTime(t.open) + ' – ' + infoTime(t.close); cls = ''; any = true; }
+        return { key: d[0], label: d[1], text: text, cls: cls };
+      });
       if (any) {
-        const open = (r.availability && typeof r.availability.isOpen === 'boolean') ? r.availability.isOpen
-          : (typeof r.isOpen === 'boolean' ? r.isOpen : true);
         const todayT = restaurantTimeStr(hours[todayKey]);
-        const availability = r.availability || {};
+        const open = statusOpen === null ? true : statusOpen;
+        statusOpen = open;
         const nextOpen = availability.opensAt || (todayT && todayT.open);
-        const closedToday = availability.closedReason === 'closed_today';
-        const nextOpenLabel = nextOpen ? formatTime(nextOpen) : '';
-        const status = open
-          ? '<span class="info-open">Open now</span>' + (todayT && todayT.close ? ' &bull; Closes ' + esc(todayT.close) : '')
-          : closedToday
-            ? '<span class="info-closed">Closed today</span>' + (availability.opensAt ? ' &bull; Opens tomorrow at ' + esc(nextOpenLabel) : '')
-            : '<span class="info-closed">Closed now</span>' + (nextOpen ? ' &bull; Opens at ' + esc(nextOpenLabel) : '');
-        parts.push('<div class="info-block"><h3 class="info-title">Opening hours</h3><div class="info-row">' + status + '</div><div class="info-hours">' + rows + '</div></div>');
+        const nextLabel = nextOpen ? infoTime(nextOpen) : '';
+        if (open) statusSub = (todayT && todayT.close) ? 'Closes ' + infoTime(todayT.close) : '';
+        else if (availability.closedReason === 'closed_today') statusSub = availability.opensAt ? 'Opens tomorrow at ' + nextLabel : '';
+        else statusSub = nextLabel ? 'Opens at ' + nextLabel : '';
+
+        const same = rowsData.every(function (x) { return x.text === rowsData[0].text; });
+        const todayRow = rowsData.filter(function (x) { return x.key === todayKey; })[0];
+        const rows = same
+          ? ''
+          : rowsData.map(function (x) {
+              return '<div class="inf-hrow' + (x.key === todayKey ? ' is-today' : '') + '"><span class="inf-hd">' + x.label + '</span><span class="inf-ht ' + x.cls + '">' + esc(x.text) + '</span></div>';
+            }).join('');
+        const summaryText = same ? 'Every day ' + rowsData[0].text : (todayRow ? 'Today ' + todayRow.text : '');
+        hoursHtml =
+          '<details class="inf-sec inf-hours' + (same ? ' is-static' : '') + '">' +
+            '<summary class="inf-hours-sum">' +
+              '<span class="inf-sec-ic"><i class="fa-regular fa-clock" aria-hidden="true"></i></span>' +
+              '<span class="inf-hours-head"><span class="inf-sec-title">Opening hours</span><span class="inf-hours-today">' + esc(summaryText) + '</span></span>' +
+              (same ? '' : '<i class="fa-solid fa-chevron-down inf-chev" aria-hidden="true"></i>') +
+            '</summary>' +
+            (same ? '' : '<div class="inf-hours-list">' + rows + '</div>') +
+          '</details>';
       }
     }
 
-    const svc = [infoRow('fa-solid fa-bag-shopping', 'Provides delivery')];
+    /* ---- hero ---- */
+    const parts = [];
+    let pill = '';
+    if (statusOpen !== null) {
+      pill = '<span class="inf-pill ' + (statusOpen ? 'is-open' : 'is-closed') + '"><i class="inf-pill-dot" aria-hidden="true"></i>' + (statusOpen ? 'Open now' : 'Closed') + '</span>';
+    }
+    let hero = '<section class="inf-hero">' +
+      '<div class="inf-hero-top"><h2 class="inf-name">' + esc(name) + '</h2>' + pill + '</div>';
+    const sub = [];
+    if (cuisine) sub.push(esc(cuisine));
+    if (Number.isFinite(cost) && cost > 0) sub.push('&#8377;' + cost + ' for one');
+    if (sub.length) hero += '<p class="inf-sub">' + sub.join('<span class="inf-sep" aria-hidden="true"></span>') + '</p>';
+    if (statusSub) hero += '<p class="inf-status">' + esc(statusSub) + '</p>';
+
+    /* action buttons: labelled, number is never printed */
+    const acts = [];
+    if (phone) {
+      const tel = esc(String(phone).replace(/[^0-9+]/g, ''));
+      acts.push('<a class="inf-act" href="tel:' + tel + '" rel="nofollow"><i class="fa-solid fa-phone" aria-hidden="true"></i><span>Call</span></a>');
+    }
+    if (rcoords) {
+      const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(rcoords.lat + ',' + rcoords.lng);
+      acts.push('<a class="inf-act" href="' + esc(mapsUrl) + '" target="_blank" rel="noopener"><i class="fa-solid fa-diamond-turn-right" aria-hidden="true"></i><span>Directions</span></a>');
+    }
+    acts.push('<button class="inf-act" type="button" onclick="shareRestaurantInfo(this)"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Share</span></button>');
+    hero += '<div class="inf-acts">' + acts.join('') + '</div></section>';
+    parts.push(hero);
+
+    /* ---- address ---- */
+    if (addr) {
+      parts.push('<section class="inf-sec inf-addr"><span class="inf-sec-ic"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>' +
+        '<div><span class="inf-sec-title">Address</span><p class="inf-addr-tx">' + esc(addr) + '</p></div></section>');
+    }
+
+    if (hoursHtml) parts.push(hoursHtml);
+
+    /* ---- services ---- */
+    const svc = [infoSvc('fa-solid fa-bag-shopping', 'Delivery available')];
     const freeAbove = Number(r.freeDeliveryAbove);
     if (r.freeDeliveryEnabled !== false && Number.isFinite(freeAbove) && freeAbove > 0) {
-      svc.push(infoRow('fa-solid fa-motorcycle', 'Free delivery on orders above &#8377;' + freeAbove));
+      svc.push(infoSvc('fa-solid fa-motorcycle', 'Free delivery above &#8377;' + freeAbove));
     }
     const radius = Number(r.deliveryRadiusKm);
-    if (Number.isFinite(radius) && radius > 0) svc.push(infoRow('fa-solid fa-location-dot', 'Delivers within ' + radius + ' km'));
-    if (r.codEnabled === true) svc.push(infoRow('fa-solid fa-indian-rupee-sign', 'Cash on delivery available'));
-    parts.push('<div class="info-block"><h3 class="info-title">Services</h3>' + svc.join('') + '</div>');
+    if (Number.isFinite(radius) && radius > 0) svc.push(infoSvc('fa-solid fa-route', 'Delivers within ' + radius + ' km'));
+    if (r.codEnabled === true) svc.push(infoSvc('fa-solid fa-indian-rupee-sign', 'Cash on delivery'));
+    parts.push('<section class="inf-sec"><span class="inf-sec-title">Services</span><div class="inf-svc-list">' + svc.join('') + '</div></section>');
 
-    // FSSAI mark: authentic logo only. The licence number is intentionally
-    // not rendered here (it remains in the backend and the data object).
     if (FSSAI_LOGO_SRC) {
-      parts.push('<div class="info-block info-fssai"><img alt="FSSAI licensed" class="info-fssai-logo" loading="lazy" onerror="this.closest(\'.info-fssai\').hidden=true" src="' + esc(FSSAI_LOGO_SRC) + '"></div>');
+      parts.push('<div class="inf-fssai"><img alt="FSSAI licensed" class="inf-fssai-logo" loading="lazy" onerror="this.closest(\'.inf-fssai\').hidden=true" src="' + esc(FSSAI_LOGO_SRC) + '"></div>');
     }
 
     box.innerHTML = parts.join('');
@@ -1719,43 +1771,131 @@ window.ewLoadVisibleImages = function(root, margin){
 
   document.addEventListener('DOMContentLoaded', loadRestaurantPage);
 
-  /* Menu/Info tab gestures: horizontal swipe on touch, arrow keys on desktop.
-     Only a decisive horizontal swipe switches panes, so vertical menu scrolling
-     is never hijacked. Nothing here changes the URL or history. */
+  /* Menu/Info tab gestures. The pane follows the finger, the tab underline
+     tracks it, and releasing past ~22% of the screen (or a quick flick)
+     commits the switch; otherwise it springs back. Swipes that start inside a
+     horizontally scrolling strip (filter chips, pairing carousel) are left to
+     that strip. Vertical scrolling is never hijacked. No URL/history changes. */
   (function initResTabGestures() {
     const tabs = document.getElementById('res-tabs');
     if (!tabs) return;
     const menuPane = document.getElementById('menu-pane');
     const infoPane = document.getElementById('info-pane');
+    const menuBtn = document.getElementById('res-tab-menu');
+    const infoBtn = document.getElementById('res-tab-info');
+    const reduce = function () { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; };
 
-    let startX = 0, startY = 0, tracking = false, fired = false;
+    /* sliding underline */
+    if (getComputedStyle(tabs).position === 'static') tabs.style.position = 'relative';
+    const ind = document.createElement('span');
+    ind.className = 'menu-tab-indicator';
+    ind.setAttribute('aria-hidden', 'true');
+    tabs.appendChild(ind);
+    tabs.classList.add('has-indicator');
 
+    function layoutIndicator(progress) {
+      if (!menuBtn || !infoBtn) return;
+      const from = activeResTab === 'menu' ? menuBtn : infoBtn;
+      const to = activeResTab === 'menu' ? infoBtn : menuBtn;
+      const p = Math.max(0, Math.min(1, progress || 0));
+      const x = from.offsetLeft + (to.offsetLeft - from.offsetLeft) * p;
+      const w = from.offsetWidth + (to.offsetWidth - from.offsetWidth) * p;
+      ind.style.width = w + 'px';
+      ind.style.transform = 'translate3d(' + x + 'px,0,0)';
+    }
+    window.ewSyncTabIndicator = function () { layoutIndicator(0); };
+    layoutIndicator(0);
+    window.addEventListener('resize', function () { layoutIndicator(0); });
+    window.addEventListener('load', function () { layoutIndicator(0); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { layoutIndicator(0); });
+
+    /* drag */
+    let st = null;
+
+    function insideHScroller(node, pane) {
+      for (let n = node; n && n !== pane; n = n.parentElement) {
+        if (n.scrollWidth > n.clientWidth + 2) {
+          const ox = getComputedStyle(n).overflowX;
+          if (ox === 'auto' || ox === 'scroll') return true;
+        }
+      }
+      return false;
+    }
+    function resetPane(pane) {
+      pane.classList.remove('is-dragging');
+      pane.style.transition = '';
+      pane.style.transform = '';
+      pane.style.opacity = '';
+      tabs.classList.remove('is-dragging');
+    }
     function onStart(e) {
-      if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+      if (!e.touches || e.touches.length !== 1) { st = null; return; }
+      const pane = e.currentTarget;
+      if (insideHScroller(e.target, pane)) { st = null; return; }
       const t = e.touches[0];
-      startX = t.clientX; startY = t.clientY;
-      tracking = true; fired = false;
+      st = { x: t.clientX, y: t.clientY, t: Date.now(), axis: null, pane: pane, dx: 0, from: activeResTab };
     }
     function onMove(e) {
-      if (!tracking || fired || !e.touches || e.touches.length !== 1) return;
+      if (!st || !e.touches || e.touches.length !== 1) return;
       const t = e.touches[0];
-      const dx = t.clientX - startX, dy = t.clientY - startY;
-      if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
-      fired = true;
-      if (dx < 0) {
-        if (activeResTab === 'menu') switchResTab('info');
-      } else if (activeResTab === 'info') {
-        switchResTab('menu');
+      const dx = t.clientX - st.x, dy = t.clientY - st.y;
+      if (!st.axis) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        const horizontal = Math.abs(dx) > Math.abs(dy) * 1.3;
+        const rightWay = st.from === 'menu' ? dx < 0 : dx > 0; // only toward the other tab
+        if (!horizontal || !rightWay) { st = null; return; }
+        st.axis = 'x';
+        if (!reduce()) { st.pane.classList.add('is-dragging'); tabs.classList.add('is-dragging'); }
+      }
+      const w = window.innerWidth || 360;
+      const lim = st.from === 'menu' ? Math.min(0, dx) : Math.max(0, dx);
+      st.dx = lim;
+      if (reduce()) return;
+      st.pane.style.transform = 'translate3d(' + (lim * 0.85) + 'px,0,0)';
+      st.pane.style.opacity = String(1 - Math.min(Math.abs(lim) / w, 1) * 0.7);
+      layoutIndicator(Math.abs(lim) / w * 1.6);
+    }
+    function onEnd(e) {
+      if (!st) return;
+      const s = st; st = null;
+      if (s.axis !== 'x') return;
+      const cancelled = e && e.type === 'touchcancel';
+      const w = window.innerWidth || 360;
+      const dt = Math.max(Date.now() - s.t, 1);
+      const fast = Math.abs(s.dx) / dt > 0.45 && Math.abs(s.dx) > 30;
+      const commit = !cancelled && (Math.abs(s.dx) > w * 0.22 || fast);
+      const target = s.from === 'menu' ? 'info' : 'menu';
+      const pane = s.pane;
+      if (reduce()) { if (commit) switchResTab(target); return; }
+      pane.classList.remove('is-dragging');
+      tabs.classList.remove('is-dragging');
+      if (commit) {
+        const dir = s.dx < 0 ? -1 : 1;
+        pane.style.transition = 'transform .16s ease-in, opacity .16s ease-in';
+        pane.style.transform = 'translate3d(' + (dir * w * 0.35) + 'px,0,0)';
+        pane.style.opacity = '0';
+        layoutIndicator(1);
+        setTimeout(function () {
+          resetPane(pane);
+          if (activeResTab === s.from) switchResTab(target);
+          else layoutIndicator(0);
+        }, 150);
+      } else {
+        pane.style.transition = 'transform .24s cubic-bezier(.22,.8,.3,1), opacity .24s ease';
+        pane.style.transform = '';
+        pane.style.opacity = '';
+        layoutIndicator(0);
+        setTimeout(function () { resetPane(pane); }, 250);
       }
     }
-    function onEnd() { tracking = false; fired = false; }
 
-    if (menuPane) menuPane.addEventListener('touchstart', onStart, { passive: true });
-    if (infoPane) infoPane.addEventListener('touchstart', onStart, { passive: true });
-    if (menuPane) menuPane.addEventListener('touchmove', onMove, { passive: true });
-    if (infoPane) infoPane.addEventListener('touchmove', onMove, { passive: true });
-    if (menuPane) menuPane.addEventListener('touchend', onEnd, { passive: true });
-    if (infoPane) infoPane.addEventListener('touchend', onEnd, { passive: true });
+    [menuPane, infoPane].forEach(function (pane) {
+      if (!pane) return;
+      pane.addEventListener('touchstart', onStart, { passive: true });
+      pane.addEventListener('touchmove', onMove, { passive: true });
+      pane.addEventListener('touchend', onEnd, { passive: true });
+      pane.addEventListener('touchcancel', onEnd, { passive: true });
+    });
 
     tabs.addEventListener('keydown', function (e) {
       const key = e.key;
