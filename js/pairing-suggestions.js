@@ -6,6 +6,9 @@
   var MAX = 6, MIN = 2, internal = false, openFor = null, stripEl = null;
   var pendingCustId = null, lastSnap = {};
   function snapshot() { var c = readCart(), o = {}; Object.keys(c).forEach(function (k) { o[k] = Number((c[k] || {}).quantity) || 0; }); lastSnap = o; }
+  function cartTotal() { var c = readCart(), n = 0; Object.keys(c).forEach(function (k) { n += Number((c[k] || {}).quantity) || 0; }); return n; }
+  function snapTotal() { var n = 0; Object.keys(lastSnap).forEach(function (k) { n += lastSnap[k] || 0; }); return n; }
+  function reducedMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   function findIncreased() {
     var c = readCart(), hit = null;
     Object.keys(c).forEach(function (k) { if (!hit && (Number((c[k] || {}).quantity) || 0) > (lastSnap[k] || 0)) hit = c[k]; });
@@ -144,7 +147,41 @@
       '<p class="ew-pair-name">' + esc(it.name) + '</p><p class="ew-pair-price">\u20B9' + priceOf(it) + '</p></div>';
   }
 
-  function closeStrip() { if (stripEl && stripEl.parentNode) stripEl.parentNode.removeChild(stripEl); stripEl = null; openFor = null; }
+  function removeNode(n) { if (n && n.parentNode) n.parentNode.removeChild(n); }
+  /* animate=true: smooth collapse, then remove. Otherwise remove immediately. */
+  function closeStrip(animate) {
+    var el = stripEl;
+    stripEl = null; openFor = null;
+    if (!el || !el.parentNode) return;
+    if (!animate || reducedMotion() || typeof el.animate !== 'function') { removeNode(el); return; }
+    var h = el.offsetHeight;
+    el.style.pointerEvents = 'none';
+    el.style.overflow = 'hidden';
+    var a = el.animate([
+      { height: h + 'px', opacity: 1, transform: 'none' },
+      { height: '0px', opacity: 0, transform: 'translateY(-8px)', marginTop: '0px', marginBottom: '0px', paddingTop: '0px', paddingBottom: '0px' }
+    ], { duration: 240, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' });
+    a.onfinish = a.oncancel = function () { removeNode(el); };
+  }
+
+  /* Pop-down: the strip grows open under the item, then (if needed) scrolls fully into view above the cart bar. */
+  function animateOpen(el) {
+    if (reducedMotion() || typeof el.animate !== 'function') return;
+    var cs = window.getComputedStyle(el), h = el.offsetHeight;
+    var to = { height: h + 'px', opacity: 1, transform: 'none', marginTop: cs.marginTop, marginBottom: cs.marginBottom, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom };
+    var from = { height: '0px', opacity: 0, transform: 'translateY(-10px)', marginTop: '0px', marginBottom: '0px', paddingTop: '0px', paddingBottom: '0px' };
+    el.style.overflow = 'hidden';
+    var a = el.animate([from, to], { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    var done = function () { el.style.overflow = ''; revealStrip(el); };
+    a.onfinish = done; a.oncancel = function () { el.style.overflow = ''; };
+  }
+  function revealStrip(el) {
+    try {
+      if (!el || !el.parentNode) return;
+      var r = el.getBoundingClientRect(), safeBottom = window.innerHeight - 120;   /* leave room for the floating cart bar */
+      if (r.bottom > safeBottom) window.scrollBy({ top: Math.min(r.bottom - safeBottom, Math.max(0, r.top - 80)), behavior: reducedMotion() ? 'auto' : 'smooth' });
+    } catch (e) {}
+  }
 
   function openStrip(entry) {
     var host = document.querySelector('.menu-item[data-menu-item-id="' + String(idOf(entry.item)).replace(/"/g, '') + '"]');
@@ -162,6 +199,7 @@
     });
     host.insertAdjacentElement('afterend', stripEl);
     openFor = idOf(entry.item);
+    animateOpen(stripEl);
   }
 
   function refreshButtons() {
@@ -186,7 +224,7 @@
     var t = ev.target.closest && ev.target.closest('[data-ew-pair]');
     if (!t || !stripEl || !stripEl.contains(t)) return;
     var a = t.getAttribute('data-ew-pair');
-    if (a === 'close') { closeStrip(); return; }
+    if (a === 'close') { closeStrip(true); return; }
     var e = findEntryById(t.getAttribute('data-id'));
     if (!e) return;
     if (a === 'inc' && window.__ewCust && window.__ewCust[idOf(e.item)] && typeof window.ewOpenCustomize === 'function') { pendingCustId = idOf(e.item); window.ewOpenCustomize(idOf(e.item)); return; }
@@ -201,13 +239,14 @@
     if (typeof window.updateCart !== 'function' || window.updateCart.__ewPair) return;
     var original = window.updateCart;
     var wrapped = function (name, delta, price, resId, inStock, menuItemId) {
+      var cartWasEmpty = cartTotal() === 0;   /* suggestions show once: only for the first item added to an empty cart */
       var result = original.apply(this, arguments);
       if (internal) return result;
       try {
         var entry = (menuItemId && findEntryById(menuItemId)) || findEntryByName(name);
         if (!entry) return result;
-        if (Number(delta) > 0) { if (isOpenNow() && entry.item.inStock !== false) openStrip(entry); }
-        else if (openFor === idOf(entry.item) && cartQty(entry.item) === 0) closeStrip();
+        if (Number(delta) > 0) { if (cartWasEmpty && isOpenNow() && entry.item.inStock !== false) openStrip(entry); }
+        else if (openFor === idOf(entry.item) && cartQty(entry.item) === 0) closeStrip(true);
         refreshButtons();
       } catch (e) { console.warn('[pairing] suggestions failed:', e); }
       snapshot();
@@ -220,6 +259,7 @@
     var fn = window.refreshCustomizedCartQuantities;
     if (typeof fn !== 'function' || fn.__ewPair) return;
     var w = function (dir) {
+      var cartWasEmpty = snapTotal() === 0;   /* same once-per-cart rule for customised items */
       var r = fn.apply(this, arguments);
       try {
         if (dir === 'up') {
@@ -229,11 +269,11 @@
             var entry = (id && findEntryById(id)) || findEntryByName(hit.name);
             if (entry) {
               if (pendingCustId && pendingCustId === idOf(entry.item)) { pendingCustId = null; }
-              else if (isOpenNow() && entry.item.inStock !== false) { pendingCustId = null; openStrip(entry); }
+              else if (cartWasEmpty && isOpenNow() && entry.item.inStock !== false) { pendingCustId = null; openStrip(entry); }
             }
           }
         }
-        if (openFor) { var m = findEntryById(openFor); if (m && cartQty(m.item) === 0) closeStrip(); }
+        if (openFor) { var m = findEntryById(openFor); if (m && cartQty(m.item) === 0) closeStrip(true); }
         refreshButtons();
       } catch (e) { console.warn('[pairing] custom add hook failed:', e); }
       snapshot();
@@ -246,4 +286,6 @@
   snapshot();
   installAll();
   window.addEventListener('load', function () { snapshot(); installAll(); });
+  window.addEventListener('pageshow', snapshot);
+  window.addEventListener('storage', snapshot);
 })();
