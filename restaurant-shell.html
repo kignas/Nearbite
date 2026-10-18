@@ -1791,7 +1791,7 @@ window.ewLoadVisibleImages = function(root, margin){
   }
 
   /* Bold the letters the person typed inside the dish name. */
-  function ssHighlight(name, tokens) {
+  function ssHighlight(name, tokens, fuzzy) {
     name = String(name == null ? '' : name);
     const esc = escapeMenuHtml;
     const lower = name.toLowerCase();
@@ -1799,10 +1799,25 @@ window.ewLoadVisibleImages = function(root, margin){
     const marks = new Array(name.length).fill(false);
     tokens.forEach(function (t) {
       if (!t) return;
-      let i = lower.indexOf(t);
+      let i = lower.indexOf(t), found = false;
       while (i !== -1) {
+        found = true;
         for (let k = i; k < i + t.length; k++) marks[k] = true;
         i = lower.indexOf(t, i + t.length);
+      }
+      // Typo match ("chiken"): bold the dish-name word it matched instead.
+      if (!found && fuzzy) {
+        const max = t.length >= 8 ? 2 : (t.length >= 4 ? 1 : 0);
+        if (!max) return;
+        const re = /[^\s\-_,.&/()+:;!?'"]+/g;
+        let m;
+        while ((m = re.exec(lower))) {
+          const w = m[0];
+          let len = 0;
+          if (ssDist(t, w, max) <= max) len = w.length;
+          else if (w.length > t.length && ssDist(t, w.slice(0, t.length), max) <= max) len = t.length;
+          if (len) { for (let k = m.index; k < m.index + len; k++) marks[k] = true; break; }
+        }
       }
     });
     let out = '', open = false;
@@ -1856,7 +1871,7 @@ window.ewLoadVisibleImages = function(root, margin){
     return '<span class="ss-veg ' + (it.isVeg ? 'is-veg' : 'is-nonveg') + '" role="img" aria-label="' + (it.isVeg ? 'Veg' : 'Non-veg') + '"><span></span></span>';
   }
 
-  function ssCardHTML(e, tokens) {
+  function ssCardHTML(e, tokens, fuzzy) {
     const esc = escapeMenuHtml, it = e.item;
     const inStock = it.inStock !== false;
     const avail = inStock && isRestaurantOpen;
@@ -1868,7 +1883,7 @@ window.ewLoadVisibleImages = function(root, margin){
     return '<article class="ss-card' + (custom ? ' has-cust' : '') + '" data-i="' + e.idx + '">' +
       '<div class="ss-main">' +
         (e.badge ? '<span class="ss-badge">' + esc(e.badge) + '</span>' : '') +
-        '<div class="ss-title-row">' + ssVegMark(it) + '<h3 class="ss-name">' + ssHighlight(it.name, tokens) + '</h3></div>' +
+        '<div class="ss-title-row">' + ssVegMark(it) + '<h3 class="ss-name">' + ssHighlight(it.name, tokens, fuzzy) + '</h3></div>' +
         '<div class="ss-price"><span class="ss-now">₹' + e.price + '</span>' +
           (e.original ? '<s class="ss-was">₹' + e.original + '</s><span class="ss-off">' + off + '% OFF</span>' : '') + '</div>' +
         '<p class="ss-cat">in ' + esc(e.cat) + '</p>' +
@@ -1903,6 +1918,15 @@ window.ewLoadVisibleImages = function(root, margin){
           '<span class="ss-pop-name">' + esc(e.item.name) + '</span>' +
           '<span class="ss-pop-price">₹' + e.price + '</span></button>';
       }).join('') + '</div></section>';
+  }
+
+  /* Empty-result suggestions: real dish cards (with add buttons) for the
+     restaurant's bestsellers, respecting the Veg / Non-veg toggle. */
+  function ssBestHTML() {
+    const pick = ssVisible(ssDiet).filter(function (e) { return e.popular; }).slice(0, 4);
+    if (!pick.length) return '';
+    return '<section class="ss-sec ss-best"><div class="ss-sec-head"><h2>Bestsellers you might like</h2></div></section>' +
+      pick.map(function (e) { return ssCardHTML(e, null, false); }).join('');
   }
 
   function ssCatsHTML() {
@@ -1955,13 +1979,13 @@ window.ewLoadVisibleImages = function(root, margin){
         : '<button type="button" class="ss-empty-btn" data-act="clear-q">Clear search</button>';
       body.innerHTML = '<div class="ss-empty is-short"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>' +
         '<p class="ss-empty-t">' + title + '</p><p class="ss-empty-s">' + sub + '</p>' + btn + '</div>' +
-        (ssPopHTML('Popular dishes') || ssCatsHTML());
+        (ssBestHTML() || ssPopHTML('Popular dishes') || ssCatsHTML());
       return;
     }
     const kind = ssDiet === 'veg' ? 'veg ' : (ssDiet === 'nonveg' ? 'non-veg ' : '');
     body.innerHTML = '<p class="ss-count" aria-live="polite">' + r.list.length + ' ' + kind + (r.list.length === 1 ? 'dish' : 'dishes') +
       (r.fuzzy ? ' · close matches for “' + escapeMenuHtml(q) + '”' : '') + '</p>' +
-      r.list.map(function (e) { return ssCardHTML(e, r.tokens); }).join('');
+      r.list.map(function (e) { return ssCardHTML(e, r.tokens, r.fuzzy); }).join('');
   }
 
   function ssSetQuery(q, save) {
@@ -1991,11 +2015,11 @@ window.ewLoadVisibleImages = function(root, margin){
         '<label class="ss-field"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>' +
           '<input id="ss-input" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search dishes">' +
           '<button type="button" class="ss-clear" aria-label="Clear search" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>' +
+          '<span class="ss-diet" role="group" aria-label="Diet">' +
+            '<button type="button" class="ss-diet-chip" data-diet="veg" aria-pressed="false" aria-label="Veg only" title="Veg only"><span class="ss-veg is-veg" aria-hidden="true"><span></span></span></button>' +
+            '<button type="button" class="ss-diet-chip" data-diet="nonveg" aria-pressed="false" aria-label="Non-veg only" title="Non-veg only"><span class="ss-veg is-nonveg" aria-hidden="true"><span></span></span></button>' +
+          '</span>' +
         '</label>' +
-      '</div>' +
-      '<div class="ss-diet" role="group" aria-label="Diet">' +
-        '<button type="button" class="ss-diet-chip" data-diet="veg" aria-pressed="false"><span class="ss-veg is-veg" aria-hidden="true"><span></span></span>Veg</button>' +
-        '<button type="button" class="ss-diet-chip" data-diet="nonveg" aria-pressed="false"><span class="ss-veg is-nonveg" aria-hidden="true"><span></span></span>Non-veg</button>' +
       '</div>' +
       '<div class="ss-body" id="ss-body"></div>';
     document.body.appendChild(root);
