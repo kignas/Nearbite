@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
-<link rel="stylesheet" href="css/restaurant-search-page.css?v=4">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=5">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -709,12 +709,31 @@ window.ewLoadVisibleImages = function(root, margin){
   // page never claims a licence the restaurant has not given us.
   const FSSAI_LOGO_SRC = 'assets/fssai-logo.png';
 
-  // Returns the 14-digit licence number, or '' when the record has none / an invalid one.
+  // Returns the 14-digit licence number, or '' when the record has none, an
+  // invalid one, or one that admin has not marked Verified. Field names are
+  // matched loosely (fssaiNumber, fssaiLicenseNumber, fssai_license_no, ...).
   window.ewFssaiNumber = function (r) {
-    if (!r) return '';
-    const raw = r.fssaiNumber || r.fssaiLicenseNumber || r.fssaiLicenceNumber || r.fssai || r.fssaiNo ||
-      r.licenseNumber || r.licenceNumber || '';
-    const digits = String(raw).replace(/\D/g, '');
+    if (!r || typeof r !== 'object') return '';
+    const keys = Object.keys(r).filter(function (k) { return /fssai|licen[sc]e/i.test(k); });
+    if (/[?&]debugfssai/.test(location.search)) {
+      console.log('[fssai] matching keys:', keys.map(function (k) { return k + ' = ' + JSON.stringify(r[k]); }));
+    }
+    let num = '', status = null;
+    keys.forEach(function (k) {
+      const v = r[k];
+      if (/status|verif/i.test(k)) { status = String(v == null ? '' : v); return; }
+      if (v && typeof v === 'object') {   // e.g. fssai: { number, status }
+        const n = v.number || v.licenseNumber || v.licenceNumber || v.no || '';
+        if (n && !num) num = String(n);
+        const st = v.status || v.verificationStatus;
+        if (st != null && status === null) status = String(st);
+      } else if (v != null && !num) {
+        num = String(v);
+      }
+    });
+    // If admin tracks a verification status, only show a verified licence.
+    if (status !== null && !/^\s*(verified|approved)\s*$/i.test(status)) return '';
+    const digits = num.replace(/\D/g, '');
     return digits.length === 14 ? digits : '';
   };
 
