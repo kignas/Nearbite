@@ -41,6 +41,7 @@
 <link rel="stylesheet" href="food-placeholder.css">
 <link rel="stylesheet" href="css/restaurant-tabs.css">
 <link rel="stylesheet" href="css/restaurant-menu-enhancements.css?v=20261016-3">
+<link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -1179,6 +1180,7 @@ window.ewLoadVisibleImages = function(root, margin){
         return showEmptyMenuState();
       }
 
+      window.__ewMenuGroups = groups;
       renderMenu(groups, resId);
       const focusItemId = new URLSearchParams(window.location.search).get('focusItem');
       if (focusItemId) {
@@ -1970,6 +1972,7 @@ window.ewLoadVisibleImages = function(root, margin){
 })();
 </script>
 
+<script src="js/pairing-suggestions.js?v=1"></script>
 
 </body>
 </html>
