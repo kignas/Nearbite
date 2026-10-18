@@ -98,6 +98,10 @@
     stripEl.className = 'ew-pair';
     stripEl.setAttribute('data-for', idOf(entry.item));
     stripEl.innerHTML = '<div class="ew-pair-head"><h4 class="ew-pair-title">You will love pairing it with</h4><button type="button" class="ew-pair-close" data-ew-pair="close" aria-label="Close suggestions">&times;</button></div><div class="ew-pair-row">' + list.map(cardHTML).join('') + '</div>';
+    /* Swiping the strip must not reach the Menu/Info tab swipe handler on #menu-pane. */
+    ['touchstart', 'touchmove', 'touchend'].forEach(function (n) {
+      stripEl.addEventListener(n, function (e) { e.stopPropagation(); }, { passive: true });
+    });
     host.insertAdjacentElement('afterend', stripEl);
     openFor = idOf(entry.item);
   }
