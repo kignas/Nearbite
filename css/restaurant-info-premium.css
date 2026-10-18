@@ -1,0 +1,102 @@
+/* RESTAURANT INFO (premium) + MENU/INFO SWIPE
+   Load AFTER the other restaurant css files (the shell links it last).
+   Save as: css/restaurant-info-premium.css */
+
+:root{
+  --inf-ink:#171B24;
+  --inf-mute:#7C838E;
+  --inf-line:#EEF0F3;
+  --inf-accent:var(--hd-primary,#E9546B);
+  --inf-tint:#FBEDEF;
+  --inf-open:#1D8F62;
+  --inf-open-bg:#E7F6EE;
+  --inf-closed:#C23B3B;
+  --inf-closed-bg:#FDECEC;
+}
+@supports (background:color-mix(in srgb,red 10%,white)){
+  :root{--inf-tint:color-mix(in srgb,var(--inf-accent) 10%,#fff)}
+}
+
+/* ---------- Info content ---------- */
+#info-content{padding:4px 0 32px}
+
+.inf-hero{padding:6px 0 20px}
+.inf-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.inf-name{margin:0;font-size:23px;line-height:1.15;letter-spacing:-.6px;font-weight:800;color:var(--inf-ink)}
+.inf-pill{flex:none;display:inline-flex;align-items:center;gap:6px;margin-top:2px;padding:5px 11px 5px 9px;border-radius:999px;font-size:12px;line-height:1;font-weight:700}
+.inf-pill-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.inf-pill.is-open{background:var(--inf-open-bg);color:var(--inf-open)}
+.inf-pill.is-closed{background:var(--inf-closed-bg);color:var(--inf-closed)}
+.inf-sub{margin:6px 0 0;font-size:14px;line-height:1.4;font-weight:500;color:var(--inf-mute)}
+.inf-sep{display:inline-block;width:3px;height:3px;margin:0 8px;vertical-align:middle;border-radius:50%;background:#C3C8D0}
+.inf-status{margin:4px 0 0;font-size:13px;font-weight:600;color:var(--inf-ink)}
+
+.inf-acts{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:10px;margin-top:18px}
+.inf-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:68px;padding:10px 6px;border:1px solid var(--inf-line);border-radius:16px;background:#fff;color:var(--inf-ink);font:inherit;font-size:12.5px;font-weight:700;line-height:1;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s ease,background-color .12s ease}
+.inf-act i{font-size:17px;color:var(--inf-accent)}
+.inf-act:active{transform:scale(.97);background:var(--inf-tint)}
+.inf-act:focus-visible,.inf-hours-sum:focus-visible{outline:2px solid var(--inf-accent);outline-offset:2px}
+
+.inf-sec{padding:18px 0;border-top:1px solid var(--inf-line)}
+.inf-sec-title{display:block;font-size:15px;line-height:1.25;font-weight:700;color:var(--inf-ink)}
+.inf-sec-ic,.inf-svc-ic{flex:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--inf-tint);color:var(--inf-accent);font-size:14px}
+
+.inf-addr{display:flex;align-items:flex-start;gap:12px}
+.inf-addr-tx{margin:4px 0 0;font-size:14px;line-height:1.45;color:var(--inf-mute)}
+
+/* hours: one line summary, tap to see the week */
+.inf-hours{padding:0;border-top:1px solid var(--inf-line)}
+.inf-hours-sum{display:flex;align-items:center;gap:12px;padding:18px 0;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+.inf-hours-sum::-webkit-details-marker{display:none}
+.inf-hours-head{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.inf-hours-today{font-size:13.5px;font-weight:500;color:var(--inf-mute)}
+.inf-chev{flex:none;font-size:12px;color:var(--inf-mute);transition:transform .22s ease}
+.inf-hours[open] .inf-chev{transform:rotate(180deg)}
+.inf-hours-list{padding:0 0 14px 48px}
+.inf-hrow{display:flex;justify-content:space-between;gap:16px;padding:7px 0;font-size:14px;color:var(--inf-mute)}
+.inf-hrow.is-today{font-weight:700;color:var(--inf-ink)}
+.inf-ht.is-closed{color:var(--inf-closed)}
+.inf-ht.is-na{color:#A5ABB5}
+
+/* services */
+.inf-svc-list{margin-top:8px}
+.inf-svc{display:flex;align-items:center;gap:12px;padding:8px 0}
+.inf-svc-tx{font-size:14px;line-height:1.35;font-weight:500;color:var(--inf-ink)}
+
+/* FSSAI: hides itself when the logo file is missing */
+.inf-fssai{padding:18px 0 0;border-top:1px solid var(--inf-line)}
+.inf-fssai[hidden]{display:none!important}
+.inf-fssai-logo{display:block;height:34px;width:auto}
+
+/* ---------- Menu <-> Info swipe ---------- */
+.res-pane{touch-action:pan-y}
+.res-pane.is-dragging{will-change:transform,opacity}
+body:has(.res-pane.is-dragging){overflow-x:clip}
+
+/* "backwards" (not "both") so the finished animation never overrides the
+   inline transform used while dragging. */
+@keyframes ew-pane-in{
+  from{opacity:0;transform:translate3d(var(--res-pane-shift,40px),0,0)}
+  to{opacity:1;transform:none}
+}
+.res-pane.ew-pane-in{animation:ew-pane-in .28s cubic-bezier(.22,.8,.3,1) backwards}
+
+/* sliding underline (replaces each tab's own underline) */
+.menu-tabs.has-indicator .menu-tab::before,
+.menu-tabs.has-indicator .menu-tab::after{display:none!important}
+.menu-tabs.has-indicator .menu-tab,
+.menu-tabs.has-indicator .menu-tab.active{border-bottom-color:transparent!important;box-shadow:none!important;background-image:none!important}
+.menu-tab-indicator{position:absolute;left:0;bottom:0;height:3px;width:0;border-radius:3px 3px 0 0;background:var(--hd-primary,#E9546B);pointer-events:none;will-change:transform,width;transition:transform .3s cubic-bezier(.22,.8,.3,1),width .3s cubic-bezier(.22,.8,.3,1)}
+.menu-tabs.is-dragging .menu-tab-indicator{transition:none}
+
+@media(prefers-reduced-motion:reduce){
+  .res-pane.ew-pane-in{animation:none}
+  .menu-tab-indicator,.inf-act,.inf-chev{transition:none}
+}
+@media(max-width:360px){
+  .inf-name{font-size:21px}
+  .inf-hours-list{padding-left:0}
+}
+
+/* same hours every day: nothing to expand */
+.inf-hours.is-static .inf-hours-sum{cursor:default;pointer-events:none}
