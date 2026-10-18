@@ -6,6 +6,10 @@
 /* Phones: run edge to edge, and line the first card up with the menu text. */
 @media (max-width:640px){
   .ew-pair{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding-left:calc(50vw - 50%)}
+  /* .menu-cat-items is overflow:hidden (for the collapse animation) and was clipping the band to the menu's padding.
+     Let it overflow only while a pairing strip is inside; a collapsed category stays clipped. */
+  .menu-cat-items:has(.ew-pair){overflow:visible}
+  .menu-cat-items.collapsed:has(.ew-pair){overflow:hidden}
 }
 @media (min-width:641px){
   .ew-pair{border-radius:16px;padding-left:16px}
