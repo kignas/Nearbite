@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
-<link rel="stylesheet" href="css/restaurant-search-page.css?v=3">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=4">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -199,6 +199,7 @@
   <button type="button" class="rmf-info" onclick="switchResTab('info');window.scrollTo({top:0,behavior:'smooth'})">
     <i class="fa-solid fa-store" aria-hidden="true"></i><span>Restaurant details &amp; timings</span><i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
   </button>
+  <div class="rmf-fssai" id="rmf-fssai" hidden></div>
   <div class="rmf-brand" aria-hidden="true">Eatswada</div>
 </footer>
 </div>
@@ -703,10 +704,36 @@ window.ewLoadVisibleImages = function(root, margin){
     return null;
   }
 
-  // Official FSSAI logo asset. If the file is missing the section hides itself
-  // (see .inf-fssai[hidden] in restaurant-info-premium.css). The licence number
-  // is never shown here.
+  // Official FSSAI logo asset. The logo and licence number are only shown for a
+  // restaurant whose record has a valid 14-digit FSSAI licence number, so the
+  // page never claims a licence the restaurant has not given us.
   const FSSAI_LOGO_SRC = 'assets/fssai-logo.png';
+
+  // Returns the 14-digit licence number, or '' when the record has none / an invalid one.
+  window.ewFssaiNumber = function (r) {
+    if (!r) return '';
+    const raw = r.fssaiNumber || r.fssaiLicenseNumber || r.fssaiLicenceNumber || r.fssai || r.fssaiNo ||
+      r.licenseNumber || r.licenceNumber || '';
+    const digits = String(raw).replace(/\D/g, '');
+    return digits.length === 14 ? digits : '';
+  };
+
+  // Shared markup: logo (hides itself if the file is missing) + licence number.
+  window.ewFssaiHTML = function (num, cls) {
+    if (!num) return '';
+    return '<div class="' + cls + '">' +
+      (FSSAI_LOGO_SRC ? '<img alt="FSSAI" class="fss-logo" loading="lazy" onerror="this.hidden=true" src="' + FSSAI_LOGO_SRC + '">' : '') +
+      '<div class="fss-tx"><span class="fss-lbl">FSSAI Licence No.</span><b class="fss-no">' + num + '</b></div></div>';
+  };
+
+  // Menu-page footer line.
+  window.ewFillFssai = function (r) {
+    const el = document.getElementById('rmf-fssai');
+    if (!el) return;
+    const num = window.ewFssaiNumber(r);
+    el.innerHTML = num ? window.ewFssaiHTML(num, 'fss fss-foot') : '';
+    el.hidden = !num;
+  };
 
   // "22:00" -> "10:00 PM". Values that are already formatted pass through.
   function infoTime(v) {
@@ -847,9 +874,8 @@ window.ewLoadVisibleImages = function(root, margin){
     if (r.codEnabled === true) svc.push(infoSvc('fa-solid fa-indian-rupee-sign', 'Cash on delivery'));
     parts.push('<section class="inf-sec"><span class="inf-sec-title">Services</span><div class="inf-svc-list">' + svc.join('') + '</div></section>');
 
-    if (FSSAI_LOGO_SRC) {
-      parts.push('<div class="inf-fssai"><img alt="FSSAI licensed" class="inf-fssai-logo" loading="lazy" onerror="this.closest(\'.inf-fssai\').hidden=true" src="' + esc(FSSAI_LOGO_SRC) + '"></div>');
-    }
+    const fssaiNo = window.ewFssaiNumber(r);
+    if (fssaiNo) parts.push(window.ewFssaiHTML(fssaiNo, 'fss fss-info'));
 
     box.innerHTML = parts.join('');
     box.style.display = '';
@@ -874,6 +900,7 @@ window.ewLoadVisibleImages = function(root, margin){
 
   function renderRestaurantHeader(restaurant) {
     currentRestaurant = restaurant;   // used by the minimum-order hint
+    if (window.ewFillFssai) window.ewFillFssai(restaurant);
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
     const restaurantName = restaurant.name || 'Restaurant';
