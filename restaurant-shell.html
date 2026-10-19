@@ -1624,12 +1624,12 @@ window.ewLoadVisibleImages = function(root, margin){
     const pane = document.getElementById('menu-pane');
     const container = document.getElementById('menu-container');
     const skel = document.getElementById('menu-skeleton');
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const rendered = !!container && container.childElementCount > 0 && container.style.display !== 'none';
     const alreadyFiltering = !!pane && pane.classList.contains('ew-filtering');
     const h = (rendered && !alreadyFiltering) ? container.offsetHeight : 0; // measure before the swap
     const visible = applyAllMenuFilters();
-    if (!rendered || !skel || !pane || reduce) return visible;
+    // Skeleton is a loading state, so it is NOT skipped for reduced motion.
+    if (!rendered || !skel || !pane) return visible;
 
     if (!alreadyFiltering) {
       skel.style.minHeight = Math.min(h, 900) + 'px'; // keeps the page from jumping
@@ -1644,7 +1644,7 @@ window.ewLoadVisibleImages = function(root, margin){
       container.classList.remove('ew-filter-reveal');
       void container.offsetWidth;
       container.classList.add('ew-filter-reveal');
-    }, 420);
+    }, 650);
     return visible;
   }
 
