@@ -1795,3 +1795,28 @@ body.u99-cust-open #nearbite-help-center{ display:none !important; }
 @media (prefers-reduced-motion: reduce){
   .u99-item-image img.ew-img-fade{ transition:none; }
 }
+
+
+/* ── Verified tick after the restaurant name ───────────────────────── */
+.u99-restaurant-name{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.u99-restaurant-name .u99-name-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.u99-verified{
+  flex:0 0 auto;
+  width:16px;
+  height:16px;
+  color:#111;
+  --ew-verified-check:#fff;
+}
+html[data-ew-theme="dark"] .u99-verified{
+  color:#fff;
+  --ew-verified-check:#111;
+}

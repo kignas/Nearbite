@@ -702,6 +702,12 @@
   }
   function homeRatingMarkup(r){var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
   function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
+  /* Black verified tick shown after the restaurant name. Hidden only when the
+     API explicitly says verified === false (same rule as the restaurant page). */
+  function homeVerifiedBadge(r){
+    if (r && r.verified === false) return '';
+    return '<svg class="u99-verified" viewBox="0 0 24 24" role="img" aria-label="Verified restaurant"><path fill="currentColor" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path d="M8.2 12.4l2.6 2.6 5-5.4" fill="none" stroke="var(--ew-verified-check,#fff)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
   function homeBuildCard(res,index,customerCoords){
     var id=read.id(res),name=read.name(res);if(!id||!name)return '';
     var status=resolveAvailability(res,customerCoords),unavailable=!!status,label=unavailable?getAvailabilityLabel(status,res):'';
@@ -709,7 +715,7 @@
     var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
-      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name">'+esc(name)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
+      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
       '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i){return homeItemMarkup(i,res);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
