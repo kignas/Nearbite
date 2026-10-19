@@ -1946,13 +1946,42 @@ html[data-ew-theme="dark"] .u99-verified{
   font-size:12px; font-weight:800; line-height:1.2; text-align:center;
 }
 
-/* Favourite heart on the restaurant card (reuses the .es-fav look + JS) */
-.u99-restaurant-card > .u99-fav{ top:12px; right:12px; z-index:7; }
-.u99-restaurant-card:has(> .u99-fav) .u99-card-copy{ padding-right:42px; }
-
 /* Unavailable cards: tile follows the greyed look */
 .u99-restaurant-card.is-unavailable .u99-more-box{ cursor:not-allowed; }
 
 @media (prefers-reduced-motion: reduce){
   .u99-more-box:active{ transform:none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LARGER CARD — more presence on the feed. Sizes only; no behaviour.
+   ═══════════════════════════════════════════════════════════════════ */
+.u99-restaurant-card{ padding:18px 17px 17px; border-radius:30px; }
+.u99-discount-line{ font-size:12px; margin-bottom:7px; }
+.u99-restaurant-name{ font-size:20px; margin-bottom:8px; }
+.u99-verified{ width:19px; height:19px; }
+.u99-meta{ font-size:14px; gap:6px; }
+.u99-delivery svg{ width:16px; height:16px; flex-basis:16px; }
+.u99-rating .u99-rating-badge{ width:18px; height:18px; flex-basis:18px; }
+.u99-free-row{ font-size:14px; margin-top:8px; }
+.u99-carousel-wrap{ margin-top:14px; padding-top:14px; }
+.u99-carousel-wrap::after{ top:14px; }
+.u99-carousel{ gap:11px; }
+.u99-item,.u99-more-tile{ width:min(142px, 36vw); }
+.u99-item-image,.u99-item-image img,.u99-image-fallback,.u99-item-image .ew-food-ph{ border-radius:22px; }
+.u99-item-image::after{ border-radius:0 0 22px 22px; }
+.u99-more-box{ border-radius:22px; }
+.u99-add{ width:34px; height:34px; font-size:20px; }
+.u99-item-name{ font-size:15px; min-height:38px; margin-top:11px; }
+.u99-price-row{ margin-top:7px; }
+.u99-price-row strong{ font-size:18px; }
+.u99-off{ font-size:11px; }
+.u99-card-host{ margin-bottom:22px; }
+@media(max-width:370px){
+  .u99-restaurant-name{ font-size:19px; }
+  .u99-meta,.u99-free-row{ font-size:13px; }
+  .u99-item,.u99-more-tile{ width:min(132px, 36vw); }
+  .u99-item-name{ font-size:14px; }
+  .u99-price-row strong{ font-size:17px; }
 }

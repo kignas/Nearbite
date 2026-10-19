@@ -694,12 +694,6 @@
   function homeRailMarkup(menu,r){
     return menu.map(function(i){return homeItemMarkup(i,r);}).join('')+(menu.length?homeMoreTileMarkup():'');
   }
-  /* Favourite heart. Only rendered when favorites.js is loaded, so there is
-     never a dead button. Existing delegated .es-fav handler does the work. */
-  function homeFavMarkup(id){
-    if(!window.Favorites)return '';
-    return '<button type="button" class="es-fav u99-fav" data-fav-id="'+esc(id)+'" aria-pressed="false" aria-label="Add to favorites"><i class="fa-regular fa-heart"></i></button>';
-  }
 
   function homeSortedMenu(r){return Array.isArray(r.menu)?r.menu.filter(function(i){return i&&Number(i.price)>0;}).slice().sort(function(a,b){return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||''));}):[];}
 
@@ -757,7 +751,7 @@
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
       '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(distanceText?'<span class="u99-sep">•</span><span class="u99-distance">'+esc(distanceText)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
-      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?homeRailMarkup(menu,res):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+homeFavMarkup(id)+
+      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?homeRailMarkup(menu,res):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
     return card;
