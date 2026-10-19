@@ -2,13 +2,13 @@
    and jumps to the one you pick. The button turns into "Close" while the card is open.
    Additive and self-contained: injects its own CSS, reads the categories from the rendered menu
    (.menu-cat-group), and reuses the page's own scrollToCategory() / toggleCategory().
-   No network calls, no libraries, no blur, no timers - it only does work on scroll (one rAF-throttled check). */
+   No network calls, no libraries, no blur, no timers - one rAF-throttled check on scroll/resize, plus light observers
+   so the button is visible as soon as the menu has rendered (no scrolling needed). */
 (function () {
   'use strict';
   if (window.__ewMenuJump) return;
   window.__ewMenuJump = true;
 
-  var SHOW_AFTER = 320;            /* px scrolled before the button appears */
   var BTN_H = 44, GAP = 12;
   var btn = null, sheet = null, backdrop = null, listEl = null;
   var isOpen = false, ticking = false, lastMeasure = 0;
@@ -158,7 +158,7 @@
     if (!btn) return;
     var pane = document.getElementById('menu-pane');
     var menuVisible = !pane || !pane.hidden;
-    var shouldShow = isOpen || (menuVisible && window.scrollY > SHOW_AFTER && document.querySelectorAll('#menu-container .menu-cat-group').length > 1);
+    var shouldShow = isOpen || (menuVisible && document.querySelectorAll('#menu-container .menu-cat-group').length > 1);
     btn.classList.toggle('show', shouldShow);
     if (shouldShow && !isOpen) {
       var now = Date.now();
@@ -166,6 +166,30 @@
     }
   }
   function schedule() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+
+  /* show the button as soon as the menu renders (or the Menu/Info tab switches) - no scroll needed */
+  var pageObs = null;
+  function watchMenu() {
+    if (!window.MutationObserver) return;
+    var pane = document.getElementById('menu-pane');
+    if (pane && !pane.__ewMj) {
+      pane.__ewMj = 1;
+      new MutationObserver(function () { schedule(); }).observe(pane, { attributes: true, attributeFilter: ['hidden'] });
+    }
+    var box = document.getElementById('menu-container');
+    if (box) {
+      if (!box.__ewMj) {
+        box.__ewMj = 1;
+        new MutationObserver(function () { lastMeasure = 0; schedule(); }).observe(box, { childList: true, subtree: true });
+      }
+      if (pageObs) { pageObs.disconnect(); pageObs = null; }
+      schedule();
+    } else if (!pageObs) {
+      /* menu container not in the page yet: wait for it once, then stop watching the whole page */
+      pageObs = new MutationObserver(watchMenu);
+      pageObs.observe(document.documentElement, { childList: true, subtree: true });
+    }
+  }
 
   function init() {
     build();
@@ -176,9 +200,10 @@
       var el = document.getElementById(id);
       if (el && window.MutationObserver) new MutationObserver(function () { lastMeasure = 0; schedule(); }).observe(el, { childList: true, attributes: true, subtree: true });
     });
+    watchMenu();
     schedule();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   /* the cart root can be created after load */
-  window.addEventListener('load', function () { lastMeasure = 0; schedule(); });
+  window.addEventListener('load', function () { lastMeasure = 0; watchMenu(); schedule(); });
 })();
