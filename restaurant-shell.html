@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
-<link rel="stylesheet" href="css/restaurant-search-page.css?v=5">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=6">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -59,6 +59,9 @@
 <div class="top-bar ew-themed-header">
 <button aria-label="Back" class="icon-btn" onclick="window.nearbiteSafeBack()" type="button">
 <i class="fa-solid fa-arrow-left"></i>
+</button>
+<button aria-label="Search dishes in this restaurant" class="tsp" id="top-search-pill" onclick="toggleMenuSearch()" type="button">
+<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="tsp-text" id="tsp-text"></span>
 </button>
 <div class="top-actions">
 <button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
@@ -2374,6 +2377,80 @@ window.ewLoadVisibleImages = function(root, margin){
       ents.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
     }, { threshold: 0.15 });
     f.querySelectorAll('.rmf-row, .rmf-info').forEach(function (el, i) { el.style.setProperty('--d', (i * 60) + 'ms'); io.observe(el); });
+  })();
+
+
+  /* Sticky top search pill: once the restaurant header has scrolled away, the
+     top bar shows a search pill whose text slides up through dish names
+     (Search "biryani" -> Search "chicken tikka" ...). Tapping it opens search. */
+  (function () {
+    const pill = document.getElementById('top-search-pill');
+    const txt = document.getElementById('tsp-text');
+    const nameEl = document.getElementById('res-name');
+    if (!pill || !txt || !nameEl || !('IntersectionObserver' in window)) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer = null, idx = 0, names = [], cur = null, on = false;
+
+    function collect() {
+      const d = window.__ewSearchData;
+      if (!d || !Array.isArray(d.groups)) return [];
+      const top = [], rest = [], seen = {};
+      d.groups.forEach(function (g) {
+        (g.items || []).forEach(function (it) {
+          const n = String(it.name || '').trim(), k = n.toLowerCase();
+          if (!n || n.length > 28 || seen[k] || it.inStock === false) return;
+          seen[k] = 1;
+          (it.badge || it.isBestseller === true || it.bestseller === true ? top : rest).push(n);
+        });
+      });
+      return top.concat(rest).slice(0, 12);
+    }
+    function label(n) { return n ? 'Search "' + n + '"' : 'Search dishes'; }
+    function set(text, animate) {
+      const el = document.createElement('span');
+      el.className = 'tsp-line';
+      el.textContent = text;
+      if (!cur || !animate || reduce) { txt.textContent = ''; txt.appendChild(el); cur = el; return; }
+      el.classList.add('is-in');
+      txt.appendChild(el);
+      void el.offsetWidth;
+      const old = cur;
+      old.classList.add('is-out');
+      el.classList.remove('is-in');
+      cur = el;
+      setTimeout(function () { old.remove(); }, 520);
+    }
+    function tick() {
+      if (names.length < 2) { names = collect(); if (names.length < 2) return; }
+      idx = (idx + 1) % names.length;
+      set(label(names[idx]), true);
+    }
+    function run() {
+      if (timer || document.hidden) return;
+      timer = setInterval(tick, 2800);
+    }
+    function stop() { clearInterval(timer); timer = null; }
+    function show() {
+      if (on) return;
+      on = true;
+      names = collect(); idx = 0;
+      set(label(names[0]), false);
+      document.body.classList.add('ew-tsp-on');
+      if (names.length > 1) run();
+    }
+    function hide() {
+      if (!on) return;
+      on = false;
+      stop();
+      document.body.classList.remove('ew-tsp-on');
+    }
+    new IntersectionObserver(function (entries) {
+      const e = entries[0];
+      if (!e.isIntersecting && e.boundingClientRect.top < 72) show(); else hide();
+    }, { rootMargin: '-72px 0px 0px 0px', threshold: 0 }).observe(nameEl);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else if (on && names.length > 1) run();
+    });
   })();
 
   function ewOpenSearch() {
