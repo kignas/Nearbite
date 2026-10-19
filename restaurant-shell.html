@@ -57,6 +57,11 @@ html body .top-bar .top-actions #menu-search-btn.ew-hd-search{all:unset;box-sizi
 html body .top-bar .top-actions #menu-search-btn.ew-hd-search:active{transform:scale(.95)}
 .ew-hd-search svg{display:block;width:19px;height:19px;flex:0 0 auto}
 html[data-ew-theme="dark"] .ew-hd-search{background:rgba(31,36,48,.9)!important;color:#fff!important;border-color:rgba(255,255,255,.12)!important}
+.ew-hd-circle.ew-hd-back,.tsb-back.ew-hd-circle{background:#1E1F23;color:#fff;border-color:rgba(255,255,255,.08);box-shadow:0 4px 14px rgba(15,16,20,.22),0 1px 2px rgba(15,16,20,.18);-webkit-backdrop-filter:none;backdrop-filter:none}
+.ew-hd-circle.ew-hd-back:active,.tsb-back.ew-hd-circle:active{background:#2B2C31;transform:scale(.94)}
+.ew-hd-back svg,.tsb-back.ew-hd-circle svg{width:24px;height:24px;transition:transform .18s cubic-bezier(.16,1,.3,1)}
+.ew-hd-back:active svg,.tsb-back.ew-hd-circle:active svg{transform:translateX(-2px)}
+html[data-ew-theme="dark"] .ew-hd-circle.ew-hd-back,html[data-ew-theme="dark"] .tsb-back.ew-hd-circle{background:#2B2C31;border-color:rgba(255,255,255,.14)}
 .ew-res-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:start;width:100%}
 .ew-res-head-main{grid-column:1;grid-row:1;min-width:0}
 .ew-hd-rbox{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;text-align:right}
@@ -84,7 +89,7 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 </div>
 </div>
 <div class="top-bar ew-themed-header">
-<button aria-label="Back" class="ew-hd-circle ew-hd-back" onclick="window.nearbiteSafeBack()" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
+<button aria-label="Back" class="ew-hd-circle ew-hd-back" onclick="window.nearbiteSafeBack()" type="button"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 6.5L6 12l5.5 5.5" stroke="#fff" stroke-opacity=".45"/><path d="M18.5 6.5L13 12l5.5 5.5" stroke="#fff"/></svg></button>
 <div class="top-actions">
 <button aria-label="Search dishes in this restaurant" aria-expanded="false" class="ew-hd-search" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
@@ -2484,7 +2489,7 @@ window.ewLoadVisibleImages = function(root, margin){
     bar.className = 'tsb';
     bar.id = 'ew-sticky-search';
     bar.innerHTML =
-      '<button type="button" class="tsb-back ew-hd-circle" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>' +
+      '<button type="button" class="tsb-back ew-hd-circle" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 6.5L6 12l5.5 5.5" stroke="#fff" stroke-opacity=".45"/><path d="M18.5 6.5L13 12l5.5 5.5" stroke="#fff"/></svg></button>' +
       '<button type="button" class="tsp" aria-label="Search dishes in this restaurant">' +
         '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="tsp-text"></span></button>';
     document.body.appendChild(bar);
