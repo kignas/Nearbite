@@ -540,7 +540,21 @@
     var raw=String(r.offer||r.offerText||r.discountText||'').trim();
     if(raw){var m=raw.match(/(\d+(?:\.\d+)?)\s*%/);if(m)return Math.round(Number(m[1]))+'% LOWER PRICES';if(/lower|off|deal|discount/i.test(raw))return raw.toUpperCase();}
     if(r.discountPercent!=null&&Number(r.discountPercent)>0)return Math.round(Number(r.discountPercent))+'% LOWER PRICES';
+    /* No restaurant-level offer: use the best real item discount, if the
+       menu is loaded. Otherwise keep the original generic label. */
+    var best=homeBestItemDiscount(r);
+    if(best>0)return 'UP TO '+best+'% OFF';
     return 'LOWER PRICES';
+  }
+  function homeBestItemDiscount(r){
+    var menu=r&&Array.isArray(r.menu)?r.menu:[], best=0;
+    menu.forEach(function(item){
+      if(!item)return;
+      var price=Number(item.price), original=Number(item.originalPrice), pct=Number(item.discountPercent);
+      var d=Number.isFinite(pct)&&pct>0?pct:(Number.isFinite(original)&&original>price&&price>0?(1-price/original)*100:0);
+      if(d>best)best=d;
+    });
+    return Math.round(best);
   }
   /*
    * Homepage restaurant results do not always include the restaurant menu.
@@ -671,6 +685,22 @@
   }
   function homeCloseCustomize(){document.body.classList.remove('u99-cust-open');if(!homeCustEls)return;homeCustEls.sh.classList.remove('show');homeCustEls.bd.classList.remove('show');homeCustCurrent=null;if(typeof window.updateGlobalCart==='function')window.updateGlobalCart();}
 
+  /* End-of-rail tile: gives the scroll an end and opens the real menu.
+     Reuses the existing "restaurant" action, so navigation and the
+     out-of-delivery-area guard behave exactly like tapping the header. */
+  function homeMoreTileMarkup(){
+    return '<div class="u99-more-tile"><button type="button" class="u99-more-box" data-home99-action="restaurant" aria-label="View full menu"><span class="u99-more-arrow" aria-hidden="true">&rarr;</span><span class="u99-more-text">View full menu</span></button></div>';
+  }
+  function homeRailMarkup(menu,r){
+    return menu.map(function(i){return homeItemMarkup(i,r);}).join('')+(menu.length?homeMoreTileMarkup():'');
+  }
+  /* Favourite heart. Only rendered when favorites.js is loaded, so there is
+     never a dead button. Existing delegated .es-fav handler does the work. */
+  function homeFavMarkup(id){
+    if(!window.Favorites)return '';
+    return '<button type="button" class="es-fav u99-fav" data-fav-id="'+esc(id)+'" aria-pressed="false" aria-label="Add to favorites"><i class="fa-regular fa-heart"></i></button>';
+  }
+
   function homeSortedMenu(r){return Array.isArray(r.menu)?r.menu.filter(function(i){return i&&Number(i.price)>0;}).slice().sort(function(a,b){return (Number(a.price)||0)-(Number(b.price)||0)||String(a.name||'').localeCompare(String(b.name||''));}):[];}
 
   function homeHydrateMenus(container,list,renderToken){
@@ -695,12 +725,22 @@
         var carousel=host.querySelector('.u99-carousel');
         if(!carousel)return;
         var menu=homeSortedMenu(r).slice(0,6);
-        carousel.classList.toggle('u99-carousel-empty',!menu.length); carousel.innerHTML=menu.length?menu.map(function(item){return homeItemMarkup(item,r);}).join(''):'<div class=\"u99-no-items\">Menu unavailable</div>';
+        carousel.classList.toggle('u99-carousel-empty',!menu.length); carousel.innerHTML=menu.length?homeRailMarkup(menu,r):'<div class=\"u99-no-items\">Menu unavailable</div>';
         ewLazyLoadImages(carousel,'150px 150px');
+        var offerLine=host.querySelector('.u99-discount-line');
+        if(offerLine)offerLine.textContent=homeRestaurantOffer(r);
       });
     });
   }
-  function homeRatingMarkup(r){var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
+  /* Below this many ratings the number is weak social proof, so show "New".
+     Only applies when a real count is present; unknown counts are untouched. */
+  var MIN_RATING_COUNT=20;
+  function homeRatingMarkup(r){
+    var rawCount=Number(r.ratingCount);
+    if(Number.isFinite(rawCount)&&rawCount>0&&rawCount<MIN_RATING_COUNT){
+      return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>New</b></span>';
+    }
+    var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
   function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
   /* Black verified tick shown after the restaurant name. Hidden only when the
      API explicitly says verified === false (same rule as the restaurant page). */
@@ -712,11 +752,12 @@
     var id=read.id(res),name=read.name(res);if(!id||!name)return '';
     var status=resolveAvailability(res,customerCoords),unavailable=!!status,label=unavailable?getAvailabilityLabel(status,res):'';
     var cuisine=read.cuisine(res)||'', time=read.deliveryTime(res), delivery=time?time.text:'', menu=homeSortedMenu(res).slice(0,6);
+    var distanceText=formatDistance(getDistanceKm(res,customerCoords));
     var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
-      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
-      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?menu.map(function(i){return homeItemMarkup(i,res);}).join(''):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
+      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(distanceText?'<span class="u99-sep">•</span><span class="u99-distance">'+esc(distanceText)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
+      '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?homeRailMarkup(menu,res):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+homeFavMarkup(id)+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
     return card;

@@ -1820,3 +1820,139 @@ html[data-ew-theme="dark"] .u99-verified{
   color:#fff;
   --ew-verified-check:#111;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN POLISH PASS — CSS-only refinements + styles for the new
+   distance, "View full menu" tile and favourite heart on the card.
+   Appended last; nothing above is removed.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Bigger, easier-to-tap "+" (was 23–25px) */
+.u99-add{ width:31px; height:31px; font-size:19px; }
+.u99-item-action{ right:7px; bottom:7px; }
+@media(max-width:430px){ .u99-add{ width:30px; height:30px; font-size:18px; } }
+@media(max-width:370px){ .u99-add{ width:29px; height:29px; font-size:18px; } }
+
+/* Tighter, more premium tile corners (was 22–28px) */
+.u99-item-image,
+.u99-item-image img,
+.u99-image-fallback,
+.u99-item-image .ew-food-ph{ border-radius:20px; }
+@media(max-width:430px){
+  .u99-item-image,
+  .u99-item-image img,
+  .u99-image-fallback,
+  .u99-item-image .ew-food-ph{ border-radius:20px; }
+}
+@media(max-width:370px){
+  .u99-item-image,
+  .u99-item-image img,
+  .u99-image-fallback,
+  .u99-item-image .ew-food-ph{ border-radius:18px; }
+}
+
+/* Soft bottom scrim so the "+" and photo edge stay legible on bright food */
+.u99-item-image::after{
+  content:'';
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:38%;
+  border-radius:0 0 20px 20px;
+  background:linear-gradient(to top, rgba(16,24,40,.22), rgba(16,24,40,0));
+  pointer-events:none;
+  z-index:1;
+}
+
+/* Discount: green text instead of a third pink accent */
+.u99-off{
+  background:none;
+  color:var(--ew-success,#23956D);
+  padding:0;
+  font-size:10.5px;
+  letter-spacing:.1px;
+}
+@media(max-width:430px){ .u99-off{ font-size:10px; padding:0; } }
+
+/* Larger veg / non-veg marks (was 14px) */
+.u99-dietary{ width:16px; height:16px; flex:0 0 16px; }
+.u99-dietary:after{ width:6px; height:6px; }
+.u99-dietary.u99-nonveg:after{
+  width:0; height:0;
+  border-left:3.5px solid transparent;
+  border-right:3.5px solid transparent;
+  border-bottom:6px solid #E5264F;
+}
+
+/* Two clear zones: info header, hairline, food rail */
+.u99-carousel-wrap{
+  position:relative;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid #F0F2F6;
+}
+
+/* Fade on the right edge hints that the rail scrolls */
+.u99-carousel-wrap::after{
+  content:'';
+  position:absolute;
+  top:12px; right:-1px; bottom:0;
+  width:26px;
+  background:linear-gradient(to left, #fff, rgba(255,255,255,0));
+  pointer-events:none;
+  z-index:3;
+}
+
+/* Distance in the meta row */
+.u99-distance{ flex:0 0 auto; white-space:nowrap; color:#475467; font-weight:650; }
+
+/* "View full menu" end-of-rail tile */
+.u99-more-tile{
+  flex:0 0 auto;
+  width:min(120px, 30vw);
+  scroll-snap-align:start;
+  align-self:flex-start;
+}
+@media(max-width:430px){ .u99-more-tile{ width:30vw; } }
+.u99-more-box{
+  width:100%;
+  aspect-ratio:4/3;
+  border:1px dashed #D0D5DD;
+  border-radius:20px;
+  background:#F7F8FA;
+  color:#344054;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 8px;
+  font:inherit;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-more-box:active{ transform:scale(.97); }
+.u99-more-box:focus-visible{ outline:2px solid var(--hd-primary,#E9546B); outline-offset:2px; }
+.u99-more-arrow{
+  width:28px; height:28px;
+  border-radius:50%;
+  display:grid; place-items:center;
+  background:#fff;
+  color:var(--hd-primary,#E9546B);
+  font-size:15px; font-weight:800; line-height:1;
+  box-shadow:0 2px 6px rgba(16,24,40,.12);
+}
+.u99-more-text{
+  font-size:12px; font-weight:800; line-height:1.2; text-align:center;
+}
+
+/* Favourite heart on the restaurant card (reuses the .es-fav look + JS) */
+.u99-restaurant-card > .u99-fav{ top:12px; right:12px; z-index:7; }
+.u99-restaurant-card:has(> .u99-fav) .u99-card-copy{ padding-right:42px; }
+
+/* Unavailable cards: tile follows the greyed look */
+.u99-restaurant-card.is-unavailable .u99-more-box{ cursor:not-allowed; }
+
+@media (prefers-reduced-motion: reduce){
+  .u99-more-box:active{ transform:none; }
+}
