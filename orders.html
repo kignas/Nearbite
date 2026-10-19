@@ -547,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const items = itemsSummary(order.items);
       const id = esc(order._id);
       const trackUrl = `track-order.html?id=${encodeURIComponent(order._id)}`;
+      const supportUrl = `order-support.html?order=${encodeURIComponent(order._id)}`;
 
       return `
         <div class="order-card track-card${enterClass('live:' + order._id)}">
@@ -576,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="live-actions">
             <a class="track-btn tap" href="${trackUrl}">${moving ? 'Track live' : 'View live tracking'} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             ${riderTel ? `<a href="tel:${esc(riderTel)}" class="icon-btn call tap" aria-label="Call delivery partner"><i class="fa-solid fa-phone"></i></a>` : ''}
-            <button class="icon-btn tap" aria-label="Help with this order" onclick="window.location.href='support.html?order=${id}'"><i class="fa-solid fa-headset"></i></button>
+            <button class="icon-btn tap" aria-label="Help with this order" onclick="window.location.href='${supportUrl}'"><i class="fa-solid fa-headset"></i></button>
           </div>
         </div>
       `;
@@ -610,12 +611,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const cuisine = order.cuisine || order.restaurantCuisine || '';
       const id = esc(order._id);
       const detailsUrl = `track-order.html?id=${encodeURIComponent(order._id)}`;
+      const supportUrl = `order-support.html?order=${encodeURIComponent(order._id)}`;
 
       return `
         <div class="swipe-container${enterClass('past:' + order._id)}">
           <div class="swipe-actions">
             <button class="swipe-btn btn-invoice tap" onclick="showInvoice('${id}')"><i class="fa-solid fa-receipt"></i><span>Invoice</span></button>
-            <button class="swipe-btn btn-support tap" onclick="window.location.href='support.html?order=${id}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
+            <button class="swipe-btn btn-support tap" onclick="window.location.href='${supportUrl}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
             ${isCancelled ? `<button class="swipe-btn btn-delete tap" onclick="deleteCancelledOrder('${id}')"><i class="fa-solid fa-trash"></i><span>Remove</span></button>` : ''}
           </div>
           <div class="order-card past-card ${isCancelled ? 'has-delete' : ''}" data-order-id="${id}">
@@ -638,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="ghost-row">
                 <button class="ghost-btn tap" onclick="showInvoice('${id}')"><i class="fa-solid fa-file-lines"></i>Invoice</button>
                 ${isDelivered ? `<button class="ghost-btn rate tap" onclick="window.location.href='${detailsUrl}#rate'"><i class="fa-solid fa-star"></i>Rate</button>` : ''}
-                <button class="ghost-btn tap" onclick="window.location.href='support.html?order=${id}'"><i class="fa-solid fa-circle-question"></i>Help</button>
+                <button class="ghost-btn tap" onclick="window.location.href='${supportUrl}'"><i class="fa-solid fa-circle-question"></i>Help</button>
               </div>
               <button class="btn-reorder tap" onclick="reorder('${id}')"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i>Reorder</button>
             </div>

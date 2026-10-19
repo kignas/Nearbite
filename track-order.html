@@ -362,7 +362,7 @@
         <h1 id="hero-restaurant-name">Your order</h1>
         <p id="hero-meta-line">Order #------</p>
       </div>
-      <a href="support.html" class="ab-support tap" id="header-support"><i class="fa-regular fa-message"></i>Support</a>
+      <a href="order-support.html" class="ab-support tap" id="header-support"><i class="fa-regular fa-message"></i>Support</a>
       <button class="ab-btn tap" id="hero-share-btn" aria-label="Share tracking link"><i class="fa-solid fa-share-nodes"></i></button>
     </div>
   </header>
@@ -516,8 +516,8 @@
     <div class="help-card card-fade d5" id="help-card">
       <div class="help-card-title">Need help with this order?</div>
       <div class="help-grid">
-        <a class="help-item tap" id="help-chat" href="support.html"><i class="fa-solid fa-comment-dots"></i>Chat with support</a>
-        <a class="help-item tap" id="help-report" href="support.html"><i class="fa-solid fa-triangle-exclamation"></i>Report an issue</a>
+        <a class="help-item tap" id="help-chat" href="order-support.html"><i class="fa-solid fa-comment-dots"></i>Chat with support</a>
+        <a class="help-item tap" id="help-report" href="order-support.html"><i class="fa-solid fa-triangle-exclamation"></i>Report an issue</a>
         <a class="help-item tap" id="help-call-restaurant" href="#" style="display:none;"><i class="fa-solid fa-store"></i>Call restaurant</a>
         <button class="help-item danger tap" id="help-cancel" style="display:none;"><i class="fa-solid fa-ban"></i>Cancel order</button>
       </div>
@@ -1019,9 +1019,9 @@
 
       const orderOTP = order.deliveryOtp || '----';
 
-      const supportUrl = `support.html?order=${encodeURIComponent(order._id)}`;
+      const supportUrl = `order-support.html?order=${encodeURIComponent(order._id)}`;
       document.getElementById('header-support').href = supportUrl;
-      document.getElementById('help-chat').href = supportUrl;
+      document.getElementById('help-chat').href = `${supportUrl}&view=chat`;
       document.getElementById('help-report').href = `${supportUrl}&type=issue`;
 
       const restaurantName = order.restaurantName ||
