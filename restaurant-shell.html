@@ -48,10 +48,14 @@
 
 <meta name="twitter:card" content="summary"/>
 <style id="ew-header-v2">
-.top-actions .menu-search-trigger.ew-search-pill{width:auto;min-width:0;padding:0 16px 0 13px;gap:8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
-.ew-search-pill .ew-search-pill-text{font-size:15px;font-weight:600;line-height:1;color:inherit}
-.res-header.ew-res-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-.ew-res-head-main{min-width:0;flex:1 1 auto}
+.ew-hd-search{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;align-self:stretch;min-height:36px;padding:0 14px 0 11px;border-radius:999px;background:#fff;color:#111;border:1px solid rgba(0,0,0,.08);box-shadow:0 2px 10px rgba(0,0,0,.08);font-family:inherit;font-size:15px;font-weight:600;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.ew-hd-search svg{display:block;width:19px;height:19px;flex:0 0 auto}
+.ew-hd-search:active{transform:scale(.96)}
+.ew-hd-search:focus-visible{outline:2px solid #159A62;outline-offset:2px}
+html[data-ew-theme="dark"] .ew-hd-search{background:#1f2430;color:#fff;border-color:rgba(255,255,255,.12)}
+.ew-res-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:start;width:100%}
+.ew-res-head-main{grid-column:1;grid-row:1;min-width:0}
+.ew-hd-rbox{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;text-align:right}
 .ew-name-row{display:flex;align-items:center;gap:7px;min-width:0}
 .ew-name-row .res-name{margin:0;min-width:0;overflow-wrap:anywhere}
 .ew-verified{flex:0 0 auto;width:22px;height:22px;color:#111;--ew-verified-check:#fff}
@@ -59,13 +63,12 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 .ew-info-row{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:15px;font-weight:600;line-height:1.25;color:#3b414d}
 .ew-info-row svg{width:17px;height:17px;flex:0 0 auto}
 .ew-info-row.ew-time{color:#159A62}
-.ew-rating-box{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:0 0 auto;max-width:42%;padding-top:2px;text-align:right}
-.ew-rating-box .rating-pill{display:inline-flex;align-items:center;gap:4px;padding:7px 10px;border-radius:11px;border:0;background:linear-gradient(160deg,#159A62,#0E7B4C);color:#fff;box-shadow:0 2px 6px rgba(14,123,76,.28)}
-.ew-rating-box .rating-pill[data-tier="low"]{background:linear-gradient(160deg,#E39A12,#C47F00);box-shadow:0 2px 6px rgba(196,127,0,.28)}
-.ew-rating-box .rating-pill[data-tier="new"]{background:linear-gradient(160deg,#4B5563,#374151);box-shadow:none}
-.ew-rating-box .rating-num{color:#fff;font-size:18px;font-weight:800;line-height:1}
-.ew-rating-box .rating-star{display:inline-flex;color:#fff}
-.ew-rating-box .rating-count{font-size:12px;font-weight:500;color:#6b7280;line-height:1.2;padding-bottom:1px;border-bottom:1px dashed #9aa0aa;cursor:default}
+.ew-hd-pill{display:inline-flex;align-items:center;gap:4px;padding:7px 10px;border-radius:11px;background:linear-gradient(160deg,#159A62,#0E7B4C);color:#fff;box-shadow:0 2px 6px rgba(14,123,76,.28)}
+.ew-hd-pill[data-tier="low"]{background:linear-gradient(160deg,#E39A12,#C47F00);box-shadow:0 2px 6px rgba(196,127,0,.28)}
+.ew-hd-pill[data-tier="new"]{background:linear-gradient(160deg,#4B5563,#374151);box-shadow:none}
+.ew-hd-num{color:#fff;font-size:18px;font-weight:800;line-height:1}
+.ew-hd-star{display:inline-flex;color:#fff}
+.ew-hd-count{font-size:12px;font-weight:500;color:#6b7280;line-height:1.2;padding-bottom:1px;border-bottom:1px dashed #9aa0aa;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -81,9 +84,9 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 <i class="fa-solid fa-arrow-left"></i>
 </button>
 <div class="top-actions">
-<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger ew-search-pill" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
+<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="ew-hd-search" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
-<span class="ew-search-pill-text">Search</span>
+<span>Search</span>
 </button>
 <button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
@@ -100,7 +103,7 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 </div>
 <div class="res-card">
 <div class="res-card-body">
-<div class="res-header ew-res-head">
+<div class="ew-res-head">
 <div class="ew-res-head-main">
 <div class="ew-name-row">
 <h1 class="res-name" id="res-name">Loading…</h1>
@@ -110,12 +113,12 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 <div class="ew-info-row ew-dist" id="res-distance"></div>
 <div class="ew-info-row ew-time" id="res-time"></div>
 </div>
-<div class="ew-rating-box">
-<div aria-label="Restaurant rating" class="rating-pill">
-<span class="rating-num" id="res-rating-num">–</span>
-<span aria-hidden="true" class="rating-star"><svg aria-hidden="true" focusable="false" height="15" viewBox="0 0 24 24" width="15"><path d="M12 3.6l2.48 5.02 5.54.81-4.01 3.91.95 5.52L12 16.25l-4.96 2.61.95-5.52-4.01-3.91 5.54-.81L12 3.6z" fill="currentColor"></path></svg></span>
+<div class="ew-hd-rbox">
+<div aria-label="Restaurant rating" class="ew-hd-pill" id="res-rating-pill">
+<span class="ew-hd-num" id="res-rating-num">–</span>
+<span aria-hidden="true" class="ew-hd-star"><svg aria-hidden="true" focusable="false" height="15" viewBox="0 0 24 24" width="15"><path d="M12 3.6l2.48 5.02 5.54.81-4.01 3.91.95 5.52L12 16.25l-4.96 2.61.95-5.52-4.01-3.91 5.54-.81L12 3.6z" fill="currentColor"></path></svg></span>
 </div>
-<span class="rating-count" id="res-rating-count"></span>
+<span class="ew-hd-count" id="res-rating-count"></span>
 </div>
 </div>
 <div class="offer-strip" id="res-offer-banner">
@@ -1027,14 +1030,10 @@ window.ewLoadVisibleImages = function(root, margin){
     cuisineEl.innerText = cuisine;
     cuisineEl.style.display = cuisine ? '' : 'none';
 
-    const ratingPill = document.querySelector('.rating-pill');
-    // Prefer Google's rating + count when the API provides them
-    // (googleRating / googleRatingCount); otherwise use the app's own.
-    const gRating = Number(restaurant.googleRating);
-    const gCount = Number(restaurant.googleRatingCount);
-    const useGoogle = Number.isFinite(gRating) && gRating > 0;
-    const rating = useGoogle ? gRating : Number(restaurant.rating);
-    const count = useGoogle ? gCount : Number(restaurant.ratingCount);
+    const ratingPill = document.getElementById('res-rating-pill');
+    // This is EatSwada's own rating and count (not Google's).
+    const rating = Number(restaurant.rating);
+    const count = Number(restaurant.ratingCount);
     const countEl = document.getElementById('res-rating-count');
     const compact = function (n) {
       if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -1046,8 +1045,8 @@ window.ewLoadVisibleImages = function(root, margin){
       if (ratingPill) { ratingPill.style.display = ''; ratingPill.dataset.tier = rating >= 3.5 ? 'good' : 'low'; }
       document.getElementById('res-rating-num').innerText = rating.toFixed(1);
       if (Number.isFinite(count) && count > 0) {
-        countEl.innerText = compact(count) + (useGoogle ? ' Google ratings' : ' ratings');
-        countEl.title = count.toLocaleString('en-IN') + (useGoogle ? ' ratings on Google' : ' ratings');
+        countEl.innerText = compact(count) + (count === 1 ? ' rating' : ' ratings');
+        countEl.title = count.toLocaleString('en-IN') + ' ratings';
         countEl.style.display = '';
       } else {
         countEl.style.display = 'none';
