@@ -48,11 +48,15 @@
 
 <meta name="twitter:card" content="summary"/>
 <style id="ew-header-v2">
-.ew-hd-search{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;align-self:stretch;min-height:36px;padding:0 14px 0 11px;border-radius:999px;background:#fff;color:#111;border:1px solid rgba(0,0,0,.08);box-shadow:0 2px 10px rgba(0,0,0,.08);font-family:inherit;font-size:15px;font-weight:600;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.ew-hd-circle{all:unset;box-sizing:border-box;display:inline-flex!important;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 10px rgba(0,0,0,.09),0 1px 2px rgba(0,0,0,.05);color:#111;font-size:17px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s ease,box-shadow .15s ease}
+.ew-hd-circle:active{transform:scale(.92);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.ew-hd-circle:focus-visible{outline:2px solid #159A62;outline-offset:2px}
+.ew-hd-circle svg{display:block;width:22px;height:22px}
+html[data-ew-theme="dark"] .ew-hd-circle{background:rgba(31,36,48,.9);color:#fff;border-color:rgba(255,255,255,.12)}
+html body .top-bar .top-actions #menu-search-btn.ew-hd-search{all:unset;box-sizing:border-box;display:inline-flex!important;visibility:visible!important;opacity:1!important;position:static!important;transform:none;width:auto!important;max-width:none!important;height:40px!important;align-items:center;justify-content:center;gap:6px;flex:0 0 auto;padding:0 15px 0 12px;border-radius:999px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#111;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 10px rgba(0,0,0,.09),0 1px 2px rgba(0,0,0,.05);font-family:inherit;font-size:15px;font-weight:600;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:transform .15s ease}
+html body .top-bar .top-actions #menu-search-btn.ew-hd-search:active{transform:scale(.95)}
 .ew-hd-search svg{display:block;width:19px;height:19px;flex:0 0 auto}
-.ew-hd-search:active{transform:scale(.96)}
-.ew-hd-search:focus-visible{outline:2px solid #159A62;outline-offset:2px}
-html[data-ew-theme="dark"] .ew-hd-search{background:#1f2430;color:#fff;border-color:rgba(255,255,255,.12)}
+html[data-ew-theme="dark"] .ew-hd-search{background:rgba(31,36,48,.9)!important;color:#fff!important;border-color:rgba(255,255,255,.12)!important}
 .ew-res-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:start;width:100%}
 .ew-res-head-main{grid-column:1;grid-row:1;min-width:0}
 .ew-hd-rbox{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;text-align:right}
@@ -80,15 +84,13 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 </div>
 </div>
 <div class="top-bar ew-themed-header">
-<button aria-label="Back" class="icon-btn" onclick="window.nearbiteSafeBack()" type="button">
-<i class="fa-solid fa-arrow-left"></i>
-</button>
+<button aria-label="Back" class="ew-hd-circle ew-hd-back" onclick="window.nearbiteSafeBack()" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
 <div class="top-actions">
 <button aria-label="Search dishes in this restaurant" aria-expanded="false" class="ew-hd-search" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
 <span>Search</span>
 </button>
-<button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
+<button aria-label="Save restaurant" class="ew-hd-circle" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
 </button>
 </div>
@@ -2482,7 +2484,7 @@ window.ewLoadVisibleImages = function(root, margin){
     bar.className = 'tsb';
     bar.id = 'ew-sticky-search';
     bar.innerHTML =
-      '<button type="button" class="tsb-back" aria-label="Back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>' +
+      '<button type="button" class="tsb-back ew-hd-circle" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>' +
       '<button type="button" class="tsp" aria-label="Search dishes in this restaurant">' +
         '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="tsp-text"></span></button>';
     document.body.appendChild(bar);
