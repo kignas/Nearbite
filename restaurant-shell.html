@@ -47,6 +47,26 @@
 <link rel="stylesheet" href="css/restaurant-search-page.css?v=8">
 
 <meta name="twitter:card" content="summary"/>
+<style id="ew-header-v2">
+.top-actions .menu-search-trigger.ew-search-pill{width:auto;min-width:0;padding:0 16px 0 13px;gap:8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
+.ew-search-pill .ew-search-pill-text{font-size:15px;font-weight:600;line-height:1;color:inherit}
+.res-header.ew-res-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.ew-res-head-main{min-width:0;flex:1 1 auto}
+.ew-name-row{display:flex;align-items:center;gap:7px;min-width:0}
+.ew-name-row .res-name{margin:0;min-width:0;overflow-wrap:anywhere}
+.ew-verified{flex:0 0 auto;width:22px;height:22px;color:#111;--ew-verified-check:#fff}
+html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
+.ew-info-row{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:15px;font-weight:600;line-height:1.25;color:#3b414d}
+.ew-info-row svg{width:17px;height:17px;flex:0 0 auto}
+.ew-info-row.ew-time{color:#159A62}
+.ew-rating-box{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:0 0 auto;max-width:42%;padding-top:2px;text-align:right}
+.ew-rating-box .rating-pill{display:inline-flex;align-items:center;gap:4px;padding:7px 10px;border-radius:11px;border:0;background:linear-gradient(160deg,#159A62,#0E7B4C);color:#fff;box-shadow:0 2px 6px rgba(14,123,76,.28)}
+.ew-rating-box .rating-pill[data-tier="low"]{background:linear-gradient(160deg,#E39A12,#C47F00);box-shadow:0 2px 6px rgba(196,127,0,.28)}
+.ew-rating-box .rating-pill[data-tier="new"]{background:linear-gradient(160deg,#4B5563,#374151);box-shadow:none}
+.ew-rating-box .rating-num{color:#fff;font-size:18px;font-weight:800;line-height:1}
+.ew-rating-box .rating-star{display:inline-flex;color:#fff}
+.ew-rating-box .rating-count{font-size:12px;font-weight:500;color:#6b7280;line-height:1.2;padding-bottom:1px;border-bottom:1px dashed #9aa0aa;cursor:default}
+</style>
 </head>
 <body>
 <div aria-atomic="true" aria-live="polite" class="ew-free-delivery-toast" id="ew-free-delivery-toast" role="status">
@@ -61,8 +81,9 @@
 <i class="fa-solid fa-arrow-left"></i>
 </button>
 <div class="top-actions">
-<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
-<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+<button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger ew-search-pill" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+<span class="ew-search-pill-text">Search</span>
 </button>
 <button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
@@ -79,27 +100,23 @@
 </div>
 <div class="res-card">
 <div class="res-card-body">
-<div class="res-header">
-<div>
+<div class="res-header ew-res-head">
+<div class="ew-res-head-main">
+<div class="ew-name-row">
 <h1 class="res-name" id="res-name">Loading…</h1>
+<svg class="ew-verified" id="res-verified" viewBox="0 0 24 24" role="img" aria-label="Verified restaurant"><path fill="currentColor" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path d="M8.2 12.4l2.6 2.6 5-5.4" fill="none" stroke="var(--ew-verified-check,#fff)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
 <p class="res-cuisine" id="res-cuisine"></p>
+<div class="ew-info-row ew-dist" id="res-distance"></div>
+<div class="ew-info-row ew-time" id="res-time"></div>
 </div>
-</div>
-<div class="res-meta-row">
+<div class="ew-rating-box">
 <div aria-label="Restaurant rating" class="rating-pill">
-<span aria-hidden="true" class="rating-star">
-<svg aria-hidden="true" focusable="false" height="14" viewbox="0 0 24 24" width="14">
-<path d="M12 3.6l2.48 5.02 5.54.81-4.01 3.91.95 5.52L12 16.25l-4.96 2.61.95-5.52-4.01-3.91 5.54-.81L12 3.6z" fill="currentColor"></path>
-</svg>
-</span>
 <span class="rating-num" id="res-rating-num">–</span>
-<div class="rating-divider"></div>
-<span class="rating-count" id="res-rating-count">— ratings</span>
+<span aria-hidden="true" class="rating-star"><svg aria-hidden="true" focusable="false" height="15" viewBox="0 0 24 24" width="15"><path d="M12 3.6l2.48 5.02 5.54.81-4.01 3.91.95 5.52L12 16.25l-4.96 2.61.95-5.52-4.01-3.91 5.54-.81L12 3.6z" fill="currentColor"></path></svg></span>
 </div>
-<span class="meta-dot">•</span>
-<span class="meta-chip" id="res-time"><i class="fa-regular fa-clock"></i> –</span>
-<span class="meta-dot">•</span>
-<span class="meta-chip" id="res-distance"><i class="fa-solid fa-location-dot"></i> –</span>
+<span class="rating-count" id="res-rating-count"></span>
+</div>
 </div>
 <div class="offer-strip" id="res-offer-banner">
 <div class="offer-icon"><i class="fa-solid fa-tag"></i></div>
@@ -1011,41 +1028,54 @@ window.ewLoadVisibleImages = function(root, margin){
     cuisineEl.style.display = cuisine ? '' : 'none';
 
     const ratingPill = document.querySelector('.rating-pill');
-    const rating = Number(restaurant.rating);
+    // Prefer Google's rating + count when the API provides them
+    // (googleRating / googleRatingCount); otherwise use the app's own.
+    const gRating = Number(restaurant.googleRating);
+    const gCount = Number(restaurant.googleRatingCount);
+    const useGoogle = Number.isFinite(gRating) && gRating > 0;
+    const rating = useGoogle ? gRating : Number(restaurant.rating);
+    const count = useGoogle ? gCount : Number(restaurant.ratingCount);
+    const countEl = document.getElementById('res-rating-count');
+    const compact = function (n) {
+      if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(Math.round(n));
+    };
 
     if (Number.isFinite(rating) && rating > 0) {
-      if (ratingPill) ratingPill.style.display = '';
+      if (ratingPill) { ratingPill.style.display = ''; ratingPill.dataset.tier = rating >= 3.5 ? 'good' : 'low'; }
       document.getElementById('res-rating-num').innerText = rating.toFixed(1);
-
-      const count = Number(restaurant.ratingCount);
-      const countEl = document.getElementById('res-rating-count');
       if (Number.isFinite(count) && count > 0) {
-        countEl.innerText = '(' + count.toLocaleString('en-IN') + ')';
+        countEl.innerText = compact(count) + (useGoogle ? ' Google ratings' : ' ratings');
+        countEl.title = count.toLocaleString('en-IN') + (useGoogle ? ' ratings on Google' : ' ratings');
         countEl.style.display = '';
       } else {
         countEl.style.display = 'none';
-        const divider = document.querySelector('.rating-divider');
-        if (divider) divider.style.display = 'none';
       }
     } else if (ratingPill) {
       // Genuinely unrated restaurants say so rather than showing a made-up score.
       ratingPill.style.display = '';
+      ratingPill.dataset.tier = 'new';
       document.getElementById('res-rating-num').innerText = 'New';
-      document.getElementById('res-rating-count').style.display = 'none';
-      const divider = document.querySelector('.rating-divider');
-      if (divider) divider.style.display = 'none';
+      countEl.style.display = 'none';
     }
+
+    const verifiedEl = document.getElementById('res-verified');
+    if (verifiedEl) verifiedEl.style.display = restaurant.verified === false ? 'none' : '';
 
     const min = Number(restaurant.estimatedDeliveryMin);
     const max = Number(restaurant.estimatedDeliveryMax);
     let timeText = '';
-    if (Number.isFinite(min) && Number.isFinite(max)) timeText = min + '-' + max + ' mins';
+    if (Number.isFinite(min) && Number.isFinite(max)) timeText = min + '\u2013' + max + ' mins';
     else if (Number.isFinite(max)) timeText = max + ' mins';
     else if (typeof restaurant.time === 'string' && restaurant.time.trim()) timeText = restaurant.time.trim();
-    setMetaChip('res-time', '<i class="fa-regular fa-clock"></i>', timeText);
+    setMetaChip('res-time', '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 2L4.5 13.5h6L9.5 22l9-11.5h-6z"/></svg>', timeText);
 
-    const distanceText = formatRestaurantDistance(restaurant);
-    setMetaChip('res-distance', '<i class="fa-solid fa-location-dot"></i>', distanceText);
+    // Distance is user -> restaurant (saved delivery address), plus the area when known.
+    const areaText = String(restaurant.area || restaurant.locality || restaurant.neighbourhood || restaurant.neighborhood || '').trim();
+    const distanceBase = formatRestaurantDistance(restaurant);
+    const distanceText = distanceBase ? distanceBase + (areaText ? ' \u00b7 ' + areaText : '') : '';
+    setMetaChip('res-distance', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>', distanceText);
 
     const freeDeliveryEl = document.getElementById('res-free-delivery');
     if (freeDeliveryEl) {
