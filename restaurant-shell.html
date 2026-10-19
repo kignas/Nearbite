@@ -714,26 +714,34 @@ window.ewLoadVisibleImages = function(root, margin){
   // matched loosely (fssaiNumber, fssaiLicenseNumber, fssai_license_no, ...).
   window.ewFssaiNumber = function (r) {
     if (!r || typeof r !== 'object') return '';
-    const keys = Object.keys(r).filter(function (k) { return /fssai|licen[sc]e/i.test(k); });
-    if (/[?&]debugfssai/.test(location.search)) {
-      console.log('[fssai] matching keys:', keys.map(function (k) { return k + ' = ' + JSON.stringify(r[k]); }));
-    }
-    let num = '', status = null;
-    keys.forEach(function (k) {
-      const v = r[k];
-      if (/status|verif/i.test(k)) { status = String(v == null ? '' : v); return; }
-      if (v && typeof v === 'object') {   // e.g. fssai: { number, status }
-        const n = v.number || v.licenseNumber || v.licenceNumber || v.no || '';
-        if (n && !num) num = String(n);
-        const st = v.status || v.verificationStatus;
-        if (st != null && status === null) status = String(st);
-      } else if (v != null && !num) {
-        num = String(v);
+
+    // Read the actual licence-number field first. Do not accidentally treat
+    // certificate URLs, expiry dates, or verification metadata as a number.
+    const numberKeys = [
+      'fssaiLicenseNumber', 'fssaiLicenceNumber', 'fssaiNumber',
+      'fssai_license_number', 'fssai_license_no', 'fssai'
+    ];
+    let raw = '';
+    for (const key of numberKeys) {
+      const value = r[key];
+      if (value && typeof value === 'object') {
+        raw = value.number || value.licenseNumber || value.licenceNumber || value.no || '';
+      } else if (value != null) {
+        raw = String(value);
       }
-    });
-    // If admin tracks a verification status, only show a verified licence.
-    if (status !== null && !/^\s*(verified|approved)\s*$/i.test(status)) return '';
-    const digits = num.replace(/\D/g, '');
+      if (String(raw).trim()) break;
+    }
+
+    // Support nested FSSAI data and common status-field aliases.
+    let status = r.fssaiVerificationStatus ?? r.fssaiStatus ??
+      r.fssai_verification_status ?? r.licenseVerificationStatus ??
+      r.licenceVerificationStatus ?? null;
+    if (status == null && r.fssai && typeof r.fssai === 'object') {
+      status = r.fssai.status ?? r.fssai.verificationStatus ?? null;
+    }
+    if (status !== null && !/^\s*(verified|approved)\s*$/i.test(String(status))) return '';
+
+    const digits = String(raw).replace(/\D/g, '');
     return digits.length === 14 ? digits : '';
   };
 
