@@ -61,6 +61,15 @@ html[data-ew-theme="dark"] .ew-hd-search{background:rgba(31,36,48,.9)!important;
 .ew-hd-circle.ew-hd-back:active,.tsb-back.ew-hd-circle:active{background:#FAFAFB;transform:scale(.94)}
 .ew-hd-back svg,.tsb-back.ew-hd-circle svg{width:24px;height:24px;transition:transform .18s cubic-bezier(.16,1,.3,1)}
 .ew-hd-back:active svg,.tsb-back.ew-hd-circle:active svg{transform:translateX(-2px)}
+/* tighter header spacing: top bar -> title -> info rows (tune --ew-hd-gap to taste) */
+:root{--ew-hd-gap:2px}
+.top-bar.ew-themed-header{padding-bottom:0!important;margin-bottom:0!important;min-height:0!important}
+.res-card{margin-top:0!important;padding-top:0!important}
+.res-card-body{padding-top:var(--ew-hd-gap)!important}
+.ew-res-head{margin-top:0!important}
+.ew-name-row .res-name{line-height:1.12!important;margin:0!important}
+.ew-res-head .res-cuisine{margin:2px 0 0!important}
+.ew-info-row{margin-top:7px}
 .ew-res-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:start;width:100%}
 .ew-res-head-main{grid-column:1;grid-row:1;min-width:0}
 .ew-hd-rbox{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:2px;text-align:right}
