@@ -238,3 +238,16 @@ body.ew-dish-open{overflow:hidden}
 .fss-info{margin:6px 16px 4px;padding:14px 16px;border:1px solid var(--ss-line);border-radius:16px;background:#fff}
 .rmf-fssai{margin-top:26px;padding-top:18px;border-top:1px solid #E3E6EB}
 .fss-foot{justify-content:center;text-align:left}
+
+/* ---- sticky top search pill ---- */
+.tsp{flex:1 1 0;min-width:0;margin:0 10px;height:42px;padding:0 14px;display:flex;align-items:center;gap:10px;border:1px solid #E6E8EC;border-radius:14px;background:#F4F5F7;color:var(--ss-mute);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  visibility:hidden;opacity:0;transform:translate3d(0,8px,0);transition:opacity .25s ease,transform .3s cubic-bezier(.2,.8,.3,1),visibility 0s linear .3s}
+.tsp i{flex:none;font-size:15px;color:var(--ss-accent)}
+.tsp-text{position:relative;flex:1;min-width:0;height:20px;overflow:hidden;text-align:left}
+.tsp-line{position:absolute;left:0;right:0;top:0;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .45s cubic-bezier(.3,.8,.3,1),opacity .45s ease}
+.tsp-line.is-in{transform:translate3d(0,110%,0);opacity:0}
+.tsp-line.is-out{transform:translate3d(0,-110%,0);opacity:0}
+body.ew-tsp-on .tsp{visibility:visible;opacity:1;transform:none;transition-delay:0s}
+body.ew-tsp-on #menu-search-btn{display:none}
+.tsp:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.tsp,.tsp-line{transition:none}}
