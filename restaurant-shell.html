@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
-<link rel="stylesheet" href="css/restaurant-search-page.css?v=7">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=8">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -63,6 +63,9 @@
 <div class="top-actions">
 <button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+</button>
+<button aria-label="Share restaurant" class="icon-btn" id="restaurant-share-btn" onclick="ewShareTop(this)" type="button">
+<i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
 </button>
 <button aria-label="Save restaurant" class="icon-btn" onclick="toggleRestaurantFavorite()" type="button">
 <i class="fa-regular fa-heart" id="restaurant-heart-icon"></i>
@@ -83,6 +86,7 @@
 <div>
 <h1 class="res-name" id="res-name">Loading…</h1>
 <p class="res-cuisine" id="res-cuisine"></p>
+<div class="res-status" id="res-status" hidden></div>
 </div>
 </div>
 <div class="res-meta-row">
@@ -928,6 +932,7 @@ window.ewLoadVisibleImages = function(root, margin){
   function renderRestaurantHeader(restaurant) {
     currentRestaurant = restaurant;   // used by the minimum-order hint
     if (window.ewFillFssai) window.ewFillFssai(restaurant);
+    if (window.ewFillStatus) window.ewFillStatus(restaurant);
     const brand = (window.CONFIG && window.CONFIG.BRAND_NAME) || 'EatSwada';
     document.title = restaurant.name + ' – ' + brand;
     const restaurantName = restaurant.name || 'Restaurant';
@@ -2462,6 +2467,47 @@ window.ewLoadVisibleImages = function(root, margin){
       if (document.hidden) stop(); else if (on && names.length > 1) run();
     });
   })();
+
+
+  /* Header: share button + "Open now · Closes 11:00 PM" line. */
+  window.ewShareTop = function (btn) {
+    const r = (typeof currentRestaurant !== 'undefined' && currentRestaurant) || {};
+    const data = { title: (r.name || 'Restaurant') + ' on EatSwada', url: location.href };
+    if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+    const icon = btn && btn.querySelector('i');
+    function flash() {
+      if (!icon) return;
+      icon.className = 'fa-solid fa-check';
+      setTimeout(function () { icon.className = 'fa-solid fa-share-nodes'; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(data.url).then(flash, function () { window.prompt('Copy this link', data.url); });
+    } else {
+      window.prompt('Copy this link', data.url);
+    }
+  };
+
+  window.ewFillStatus = function (r) {
+    const el = document.getElementById('res-status');
+    if (!el || !r) return;
+    const av = r.availability || {};
+    const open = typeof av.isOpen === 'boolean' ? av.isOpen : (typeof r.isOpen === 'boolean' ? r.isOpen : null);
+    if (open === null) { el.hidden = true; return; }
+    let sub = '';
+    const hours = r.openingHours || r.hours;
+    if (hours && typeof hours === 'object') {
+      const key = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][new Date().getDay()];
+      const t = restaurantTimeStr(hours[key]);
+      const next = av.opensAt || (t && t.open);
+      if (open) sub = t && t.close ? 'Closes ' + infoTime(t.close) : '';
+      else if (av.closedReason === 'closed_today') sub = av.opensAt ? 'Opens tomorrow at ' + infoTime(av.opensAt) : '';
+      else sub = next ? 'Opens at ' + infoTime(next) : '';
+    }
+    el.className = 'res-status ' + (open ? 'is-open' : 'is-closed');
+    el.innerHTML = '<span class="rs-dot" aria-hidden="true"></span><b>' + (open ? 'Open now' : 'Closed') + '</b>' +
+      (sub ? '<span class="rs-sub">&middot; ' + escapeMenuHtml(sub) + '</span>' : '');
+    el.hidden = false;
+  };
 
   function ewOpenSearch() {
     if (ssOpen) return;
