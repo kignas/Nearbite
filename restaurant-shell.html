@@ -44,7 +44,7 @@
 <link rel="stylesheet" href="css/pairing-suggestions.css?v=1">
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
-<link rel="stylesheet" href="css/restaurant-search-page.css?v=6">
+<link rel="stylesheet" href="css/restaurant-search-page.css?v=7">
 
 <meta name="twitter:card" content="summary"/>
 </head>
@@ -59,9 +59,6 @@
 <div class="top-bar ew-themed-header">
 <button aria-label="Back" class="icon-btn" onclick="window.nearbiteSafeBack()" type="button">
 <i class="fa-solid fa-arrow-left"></i>
-</button>
-<button aria-label="Search dishes in this restaurant" class="tsp" id="top-search-pill" onclick="toggleMenuSearch()" type="button">
-<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="tsp-text" id="tsp-text"></span>
 </button>
 <div class="top-actions">
 <button aria-label="Search dishes in this restaurant" aria-expanded="false" class="icon-btn menu-search-trigger" id="menu-search-btn" onclick="toggleMenuSearch()" type="button">
@@ -2380,14 +2377,27 @@ window.ewLoadVisibleImages = function(root, margin){
   })();
 
 
-  /* Sticky top search pill: once the restaurant header has scrolled away, the
-     top bar shows a search pill whose text slides up through dish names
-     (Search "biryani" -> Search "chicken tikka" ...). Tapping it opens search. */
+  /* Sticky search bar. The page's own top bar scrolls away, so this is its own
+     fixed bar: once the restaurant header has scrolled out of view it slides down
+     from the top with a back arrow and a search pill whose text slides up through
+     dish names (Search "biryani" -> Search "chicken tikka" ...). Tap = open search. */
   (function () {
-    const pill = document.getElementById('top-search-pill');
-    const txt = document.getElementById('tsp-text');
     const nameEl = document.getElementById('res-name');
-    if (!pill || !txt || !nameEl || !('IntersectionObserver' in window)) return;
+    if (!nameEl || !('IntersectionObserver' in window)) return;
+    const bar = document.createElement('div');
+    bar.className = 'tsb';
+    bar.id = 'ew-sticky-search';
+    bar.innerHTML =
+      '<button type="button" class="tsb-back" aria-label="Back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>' +
+      '<button type="button" class="tsp" aria-label="Search dishes in this restaurant">' +
+        '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="tsp-text"></span></button>';
+    document.body.appendChild(bar);
+    const txt = bar.querySelector('.tsp-text');
+    bar.querySelector('.tsb-back').addEventListener('click', function () {
+      if (typeof window.nearbiteSafeBack === 'function') window.nearbiteSafeBack(); else history.back();
+    });
+    bar.querySelector('.tsp').addEventListener('click', function () { ewOpenSearch(); });
+
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let timer = null, idx = 0, names = [], cur = null, on = false;
 
@@ -2425,29 +2435,29 @@ window.ewLoadVisibleImages = function(root, margin){
       idx = (idx + 1) % names.length;
       set(label(names[idx]), true);
     }
-    function run() {
-      if (timer || document.hidden) return;
-      timer = setInterval(tick, 2800);
-    }
+    function run() { if (!timer && !document.hidden) timer = setInterval(tick, 2800); }
     function stop() { clearInterval(timer); timer = null; }
     function show() {
       if (on) return;
       on = true;
       names = collect(); idx = 0;
       set(label(names[0]), false);
-      document.body.classList.add('ew-tsp-on');
+      bar.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('ew-tsb-on');
       if (names.length > 1) run();
     }
     function hide() {
       if (!on) return;
       on = false;
       stop();
-      document.body.classList.remove('ew-tsp-on');
+      bar.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('ew-tsb-on');
     }
+    // Visible once the restaurant name has scrolled off the top of the screen.
     new IntersectionObserver(function (entries) {
       const e = entries[0];
-      if (!e.isIntersecting && e.boundingClientRect.top < 72) show(); else hide();
-    }, { rootMargin: '-72px 0px 0px 0px', threshold: 0 }).observe(nameEl);
+      if (!e.isIntersecting && e.boundingClientRect.bottom < 0) show(); else hide();
+    }, { threshold: 0 }).observe(nameEl);
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stop(); else if (on && names.length > 1) run();
     });
