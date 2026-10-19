@@ -6,12 +6,16 @@
   -webkit-tap-highlight-color:transparent;
   transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .12s ease;
 }
-.ew-filter-chip:active{transform:scale(.94)}
-.ew-filter-chip.ew-chip-pop{animation:ew-chip-pop .34s cubic-bezier(.3,1.5,.5,1)}
-@keyframes ew-chip-pop{
-  0%{transform:scale(.92)}
-  55%{transform:scale(1.06)}
-  100%{transform:scale(1)}
+.ew-filter-chip{transform-origin:center}
+.ew-filter-chip:active{transform:scaleX(1.1) scaleY(.9)}
+/* stretch: squash wide, snap back past 1, settle (jelly feel) */
+.ew-filter-chip.ew-chip-pop{animation:ew-chip-stretch .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes ew-chip-stretch{
+  0%{transform:scaleX(1) scaleY(1)}
+  25%{transform:scaleX(1.18) scaleY(.88)}
+  50%{transform:scaleX(.94) scaleY(1.06)}
+  75%{transform:scaleX(1.04) scaleY(.98)}
+  100%{transform:scaleX(1) scaleY(1)}
 }
 .ew-filter-chip:focus-visible{outline:2px solid var(--hd-primary,#E9546B);outline-offset:2px}
 
