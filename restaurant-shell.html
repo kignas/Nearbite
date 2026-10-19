@@ -341,6 +341,71 @@ window.ewLoadVisibleImages = function(root, margin){
     window.scrollTo({ top, behavior: 'smooth' });
   }
 
+  /* Landing glide (Zomato-style). Once the menu is on screen, the page eases down
+     a little so the restaurant header tucks away and the sticky search bar, the
+     category strip and the quick filters take over the top of the screen.
+     Runs once per page load and never fights the user: skipped when coming back
+     with Back/Forward or a reload, when the page is already scrolled, for
+     #hash / focusItem links, while the Info tab or the search page is open, and
+     for a closed restaurant (its notice has to stay visible). The first touch,
+     wheel or key press cancels it. */
+  let ewAutoScrolled = false;
+  function ewAutoScrollIntoMenu() {
+    if (ewAutoScrolled) return;
+    ewAutoScrolled = true;
+    try {
+      const qs = new URLSearchParams(window.location.search);
+      if (qs.get('focusItem') || window.location.hash) return;
+      if (window.scrollY > 0 || !isRestaurantOpen) return;
+      const nav = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (nav && (nav.type === 'back_forward' || nav.type === 'reload')) return;
+      const pane = document.getElementById('menu-pane');
+      if ((pane && pane.hidden) || document.body.classList.contains('ew-search-open')) return;
+
+      const bar = document.getElementById('restaurant-filter-bar');
+      const anchorEl = (bar && bar.offsetParent !== null) ? bar : menuSec;
+      if (!anchorEl) return;
+
+      const tsb = document.getElementById('ew-sticky-search');
+      const gapTop = Math.max(tsb ? tsb.offsetHeight : 0, 62) + Math.max(catNav ? catNav.offsetHeight : 0, 44) + 6;
+      const PAD = 44;                                   /* menu-section padding while the category strip shows */
+      const curPad = parseFloat(getComputedStyle(menuSec).paddingTop) || 0;
+      const extra = Math.max(0, PAD - curPad);          /* the strip adds this much height above the filters */
+      const docTop = anchorEl.getBoundingClientRect().top + window.scrollY + extra;
+      const maxY = document.documentElement.scrollHeight + extra - window.innerHeight;
+      const target = Math.round(Math.min(docTop - gapTop, maxY));
+      if (!(target > 80)) return;                       /* short page: nothing worth scrolling */
+
+      const jump = (y) => {
+        try { window.scrollTo({ top: y, left: 0, behavior: 'instant' }); }
+        catch (e) { window.scrollTo(0, y); }
+      };
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const events = ['touchstart', 'wheel', 'keydown', 'mousedown'];
+      let raf = 0, cancelled = false;
+      const detach = () => events.forEach(ev => window.removeEventListener(ev, onUser, true));
+      function onUser() {
+        cancelled = true;
+        cancelAnimationFrame(raf);
+        detach();
+        /* stopped before the header cleared: the strip is not showing, so drop its spacer */
+        if (sentinel.getBoundingClientRect().top >= 0) menuSec.style.paddingTop = '0px';
+      }
+
+      menuSec.style.paddingTop = PAD + 'px';            /* same frame as the first step: no flash */
+      if (reduce) { jump(target); return; }
+      events.forEach(ev => window.addEventListener(ev, onUser, { capture: true, passive: true }));
+      const t0 = performance.now(), DUR = 420;
+      const step = (now) => {
+        if (cancelled) return;
+        const p = Math.min(1, (now - t0) / DUR);
+        jump(Math.round(target * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) raf = requestAnimationFrame(step); else detach();
+      };
+      raf = requestAnimationFrame(step);
+    } catch (e) { /* purely cosmetic: never let it break the page */ }
+  }
+
   /* Builds a JS string literal that is safe to sit inside an HTML attribute.
      JSON.stringify handles every JS-string hazard (quotes, backslashes,
      newlines, line separators); escapeMenuHtml then handles the HTML layer,
@@ -1311,6 +1376,7 @@ window.ewLoadVisibleImages = function(root, margin){
 
       window.__ewMenuGroups = groups;
       renderMenu(groups, resId);
+      requestAnimationFrame(() => requestAnimationFrame(ewAutoScrollIntoMenu));
       const focusItemId = new URLSearchParams(window.location.search).get('focusItem');
       if (focusItemId) {
         setTimeout(() => {
