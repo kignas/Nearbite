@@ -1006,24 +1006,15 @@
       const OS = window.EatswadaOrderStatus;
       const info = OS.info(order);
       const head = OS.headline(order);
-
-      // Customer-facing delivery countdown: once the order is handed to the
-      // delivery flow, show a 7:00 -> 0:00 countdown. This is display-only;
-      // backend ETA/rider data remains unchanged.
-      const statusNow = OS.norm(order.status);
-      const deliveryStage = ['assigned', 'picked_up', 'out_for_delivery', 'otp_verified'].includes(statusNow);
-      if (deliveryStage && head.etaValue) {
-        const countdownKey = String(order._id || order.id || '');
-        if (!window.__ewDeliveryCountdown || window.__ewDeliveryCountdown.key !== countdownKey) {
-          window.__ewDeliveryCountdown = { key: countdownKey, end: Date.now() + 7 * 60 * 1000 };
-        }
-        const remaining = Math.max(0, window.__ewDeliveryCountdown.end - Date.now());
-        const totalSeconds = Math.ceil(remaining / 1000);
-        const mins = Math.floor(totalSeconds / 60);
-        const secs = totalSeconds % 60;
-        head.etaValue = mins + ':' + String(secs).padStart(2, '0');
-        head.etaLabel = 'Arriving in';
-        head.overdue = false;
+      if (info.group === 'cancelled') {
+        // Set on `head` BEFORE the title comparison below, so the 1-second
+        // re-render sees identical text and does not replay the animation.
+        const rsn = String(order.cancelReason || '').trim();
+        const byRest = /^rejected by restaurant/i.test(rsn);
+        const clean = rsn.replace(/^rejected by restaurant:\s*/i, '');
+        head.title = 'Order was cancelled';
+        head.detail = byRest ? 'Cancelled by the restaurant' + (clean ? ': ' + clean : '') : (rsn ? 'Reason: ' + rsn : 'This order was cancelled');
+        head.etaValue = '';
       }
 
       const hero = document.getElementById('hero-bg');
@@ -1034,14 +1025,15 @@
 
       const titleEl = document.getElementById('status-title');
       if (titleEl.textContent !== head.title) { titleEl.textContent = head.title; replay(titleEl, 'status-anim'); }
-      setText('status-sub', head.etaValue ? info.sub : head.detail);
-      if (info.group === 'cancelled') {
-        const rsn = String(order.cancelReason || '').trim();
-        titleEl.textContent = 'Order was cancelled';
-        const byRest = /^rejected by restaurant/i.test(rsn);
-        const clean = rsn.replace(/^rejected by restaurant:\s*/i, '');
-        setText('status-sub', byRest ? 'Cancelled by the restaurant' + (clean ? ': ' + clean : '') : (rsn ? 'Reason: ' + rsn : 'This order was cancelled'));
+      let subText = head.etaValue ? info.sub : head.detail;
+      // Once a delivery partner has really accepted, say so by name (as Zomato does).
+      const stNow = OS.norm(order.status);
+      if (OS.riderAssigned(order) && order.rider && order.rider.name) {
+        const rn = String(order.rider.name).trim().split(/\s+/)[0];
+        if (stNow === 'assigned') subText = rn + ' accepted your order and is heading to the restaurant';
+        else if (stNow === 'picked_up' || stNow === 'out_for_delivery') subText = rn + ' is on the way with your order';
       }
+      setText('status-sub', subText);
       const note = document.getElementById('status-note');
       note.textContent = head.note || '';
       note.hidden = !head.note;
@@ -1056,13 +1048,6 @@
         etaBox.hidden = true;
         etaTime.textContent = '';
       }
-    }
-
-    // Refresh the customer-facing 7-minute countdown every second.
-    if (!window.__ewDeliveryCountdownTimer) {
-      window.__ewDeliveryCountdownTimer = setInterval(function () {
-        if (currentOrder) renderStatusCard(currentOrder);
-      }, 1000);
     }
 
     let lastTimelineHtml = '';
@@ -1232,7 +1217,6 @@
         clearInterval(pollInterval);
         renderStatusCard(order);
         const reason = String(order.cancelReason || '').trim();
-        setText('status-sub', /^rejected by restaurant/i.test(reason) ? 'Cancelled by the restaurant' : 'This order was cancelled');
         timelineCard.style.display = 'none';
         document.getElementById('rider-card').style.display = 'none';
         document.getElementById('map-card').style.display = 'none';
