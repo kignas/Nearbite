@@ -10,7 +10,7 @@
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#F7F7F9">
-<title>My Orders – Nearbite | EatSwada</title>
+<title>Your Orders – Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
@@ -76,7 +76,7 @@ img{max-width:100%;display:block;}
 }
 .header-back-btn:active{background:rgba(0,0,0,.05);}
 .header-titles{flex:1;min-width:0;}
-.header-titles h1{margin:0;font-size:18px;line-height:24px;font-weight:800;letter-spacing:-.3px;color:var(--ink-900);}
+.header-titles h1{margin:0;font-size:22px;line-height:28px;font-weight:800;letter-spacing:-.45px;color:var(--ink-900);}
 .header-stats{
   display:flex;align-items:center;gap:8px;max-width:640px;margin:0 auto;
   font-size:12px;font-weight:600;color:var(--ink-500);
@@ -94,7 +94,7 @@ img{max-width:100%;display:block;}
 .search-bar>i{color:#737476;font-size:15px;flex:none;}
 .search-bar input{
   flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;padding:0;
-  font:500 13px/1.3 'Manrope',system-ui,sans-serif;color:var(--ink-900);-webkit-appearance:none;
+  font:500 15px/1.4 'Manrope',system-ui,sans-serif;color:var(--ink-900);-webkit-appearance:none;
 }
 .search-bar input::placeholder{color:var(--ink-400);}
 .search-clear{
@@ -102,30 +102,6 @@ img{max-width:100%;display:block;}
   place-items:center;font-size:11px;flex:none;
 }
 .search-bar.has-value .search-clear{display:grid;}
-
-/* Filter pills (same pill pattern as the Home filter bar; style.css
-   forces .chip geometry with !important, so this page scopes over it).
-   The green pill behind the active filter slides between filters. */
-.filter-chips{
-  position:relative;display:flex;gap:8px;max-width:640px;margin:10px auto 0;padding:0 0 12px;
-  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
-}
-.filter-chips::-webkit-scrollbar{display:none;}
-.filter-chips .chip{
-  position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;min-height:34px;
-  padding:0 14px !important;border:1px solid var(--ink-200) !important;border-radius:999px !important;
-  background:transparent;color:var(--ink-700) !important;font-family:'Manrope',system-ui,sans-serif !important;
-  font-size:13px !important;font-weight:600 !important;box-shadow:none !important;white-space:nowrap;user-select:none;
-  transition:color .2s var(--ease),border-color .2s var(--ease);
-}
-.filter-chips .chip.active{color:var(--brand) !important;border-color:var(--brand-soft) !important;font-weight:700 !important;}
-.filter-chips .chip::after{content:attr(data-count);margin-left:6px;font-size:11px;font-weight:700;color:var(--ink-400);}
-.filter-chips .chip.active::after{color:var(--brand);}
-.filter-chips .chip[data-count=""]::after,.filter-chips .chip:not([data-count])::after{content:"";margin:0;}
-.chip-indicator{
-  position:absolute;left:0;top:0;height:34px;width:0;border-radius:999px;background:var(--brand-tint);
-  transform:translateX(0);transition:transform .32s var(--ease-out),width .32s var(--ease-out);
-}
 
 /* ---------- Content ---------- */
 .orders-content{max-width:640px;margin:0 auto;padding:14px 14px 0;}
@@ -146,8 +122,8 @@ img{max-width:100%;display:block;}
   display:grid;place-items:center;font-size:17px;font-weight:800;color:var(--ink-500);
 }
 .oc-title{flex:1;min-width:0;}
-.oc-name{margin:0;font-size:15px;line-height:20px;font-weight:700;letter-spacing:-.15px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.oc-sub{margin-top:1px;font-size:12px;line-height:16px;font-weight:500;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-name{margin:0;font-size:17px;line-height:23px;font-weight:700;letter-spacing:-.2px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-sub{margin-top:2px;font-size:13px;line-height:18px;font-weight:500;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ---------- Live order card ---------- */
 .track-card{margin-bottom:12px;}
@@ -207,7 +183,7 @@ img{max-width:100%;display:block;}
 .past-card.swiped.has-delete{transform:translateX(-174px);}
 
 .past-items{list-style:none;margin:0;padding:12px 14px 2px;border-top:1px solid #F0F0F2;}
-.past-items li{display:flex;align-items:baseline;gap:8px;font-size:13px;line-height:18px;font-weight:500;color:var(--ink-700);padding:0 0 8px;min-width:0;}
+.past-items li{display:flex;align-items:baseline;gap:8px;font-size:15px;line-height:21px;font-weight:500;color:var(--ink-700);padding:0 0 8px;min-width:0;}
 .past-items .q{flex:none;min-width:22px;font-weight:700;color:var(--ink-900);}
 .past-items .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .past-items li.more{color:var(--ink-500);font-weight:600;}
@@ -217,8 +193,8 @@ img{max-width:100%;display:block;}
   border-top:1px dashed var(--line);background:none;border-left:0;border-right:0;border-bottom:0;width:calc(100% - 28px);
   text-align:left;color:inherit;cursor:pointer;
 }
-.past-when{font-size:12px;line-height:16px;font-weight:500;color:var(--ink-500);}
-.past-status{margin-top:3px;font-size:13px;line-height:18px;font-weight:700;}
+.past-when{font-size:13px;line-height:18px;font-weight:500;color:var(--ink-500);}
+.past-status{margin-top:3px;font-size:14px;line-height:20px;font-weight:700;}
 .past-status.delivered{color:var(--brand);}
 .past-status.cancelled{color:var(--danger);}
 .past-status.refunded{color:var(--info);}
@@ -237,7 +213,7 @@ img{max-width:100%;display:block;}
 .ghost-btn:active{background:#F4F4F6;}
 .btn-reorder{
   display:inline-flex;align-items:center;gap:7px;flex:none;height:36px;padding:0 16px;border:0;border-radius:999px;
-  background:var(--brand);color:var(--hd-ink,#fff);font-size:13px;font-weight:800;
+  background:var(--brand);color:var(--hd-ink,#fff);font-size:14px;font-weight:800;
 }
 .btn-reorder:active{background:var(--brand-press);}
 
@@ -370,14 +346,6 @@ img{max-width:100%;display:block;}
     <div class="search-clear tap" id="search-clear" role="button" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></div>
   </div>
 
-  <div class="filter-chips" id="filter-chips" role="tablist" aria-label="Filter orders">
-    <div class="chip-indicator" id="chip-indicator"></div>
-    <div class="chip active tap" data-filter="all">All</div>
-    <div class="chip tap" data-filter="active">Active</div>
-    <div class="chip tap" data-filter="delivered">Delivered</div>
-    <div class="chip tap" data-filter="cancelled">Cancelled</div>
-    <div class="chip tap" data-filter="refunded">Refunded</div>
-  </div>
 </header>
 
 <div class="orders-content">
@@ -429,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let allOrdersData = [];
   let currentSearch = '';
-  let currentFilter = 'all';
+  
   let hasRenderedOnce = false;
 
   // Infinite-scroll state for Past Orders (all data is already fetched; we
@@ -734,17 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const updateChipCounts = () => {
     const hidden = new Set(getHidden());
     const visible = allOrdersData.filter(o => !hidden.has(o._id));
-    const counts = { all: visible.length, active: 0, delivered: 0, cancelled: 0, refunded: 0 };
+    const counts = { active: 0 };
     visible.forEach(o => {
-      const s = o.status.toLowerCase();
-      if (liveStatuses.includes(s)) { counts.active++; return; }
-      if (isOrderRefunded(o)) { counts.refunded++; return; }   // refunded counted separately from cancelled
-      if (counts[s] !== undefined) counts[s]++;
-    });
-    document.querySelectorAll('.chip').forEach(chip => {
-      const key = chip.getAttribute('data-filter');
-      const n = counts[key] || 0;
-      chip.setAttribute('data-count', n > 0 ? n : '');
+      if (liveStatuses.includes(o.status.toLowerCase())) counts.active++;
     });
     document.getElementById('stat-total').innerText = `${visible.length} order${visible.length === 1 ? '' : 's'}`;
     const liveStat = document.getElementById('stat-live');
@@ -754,15 +714,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       liveStat.style.display = 'none';
     }
-  };
-
-  const moveChipIndicator = () => {
-    const active = document.querySelector('.chip.active');
-    const indicator = document.getElementById('chip-indicator');
-    if (!active || !indicator) return;
-    indicator.style.transform = `translateX(${active.offsetLeft}px)`;
-    indicator.style.width = `${active.offsetWidth}px`;
-    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-selected', c === active ? 'true' : 'false'));
   };
 
   const renderOrders = () => {
@@ -780,17 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    // Chip Filtering
-    if (currentFilter !== 'all') {
-      if (currentFilter === 'active') filteredOrders = filteredOrders.filter(o => liveStatuses.includes(o.status.toLowerCase()));
-      else if (currentFilter === 'refunded') filteredOrders = filteredOrders.filter(o => isOrderRefunded(o));
-      else if (currentFilter === 'cancelled') filteredOrders = filteredOrders.filter(o => o.status.toLowerCase() === 'cancelled' && !isOrderRefunded(o));
-      else filteredOrders = filteredOrders.filter(o => o.status.toLowerCase() === currentFilter);
-    }
-
     // Reset the infinite-scroll page only when the result *set* changes (new search/filter),
     // not on every 10s poll refresh — otherwise a scrolled-down user would keep getting bumped back up.
-    const searchKey = currentSearch + '::' + currentFilter;
+    const searchKey = currentSearch;
     if (searchKey !== lastSearchKey) { pastRenderLimit = PAGE_SIZE; lastSearchKey = searchKey; }
 
     const liveOrders = filteredOrders.filter(o => liveStatuses.includes(o.status.toLowerCase()));
@@ -867,22 +810,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderOrders();
     searchInput.focus();
   });
-
-  // Filter Chips (animated selection)
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', (e) => {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      currentFilter = e.currentTarget.getAttribute('data-filter');
-      renderOrders();
-      moveChipIndicator();
-      e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-    });
-  });
-  document.querySelectorAll('.chip').forEach(c => c.setAttribute('role', 'tab'));
-  window.addEventListener('resize', moveChipIndicator);
-  setTimeout(moveChipIndicator, 50);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveChipIndicator);
 
   // Infinite scroll for Past Orders
   const io = new IntersectionObserver((entries) => {
