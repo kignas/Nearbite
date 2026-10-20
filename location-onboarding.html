@@ -429,6 +429,17 @@ function showSearchStatus(text,show=true){
  const el=$('locationSearchStatus'); if(!el)return;
  el.textContent=text||''; el.classList.toggle('show',!!show);
 }
+function photonAddress(properties){
+ const p=properties||{};
+ const parts=[];
+ // Photon fields are OSM-derived. Keep the display concise and avoid repeats.
+ [p.name,p.street,p.housenumber,p.district,p.city,p.county,p.state,p.postcode,p.country].forEach(v=>{
+   if(v==null||!String(v).trim())return;
+   const value=String(v).trim();
+   if(!parts.some(x=>x.toLowerCase()===value.toLowerCase()))parts.push(value);
+ });
+ return parts.join(', ');
+}
 function renderSearchResults(features){
  const box=$('locationResults'); if(!box)return;
  box.innerHTML='';
@@ -437,17 +448,18 @@ function renderSearchResults(features){
    if(!Array.isArray(coords)||coords.length<2)return;
    const lng=Number(coords[0]),lat=Number(coords[1]);
    if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+   const p=f.properties||{};
+   const title=String(p.name||p.street||p.city||p.locality||'Selected location');
+   const full=photonAddress(p);
+   const detail=full.toLowerCase().startsWith(title.toLowerCase())?full.slice(title.length).replace(/^,\s*/,''):full;
    const btn=document.createElement('button');
    btn.type='button';btn.className='location-result';btn.setAttribute('role','option');
-   const title=String(f.text||f.place_name||'Selected location');
-   const full=String(f.place_name||'');
-   const detail=full.replace(title,'').replace(/^,\s*/,'');
    btn.innerHTML='<i class="fa-solid fa-location-dot" aria-hidden="true"></i><span></span>';
    const span=btn.querySelector('span');
    const b=document.createElement('b'); b.textContent=title;
-   const small=document.createElement('small'); small.textContent=detail;
-   span.appendChild(b); if(detail)span.appendChild(small);
-   btn.addEventListener('click',()=>selectSearchResult(lat,lng,title,detail));
+   const small=document.createElement('small'); small.textContent=detail||full;
+   span.appendChild(b); if(detail||full)span.appendChild(small);
+   btn.addEventListener('click',()=>selectSearchResult(lat,lng,title,detail||full));
    box.appendChild(btn);
  });
  box.classList.toggle('show',box.children.length>0);
@@ -474,22 +486,48 @@ async function searchLocation(){
  $('locationSearchClear').classList.toggle('show',!!q);
  if(q.length<2){$('locationResults').classList.remove('show');showSearchStatus('',false);return}
  if(searchController)searchController.abort();
- searchController=new AbortController();
- showSearchStatus('Searching…',true); $('locationResults').classList.remove('show');
+ const controller=new AbortController();
+ searchController=controller;
+ showSearchStatus('Searching Maynaguri first…',true); $('locationResults').classList.remove('show');
+ const endpoint='https://photon.komoot.io/api/';
+ const localBox='88.65,26.42,89.00,26.72';
+ const paramsFor=(query,local)=>{
+   const p=new URLSearchParams({q:query,limit:'10',lang:'en',lat:'26.545',lon:'88.820'});
+   if(local)p.set('bbox',localBox);
+   return endpoint+'?'+p.toString();
+ };
  try{
-   const key=window.CONFIG?.MAPTILER?.apiKey;
-   if(!key) throw new Error('Location search is temporarily unavailable.');
-   const proximity='88.820,26.545';
-   const url=`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json?key=${encodeURIComponent(key)}&country=in&autocomplete=true&limit=5&proximity=${proximity}`;
-   const r=await fetch(url,{signal:searchController.signal,headers:{Accept:'application/json'}});
-   if(!r.ok)throw new Error('Search failed.');
-   const d=await r.json();
-   const features=Array.isArray(d.features)?d.features:[];
+   // First search inside the Maynaguri delivery area using Photon/OpenStreetMap.
+   // If that produces no useful results, retry the original query across India.
+   const localResponse=await fetch(paramsFor(q+' Maynaguri West Bengal India',true),{signal:controller.signal,headers:{Accept:'application/json'}});
+   if(!localResponse.ok)throw new Error('Photon local search failed.');
+   const localData=await localResponse.json();
+   let features=Array.isArray(localData.features)?localData.features:[];
+   features=features.filter(f=>{
+     const c=f?.geometry?.coordinates,p=f?.properties||{};
+     if(!Array.isArray(c)||c.length<2)return false;
+     const lng=Number(c[0]),lat=Number(c[1]);
+     return Number.isFinite(lat)&&Number.isFinite(lng)&&lng>=88.65&&lng<=89.00&&lat>=26.42&&lat<=26.72;
+   });
+   if(!features.length){
+     if(controller.signal.aborted)return;
+     showSearchStatus('No nearby match. Searching across India…',true);
+     const nationalResponse=await fetch(paramsFor(q,false),{signal:controller.signal,headers:{Accept:'application/json'}});
+     if(!nationalResponse.ok)throw new Error('Photon India-wide search failed.');
+     const nationalData=await nationalResponse.json();
+     features=(Array.isArray(nationalData.features)?nationalData.features:[]).filter(f=>{
+       const p=f?.properties||{};
+       // Photon returns ISO countrycode for country-aware results. Keep Indian
+       // results only when a country code is present; allow missing codes.
+       return !p.countrycode||String(p.countrycode).toUpperCase()==='IN';
+     });
+   }
+   if(controller.signal.aborted)return;
    if(!features.length){showSearchStatus('No matching location found. Try a nearby landmark or area.',true);return}
    showSearchStatus('',false); renderSearchResults(features);
  }catch(e){
    if(e.name==='AbortError')return;
-   console.error(e);showSearchStatus('Location search is unavailable right now. Please try again or use GPS.',true);
+   console.error('[location] Photon search failed:',e);showSearchStatus('Location search is unavailable right now. Please try again or use GPS.',true);
  }
 }
 function scheduleSearch(){
