@@ -327,6 +327,67 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
+
+    /* ============================================================
+       REDESIGN OVERRIDES (tracking page only, appended; delete this block to revert the look)
+       White page, burgundy brand, bordered white cards, compact status, circular call button.
+       ============================================================ */
+    body {
+      --brand:#690D27; --brand-press:#520A1E; --brand-tint:#F8ECEF; --brand-soft:#690D27;
+      --paper:#FFFFFF; --line:#ECECEF; --line-soft:#F1F1F4;
+      --ink-500:#6B6D73; --ink-400:#8A8C92;
+      --shadow-xs:none;
+    }
+    html body { background:#fff; }
+    .app-bar { border-bottom:1px solid var(--line); }
+    .ab-title h1 { font-size:16px; }
+    .ab-support { border:0; padding:0 8px; height:40px; font-size:14px; font-weight:700; color:var(--brand); }
+    .tracking-sheet { padding-top:14px; }
+    .tracker-hero, .customer-otp-box, .map-card, .rider-card, .timeline-card, .info-card,
+    .order-summary, .details-card, .cancel-card, .help-card, .rating-card, .completion-screen {
+      border:1px solid var(--line); border-radius:16px; box-shadow:none; margin-bottom:14px;
+    }
+    /* status card */
+    .tracker-hero { padding:16px; }
+    .hero-icon-wrapper { width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:#fff; }
+    .status-title { font-size:17px; line-height:22px; }
+    .tracker-hero.cancelled .hero-icon-wrapper { background:var(--danger-light); border-color:transparent; }
+    .tracker-hero.cancelled .status-title { color:var(--ink-900); }
+    /* restaurant card: name + area, circular call button */
+    .info-card { padding:16px; }
+    .hero-logo { width:48px; height:48px; border-radius:50%; background:var(--brand); color:#fff; }
+    .info-card-label { display:none; }
+    .info-card-title { font-size:16px; line-height:21px; font-weight:800; }
+    .call-restaurant { width:44px; height:44px; padding:0; justify-content:center; border-radius:50%; font-size:0; gap:0; border:1px solid var(--line); color:var(--brand); }
+    .call-restaurant i { font-size:16px; }
+    /* order details + bill */
+    .order-summary { padding:16px; }
+    .summary-header h3 { font-size:16px; }
+    .item-row { font-size:14px; line-height:20px; }
+    .item-price, .total-price { font-weight:700; }
+    .summary-charges { border-top:1px solid var(--line-soft); }
+    .total-label { font-size:15px; } .total-price { font-size:16px; }
+    .charge-row.discount, .charge-row.discount .charge-val { color:var(--info); }
+    .invoice-btn { height:44px; color:var(--brand); border-color:var(--line); }
+    .invoice-btn i { color:var(--brand); }
+    /* receiver / payment / address */
+    .details-card { padding:4px 16px; }
+    .d-row { padding:16px 0; }
+    .d-ico { background:#fff; border:1px solid var(--line); color:var(--ink-700); }
+    .d-title { font-size:14px; } .d-sub { font-size:13px; line-height:18px; }
+    /* cancellation: compact, neutral card */
+    .cancel-card { padding:14px 16px; }
+    .cancel-card-head { color:var(--danger); font-size:14px; }
+    .refund-row { background:#FAFAFB; border:1px solid var(--line-soft); }
+    /* help + buttons */
+    .help-card { padding:16px; }
+    .help-item { border-color:var(--line); min-height:46px; }
+    .btn-primary, .rating-submit, .sheet-cta { background:var(--brand); }
+    .sheet-cta.danger { background:var(--danger); }
+    .rating-submit:disabled { background:#DEDDE2; }
+    .completion-icon { background:var(--brand); }
+    .pay-status-pill { white-space:nowrap; }
+    @media (max-width:374px) { .info-card { flex-wrap:nowrap; } .call-restaurant { margin-left:0; } }
   </style>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
@@ -451,7 +512,7 @@
         <div class="info-card-sub" id="restaurant-address"></div>
       </div>
       <div id="restaurant-owner-contact" style="display:none;">
-        <a id="restaurant-call-btn" class="call-restaurant tap" href="#"><i class="fa-solid fa-phone"></i>Call Restaurant<span id="restaurant-phone" hidden></span></a>
+        <a id="restaurant-call-btn" class="call-restaurant tap" href="#" aria-label="Call restaurant"><i class="fa-solid fa-phone"></i>Call Restaurant<span id="restaurant-phone" hidden></span></a>
       </div>
     </div>
 
@@ -1164,6 +1225,7 @@
       clearCustomerCancelTimer();
       const btn = document.getElementById('help-cancel');
       if (!btn) return;
+      const OS = window.EatswadaOrderStatus;
       const status = OS.norm(order?.status);
       if (status !== 'placed' || order?.isCancellable === false) {
         btn.style.display = 'none';
@@ -1252,6 +1314,7 @@
       const layer = document.getElementById('confetti-layer');
       if (!layer) return;
       layer.innerHTML = '';
+      const hd = (name, fb) => (getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fb);
       const colors = [hd('--hd-primary', '#E9546B'), hd('--hd-on-light', '#C13A50'), '#E5A100', hd('--ew-info', '#4C7FF0'), hd('--ew-error', '#D64545')];
       for (let i = 0; i < 26; i++) {
         const piece = document.createElement('div');
