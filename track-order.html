@@ -389,6 +389,10 @@
     .pay-status-pill { white-space:nowrap; }
     @media (max-width:374px) { .info-card { flex-wrap:nowrap; } .call-restaurant { margin-left:0; } }
 
+    /* Support appears once in the header; the help card keeps "Report an issue" (+ Cancel when allowed). */
+    #help-chat { display:none !important; }
+    .help-grid { grid-template-columns:1fr; }
+
     /* ---- v2 additions: header, merged restaurant/items card, bill card, customer card ---- */
     .app-bar-row { position:relative; }
     .app-bar .ab-btn.floating-back { position:static !important; width:40px !important; height:40px !important; background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:50% !important; color:#131313 !important; }
@@ -984,12 +988,20 @@
       }
 
       if (footer){
+        // The rider's own ETA/distance describe the trip to the customer only
+        // once the order is picked up. Before that (heading to the restaurant)
+        // it would contradict the card's delivery estimate, so it is not shown.
+        const carrying = window.EatswadaOrderStatus.riderMoving(order);
         const eta = Number(order.riderEtaMinutes);
         const km = Number(order.riderDistanceKm);
         const parts = [];
-        if (order.riderDistanceKm != null && Number.isFinite(km) && km >= 0) parts.push(km < 1 ? Math.round(km * 1000) + ' m away' : km.toFixed(1) + ' km away');
-        if (Number.isFinite(eta) && eta > 0) parts.push('arriving in ~' + Math.ceil(eta) + ' min');
-        footer.textContent = parts.length ? 'Delivery partner ' + parts.join(' · ') : 'Live location updates every few seconds.';
+        if (carrying) {
+          if (order.riderDistanceKm != null && Number.isFinite(km) && km >= 0) parts.push(km < 1 ? Math.round(km * 1000) + ' m away' : km.toFixed(1) + ' km away');
+          if (Number.isFinite(eta) && eta > 0) parts.push('arriving in ~' + Math.ceil(eta) + ' min');
+        }
+        footer.textContent = carrying
+          ? (parts.length ? 'Delivery partner ' + parts.join(' · ') : 'Live location updates every few seconds.')
+          : 'Delivery partner is heading to the restaurant';
       }
     }
 
