@@ -331,6 +331,26 @@ img{max-width:100%;display:block;}
 .section-title{margin:4px 2px 10px;}
 .st-left{font-size:12px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-500);}
 .order-card.ord-card{border-radius:16px;border:1px solid #ECEDEF;box-shadow:0 2px 5px rgba(16,24,40,.07);overflow:hidden;margin-bottom:14px;}
+/* Orders-page refinements: neutral header, restaurant menu link, food-type markers. */
+.orders-header.ew-themed-header{
+  background:var(--card,#fff)!important;
+  background-image:none!important;
+  color:var(--ink-900,#16191E);
+  border-bottom:1px solid var(--line,#E5E7E6);
+}
+.orders-header.ew-themed-header::before,
+.orders-header.ew-themed-header::after{background:none!important;content:none!important;}
+.orders-header .header-titles h1{color:var(--ink-900,#16191E)!important;}
+.orders-header .header-back-btn{color:var(--ink-900,#16191E)!important;}
+.ord-restaurant-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px;}
+.ord-loc{margin-top:1px;font-size:12.5px;line-height:17px;font-weight:500;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ord-view-menu{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;line-height:17px;font-weight:700;color:var(--brand);text-decoration:none;white-space:nowrap;}
+.ord-view-menu:active{opacity:.72;}
+.ord-item-type{width:13px;height:13px;flex:none;display:inline-grid;place-items:center;border:1.5px solid currentColor;border-radius:3px;margin-top:3px;}
+.ord-item-type::after{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;}
+.ord-item-type.veg{color:var(--success,#23956D);}
+.ord-item-type.nonveg{color:var(--danger,#C8453B);}
+.ord-item-type.unknown{visibility:hidden;}
 .ord-card-head{display:flex;align-items:center;gap:12px;padding:14px 14px 12px;}
 .ord-card-head .oc-logo,.ord-card-head .restaurant-logo{width:44px;height:44px;flex:none;border-radius:10px;object-fit:cover;}
 .ord-title{flex:1;min-width:0;}
@@ -533,10 +553,26 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Full item list for past orders (up to 3 lines, then "+N more").
+  const itemFoodType = (item) => {
+    if (!item || typeof item !== 'object') return 'unknown';
+    const raw = item.isVeg ?? item.veg ?? item.isVegetarian ?? item.is_veg ?? item.foodType ?? item.food_type ?? item.type;
+    if (raw === true || raw === 1) return 'veg';
+    if (raw === false || raw === 0) return 'nonveg';
+    if (typeof raw === 'string') {
+      const value = raw.trim().toLowerCase();
+      if (['veg','vegetarian','pure veg','true','1'].includes(value)) return 'veg';
+      if (['non-veg','nonveg','non veg','non_veg','nonvegetarian','non-vegetarian','false','0'].includes(value)) return 'nonveg';
+    }
+    return 'unknown';
+  };
+
   const itemsList = (items) => {
     if (!Array.isArray(items) || !items.length) return '';
-    const shown = items.slice(0, 3).map(i =>
-      `<li><span class="q">${esc(i.quantity || 1)} ×</span><span class="n">${esc(i.name || 'Item')}</span></li>`).join('');
+    const shown = items.slice(0, 3).map(i => {
+      const foodType = itemFoodType(i);
+      const label = foodType === 'veg' ? 'Vegetarian' : foodType === 'nonveg' ? 'Non-vegetarian' : 'Food type not provided';
+      return `<li><span class="ord-item-type ${foodType}" role="img" aria-label="${label}" title="${label}"></span><span class="q">${esc(i.quantity || 1)} ×</span><span class="n">${esc(i.name || 'Item')}</span></li>`;
+    }).join('');
     const rest = items.length > 3 ? `<li class="more">+ ${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}</li>` : '';
     return `<ul class="past-items">${shown}${rest}</ul>`;
   };
@@ -640,6 +676,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const pay = OS.payment(order);
       const cuisine = order.cuisine || order.restaurantCuisine || '';
       const locality = order.restaurantLocality || order.locality || order.restaurantAddress || cuisine;
+      const restaurantRef = order.restaurantId || order.restaurant?._id || order.restaurant?.id || order.restaurant || order.restaurant_id;
+      const restaurantId = restaurantRef && typeof restaurantRef === 'object' ? (restaurantRef._id || restaurantRef.id) : restaurantRef;
+      const viewMenuUrl = restaurantId && /^[a-zA-Z0-9_-]{1,128}$/.test(String(restaurantId))
+        ? `restaurant.html?id=${encodeURIComponent(String(restaurantId))}` : '';
       const id = esc(order._id);
       const detailsUrl = `track-order.html?id=${encodeURIComponent(order._id)}`;
       const supportUrl = `order-support.html?order=${encodeURIComponent(order._id)}`;
@@ -649,7 +689,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ${logoHtml(order)}
             <div class="ord-title">
               <h4 class="ord-name">${esc(order.restaurantName || 'Eatswada partner')}</h4>
-              <div class="ord-loc">${locality ? esc(locality) : `Order #${esc(orderLabel(order))}`}</div>
+              ${locality ? `<div class="ord-loc">${esc(locality)}</div>` : `<div class="ord-loc">Order #${esc(orderLabel(order))}</div>`}
+              ${viewMenuUrl ? `<a class="ord-view-menu" href="${viewMenuUrl}" aria-label="View ${esc(order.restaurantName || 'restaurant')} menu">View menu <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>` : ''}
             </div>
             <button type="button" class="ord-menu-btn tap" aria-label="Order options" aria-haspopup="menu" aria-expanded="false" onclick="openOrderMenu('${id}', this, '${supportUrl}')"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
           </div>
