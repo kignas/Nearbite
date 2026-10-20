@@ -388,6 +388,46 @@
     .completion-icon { background:var(--brand); }
     .pay-status-pill { white-space:nowrap; }
     @media (max-width:374px) { .info-card { flex-wrap:nowrap; } .call-restaurant { margin-left:0; } }
+
+    /* ---- v2 additions: header, merged restaurant/items card, bill card, customer card ---- */
+    .app-bar-row { position:relative; }
+    .app-bar .ab-btn.floating-back { position:static !important; width:40px !important; height:40px !important; background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:50% !important; color:#131313 !important; }
+    .app-bar .floating-back::before, .app-bar .floating-back::after { content:none !important; }
+    .app-bar .floating-back i { display:block !important; font-size:18px; }
+    .ab-center { position:absolute; left:56px; right:130px; text-align:center; font-size:17px; font-weight:700; letter-spacing:-.2px; color:var(--ink-900); pointer-events:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ab-support { margin-left:auto; }
+    @media (max-width:380px) { .ab-support i { display:none; } .ab-center { right:110px; } }
+    .od-card, .bill-card { background:#fff; border:1px solid var(--line); border-radius:16px; margin-bottom:14px; overflow:hidden; }
+    .od-card .info-card { border:0; border-radius:0; margin:0; border-bottom:1px solid var(--line-soft); }
+    .od-items { padding:14px 16px 16px; }
+    .od-id-row { display:flex; align-items:center; gap:8px; }
+    .od-id-row .order-id { font-size:14px; font-weight:600; color:var(--ink-500); }
+    .copy-id { width:32px; height:32px; border:0; background:transparent; color:var(--ink-500); font-size:14px; border-radius:50%; }
+    .od-placed { font-size:12px; color:var(--ink-400); margin-top:-4px; }
+    #summary-restaurant-name { display:none !important; }
+    .od-items .summary-items-list { border:0; margin-top:10px; padding-top:0; gap:12px; }
+    .item-row { align-items:center; gap:10px; }
+    .item-name { font-size:15px; font-weight:600; color:var(--ink-900); }
+    .item-price { font-size:15px; font-weight:600; }
+    .veg-mark { flex:none; width:16px; height:16px; border:1.5px solid; border-radius:3px; display:grid; place-items:center; }
+    .veg-mark i { width:8px; height:8px; border-radius:50%; background:currentColor; display:block; }
+    .veg-mark.veg { color:#23956D; }
+    .veg-mark.nonveg { color:#B3261E; }
+    .veg-mark.nonveg i { border-radius:0; clip-path:polygon(50% 0,100% 100%,0 100%); }
+    .bill-head { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line-soft); }
+    .bill-head h3 { font-size:16px; font-weight:800; color:var(--ink-900); }
+    .bill-ico { width:40px; height:40px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; color:var(--ink-700); font-size:15px; }
+    .bill-body { padding:6px 16px 16px; }
+    .bill-body .summary-charges { border:0; margin-top:8px; padding-top:0; gap:14px; }
+    .charge-row { font-size:14px; }
+    .charge-row .strike { color:var(--ink-400); }
+    .charge-row .free { color:var(--info); font-weight:700; }
+    .bill-body .summary-total { margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
+    .saved-banner { padding:14px 16px 16px; text-align:center; background:#E3EBFD; color:#2F5FD0; font-size:15px; font-weight:800; }
+    .saved-banner[hidden] { display:none; }
+    .details-card .d-ico { width:40px; height:40px; }
+    #help-call-restaurant { display:none !important; }
+    .help-grid { grid-template-columns:1fr 1fr; }
   </style>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
@@ -419,11 +459,9 @@
   <header class="app-bar">
     <div class="app-bar-row">
       <a href="orders.html" class="ab-btn floating-back tap" aria-label="Back to orders"><i class="fa-solid fa-arrow-left"></i></a>
-      <div class="ab-title">
-        <h1 id="hero-restaurant-name">Your order</h1>
-        <p id="hero-meta-line">Order #------</p>
-      </div>
-      <a href="order-support.html" class="ab-support tap" id="header-support"><i class="fa-regular fa-message"></i>Support</a>
+      <h1 class="ab-center">Order Details</h1>
+      <span id="hero-restaurant-name" hidden>Your order</span><span id="hero-meta-line" hidden>Order #------</span>
+      <a href="order-support.html" class="ab-support tap" id="header-support"><i class="fa-regular fa-message"></i><span>Support</span></a>
       <button class="ab-btn tap" id="hero-share-btn" aria-label="Share tracking link"><i class="fa-solid fa-share-nodes"></i></button>
     </div>
   </header>
@@ -503,16 +541,26 @@
       <ol class="tl" id="timeline-steps"></ol>
     </div>
 
-    <!-- Restaurant + Call Restaurant -->
-    <div class="info-card card-fade d3" id="restaurant-card">
-      <div class="hero-logo" id="hero-logo">E</div>
-      <div class="info-card-body">
-        <div class="info-card-label">Restaurant</div>
-        <div class="info-card-title" id="restaurant-name">—</div>
-        <div class="info-card-sub" id="restaurant-address"></div>
+    <!-- Restaurant + order id + items (one card, like the reference) -->
+    <div class="od-card card-fade d3">
+      <div class="info-card" id="restaurant-card">
+        <div class="hero-logo" id="hero-logo">E</div>
+        <div class="info-card-body">
+          <div class="info-card-title" id="restaurant-name">—</div>
+          <div class="info-card-sub" id="restaurant-address"></div>
+        </div>
+        <div id="restaurant-owner-contact" style="display:none;">
+          <a id="restaurant-call-btn" class="call-restaurant tap" href="#" aria-label="Call restaurant"><i class="fa-solid fa-phone"></i>Call Restaurant<span id="restaurant-phone" hidden></span></a>
+        </div>
       </div>
-      <div id="restaurant-owner-contact" style="display:none;">
-        <a id="restaurant-call-btn" class="call-restaurant tap" href="#" aria-label="Call restaurant"><i class="fa-solid fa-phone"></i>Call Restaurant<span id="restaurant-phone" hidden></span></a>
+      <div class="od-items">
+        <div class="od-id-row">
+          <span class="order-id" id="display-res-name">Loading…</span>
+          <button type="button" class="copy-id tap" id="copy-order-id" aria-label="Copy order ID"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="od-placed" id="order-placed-at"></div>
+        <div class="summary-restaurant" id="summary-restaurant-name"></div>
+        <div class="summary-items-list" id="summary-items-list"></div>
       </div>
     </div>
 
@@ -529,20 +577,18 @@
       </div>
     </div>
 
-    <!-- Items + bill -->
-    <div class="order-summary card-fade d4">
-      <div class="summary-header">
-        <h3>Order details</h3>
-        <span class="order-id" id="display-res-name">Loading…</span>
+    <!-- Bill summary -->
+    <div class="bill-card card-fade d4">
+      <div class="bill-head"><span class="bill-ico"><i class="fa-solid fa-receipt"></i></span><h3>Bill summary</h3></div>
+      <div class="bill-body">
+        <div class="summary-charges" id="summary-charges"></div>
+        <div class="summary-total">
+          <span class="total-label">Grand total</span>
+          <span class="total-price" id="display-total">₹0</span>
+        </div>
+        <button class="invoice-btn tap" id="invoice-btn"><i class="fa-solid fa-file-lines"></i> View invoice</button>
       </div>
-      <div class="summary-restaurant" id="summary-restaurant-name"></div>
-      <div class="summary-items-list" id="summary-items-list"></div>
-      <div class="summary-charges" id="summary-charges"></div>
-      <div class="summary-total">
-        <span class="total-label">Grand total</span>
-        <span class="total-price" id="display-total">₹0</span>
-      </div>
-      <button class="invoice-btn tap" id="invoice-btn"><i class="fa-solid fa-file-lines"></i> View invoice</button>
+      <div class="saved-banner" id="saved-banner" hidden></div>
     </div>
 
     <!-- Receiver, payment, address -->
@@ -557,7 +603,7 @@
       <div class="d-row" id="payment-card">
         <div class="d-ico"><i class="fa-solid fa-wallet"></i></div>
         <div class="d-body">
-          <div class="d-title">Payment</div>
+          <div class="d-title">Payment method</div>
           <div class="d-sub" id="payment-type">Loading…</div>
           <div class="d-sub" id="payment-txn-row" style="display:none;">Transaction ID: <span id="payment-txn-id"></span></div>
         </div>
@@ -726,8 +772,11 @@
         return order.deliveryAddress.trim();
       }
       if (order.deliveryAddress && typeof order.deliveryAddress === 'object') {
-        return order.deliveryAddress.formatted || order.deliveryAddress.fullAddress ||
-               order.deliveryAddress.addressLine || order.deliveryAddress.line1 || '';
+        const d = order.deliveryAddress;
+        const direct = d.formatted || d.fullAddress || d.addressLine || d.line1 || d.address || d.text || '';
+        if (direct) return String(direct);
+        return [d.houseNo || d.flat, d.street, d.landmark, d.area || d.locality, d.city, d.state, d.pincode || d.zip]
+          .filter(Boolean).join(', ');
       }
       if (typeof order.address === 'string' && order.address.trim()) {
         return order.address.trim();
@@ -750,46 +799,70 @@
 
     function fmtMoney(n) { return '₹' + n; }
 
+    function itemVegClass(i) {
+      // Only when the item data really says so; otherwise no marker is drawn.
+      let v = i.isVeg ?? i.veg ?? i.isVegetarian;
+      if (v === undefined) {
+        const t = String(i.foodType || i.type || i.dietType || '').toLowerCase().replace(/[\s_-]/g, '');
+        if (t === 'veg' || t === 'vegetarian') v = true;
+        else if (t === 'nonveg' || t === 'nonvegetarian' || t === 'egg') v = false;
+      }
+      return v === true ? 'veg' : v === false ? 'nonveg' : '';
+    }
+    const num = (...vals) => { for (const v of vals) { if (typeof v === 'number' && isFinite(v)) return v; } return undefined; };
+    const money2 = (n) => '₹' + (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, '');
+
     function renderInvoiceStyleSummary(order) {
       const itemsList = document.getElementById('summary-items-list');
       const chargesWrap = document.getElementById('summary-charges');
 
       itemsList.innerHTML = (order.items || []).map(i => {
         const hasPrice = typeof i.price === 'number';
-        return `<div class="item-row"><span class="item-qty">${esc(i.quantity)}×</span><span class="item-name">${esc(i.name)}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
+        const vc = itemVegClass(i);
+        const mark = vc ? `<span class="veg-mark ${vc}" aria-label="${vc === 'veg' ? 'Veg' : 'Non-veg'}"><i></i></span>` : '';
+        return `<div class="item-row">${mark}<span class="item-name">${esc(i.quantity)} x ${esc(i.name)}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
       }).join('');
 
-      // Only ever render charge rows for fields the backend actually provided —
-      // never fabricate discount/tax/delivery/coupon figures.
+      // Only rows for fields the backend really sent. Nothing is invented.
       const rows = [];
+      const row = (label, val, cls) => rows.push(`<div class="charge-row ${cls || ''}"><span class="charge-label">${label}</span><span class="charge-val">${val}</span></div>`);
       const allItemsHavePrices = (order.items || []).length > 0 && order.items.every(i => typeof i.price === 'number');
       const subtotal = allItemsHavePrices ? order.items.reduce((s, i) => s + i.price * i.quantity, 0) : null;
+      if (subtotal !== null) row('Item total', money2(subtotal));
 
-      if (subtotal !== null) rows.push(`<div class="charge-row"><span class="charge-label">Item Subtotal</span><span class="charge-val">${fmtMoney(subtotal)}</span></div>`);
+      const taxes = num(order.taxes, order.tax, order.gst, order.gstAmount);
+      if (taxes > 0) row('GST (govt. taxes)', money2(taxes));
 
-      const discount = order.discount ?? order.couponDiscount;
-      if (typeof discount === 'number' && discount > 0) rows.push(`<div class="charge-row discount"><span class="charge-label">Discount${order.couponCode ? ' (' + esc(order.couponCode) + ')' : ''}</span><span class="charge-val">-${fmtMoney(discount)}</span></div>`);
-
-      const taxes = order.taxes ?? order.tax;
-      if (typeof taxes === 'number' && taxes > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes</span><span class="charge-val">${fmtMoney(taxes)}</span></div>`);
-
-      const deliveryFee = order.deliveryFee ?? order.deliveryCharge;
-      if (typeof deliveryFee === 'number') rows.push(`<div class="charge-row"><span class="charge-label">Delivery Fee</span><span class="charge-val">${deliveryFee > 0 ? fmtMoney(deliveryFee) : 'FREE'}</span></div>`);
-
-      // Rider tip is part of the server-authoritative order total. Show it as
-      // its own line so the Grand Total is fully explainable to the customer.
-      const tipAmount = order.tipAmount ?? order.riderTip ?? order.tip;
-      if (typeof tipAmount === 'number' && tipAmount > 0) rows.push(`<div class="charge-row"><span class="charge-label">Rider Tip</span><span class="charge-val">${fmtMoney(tipAmount)}</span></div>`);
-
-      // If we know a subtotal but none of the individual charge fields exist,
-      // show the honest gap between subtotal and total as one transparent line
-      // rather than inventing categorized charges.
-      if (subtotal !== null && discount === undefined && taxes === undefined && deliveryFee === undefined) {
-        const gap = order.total - subtotal;
-        if (gap > 0) rows.push(`<div class="charge-row"><span class="charge-label">Taxes &amp; Charges</span><span class="charge-val">${fmtMoney(gap)}</span></div>`);
+      const deliveryFee = num(order.deliveryFee, order.deliveryCharge);
+      const deliveryOrig = num(order.originalDeliveryFee, order.deliveryFeeOriginal, order.baseDeliveryFee);
+      if (deliveryFee !== undefined) {
+        if (deliveryFee > 0) row('Delivery partner fee', money2(deliveryFee));
+        else row('Delivery partner fee', (deliveryOrig > 0 ? `<s class="strike">${money2(deliveryOrig)}</s> ` : '') + '<span class="free">FREE</span>');
       }
 
+      const platformFee = num(order.platformFee, order.platformCharge, order.handlingFee);
+      if (platformFee > 0) row('Platform fee', money2(platformFee));
+
+      const tipAmount = num(order.tipAmount, order.riderTip, order.tip);
+      if (tipAmount > 0) row('Rider tip', money2(tipAmount));
+
+      const discount = num(order.discount, order.couponDiscount);
+      if (discount > 0) row(order.couponCode ? 'Coupon applied - ' + esc(order.couponCode) : 'Discount', '- ' + money2(discount), 'discount');
+
+      const roundOff = num(order.roundOff, order.cashRoundOff);
+      if (roundOff !== undefined && roundOff !== 0) row('Cash round off', money2(roundOff));
+
+      if (subtotal !== null && discount === undefined && taxes === undefined && deliveryFee === undefined && platformFee === undefined) {
+        const gap = order.total - subtotal;
+        if (gap > 0) row('Taxes &amp; charges', money2(gap));
+      }
       chargesWrap.innerHTML = rows.join('');
+
+      // Savings banner: only from real discount / real waived delivery fee.
+      const saved = (discount > 0 ? discount : 0) + (deliveryFee === 0 && deliveryOrig > 0 ? deliveryOrig : 0);
+      const banner = document.getElementById('saved-banner');
+      if (saved > 0) { banner.textContent = `You saved ${money2(saved)} on this order!`; banner.hidden = false; }
+      else banner.hidden = true;
     }
 
     // ── Real live map (Leaflet + MapTiler) ─────────────────────────
@@ -962,6 +1035,13 @@
       const titleEl = document.getElementById('status-title');
       if (titleEl.textContent !== head.title) { titleEl.textContent = head.title; replay(titleEl, 'status-anim'); }
       setText('status-sub', head.etaValue ? info.sub : head.detail);
+      if (info.group === 'cancelled') {
+        const rsn = String(order.cancelReason || '').trim();
+        titleEl.textContent = 'Order was cancelled';
+        const byRest = /^rejected by restaurant/i.test(rsn);
+        const clean = rsn.replace(/^rejected by restaurant:\s*/i, '');
+        setText('status-sub', byRest ? 'Cancelled by the restaurant' + (clean ? ': ' + clean : '') : (rsn ? 'Reason: ' + rsn : 'This order was cancelled'));
+      }
       const note = document.getElementById('status-note');
       note.textContent = head.note || '';
       note.hidden = !head.note;
@@ -1058,7 +1138,9 @@
 
       const idLabel = order.orderNumber || String(order._id).slice(-5).toUpperCase();
       const placedAt = OS.fmtDateTime(order.createdAt);
-      document.getElementById('display-res-name').innerText = `Order #${idLabel}`;
+      document.getElementById('display-res-name').innerText = `Order ID: #${idLabel}`;
+      document.getElementById('copy-order-id').dataset.id = idLabel;
+      setText('order-placed-at', placedAt ? 'Placed on ' + placedAt : '');
       document.getElementById('hero-meta-line').innerText = `Order #${idLabel}${placedAt ? ' · ' + placedAt : ''}`;
       document.getElementById('display-total').innerText = `₹${order.total}`;
 
@@ -1109,8 +1191,8 @@
 
       // Receiver — shown only if the saved address carried it into the order.
       const da = (order.deliveryAddress && typeof order.deliveryAddress === 'object') ? order.deliveryAddress : {};
-      const receiverName = String(da.receiverName || '').trim();
-      const receiverPhone = maskPhone(da.receiverPhone);
+      const receiverName = String(da.receiverName || da.name || order.customerName || order.userName || (order.user && order.user.name) || '').trim();
+      const receiverPhone = maskPhone(da.receiverPhone || da.phone || order.customerPhone || (order.user && order.user.phone));
       const receiverRow = document.getElementById('receiver-row');
       receiverRow.hidden = !(receiverName || receiverPhone);
       setText('receiver-name', receiverName || 'Receiver');
@@ -1307,7 +1389,7 @@
         refundRow.style.display = 'none';
       }
 
-      card.style.display = 'block';
+      card.style.display = (refundRow.style.display === 'none') ? 'none' : 'block';
     }
 
     function launchConfetti() {
@@ -1436,6 +1518,11 @@
       const heroShareBtn = document.getElementById('hero-share-btn');
       const riderShareBtn = document.getElementById('rider-share-btn');
       const shareExpBtn = document.getElementById('share-experience-btn');
+      const copyBtn = document.getElementById('copy-order-id');
+      if (copyBtn) copyBtn.addEventListener('click', async () => {
+        const v = '#' + (copyBtn.dataset.id || '');
+        try { await navigator.clipboard.writeText(v); copyBtn.innerHTML = '<i class="fa-solid fa-check"></i>'; setTimeout(() => { copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>'; }, 1500); } catch (e) {}
+      });
       if (heroShareBtn) heroShareBtn.addEventListener('click', shareHandler);
       if (riderShareBtn) riderShareBtn.addEventListener('click', shareHandler);
       if (shareExpBtn) shareExpBtn.addEventListener('click', async () => {
