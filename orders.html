@@ -10,7 +10,7 @@
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#F7F7F9">
-<title>Your Orders – Eatswada</title>
+<title>My Orders – Eatswada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
@@ -76,7 +76,7 @@ img{max-width:100%;display:block;}
 }
 .header-back-btn:active{background:rgba(0,0,0,.05);}
 .header-titles{flex:1;min-width:0;}
-.header-titles h1{margin:0;font-size:22px;line-height:28px;font-weight:800;letter-spacing:-.45px;color:var(--ink-900);}
+.header-titles h1{margin:0;font-size:18px;line-height:24px;font-weight:800;letter-spacing:-.3px;color:var(--ink-900);}
 .header-stats{
   display:flex;align-items:center;gap:8px;max-width:640px;margin:0 auto;
   font-size:12px;font-weight:600;color:var(--ink-500);
@@ -94,7 +94,7 @@ img{max-width:100%;display:block;}
 .search-bar>i{color:#737476;font-size:15px;flex:none;}
 .search-bar input{
   flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;padding:0;
-  font:500 15px/1.4 'Manrope',system-ui,sans-serif;color:var(--ink-900);-webkit-appearance:none;
+  font:500 13px/1.3 'Manrope',system-ui,sans-serif;color:var(--ink-900);-webkit-appearance:none;
 }
 .search-bar input::placeholder{color:var(--ink-400);}
 .search-clear{
@@ -102,6 +102,30 @@ img{max-width:100%;display:block;}
   place-items:center;font-size:11px;flex:none;
 }
 .search-bar.has-value .search-clear{display:grid;}
+
+/* Filter pills (same pill pattern as the Home filter bar; style.css
+   forces .chip geometry with !important, so this page scopes over it).
+   The green pill behind the active filter slides between filters. */
+.filter-chips{
+  position:relative;display:flex;gap:8px;max-width:640px;margin:10px auto 0;padding:0 0 12px;
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.filter-chips::-webkit-scrollbar{display:none;}
+.filter-chips .chip{
+  position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;min-height:34px;
+  padding:0 14px !important;border:1px solid var(--ink-200) !important;border-radius:999px !important;
+  background:transparent;color:var(--ink-700) !important;font-family:'Manrope',system-ui,sans-serif !important;
+  font-size:13px !important;font-weight:600 !important;box-shadow:none !important;white-space:nowrap;user-select:none;
+  transition:color .2s var(--ease),border-color .2s var(--ease);
+}
+.filter-chips .chip.active{color:var(--brand) !important;border-color:var(--brand-soft) !important;font-weight:700 !important;}
+.filter-chips .chip::after{content:attr(data-count);margin-left:6px;font-size:11px;font-weight:700;color:var(--ink-400);}
+.filter-chips .chip.active::after{color:var(--brand);}
+.filter-chips .chip[data-count=""]::after,.filter-chips .chip:not([data-count])::after{content:"";margin:0;}
+.chip-indicator{
+  position:absolute;left:0;top:0;height:34px;width:0;border-radius:999px;background:var(--brand-tint);
+  transform:translateX(0);transition:transform .32s var(--ease-out),width .32s var(--ease-out);
+}
 
 /* ---------- Content ---------- */
 .orders-content{max-width:640px;margin:0 auto;padding:14px 14px 0;}
@@ -122,8 +146,8 @@ img{max-width:100%;display:block;}
   display:grid;place-items:center;font-size:17px;font-weight:800;color:var(--ink-500);
 }
 .oc-title{flex:1;min-width:0;}
-.oc-name{margin:0;font-size:17px;line-height:23px;font-weight:700;letter-spacing:-.2px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.oc-sub{margin-top:2px;font-size:13px;line-height:18px;font-weight:500;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-name{margin:0;font-size:15px;line-height:20px;font-weight:700;letter-spacing:-.15px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.oc-sub{margin-top:1px;font-size:12px;line-height:16px;font-weight:500;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ---------- Live order card ---------- */
 .track-card{margin-bottom:12px;}
@@ -183,7 +207,7 @@ img{max-width:100%;display:block;}
 .past-card.swiped.has-delete{transform:translateX(-174px);}
 
 .past-items{list-style:none;margin:0;padding:12px 14px 2px;border-top:1px solid #F0F0F2;}
-.past-items li{display:flex;align-items:baseline;gap:8px;font-size:15px;line-height:21px;font-weight:500;color:var(--ink-700);padding:0 0 8px;min-width:0;}
+.past-items li{display:flex;align-items:baseline;gap:8px;font-size:13px;line-height:18px;font-weight:500;color:var(--ink-700);padding:0 0 8px;min-width:0;}
 .past-items .q{flex:none;min-width:22px;font-weight:700;color:var(--ink-900);}
 .past-items .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .past-items li.more{color:var(--ink-500);font-weight:600;}
@@ -193,8 +217,8 @@ img{max-width:100%;display:block;}
   border-top:1px dashed var(--line);background:none;border-left:0;border-right:0;border-bottom:0;width:calc(100% - 28px);
   text-align:left;color:inherit;cursor:pointer;
 }
-.past-when{font-size:13px;line-height:18px;font-weight:500;color:var(--ink-500);}
-.past-status{margin-top:3px;font-size:14px;line-height:20px;font-weight:700;}
+.past-when{font-size:12px;line-height:16px;font-weight:500;color:var(--ink-500);}
+.past-status{margin-top:3px;font-size:13px;line-height:18px;font-weight:700;}
 .past-status.delivered{color:var(--brand);}
 .past-status.cancelled{color:var(--danger);}
 .past-status.refunded{color:var(--info);}
@@ -213,7 +237,7 @@ img{max-width:100%;display:block;}
 .ghost-btn:active{background:#F4F4F6;}
 .btn-reorder{
   display:inline-flex;align-items:center;gap:7px;flex:none;height:36px;padding:0 16px;border:0;border-radius:999px;
-  background:var(--brand);color:var(--hd-ink,#fff);font-size:14px;font-weight:800;
+  background:var(--brand);color:var(--hd-ink,#fff);font-size:13px;font-weight:800;
 }
 .btn-reorder:active{background:var(--brand-press);}
 
@@ -297,6 +321,46 @@ img{max-width:100%;display:block;}
   .invoice-sheet{max-width:none;max-height:none;border-radius:0;}
   .no-print{display:none!important;}
 }
+@keyframes menuIn{from{opacity:0;transform:translateY(-4px) scale(.97);}to{opacity:1;transform:none;}}
+
+/* ---------- Orders page polish: compact reference-style cards ---------- */
+.header-stats{margin-top:0;}
+.search-bar{margin-top:8px;margin-bottom:12px;height:44px;border-radius:14px;box-shadow:var(--shadow-sm);}
+.search-bar input{font-size:15px;}
+.orders-content{padding-top:12px;}
+.section-title{margin:4px 2px 10px;}
+.st-left{font-size:12px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-500);}
+.order-card.ord-card{border-radius:16px;border:1px solid #ECEDEF;box-shadow:0 2px 5px rgba(16,24,40,.07);overflow:hidden;margin-bottom:14px;}
+.ord-card-head{display:flex;align-items:center;gap:12px;padding:14px 14px 12px;}
+.ord-card-head .oc-logo,.ord-card-head .restaurant-logo{width:44px;height:44px;flex:none;border-radius:10px;object-fit:cover;}
+.ord-title{flex:1;min-width:0;}
+.ord-name{margin:0;font-size:16px;line-height:22px;font-weight:800;letter-spacing:-.2px;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ord-loc{margin-top:1px;font-size:12.5px;line-height:17px;font-weight:500;color:var(--ink-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ord-menu-btn{width:34px;height:34px;flex:none;border:0;border-radius:50%;background:transparent;color:var(--ink-500);display:grid;place-items:center;font-size:16px;}
+.ord-menu-btn:active{background:#F1F1F3;}
+.ord-card .order-items,.ord-card .items-list{padding:2px 14px 10px;}
+.ord-card .item-row,.ord-card .order-item{font-size:14px;}
+.ord-meta{width:calc(100% - 28px);display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 14px 0;padding:10px 0;border:0;border-top:1px dashed var(--line);background:transparent;text-align:left;color:inherit;}
+.ord-meta-left{min-width:0;flex:1;}
+.ord-when{font-size:12.5px;line-height:17px;font-weight:500;color:var(--ink-500);}
+.ord-status{margin-top:2px;font-size:13.5px;line-height:19px;font-weight:800;}
+.ord-status.delivered{color:var(--brand);}.ord-status.cancelled{color:var(--danger);}.ord-status.refunded{color:var(--info);}
+.ord-status small{font-weight:600;color:var(--ink-500);font-size:12px;}
+.ord-total{flex:none;font-size:14.5px;font-weight:800;color:var(--ink-900);font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:5px;}
+.ord-total i{font-size:10px;color:var(--ink-400);}
+.ord-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:2px 14px 14px;}
+.ord-foot .ghost-link{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 8px;border:0;background:transparent;color:var(--ink-500);font-size:12.5px;font-weight:700;border-radius:8px;}
+.ord-foot .ghost-link i{color:#E5A100;font-size:12px;}
+.ord-reorder{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 18px;border:0;border-radius:12px;background:var(--brand);color:var(--hd-ink,#fff);font-size:14px;font-weight:800;}
+.ord-reorder:active{background:var(--brand-press);}
+.ord-ctx-menu{position:fixed;z-index:1200;min-width:170px;background:var(--card);border-radius:12px;box-shadow:var(--shadow-pop);border:1px solid var(--line);padding:6px;animation:menuIn .16s var(--ease-out) both;}
+.ord-ctx-menu[hidden]{display:none;}
+.ord-ctx-item{display:flex;align-items:center;gap:10px;width:100%;height:40px;padding:0 10px;border:0;background:transparent;border-radius:8px;text-align:left;font-size:14px;font-weight:600;color:var(--ink-800);cursor:pointer;}
+.ord-ctx-item i{width:16px;text-align:center;font-size:13px;color:var(--ink-500);}
+.ord-ctx-item:active{background:rgba(128,128,128,.10);}.ord-ctx-item.danger,.ord-ctx-item.danger i{color:var(--danger);}
+:root[data-ew-theme="dark"] .order-card.ord-card{border-color:#2A2D33;}
+@media(max-width:374px){.ord-name{font-size:15px;}.ord-reorder{padding:0 14px;font-size:13px;}}
+
 </style>
 <link rel="stylesheet" href="style.css">
 <script src="config.js"></script>
@@ -342,10 +406,9 @@ img{max-width:100%;display:block;}
 
   <div class="search-bar" id="search-bar">
     <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="search" id="order-search" placeholder="Search restaurant, item, or Order ID" autocomplete="off" enterkeyhint="search" aria-label="Search orders">
+    <input type="search" id="order-search" placeholder="Search by restaurant or dish" autocomplete="off" enterkeyhint="search" aria-label="Search orders">
     <div class="search-clear tap" id="search-clear" role="button" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></div>
   </div>
-
 </header>
 
 <div class="orders-content">
@@ -397,7 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let allOrdersData = [];
   let currentSearch = '';
-  
   let hasRenderedOnce = false;
 
   // Infinite-scroll state for Past Orders (all data is already fetched; we
@@ -562,9 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderPastSection(pastOrders) {
     if (pastOrders.length === 0) { pastContainer.innerHTML = ''; loadMoreWrap.style.display = 'none'; return; }
-
     const visible = pastOrders.slice(0, pastRenderLimit);
-
     pastContainer.innerHTML = `
       <div class="section-title" style="margin-top:${liveContainer.innerHTML ? '20px' : '4px'}">
         <div class="st-left">Past orders</div>
@@ -579,54 +639,82 @@ document.addEventListener('DOMContentLoaded', () => {
       const statusLabel = isRefunded ? 'Refunded' : (isCancelled ? 'Order cancelled' : OS.info(order).label);
       const pay = OS.payment(order);
       const cuisine = order.cuisine || order.restaurantCuisine || '';
+      const locality = order.restaurantLocality || order.locality || order.restaurantAddress || cuisine;
       const id = esc(order._id);
       const detailsUrl = `track-order.html?id=${encodeURIComponent(order._id)}`;
       const supportUrl = `order-support.html?order=${encodeURIComponent(order._id)}`;
-
       return `
-        <div class="swipe-container${enterClass('past:' + order._id)}">
-          <div class="swipe-actions">
-            <button class="swipe-btn btn-invoice tap" onclick="showInvoice('${id}')"><i class="fa-solid fa-receipt"></i><span>Invoice</span></button>
-            <button class="swipe-btn btn-support tap" onclick="window.location.href='${supportUrl}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
-            ${isCancelled ? `<button class="swipe-btn btn-delete tap" onclick="deleteCancelledOrder('${id}')"><i class="fa-solid fa-trash"></i><span>Remove</span></button>` : ''}
-          </div>
-          <div class="order-card past-card ${isCancelled ? 'has-delete' : ''}" data-order-id="${id}">
-            <div class="oc-head">
-              ${logoHtml(order)}
-              <div class="oc-title">
-                <h4 class="oc-name">${esc(order.restaurantName || 'Eatswada partner')}</h4>
-                <div class="oc-sub">${cuisine ? esc(cuisine) + ' · ' : ''}Order #${esc(orderLabel(order))}</div>
-              </div>
+        <article class="order-card ord-card ${enterClass('past:' + order._id)}" data-order-id="${id}">
+          <div class="ord-card-head">
+            ${logoHtml(order)}
+            <div class="ord-title">
+              <h4 class="ord-name">${esc(order.restaurantName || 'Eatswada partner')}</h4>
+              <div class="ord-loc">${locality ? esc(locality) : `Order #${esc(orderLabel(order))}`}</div>
             </div>
-            ${itemsList(order.items)}
-            <button type="button" class="past-summary" onclick="window.location.href='${detailsUrl}'" aria-label="View order details">
-              <span>
-                ${placed ? `<span class="past-when" style="display:block">Order placed on ${esc(placed)}</span>` : ''}
-                <span class="past-status ${statusClass}" style="display:block">${esc(statusLabel)}${pay.short && !isRefunded ? ` <small>· ${esc(pay.short)}</small>` : ''}</span>
-              </span>
-              <span class="past-total">₹${esc(order.total)} <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-            </button>
-            <div class="past-footer">
-              <div class="ghost-row">
-                <button class="ghost-btn tap" onclick="showInvoice('${id}')"><i class="fa-solid fa-file-lines"></i>Invoice</button>
-                ${isDelivered ? `<button class="ghost-btn rate tap" onclick="window.location.href='${detailsUrl}#rate'"><i class="fa-solid fa-star"></i>Rate</button>` : ''}
-                <button class="ghost-btn tap" onclick="window.location.href='${supportUrl}'"><i class="fa-solid fa-circle-question"></i>Help</button>
-              </div>
-              <button class="btn-reorder tap" onclick="reorder('${id}')"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i>Reorder</button>
-            </div>
+            <button type="button" class="ord-menu-btn tap" aria-label="Order options" aria-haspopup="menu" aria-expanded="false" onclick="openOrderMenu('${id}', this, '${supportUrl}')"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
           </div>
-        </div>
-      `;
+          ${itemsList(order.items)}
+          <button type="button" class="ord-meta" onclick="window.location.href='${detailsUrl}'" aria-label="View order details">
+            <span class="ord-meta-left">
+              ${placed ? `<span class="ord-when" style="display:block">Order placed on ${esc(placed)}</span>` : ''}
+              <span class="ord-status ${statusClass}" style="display:block">${esc(statusLabel)}${pay.short && !isRefunded ? ` <small>· ${esc(pay.short)}</small>` : ''}</span>
+            </span>
+            <span class="ord-total">₹${esc(order.total)} <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+          </button>
+          <div class="ord-foot">
+            ${isDelivered ? `<button type="button" class="ghost-link tap" onclick="window.location.href='${detailsUrl}#rate'"><i class="fa-solid fa-star"></i> Rate</button>` : ''}
+            <button type="button" class="ord-reorder tap" onclick="reorder('${id}')"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i>Order again</button>
+          </div>
+        </article>`;
     }).join('');
-
-    if (pastOrders.length > pastRenderLimit) {
-      loadMoreWrap.style.display = 'flex';
-    } else {
-      loadMoreWrap.style.display = 'none';
-    }
+    if (pastOrders.length > pastRenderLimit) loadMoreWrap.style.display = 'flex';
+    else loadMoreWrap.style.display = 'none';
   }
 
+  // Accessible three-dot order menu. Remove is intentionally available only for cancelled orders.
+  let activeOrderMenuId = null;
+  let activeOrderMenuAnchor = null;
+  const orderMenu = document.createElement('div');
+  orderMenu.id = 'order-menu-popover';
+  orderMenu.className = 'ord-ctx-menu';
+  orderMenu.hidden = true;
+  orderMenu.setAttribute('role', 'menu');
+  document.body.appendChild(orderMenu);
+  window.openOrderMenu = (id, anchor, supportUrl) => {
+    if (activeOrderMenuId === id && !orderMenu.hidden) { closeOrderMenu(); return; }
+    document.querySelectorAll('.ord-menu-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded','false'));
+    activeOrderMenuId = id;
+    activeOrderMenuAnchor = anchor;
+    const order = allOrdersData.find(o => String(o._id) === String(id));
+    const canRemove = order && OS.norm(order.status) === 'cancelled';
+    orderMenu.innerHTML = `
+      <button type="button" class="ord-ctx-item" role="menuitem" onclick="closeOrderMenu();showInvoice('${id}')"><i class="fa-solid fa-file-invoice"></i><span>Invoice</span></button>
+      <button type="button" class="ord-ctx-item" role="menuitem" onclick="closeOrderMenu();window.location.href='${supportUrl}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
+      ${canRemove ? `<button type="button" class="ord-ctx-item danger" role="menuitem" onclick="closeOrderMenu();deleteCancelledOrder('${id}')"><i class="fa-solid fa-trash"></i><span>Remove</span></button>` : ''}`;
+    const r = anchor.getBoundingClientRect();
+    orderMenu.hidden = false;
+    orderMenu.style.visibility = 'hidden';
+    const mw = orderMenu.offsetWidth || 180, mh = orderMenu.offsetHeight || 100;
+    const left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw));
+    const top = r.bottom + mh + 8 <= window.innerHeight ? r.bottom + 6 : Math.max(8, r.top - mh - 6);
+    orderMenu.style.left = `${left}px`; orderMenu.style.top = `${top}px`;
+    orderMenu.style.visibility = 'visible';
+    anchor.setAttribute('aria-expanded','true');
+  };
+  window.closeOrderMenu = () => {
+    orderMenu.hidden = true;
+    if (activeOrderMenuAnchor) activeOrderMenuAnchor.setAttribute('aria-expanded','false');
+    activeOrderMenuId = null; activeOrderMenuAnchor = null;
+  };
+  document.addEventListener('pointerdown', e => {
+    if (!orderMenu.hidden && !orderMenu.contains(e.target) && !e.target.closest('.ord-menu-btn')) closeOrderMenu();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOrderMenu(); });
+  window.addEventListener('resize', closeOrderMenu);
+  window.addEventListener('scroll', closeOrderMenu, true);
+
   window.deleteCancelledOrder = (id) => {
+    if (!window.confirm('Remove this cancelled order from this device? It will not delete the order from your account history.')) return;
     hideOrderLocally(id);
     renderOrders();
   };
@@ -702,18 +790,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const updateChipCounts = () => {
     const hidden = new Set(getHidden());
     const visible = allOrdersData.filter(o => !hidden.has(o._id));
-    const counts = { active: 0 };
-    visible.forEach(o => {
-      if (liveStatuses.includes(o.status.toLowerCase())) counts.active++;
-    });
     document.getElementById('stat-total').innerText = `${visible.length} order${visible.length === 1 ? '' : 's'}`;
+    const liveCount = visible.filter(o => liveStatuses.includes(OS.norm(o.status))).length;
     const liveStat = document.getElementById('stat-live');
-    if (counts.active > 0) {
+    if (liveCount > 0) {
       liveStat.style.display = 'inline-flex';
-      document.getElementById('stat-live-text').innerText = `${counts.active} live`;
-    } else {
-      liveStat.style.display = 'none';
-    }
+      document.getElementById('stat-live-text').innerText = `${liveCount} live`;
+    } else liveStat.style.display = 'none';
   };
 
   const renderOrders = () => {
@@ -731,6 +814,7 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
+
     // Reset the infinite-scroll page only when the result *set* changes (new search/filter),
     // not on every 10s poll refresh — otherwise a scrolled-down user would keep getting bumped back up.
     const searchKey = currentSearch;
@@ -745,9 +829,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (filteredOrders.length === 0) {
       emptyState.style.display = 'block';
-      if (currentSearch || currentFilter !== 'all') {
+      if (currentSearch) {
         document.getElementById('empty-title').innerText = "No matching orders";
-        document.getElementById('empty-desc').innerText = "Try changing your filters or search term.";
+        document.getElementById('empty-desc').innerText = "Try another restaurant or dish.";
       } else {
         document.getElementById('empty-title').innerText = "No orders found";
         document.getElementById('empty-desc').innerText = "Looks like you haven't placed any orders yet.";
@@ -820,25 +904,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { rootMargin: '200px' });
   io.observe(sentinel);
   loadMoreBtn.addEventListener('click', () => { pastRenderLimit += PAGE_SIZE; renderOrders(); });
-
-  // Swipe Gestures Logic (adds a 3rd "delete" action for cancelled orders)
-  let startX = 0;
-  let currentCard = null;
-
-  document.addEventListener('touchstart', e => {
-    const card = e.target.closest('.past-card');
-    if (card) { startX = e.touches[0].clientX; currentCard = card; }
-  }, { passive: true });
-
-  document.addEventListener('touchmove', e => {
-    if (!currentCard) return;
-    const currentX = e.touches[0].clientX;
-    const diff = startX - currentX;
-    if (diff > 40) currentCard.classList.add('swiped');
-    else if (diff < -40) currentCard.classList.remove('swiped');
-  }, { passive: true });
-
-  document.addEventListener('touchend', () => { currentCard = null; });
 
   // Pull to Refresh Logic
   let touchStartPtr = 0;
