@@ -333,7 +333,9 @@ var SUPPORT_ADAPTER = {
     return { ticketId: String(ticket._id), messages: Array.isArray(ticket.messages) ? ticket.messages : [] };
   },
   listMessages: async function (a) {
-    var res = await a.api.call('/support/tickets/' + encodeURIComponent(a.ticketId));
+    var path = '/support/tickets/' + encodeURIComponent(a.ticketId);
+    if (a.since) path += '?since=' + encodeURIComponent(a.since);
+    var res = await a.api.call(path);
     var ticket = res && res.data;
     if (!ticket) throw new Error('Support ticket was not returned');
     return Array.isArray(ticket.messages) ? ticket.messages : [];
@@ -793,9 +795,10 @@ var SUPPORT_ADAPTER = {
       return { id: String(m.id), from: m.from === 'user' ? 'user' : (m.from === 'system' ? 'system' : 'agent'), text: text, at: d, demo: !!m.demo };
     } catch (e) { console.error('[order-support] normalizeMessage failed', e); return null; }
   }
-  function ingest(rawList) {
+  function ingest(rawList, merge) {
     var seen = {}, out = [];
-    rawList.forEach(function (r) { var m = normalize(r); if (m && !seen[m.id]) { seen[m.id] = 1; out.push(m); } });
+    if (merge) S.server.forEach(function (m) { if (m && m.id && !seen[m.id]) { seen[m.id] = 1; out.push(m); } });
+    (Array.isArray(rawList) ? rawList : []).forEach(function (r) { var m = normalize(r); if (m && !seen[m.id]) { seen[m.id] = 1; out.push(m); } });
     out.sort(function (a, b) { return a.at - b.at; });
     S.server = out;
     // drop optimistic copies the server now echoes back
@@ -812,7 +815,11 @@ var SUPPORT_ADAPTER = {
     S.polling = true;
     try {
       var before = S.server.length;
-      ingest(await ADAPTER.listMessages({ api: api, ticketId: S.ticketId }));
+      // Request only messages newer than the last one already rendered. This
+      // prevents retransmitting the entire conversation on each 8-second poll.
+      var newest = S.server.length ? new Date(S.server[S.server.length - 1].at.getTime() - 1).toISOString() : '';
+      var fresh = await ADAPTER.listMessages({ api: api, ticketId: S.ticketId, since: newest });
+      ingest(fresh, !!newest);
       S.pollFails = 0; S.loadedOnce = true;
       if (S.screen === 'chat') {
         var grew = S.server.length > before && S.server.slice(before).some(function (m) { return m.from !== 'user'; });

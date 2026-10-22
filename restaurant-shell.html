@@ -88,6 +88,29 @@ html[data-ew-theme="dark"] .ew-verified{color:#fff;--ew-verified-check:#111}
 .ew-hd-star{display:inline-flex;color:#fff}
 .ew-hd-count{font-size:12px;font-weight:500;color:#6b7280;line-height:1.2;padding-bottom:1px;border-bottom:1px dashed #9aa0aa;white-space:nowrap}
 </style>
+
+<style>
+.ew-customer-reviews{margin-top:18px;padding-top:16px;border-top:1px solid #ECEEF2}
+.ew-customer-reviews-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.ew-customer-reviews-title{font-size:15px;font-weight:800;color:#20232A}
+.ew-customer-reviews-summary{font-size:12px;font-weight:700;color:#7A7D85;white-space:nowrap}
+.ew-customer-reviews-status{font-size:13px;color:#747782;padding:8px 0}
+.ew-customer-review{padding:13px 0;border-top:1px solid #F0F1F4}
+.ew-customer-review-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ew-customer-review-person{font-size:13px;font-weight:800;color:#252831}
+.ew-customer-review-date{font-size:11px;color:#92949C;white-space:nowrap}
+.ew-customer-review-score{margin-top:5px;color:#C58A09;font-size:13px;letter-spacing:1px}
+.ew-customer-review-comment{font-size:13px;color:#4B4E57;line-height:1.55;margin-top:6px;white-space:pre-wrap;overflow-wrap:anywhere}
+.ew-customer-review-items{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ew-customer-review-item{font-size:11px;font-weight:700;color:#4D5664;background:#F4F5F7;padding:5px 7px;border-radius:7px}
+.ew-customer-review-reply{margin-top:9px;padding:9px 10px;background:#F8F7F4;border-left:3px solid #690D27;border-radius:0 8px 8px 0}
+.ew-customer-review-reply b{display:block;font-size:11px;color:#690D27;margin-bottom:3px}
+.ew-customer-review-reply p{font-size:12px;color:#555862;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.ew-customer-reviews-more{border:1px solid #E2E4E9;background:#fff;border-radius:999px;padding:9px 13px;color:#333741;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.ew-customer-reviews-more:disabled{opacity:.55;cursor:wait}
+@media(prefers-reduced-motion:reduce){.ew-customer-review{scroll-behavior:auto}}
+</style>
+
 </head>
 <body>
 <div aria-atomic="true" aria-live="polite" class="ew-free-delivery-toast" id="ew-free-delivery-toast" role="status">
@@ -1004,11 +1027,97 @@ window.ewLoadVisibleImages = function(root, margin){
     const fssaiNo = window.ewFssaiNumber(r);
     if (fssaiNo) parts.push(window.ewFssaiHTML(fssaiNo, 'fss fss-info'));
 
+    // The reviews endpoint returns verified order reviews, per-dish ratings,
+    // and restaurant replies. Load this data only after the Info tab is opened.
+    parts.push('<section class="ew-customer-reviews" id="ew-customer-reviews" aria-label="Customer reviews">' +
+      '<div class="ew-customer-reviews-head"><h3 class="ew-customer-reviews-title">Customer reviews</h3><span class="ew-customer-reviews-summary" id="ew-customer-reviews-summary"></span></div>' +
+      '<div class="ew-customer-reviews-status" id="ew-customer-reviews-status" role="status" aria-live="polite">Loading recent reviews…</div>' +
+      '<div id="ew-customer-reviews-list"></div>' +
+      '<button type="button" class="ew-customer-reviews-more" id="ew-customer-reviews-more" hidden>Load more reviews</button>' +
+      '</section>');
+
     box.innerHTML = parts.join('');
     box.style.display = '';
     if (skeleton) skeleton.style.display = 'none';
     infoRenderedFor = r;
+    loadRestaurantReviews(r._id || r.id);
   }
+
+  const ewReviewState = { restaurantId: '', page: 0, pages: 0, total: 0, summary: null, items: [], loading: false, error: false };
+  function renderRestaurantReviews() {
+    const status = document.getElementById('ew-customer-reviews-status');
+    const summary = document.getElementById('ew-customer-reviews-summary');
+    const list = document.getElementById('ew-customer-reviews-list');
+    const more = document.getElementById('ew-customer-reviews-more');
+    if (!status || !summary || !list || !more) return;
+    const data = ewReviewState.summary || {};
+    const count = Number(data.ratingCount || data.reviewCount || ewReviewState.total || 0);
+    const score = Number(data.rating);
+    summary.textContent = count > 0 ? ((Number.isFinite(score) && score > 0 ? score.toFixed(1) + ' ★ · ' : '') + count + (count === 1 ? ' review' : ' reviews')) : '';
+    status.textContent = ewReviewState.items.length ? '' : (ewReviewState.error ? 'Customer reviews are temporarily unavailable.' : (ewReviewState.page ? 'No verified customer reviews yet.' : ''));
+    list.innerHTML = ewReviewState.items.map(review => {
+      const person = review.customer && review.customer.name || 'Customer';
+      const scoreValue = Math.max(0, Math.min(5, Number(review.score) || 0));
+      const date = review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      const itemRatings = Array.isArray(review.itemRatings) ? review.itemRatings.slice(0, 8) : [];
+      const itemHtml = itemRatings.length ? '<div class="ew-customer-review-items">' + itemRatings.map(item => {
+        const n = String(item.itemName || 'Dish');
+        const sc = Math.max(0, Math.min(5, Number(item.score) || 0));
+        return '<span class="ew-customer-review-item">' + escapeMenuHtml(n) + ' · ' + sc + '/5 ★</span>';
+      }).join('') + '</div>' : '';
+      const reply = review.vendorReply && review.vendorReply.message ? '<div class="ew-customer-review-reply"><b>Restaurant response</b><p>' + escapeMenuHtml(review.vendorReply.message) + '</p></div>' : '';
+      const comment = String(review.comment || '').trim();
+      return '<article class="ew-customer-review"><div class="ew-customer-review-top"><span class="ew-customer-review-person">' + escapeMenuHtml(person) + '</span><span class="ew-customer-review-date">' + escapeMenuHtml(date) + '</span></div>' +
+        '<div class="ew-customer-review-score" aria-label="' + scoreValue + ' out of 5 stars">' + '★'.repeat(scoreValue) + '☆'.repeat(5 - scoreValue) + '</div>' +
+        (comment ? '<p class="ew-customer-review-comment">' + escapeMenuHtml(comment) + '</p>' : '') + itemHtml + reply +
+        (review.verified ? '<div style="font-size:11px;color:#25825E;font-weight:700;margin-top:7px">✓ Verified order</div>' : '') + '</article>';
+    }).join('');
+    more.hidden = !ewReviewState.error && !(ewReviewState.page < ewReviewState.pages);
+    more.disabled = ewReviewState.loading;
+    more.textContent = ewReviewState.loading ? 'Loading…' : (ewReviewState.error ? 'Try again' : 'Load more reviews');
+  }
+
+  async function loadRestaurantReviews(restaurantId, append) {
+    const id = String(restaurantId || '');
+    if (!id || ewReviewState.loading) return;
+    if (ewReviewState.restaurantId !== id || !append) {
+      if (ewReviewState.restaurantId !== id) ewReviewState.items = [];
+      ewReviewState.restaurantId = id;
+      ewReviewState.page = 0;
+      ewReviewState.pages = 0;
+      ewReviewState.total = 0;
+      ewReviewState.summary = null;
+      ewReviewState.error = false;
+    }
+    const nextPage = append ? ewReviewState.page + 1 : 1;
+    if (append && ewReviewState.page >= ewReviewState.pages && !ewReviewState.error) return;
+    ewReviewState.loading = true;
+    ewReviewState.error = false;
+    renderRestaurantReviews();
+    const status = document.getElementById('ew-customer-reviews-status');
+    if (status && !ewReviewState.items.length) status.textContent = 'Loading recent reviews…';
+    try {
+      const payload = await window.API.request('/restaurants/' + encodeURIComponent(id) + '/reviews?page=' + nextPage + '&limit=5');
+      if (!payload || payload.success !== true || !Array.isArray(payload.data)) throw new Error('Unexpected reviews response');
+      ewReviewState.page = Number(payload.page) || nextPage;
+      ewReviewState.pages = Number(payload.pages) || 0;
+      ewReviewState.total = Number(payload.total) || 0;
+      ewReviewState.summary = payload.summary || null;
+      ewReviewState.items = append ? ewReviewState.items.concat(payload.data) : payload.data.slice();
+    } catch (error) {
+      ewReviewState.error = true;
+      console.warn('[restaurant] Customer reviews are temporarily unavailable.');
+    } finally {
+      ewReviewState.loading = false;
+      renderRestaurantReviews();
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    const button = event.target && event.target.closest ? event.target.closest('#ew-customer-reviews-more') : null;
+    if (!button) return;
+    loadRestaurantReviews(ewReviewState.restaurantId, !ewReviewState.error);
+  });
 
   function openRestaurantDetails() {
     // Kept for backward compatibility with any existing caller; it now opens

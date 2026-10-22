@@ -283,6 +283,13 @@
     .rating-card > p { font-size: 13px; color: var(--ink-500); margin-top: 2px; }
     .rating-block { margin-top: 14px; }
     .rating-block-label { font-size: 12px; font-weight: 700; color: var(--ink-700); margin-bottom: 6px; }
+    .item-rating-list { display: grid; gap: 10px; text-align: left; }
+    .item-rating-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-soft); }
+    .item-rating-name { min-width: 0; font-size: 13px; font-weight: 700; color: var(--ink-800); overflow-wrap: anywhere; }
+    .item-rating-stars { display: flex; gap: 3px; flex: 0 0 auto; }
+    .item-rating-star { border: 0; background: transparent; padding: 3px; color: #D5D7DC; font-size: 20px; line-height: 1; cursor: pointer; }
+    .item-rating-star.active { color: #E5A100; }
+    .item-rating-star:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; border-radius: 4px; }
     .stars { display: inline-flex; gap: 6px; }
     .stars i { font-size: 26px; color: #E1E2E6; cursor: pointer; padding: 4px; transition: color .15s var(--ease), transform .15s var(--ease-out); }
     .stars i.active { color: #E5A100; }
@@ -657,7 +664,12 @@
         </div>
       </div>
 
-      <textarea class="review-box" id="review-text" placeholder="Tell us more about your experience (optional)"></textarea>
+      <div class="rating-block" id="item-ratings-block">
+        <div class="rating-block-label">Rate the dishes you ordered <span style="font-weight:500;color:var(--ink-500)">(optional)</span></div>
+        <div class="item-rating-list" id="item-rating-list"></div>
+      </div>
+
+      <textarea class="review-box" id="review-text" maxlength="500" placeholder="Tell us more about your experience (optional)"></textarea>
 
       <!-- Photo upload is not wired to the review API, so it stays hidden
            (the old picker previewed a photo that was never uploaded). -->
@@ -705,6 +717,9 @@
       cancelled: 'Your order was cancelled.'
     };
     let currentOrder = null;
+    let reviewUIInitializedFor = '';
+    let itemReviewEntries = [];
+    const itemRatingScores = Object.create(null);
 
     /* XSS-safe output helpers, shared by ALL render functions below. Must live
        at this (script) scope — not inside fetchOrderData — or sibling functions
@@ -719,6 +734,56 @@
       try { var u = new URL(String(v), location.href); return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : ''; }
       catch (e) { return ''; }
     };
+
+    function renderItemRatingControls(order) {
+      const list = document.getElementById('item-rating-list');
+      const block = document.getElementById('item-ratings-block');
+      if (!list || !block) return;
+      const seen = new Set();
+      itemReviewEntries = [];
+      (Array.isArray(order && order.items) ? order.items : []).forEach(item => {
+        const name = String(item && item.name || '').trim();
+        if (!name) return;
+        const menuItem = item && item.menuItem ? String(item.menuItem) : '';
+        const key = (menuItem || name).toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        itemReviewEntries.push({ name, menuItem });
+      });
+      Object.keys(itemRatingScores).forEach(key => delete itemRatingScores[key]);
+      if (!itemReviewEntries.length) { block.hidden = true; list.textContent = ''; return; }
+      block.hidden = false;
+      list.innerHTML = itemReviewEntries.map((item, index) => {
+        const stars = [1,2,3,4,5].map(score => '<button class="item-rating-star" type="button" data-item-index="' + index + '" data-score="' + score + '" aria-label="Rate ' + esc(item.name) + ' ' + score + ' out of 5" aria-pressed="false">★</button>').join('');
+        return '<div class="item-rating-row"><span class="item-rating-name">' + esc(item.name) + '</span><div class="item-rating-stars" role="group" aria-label="Rate ' + esc(item.name) + '">' + stars + '</div></div>';
+      }).join('');
+    }
+
+    async function loadExistingOrderReview(order) {
+      const orderId = String(order && order._id || '');
+      if (!orderId || reviewUIInitializedFor === orderId) return;
+      reviewUIInitializedFor = orderId;
+      renderItemRatingControls(order);
+      const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token') || sessionStorage.getItem('nearbite_token') || '';
+      try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/orders/${encodeURIComponent(orderId)}/review`, {
+          headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          cache: 'no-store'
+        });
+        if (response.status === 401) { window.location.href = 'login.html'; return; }
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result || result.success !== true) return;
+        if (!result.data) return;
+        // The API upserts a review per order. Fetching it here prevents the
+        // delivered-order card from inviting a duplicate review after refresh.
+        document.querySelectorAll('#rating-card .rating-block, #rating-card .review-box, #rating-card .photo-upload-label, #rating-card .photo-preview-row, #rating-card #rating-submit').forEach(el => { el.hidden = true; });
+        const thanks = document.getElementById('rating-thanks');
+        if (thanks) { thanks.textContent = 'You have already rated this order. Thank you for your feedback!'; thanks.style.display = 'block'; }
+      } catch (error) {
+        // Keep the form usable if the optional review-status lookup is offline.
+        console.warn('[track-order] Review status could not be loaded.');
+      }
+    }
 
     async function fetchOrderData() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -1260,6 +1325,7 @@
         if (!renderLiveUI.celebrated) { renderLiveUI.celebrated = true; launchConfetti(); }
 
         ratingCard.style.display = 'block';
+        loadExistingOrderReview(order);
         if (location.hash === '#rate' && !renderLiveUI.scrolledToRating) {
           renderLiveUI.scrolledToRating = true;
           setTimeout(() => ratingCard.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
@@ -1542,12 +1608,26 @@
             onSet(val);
             stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value, 10) <= val));
             wrap.classList.remove('just-set'); void wrap.offsetWidth; wrap.classList.add('just-set');
-            if (ratingSubmitBtn) ratingSubmitBtn.disabled = false;
+            if (ratingSubmitBtn) ratingSubmitBtn.disabled = !selectedFoodRating;
           });
         });
       };
       wireStars('rider-rating-stars', v => selectedRiderRating = v);
       wireStars('food-rating-stars', v => selectedFoodRating = v);
+      const itemRatingList = document.getElementById('item-rating-list');
+      if (itemRatingList) itemRatingList.addEventListener('click', event => {
+        const btn = event.target && event.target.closest ? event.target.closest('button[data-item-index][data-score]') : null;
+        if (!btn) return;
+        const index = Number(btn.dataset.itemIndex), score = Number(btn.dataset.score);
+        if (!Number.isInteger(index) || !itemReviewEntries[index] || !Number.isInteger(score) || score < 1 || score > 5) return;
+        itemRatingScores[index] = score;
+        itemRatingList.querySelectorAll('button[data-item-index="' + index + '"]').forEach(star => {
+          const active = Number(star.dataset.score) <= score;
+          star.classList.toggle('active', active);
+          star.setAttribute('aria-pressed', String(Number(star.dataset.score) === score));
+        });
+        if (ratingSubmitBtn) ratingSubmitBtn.disabled = !selectedFoodRating;
+      });
 
       // Photo upload — local preview only, nothing is uploaded anywhere
       const photoInput = document.getElementById('review-photo-input');
@@ -1579,13 +1659,23 @@
             const response = await fetch(`${CONFIG.API_BASE_URL}/orders/${currentOrder._id}/review`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-              body: JSON.stringify({ score: selectedFoodRating, riderScore: selectedRiderRating || null, comment: document.getElementById('review-text').value.trim() })
+              body: JSON.stringify({
+                score: selectedFoodRating,
+                riderScore: selectedRiderRating || null,
+                comment: document.getElementById('review-text').value.trim(),
+                itemRatings: itemReviewEntries.reduce((out, item, index) => {
+                  const score = Number(itemRatingScores[index] || 0);
+                  if (score >= 1 && score <= 5) out.push({ itemName: item.name, ...(item.menuItem ? { menuItem: item.menuItem } : {}), score });
+                  return out;
+                }, [])
+              })
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Could not submit review');
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || !result || result.success !== true) throw new Error((result && result.message) || 'Could not submit review');
             document.getElementById('rider-rating-stars').style.display = 'none';
             document.getElementById('food-rating-stars').style.display = 'none';
             document.querySelectorAll('.rating-block-label').forEach(l => l.style.display = 'none');
+            document.getElementById('item-ratings-block').style.display = 'none';
             document.getElementById('review-text').style.display = 'none';
             const photoLabel = document.querySelector('.photo-upload-label');
             if (photoLabel) photoLabel.style.display = 'none';

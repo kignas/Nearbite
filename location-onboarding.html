@@ -793,6 +793,18 @@ function showPresetPoint(pt){
  setAddress(pt.title||'Selected delivery location','Move the map to adjust the pin',pt.sub||'','map');
  $('confirm').disabled=false;
 }
+async function checkBackendServiceability(lat,lng){
+ const base=(window.CONFIG&&window.CONFIG.API_BASE_URL)||'https://api.eatswada.com/api';
+ const qs=new URLSearchParams({lat:String(lat),lng:String(lng)});
+ const response=await fetch(base+'/restaurants/serviceability?'+qs.toString(),{
+   headers:{Accept:'application/json'},cache:'no-store'
+ });
+ const result=await response.json().catch(()=>null);
+ if(!response.ok||!result||result.success!==true||!result.data||typeof result.data.serviceable!=='boolean'){
+   throw new Error((result&&result.message)||'Could not verify delivery availability.');
+ }
+ return result.data;
+}
 async function confirmLocation(){
  // Saving is allowed only after a genuine GPS fix or an explicit search/map
  // selection. The DEFAULT map centre is never treated as a customer location.
@@ -800,18 +812,37 @@ async function confirmLocation(){
  const btn=$('confirm');
  btn.disabled=true;
  btn.textContent='Checking availability…';
+ warn('');
  try{
-   // Run reverse geocoding and the 10 km serviceability check together. They
-   // are independent operations, so there is no reason to make the customer
-   // wait for one before the other.
+   // Ask the backend's indexed geospatial query whether at least one approved,
+   // active restaurant serves within the platform's 10 km launch radius.
+   // Reverse geocoding and serviceability are independent, so run them together.
    const lat=Number(current.lat.toFixed(7));
    const lng=Number(current.lng.toFixed(7));
-   const d = await reverseGeocode(current.lat,current.lng);
+   const results=await Promise.all([
+     reverseGeocode(current.lat,current.lng),
+     checkBackendServiceability(lat,lng)
+   ]);
+   const d=results[0];
+   const serviceability=results[1];
+   if(!serviceability.serviceable){
+     const distance=Number(serviceability.nearestDistanceKm);
+     const detail=Number.isFinite(distance)&&distance>=0
+       ? ' The nearest available restaurant is about '+distance.toFixed(1)+' km away.'
+       : ' No approved restaurant is currently available within 10 km.';
+     warn('Eatswada delivery is not available at this location yet.'+detail+' Move the map to another location and check again.');
+     btn.disabled=false;
+     btn.textContent='Check this location again';
+     setAddress('Outside current delivery area','No approved restaurant within 10 km','Move the map to try another delivery point','map');
+     return;
+   }
 
    const pointPayload={
      latitude:lat,longitude:lng,
      accuracy:Number((current.accuracy||0).toFixed(1)),
-     source:current.source|| (firstFix?'gps':'map'),capturedAt:Date.now()
+     source:current.source|| (firstFix?'gps':'map'),capturedAt:Date.now(),
+     serviceability:{serviceable:true,maxDeliveryDistanceKm:Number(serviceability.maxDeliveryDistanceKm)||10,
+       nearestDistanceKm:Number.isFinite(Number(serviceability.nearestDistanceKm))?Number(serviceability.nearestDistanceKm):null}
    };
    localStorage.setItem('nearbite_onboarding_location',JSON.stringify(pointPayload));
    localStorage.setItem('eatswada_device_location',JSON.stringify({lat,lng,ts:Date.now()}));
@@ -825,7 +856,7 @@ async function confirmLocation(){
    window.location.replace(next || 'index.html');
  }catch(e){
    console.error('[location] serviceability check failed:',e);
-   warn('We could not check delivery availability. Please try again.');
+   warn('We could not verify delivery availability. Check your connection and try again.');
    btn.disabled=false;
    btn.textContent='Confirm & proceed';
  }
