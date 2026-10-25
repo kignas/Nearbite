@@ -26,6 +26,7 @@
   var method = 'upi';
   var sendCutlery = false;
   try { sendCutlery = localStorage.getItem(CUTLERY_KEY) === '1'; } catch (e) { /* storage unavailable */ }
+  try { method = localStorage.getItem(METHOD_KEY) === 'cod' ? 'cod' : 'upi'; } catch (e) { /* storage unavailable */ }
 
   function S() {
     return (window.EWPlatform && window.EWPlatform.current()) || {};
@@ -120,15 +121,72 @@
     return method;
   }
 
+  /* Called by placeOrder() immediately before POST /orders, after a fresh
+     platform-status read. Returns a user-facing message when the order must
+     not be attempted, or null when it may proceed. Never mutates money —
+     the backend stays authoritative; this only avoids a guaranteed reject. */
+  function revalidateBeforeOrder() {
+    var s = S();
+    if (s.isUnderMaintenance === true) {
+      return (s.maintenanceMessage || 'Ordering is paused for maintenance. Please try again shortly.');
+    }
+    if (s.isDeliveryPausedShortage === true) {
+      return 'High demand: Delivery partners are currently busy. Ordering will resume shortly.';
+    }
+    var chosen = storedMethod();
+    if (chosen === 'cod' && !codState().ok) {
+      // COD became ineligible (platform switch, block, multi-restaurant or cap).
+      // Drop the stale preference so the customer is not left with a COD CTA
+      // the backend would reject, and tell them plainly.
+      method = 'upi';
+      try { localStorage.setItem(METHOD_KEY, 'upi'); } catch (e) { /* ignore */ }
+      try { if (window.CtX) window.CtX.refreshPayment(); } catch (e) { /* ignore */ }
+      if (!upiState().ok) return 'Cash on delivery is unavailable for this order and online payment is currently disabled. Please try again later.';
+      return 'Cash on delivery is no longer available for this order. Please pay online to continue.';
+    }
+    if (chosen === 'upi' && !upiState().ok) {
+      return 'Online payment is currently unavailable. Please try again later.';
+    }
+    return null;
+  }
+
+  /* The raw stored preference, before eligibility is applied. Lets the
+     checkout tell "customer chose UPI" apart from "customer chose COD but
+     COD is no longer eligible". */
+  function storedMethod() {
+    try { return localStorage.getItem(METHOD_KEY) === 'cod' ? 'cod' : 'upi'; } catch (e) { return 'upi'; }
+  }
+
   function selectMethod(m) {
     var want = m === 'cod' ? 'cod' : 'upi';
     if (want === 'cod' && !codState().ok) want = 'upi';
     if (want === 'upi' && !upiState().ok && codState().ok) want = 'cod';
+    if (want !== method) {
+      // A different payment method is a materially different checkout, so the
+      // pending attempt key must not be reused for the new payload.
+      if (window.EWCheckout) { try { window.EWCheckout.clearKey(); } catch (e) { /* ignore */ } }
+    }
     method = want;
     try { localStorage.setItem(METHOD_KEY, method); } catch (e) { /* ignore */ }
     paintPayment(true);
     paintPayNote();
     refreshCta();
+  }
+
+  /* Re-read the platform settings (COD / UPI availability can change while the
+     customer is on the page) and repaint the selector. Called by cart-page's
+     syncPaymentOptions() whenever delivery eligibility is refreshed. */
+  function refreshPayment() {
+    if (method === 'cod' && !codState().ok) method = 'upi';
+    paintPayment(true);
+    paintPayNote();
+    refreshCta();
+  }
+
+  /* Used by clearCart(): fall back to the default method. */
+  function resetMethod() {
+    method = 'upi';
+    try { localStorage.setItem(METHOD_KEY, method); } catch (e) { /* ignore */ }
   }
 
   function refreshCta() {
@@ -382,10 +440,15 @@
     ctaBlock: ctaBlock,
     ctaLabel: ctaLabel,
     getPaymentMethod: getPaymentMethod,
+    storedMethod: storedMethod,
+    revalidateBeforeOrder: revalidateBeforeOrder,
     selectMethod: selectMethod,
+    refreshPayment: refreshPayment,
+    resetMethod: resetMethod,
     getSendCutlery: function () { return sendCutlery; },
     handleOrderFailure: handleOrderFailure,
     codState: codState,
+    upiState: upiState,
     init: init
   };
 

@@ -44,6 +44,33 @@ function esc(value) {
   return String(value == null ? '' : value).replace(/[&<>"']/g, ch => CT_ESC[ch]);
 }
 
+/* Any material change to the cart, address or checkout extras voids the
+   pending attempt key, so the next order can never replay an earlier one. */
+function ctClearCheckoutKey() {
+  if (window.EWCheckout) window.EWCheckout.clearKey();
+  else {
+    try {
+      localStorage.removeItem('nearbite_checkout_key');
+      localStorage.removeItem('nearbite_checkout_fp');
+      localStorage.removeItem('nearbite_checkout_fp_ts');
+    } catch (e) { /* ignore */ }
+  }
+}
+
+/* Selected payment method is owned by js/cart-checkout-upgrades.js (window.CtX).
+   This shim keeps the existing call sites working and never overrides the
+   customer's real selection with a hardcoded value. */
+function ctSelectedPaymentMethod() {
+  try {
+    if (window.CtX && typeof window.CtX.getPaymentMethod === 'function') {
+      return window.CtX.getPaymentMethod() === 'cod' ? 'cod' : 'upi';
+    }
+  } catch (e) { /* fall through */ }
+  try {
+    return localStorage.getItem('nearbite_payment_method') === 'cod' ? 'cod' : 'upi';
+  } catch (e) { return 'upi'; }
+}
+
 /* ── Geo + fee primitives (unchanged) ───────────────────────────────────── */
 function normalizeCoords(value) {
   // GeoJSON: { type: 'Point', coordinates: [lng, lat] }
@@ -232,7 +259,7 @@ async function calculateCurrentDelivery(options) {
 
   // If a selected server-side address exists, hydrate its coordinates before
   // calculating delivery. This prevents Home/Work switches from using stale GPS.
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  const token = window.EWAuth ? window.EWAuth.getToken() : (localStorage.getItem('nearbite_token') || localStorage.getItem('token'));
   const needsHydration = force || ctAddrHydratedFor !== selectedAddressId;
   if (token && selectedAddressId && needsHydration) {
     try {
@@ -372,6 +399,7 @@ function applyMultiDelivery(rows) {
   const belowMin = rows.filter(r => r.minOrder > 0 && r.subtotal < r.minOrder);
 
   ctState.deliveryFee = deliveryTotal;
+  ctState.deliveryFeeEstimated = false;
   ctState.unavailable = anyOutside;
   ctState.deliveryReady = true;
   ctState.multiBelowMin = belowMin;
@@ -423,25 +451,27 @@ function applyMultiDelivery(rows) {
   updateCheckoutCta();
 }
 
-/* ── Payment (behaviour unchanged) ──────────────────────────────────────── */
-let selectedPaymentMethod = 'upi';
-localStorage.setItem('nearbite_payment_method', 'upi');
-
-function selectPaymentMethod(_method) {
-  // UPI is the only supported payment method on Eatswada.
-  selectedPaymentMethod = 'upi';
-  localStorage.setItem('nearbite_payment_method', 'upi');
-  document.querySelectorAll('.payment-method-option').forEach(el => {
-    const active = el.dataset.method === 'upi';
-    el.classList.toggle('selected', active);
-    const icon = el.querySelector('.payment-check');
-    if (icon) icon.className = active ? 'fa-solid fa-circle-check payment-check' : 'fa-regular fa-circle payment-check';
-  });
+/* ── Payment (delegates to the shared selector) ─────────────────────────── */
+/* The selector UI and eligibility rules live in js/cart-checkout-upgrades.js
+   (window.CtX), which is the single authority for the customer's chosen
+   method. This file only reads it, so a COD selection can no longer be
+   silently overwritten with 'upi' before the order is submitted. */
+function selectPaymentMethod(method) {
+  try {
+    if (window.CtX && typeof window.CtX.selectMethod === 'function') {
+      window.CtX.selectMethod(method);
+      return;
+    }
+  } catch (e) { /* fall through */ }
+  try { localStorage.setItem('nearbite_payment_method', method === 'cod' ? 'cod' : 'upi'); } catch (e) {}
 }
 
-function syncPaymentOptions(_ignored) {
-  // Compatibility shim for existing delivery-state callers. COD no longer exists.
-  selectPaymentMethod('upi');
+/* Kept for existing delivery-state callers. Eligibility is decided by CtX
+   from the platform settings and the restaurant, never hardcoded here. */
+function syncPaymentOptions(_codEnabled) {
+  if (window.CtX && typeof window.CtX.refreshPayment === 'function') {
+    try { window.CtX.refreshPayment(); } catch (e) { /* ignore */ }
+  }
 }
 
 /* ── Shared UI state ────────────────────────────────────────────────────── */
@@ -453,6 +483,7 @@ const ctState = {
   unavailable: false,
   deliveryReady: false,
   deliveryFee: 0,
+  deliveryFeeEstimated: false,
   minOrder: 0,
   freeDeliveryEnabled: false,
   freeDeliveryAbove: 0,
@@ -465,6 +496,10 @@ const ctState = {
   itemSavings: 0,
   originalCartTotal: 0
 };
+
+/* Held while a POST /orders is being prepared or a payment is open, so a
+   second tap or keyboard submit cannot start a parallel checkout. */
+let ctOrderInFlight = false;
 
 /* ══════════════════════════════════════════════════════════════════════════
    CART EXTRAS — restaurant note, delivery instructions, tip
@@ -838,6 +873,14 @@ function applyTotals() {
   paintSavingsHero();
   paintFooterSavings();
   paintSavingsCorner();
+
+  // Let the checkout-upgrades layer add the itemized extras (packaging,
+  // handling, surge, tax) it previews from the platform settings, so the
+  // "To Pay" figure includes every charge the backend will apply. The backend
+  // remains authoritative; this only mirrors it.
+  if (window.CtX && typeof window.CtX.paintBill === 'function') {
+    try { window.CtX.paintBill(); } catch (e) { /* never block the cart paint */ }
+  }
 }
 
 /* Collapsed summary of the same figures shown in the sheet. */
@@ -865,7 +908,7 @@ function updateBillCompact(total) {
   } else if (ctState.deliveryFee === 0) {
     parts.push('Free delivery');
   } else {
-    parts.push('Delivery ₹' + ctState.deliveryFee);
+    parts.push((ctState.deliveryFeeEstimated ? 'Delivery ~₹' : 'Delivery ₹') + ctState.deliveryFee);
   }
 
   const tip = ctCleanTip(ctState.tipAmount);
@@ -900,7 +943,13 @@ function applyDelivery(delivery) {
     deliveryFee = 30;
   }
 
+  // A fee that came from the GPS-less fallback is an ESTIMATE, not a quote.
+  // The UI must never present it as a guaranteed final charge — the backend
+  // computes the authoritative delivery fee and returns the order total.
+  const estimated = delivery.source === 'fallback' || delivery.estimated === true;
+
   ctState.deliveryFee = deliveryFee;
+  ctState.deliveryFeeEstimated = estimated;
   ctState.multiBelowMin = [];
   const _bpr = document.getElementById('bill-per-restaurant'); if (_bpr) { _bpr.style.display = 'none'; _bpr.innerHTML = ''; }
   const _dl = document.getElementById('bill-delivery-label');
@@ -961,14 +1010,18 @@ function applyDelivery(delivery) {
     setStrip('', 'fa-solid fa-motorcycle', title, sub);
   } else if (delivery.distance != null) {
     feeEl.className = 'ct-bill-val';
-    feeEl.textContent = '₹' + deliveryFee;
+    feeEl.textContent = (estimated ? '~' : '') + '₹' + deliveryFee;
     setStrip('', 'fa-solid fa-motorcycle',
       `${delivery.distance.toFixed(1)} km away · ₹${deliveryFee} delivery fee`, '');
   } else {
+    // No GPS fix: the fee below is an estimate only. Say so, and confirm the
+    // final amount at checkout instead of promising a fixed charge.
     feeEl.className = 'ct-bill-val';
-    feeEl.textContent = '₹' + deliveryFee;
+    feeEl.textContent = '~₹' + deliveryFee;
+    const feeLabel = document.getElementById('bill-delivery-label');
+    if (feeLabel) feeLabel.textContent = 'Delivery fee (estimated)';
     setStrip('is-neutral', 'fa-solid fa-motorcycle',
-      'Delivery fee is calculated from the restaurant and your address GPS.', '');
+      'Delivery fee is an estimate — the exact charge is confirmed at checkout.', '');
   }
 
   applyTotals();
@@ -1055,7 +1108,9 @@ function updateCheckoutCta() {
   }
   btn.classList.remove('locked');
   btn.setAttribute('aria-disabled', 'false');
-  label.innerHTML = `Proceed to Pay ${CT_ICON_ARROW}<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
+  const isCod = ctSelectedPaymentMethod() === 'cod';
+  const ctaMain = isCod ? 'Place Order (COD)' : 'Proceed to Pay';
+  label.innerHTML = `${ctaMain} ${CT_ICON_ARROW}<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
 }
 
 /* ── Render ─────────────────────────────────────────────────────────────── */
@@ -1122,7 +1177,7 @@ function cartAdjust(name, change) {
     if (savedCart[name].quantity <= 0) delete savedCart[name];
     localStorage.setItem('nearbite_cart', JSON.stringify(savedCart));
     // A cart mutation invalidates any pending checkout idempotency key.
-    localStorage.removeItem('nearbite_checkout_key');
+    ctClearCheckoutKey();
     repaintCart();       // instant feedback
     ctBumpQty(name);     // visual only — the row above is already repainted
     scheduleDelivery();  // debounced; free-delivery threshold depends on subtotal
@@ -1148,9 +1203,9 @@ function ctBumpQty(name) {
 function clearCart() {
   localStorage.removeItem('nearbite_cart');
   localStorage.removeItem('nearbite_payment_method');
-  localStorage.removeItem('nearbite_checkout_key');
+  ctClearCheckoutKey();
   clearCartExtras();
-  selectedPaymentMethod = 'upi';
+  if (window.CtX && typeof window.CtX.resetMethod === 'function') window.CtX.resetMethod();
   renderCart();
 }
 
@@ -1174,7 +1229,7 @@ async function loadAddress() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem('nearbite_address')); } catch(e) {}
 
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  const token = window.EWAuth ? window.EWAuth.getToken() : (localStorage.getItem('nearbite_token') || localStorage.getItem('token'));
   const tagLabel = document.getElementById('address-tag-label');
   const addrText = document.getElementById('address-display-text');
 
@@ -1295,17 +1350,19 @@ function ctSavePaymentContext(data) {
   } catch (_) {}
 }
 
-function ctPaymentContextBase(result, primaryOrderId) {
-  return {
-    orderId: primaryOrderId,
+function ctPaymentContextBase(result, orderId, extra) {
+  // Deliberately carries no delivery OTP: the OTP is read from the
+  // owner-scoped order response when the customer opens the order, never
+  // persisted in shared storage.
+  return Object.assign({
+    orderId: orderId || null,
     multiple: !!result?.multiple,
-    orderNumber: result?.data?.orderNumber || '',
-    deliveryOtp: result?.deliveryOtp || '',
-    deliveryOtps: result?.deliveryOtps || {}
-  };
+    orderNumber: result?.data?.orderNumber || ''
+  }, extra || {});
 }
 
 function ctGoPaymentResult(state, extra) {
+  if (extra) ctSavePaymentContext(extra);
   const params = new URLSearchParams();
   params.set('state', state);
   window.location.href = `payment-${state}.html?${params.toString()}`;
@@ -1313,9 +1370,22 @@ function ctGoPaymentResult(state, extra) {
 
 function ctRestoreCheckoutButton(btn, originalHTML) {
   ctSetCheckoutButton(btn, originalHTML, false);
+  // Any path that returns control to the checkout page (payment dismissed,
+  // payment failed, request error) releases the submit lock. Success paths
+  // navigate away and never call this, so the lock stays held.
+  ctOrderInFlight = false;
 }
 
+/* Ask the backend for the authoritative payment status of an order. A
+   non-OK / non-success answer is thrown so callers treat it as "unknown"
+   rather than as proof of failure. Restored from the pristine baseline
+   (main:js/cart-page.js) after it was dropped in the checkout rewrite. */
 async function ctReadPaymentStatus(orderId, token) {
+  if (window.EWPaymentVerify) {
+    return window.EWPaymentVerify.readStatus({
+      fetchImpl: fetch, apiBase: CONFIG.API_BASE_URL, orderId: orderId, token: token
+    });
+  }
   const response = await fetch(
     `${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(orderId)}/status`,
     { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
@@ -1330,25 +1400,40 @@ async function ctReadPaymentStatus(orderId, token) {
   return result.data || {};
 }
 
-/*
- * Razorpay can return control to the browser before the capture/webhook has
- * reached our database. Never turn that short race into "payment failed".
- * We give the backend a bounded window to become authoritative, then send the
- * customer to a transparent pending-verification screen.
- */
+/* A terminal state means the backend has stopped changing its mind. A settled
+   partial-COD advance counts too, even though its raw paymentStatus is
+   `cod_pending` — so the raw string alone is not enough. */
+function ctPaymentStatusIsTerminal(status) {
+  if (!status) return false;
+  if (window.EWPayment) {
+    const s = window.EWPayment.state(status);
+    if (s.isPaid || s.isFailed || s.isRefunded) return true;
+  }
+  const ps = String(status.paymentStatus || '').toLowerCase();
+  return ps === 'paid' || ps === 'failed' || ps === 'refunded';
+}
+
+/* Razorpay can return control to the browser before the capture/webhook has
+   reached the database. Never turn that short race into "payment failed".
+   Give the backend a bounded window to become authoritative, then let the
+   caller send the customer to a transparent pending screen. */
 async function ctWaitForPaymentStatus(orderId, token, maxMs = 22000) {
+  if (window.EWPaymentVerify) {
+    return window.EWPaymentVerify.waitForStatus({
+      fetchImpl: fetch, apiBase: CONFIG.API_BASE_URL, orderId: orderId, token: token, maxMs: maxMs,
+      onPollError: (e) => console.warn('[PAYMENT] status poll:', e && e.message)
+    });
+  }
   const started = Date.now();
   let delay = 1200;
   while (Date.now() - started < maxMs) {
     try {
       const status = await ctReadPaymentStatus(orderId, token);
-      const paymentStatus = String(status.paymentStatus || '').toLowerCase();
-      if (paymentStatus === 'paid' || paymentStatus === 'refunded') return status;
-      if (paymentStatus === 'failed') return status;
+      if (ctPaymentStatusIsTerminal(status)) return status;
     } catch (error) {
-      // A transient 5xx/network failure should not turn a real payment into a
-      // failure. Continue the bounded verification window.
-      console.warn('[PAYMENT] status poll:', error.message);
+      // A transient 401/429/5xx/network failure is not proof of failure.
+      // Keep polling for the remainder of the bounded window.
+      console.warn('[PAYMENT] status poll:', error && error.message);
     }
     await new Promise(resolve => setTimeout(resolve, delay));
     delay = Math.min(3000, Math.round(delay * 1.35));
@@ -1356,24 +1441,48 @@ async function ctWaitForPaymentStatus(orderId, token, maxMs = 22000) {
   return null;
 }
 
-function ctStoreSuccessfulPayment(result) {
-  if (result?.multiple && result.deliveryOtps && typeof result.deliveryOtps === 'object') {
-    Object.keys(result.deliveryOtps).forEach(oid => {
-      const otp = result.deliveryOtps[oid];
-      if (otp) localStorage.setItem(`nearbite_delivery_otp_${oid}`, otp);
-    });
-  } else if (result?.deliveryOtp && result?.data?._id) {
-    localStorage.setItem(`nearbite_delivery_otp_${result.data._id}`, result.deliveryOtp);
-  }
+function ctFinishCodOrder(result, primaryOrderId, serverTotal, btn) {
+  // The backend already created the COD order; the cart is cleared only now.
+  localStorage.removeItem('nearbite_cart');
+  ctClearCheckoutKey();
+  clearCartExtras();
+  ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId, {
+    method: 'COD',
+    serverTotal: serverTotal != null ? serverTotal : null
+  }));
+  if (btn) btn.style.pointerEvents = 'none';
+  ctGoPaymentResult('success');
 }
 
-function ctFinishSuccessfulPayment(result, btn) {
-  ctStoreSuccessfulPayment(result);
+/* Display amounts for the confirmation screen, taken only from the server's
+   own fields. The advance (not the full total) is the figure paid online for
+   a partial-COD order; the remaining cash due is whatever the backend says. */
+function ctPaymentDisplayAmounts(result, confirmed) {
+  const src = Object.assign({}, result?.data || {}, confirmed || {});
+  const out = {
+    serverTotal: window.EWPayment ? window.EWPayment.authoritativeTotal(src) : null
+  };
+  if (window.EWPayment) {
+    const pc = window.EWPayment.partialCod(src);
+    if (pc.required) {
+      out.partialCodAdvanceAmount = pc.advanceAmount;
+      out.partialCodCashDue = pc.cashDue;
+      out.advanceStatus = pc.status;
+    }
+  }
+  return out;
+}
+
+function ctFinishSuccessfulPayment(result, btn, confirmed) {
   localStorage.removeItem('nearbite_cart');
-  localStorage.removeItem('nearbite_checkout_key');
+  ctClearCheckoutKey();
   clearCartExtras();
 
-  ctSavePaymentContext(ctPaymentContextBase(result, result?.data?._id));
+  ctSavePaymentContext(ctPaymentContextBase(
+    result,
+    result?.data?._id,
+    ctPaymentDisplayAmounts(result, confirmed)
+  ));
   if (btn) btn.style.pointerEvents = 'none';
   ctGoPaymentResult('success');
 }
@@ -1384,9 +1493,122 @@ function ctHandleFailedPayment(result, primaryOrderId, btn) {
   ctGoPaymentResult('failed');
 }
 
+/* An ambiguous outcome (network drop, capture not yet visible) is NOT a
+   failure: keep the order context and let the pending screen reconcile
+   against the authoritative backend before anyone retries. */
+function ctHandlePendingPayment(result, primaryOrderId, extra) {
+  ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId, extra));
+  ctGoPaymentResult('pending');
+}
+
+/* Opens Razorpay for a full UPI payment or a partial-COD advance. The
+   signature/payment is always verified server-side; the browser callback
+   alone never marks an order paid. purpose: 'payment' | 'advance'. */
+function ctOpenRazorpay(opts) {
+  const { result, primaryOrderId, btn, originalHTML, token, purpose } = opts;
+  const isAdvance = purpose === 'advance';
+
+  ctSetCheckoutButton(
+    btn,
+    '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> ' +
+      (isAdvance ? 'Opening advance payment…' : 'Opening secure payment…') + '</span>',
+    true
+  );
+
+  const rzp = new Razorpay({
+    timeout: 300,
+    key: result.payment.keyId,
+    amount: result.payment.amount,
+    currency: result.payment.currency || 'INR',
+    name: 'Eatswada',
+    description: isAdvance
+      ? `Advance for COD order ${result.data?.orderNumber || ''}`
+      : (result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`),
+    order_id: result.payment.orderId,
+    prefill: {
+      name: document.getElementById('checkout-customer-name')?.textContent || '',
+      contact: document.getElementById('checkout-customer-phone')?.textContent || ''
+    },
+    theme: { color: '#C2185B' },
+    modal: {
+      ondismiss: () => {
+        ctRestoreCheckoutButton(btn, originalHTML);
+        showToast(isAdvance
+          ? 'Advance payment cancelled. Your order is not confirmed yet — you can try again.'
+          : 'Payment cancelled. Your cart is still saved.');
+      }
+    },
+    handler: async function (paymentResponse) {
+      // Razorpay has returned success. Keep the CTA in a clear verification
+      // state so a slow backend never looks like a frozen button.
+      ctSetCheckoutButton(
+        btn,
+        '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Verifying payment…</span>',
+        true
+      );
+
+      const paymentPayload = {
+        orderId: primaryOrderId,
+        razorpayPaymentId: paymentResponse.razorpay_payment_id,
+        razorpayOrderId: paymentResponse.razorpay_order_id,
+        razorpaySignature: paymentResponse.razorpay_signature
+      };
+
+      // The whole verify + reconcile decision lives in js/payment-verify.js so
+      // it is unit-tested against a fake fetch. Its contract: an unconfirmed
+      // outcome is never a failed outcome; only the server may declare
+      // success or failure.
+      if (window.EWPaymentVerify) {
+        try {
+          const outcome = await window.EWPaymentVerify.run({
+            fetchImpl: fetch,
+            apiBase: CONFIG.API_BASE_URL,
+            token: token,
+            orderId: primaryOrderId,
+            verifyBody: paymentPayload,
+            onError: (e) => console.error('[PAYMENT] verification:', e)
+          });
+          if (outcome.verdict === 'paid') {
+            ctFinishSuccessfulPayment(result, btn, outcome.data);
+          } else if (outcome.verdict === 'failed') {
+            ctHandleFailedPayment(result, primaryOrderId, btn);
+          } else {
+            ctHandlePendingPayment(result, primaryOrderId);
+          }
+        } catch (verifyError) {
+          // A failure inside reconciliation itself is unknown, not failed.
+          console.error('[PAYMENT] verification:', verifyError);
+          ctHandlePendingPayment(result, primaryOrderId);
+        }
+        return;
+      }
+
+      // js/payment-verify.js is a hard dependency of the checkout page. If it
+      // is missing, the page is mis-deployed: refuse to guess an outcome.
+      // Do NOT silently fall back to a second copy of this logic — that would
+      // hide a broken deployment. Never claim success, never claim failure,
+      // never create a second order; keep the order recoverable instead.
+      console.error('[PAYMENT] js/payment-verify.js failed to load — cannot verify or reconcile. Treating the outcome as unknown.');
+      ctHandlePendingPayment(result, primaryOrderId);
+    }
+  });
+
+  rzp.on('payment.failed', function (failure) {
+    console.error('Razorpay payment failed:', failure);
+    ctSavePaymentContext(Object.assign(
+      ctPaymentContextBase(result, primaryOrderId),
+      { failureMessage: failure?.error?.description || 'Payment was not completed.' }
+    ));
+    ctRestoreCheckoutButton(btn, originalHTML);
+    ctGoPaymentResult('failed');
+  });
+
+  rzp.open();
+}
+
 /* ── Checkout ───────────────────────────────────────────────────────────── */
 async function placeOrder() {
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  const token = window.EWAuth ? window.EWAuth.getToken() : (localStorage.getItem('nearbite_token') || localStorage.getItem('token'));
 
   // UI guard only. Backend validation below is untouched.
   if (ctState.unavailable) {
@@ -1427,6 +1649,11 @@ async function placeOrder() {
     return;
   }
 
+  // Re-entrancy guard: the CTA is disabled below, but a keyboard Enter or a
+  // second tap before the first repaint must not start a second POST /orders.
+  if (ctOrderInFlight) return;
+  ctOrderInFlight = true;
+
   const btn = document.getElementById('btn-checkout');
   const originalHTML = btn.innerHTML;
 
@@ -1435,6 +1662,26 @@ async function placeOrder() {
     '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Preparing your order…</span>',
     true
   );
+
+  // Revalidate platform availability (maintenance / rider shortage) and COD
+  // eligibility right before creating the order. A stale banner must not let
+  // the customer reach a checkout the backend will reject, and a payment
+  // method chosen before a platform change must be rechecked. The backend
+  // remains the final authority — this only avoids a guaranteed rejection.
+  try {
+    if (window.EWPlatform) await window.EWPlatform.get(true);
+  } catch (e) { /* a status outage must not block ordering; backend enforces */ }
+  try {
+    if (window.CtX && typeof window.CtX.revalidateBeforeOrder === 'function') {
+      const block = window.CtX.revalidateBeforeOrder();
+      if (block) {
+        ctRestoreCheckoutButton(btn, originalHTML);
+        shakeCheckout();
+        showToast(block, 'error');
+        return;
+      }
+    }
+  } catch (e) { /* never let the preflight itself break checkout */ }
 
   try {
     const savedCart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
@@ -1503,7 +1750,28 @@ async function placeOrder() {
 
     const total = subtotal + deliveryFee;
 
-    const payload = {
+    // The customer's real selection (UPI or COD) from the shared selector.
+    // The backend is still the authority for eligibility and money.
+    const paymentMethod = ctSelectedPaymentMethod();
+
+    // One builder for the request body. The same values feed the idempotency
+    // fingerprint below, so the key and the request can never disagree. The
+    // inline object is the fallback if the module failed to load.
+    const payload = window.EWOrderPayload ? window.EWOrderPayload.build(savedCart, {
+      items: itemsArray,
+      deliveryAddress: savedAddress,
+      addressId: localStorage.getItem('nearbite_selected_address_id') || (savedAddress && savedAddress._id) || null,
+      restaurantId: restaurantId,
+      restaurantName: restaurantName || document.getElementById('cart-restaurant-name').innerText,
+      subtotal,
+      deliveryFee,
+      paymentMethod: paymentMethod,
+      restaurantNote: ctState.restaurantNote || '',
+      restaurantNotes: Object.keys(ctState.restaurantNotes || {}).length ? ctState.restaurantNotes : undefined,
+      deliveryInstructions: ctState.deliveryInstructions || '',
+      tipAmount: ctCleanTip(ctState.tipAmount),
+      couponCode: String(ctState.couponCode || '')
+    }) : {
       items: itemsArray,
       deliveryAddress: savedAddress,
       addressId: localStorage.getItem('nearbite_selected_address_id') || (savedAddress && savedAddress._id) || null,
@@ -1512,7 +1780,7 @@ async function placeOrder() {
       subtotal,
       deliveryFee,
       total,
-      paymentMethod: 'upi',
+      paymentMethod: paymentMethod,
       // Phase 3.1 — read from ctState, not from the DOM, so they are exactly
       // what the customer saved. subtotal/deliveryFee/total above keep their
       // existing pre-tip meaning; the tip is a separate field and the backend
@@ -1524,15 +1792,23 @@ async function placeOrder() {
       couponCode: String(ctState.couponCode || '')
     };
 
-    // Idempotency: reuse one key for this cart so a double-tap, a dropped
-    // response, or a network retry returns the SAME order(s) instead of
-    // creating a second set. Cleared once the order succeeds.
-    let idempotencyKey = localStorage.getItem('nearbite_checkout_key');
-    if (!idempotencyKey) {
-      idempotencyKey = (self.crypto && self.crypto.randomUUID)
-        ? self.crypto.randomUUID()
-        : 'ck_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-      localStorage.setItem('nearbite_checkout_key', idempotencyKey);
+    // Idempotency: the key is bound to a fingerprint of the payload above.
+    // An unchanged retry (double-tap, dropped response, network retry) reuses
+    // the same key and returns the SAME order; any material change — items,
+    // quantities, restaurant, address, tip, coupon, notes or payment method —
+    // yields a new key so an old order can never be replayed with stale
+    // amounts or missing items. Cleared once the order succeeds.
+    let idempotencyKey;
+    if (window.EWCheckout) {
+      idempotencyKey = window.EWCheckout.ensureKey(payload);
+    } else {
+      idempotencyKey = localStorage.getItem('nearbite_checkout_key');
+      if (!idempotencyKey) {
+        idempotencyKey = (self.crypto && self.crypto.randomUUID)
+          ? self.crypto.randomUUID()
+          : 'ck_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        localStorage.setItem('nearbite_checkout_key', idempotencyKey);
+      }
     }
 
     const response = await fetch(`${CONFIG.API_BASE_URL}/orders`, {
@@ -1545,10 +1821,75 @@ async function placeOrder() {
       body: JSON.stringify(payload)
     });
 
-    const result = await response.json();
+    let result = null;
+    try { result = await response.json(); } catch (_) { result = null; }
 
-    if (!(response.ok && result.success)) {
-      throw new Error(result.message || 'Failed to place order.');
+    // A platform block (maintenance / rider shortage) arrives as a 503 body.
+    // It must be checked BEFORE the generic !success guard, otherwise a 503
+    // whose body has no `success:true` is swallowed by the generic error and
+    // the platform banner never updates.
+    if (response.status === 503 && window.CtX && typeof window.CtX.handleOrderFailure === 'function') {
+      const blocked = window.CtX.handleOrderFailure(response.status, result);
+      if (blocked) throw new Error(blocked);
+    }
+
+    if (!(response.ok && result && result.success)) {
+      throw new Error((result && result.message) || 'Failed to place order.');
+    }
+
+    const primaryOrderId = result.data?._id;
+
+    // Server-authoritative money: prefer the backend's own total over the
+    // preview we sent, and never recompute a final charge on the client.
+    const serverTotal = window.EWPayment
+      ? window.EWPayment.authoritativeTotal(result.data)
+      : null;
+
+    // ── Cash on Delivery ─────────────────────────────────────────────────
+    // No Razorpay order is created. The backend is the authority for COD
+    // eligibility; a 200 here means it accepted the COD order. If the
+    // backend requires a partial advance, it returns partialCodAdvanceAmount
+    // and a Razorpay order — that path is handled below exactly like UPI so a
+    // required advance is never treated as a completed order.
+    if (paymentMethod === 'cod') {
+      // The advance decision (does the server require an online advance, and
+      // can we start it?) lives in js/payment-verify.js so it is unit-tested.
+      const cod = window.EWPaymentVerify
+        ? window.EWPaymentVerify.codDecision({
+            data: result.data || {},
+            payment: result.payment || null,
+            hasRazorpay: !!window.Razorpay
+          })
+        : {
+            kind: (result.payment && result.payment.orderId) ? 'advance-pending' : 'complete'
+          };
+
+      if (cod.kind === 'advance-open') {
+        ctOpenRazorpay({
+          result: result,
+          primaryOrderId: primaryOrderId,
+          serverTotal: serverTotal,
+          btn: btn,
+          originalHTML: originalHTML,
+          token: token,
+          purpose: 'advance'
+        });
+        return;
+      }
+
+      if (cod.kind === 'advance-pending') {
+        // The server requires an advance we cannot start right now. The order
+        // is NOT complete: keep its id, clear nothing, and route to recovery.
+        ctHandlePendingPayment(result, primaryOrderId, Object.assign(
+          { method: 'COD', serverTotal: serverTotal != null ? serverTotal : null },
+          ctPaymentDisplayAmounts(result, null)
+        ));
+        return;
+      }
+
+      // COD accepted with nothing to pay online.
+      ctFinishCodOrder(result, primaryOrderId, serverTotal, btn);
+      return;
     }
 
     // UPI orders are finalized only after Razorpay returns and the backend verifies
@@ -1558,126 +1899,15 @@ async function placeOrder() {
       throw new Error('Online payment is temporarily unavailable. Please try again.');
     }
 
-    const primaryOrderId = result.data?._id;
-    ctSetCheckoutButton(
-      btn,
-      '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Opening secure payment…</span>',
-      true
-    );
-
-    const rzp = new Razorpay({
-      timeout: 300,
-      key: result.payment.keyId,
-      amount: result.payment.amount,
-      currency: result.payment.currency || 'INR',
-      name: 'Eatswada',
-      description: result.multiple ? 'Eatswada multi-restaurant order' : `Eatswada order ${result.data?.orderNumber || ''}`,
-      order_id: result.payment.orderId,
-      prefill: {
-        name: document.getElementById('checkout-customer-name')?.textContent || '',
-        contact: document.getElementById('checkout-customer-phone')?.textContent || ''
-      },
-      theme: { color: '#C2185B' },
-      modal: {
-        ondismiss: () => {
-          ctRestoreCheckoutButton(btn, originalHTML);
-          showToast('Payment cancelled. Your cart is still saved.');
-        }
-      },
-      handler: async function (paymentResponse) {
-        // Razorpay has returned success. Keep the CTA in a clear verification
-        // state so a slow backend never looks like a frozen button.
-        ctSetCheckoutButton(
-          btn,
-          '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Verifying payment…</span>',
-          true
-        );
-
-        const paymentPayload = {
-          orderId: primaryOrderId,
-          razorpayPaymentId: paymentResponse.razorpay_payment_id,
-          razorpayOrderId: paymentResponse.razorpay_order_id,
-          razorpaySignature: paymentResponse.razorpay_signature
-        };
-
-        let verificationResponseReceived = false;
-        try {
-          const verifyResponse = await fetch(`${CONFIG.API_BASE_URL}/payments/verify`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(paymentPayload)
-          });
-
-          verificationResponseReceived = true;
-          let verifyResult = null;
-          try { verifyResult = await verifyResponse.json(); } catch (_) {}
-
-          if (verifyResponse.ok && verifyResult?.success && verifyResult.paymentStatus === 'paid') {
-            ctFinishSuccessfulPayment(result, btn);
-            return;
-          }
-
-          // 409 means Razorpay payment exists but capture may not have reached
-          // the app yet. Poll our server rather than asking for another payment.
-          if (verifyResponse.status === 409 || verifyResponse.status >= 500) {
-            const status = await ctWaitForPaymentStatus(primaryOrderId, token);
-            if (status?.paymentStatus === 'paid') {
-              ctFinishSuccessfulPayment(result, btn);
-              return;
-            }
-            if (status?.paymentStatus === 'failed') {
-              ctHandleFailedPayment(result, primaryOrderId, btn);
-              return;
-            }
-            ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId));
-            ctGoPaymentResult('pending');
-            return;
-          }
-
-          // A definitive client/server validation failure is not a transient
-          // delay. Preserve the order context and offer a safe retry.
-          throw new Error(verifyResult?.message || 'Payment could not be verified.');
-        } catch (verifyError) {
-          console.error('[PAYMENT] verification:', verifyError);
-
-          // A normal 4xx response is a definitive verification failure. A
-          // network/5xx failure is ambiguous, so check the authoritative
-          // payment status before ever telling the customer to pay again.
-          if (verificationResponseReceived) {
-            ctHandleFailedPayment(result, primaryOrderId, btn);
-            return;
-          }
-
-          const status = await ctWaitForPaymentStatus(primaryOrderId, token);
-          if (status?.paymentStatus === 'paid') {
-            ctFinishSuccessfulPayment(result, btn);
-            return;
-          }
-          if (status?.paymentStatus === 'failed') {
-            ctHandleFailedPayment(result, primaryOrderId, btn);
-            return;
-          }
-
-          ctSavePaymentContext(ctPaymentContextBase(result, primaryOrderId));
-          ctGoPaymentResult('pending');
-        }
-      }
+    ctOpenRazorpay({
+      result: result,
+      primaryOrderId: primaryOrderId,
+      serverTotal: serverTotal,
+      btn: btn,
+      originalHTML: originalHTML,
+      token: token,
+      purpose: 'payment'
     });
-
-    rzp.on('payment.failed', function (failure) {
-      console.error('Razorpay payment failed:', failure);
-      ctSavePaymentContext({
-        ...ctPaymentContextBase(result, primaryOrderId),
-        failureMessage: failure?.error?.description || 'Payment was not completed.'
-      });
-      ctRestoreCheckoutButton(btn, originalHTML);
-      ctGoPaymentResult('failed');
-    });
-
-    rzp.open();
     return;
 
   } catch (error) {
@@ -2560,7 +2790,7 @@ function ctAddMealItem(idx, btn){
     localStorage.setItem('nearbite_cart', JSON.stringify(cart));
   }
   // Same rule as cartAdjust(): any cart change voids the pending order key.
-  localStorage.removeItem('nearbite_checkout_key');
+  ctClearCheckoutKey();
 
   ctMealBusy = true;
   const card = btn && btn.closest('.ct-cym-card');
@@ -2872,7 +3102,7 @@ function paintCheckoutDeliverySummary() {
 /* Profile is only needed for the visible customer contact card when the
    selected address does not already contain receiver details. */
 async function ctEnsureProfile() {
-  const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token');
+  const token = window.EWAuth ? window.EWAuth.getToken() : (localStorage.getItem('nearbite_token') || localStorage.getItem('token'));
   // A cached login profile is enough to paint immediately, but when a token is
   // present always refresh from the authenticated backend so edited profile
   // data is reflected on Cart.
@@ -2978,7 +3208,7 @@ async function applyCouponFromSheet() {
     if(err){err.hidden=true;err.textContent='';} if(!code){if(err){err.hidden=false;err.textContent='Enter a coupon code.';}return;}
     try {
       const subtotal = Array.isArray(ctState.items) ? ctState.items.reduce((sum,it)=>sum + Number(it.price||0)*Number(it.quantity||1),0) : 0;
-      const token=localStorage.getItem('nearbite_token') || localStorage.getItem('eatswada_token') || '';
+      const token=(window.EWAuth ? window.EWAuth.getToken() : (localStorage.getItem('nearbite_token') || localStorage.getItem('eatswada_token') || ''));
       const r=await fetch(`${CONFIG.API_BASE_URL}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({code,subtotal,restaurantId:getCartRestaurantId(readCart() || {}) || undefined})});
       const data=await r.json(); if(!r.ok||!data.success) throw new Error(data.message||'Coupon could not be applied.');
       ctState.couponCode=data.data.code; ctState.couponDiscount=Number(data.data.discount||0);
@@ -3091,7 +3321,7 @@ window.addEventListener('pageshow',(e)=>{
 });
 window.addEventListener('storage',(e)=>{
   if(['nearbite_address','nearbite_selected_address_id'].includes(e.key)){
-    localStorage.removeItem('nearbite_checkout_key');
+    ctClearCheckoutKey();
     ctAddrHydratedFor = null;
     // Load the changed address, then render once — renderCart() recalculates
     // delivery and repaints the summary through its own pipeline.
@@ -3105,7 +3335,7 @@ window.addEventListener('storage',(e)=>{
 // address.html dispatches this when the selected address changes; refresh
 // address text + recalculate distance/fee/total using the existing pipeline.
 window.addEventListener('nearbite:address-changed',()=>{
-  localStorage.removeItem('nearbite_checkout_key');
+  ctClearCheckoutKey();
   ctAddrHydratedFor = null;
   // renderCart() recalculates distance/fee/total and repaints the summary via
   // its own pipeline, so load the new address first and then render exactly once.
