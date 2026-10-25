@@ -1107,7 +1107,14 @@
     if (confirmClear) confirmClear.addEventListener('click', (e) => {
       e.stopPropagation();
       localStorage.removeItem('nearbite_cart');
-      localStorage.removeItem('nearbite_checkout_key');
+      // Void the whole pending checkout attempt through the shared helper so
+      // the key, its fingerprint AND its timestamp can never go out of sync.
+      if (window.EWCheckout) window.EWCheckout.clearKey();
+      else {
+        localStorage.removeItem('nearbite_checkout_key');
+        localStorage.removeItem('nearbite_checkout_fp');
+        localStorage.removeItem('nearbite_checkout_fp_ts');
+      }
       // Same shared event so homepage cards immediately return to "+".
       try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'clearCart', cleared: true } })); } catch (e) {}
       isDismissed = false;

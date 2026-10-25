@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#F7F7F9">
@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
 
 <style>
 /* ============================================================
@@ -392,9 +392,11 @@ img{max-width:100%;display:block;}
 
 </style>
 <link rel="stylesheet" href="style.css">
+<script src="js/auth-token.js?v=20261025"></script>
 <script src="config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="safe-html.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" integrity="sha384-AQ3POAMqIhwS81FrUH95ekxqBZHeP5tG2JfEL3+7GuTtfRLWnrRh32UxwzM+//A9" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js" integrity="sha384-XtSlZdmg0Ad5zf0AX4W9TGdm+dGjaNK4KG3lNFjfgbnxkCEuT9ugWXkLExgQTJ+6" crossorigin="anonymous"></script>
 <script src="push.js"></script>
 <script src="order-status.js?v=20260926-1"></script>
 <link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
@@ -717,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${locality ? `<div class="ord-loc">${esc(locality)}</div>` : `<div class="ord-loc">Order #${esc(orderLabel(order))}</div>`}
               ${viewMenuUrl ? `<a class="ord-view-menu" href="${viewMenuUrl}" aria-label="View ${esc(order.restaurantName || 'restaurant')} menu">View menu <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>` : ''}
             </div>
-            <button type="button" class="ord-menu-btn tap" aria-label="Order options" aria-haspopup="menu" aria-expanded="false" onclick="openOrderMenu('${id}', this, '${supportUrl}')"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
+            <button type="button" class="ord-menu-btn tap" aria-label="Order options" aria-haspopup="menu" aria-expanded="false" onclick="openOrderMenu('${esc(id)}', this, '${esc(supportUrl)}')"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
           </div>
           ${itemsList(order.items)}
           <button type="button" class="ord-meta" onclick="window.location.href='${detailsUrl}'" aria-label="View order details">
@@ -754,9 +756,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const order = allOrdersData.find(o => String(o._id) === String(id));
     const canRemove = order && OS.norm(order.status) === 'cancelled';
     orderMenu.innerHTML = `
-      <button type="button" class="ord-ctx-item" role="menuitem" onclick="closeOrderMenu();showInvoice('${id}')"><i class="fa-solid fa-file-invoice"></i><span>Invoice</span></button>
-      <button type="button" class="ord-ctx-item" role="menuitem" onclick="closeOrderMenu();window.location.href='${supportUrl}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
-      ${canRemove ? `<button type="button" class="ord-ctx-item danger" role="menuitem" onclick="closeOrderMenu();deleteCancelledOrder('${id}')"><i class="fa-solid fa-trash"></i><span>Remove</span></button>` : ''}`;
+      <button type="button" class="ord-ctx-item" role="menuitem" onclick="closeOrderMenu();showInvoice('${esc(id)}')"><i class="fa-solid fa-file-invoice"></i><span>Invoice</span></button>
+      <button type="button" class="ord-ctx-item" role="menuitem" onclick="closeOrderMenu();window.location.href='${esc(supportUrl)}'"><i class="fa-solid fa-headset"></i><span>Help</span></button>
+      ${canRemove ? `<button type="button" class="ord-ctx-item danger" role="menuitem" onclick="closeOrderMenu();deleteCancelledOrder('${esc(id)}')"><i class="fa-solid fa-trash"></i><span>Remove</span></button>` : ''}`;
     const r = anchor.getBoundingClientRect();
     orderMenu.hidden = false;
     orderMenu.style.visibility = 'hidden';
@@ -834,8 +836,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const rows = (o.items||[]).map(it =>
       `<tr><td>${(it.quantity||1)} × ${escapeHtmlInv(it.name||'Item')}</td><td class="r">${invMoney((it.price||0)*(it.quantity||1))}</td></tr>`
     ).join('');
-    const disc = Number(o.discount||0), tip = Number(o.tipAmount||0), paid = o.paymentStatus === 'paid';
+    const disc = Number(o.discount||0), tip = Number(o.tipAmount||0);
+    const pc = (window.EatswadaOrderStatus && window.EatswadaOrderStatus.partialCod)
+      ? window.EatswadaOrderStatus.partialCod(o) : { required: false };
     const pay = OS.payment(o);
+    const totalLabel = pc.required
+      ? (pc.status === 'paid' ? 'Total (advance paid)' : 'Total')
+      : (o.paymentStatus === 'paid' ? 'Total paid' : 'Total payable');
     document.getElementById('invoice-content').innerHTML =
       `<div class="inv-head"><div class="inv-brand">Eatswada</div><div class="inv-status ${pay.tone}">${escapeHtmlInv(pay.short || pay.label)}</div></div>
        <div class="inv-sub">${escapeHtmlInv(o.restaurantName||'Restaurant')}</div>
@@ -846,7 +853,9 @@ document.addEventListener('DOMContentLoaded', () => {
        ${disc>0?`<div class="inv-line disc"><span>Discount${o.coupon&&o.coupon.code?(' ('+escapeHtmlInv(o.coupon.code)+')'):''}</span><span>− ${invMoney(disc)}</span></div>`:''}
        <div class="inv-line"><span>Delivery fee</span><span>${invMoney(o.deliveryFee)}</span></div>
        ${tip>0?`<div class="inv-line"><span>Tip</span><span>${invMoney(tip)}</span></div>`:''}
-       <div class="inv-total"><span>Total ${paid?'paid':'payable'}</span><span>${invMoney(o.total)}</span></div>
+       ${pc.required && pc.advanceAmount!=null?`<div class="inv-line"><span>${pc.status==='paid'?'Advance paid online':'Advance due online'}</span><span>${invMoney(pc.advanceAmount)}</span></div>`:''}
+       ${pc.required && pc.cashDue!=null?`<div class="inv-line"><span>Cash due on delivery</span><span>${invMoney(pc.cashDue)}</span></div>`:''}
+       <div class="inv-total"><span>${totalLabel}</span><span>${invMoney(o.total)}</span></div>
        <div class="inv-foot">${pay.method ? 'Payment: ' + escapeHtmlInv(pay.method) + ' · ' : ''}Thank you for ordering with Eatswada.</div>`;
     document.getElementById('invoice-overlay').classList.add('open');
   };

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#ffffff">
@@ -15,9 +15,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 
   <style>
     /* ============================================================
@@ -303,7 +303,17 @@
     .stars.just-set i.active { transform: scale(1.08); }
     .review-box { width: 100%; min-height: 76px; margin-top: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); resize: vertical; font-size: 13px; outline: 0; background: #fff; }
     .review-box:focus { border-color: #9FA3A8; }
-    .photo-upload-label, .photo-preview-row { display: none !important; }
+    .photo-upload-label { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 9px 14px; border: 1px dashed var(--line); border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--ink-700); cursor: pointer; }
+    .photo-upload-label i { color: var(--brand); }
+    .photo-preview-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .photo-thumb { position: relative; width: 68px; height: 68px; border-radius: 12px; overflow: hidden; background: #F4F4F6; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-thumb .rm { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: rgba(17,18,20,.62); color: #fff; font-size: 11px; cursor: pointer; }
+    .photo-thumb.is-uploading::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.55); }
+    .photo-thumb.is-uploading { animation: photoPulse 1.1s ease-in-out infinite; }
+    .photo-thumb.is-failed { outline: 2px solid #D32F2F; outline-offset: -2px; }
+    .photo-thumb.is-failed::after { content: '!'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(211,47,47,.72); color: #fff; font-weight: 800; font-size: 18px; }
+    @keyframes photoPulse { 0%,100% { opacity: 1; } 50% { opacity: .62; } }
     .rating-submit { margin-top: 12px; width: 100%; height: 46px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font-size: 15px; font-weight: 800; }
     .rating-submit:disabled { background: #DEDDE2; color: #989BA0; cursor: not-allowed; }
     .rating-thanks { display: none; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--brand); }
@@ -684,8 +694,10 @@
 
       <textarea class="review-box" id="review-text" maxlength="500" placeholder="Tell us more about your experience (optional)"></textarea>
 
-      <!-- Photo upload is not wired to the review API, so it stays hidden
-           (the old picker previewed a photo that was never uploaded). -->
+      <!-- Photo upload stays hidden until the review-photo field name and
+           validation rules are confirmed against the backend contract. The
+           handler below is wired to the authenticated media endpoint, so
+           enabling the picker is a one-line change once verified. -->
       <label class="photo-upload-label" for="review-photo-input" hidden><i class="fa-solid fa-camera"></i> Add a photo</label>
       <input type="file" accept="image/*" id="review-photo-input" hidden disabled>
       <div class="photo-preview-row" id="photo-preview-row" hidden></div>
@@ -707,11 +719,14 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+  <script src="js/auth-token.js?v=20261025"></script>
+<script src="config.js"></script>
+<script src="safe-html.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" integrity="sha384-AQ3POAMqIhwS81FrUH95ekxqBZHeP5tG2JfEL3+7GuTtfRLWnrRh32UxwzM+//A9" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js" integrity="sha384-XtSlZdmg0Ad5zf0AX4W9TGdm+dGjaNK4KG3lNFjfgbnxkCEuT9ugWXkLExgQTJ+6" crossorigin="anonymous"></script>
   <script src="push.js"></script>
   <script src="order-status.js?v=20260926-1"></script>
+<script src="customer-upload.js?v=20261025"></script>
   <script>
     let pollInterval;
     let customerCancelTimer = null;
@@ -733,6 +748,9 @@
     let reviewUIInitializedFor = '';
     let itemReviewEntries = [];
     const itemRatingScores = Object.create(null);
+    // Review photos: { url, local }. `local:true` means the upload has not
+    // finished (or failed), so it is never submitted as if it were a real URL.
+    const reviewPhotoEntries = [];
 
     /* XSS-safe output helpers, shared by ALL render functions below. Must live
        at this (script) scope — not inside fetchOrderData — or sibling functions
@@ -952,6 +970,21 @@
 
       const roundOff = num(order.roundOff, order.cashRoundOff);
       if (roundOff !== undefined && roundOff !== 0) row('Cash round off', money2(roundOff));
+
+      // Partial-COD: show the server's own advance / cash-due figures so the
+      // amount paid online is never confused with the full order total.
+      const pc = (window.EatswadaOrderStatus && window.EatswadaOrderStatus.partialCod)
+        ? window.EatswadaOrderStatus.partialCod(order)
+        : { required: false };
+      if (pc.required) {
+        if (pc.advanceAmount !== null && pc.advanceAmount !== undefined) {
+          const advLabel = pc.status === 'paid' ? 'Advance paid online' : 'Advance due online';
+          row(advLabel, money2(pc.advanceAmount), pc.status === 'paid' ? '' : 'discount');
+        }
+        if (pc.cashDue !== null && pc.cashDue !== undefined) {
+          row('Cash due on delivery', money2(pc.cashDue));
+        }
+      }
 
       if (subtotal !== null && discount === undefined && taxes === undefined && deliveryFee === undefined && platformFee === undefined) {
         const gap = order.total - subtotal;
@@ -1321,8 +1354,15 @@
         const showCod = isCodOrder && OS.norm(order.paymentStatus) !== 'cod_collected' && OS.norm(order.paymentStatus) !== 'paid' && OS.isActive(order);
         codBox.hidden = !showCod;
         if (showCod) {
-          const due = Number(order.grandTotal != null ? order.grandTotal : (order.total != null ? order.total : (order.bill && order.bill.grandTotal)));
-          const dueText = isFinite(due) ? '₹' + (due % 1 ? due.toFixed(2) : due) : 'the order amount';
+          const pc = OS.partialCod ? OS.partialCod(order) : { required: false };
+          let dueText;
+          if (pc.required && pc.cashDue !== null && pc.cashDue !== undefined) {
+            // The cash still owed is the backend's own figure, never the full total.
+            dueText = '₹' + Number(pc.cashDue).toLocaleString('en-IN');
+          } else {
+            const due = Number(order.grandTotal != null ? order.grandTotal : (order.total != null ? order.total : (order.bill && order.bill.grandTotal)));
+            dueText = isFinite(due) ? '₹' + (due % 1 ? due.toFixed(2) : due) : 'the order amount';
+          }
           setText('cod-callout-text', 'Cash on Delivery: Please keep ' + dueText + ' ready for the delivery partner');
         }
       }
@@ -1678,55 +1718,100 @@
         if (ratingSubmitBtn) ratingSubmitBtn.disabled = !selectedFoodRating;
       });
 
-      // Photo upload — local preview only, nothing is uploaded anywhere
+      // Photo upload — downscaled then sent through the authenticated customer
+      // media endpoint (window.EWUpload). A local preview shows immediately;
+      // the uploaded URL is what is submitted with the review. A failed upload
+      // keeps the thumbnail marked as failed so it is never submitted silently.
       const photoInput = document.getElementById('review-photo-input');
       const previewRow = document.getElementById('photo-preview-row');
       if (photoInput && !photoInput.disabled) {
         photoInput.addEventListener('change', () => {
           const file = photoInput.files && photoInput.files[0];
           if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const thumb = document.createElement('div');
-            thumb.className = 'photo-thumb';
-            thumb.innerHTML = `<img src="${e.target.result}" alt=""><div class="rm"><i class="fa-solid fa-xmark"></i></div>`;
-            thumb.querySelector('.rm').addEventListener('click', () => thumb.remove());
-            previewRow.appendChild(thumb);
-          };
-          reader.readAsDataURL(file);
           photoInput.value = '';
+          if (!window.EWUpload) {
+            document.getElementById('rating-thanks').textContent = 'Photo upload is unavailable right now.';
+            document.getElementById('rating-thanks').style.display = 'block';
+            return;
+          }
+          const thumb = document.createElement('div');
+          thumb.className = 'photo-thumb is-uploading';
+          const img = document.createElement('img');
+          img.alt = '';
+          const rm = document.createElement('div');
+          rm.className = 'rm';
+          rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          thumb.appendChild(img); thumb.appendChild(rm);
+          previewRow.hidden = false;
+          previewRow.appendChild(thumb);
+          let objectUrl = '';
+          try { objectUrl = URL.createObjectURL(file); img.src = objectUrl; } catch (e) { /* preview optional */ }
+          const entry = { url: '', local: true };
+          reviewPhotoEntries.push(entry);
+          const drop = () => {
+            const i = reviewPhotoEntries.indexOf(entry);
+            if (i > -1) reviewPhotoEntries.splice(i, 1);
+            if (objectUrl) { try { URL.revokeObjectURL(objectUrl); } catch (e) {} }
+            thumb.remove();
+            if (!previewRow.children.length) previewRow.hidden = true;
+          };
+          rm.addEventListener('click', drop);
+          window.EWUpload.image(file).then((url) => {
+            entry.url = url;
+            entry.local = false;
+            thumb.classList.remove('is-uploading');
+            thumb.classList.add('is-uploaded');
+          }).catch((err) => {
+            thumb.classList.remove('is-uploading');
+            thumb.classList.add('is-failed');
+            thumb.title = (err && err.message) || 'Upload failed';
+          });
         });
       }
 
       if (ratingSubmitBtn) {
         ratingSubmitBtn.addEventListener('click', async () => {
           if (!currentOrder || !selectedFoodRating) return;
+          if (ratingSubmitBtn.dataset.busy === '1') return;
+          // Only uploads that actually reached the media endpoint may be sent;
+          // a pending or failed local preview is never submitted as a URL.
+          if (reviewPhotoEntries.some(p => p && p.local)) {
+            document.getElementById('rating-thanks').textContent = 'Please wait for your photo to finish uploading, or remove it.';
+            document.getElementById('rating-thanks').style.display = 'block';
+            return;
+          }
+          const photos = reviewPhotoEntries.filter(p => p && /^https:\/\//i.test(p.url)).map(p => p.url);
+          ratingSubmitBtn.dataset.busy = '1';
           ratingSubmitBtn.disabled = true;
           ratingSubmitBtn.textContent = 'Submitting…';
           try {
-            const token = localStorage.getItem('nearbite_token') || localStorage.getItem('token') || sessionStorage.getItem('nearbite_token') || '';
+            const token = window.EWAuth ? window.EWAuth.getToken() : (localStorage.getItem('nearbite_token') || localStorage.getItem('token') || sessionStorage.getItem('nearbite_token') || '');
+            const body = {
+              score: selectedFoodRating,
+              riderScore: selectedRiderRating || null,
+              comment: document.getElementById('review-text').value.trim(),
+              itemRatings: itemReviewEntries.reduce((out, item, index) => {
+                const score = Number(itemRatingScores[index] || 0);
+                if (score >= 1 && score <= 5) {
+                  // Superset payload: `itemName/menuItem/score` is what POST /orders/:id/review
+                  // reads today; `name/menuItemId/isVeg/rating` match the item-rating contract.
+                  out.push({
+                    itemName: item.name, name: item.name,
+                    ...(item.menuItem ? { menuItem: item.menuItem, menuItemId: item.menuItem } : {}),
+                    ...(item.isVeg === null || item.isVeg === undefined ? {} : { isVeg: item.isVeg }),
+                    score, rating: score
+                  });
+                }
+                return out;
+              }, [])
+            };
+            // Only attach photos once at least one real uploaded URL exists;
+            // the field name is added only when the contract confirms it.
+            if (photos.length) body.photos = photos;
             const response = await fetch(`${CONFIG.API_BASE_URL}/orders/${currentOrder._id}/review`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-              body: JSON.stringify({
-                score: selectedFoodRating,
-                riderScore: selectedRiderRating || null,
-                comment: document.getElementById('review-text').value.trim(),
-                itemRatings: itemReviewEntries.reduce((out, item, index) => {
-                  const score = Number(itemRatingScores[index] || 0);
-                  if (score >= 1 && score <= 5) {
-                    // Superset payload: `itemName/menuItem/score` is what POST /orders/:id/review
-                    // reads today; `name/menuItemId/isVeg/rating` match the item-rating contract.
-                    out.push({
-                      itemName: item.name, name: item.name,
-                      ...(item.menuItem ? { menuItem: item.menuItem, menuItemId: item.menuItem } : {}),
-                      ...(item.isVeg === null || item.isVeg === undefined ? {} : { isVeg: item.isVeg }),
-                      score, rating: score
-                    });
-                  }
-                  return out;
-                }, [])
-              })
+              body: JSON.stringify(body)
             });
             const result = await response.json().catch(() => ({}));
             if (!response.ok || !result || result.success !== true) throw new Error((result && result.message) || 'Could not submit review');
@@ -1742,6 +1827,7 @@
             document.getElementById('rating-thanks').textContent = 'Thanks! Your verified review is live.';
             document.getElementById('rating-thanks').style.display = 'block';
           } catch (err) {
+            ratingSubmitBtn.dataset.busy = '';
             ratingSubmitBtn.disabled = false;
             ratingSubmitBtn.textContent = 'Submit rating';
             alert(err.message || 'Could not submit review.');

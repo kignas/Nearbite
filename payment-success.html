@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta name="color-scheme" content="light"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <title>Payment Successful – Eatswada | EatSwada</title>
@@ -47,7 +47,15 @@
     <span class="ew-order-label">Order number</span>
     <span class="ew-order-value" id="ew-order-number"></span>
   </div>
-  <p class="ew-order-meta">Payment verified · Order confirmed</p>
+  <div class="ew-order-row" id="ew-advance-row" hidden>
+    <span class="ew-order-label">Advance paid online</span>
+    <span class="ew-order-value" id="ew-advance-amount"></span>
+  </div>
+  <div class="ew-order-row" id="ew-cashdue-row" hidden>
+    <span class="ew-order-label">Cash due on delivery</span>
+    <span class="ew-order-value" id="ew-cashdue-amount"></span>
+  </div>
+  <p class="ew-order-meta" id="ew-order-meta">Payment verified · Order confirmed</p>
 </div>
 
 <div class="ew-actions">
@@ -60,22 +68,32 @@
 </div>
 
 </main>
+<script src="js/auth-token.js?v=20261025"></script>
+<script src="config.js"></script>
+<script src="js/payment-state.js?v=20261025"></script>
 <script>
 (function(){
 const KEY='nearbite_payment_context';let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
 const box=document.getElementById('ew-order'),num=document.getElementById('ew-order-number');
+const meta=document.getElementById('ew-order-meta');
+const advRow=document.getElementById('ew-advance-row'),advAmt=document.getElementById('ew-advance-amount');
+const cashRow=document.getElementById('ew-cashdue-row'),cashAmt=document.getElementById('ew-cashdue-amount');
 /* COD hand-off: payment-success.html?method=COD&orderId=… (cart-page.js also saves the context). */
 const qp=new URLSearchParams(location.search);
 if(qp.get('orderId')&&!(ctx&&ctx.orderId)){ctx=Object.assign({},ctx||{},{orderId:qp.get('orderId')})}
 if(String(qp.get('method')||ctx?.method||'').toUpperCase()==='COD'){
   const h=document.querySelector('h1'); if(h)h.textContent='Order placed!';
-  const note=document.querySelector('.ew-note'); if(note)note.textContent='Pay cash or UPI to your delivery partner at the doorstep.';
+  if(meta)meta.textContent='Cash on delivery · Order confirmed';
 }
 if(ctx?.orderNumber){num.textContent=ctx.orderNumber;box.hidden=false}
+/* A partial-COD advance is the amount actually paid online. The full order
+   total is never presented as paid; the remaining cash due comes from the
+   backend's own fields. */
+const money=v=>{const n=Number(v);return isFinite(n)?'₹'+n.toLocaleString('en-IN',{maximumFractionDigits:2}):''};
+if(ctx&&ctx.partialCodAdvanceAmount!=null&&advRow){advAmt.textContent=money(ctx.partialCodAdvanceAmount);advRow.hidden=false}
+if(ctx&&ctx.partialCodCashDue!=null&&cashRow){cashAmt.textContent=money(ctx.partialCodCashDue);cashRow.hidden=false}
 let done=false;
 function go(){if(done)return;done=true;
-try{if(ctx?.multiple&&ctx.deliveryOtps){Object.keys(ctx.deliveryOtps).forEach(id=>{if(ctx.deliveryOtps[id])localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id])})}
-else if(ctx?.deliveryOtp&&ctx?.orderId)localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp)}catch(_){}
 /* No order id available (e.g. the page was refreshed after the context was
    consumed). Stay on this confirmation screen instead of falling through to
    the Orders list, which would look like the payment never completed. */

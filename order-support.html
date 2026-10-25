@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#FFFFFF">
@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
 
 <style>
 /* ============================================================
@@ -250,9 +250,11 @@ body.chat-mode #view{padding:0;display:flex;flex-direction:column;overflow:hidde
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="js/auth-token.js?v=20261025"></script>
 <script src="config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="safe-html.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" integrity="sha384-AQ3POAMqIhwS81FrUH95ekxqBZHeP5tG2JfEL3+7GuTtfRLWnrRh32UxwzM+//A9" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js" integrity="sha384-XtSlZdmg0Ad5zf0AX4W9TGdm+dGjaNK4KG3lNFjfgbnxkCEuT9ugWXkLExgQTJ+6" crossorigin="anonymous"></script>
 <script src="push.js"></script>
 <script src="customer-upload.js?v=20261023"></script>
 <script src="order-status.js?v=20260926-1"></script>
@@ -1045,6 +1047,10 @@ var SUPPORT_ADAPTER = {
     });
   }
   async function deliver(l) {
+    // A double-tapped Retry (or Retry while a send is already in flight) must
+    // not post the same message twice.
+    if (l.state === 'sending' && l._busy) return;
+    l._busy = true;
     l.state = 'sending'; renderMsgs(false);
     try {
       if (!S.ticketId) {

@@ -2,12 +2,13 @@
 <html lang="en"><head>
 <meta name="color-scheme" content="light"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <title>Payment Failed – Eatswada | EatSwada</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="config.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="js/auth-token.js?v=20261025"></script>
+<script src="config.js"></script>
 <link rel="stylesheet" href="css/eatswada-payment.css?v=20261004-pay1">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
@@ -48,23 +49,32 @@
 <p class="ew-note">If your bank shows a debit, don't pay again immediately. Use My Orders or wait for the payment status to update.</p>
 
 </main>
+<script src="js/payment-state.js?v=20261025"></script>
+<script src="js/checkout-key.js?v=20261025"></script>
+<script src="js/payment-verify.js?v=20261025"></script>
 <script>
 (function(){
-const KEY='nearbite_payment_context',token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
+const KEY='nearbite_payment_context',token=window.EWAuth?window.EWAuth.getToken():(localStorage.getItem('nearbite_token')||localStorage.getItem('token'));let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
 const errEl=document.getElementById('ew-error'),retry=document.getElementById('ew-retry');
 function showError(m){errEl.textContent=m||'Payment could not be completed.';errEl.hidden=false}
 function busy(on,text){retry.disabled=on;retry.textContent=on?(text||'Opening secure payment…'):'Try payment again';retry.style.opacity=on?'.75':'1';retry.classList.toggle('is-busy',on)}
-async function status(){if(!ctx?.orderId||!token)return null;try{const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});const j=await r.json();return r.ok&&j.success?j.data:null}catch(_){return null}}
+/* The server decides whether the payment is actually settled. A partial-COD
+   advance reported as paid, or any paid/refunded order, counts as success. */
+function isPaid(data){
+  if(window.EWPayment)return window.EWPayment.state(data||{}).isPaid===true;
+  const st=String(data?.paymentStatus||'').toLowerCase();return st==='paid'||st==='refunded';
+}
 function success(){
+  /* The server has authoritatively confirmed payment, so the cart and the
+     checkout attempt key are finished with. Nothing is cleared on an
+     uncertain or genuinely failed state.
+     The delivery OTP is read from the owner-scoped order response, never
+     persisted here. */
   try {
-    if(ctx?.multiple && ctx.deliveryOtps){
-      Object.keys(ctx.deliveryOtps).forEach(id=>{
-        if(ctx.deliveryOtps[id]) localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id]);
-      });
-    } else if(ctx?.orderId && ctx.deliveryOtp) {
-      localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp);
-    }
+    localStorage.removeItem('nearbite_cart');
     localStorage.removeItem(KEY);
+    if (window.EWCheckout) window.EWCheckout.clearKey();
+    else {localStorage.removeItem('nearbite_checkout_key');localStorage.removeItem('nearbite_checkout_fp');localStorage.removeItem('nearbite_checkout_fp_ts');}
   } catch(_) {}
   if(!ctx?.orderId){location.href='orders.html';return}
   location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId);
@@ -74,15 +84,34 @@ if(!ctx?.orderId){location.href='cart.html';return}if(!token){location.href='log
 busy(true);errEl.hidden=true;
 try{
 const response=await fetch(`${CONFIG.API_BASE_URL}/payments/retry`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({orderId:ctx.orderId})});
-const result=await response.json();if(result?.alreadyPaid||result?.paymentStatus==='paid'){success();return}
-if(!response.ok||!result.success||!result.payment?.orderId)throw new Error(result?.message||'Retry is temporarily unavailable.');
+let result=null;try{result=await response.json()}catch(_){}
+if(result?.alreadyPaid||isPaid(result)){success();return}
+if(!response.ok||!result?.success||!result.payment?.orderId){
+  /* No second payment can be started. If the server is merely unsure, the
+     pending screen reconciles; only a definitive server failure stays here. */
+  if(response.ok===false&&response.status<500&&window.EWPayment&&window.EWPayment.state(result||{}).isFailed===true){
+    throw new Error(result?.message||'This payment could not be retried.');
+  }
+  location.href='payment-pending.html';return;
+}
 const rzp=new Razorpay({key:result.payment.keyId,amount:result.payment.amount,currency:result.payment.currency||'INR',name:'Eatswada',description:ctx.multiple?'Eatswada multi-restaurant order':`Eatswada order ${ctx.orderNumber||''}`,order_id:result.payment.orderId,theme:{color:(window.EatswadaHeaderTheme&&window.EatswadaHeaderTheme.primary())||'#E9546B'},modal:{ondismiss:()=>busy(false)},handler:async function(p){
-busy(true,'Verifying payment…');try{
+busy(true,'Verifying payment…');
+/* The outcome decision is the same tested module the checkout uses. An
+   unconfirmed result is never shown as a failure: it goes to the pending
+   screen, which reconciles against the authoritative backend. */
+try{
+if(window.EWPaymentVerify){
+  const outcome=await window.EWPaymentVerify.run({fetchImpl:fetch,apiBase:CONFIG.API_BASE_URL,token:token,orderId:ctx.orderId,verifyBody:{orderId:ctx.orderId,razorpayPaymentId:p.razorpay_payment_id,razorpayOrderId:p.razorpay_order_id,razorpaySignature:p.razorpay_signature},onError:e=>console.error('[PAYMENT] retry verification:',e)});
+  if(outcome.verdict==='paid'){success();return}
+  if(outcome.verdict==='failed'){showError((outcome.data&&outcome.data.message)||'Payment was not completed. Your cart is still saved.');busy(false);return}
+  location.href='payment-pending.html';return;
+}
 const vr=await fetch(`${CONFIG.API_BASE_URL}/payments/verify`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({orderId:ctx.orderId,razorpayPaymentId:p.razorpay_payment_id,razorpayOrderId:p.razorpay_order_id,razorpaySignature:p.razorpay_signature})});
-const v=await vr.json();if(v?.success&&v.paymentStatus==='paid'){success();return}
-if(vr.status===409||vr.status>=500){const s=await status();if(s?.paymentStatus==='paid'){success();return}}
-throw new Error(v?.message||'Payment verification is still pending.')
-}catch(e){const s=await status();if(s?.paymentStatus==='paid'){success();return}showError(e.message||'Payment verification failed. Please wait before trying again.');busy(false)}
+let v=null;try{v=await vr.json()}catch(_){}
+if(v?.success&&isPaid(v)){success();return}
+if(vr.ok===false&&window.EWPayment&&window.EWPayment.state(v||{}).isFailed===true){showError((v&&v.message)||'Payment was not completed. Your cart is still saved.');busy(false);return}
+location.href='payment-pending.html';
+}catch(e){location.href='payment-pending.html'}
 }});
 rzp.on('payment.failed',f=>{showError(f?.error?.description||'Payment was not completed. Your cart is still saved.');busy(false)});rzp.open()
 }catch(e){showError(e.message||'Could not start payment.');busy(false)}

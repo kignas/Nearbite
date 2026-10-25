@@ -453,6 +453,8 @@ section('Correctness — clear cart');
 {
   const e = boot('/index.html', cartJSON({ Momo: item('Momo', 2, 120, 'r1', 'Momo House') }));
   e.localStorage.setItem('nearbite_checkout_key', 'abc');
+  e.localStorage.setItem('nearbite_checkout_fp', 'deadbeef');
+  e.localStorage.setItem('nearbite_checkout_fp_ts', String(Date.now()));
   e.flushRAF();
   let broadcast = 0;
   e.doc.addEventListener('eatswada:cart-updated', ev => { if (ev.detail && ev.detail.cleared) broadcast++; });
@@ -460,6 +462,8 @@ section('Correctness — clear cart');
   e.flushRAF();
   ok('clear removes nearbite_cart', e.localStorage.getItem('nearbite_cart') === null);
   ok('clear removes nearbite_checkout_key', e.localStorage.getItem('nearbite_checkout_key') === null);
+  ok('clear removes the fingerprint too', e.localStorage.getItem('nearbite_checkout_fp') === null);
+  ok('clear removes the fingerprint timestamp too (no stale expiry)', e.localStorage.getItem('nearbite_checkout_fp_ts') === null);
   ok('clear hides the cart bar', !visible(e), 'display=' + root(e).style.display);
   ok('clear notifies homepage cards', broadcast === 1);
   ok('"All" capsule reset after clear', !e.doc.getElementById('wc-allup').classList.contains('show'));

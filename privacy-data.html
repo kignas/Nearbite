@@ -5,10 +5,12 @@
   <meta name="color-scheme" content="light">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-  <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+  <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
   <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
-  <script src="config.js"></script>
+  <script src="js/auth-token.js?v=20261025"></script>
+<script src="config.js"></script>
+<script src="safe-html.js"></script>
   <title>Privacy Policy | EatSwada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -151,7 +153,7 @@
       box.innerHTML=rows.map(function(r){
         var label=(r.type==='grievance'?'Privacy grievance':'Correction request');
         var when=r.createdAt?new Date(r.createdAt).toLocaleString():'';
-        return '<div style="padding:9px 0;border-bottom:1px solid var(--pd-border)"><strong style="color:var(--pd-text)">'+label+'</strong><br><span>'+String(r.requestId||'')+' · '+String(r.status||'').replace(/_/g,' ')+' · '+when+'</span></div>';
+        return '<div style="padding:9px 0;border-bottom:1px solid var(--pd-border)"><strong style="color:var(--pd-text)">'+label+'</strong><br><span>'+esc(String(r.requestId||''))+' · '+esc(String(r.status||'').replace(/_/g,' '))+' · '+when+'</span></div>';
       }).join('');
     }catch(e){setStatus('historyStatus','Request history could not be loaded.',false);}
   }

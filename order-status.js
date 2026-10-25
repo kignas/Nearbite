@@ -53,10 +53,20 @@
   function riderAssigned(order) { return RIDER_ASSIGNED.indexOf(norm(order && order.status)) !== -1; }
   function riderMoving(order) { return RIDER_MOVING.indexOf(norm(order && order.status)) !== -1; }
 
-  /* 'refunded' is a payment outcome, not an order status. */
+  /* 'refunded' is a payment outcome, not an order status. A partial refund
+     is still a refund, but it must never be labelled a full one. */
   function isRefunded(order) {
-    return !!(order && (norm(order.paymentStatus) === 'refunded' ||
-      (order.refund && norm(order.refund.status) === 'completed')));
+    if (!order) return false;
+    if (window.EWPayment) return window.EWPayment.refundState(order).isRefunded === true;
+    return !!(norm(order.paymentStatus) === 'refunded' ||
+      (order.refund && norm(order.refund.status) === 'completed'));
+  }
+
+  /* A refund that covers only part of the order total. */
+  function isPartialRefund(order) {
+    if (!order) return false;
+    if (window.EWPayment) return window.EWPayment.refundState(order).isPartial === true;
+    return norm(order.refund && order.refund.status) === 'partial';
   }
 
   /* ---------------- time helpers ---------------- */
@@ -260,6 +270,29 @@
     return '';
   }
 
+  /* Partial-COD (advance) fields, read straight from the backend response.
+     Nothing here is derived on the client — a missing field stays missing. */
+  function partialCod(order) {
+    var o = order || {};
+    var advance = money2OrNull(o.partialCodAdvanceAmount);
+    var cashDue = money2OrNull(o.partialCodCashDue);
+    var status = norm(o.partialCodAdvanceStatus);
+    var required = (advance !== null && advance > 0) || (cashDue !== null) || !!status;
+    return { required: required, advanceAmount: advance, cashDue: cashDue, status: status };
+  }
+
+  function money2OrNull(v) {
+    if (v === null || v === undefined || v === '') return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+
+  function inr(v) {
+    var n = money2OrNull(v);
+    if (n === null) return '';
+    return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  }
+
   function payment(order) {
     var ps = norm(order && order.paymentStatus);
     var pm = norm(order && order.paymentMethod);
@@ -268,12 +301,32 @@
     var method = methodLabel(order);
     var p = { method: method, label: '', short: '', tone: 'neutral' };
 
-    if (ps === 'refunded' || rs === 'completed') { p.label = p.short = 'Refund completed'; p.tone = 'good'; return p; }
+    if (ps === 'refunded' || rs === 'completed') {
+      var partial = isPartialRefund(order);
+      p.label = partial ? 'Partial refund completed' : 'Refund completed';
+      p.short = partial ? 'Partial refund' : 'Refund completed';
+      p.tone = 'good';
+      return p;
+    }
     if (rs === 'processing') { p.label = p.short = 'Refund processing'; p.tone = 'warn'; return p; }
+    if (rs === 'partial' || rs === 'partially_refunded') {
+      p.label = 'Partial refund'; p.short = 'Partial refund'; p.tone = 'warn'; return p;
+    }
     if (rs === 'failed')     { p.label = 'Refund needs attention'; p.short = 'Refund issue'; p.tone = 'bad'; return p; }
     if (rs && rs !== 'none')      { p.label = p.short = 'Refund initiated'; p.tone = 'warn'; return p; }
 
     if (pm === 'cod') {
+      var pc = partialCod(order);
+      if (pc.required && pc.status === 'paid') {
+        // A settled advance is a success; the cash still due is the backend's figure.
+        var due = inr(pc.cashDue);
+        p.label = 'Advance paid' + (due ? ' · ' + due + ' cash due' : '');
+        p.short = 'Advance paid';
+        p.tone = 'good';
+        return p;
+      }
+      if (pc.required && pc.status === 'failed') { p.label = p.short = 'Advance payment failed'; p.tone = 'bad'; return p; }
+      if (pc.required && (pc.status === 'pending' || !pc.status)) { p.label = p.short = 'Advance payment pending'; p.tone = 'warn'; return p; }
       if (ps === 'paid') { p.label = 'Paid · Cash on delivery'; p.short = 'Paid'; p.tone = 'good'; }
       else if (cancelled) { p.label = 'Not collected'; p.short = 'Not collected'; }
       else if (norm(order.status) === 'delivered') { p.label = p.short = 'Cash on delivery'; }
@@ -312,6 +365,7 @@
     info: info,
     isActive: isActive,
     isRefunded: isRefunded,
+    isPartialRefund: isPartialRefund,
     riderAssigned: riderAssigned,
     riderMoving: riderMoving,
     prepTiming: prepTiming,
@@ -322,6 +376,8 @@
     headline: headline,
     timeline: timeline,
     payment: payment,
+    partialCod: partialCod,
+    inr: inr,
     methodLabel: methodLabel,
     restaurantPhone: restaurantPhone,
     riderPhone: riderPhone,

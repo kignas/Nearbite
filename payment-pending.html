@@ -2,12 +2,15 @@
 <html lang="en"><head>
 <meta name="color-scheme" content="light"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" data-ew-dark-reader></script>
+<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <title>Verifying Payment – Eatswada | EatSwada</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
 <script src="config.js"></script>
+<script src="js/auth-token.js?v=20261025"></script>
+<script src="js/payment-state.js?v=20261025"></script>
+<script src="js/checkout-key.js?v=20261025"></script>
 <link rel="stylesheet" href="css/eatswada-payment.css?v=20261004-pay1">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
@@ -70,30 +73,40 @@
 </main>
 <script>
 (function(){
-const KEY='nearbite_payment_context',token=localStorage.getItem('nearbite_token')||localStorage.getItem('token');let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
+const KEY='nearbite_payment_context',token=window.EWAuth?window.EWAuth.getToken():(localStorage.getItem('nearbite_token')||localStorage.getItem('token'));let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
 if(ctx?.orderNumber){document.getElementById('ew-order-number').textContent=ctx.orderNumber;document.getElementById('ew-order').hidden=false}
 function goToOrder(){
+  /* The backend has authoritatively confirmed the payment/order, so cleanup
+     is now warranted: the cart, the checkout attempt key and the payment
+     context are all finished with. Nothing is cleared on a pending or
+     uncertain state — see classify()/check() below.
+     The delivery OTP is read from the owner-scoped order response on the
+     order page; it is never persisted in shared storage. */
   try {
-    if(ctx?.multiple && ctx.deliveryOtps){
-      Object.keys(ctx.deliveryOtps).forEach(id=>{
-        if(ctx.deliveryOtps[id]) localStorage.setItem('nearbite_delivery_otp_'+id,ctx.deliveryOtps[id]);
-      });
-    } else if(ctx?.orderId && ctx.deliveryOtp) {
-      localStorage.setItem('nearbite_delivery_otp_'+ctx.orderId,ctx.deliveryOtp);
-    }
+    localStorage.removeItem('nearbite_cart');
     localStorage.removeItem(KEY);
+    if (window.EWCheckout) window.EWCheckout.clearKey();
+    else {localStorage.removeItem('nearbite_checkout_key');localStorage.removeItem('nearbite_checkout_fp');localStorage.removeItem('nearbite_checkout_fp_ts');}
   } catch(_) {}
   if(!ctx?.orderId){location.href='orders.html';return}
   location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId);
+}
+/* Only the server's own fields decide the outcome. A partial-COD advance that
+   the backend reports as settled (cod_pending + partialCodAdvanceStatus:paid)
+   is a success, not a failure. */
+function classify(data){
+  if(window.EWPayment){const s=window.EWPayment.state(data||{});return s.isPaid?'paid':(s.isFailed?'failed':'pending')}
+  const st=String(data?.paymentStatus||'').toLowerCase();
+  return st==='paid'||st==='refunded'?'paid':(st==='failed'?'failed':'pending');
 }
 async function check(){
   if(!ctx?.orderId||!token)return;
   try{
     const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
     const j=await r.json();if(!r.ok||!j.success)return;
-    const s=String(j.data?.paymentStatus||'').toLowerCase();
-    if(s==='paid'){goToOrder();return}
-    if(s==='failed'){location.href='payment-failed.html'}
+    const verdict=classify(j.data||{});
+    if(verdict==='paid'){goToOrder();return}
+    if(verdict==='failed'){location.href='payment-failed.html'}
   }catch(_){}
 }
 const refreshBtn=document.getElementById('ew-refresh');
