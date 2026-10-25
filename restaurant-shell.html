@@ -1065,7 +1065,8 @@ window.ewLoadVisibleImages = function(root, margin){
         const sc = Math.max(0, Math.min(5, Number(item.score) || 0));
         return '<span class="ew-customer-review-item">' + escapeMenuHtml(n) + ' · ' + sc + '/5 ★</span>';
       }).join('') + '</div>' : '';
-      const reply = review.vendorReply && review.vendorReply.message ? '<div class="ew-customer-review-reply"><b>Restaurant response</b><p>' + escapeMenuHtml(review.vendorReply.message) + '</p></div>' : '';
+      const replyText = review.vendorReply && (review.vendorReply.text || review.vendorReply.message);
+      const reply = replyText ? '<div class="ew-customer-review-reply"><b>Restaurant replied</b><p>' + escapeMenuHtml(replyText) + '</p></div>' : '';
       const comment = String(review.comment || '').trim();
       return '<article class="ew-customer-review"><div class="ew-customer-review-top"><span class="ew-customer-review-person">' + escapeMenuHtml(person) + '</span><span class="ew-customer-review-date">' + escapeMenuHtml(date) + '</span></div>' +
         '<div class="ew-customer-review-score" aria-label="' + scoreValue + ' out of 5 stars">' + '★'.repeat(scoreValue) + '☆'.repeat(5 - scoreValue) + '</div>' +

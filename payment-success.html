@@ -64,6 +64,13 @@
 (function(){
 const KEY='nearbite_payment_context';let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
 const box=document.getElementById('ew-order'),num=document.getElementById('ew-order-number');
+/* COD hand-off: payment-success.html?method=COD&orderId=… (cart-page.js also saves the context). */
+const qp=new URLSearchParams(location.search);
+if(qp.get('orderId')&&!(ctx&&ctx.orderId)){ctx=Object.assign({},ctx||{},{orderId:qp.get('orderId')})}
+if(String(qp.get('method')||ctx?.method||'').toUpperCase()==='COD'){
+  const h=document.querySelector('h1'); if(h)h.textContent='Order placed!';
+  const note=document.querySelector('.ew-note'); if(note)note.textContent='Pay cash or UPI to your delivery partner at the doorstep.';
+}
 if(ctx?.orderNumber){num.textContent=ctx.orderNumber;box.hidden=false}
 let done=false;
 function go(){if(done)return;done=true;

@@ -1659,7 +1659,15 @@
     });
   }
 
+  /* Platform status banners (maintenance / rider shortage / rain surge).
+     platform-status.js owns fetching + painting; failures are silent. */
+  function mountPlatformBanners() {
+    var host = document.getElementById('home-platform-banners');
+    if (host && window.EWPlatform) window.EWPlatform.mount(host);
+  }
+
   function init() {
+    mountPlatformBanners();
     if (window.CONFIG && window.CONFIG.BRAND_NAME) {
       document.title = window.CONFIG.BRAND_NAME + ' – Food Near You';
     }

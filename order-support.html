@@ -128,6 +128,12 @@ h2.screen-title{font-size:20px;line-height:26px;font-weight:800;letter-spacing:-
 .ctx-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .btn-mini{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--ink-200);background:#fff;font-size:13px;font-weight:700;color:var(--ink-800);text-decoration:none;}
 .btn-mini i{color:var(--brand);font-size:12px;}
+.ph-card{padding:12px}.ph-row{display:flex;flex-wrap:wrap;gap:10px}.ph-hint{margin-top:10px;font-size:12px;color:var(--ink-500)}
+.ph-thumb{position:relative;width:76px;height:76px;border-radius:12px;overflow:hidden;background:#F3F4F6}.ph-thumb img{width:100%;height:100%;object-fit:cover;display:block}.ph-thumb.uploading img{opacity:.5}.ph-thumb.error{outline:2px solid #D64545}
+.ph-state{position:absolute;inset:0;display:grid;place-items:center;font-weight:800}.ph-state.err{color:#fff;background:rgba(214,69,69,.55);font-size:22px}
+.ph-rm{position:absolute;top:3px;right:3px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(17,24,39,.72);color:#fff;display:grid;place-items:center;font-size:11px;cursor:pointer}
+.ph-add{width:76px;height:76px;border-radius:12px;border:1.5px dashed var(--ink-200);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink-500);font-size:11px;font-weight:700;cursor:pointer}.ph-add i{color:var(--brand);font-size:18px}
+.tk .ctx-meta{margin-top:4px}
 .safety{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r-md);background:var(--amber-bg);color:var(--amber);font-size:13px;font-weight:600;margin-bottom:12px;}
 
 /* options (radio/checkbox) */
@@ -248,6 +254,7 @@ body.chat-mode #view{padding:0;display:flex;flex-direction:column;overflow:hidde
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <script src="push.js"></script>
+<script src="customer-upload.js?v=20261023"></script>
 <script src="order-status.js?v=20260926-1"></script>
 
 <script>
@@ -327,6 +334,9 @@ var SUPPORT_ADAPTER = {
       message: message.slice(0, 2000),
       items: (Array.isArray(a.items) ? a.items : []).map(function (it) { return String(it.name || '').slice(0, 80); }).filter(Boolean)
     };
+    // Order-linked refund workflow fields (additive; older backends ignore them).
+    if (a.issueCategory) body.issueCategory = a.issueCategory;
+    if (Array.isArray(a.evidencePhotos) && a.evidencePhotos.length) body.evidencePhotos = a.evidencePhotos.slice(0, 3);
     var res = await a.api.call('/support/tickets', { method: 'POST', body: body });
     var ticket = res && res.data;
     if (!ticket || !ticket._id) throw new Error('Support API did not return a ticket ID');
@@ -481,7 +491,7 @@ var SUPPORT_ADAPTER = {
         { id: 'missing_items', label: 'Item(s) missing from my order' },
         { id: 'wrong_items', label: 'I received a different item' }
       ] },
-    { id: 'food_quality', label: 'Food quality', desc: 'Cold, stale, poor taste or portion size', icon: 'fa-utensils', tone: 'danger', afterDelivery: true,
+    { id: 'food_quality', label: 'Food quality', desc: 'Cold, stale, poor taste or portion size', icon: 'fa-utensils', tone: 'danger', afterDelivery: true, itemsOptional: true,
       subs: [
         { id: 'cold', label: 'Food was cold' },
         { id: 'poor_quality', label: 'Taste or quality was not good' },
@@ -489,7 +499,7 @@ var SUPPORT_ADAPTER = {
         { id: 'portion', label: 'Quantity or portion was too small' },
         { id: 'unwell', label: 'I felt unwell after eating', safety: 'If you feel seriously unwell, please get medical help right away.' }
       ] },
-    { id: 'spilled', label: 'Spilled or damaged order', desc: 'Spills, leaks or damaged packaging', icon: 'fa-droplet', tone: 'info', afterDelivery: true,
+    { id: 'spilled', label: 'Spilled or damaged order', desc: 'Spills, leaks or damaged packaging', icon: 'fa-droplet', tone: 'info', afterDelivery: true, itemsOptional: true,
       subs: [
         { id: 'spilled_bag', label: 'Food or drink spilled in the bag' },
         { id: 'leaking', label: 'Container was leaking or broken' },
@@ -529,7 +539,7 @@ var SUPPORT_ADAPTER = {
   var S = {
     screen: '', depth: 0,
     orders: [], order: null, ticketId: P.ticketId || '', closed: false, ticketOrderMissing: false,
-    cat: null, sub: '', picked: {}, note: '', submitting: false,
+    cat: null, sub: '', picked: {}, note: '', submitting: false, photos: [], photoSeq: 0, tickets: [],
     server: [], local: [], seq: 0, summary: null,
     pollFails: 0, polling: false, loadedOnce: false, unseen: false, notFound: false
   };
@@ -651,6 +661,108 @@ var SUPPORT_ADAPTER = {
   }
 
   /* ---------- screen: issue selection ---------- */
+  /* ---------- issue category slug + evidence photos ---------- */
+  var PHOTO_MAX = 3;
+  function issueSlug(cat, subId) {
+    if (!cat) return '';
+    if (cat.id === 'missing_wrong') return subId === 'wrong_items' ? 'wrong_item' : (subId === 'missing_items' ? 'missing_item' : '');
+    if (cat.id === 'spilled') return 'spilled_packaging';
+    if (cat.id === 'food_quality') return 'quality_issue';
+    if (cat.id === 'late_delivery') return 'late_delivery';
+    if (cat.id === 'payment_refund') return 'payment_issue';
+    return '';
+  }
+  function photoRequired() { var g = issueSlug(S.cat, S.sub); return g === 'missing_item' || g === 'wrong_item' || g === 'spilled_packaging'; }
+  function photoAllowed() { return photoRequired() || issueSlug(S.cat, S.sub) === 'quality_issue'; }
+  function donePhotos() { return S.photos.filter(function (p) { return p.status === 'done'; }); }
+  function photoSectionHtml() {
+    if (!S.cat || !photoAllowed()) return '';
+    var req = photoRequired();
+    var thumbs = S.photos.map(function (p) {
+      return '<div class="ph-thumb ' + p.status + '"><img src="' + esc(p.preview) + '" alt="Evidence photo">' +
+        (p.status === 'uploading' ? '<span class="ph-state"><span class="spin" aria-hidden="true"></span></span>' : '') +
+        (p.status === 'error' ? '<span class="ph-state err" title="Upload failed">!</span>' : '') +
+        '<button type="button" class="ph-rm" data-act="ph-rm" data-id="' + p.id + '" aria-label="Remove photo"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>';
+    }).join('');
+    var add = S.photos.length < PHOTO_MAX
+      ? '<label class="ph-add tap"><input type="file" accept="image/*" id="ph-input" multiple hidden><i class="fa-solid fa-camera" aria-hidden="true"></i><span>Add photo</span></label>' : '';
+    return '<div class="sec-title">Photos ' + (req ? '(1–3 required)' : '(optional, up to 3)') + '</div>' +
+      '<div class="card ph-card"><div class="ph-row">' + thumbs + add + '</div>' +
+      '<div class="ph-hint">' + (req ? 'Clear photos of the issue help us approve your refund faster.' : 'A photo helps us look into this faster.') + '</div></div>';
+  }
+  function syncPhotoSection() {
+    var host = $('ph-section'); if (!host) return;
+    host.innerHTML = photoSectionHtml();
+  }
+  async function addPhotos(fileList) {
+    var files = Array.prototype.slice.call(fileList || []);
+    for (var i = 0; i < files.length && S.photos.length < PHOTO_MAX; i++) {
+      var f = files[i];
+      if (!f || !/^image\//i.test(f.type)) { toast('Please choose an image file.'); continue; }
+      var item = { id: 'p' + (++S.photoSeq), status: 'uploading', url: '', preview: URL.createObjectURL(f) };
+      S.photos.push(item);
+      syncPhotoSection(); syncCta();
+      try {
+        if (!window.EWUpload) throw new Error('Upload unavailable');
+        item.url = await window.EWUpload.image(f);
+        item.status = 'done';
+      } catch (err) {
+        item.status = 'error';
+        toast((err && err.message) || 'Photo upload failed. Remove it and try again.');
+      }
+      syncPhotoSection(); syncCta();
+    }
+  }
+  function removePhoto(id) {
+    S.photos = S.photos.filter(function (p) { if (p.id === id) { try { URL.revokeObjectURL(p.preview); } catch (e) {} return false; } return true; });
+    syncPhotoSection(); syncCta();
+  }
+
+  /* ---------- existing tickets on this order ---------- */
+  function ticketStatus(t) {
+    // Real SupportTicket enums: status open | waiting_vendor | waiting_admin |
+    // waiting_customer | resolved | closed; resolutionType full_refund |
+    // partial_refund | coupon_issued | rejected.
+    var st = OS.norm(t.status), rt = OS.norm(t.resolutionType);
+    var refund = Number(t.refundAmount) || 0;
+    var note = String((t.resolution && t.resolution.note) || '').trim();
+    var out = { label: 'Open', tone: 'info', note: note };
+    if (st.indexOf('waiting_') === 0) { out.label = 'In Progress'; out.tone = 'amber'; }
+    if (rt === 'full_refund' || rt === 'partial_refund') {
+      out.label = 'Refund Approved' + (refund > 0 ? ' (₹' + (refund % 1 ? refund.toFixed(2) : refund) + ')' : ''); out.tone = 'success';
+    } else if (rt === 'coupon_issued') { out.label = 'Coupon Issued'; out.tone = 'success'; }
+    else if (st === 'resolved' || st === 'closed' || rt === 'rejected') { out.label = 'Resolved'; out.tone = rt === 'rejected' ? 'danger' : 'success'; }
+    return out;
+  }
+  async function loadTickets() {
+    if (!S.order) return;
+    var list = [];
+    try {
+      var res = await call('/support/tickets?orderId=' + encodeURIComponent(S.order._id));
+      var d = res && res.data;
+      list = Array.isArray(d) ? d : (d && Array.isArray(d.tickets) ? d.tickets : []);
+    } catch (e) { list = []; }
+    if (!list.length && S.ticketId) {
+      try { var one = await call('/support/tickets/' + encodeURIComponent(S.ticketId)); if (one && one.data && one.data._id) list = [one.data]; } catch (e2) { /* optional */ }
+    }
+    S.tickets = list.filter(function (t) {
+      var oid = t.order && (t.order._id || t.order);
+      return !oid || String(oid) === String(S.order._id);
+    });
+  }
+  function ticketsHtml() {
+    if (!S.tickets.length) return '';
+    return '<h2 class="screen-title" style="font-size:16px;margin-top:6px">Your requests for this order</h2>' + S.tickets.map(function (t) {
+      var s = ticketStatus(t), cat = String(t.issueCategory || t.category || '').replace(/_/g, ' ');
+      var when = t.createdAt ? OS.fmtDateTime(t.createdAt) : '';
+      return '<section class="card ctx tk"><div class="ctx-row"><span class="ico ' + s.tone + '"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>' +
+        '<div><div class="ctx-title">' + esc(s.label) + '</div>' +
+        '<div class="ctx-text">' + esc(cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : 'Support request') + (when ? ' · ' + esc(when) : '') + '</div>' +
+        (s.note ? '<div class="ctx-meta">Support note: ' + esc(s.note) + '</div>' : '') + '</div></div>' +
+        (t._id ? '<div class="ctx-actions"><button type="button" class="btn-mini tap" data-act="open-ticket" data-id="' + esc(t._id) + '"><i class="fa-regular fa-message" aria-hidden="true"></i>Open chat</button></div>' : '') + '</section>';
+    }).join('');
+  }
+
   function renderHome() {
     var o = S.order;
     setBar('Help with your order', 'Order #' + orderLabel(o), true);
@@ -662,7 +774,7 @@ var SUPPORT_ADAPTER = {
         '<i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>';
     }).join('');
     var resume = S.ticketId ? '<button type="button" class="btn btn-ghost tap" style="margin-bottom:12px" data-act="open-chat"><i class="fa-regular fa-message" aria-hidden="true"></i>Continue your support chat</button>' : '';
-    view.innerHTML = '<div class="screen">' + orderCard(o) + resume +
+    view.innerHTML = '<div class="screen">' + orderCard(o) + ticketsHtml() + resume +
       '<h2 class="screen-title" tabindex="-1" data-focus>What went wrong?</h2>' +
       '<p class="screen-sub">Choose the option that fits best and we\u2019ll connect you with support.</p>' +
       '<div class="card">' + rows + '</div></div>';
@@ -707,8 +819,8 @@ var SUPPORT_ADAPTER = {
         return '<label class="opt"><input type="radio" name="sub" value="' + s.id + '"' + (S.sub === s.id ? ' checked' : '') + '><span class="mark"></span><span>' + esc(s.label) + '</span></label>';
       }).join('') + '</div><div id="sub-safety"></div>' : '';
     var itemsHtml = '';
-    if (cat.needsItems && items.length) {
-      itemsHtml = '<div class="sec-title">Which items?</div><div class="card">' + items.map(function (it, i) {
+    if ((cat.needsItems || cat.itemsOptional) && items.length) {
+      itemsHtml = '<div class="sec-title">' + (cat.needsItems ? 'Which items?' : 'Which items were affected? (optional)') + '</div><div class="card">' + items.map(function (it, i) {
         var q = Number(it.quantity) || 1, on = S.picked[i] != null;
         return '<div class="item' + (on ? ' on' : '') + (q > 1 ? ' multi' : '') + '" data-i="' + i + '">' +
           '<label class="opt"><input type="checkbox" data-item="' + i + '"' + (on ? ' checked' : '') + '><span class="mark sq"></span>' +
@@ -720,7 +832,7 @@ var SUPPORT_ADAPTER = {
     view.innerHTML = '<div class="screen">' +
       '<h2 class="screen-title" tabindex="-1" data-focus>' + esc(cat.label) + '</h2>' +
       '<p class="screen-sub">' + (cat.id === 'other' ? 'Tell us what\u2019s going on.' : 'Tell us a little more so support can help faster.') + '</p>' +
-      contextPanel(cat, o) + subHtml + itemsHtml +
+      contextPanel(cat, o) + subHtml + itemsHtml + '<div id="ph-section">' + photoSectionHtml() + '</div>' +
       '<div class="sec-title">' + (cat.noteRequired ? 'Describe your issue' : 'Anything else? (optional)') + '</div>' +
       '<div class="card field"><label class="sr" for="note">Details</label><textarea id="note" maxlength="' + UI.NOTE_MAX + '" placeholder="' + (cat.noteRequired ? 'What happened with your order?' : 'Add any details that might help') + '">' + esc(S.note) + '</textarea><div class="count"><span id="note-count">' + S.note.length + '</span>/' + UI.NOTE_MAX + '</div></div>' +
       '<div class="cta-bar"><div class="cta-hint" id="cta-hint"></div><button type="button" class="btn btn-primary tap" id="cta" data-act="start-chat"><i class="fa-regular fa-message" aria-hidden="true"></i><span>Chat with support</span></button></div>' +
@@ -737,6 +849,9 @@ var SUPPORT_ADAPTER = {
     if (subsFor(cat, o).length && !S.sub) return 'Choose what happened to continue';
     if (cat.needsItems && Array.isArray(o.items) && o.items.length && !Object.keys(S.picked).length) return 'Select the affected item(s)';
     if (cat.noteRequired && S.note.trim().length < 3) return 'Describe your issue to continue';
+    if (S.photos.some(function (p) { return p.status === 'uploading'; })) return 'Uploading photos…';
+    if (S.photos.some(function (p) { return p.status === 'error'; })) return 'Remove the photo that failed to upload';
+    if (photoRequired() && !donePhotos().length) return 'Add 1–3 photos of the issue to continue';
     return '';
   }
   function syncCta() {
@@ -764,7 +879,9 @@ var SUPPORT_ADAPTER = {
       var res = await ADAPTER.createTicket({
         api: api, orderId: o._id, orderNumber: o.orderNumber || undefined,
         category: { id: cat.id, label: cat.label }, issue: sub ? { id: sub.id, label: sub.label } : null,
-        items: items, note: S.note.trim(), message: ''
+        items: items, note: S.note.trim(), message: '',
+        issueCategory: issueSlug(cat, S.sub) || undefined,
+        evidencePhotos: photoAllowed() ? donePhotos().map(function (p) { return p.url; }) : []
       });
       if (!res || !res.ticketId) throw new Error('No ticket id returned');
       adoptTicket(String(res.ticketId));
@@ -972,7 +1089,9 @@ var SUPPORT_ADAPTER = {
         history.replaceState(history.state, '', u.pathname + u.search);
         nav('home', true); break;
       case 'cat':
-        S.cat = catById(t.dataset.id); S.sub = ''; S.picked = {}; S.note = ''; nav('detail'); break;
+        S.cat = catById(t.dataset.id); S.sub = ''; S.picked = {}; S.note = ''; S.photos = []; nav('detail'); break;
+      case 'ph-rm': removePhoto(t.dataset.id); break;
+      case 'open-ticket': adoptTicket(String(t.dataset.id)); S.loadedOnce = false; nav('chat'); break;
       case 'start-chat': startChatFromIssue(); break;
       case 'open-chat': nav('chat'); break;
       case 'retry':
@@ -989,7 +1108,8 @@ var SUPPORT_ADAPTER = {
   }
   view.addEventListener('change', function (e) {
     var t = e.target;
-    if (t.name === 'sub') { S.sub = t.value; syncSubSafety(); syncCta(); }
+    if (t.id === 'ph-input') { addPhotos(t.files); t.value = ''; return; }
+    if (t.name === 'sub') { S.sub = t.value; syncSubSafety(); syncPhotoSection(); syncCta(); }
     else if (t.dataset && t.dataset.item != null) {
       var item = t.closest('.item'), i = t.dataset.item;
       if (t.checked) { S.picked[i] = S.picked[i] || 1; item.classList.add('on'); item.querySelector('output') && (item.querySelector('output').textContent = S.picked[i]); }
@@ -1047,6 +1167,7 @@ var SUPPORT_ADAPTER = {
 
     history.replaceState({ s: first, d: 0 }, '');
     S.depth = 0; show(first);
+    if (S.order && first === 'home') loadTickets().then(function () { if (S.screen === 'home' && S.tickets.length) renderHome(); });
   }
   boot();
 })();

@@ -135,6 +135,13 @@
     .confetti-piece { position: absolute; top: 0; width: 6px; height: 10px; border-radius: 2px; animation: confettiFall 1.8s ease-in forwards; }
 
     /* ---------- OTP ---------- */
+    .cod-callout { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #FFF4E5; border: 1px solid #F5C77E; color: #6B4200; border-radius: 14px; font-weight: 700; font-size: 13.5px; line-height: 1.35; }
+    .cod-callout[hidden] { display: none; }
+    .cod-callout-ic { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: #FFE0B0; color: #9A5B00; display: grid; place-items: center; }
+    .item-rating-name .veg-mark { display: inline-grid; vertical-align: -3px; margin-right: 4px; }
+    .vendor-reply { margin: 10px 0 0 14px; padding: 10px 12px; border-radius: 4px 14px 14px 14px; background: #F3F4F6; border-left: 3px solid var(--brand); text-align: left; }
+    .vendor-reply-head { font-size: 11.5px; font-weight: 800; color: var(--brand); margin-bottom: 4px; }
+    .vendor-reply-text { font-size: 13px; line-height: 1.45; color: var(--ink-800); overflow-wrap: anywhere; }
     .customer-otp-box { display: none; align-items: center; gap: 12px; padding: 12px 14px; }
     .otp-lock-icon { width: 40px; height: 40px; flex: none; border-radius: 10px; background: var(--icon-bg); color: var(--ink-700); display: grid; place-items: center; font-size: 15px; }
     .otp-left { flex: 1; min-width: 0; }
@@ -507,6 +514,12 @@
       <button class="share-experience-btn tap" id="share-experience-btn"><i class="fa-solid fa-share-nodes"></i> Share your experience</button>
     </div>
 
+    <!-- Cash on Delivery doorstep callout (active COD orders only) -->
+    <div class="cod-callout card-fade d1" id="cod-callout" role="status" hidden>
+      <span class="cod-callout-ic" aria-hidden="true"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+      <span class="cod-callout-text" id="cod-callout-text"></span>
+    </div>
+
     <!-- Delivery PIN -->
     <div class="customer-otp-box card-fade d1" id="otp-container">
       <div class="otp-lock-icon"><i class="fa-solid fa-lock"></i></div>
@@ -748,14 +761,16 @@
         const key = (menuItem || name).toLowerCase();
         if (seen.has(key)) return;
         seen.add(key);
-        itemReviewEntries.push({ name, menuItem });
+        const vc = itemVegClass(item);
+        itemReviewEntries.push({ name, menuItem, isVeg: vc === 'veg' ? true : vc === 'nonveg' ? false : null });
       });
       Object.keys(itemRatingScores).forEach(key => delete itemRatingScores[key]);
       if (!itemReviewEntries.length) { block.hidden = true; list.textContent = ''; return; }
       block.hidden = false;
       list.innerHTML = itemReviewEntries.map((item, index) => {
         const stars = [1,2,3,4,5].map(score => '<button class="item-rating-star" type="button" data-item-index="' + index + '" data-score="' + score + '" aria-label="Rate ' + esc(item.name) + ' ' + score + ' out of 5" aria-pressed="false">★</button>').join('');
-        return '<div class="item-rating-row"><span class="item-rating-name">' + esc(item.name) + '</span><div class="item-rating-stars" role="group" aria-label="Rate ' + esc(item.name) + '">' + stars + '</div></div>';
+        const vmark = item.isVeg === null || item.isVeg === undefined ? '' : '<span class="veg-mark ' + (item.isVeg ? 'veg' : 'nonveg') + '" aria-label="' + (item.isVeg ? 'Veg' : 'Non-veg') + '"><i></i></span> ';
+        return '<div class="item-rating-row"><span class="item-rating-name">' + vmark + esc(item.name) + '</span><div class="item-rating-stars" role="group" aria-label="Rate ' + esc(item.name) + '">' + stars + '</div></div>';
       }).join('');
     }
 
@@ -779,10 +794,27 @@
         document.querySelectorAll('#rating-card .rating-block, #rating-card .review-box, #rating-card .photo-upload-label, #rating-card .photo-preview-row, #rating-card #rating-submit').forEach(el => { el.hidden = true; });
         const thanks = document.getElementById('rating-thanks');
         if (thanks) { thanks.textContent = 'You have already rated this order. Thank you for your feedback!'; thanks.style.display = 'block'; }
+        renderVendorReply(result.data);
       } catch (error) {
         // Keep the form usable if the optional review-status lookup is offline.
         console.warn('[track-order] Review status could not be loaded.');
       }
+    }
+
+    // "Restaurant replied" bubble under the customer's own review.
+    function renderVendorReply(review) {
+      const text = review && review.vendorReply && String(review.vendorReply.text || review.vendorReply.message || '').trim();
+      const old = document.getElementById('vendor-reply-bubble');
+      if (old) old.remove();
+      if (!text) return;
+      const holder = document.getElementById('rating-thanks');
+      if (!holder) return;
+      const bubble = document.createElement('div');
+      bubble.id = 'vendor-reply-bubble';
+      bubble.className = 'vendor-reply';
+      bubble.innerHTML = '<div class="vendor-reply-head"><i class="fa-solid fa-store" aria-hidden="true"></i> Restaurant replied</div><div class="vendor-reply-text"></div>';
+      bubble.querySelector('.vendor-reply-text').textContent = text;
+      holder.insertAdjacentElement('afterend', bubble);
     }
 
     async function fetchOrderData() {
@@ -1105,7 +1137,11 @@
       let subText = head.etaValue ? info.sub : head.detail;
       // Once a delivery partner has really accepted, say so by name (as Zomato does).
       const stNow = OS.norm(order.status);
-      if (OS.riderAssigned(order) && order.rider && order.rider.name) {
+      if (head.foodReady) {
+        subText = head.detail;
+      } else if (head.riderLine && (stNow === 'assigned' || stNow === 'picked_up' || stNow === 'out_for_delivery')) {
+        subText = head.riderLine;
+      } else if (OS.riderAssigned(order) && order.rider && order.rider.name) {
         const rn = String(order.rider.name).trim().split(/\s+/)[0];
         if (stNow === 'assigned') subText = rn + ' accepted your order and is heading to the restaurant';
         else if (stNow === 'picked_up' || stNow === 'out_for_delivery') subText = rn + ' is on the way with your order';
@@ -1277,6 +1313,19 @@
       const ratingCard = document.getElementById('rating-card');
       const helpCancelBtn = document.getElementById('help-cancel');
       const compScreen = document.getElementById('completion-screen');
+
+      // COD callout: only while an unpaid cash order is still active.
+      const codBox = document.getElementById('cod-callout');
+      const isCodOrder = OS.norm(order.paymentMethod) === 'cod';
+      if (codBox) {
+        const showCod = isCodOrder && OS.norm(order.paymentStatus) !== 'cod_collected' && OS.norm(order.paymentStatus) !== 'paid' && OS.isActive(order);
+        codBox.hidden = !showCod;
+        if (showCod) {
+          const due = Number(order.grandTotal != null ? order.grandTotal : (order.total != null ? order.total : (order.bill && order.bill.grandTotal)));
+          const dueText = isFinite(due) ? '₹' + (due % 1 ? due.toFixed(2) : due) : 'the order amount';
+          setText('cod-callout-text', 'Cash on Delivery: Please keep ' + dueText + ' ready for the delivery partner');
+        }
+      }
 
       otpBox.style.display = 'none';
       otpBox.className = 'customer-otp-box card-fade d1';
@@ -1665,7 +1714,16 @@
                 comment: document.getElementById('review-text').value.trim(),
                 itemRatings: itemReviewEntries.reduce((out, item, index) => {
                   const score = Number(itemRatingScores[index] || 0);
-                  if (score >= 1 && score <= 5) out.push({ itemName: item.name, ...(item.menuItem ? { menuItem: item.menuItem } : {}), score });
+                  if (score >= 1 && score <= 5) {
+                    // Superset payload: `itemName/menuItem/score` is what POST /orders/:id/review
+                    // reads today; `name/menuItemId/isVeg/rating` match the item-rating contract.
+                    out.push({
+                      itemName: item.name, name: item.name,
+                      ...(item.menuItem ? { menuItem: item.menuItem, menuItemId: item.menuItem } : {}),
+                      ...(item.isVeg === null || item.isVeg === undefined ? {} : { isVeg: item.isVeg }),
+                      score, rating: score
+                    });
+                  }
                   return out;
                 }, [])
               })

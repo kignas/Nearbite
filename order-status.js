@@ -92,7 +92,8 @@
 
     var minutes = Number(order.prepMinutes);
     var startedAt = order.prepStartedAt || null;
-    var readyAt = order.prepReadyAt || null;
+    // `estimatedReadyAt` is the customer-facing alias; `prepReadyAt` is what the backend stores.
+    var readyAt = order.estimatedReadyAt || order.prepReadyAt || null;
 
     if (toDate(readyAt)) {
       return {
@@ -149,12 +150,48 @@
     return null;
   }
 
+  /* ---------------- kitchen + rider milestones ----------------
+     Driven by real backend fields only: isFoodReady, prepTimeExtended and
+     riderStatus (assigned → reached_restaurant → picked_up/out_for_delivery). */
+  var PREP_STATUSES = ['confirmed', 'preparing', 'waiting_for_rider', 'assigned'];
+
+  function foodReady(order) {
+    return !!order && order.isFoodReady === true && isActive(order) && !riderMoving(order);
+  }
+
+  function riderLine(order) {
+    if (!order || !isActive(order)) return '';
+    var rs = norm(order.riderStatus);
+    if (rs === 'assigned' || rs === 'accepted') return 'Rider assigned & heading to restaurant';
+    if (rs === 'reached_restaurant') return 'Rider has reached the restaurant counter';
+    if (rs === 'picked_up' || rs === 'out_for_delivery') return 'Rider has picked up your order & is on the way';
+    var st = norm(order.status);
+    if (st === 'picked_up' || st === 'out_for_delivery') return 'Rider has picked up your order & is on the way';
+    if (st === 'assigned') return 'Rider assigned & heading to restaurant';
+    return '';
+  }
+
+  function kitchenBusy(order) {
+    return !!order && order.prepTimeExtended === true && norm(order.status) === 'preparing' && order.isFoodReady !== true;
+  }
+
   /* One headline for both screens:
      { title, detail, etaLabel, etaValue, kind: 'prep'|'delivery'|'none', overdue } */
   function headline(order, now) {
     var i = info(order);
     var out = { title: i.label, detail: i.sub, etaLabel: '', etaValue: '', kind: 'none', overdue: false };
     if (i.group !== 'active') return out;
+
+    var rl = riderLine(order);
+    if (rl) out.riderLine = rl;
+
+    if (foodReady(order)) {
+      out.kind = 'ready';
+      out.foodReady = true;
+      out.detail = 'Food is packed & ready for pickup!';
+      if (rl) out.note = rl;
+      return out;
+    }
 
     var prep = prepTiming(order, now);
     if (prep) {
@@ -168,8 +205,13 @@
         out.etaLabel = 'Estimated preparation';
         out.etaValue = '~' + prep.minutes + ' min';
       }
+      if (kitchenBusy(order)) out.note = 'Kitchen is busy — taking ~5 mins extra care with your order';
+      else if (rl && !out.note) out.note = rl;
       return out;
     }
+
+    if (kitchenBusy(order)) out.note = 'Kitchen is busy — taking ~5 mins extra care with your order';
+    else if (rl && PREP_STATUSES.indexOf(i.key) !== -1 && i.key !== 'assigned') out.note = rl;
 
     var eta = deliveryEta(order, now);
     if (eta) {
@@ -194,7 +236,7 @@
       { key: 'placed',    label: 'Order placed',               time: fmtTime(order && order.createdAt) },
       { key: 'confirmed', label: 'Restaurant confirmed' },
       { key: 'preparing', label: 'Preparing your food' },
-      { key: 'rider',     label: s === 'waiting_for_rider' ? 'Finding a delivery partner' : 'Delivery partner assigned' },
+      { key: 'rider',     label: s === 'waiting_for_rider' ? 'Finding a delivery partner' : (norm(order && order.riderStatus) === 'reached_restaurant' && s !== 'picked_up' && s !== 'out_for_delivery' ? 'Rider at the restaurant' : 'Delivery partner assigned') },
       { key: 'moving',    label: s === 'picked_up' ? 'Order picked up' : 'On the way' },
       { key: 'handover',  label: s === 'otp_verified' ? 'Delivery confirmed' : 'Delivered' }
     ];
@@ -273,6 +315,9 @@
     riderAssigned: riderAssigned,
     riderMoving: riderMoving,
     prepTiming: prepTiming,
+    foodReady: foodReady,
+    riderLine: riderLine,
+    kitchenBusy: kitchenBusy,
     deliveryEta: deliveryEta,
     headline: headline,
     timeline: timeline,
