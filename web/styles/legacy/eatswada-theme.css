@@ -1,0 +1,43 @@
+/* Eatswada theme state + UI-only styles.
+   Page-wide dark rendering is handled by Dark Reader Dynamic Theme.
+   Do not add page-wide dark color overrides here; they would fight the engine. */
+html[data-ew-theme="dark"] { color-scheme: dark; }
+html[data-ew-theme="light"] { color-scheme: light; }
+
+.ew-theme-switch {
+  width: 48px; height: 28px; flex: 0 0 48px; border: 0; border-radius: 999px;
+  padding: 3px; background: #D9DDE4; position: relative; transition: background .18s ease;
+}
+.ew-theme-switch::after {
+  content: ""; display: block; width: 22px; height: 22px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18); transform: translateX(0); transition: transform .18s ease;
+}
+.ew-theme-switch.is-on { background: var(--ew-success, #23956D); }
+.ew-theme-switch.is-on::after { transform: translateX(20px); }
+
+.ew-theme-intro {
+  position: fixed; inset: 0; z-index: 99999; display: flex; align-items: flex-end; justify-content: center;
+  padding: 18px; background: rgba(0,0,0,.58); animation: ewThemeFade .18s ease both;
+}
+.ew-theme-sheet {
+  width: min(100%, 520px); background: #fff; color: #17191E; border-radius: 24px;
+  padding: 24px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,.25);
+  animation: ewThemeUp .22s cubic-bezier(.2,.8,.2,1) both;
+}
+.ew-theme-icon {
+  width: 48px; height: 48px; display: grid; place-items: center; border-radius: 16px;
+  background: var(--ew-sage-soft, #EFF3F1); color: var(--ew-text, #17191B); margin-bottom: 14px;
+}
+.ew-theme-icon svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ew-theme-sheet h2 { margin: 0; font: 800 21px/1.2 Manrope, system-ui, sans-serif; letter-spacing: -.45px; }
+.ew-theme-sheet p { margin: 8px 0 18px; color: #69707A; font: 500 14px/1.45 Manrope, system-ui, sans-serif; }
+.ew-theme-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ew-theme-choice { min-height: 52px; border-radius: 15px; border: 1px solid #E1E4E9; display: flex; align-items: center; justify-content: center; gap: 8px; font: 700 14px/1 Manrope, system-ui, sans-serif; cursor: pointer; }
+.ew-theme-light { background: #F7F8FA; color: #242831; }
+.ew-theme-dark { background: #151820; color: #F5F7FA; border-color: #151820; }
+.ew-choice-icon { font-size: 18px; line-height: 1; }
+.ew-theme-intro.is-closing { opacity: 0; transition: opacity .18s ease; }
+.ew-theme-intro.is-closing .ew-theme-sheet { transform: translateY(12px); transition: transform .18s ease; }
+@keyframes ewThemeFade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ewThemeUp { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: translateY(0) } }
+@media (prefers-reduced-motion: reduce) { .ew-theme-intro, .ew-theme-sheet { animation: none !important; } }

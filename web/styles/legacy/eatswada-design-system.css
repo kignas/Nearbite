@@ -1,0 +1,84 @@
+/* ================================================================
+   EATSWADA DESIGN SYSTEM
+   Visual-only foundation. No API, JS, auth, payment or data behavior.
+
+   Color is owned by the centralized multi-header color system:
+     - eatswada-header-theme.css  → neutral + semantic + --hd-* tokens
+     - eatswada-header-theme.js   → active header theme state
+   This file defines NO brand color of its own. It only harmonizes
+   typography and shared interaction language across customer pages.
+   ================================================================ */
+:root{
+  --ew-radius-sm:10px;
+  --ew-radius-md:14px;
+  --ew-radius-lg:18px;
+  --ew-radius-pill:999px;
+  --ew-font:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --ew-fs-display:28px;
+  --ew-fs-page:22px;
+  --ew-fs-section:18px;
+  --ew-fs-card:16px;
+  --ew-fs-ui:15px;
+  --ew-fs-body:14px;
+  --ew-fs-label:13px;
+  --ew-fs-caption:12px;
+  --ew-fw-body:500;
+  --ew-fw-label:600;
+  --ew-fw-title:700;
+  --ew-fw-strong:800;
+}
+
+/* Manrope is the customer-facing master font. Existing explicit display
+   fonts (e.g. the Home banner script) remain intentionally untouched. */
+html body,
+html body button,
+html body input,
+html body textarea,
+html body select{
+  font-family:var(--ew-font) !important;
+}
+
+/* Shared customer-page header language.
+   Headers stay NEUTRAL by default; a page opts into the header color
+   theme with .ew-themed-header (see eatswada-header-theme.css). */
+.hero-header,
+.top-bar,
+.ct-header,
+.orders-header,
+.app-bar,
+.ea-header,
+.cat-header,
+.topbar,
+body.login-page .header,
+.header{
+  color:inherit;
+  border-color:var(--ew-border, #E5E5E5);
+}
+
+/* Home header opts into the theme color. */
+.hero-header{
+  background:var(--hd-primary);
+  color:var(--hd-ink);
+}
+
+/* Category filter rail stays light; only its page header is branded. */
+.cat-header + .filter-bar{color:var(--ew-text, #171717)}
+
+/* The 99 Store is intentionally exempt: its pink hero is a promotional
+   campaign surface, not the shared utility header. */
+.u99-header{font-family:var(--ew-font) !important}
+
+/* Consistent section/title weight without forcing page-specific geometry. */
+.section-title,
+.page-title,
+.section-heading{
+  font-family:var(--ew-font) !important;
+  font-weight:var(--ew-fw-title);
+}
+
+/* Shared interactive focus ring uses the header theme accent. */
+:focus-visible{outline-color:var(--hd-on-light, #C13A50) !important}
+
+@media (prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto !important}
+}

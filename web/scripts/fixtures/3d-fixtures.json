@@ -1,0 +1,20 @@
+{
+  "_comment": "Phase 3d base fixtures. Fake data only - no real names, phones, emails, addresses or tokens. Keys are API paths. '__hang__' keeps a request pending; {__status__,__body__} scripts a non-200. Scripts build per-state sets by spreading this object with overrides.",
+
+  "/ratings/me": { "success": true, "data": { "used": 1, "max": 3, "ratings": [ { "score": 5, "comment": "Great food and quick delivery", "createdAt": "2026-10-12T09:00:00.000Z" }, { "score": 4, "comment": "Good, but the packaging could be better", "createdAt": "2026-10-05T18:30:00.000Z" } ] } },
+  "/ratings": { "success": true, "data": { "used": 2, "remaining": 1 } },
+
+  "/privacy/me/export": { "success": true, "data": { "profile": { "name": "Test User", "email": "test@example.com" }, "orders": [] } },
+  "/privacy/requests": { "success": true, "data": { "requestId": "REQ-0001" } },
+  "/users/profile": { "success": true, "data": { "user": { "name": "Test User", "email": "test@example.com", "phone": "9000000000", "dataNominee": { "name": "Test Nominee", "email": "nominee@example.com", "phone": "9777777777", "relationship": "Sibling" } } } },
+  "/privacy/me/nominee": { "success": true, "data": {} },
+  "/privacy/me": { "success": true, "data": {} },
+
+  "/orders": { "success": true, "data": [ { "_id": "ord0000000000000000000001", "orderNumber": "EW100001", "status": "out_for_delivery", "createdAt": "2026-10-20T10:05:00.000Z", "total": 349, "restaurantName": "Test Kitchen", "paymentMethod": "cod", "paymentStatus": "pending", "deliveryFee": 25, "subtotal": 324, "items": [ { "name": "Chicken Biryani", "quantity": 2, "price": 120, "isVeg": false, "menuItem": "m1" } ] }, { "_id": "ord0000000000000000000004", "orderNumber": "EW100004", "status": "delivered", "createdAt": "2026-10-10T09:00:00.000Z", "total": 275, "restaurantName": "Test Grill", "paymentMethod": "upi", "paymentStatus": "paid", "deliveryFee": 20, "subtotal": 255, "items": [ { "name": "Paneer Tikka", "quantity": 1, "price": 150, "isVeg": true } ] } ] },
+  "/support/tickets": { "success": true, "data": { "_id": "TKT-0001", "orderId": "ord0000000000000000000001", "status": "open", "messages": [] } },
+  "/support/tickets/TKT-0001": { "success": true, "data": { "_id": "TKT-0001", "orderId": "ord0000000000000000000001", "status": "open", "messages": [ { "_id": "m1", "senderRole": "user", "message": "My order is missing an item", "createdAt": "2026-10-20T11:05:00.000Z" }, { "_id": "m2", "senderRole": "agent", "message": "Sorry about that, we are checking with the restaurant.", "createdAt": "2026-10-20T11:10:00.000Z" } ] } },
+  "/support/tickets/TKT-0001/messages": { "success": true, "data": { "_id": "TKT-0001", "messages": [] } },
+
+  "/vendor-applications/mine": { "success": true, "data": null },
+  "/vendor-applications": { "success": true, "data": { "id": "app00000000000000000002" } }
+}

@@ -1,0 +1,44 @@
+/* MENU FILTERS: chip tap animation + skeleton while the list re-filters.
+   Save as: css/restaurant-filter-motion.css (linked last in the shell). */
+
+/* chips */
+.ew-filter-chip{
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .12s ease;
+}
+.ew-filter-chip{transform-origin:center}
+.ew-filter-chip:active{transform:scaleX(1.1) scaleY(.9)}
+/* stretch: squash wide, snap back past 1, settle (jelly feel) */
+.ew-filter-chip.ew-chip-pop{animation:ew-chip-stretch .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes ew-chip-stretch{
+  0%{transform:scaleX(1) scaleY(1)}
+  25%{transform:scaleX(1.18) scaleY(.88)}
+  50%{transform:scaleX(.94) scaleY(1.06)}
+  75%{transform:scaleX(1.04) scaleY(.98)}
+  100%{transform:scaleX(1) scaleY(1)}
+}
+.ew-filter-chip:focus-visible{outline:2px solid var(--hd-primary,#E9546B);outline-offset:2px}
+
+/* the list is swapped for the existing menu skeleton for a moment */
+#menu-pane.ew-filtering #menu-container,
+#menu-pane.ew-filtering #empty-filter-msg{display:none!important}
+
+/* then fades back in (backwards: never holds a transform afterwards) */
+#menu-container.ew-filter-reveal{animation:ew-filter-reveal .32s cubic-bezier(.22,.8,.3,1) backwards}
+@keyframes ew-filter-reveal{
+  from{opacity:0;transform:translate3d(0,8px,0)}
+  to{opacity:1;transform:none}
+}
+
+/* filtered-out dishes and categories with nothing left stay out of the way */
+.hidden-by-filter{display:none!important}
+.menu-cat-group.cat-group-empty{display:none!important}
+
+/* empty state action */
+.empty-filter-clear{margin-top:14px;padding:10px 20px;border:1.5px solid var(--hd-primary,#E9546B);border-radius:999px;background:#fff;color:var(--hd-primary,#E9546B);font:inherit;font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s ease,background-color .12s ease}
+.empty-filter-clear[hidden]{display:none}
+.empty-filter-clear:active{transform:scale(.96);background:#FBEDEF}
+
+@media(prefers-reduced-motion:reduce){
+  .ew-filter-chip,.ew-filter-chip.ew-chip-pop,#menu-container.ew-filter-reveal,.empty-filter-clear{animation:none;transition:none}
+}

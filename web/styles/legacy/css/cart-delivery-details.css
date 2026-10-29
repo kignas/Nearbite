@@ -1,0 +1,77 @@
+/* ==========================================================================
+   PART 08 — DELIVERY ADDRESS & CONTACT
+   Visual-only refinement of the address and customer details rows.
+   ========================================================================== */
+body.ct-page #ct-delivery-contact{
+  margin:10px 14px;
+  padding:5px 14px;
+  border:1px solid rgba(225,229,235,.82);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 5px 20px rgba(24,32,42,.04);
+}
+body.ct-page #ct-delivery-contact .ct-details-row{
+  min-height:66px;
+  gap:12px;
+  padding:12px 0;
+}
+body.ct-page #ct-delivery-contact .ct-line-ic{
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  border-radius:11px;
+  background:var(--ew-success-soft,#EAF6F0);
+  color:var(--ew-success,#23956D);
+}
+body.ct-page #ct-delivery-contact .ct-line-ic svg{
+  width:19px;
+  height:19px;
+}
+body.ct-page #ct-delivery-contact .ct-details-copy{
+  display:block;
+  min-width:0;
+}
+body.ct-page #ct-delivery-contact .ct-details-label{
+  color:#303842;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  letter-spacing:-.05px;
+}
+body.ct-page #ct-delivery-contact .ct-details-text{
+  margin-top:4px;
+  color:#858D97;
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:500;
+  line-height:1.45;
+}
+body.ct-page #ct-delivery-contact .ct-details-text.is-empty{
+  color:var(--ew-success,#23956D);
+  font-weight:650;
+}
+body.ct-page #ct-delivery-contact .ct-details-row:focus-visible{
+  outline:2px solid var(--ew-success,#23956D);
+  outline-offset:3px;
+  border-radius:10px;
+}
+@media(max-width:380px){
+  body.ct-page #ct-delivery-contact{padding:4px 11px;}
+  body.ct-page #ct-delivery-contact .ct-details-row{gap:9px;min-height:62px;}
+  body.ct-page #ct-delivery-contact .ct-line-ic{width:33px;height:33px;flex-basis:33px;}
+  }
+/* The address is shown once in the checkout header. This compact card is
+   reserved for the delivery contact only. */
+body.ct-page #ct-delivery-contact {
+  margin: 10px 14px;
+  padding: 4px 14px;
+  border: 1px solid var(--ct-line-soft, #E5E7EB);
+  border-radius: 18px;
+  background: var(--ct-surface, #fff);
+  box-shadow: 0 4px 16px rgba(24,32,42,.035);
+}
+body.ct-page #ct-delivery-contact .ct-details-row {
+  min-height: 62px;
+  padding: 10px 0;
+}

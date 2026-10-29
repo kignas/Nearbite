@@ -1,0 +1,159 @@
+
+/* ================================================================
+   EATSWADA — MAP LOCATION PICKER
+   Benchmark: 1080 px screenshot at 2.625 image px per CSS px.
+   The earlier file nested a second style element inside this one, which made
+   the browser drop its :root override and left the gate and address
+   icon pink while the pin was green. One token set now drives the page.
+   ================================================================ */
+:root{
+  --brand:var(--hd-on-light,#C13A50);--brand-dark:var(--hd-active,#C13A50);--brand-tint:var(--hd-soft,#FDEBEE);--brand-ink:var(--hd-on-light,#C13A50);
+  --ink:#16191E;--ink-2:#3E414A;--muted:#68696B;--label:#8E8F91;
+  --line:#D9DADC;--soft:#F6F6F8;--field:#FBFBFC;--ok:var(--ew-success,#23956D);
+  --disabled-bg:#DEDDE2;--disabled-text:#989BA0;
+  --shadow-float:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.06);
+  --shadow-sheet:0 4px 24px rgba(16,24,40,.14),0 1px 3px rgba(16,24,40,.06);
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px);
+  --font:'Manrope',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:var(--font);color:var(--ink);overflow:hidden}
+#map{position:absolute;inset:0;background:#EEF1EC}
+svg{display:block;flex:none}
+
+/* ── Top: 32 px round back + 35 px pill search ── */
+.top-bar{position:absolute;z-index:1100;display:flex;flex-direction:column;gap:8px;
+ top:calc(14px + var(--safe-t));left:calc(14px + var(--safe-l));right:calc(14px + var(--safe-r))}
+.top-row{display:flex;align-items:flex-start;gap:11px}
+.back{position:relative;flex:none;width:32px;height:32px;margin-top:1.5px;border:1px solid var(--line);border-radius:50%;
+ background:#fff;color:#131313;display:grid;place-items:center;padding:0;box-shadow:var(--shadow-float);cursor:pointer}
+.back::after{content:'';position:absolute;inset:-6px}
+.back svg{width:18px;height:18px}
+.back:active{background:var(--soft)}
+.locate{display:none}
+
+.location-search{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.location-search-row{
+ display:flex;align-items:center;gap:6px;height:35px;background:#fff;
+ border:1px solid var(--line);border-radius:999px;padding:0 15px 0 15px;box-shadow:var(--shadow-float);
+}
+.location-search-row:focus-within{border-color:#B9BBBF}
+.location-search-row .search-ico{width:17px;height:17px;color:#737476}
+#locationSearch{
+ flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--ink);padding:0;
+ font:500 13px/1.3 var(--font);-webkit-appearance:none;appearance:none;
+}
+#locationSearch::placeholder{color:var(--muted);opacity:1}
+#locationSearch::-webkit-search-cancel-button{display:none}
+.location-search-clear{
+ display:none;width:22px;height:22px;border:0;border-radius:50%;background:#F1F1F3;
+ color:#6B6D72;place-items:center;cursor:pointer;flex:none;padding:0;
+}
+.location-search-clear svg{width:12px;height:12px}
+.location-search-clear.show{display:grid}
+.location-results{
+ display:none;background:#fff;border-radius:14px;box-shadow:var(--shadow-sheet);
+ overflow:hidden;max-height:min(300px,50vh);overflow-y:auto;padding:4px 0;
+}
+.location-results.show{display:block}
+.location-result{
+ position:relative;width:100%;display:flex;gap:11px;align-items:flex-start;text-align:left;
+ border:0;background:#fff;padding:10px 12px 12px;cursor:pointer;color:var(--ink);font:700 14px/19px var(--font);
+}
+.location-result+.location-result::before{content:'';position:absolute;top:0;left:12px;right:12px;height:1px;background:#E5E7E6}
+.location-result i{color:#121212;margin-top:3px;flex:none;font-size:14px}
+.location-result small{display:block;color:#69696D;font-size:12px;line-height:16px;font-weight:500;margin-top:2px}
+.location-result:active{background:#FAFAFB}
+.location-search-status{
+ display:none;background:#fff;border-radius:12px;padding:10px 13px;box-shadow:var(--shadow-float);
+ font-size:12px;line-height:17px;font-weight:600;color:var(--muted);
+}
+.location-search-status.show{display:block}
+
+/* ── Centre pin: 30 px head, stem and tip; the tip sits on the map centre ── */
+.pin{position:absolute;left:50%;top:50%;z-index:900;width:30px;height:41px;transform:translate(-50%,-100%);
+ pointer-events:none;color:var(--brand);filter:drop-shadow(0 3px 4px rgba(16,24,40,.25))}
+.pin svg{width:30px;height:41px}
+.gps-marker{width:16px;height:16px;border:3px solid #fff;border-radius:50%;background:#3D7BF7;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+.gps-pulse{border:2px solid #3D7BF7;border-radius:50%;animation:pulse 1.8s infinite}
+@keyframes pulse{0%{transform:scale(.7);opacity:.75}100%{transform:scale(1.8);opacity:0}}
+.leaflet-control-attribution{font-size:8px}
+
+/* ── Bottom dock: current-location pill + floating sheet ── */
+.dock{position:absolute;z-index:1000;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;
+ pointer-events:none;padding:0 calc(14px + var(--safe-r)) calc(12px + var(--safe-b)) calc(14px + var(--safe-l))}
+.current-pill{pointer-events:auto;display:inline-flex;align-items:center;gap:9px;
+ height:39px;padding:0 13px 0 11px;margin-bottom:12px;border:1px solid var(--line);border-radius:999px;background:#fff;
+ color:#505155;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:-.1px;
+ box-shadow:0 2px 10px rgba(16,24,40,.10);cursor:pointer}
+.current-pill svg{width:15px;height:15px;color:var(--brand)}
+.current-pill:active{background:var(--soft)}
+.current-pill:disabled{opacity:.6;cursor:default}
+
+.sheet{pointer-events:auto;width:100%;max-width:560px;background:#fff;border-radius:14px;box-shadow:var(--shadow-sheet);overflow:hidden}
+.sheet-band{display:flex;align-items:center;min-height:31px;padding:6px 15px;background:var(--soft)}
+.sheet-title{margin:0;font-size:13px;line-height:17px;font-weight:500;letter-spacing:0;color:#626367}
+.sheet-body{padding:14px 12px 14px}
+.sheet-sub{margin:0 0 6px 1px;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--label)}
+
+/* Pin + name on one row, the locality line runs under both (benchmark). */
+.address{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;align-items:center;margin-bottom:16px;
+ font-size:14px;font-weight:600;color:var(--muted);transition:opacity .15s ease}
+.addr-icon{grid-column:1;width:15px;height:20px;color:var(--brand)}
+.addr-icon svg{width:15px;height:20px}
+.addr-body{display:contents}
+.addr-primary{grid-column:2;display:block;min-width:0;font-size:16px;line-height:21px;font-weight:800;letter-spacing:-.25px;color:var(--ink);
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.addr-secondary{grid-column:1/-1;margin-top:5px;font-size:13px;line-height:17px;font-weight:500;color:#69696D;overflow-wrap:anywhere}
+.addr-meta{grid-column:1/-1;display:flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:600;line-height:14px;color:var(--label)}
+.addr-meta.is-gps{color:var(--ok)}
+.addr-meta i{font-size:10px;flex:none}
+.warn{display:none;background:#FFF6F5;border:1px solid #F3D2CF;color:#8A2A22;padding:10px 12px;border-radius:12px;
+ font-size:12px;font-weight:600;line-height:1.45;margin-bottom:12px}
+.actions{display:grid;gap:9px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:999px;
+ border:1px solid var(--line);background:#fff;font-family:var(--font);font-size:15px;font-weight:800;
+ letter-spacing:-.2px;color:var(--ink);cursor:pointer;transition:background .15s ease,color .15s ease}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-size:17px}
+.btn.primary:not(:disabled):active{background:var(--brand-dark);border-color:var(--brand-dark)}
+.btn.primary:disabled{background:var(--disabled-bg);border-color:var(--disabled-bg);color:var(--disabled-text);cursor:default}
+.loc-progress{display:none;align-items:center;gap:10px;background:var(--soft);padding:10px 12px;border-radius:12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.loc-progress.show{display:flex}
+.loc-spinner{width:16px;height:16px;border:2px solid #DDE0E4;border-top-color:var(--brand);border-radius:50%;animation:locSpin .75s linear infinite;flex:none}
+@keyframes locSpin{to{transform:rotate(360deg)}}
+.back:focus-visible,.current-pill:focus-visible,.btn:focus-visible,.location-result:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+@media (max-width:374px){
+ .top-bar{left:calc(12px + var(--safe-l));right:calc(12px + var(--safe-r))}
+ .dock{padding-left:calc(12px + var(--safe-l));padding-right:calc(12px + var(--safe-r))}
+ .addr-primary{font-size:15px}
+}
+/* Short screens with the keyboard open: keep the sheet compact. */
+@media (max-height:560px){ .current-pill{display:none} .sheet-body{padding-top:10px} .address{margin-bottom:10px} }
+
+/* ================================================================
+   PIXEL REFINEMENT — benchmark typography/spacing only
+   ================================================================ */
+.top-row{gap:12px}
+.location-search-row{height:38px;padding-left:16px;padding-right:14px}
+#locationSearch{font-size:14px;line-height:19px}
+.location-search-row .search-ico{width:18px;height:18px}
+.location-search-clear{width:24px;height:24px}
+.location-result{padding:12px 13px 13px;font-size:15px;line-height:20px}
+.location-result small{font-size:13px;line-height:17px}
+.current-pill{height:41px;padding:0 14px 0 12px;font-size:13px}
+.current-pill svg{width:16px;height:16px}
+.sheet{border-radius:16px}
+.sheet-band{min-height:34px;padding:7px 16px}
+.sheet-title{font-size:14px;line-height:18px}
+.sheet-body{padding:15px 14px 15px}
+.sheet-sub{font-size:12px;line-height:15px;margin-bottom:7px}
+.address{column-gap:9px;margin-bottom:17px}
+.addr-icon{width:16px;height:21px}
+.addr-icon svg{width:16px;height:21px}
+.addr-primary{font-size:18px;line-height:23px}
+.addr-secondary{margin-top:5px;font-size:14px;line-height:18px}
+.addr-meta{margin-top:7px;font-size:12px;line-height:15px}
+.btn.primary{height:50px;font-size:17px}
+

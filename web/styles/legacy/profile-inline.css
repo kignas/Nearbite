@@ -1,0 +1,186 @@
+
+/* ==================================================================
+   EATSWADA · PROFILE — page-scoped styles.
+   Same tokens as the Address, Orders and Tracking pages (Manrope,
+   the active header theme, #F1F0F5 page, white 14px cards, hairline dividers).
+   Loaded BEFORE style.css, so style.css wins ties: .card is avoided
+   (.pf-card), and the two global rules this page must beat —
+   body{background} and main{padding !important} — are out-scoped
+   below with higher specificity, not by editing style.css.
+   ================================================================== */
+:root{
+  --brand:var(--hd-on-light,#C13A50);--brand-press:var(--hd-active,#C13A50);--brand-tint:var(--hd-soft,#FDEBEE);--brand-soft:var(--hd-accent,#E9546B);
+  --ink:#16191E;--ink-2:#1F232A;--ink-3:#3E414A;--muted:#68696B;--faint:#8E8F91;
+  --icon:#3E414A;--chev:#B6B8BD;
+  --soft:#F1F0F5;--line:#E5E7E6;--line-soft:#EFEFF1;
+  --ok:var(--ew-success,#23956D);--ok-soft:var(--ew-success-soft,#E7F6EE);--danger:var(--ew-error,#D64545);--danger-soft:#FBEDEB;
+  --white:#fff;
+  --pf-shadow:0 1px 2px rgba(16,24,40,.04);
+  --pf-radius:14px;
+  --pf-gutter:14px;
+  --row-h:50px;
+}
+@media (max-width:374px){ :root{ --pf-gutter:12px } }
+
+*{box-sizing:border-box}
+html{background:var(--soft)}
+html body{
+  margin:0;background:var(--soft);color:var(--ink);
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;
+  /* No bottom navigation on this page: only the device safe area is kept. */
+  padding-bottom:env(safe-area-inset-bottom);
+  overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+}
+button,a,input{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+.app{max-width:640px;margin:auto;min-height:100dvh}
+.pf-sr{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* One icon family: 24px grid, 1.6 stroke, round caps/joins, drawn
+   in currentColor. The symbols hold geometry only; stroke settings
+   inherit from here, so every icon renders identically. */
+.pf-ico{
+  width:22px;height:22px;flex:none;display:block;overflow:visible;
+  fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* ---------- Header + identity ---------------------------------- */
+.header{background:var(--white);padding:calc(6px + env(safe-area-inset-top)) var(--pf-gutter) 18px;border-bottom:1px solid var(--line-soft)}
+.top{display:flex;align-items:center;justify-content:space-between;height:44px}
+.icon-btn{
+  width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:var(--ink-2);
+  display:grid;place-items:center;padding:0;transition:background .15s ease;
+}
+.icon-btn .pf-ico{width:22px;height:22px;stroke-width:1.8}
+.icon-btn.back{margin-left:-9px}
+.icon-btn.search{margin-right:-9px}
+.icon-btn:active{background:rgba(0,0,0,.05)}
+.icon-btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+.profile-hero{margin-top:8px;display:flex;align-items:center;gap:14px;min-width:0}
+.avatar{
+  width:64px;height:64px;border-radius:50%;flex:none;overflow:hidden;
+  background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;
+  font-size:24px;font-weight:800;letter-spacing:-.5px;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.user{min-width:0;flex:1}
+.user h1{
+  margin:0;font-size:20px;line-height:26px;font-weight:800;letter-spacing:-.4px;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.contact{
+  display:flex;align-items:center;gap:6px;margin:2px 0 0;min-width:0;
+  font-size:13px;line-height:18px;font-weight:500;color:var(--muted);
+}
+.contact span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact[hidden]{display:none}
+.verified{display:inline-flex;align-items:center;gap:3px;flex:none;color:var(--ok);font-size:12px;font-weight:700}
+.verified .pf-ico{width:14px;height:14px;stroke-width:2}
+.edit-profile{
+  display:inline-flex;align-items:center;gap:2px;margin-top:6px;padding:0;border:0;background:none;
+  color:var(--brand);font-size:13px;font-weight:700;
+}
+.edit-profile .pf-ico{width:15px;height:15px;stroke-width:2}
+.edit-profile:active{opacity:.7}
+.edit-profile:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:4px}
+
+/* ---------- Quick shortcuts ------------------------------------ */
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px var(--pf-gutter) 0}
+.quick-tile{
+  display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;
+  background:var(--white);border-radius:var(--pf-radius);box-shadow:var(--pf-shadow);
+  font-size:14px;font-weight:700;color:var(--ink-2);transition:transform .12s ease;
+}
+.quick-ico{display:grid;place-items:center;color:var(--icon)}
+.quick-tile:active{transform:scale(.98)}
+.quick-tile:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* ---------- Sections ------------------------------------------- */
+main.content{padding:4px var(--pf-gutter) 24px !important}
+.section{margin-top:18px}
+.section-title{
+  margin:0 2px 8px;font-size:16px;line-height:20px;font-weight:700;letter-spacing:-.2px;
+  text-transform:none;color:var(--ink-2);
+}
+.pf-card{background:var(--white);border-radius:var(--pf-radius);box-shadow:var(--pf-shadow);overflow:hidden}
+
+/* Rows: icon · label · optional value · chevron. No subtitles. */
+.row{
+  position:relative;display:flex;align-items:center;gap:14px;width:100%;
+  min-height:var(--row-h);padding:0 14px;border:0;background:var(--white);text-align:left;color:var(--ink-2);
+  transition:background .13s ease;
+}
+.row + .row::before{content:'';position:absolute;top:0;left:50px;right:0;height:1px;background:var(--line-soft)}
+a.row:active,button.row:active{background:#F7F7F9}
+a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.row-icon{display:grid;place-items:center;flex:none;color:var(--icon)}
+.row-main{min-width:0;flex:1}
+.row-title{font-size:15px;line-height:20px;font-weight:500;color:var(--ink-2);letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-sub{display:none}
+.row-value{
+  flex:none;max-width:42%;font-size:13px;font-weight:500;color:var(--faint);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.row-value:empty{display:none}
+.chev{width:18px;height:18px;flex:none;color:var(--chev);stroke-width:1.8;transition:transform .2s ease}
+
+/* Log out: an action, not a destination — no chevron. */
+.logout .row-icon,.logout .row-title{color:var(--danger)}
+.logout:active{background:var(--danger-soft)}
+
+/* ---------- Favourites ----------------------------------------- */
+.fav-toggle{overflow:hidden}
+.fav-summary{list-style:none;cursor:pointer}
+.fav-summary::-webkit-details-marker{display:none}
+.fav-summary::marker{content:''}
+.fav-toggle[open] .fav-summary .chev{transform:rotate(90deg)}
+.fav-body{border-top:1px solid var(--line-soft);padding:10px}
+.fav-list .es-card-wrap{margin:0 0 10px}
+.fav-list .es-card-wrap:last-child{margin-bottom:0}
+.fav-empty{padding:18px 14px 14px;text-align:center}
+.fav-empty .pf-ico{width:26px;height:26px;margin:0 auto;color:var(--faint)}
+.fav-empty h3{margin:10px 0 0;font-size:14px;font-weight:700;color:var(--ink)}
+.fav-empty p{margin:4px auto 12px;font-size:13px;font-weight:500;color:var(--muted);line-height:1.45;max-width:32ch}
+.fav-cta{
+  display:inline-flex;align-items:center;height:36px;padding:0 16px;border-radius:999px;
+  background:var(--brand);color:var(--hd-ink,#fff);font-size:13px;font-weight:700;
+}
+.fav-note{padding:18px 14px;text-align:center;font-size:13px;font-weight:500;color:var(--muted)}
+
+/* ---------- Edit sheet ----------------------------------------- */
+.modal{position:fixed;inset:0;background:rgba(17,18,20,.5);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.sheet{
+  width:100%;max-width:560px;background:#fff;border-radius:20px 20px 0 0;
+  padding:20px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(16,24,40,.18);
+}
+.sheet h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+.sheet p{margin:4px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}
+.field{margin-top:14px}
+.field label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--ink-3)}
+.field input{
+  width:100%;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;outline:none;
+  background:#fff;font-size:15px;color:var(--ink);
+}
+.field input:focus{border-color:var(--brand-soft);box-shadow:0 0 0 3px rgba(15,23,42,.12)}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.btn{height:46px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:700;color:var(--ink-3)}
+.btn.primary{background:var(--brand);color:var(--hd-ink,#fff);border-color:var(--brand)}
+.btn.primary:active{background:var(--brand-press)}
+.btn:disabled{opacity:.55}
+.error{min-height:16px;margin-top:8px;font-size:12px;font-weight:600;color:var(--danger)}
+
+/* ---------- Toast (no bottom nav to clear anymore) --------------- */
+.toast{
+  position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:120;
+  transform:translate(-50%,12px);opacity:0;pointer-events:none;max-width:calc(100% - 28px);
+  padding:10px 14px;border-radius:10px;background:#1B1C1F;color:#fff;font-size:13px;font-weight:600;
+  transition:opacity .2s ease,transform .2s ease;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  .icon-btn,.quick-tile,.row,.chev,.toast{transition:none}
+}

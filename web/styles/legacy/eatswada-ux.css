@@ -1,0 +1,102 @@
+/* EATSWADA UX LAYER: shared animation + components. Uses existing tokens (--brand, --ink-*, --r-lg...). */
+:root{--ux-spring:cubic-bezier(.34,1.56,.64,1);--ux-out:cubic-bezier(.16,1,.3,1);}
+
+/* Page transitions (Chromium/Safari 18+; ignored elsewhere) */
+@view-transition{navigation:auto;}
+::view-transition-old(root){animation:uxOut .18s ease both;}
+::view-transition-new(root){animation:uxIn .32s var(--ux-out) both;}
+@keyframes uxOut{to{opacity:0;transform:translateX(-12px);}}
+@keyframes uxIn{from{opacity:0;transform:translateX(16px);}}
+
+/* Staggered entry */
+.ux-in{animation:uxRise .42s var(--ux-out) both;animation-delay:calc(var(--i,0)*45ms);}
+@keyframes uxRise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+
+/* Image blur-up */
+img.ux-img{opacity:0;filter:blur(10px);transform:scale(1.03);transition:opacity .45s var(--ux-out),filter .45s var(--ux-out),transform .45s var(--ux-out);}
+img.ux-img.ux-loaded{opacity:1;filter:none;transform:none;}
+
+/* Button ripple */
+.ux-rip{position:relative;overflow:hidden;}
+.ux-ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);pointer-events:none;animation:uxRipple .55s var(--ux-out) forwards;}
+@keyframes uxRipple{to{transform:scale(1);opacity:0;}}
+
+/* Toast */
+.ux-toast-wrap{position:fixed;left:0;right:0;top:calc(10px + env(safe-area-inset-top,0px));z-index:2000;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
+.ux-toast{display:flex;align-items:center;gap:10px;max-width:min(92vw,420px);padding:11px 16px;border-radius:999px;background:#16191E;color:#fff;font:700 13px/1.3 'Manrope',system-ui,sans-serif;box-shadow:0 8px 28px rgba(16,24,40,.28);animation:uxToast .45s var(--ux-spring) both;}
+.ux-toast.out{animation:uxToastOut .25s ease forwards;}
+.ux-toast i{color:var(--brand-soft,#E9546B);}
+@keyframes uxToast{from{opacity:0;transform:translateY(-18px) scale(.9);}}
+@keyframes uxToastOut{to{opacity:0;transform:translateY(-10px) scale(.96);}}
+
+/* Bottom sheet (drag to dismiss) */
+.ux-scrim{position:fixed;inset:0;z-index:1500;background:rgba(16,24,40,.45);opacity:0;transition:opacity .25s ease;}
+.ux-scrim.show{opacity:1;}
+.ux-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1501;max-width:640px;margin:0 auto;background:#fff;border-radius:22px 22px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .5s var(--ux-spring);max-height:86dvh;overflow:auto;touch-action:none;}
+.ux-sheet.show{transform:none;}
+.ux-sheet.drag{transition:none;}
+.ux-grab{width:40px;height:4px;border-radius:2px;background:var(--ink-200,#D9DADC);margin:2px auto 12px;}
+.ux-sheet h3{font-size:17px;font-weight:800;letter-spacing:-.3px;margin:0 0 10px;}
+.ux-sheet-body{touch-action:pan-y;}
+
+/* Live status polish (track-order) */
+.tracker-hero .hero-icon-wrapper{position:relative;}
+.tracker-hero:not(.cancelled) .hero-icon-wrapper::after{content:'';position:absolute;inset:0;border-radius:inherit;border:2px solid var(--brand);opacity:0;animation:uxPulse 2.2s ease-out infinite;}
+@keyframes uxPulse{0%{transform:scale(1);opacity:.5;}100%{transform:scale(1.5);opacity:0;}}
+.hero-icon-wrapper.ux-pop{animation:uxPop .6s var(--ux-spring);}
+@keyframes uxPop{0%{transform:scale(.6) rotate(-12deg);}100%{transform:none;}}
+.eta-time .ux-digit{display:inline-block;animation:uxRoll .4s var(--ux-out) both;}
+@keyframes uxRoll{from{opacity:0;transform:translateY(60%);}}
+
+/* Map: pulse ring on rider, marching route line */
+.map-marker.rider{position:relative;}
+.map-marker.rider::after{content:'';position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--brand);animation:uxPulse 1.8s ease-out infinite;}
+.leaflet-overlay-pane path.leaflet-interactive{stroke-dasharray:2 9;stroke-linecap:round;animation:uxMarch 1s linear infinite;}
+@keyframes uxMarch{to{stroke-dashoffset:-22;}}
+
+/* Rating stars + reaction */
+.stars>*{transition:transform .25s var(--ux-spring);}
+.stars>.ux-star-pop{animation:uxStar .5s var(--ux-spring);}
+@keyframes uxStar{0%{transform:scale(1);}40%{transform:scale(1.5) rotate(-10deg);}100%{transform:none;}}
+.ux-react{text-align:center;font-size:34px;line-height:1.2;height:42px;margin-top:4px;}
+.ux-react span{display:inline-block;animation:uxPop .5s var(--ux-spring);}
+.ux-react small{display:block;font:700 12px 'Manrope',system-ui,sans-serif;color:var(--ink-500,#68696B);}
+
+/* Cancel countdown ring: <div class="ux-ring" style="--p:.6"><b>0:42</b></div> */
+.ux-ring{--p:1;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--brand) calc(var(--p)*360deg),var(--line,#E5E7E6) 0);position:relative;}
+.ux-ring::before{content:'';position:absolute;inset:4px;background:#fff;border-radius:50%;}
+.ux-ring b{position:relative;font:800 12px 'Manrope',system-ui,sans-serif;font-variant-numeric:tabular-nums;}
+
+/* Coupon ticket */
+.ux-coupon{position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--brand-tint,#FDEBEE);border:1px dashed var(--brand);border-radius:12px;}
+.ux-coupon::before,.ux-coupon::after{content:'';position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--paper,#F1F0F5);}
+.ux-coupon::before{left:-8px;}.ux-coupon::after{right:-8px;}
+.ux-coupon code{font:800 14px 'Manrope',monospace;letter-spacing:1px;color:var(--brand);}
+.ux-coupon button{margin-left:auto;border:0;background:var(--brand);color:#fff;border-radius:999px;padding:6px 12px;font:800 12px 'Manrope',system-ui,sans-serif;transition:transform .2s var(--ux-spring);}
+.ux-coupon button.done{background:var(--success,#23956D);transform:scale(1.08);}
+
+/* "You saved" strip + bill accordion */
+.ux-save{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--success-bg,#E7F6EE);color:var(--success,#23956D);font:800 13px 'Manrope',system-ui,sans-serif;border-radius:12px;}
+.ux-acc>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:800;}
+.ux-acc>summary::-webkit-details-marker{display:none;}
+.ux-acc>summary::after{content:'\f078';font-family:'Font Awesome 6 Free';font-weight:900;font-size:11px;transition:transform .3s var(--ux-out);}
+.ux-acc[open]>summary::after{transform:rotate(180deg);}
+
+/* Empty / error states */
+.ux-empty{text-align:center;padding:36px 22px;}
+.ux-empty svg{width:120px;height:120px;margin:0 auto 14px;display:block;}
+.ux-empty h2{font-size:18px;font-weight:800;margin:0 0 6px;}
+.ux-empty p{font-size:13.5px;color:var(--ink-500,#68696B);margin:0 0 16px;}
+.ux-float{animation:uxFloat 3s ease-in-out infinite;transform-origin:center;}
+@keyframes uxFloat{50%{transform:translateY(-6px);}}
+
+/* Shared status chip */
+.ux-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;font:800 11.5px 'Manrope',system-ui,sans-serif;background:var(--icon-bg,#F2F2F4);color:var(--ink-700,#3E414A);}
+.ux-chip.good{background:var(--success-bg,#E7F6EE);color:var(--success,#23956D);}
+.ux-chip.bad{background:var(--danger-bg,#FBEDEB);color:var(--danger,#C8453B);}
+.ux-chip.warn{background:var(--amber-bg,#FFF6E8);color:var(--amber,#B26A12);}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important;}
+}

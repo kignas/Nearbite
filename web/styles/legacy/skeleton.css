@@ -1,0 +1,107 @@
+/* EATSWADA — ORIGINAL HOMEPAGE SKELETON
+   Visual behavior restored to the previous skeleton loader. */
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.sk {
+  display: block;
+  background: linear-gradient(90deg, #E7E9ED 25%, #F3F4F7 50%, #E7E9ED 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 10px;
+}
+.sk.d1 { animation-delay: .08s; }
+.sk.d2 { animation-delay: .16s; }
+.sk.d3 { animation-delay: .24s; }
+.sk.d4 { animation-delay: .32s; }
+
+/* ── Homepage hero / banner skeleton ─────────────────────────── */
+/* The skeleton is a real .header-slide shell, so it inherits the EXACT
+   hero box, the active header theme color and the copy/art positions from
+   the page CSS — the swap to the real banner causes no shift. Only the
+   inner .sk blocks (badge, two title lines, subtitle, CTA on the left;
+   artwork on the right) are placeholders, so the themed
+   hero shell stays visible around them. NOT one full-size grey block.
+   home-banners.js overwrites the whole track once the feed is ready. */
+.banner-skeleton{ pointer-events:none; }
+
+.banner-skeleton .bsk-badge{ width:64px;  height:15px; border-radius:999px; margin-bottom:9px; }
+.banner-skeleton .bsk-title{ height:22px; border-radius:7px; }
+.banner-skeleton .bsk-title-1{ width:66%; max-width:150px; }
+.banner-skeleton .bsk-title-2{ width:90%; max-width:196px; margin-top:6px; }
+.banner-skeleton .bsk-sub{  width:70%; max-width:150px; height:13px; border-radius:6px; margin-top:13px; }
+.banner-skeleton .bsk-sub-2{ width:48%; max-width:104px; height:13px; border-radius:6px; margin-top:6px; }
+.banner-skeleton .bsk-cta{  width:132px; height:42px; border-radius:999px; margin-top:14px; }
+
+/* Right-side artwork placeholder. Sits inside the slide (does not bleed
+   like the real art), centred vertically, so it never reads as a giant
+   rectangle. */
+.banner-skeleton .bsk-art{
+  position:absolute;
+  top:50%; right:5%;
+  width:42%; height:74%;
+  transform:translateY(-50%);
+  border-radius:22px;
+}
+@media (max-width:380px){
+  .banner-skeleton .bsk-cta{ width:120px; height:40px; }
+}
+
+/* ── Homepage filter-bar skeleton ────────────────────────────────
+   Seeded inside the real #filter-bar and built from the real
+   .filter-pill class, so the reserved band and pill heights match the
+   loaded filter bar exactly. renderFilterBar() replaces these with the
+   real pills the moment restaurant data is ready. Painted as solid
+   shimmer blocks (not outlined pills) and made non-interactive. */
+#filter-bar .filter-pill.is-skeleton{
+  pointer-events:none;
+  color:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  background:linear-gradient(90deg, #E7E9ED 25%, #F3F4F7 50%, #E7E9ED 75%) !important;
+  background-size:1200px 100% !important;
+  animation:shimmer 1.5s infinite linear;
+}
+#filter-bar .filter-pill.is-skeleton.d1{ animation-delay:.08s; }
+#filter-bar .filter-pill.is-skeleton.d2{ animation-delay:.16s; }
+
+/* ── Homepage category skeleton ─────────────────────────────── */
+/* The category skeleton geometry is owned entirely by whats-on-your-mind.css
+   (the "Skeleton state" block), so it stays locked to the real .cat-* grid —
+   same 25vw columns, same ring size, same 2-row layout. Defining .cs-ring /
+   .cs-name here as well produced conflicting widths/heights (a 100%-wide,
+   60px-tall oval instead of a matching circle), so those rules are removed. */
+
+/* ── Homepage restaurant skeleton ────────────────────────────── */
+/* The skeleton card is a REAL .u99-card-host / .u99-restaurant-card built
+   from the same classes the loaded card uses, so it inherits the exact
+   padding, border, radius, meta layout, 2-column item rail, item-image
+   aspect-ratio and every responsive breakpoint — no guessing, no shift.
+   Only the text/images become .sk shimmer; the container line-heights and
+   min-heights keep each row at its real height. restaurant-card.js's
+   renderList() overwrites the list with real cards when data is ready. */
+.rs-skeleton{ pointer-events:none; }
+
+/* Inline shimmer lines standing in for text. Widths are set per element in
+   the markup; heights track each row's real type size. */
+.rs-skeleton .rsk-line{ display:inline-block; border-radius:6px; vertical-align:middle; }
+.rs-skeleton .u99-discount-line .sk{ height:10px; }
+.rs-skeleton .u99-restaurant-name .sk{ height:16px; }
+.rs-skeleton .u99-meta .sk{ height:13px; border-radius:6px; }
+.rs-skeleton .u99-free-row .sk{ height:12px; }
+.rs-skeleton .u99-item-name .sk{ height:12px; }
+.rs-skeleton .u99-price-row .sk{ height:14px; }
+
+/* Item-image placeholder: fills the real .u99-item-image box and inherits
+   its radius, so the food thumbnail reserves the exact same space. */
+.rs-skeleton .rsk-fill{ position:absolute; inset:0; border-radius:inherit; }
+
+/* Add-button placeholder, positioned exactly like the real .u99-add. */
+.rs-skeleton .rsk-add{ position:absolute; right:4px; bottom:-8px; width:34px; height:34px; border-radius:50%; z-index:4; }
+
+@media (prefers-reduced-motion: reduce){
+  .sk{animation:none!important;}
+}

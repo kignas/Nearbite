@@ -1,0 +1,317 @@
+
+    /* ===== Eatswada onboarding design system — identical in login.html,
+       complete-profile.html, location-onboarding.html and address.html ===== */
+    :root{
+      --brand:var(--hd-on-light,#C13A50);
+      --brand-dark:var(--hd-active,#C13A50);
+      --brand-tint:var(--hd-soft,#FDEBEE);
+      --brand-ink:#A5164C;
+      --brand-soft:#E4A9C0;
+      --bg:#F1F5F9;
+      --ink:#1A1D21;
+      --ink-2:#4B5563;
+      --label:#8E959F;
+      --muted:#6B7280;
+      --line:#E6E9ED;
+      --field:#FBFCFD;
+      --green:var(--ew-success,#23956D);
+      --danger:#D64545;
+      --font:var(--font-sans);
+    }
+    html,body,button,input,textarea,select{font-family:var(--font)}
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    html{background:var(--bg)}
+    body{
+      background:var(--bg);
+      color:var(--ink);
+      font-weight:500;
+      min-height:100dvh;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x:hidden;
+    }
+
+    .tap{-webkit-tap-highlight-color:transparent}
+
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+    }
+
+    /* ---------------- hero ---------------- */
+    .hero-section{
+      position:relative;
+      background:var(--bg);
+      padding:calc(18px + env(safe-area-inset-top)) 20px 96px;
+      min-height:300px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;overflow:hidden;
+    }
+
+    .hero-btn-skip{
+      position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;
+      border:1px solid var(--line);background:#fff;
+      color:var(--ink-2);border-radius:999px;
+      padding:8px 15px;font-size:12px;font-weight:700;cursor:pointer;
+    }
+    .hero-btn-skip:active{opacity:.6}
+
+    .slide-content{
+      display:none;flex-direction:column;align-items:center;gap:18px;
+      animation:fade .45s ease;
+    }
+    .slide-content.active{display:flex}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+    .hero-img{width:88px;height:88px;object-fit:contain}
+
+    .hero-title{
+      font-size:24px;font-weight:800;line-height:1.22;letter-spacing:-.6px;color:var(--ink);
+    }
+
+    .carousel-dots{display:flex;gap:6px;margin-top:22px}
+    .dot{width:6px;height:6px;border-radius:999px;background:#CBD2DA;transition:width .25s ease,background .25s ease}
+    .dot.active{width:20px;background:var(--brand)}
+
+    /* ---------------- sheet ---------------- */
+    .bottom-sheet{
+      position:relative;
+      margin-top:-72px;
+      background:#fff;
+      border-radius:26px 26px 0 0;
+      border-top:1px solid var(--line);
+      padding:22px 18px calc(24px + env(safe-area-inset-bottom));
+      max-width:520px;margin-left:auto;margin-right:auto;
+      min-height:calc(100dvh - 228px);
+    }
+
+    .step-container{display:none}
+    .step-container.active{display:block}
+
+    .brand-mark{
+      font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+      color:var(--brand);margin-bottom:12px;
+    }
+
+    .sheet-header{margin-bottom:20px}
+    .sheet-title{font-size:22px;font-weight:800;letter-spacing:-.55px;line-height:1.2;color:var(--ink)}
+    .sheet-sub{margin-top:7px;font-size:14px;font-weight:500;line-height:1.5;color:var(--muted)}
+
+    /* ---------------- phone input ---------------- */
+    .input-row{display:flex;gap:9px;align-items:stretch}
+
+    .country-drop{
+      flex:none;display:grid;place-items:center;
+      width:52px;min-height:48px;
+      border:1.5px solid var(--line);border-radius:14px;background:var(--field);
+      font-size:20px;
+    }
+
+    .phone-box{
+      flex:1;min-width:0;display:flex;align-items:center;
+      min-height:48px;padding:0 13px;
+      border:1.5px solid var(--line);border-radius:14px;background:var(--field);
+      transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+    }
+    .phone-box:focus-within{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(194,24,91,.10)}
+    .phone-box.error{border-color:#F0A5A5;background:#FFFAFA}
+
+    .phone-prefix{font-size:15px;font-weight:700;color:var(--ink-2)}
+    .phone-divider{width:1px;height:20px;background:var(--line);margin:0 11px}
+    .phone-input{
+      flex:1;min-width:0;border:0;background:transparent;outline:0;
+      font-size:15px;font-weight:600;color:var(--ink);
+      -webkit-appearance:none;
+    }
+    .phone-input::placeholder{color:#AEB4BC;font-weight:500}
+
+    /* ---------------- shared fields ---------------- */
+    .auth-label{
+      display:block;font-size:13px;font-weight:600;color:var(--label);
+      margin:0 0 7px;
+    }
+    .auth-field{
+      display:block;width:100%;min-height:48px;margin-bottom:14px;
+      border:1.5px solid var(--line);background:var(--field);border-radius:14px;
+      padding:13px;outline:0;
+      font-size:15px;font-weight:600;line-height:1.35;color:var(--ink);
+      -webkit-appearance:none;
+      transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+    }
+    .auth-field::placeholder{color:#AEB4BC;font-weight:500}
+    .auth-field:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(194,24,91,.10)}
+
+    .auth-note{margin-top:12px;font-size:12px;font-weight:500;line-height:1.55;color:var(--label)}
+
+    /* ---------------- buttons ---------------- */
+    .btn-primary{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;min-height:50px;margin-top:18px;
+      border:0;border-radius:14px;
+      background:var(--brand);color:#fff;
+      font-size:15px;font-weight:800;letter-spacing:-.2px;
+      cursor:pointer;transition:background .15s ease;
+    }
+    .btn-primary:not(:disabled):active{background:var(--brand-dark)}
+    .btn-primary:disabled{background:var(--brand-soft);opacity:.85;cursor:not-allowed}
+
+    .auth-secondary{
+      display:block;width:100%;min-height:46px;margin-top:10px;
+      border:1.5px solid var(--line);border-radius:14px;background:#fff;
+      color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;
+    }
+    .auth-secondary:active{background:var(--bg)}
+
+    .auth-link{
+      display:block;width:100%;margin-top:14px;
+      border:0;background:none;color:var(--brand-ink);
+      font-size:13px;font-weight:700;cursor:pointer;
+    }
+
+    .btn-back-otp{
+      width:38px;height:38px;margin-bottom:16px;
+      border:1px solid var(--line);border-radius:12px;background:#fff;
+      color:var(--ink);font-size:14px;display:grid;place-items:center;cursor:pointer;
+    }
+    .btn-back-otp:active{opacity:.6}
+
+    .verify-otp-btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;min-height:50px;margin-top:18px;
+      border:0;border-radius:14px;
+      background:var(--brand);color:#fff;
+      font-size:15px;font-weight:800;letter-spacing:-.2px;
+      cursor:pointer;transition:background .15s ease;
+    }
+    .verify-otp-btn:not(:disabled):active{background:var(--brand-dark)}
+    .verify-otp-btn:disabled{background:var(--brand-soft);opacity:.85;cursor:not-allowed}
+
+    .social-btn{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      width:100%;min-height:48px;
+      border:1.5px solid var(--line);border-radius:14px;background:#fff;
+      font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;
+    }
+    .social-btn svg{width:18px;height:18px}
+
+    /* ---------------- OTP ---------------- */
+    .otp-title{font-size:22px;font-weight:800;letter-spacing:-.55px;line-height:1.2;color:var(--ink)}
+    .otp-sub{margin-top:7px;margin-bottom:22px;font-size:14px;font-weight:500;line-height:1.5;color:var(--muted)}
+
+    .otp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:280px}
+    .otp-grid.shake{animation:shake .3s}
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      25%{transform:translateX(-6px)}
+      75%{transform:translateX(6px)}
+    }
+    .otp-box{
+      width:100%;height:58px;
+      border:1.5px solid var(--line);border-radius:14px;background:var(--field);
+      text-align:center;font-size:20px;font-weight:800;color:var(--ink);
+      outline:0;-webkit-appearance:none;
+      transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+    }
+    .otp-box:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(194,24,91,.10)}
+    .otp-box.error{border-color:#F0A5A5;background:#FFFAFA}
+
+    .resend-row{
+      margin-top:18px;font-size:13px;font-weight:500;color:var(--muted);
+      display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    }
+    .resend-btn{
+      border:0;background:none;color:var(--brand-ink);
+      font-size:13px;font-weight:800;cursor:pointer;padding:0;
+    }
+    .resend-btn:disabled{color:var(--label);cursor:default;font-weight:600}
+
+    /* ---------------- feedback ---------------- */
+    .field-error{
+      display:none;align-items:center;gap:7px;margin-top:9px;
+      font-size:12px;font-weight:600;line-height:1.45;color:var(--danger);
+    }
+    .field-error.show{display:flex}
+
+    .banner-error{
+      display:none;align-items:center;gap:9px;
+      margin-bottom:14px;padding:12px 13px;
+      background:#FEF2F2;border:1px solid #FBD5D5;border-radius:14px;
+      font-size:12px;font-weight:600;line-height:1.45;color:#B42318;
+    }
+    .banner-error.show{display:flex}
+    .banner-error i{flex:none}
+    .banner-error span{flex:1;min-width:0}
+    .banner-retry{
+      flex:none;border:1.5px solid #FBD5D5;background:#fff;border-radius:10px;
+      padding:7px 11px;font-size:11px;font-weight:800;color:#B42318;cursor:pointer;
+    }
+
+    .divider{
+      display:flex;align-items:center;gap:12px;margin:20px 0;
+      color:var(--label);
+    }
+    .divider::before,.divider::after{
+      content:'';flex:1;height:1px;background:var(--line);
+    }
+    .divider-text{font-size:12px;font-weight:600}
+
+    .legal-text{
+      margin-top:22px;text-align:center;
+      font-size:12px;font-weight:500;line-height:1.7;color:var(--label);
+    }
+    .legal-text a{color:var(--ink-2);font-weight:700;text-decoration:none}
+
+    .spinner{
+      display:inline-block;width:15px;height:15px;margin-right:8px;
+      border:2px solid rgba(255,255,255,.45);border-top-color:#fff;
+      border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media (prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+    }
+
+    @media(max-width:365px){
+      .bottom-sheet{padding-left:15px;padding-right:15px}
+      .sheet-title,.otp-title{font-size:20px}
+      .hero-title{font-size:22px}
+      .otp-box{height:54px;font-size:20px}
+      .otp-grid{gap:8px}
+    }
+
+    @media(max-height:700px){
+      .hero-section{min-height:250px;padding-bottom:88px}
+      .hero-img{width:72px;height:72px}
+      .sheet-header{margin-bottom:16px}
+    }
+
+    /* ---------------- Google redirect callback gate ----------------
+       Only active while a Firebase Google redirect is being resolved.
+       The class is set synchronously in <head> (see the script below),
+       so the normal login form is never painted during the callback. */
+    html.auth-callback .hero-section,
+    html.auth-callback .bottom-sheet{display:none !important}
+
+    #authCallback{display:none}
+    html.auth-callback #authCallback{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+      position:fixed;inset:0;z-index:60;
+      padding:24px calc(24px + env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom));
+      background:var(--bg);text-align:center;
+    }
+    #authCallback .brand-mark{margin-bottom:2px}
+    .auth-callback-spinner{
+      width:34px;height:34px;border-radius:50%;
+      border:3px solid rgba(194,24,91,.16);border-top-color:var(--brand);
+      animation:spin .7s linear infinite;
+    }
+    .auth-callback-title{font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+    .auth-callback-sub{font-size:13px;font-weight:500;color:var(--muted)}
+    .auth-callback-exit{
+      margin-top:10px;border:0;background:none;
+      color:var(--label);font-size:12px;font-weight:700;cursor:pointer;
+    }
+  

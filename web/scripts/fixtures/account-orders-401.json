@@ -1,0 +1,6 @@
+{
+  "_comment": "__delay__ pins the 401 to settle after the page's IntersectionObserver callback. Legacy registers that observer at DOMContentLoaded, so on an instant 401 the 'empty' render and the 'Please log in' render race each other — in legacy AND in the port. The delay makes both sides land on the same (later) state deterministically; it does not change any page behaviour.",
+  "/orders": { "__status__": 401, "__delay__": 300, "__body__": { "success": false, "message": "Unauthorized" } },
+  "/users/profile": { "__status__": 401, "__delay__": 300, "__body__": { "success": false, "message": "Unauthorized" } },
+  "/users/addresses": { "__status__": 401, "__delay__": 300, "__body__": { "success": false, "message": "Unauthorized" } }
+}

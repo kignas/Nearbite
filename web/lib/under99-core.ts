@@ -1,0 +1,439 @@
+/* =====================================================================
+   99 STORE — CORE
+   TypeScript port of legacy `js/under99-core.js`.
+   API base, single normalizer, canonical cart integration, add controls.
+   The cart is owned by cart-bar.js — this module only calls
+   window.updateCart() and reads canonical state. Contract preserved exactly.
+   ===================================================================== */
+import { U99Icons } from "./under99-icons";
+
+const API = "https://api.eatswada.com/api/restaurants/under99";
+const HERO_API = "https://api.eatswada.com/api/home-banners?placement=under99";
+const CART_KEY = "nearbite_cart";
+
+export interface Under99State {
+  restaurants: any[];
+  discountOnly: boolean;
+  foodType: "all" | "veg" | "nonveg";
+  priceRanges: string[];
+  deliveryLimit: number | null;
+  priceBand: "99" | "100" | "150";
+  sortMode: string;
+  searchQuery: string;
+  freeDeliveryOnly: boolean;
+  greatOffersOnly: boolean;
+}
+
+const state: Under99State = {
+  restaurants: [],
+  discountOnly: false,
+  foodType: "all",
+  priceRanges: [],
+  deliveryLimit: null,
+  priceBand: "99",
+  sortMode: "default",
+  searchQuery: "",
+  freeDeliveryOnly: false,
+  greatOffersOnly: false,
+};
+
+export const esc = (v: any): string =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+export const num = (v: any, f = 0): number => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : f;
+};
+
+const qs = (id: string): any =>
+  typeof document === "undefined" ? null : document.getElementById(id);
+
+export const deliveryMax = (v: any): number => {
+  const m = String(v || "").match(/\d+/g);
+  return m && m.length ? Math.max(...m.map(Number)) : Infinity;
+};
+
+/* ---------- Normalization: ONE canonical menu-item model ---------- */
+export function normalizeRestaurant(raw: any): any {
+  const r = raw?.restaurant && typeof raw.restaurant === "object" ? raw.restaurant : raw;
+  const sourceMenu = Array.isArray(raw?.menu) ? raw.menu : Array.isArray(r?.menu) ? r.menu : [];
+  const menu = sourceMenu
+    .map((item: any) => ({
+      id: String(item?.id || item?._id || ""),
+      name: item?.name || "Item",
+      description: item?.description || "",
+      price: num(item?.price),
+      originalPrice: item?.originalPrice == null ? null : num(item.originalPrice),
+      discountPercent: item?.discountPercent == null ? null : num(item.discountPercent),
+      image: item?.image || "",
+      isVeg: Boolean(item?.isVeg),
+      category: item?.category || "Recommended",
+      isUnder99: Boolean(item?.isUnder99 ?? num(item?.price) <= 99),
+      isBestseller: Boolean(item?.isBestseller),
+      isRecommended: Boolean(item?.isRecommended),
+      inStock: item?.inStock !== false,
+      customizations: Array.isArray(item?.customizations) ? item.customizations : [],
+    }))
+    .filter((x: any) => x.id && x.price > 0);
+  return {
+    id: String(r?.id || r?._id || ""),
+    name: r?.name || "Restaurant",
+    rating: num(r?.rating),
+    ratingCount: r?.ratingCount ?? "",
+    deliveryTime: String(r?.deliveryTime || ""),
+    estimatedDeliveryMin: num(r?.estimatedDeliveryMin),
+    estimatedDeliveryMax: num(r?.estimatedDeliveryMax),
+    cuisine: Array.isArray(r?.cuisine) ? r.cuisine.join(", ") : String(r?.cuisine || ""),
+    freeDeliveryAbove: r?.freeDeliveryAbove == null ? null : num(r.freeDeliveryAbove),
+    menu,
+  };
+}
+
+async function fetchJson(url: string, timeout = 15000): Promise<any> {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), timeout);
+  try {
+    const r = await fetch(url, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      signal: c.signal,
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+export async function loadHero(): Promise<void> {
+  try {
+    const result = await fetchJson(HERO_API, 12000);
+    const b = Array.isArray(result?.data) ? result.data[0] : null;
+    const image = String(b?.mobileImage || b?.image || "").trim();
+    if (image) {
+      const el = qs("u99-hero-art");
+      const hero = document.querySelector(".u99-hero");
+      if (el) {
+        el.onload = () => {
+          el.classList.add("loaded");
+          hero?.classList.add("u99-hero-ready");
+        };
+        el.onerror = () => {
+          el.classList.remove("loaded");
+          hero?.classList.add("u99-hero-error");
+        };
+        el.src = image;
+        el.hidden = false;
+      }
+    } else {
+      document.querySelector(".u99-hero")?.classList.add("u99-hero-error");
+    }
+  } catch (e) {
+    console.warn("[99 Store] hero artwork unavailable", e);
+    document.querySelector(".u99-hero")?.classList.add("u99-hero-error");
+  }
+}
+
+export async function load(): Promise<void> {
+  const skeleton = qs("u99-skeleton");
+  const grid = qs("u99-product-grid");
+  skeleton?.classList.remove("u99-hidden");
+  try {
+    const result = await fetchJson(API, 30000);
+    const raw = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+    state.restaurants = raw.map(normalizeRestaurant).filter((r: any) => r.id && r.menu.length);
+    if (!state.restaurants.length) throw new Error("No qualifying restaurant data returned");
+    document.dispatchEvent(new Event("eatswada99:data-ready"));
+  } catch (e) {
+    console.error("[99 Store] load failed", e);
+    if (grid)
+      grid.innerHTML =
+        '<div class="u99-empty"><div class="u99-empty-art">' +
+        iconArt("error") +
+        "</div>" +
+        "<strong>Couldn\u2019t load deals</strong><span>Check your connection and try again.</span>" +
+        '<button class="u99-retry" type="button" onclick="location.reload()">Try again</button></div>';
+    document.dispatchEvent(new CustomEvent("eatswada99:data-error", { detail: e }));
+  } finally {
+    skeleton?.classList.add("u99-hidden");
+  }
+}
+
+/* ---------- Canonical cart reads (owned by cart-bar.js) ---------- */
+export function readCart(): Record<string, any> {
+  try {
+    const p = JSON.parse(localStorage.getItem(CART_KEY) || "{}");
+    return p && typeof p === "object" && !Array.isArray(p) ? p : {};
+  } catch {
+    return {};
+  }
+}
+
+export function cartQty(menuItemId: any, restaurantId: any): number {
+  const mid = String(menuItemId || "");
+  const rid = String(restaurantId || "");
+  if (!mid) return 0;
+  let q = 0;
+  const cart = readCart();
+  for (const k in cart) {
+    const e = cart[k];
+    if (e && String(e.menuItem || "") === mid && String(e.resId || "") === rid) q += num(e.quantity);
+  }
+  return q;
+}
+
+/* Base payload — identical contract to legacy. Optional `selection` (from the
+   customization sheet) extends name/price and carries chosen options through
+   to the cart without changing the canonical keys. */
+export function cartPayload(item: any, r: any, selection?: any): string {
+  const base = num(item.price);
+  const addon = selection ? num(selection.addonTotal) : 0;
+  const price = base + addon;
+  const original =
+    item.originalPrice != null && num(item.originalPrice) > base ? num(item.originalPrice) + addon : null;
+  const payload: any = {
+    name: item.name,
+    price,
+    originalPrice: original,
+    resId: String(r.id),
+    menuItem: String(item.id),
+    image: item.image || "",
+    isVeg: Boolean(item.isVeg),
+  };
+  if (selection && Array.isArray(selection.options) && selection.options.length) {
+    payload.options = selection.options; // [{group,name,price,optionId?}]
+  }
+  return encodeURIComponent(JSON.stringify(payload));
+}
+
+function ensureCart(): boolean {
+  if (typeof (window as any).updateCart !== "function") {
+    console.error("[99 Store] updateCart unavailable");
+    (window as any).showToast?.("Cart is still loading");
+    return false;
+  }
+  return true;
+}
+
+export function cartChange(item: any, r: any, delta: number): void {
+  if (!ensureCart()) return;
+  if (!item.id) {
+    console.error("[99 Store] real menu item id missing", item);
+    (window as any).showToast?.("This item is unavailable");
+    return;
+  }
+  (window as any).updateCart(cartPayload(item, r), delta > 0 ? 1 : -1);
+}
+
+/* Add a specific configured variant (from the customization sheet). */
+export function addWithOptions(item: any, r: any, selection: any, qty?: number): void {
+  if (!ensureCart()) return;
+  const n = Math.max(1, num(qty, 1));
+  const payload = cartPayload(item, r, selection);
+  for (let i = 0; i < n; i++) (window as any).updateCart(payload, 1);
+}
+
+export function findItem(menuItemId: any, restaurantId: any): { item: any; r: any } | null {
+  const r = state.restaurants.find((x: any) => x.id === String(restaurantId));
+  const item = r?.menu.find((x: any) => x.id === String(menuItemId));
+  return item && r ? { item, r } : null;
+}
+
+export const hasOptions = (item: any): boolean =>
+  Array.isArray(item.customizations) && item.customizations.length > 0;
+
+/* ---------- Add control (shared by popular + grid) ---------- */
+export function addControlInner(item: any, r: any): string {
+  const qty = cartQty(item.id, r.id);
+  if (qty > 0) {
+    return (
+      '<div class="u99-stepper" role="group" aria-label="Quantity in cart">' +
+      '<button type="button" class="u99-step-btn" data-cart-dec aria-label="Remove one ' +
+      esc(item.name) +
+      '">' +
+      U99Icons.icon("minus", { size: 18 }) +
+      "</button>" +
+      '<span class="u99-step-qty" aria-live="polite">' +
+      qty +
+      "</span>" +
+      '<button type="button" class="u99-step-btn" data-cart-inc aria-label="Add one ' +
+      esc(item.name) +
+      '">' +
+      U99Icons.icon("plus", { size: 18 }) +
+      "</button></div>"
+    );
+  }
+  const label = hasOptions(item) ? "Customise " + esc(item.name) : "Add " + esc(item.name);
+  return (
+    '<button type="button" class="u99-add-btn' +
+    (hasOptions(item) ? " has-options" : "") +
+    '" data-cart-add aria-label="' +
+    label +
+    '">' +
+    U99Icons.icon("plus", { size: 23 }) +
+    "</button>"
+  );
+}
+
+export function renderAddControl(item: any, r: any): string {
+  const qty = cartQty(item.id, r.id);
+  return (
+    '<div class="u99-add-control' +
+    (qty > 0 ? " has-qty" : "") +
+    '" data-mi="' +
+    esc(item.id) +
+    '" data-ri="' +
+    esc(r.id) +
+    '" data-qty="' +
+    qty +
+    '">' +
+    addControlInner(item, r) +
+    "</div>"
+  );
+}
+
+/* Click routing for add/inc/dec. A "+" on a customizable item that is not yet
+   in the cart opens the customization sheet instead of adding blind. */
+function installClickRouting(): void {
+  document.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest("[data-cart-add],[data-cart-inc],[data-cart-dec]");
+    if (!btn) return;
+    const control = btn.closest(".u99-add-control") as HTMLElement | null;
+    if (!control) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const hit = findItem((control as any).dataset.mi, (control as any).dataset.ri);
+    if (!hit) return;
+    const isAdd = btn.hasAttribute("data-cart-add");
+    if (isAdd && hasOptions(hit.item)) {
+      document.dispatchEvent(
+        new CustomEvent("eatswada99:open-customize", {
+          detail: { menuItemId: hit.item.id, restaurantId: hit.r.id },
+        })
+      );
+      return;
+    }
+    cartChange(hit.item, hit.r, btn.hasAttribute("data-cart-dec") ? -1 : 1);
+  });
+}
+
+/* Image / card-body taps deliberately do NOT add or open customization. Add is
+   an explicit action that belongs to the add control only (above), which stops
+   propagation. Tapping the food image never adds an item. */
+
+const reduceMotion = (): boolean =>
+  !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+/* Vertical number roll on the existing stepper — no DOM rebuild. */
+function rollQty(qtyEl: HTMLElement, val: number, dir: number): void {
+  qtyEl.textContent = String(val);
+  if (reduceMotion()) return;
+  qtyEl.classList.remove("roll-up", "roll-down");
+  void qtyEl.offsetWidth; // restart the animation
+  qtyEl.classList.add(dir >= 0 ? "roll-up" : "roll-down");
+}
+
+/* Reconcile each card control with the canonical cart. The three state changes
+   animate distinctly and never rebuild an existing stepper:
+     0 → n : render the stepper (CSS expands it from the + button)
+     n → m : roll the number in place (up or down)
+     n → 0 : collapse the stepper, then restore the + button */
+export function syncAddControls(): void {
+  document.querySelectorAll(".u99-add-control").forEach((c: any) => {
+    const hit = findItem(c.dataset.mi, c.dataset.ri);
+    if (!hit) return;
+    const qty = cartQty(hit.item.id, hit.r.id);
+    const prev = Number(c.dataset.qty || "0");
+    const stepper = c.querySelector(".u99-stepper");
+
+    if (qty > 0 && stepper) {
+      const qtyEl = stepper.querySelector(".u99-step-qty");
+      if (qtyEl && Number(qtyEl.textContent) !== qty) rollQty(qtyEl, qty, qty - prev);
+      c.classList.add("has-qty");
+      c.dataset.qty = String(qty);
+      return;
+    }
+    if (qty > 0 && !stepper) {
+      // Paint the stepper at the old circular width first, then expand on the
+      // next style calculation so the 0 → 1 transition is actually visible.
+      c.innerHTML = addControlInner(hit.item, hit.r);
+      c.dataset.qty = String(qty);
+      if (reduceMotion()) {
+        c.classList.add("has-qty");
+      } else {
+        void c.offsetWidth;
+        requestAnimationFrame(() => c.classList.add("has-qty"));
+      }
+      return;
+    }
+    if (qty === 0 && stepper && !reduceMotion()) {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        c.classList.remove("has-qty");
+        c.innerHTML = addControlInner(hit.item, hit.r);
+        c.dataset.qty = "0";
+      };
+      stepper.classList.add("u99-collapsing");
+      c.style.width = "";
+      stepper.addEventListener("animationend", finish, { once: true });
+      setTimeout(finish, 220);
+      return;
+    }
+    c.classList.remove("has-qty");
+    c.innerHTML = addControlInner(hit.item, hit.r);
+    c.dataset.qty = String(qty);
+  });
+}
+
+/* small inline art used by empty/error states (kept in icon system spirit) */
+export function iconArt(kind: string): string {
+  if (kind === "error") {
+    return (
+      '<svg viewBox="0 0 48 48" fill="none" width="48" height="48" aria-hidden="true">' +
+      '<circle cx="24" cy="24" r="20" fill="#fff1f7"/>' +
+      '<path d="M24 15v11" stroke="#d80b6f" stroke-width="3" stroke-linecap="round"/>' +
+      '<circle cx="24" cy="32" r="1.8" fill="#d80b6f"/></svg>'
+    );
+  }
+  return "";
+}
+
+export const Eatswada99 = {
+  esc,
+  num,
+  deliveryMax,
+  qs,
+  load,
+  loadHero,
+  state,
+  renderAddControl,
+  syncAddControls,
+  findItem,
+  cartQty,
+  cartChange,
+  addWithOptions,
+  cartPayload,
+  readCart,
+  hasOptions,
+  iconArt,
+};
+
+let installed = false;
+export function installUnder99Core(): void {
+  if (typeof window === "undefined" || installed) return;
+  installed = true;
+  const w = window as any;
+  w.Eatswada99State = state;
+  w.Eatswada99 = Eatswada99;
+  installClickRouting();
+  document.addEventListener("eatswada:cart-updated", syncAddControls);
+}
+
+export default Eatswada99;

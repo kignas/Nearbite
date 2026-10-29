@@ -1,0 +1,40 @@
+{
+  "_comment": "Files allowed to issue POST/PUT/PATCH/DELETE fetch calls. NOWRITE in tools/preflight.mjs PASSes only when every write-method fetch hit lives in one of these files.",
+  "files": [
+    "web/lib/api.ts",
+    "web/lib/payment-failed.ts",
+    "web/lib/ew-payment-verify.ts",
+    "web/lib/cart-page-order.ts",
+    "web/lib/login-page.ts",
+    "web/lib/forgot-password.ts",
+    "web/lib/complete-profile.ts",
+    "web/lib/address-api.ts",
+    "web/lib/customer-upload.ts",
+    "web/lib/orders-page.ts",
+    "web/lib/profile-page.ts",
+    "web/lib/push.ts",
+    "web/lib/track-order-page.ts",
+    "web/lib/order-support-page.ts",
+    "web/lib/privacy-data-page.ts",
+    "web/lib/rate-us-page.ts",
+    "web/lib/apply-page.ts"
+  ],
+  "entries": {
+    "web/lib/payment-failed.ts": "payment-failed.html L86 POST /payments/retry {orderId} (stubbed in tests; TEST MODE only).",
+    "web/lib/ew-payment-verify.ts": "payment-verify.js L111 POST /payments/verify {orderId,razorpayPaymentId,razorpayOrderId,razorpaySignature} (stubbed in tests; TEST MODE only).",
+    "web/lib/cart-page-order.ts": "cart-page.js L1814 POST /orders (chunk C9 — the checkout place-order call). Body = EWOrderPayload.build() (items, deliveryAddress, addressId, restaurantId, restaurantName, subtotal, deliveryFee, total, paymentMethod, restaurantNote, deliveryInstructions, tipAmount, couponCode, restaurantNotes?); headers Content-Type + Authorization + Idempotency-Key (stubbed in every test; TEST MODE only, never the real backend).",
+    "web/lib/login-page.ts": "login.html L668-1183. POST {AUTH}/firebase {idToken} (Google popup/redirect hand-off); POST {API}/login {email,password} or {phone,password}; POST {API}/forgot-password/email {email}; POST {API}/forgot-password/email/verify {email,otp}; POST {API}/forgot-password/email/reset {resetToken,password}. Every write is stubbed in the auth harness; never the real backend.",
+    "web/lib/forgot-password.ts": "forgot-password.html L42-147. POST {API}/forgot-password {phone}; POST {API}/forgot-password/verify {phone,otp}; POST {API}/forgot-password/reset {phone,resetToken,password}. Stubbed in the auth harness; never the real backend.",
+    "web/lib/complete-profile.ts": "complete-profile.html L405-542. POST {AUTH}/firebase/complete-profile {idToken,name,phone,password,adultConfirmed} (Google path); PUT {API}/users/profile {name,phone,email,password,adultConfirmed} (token path). Stubbed in the auth harness; never the real backend.",
+    "web/lib/address-api.ts": "address-api.js (legacy) / address.js — POST /users/addresses (create), PUT /users/addresses/:id (edit), PATCH /users/addresses/:id/default (set default), DELETE /users/addresses/:id (delete). Every write is stubbed in the account harness (T4); never the real backend.",
+    "web/lib/customer-upload.ts": "customer-upload.js — POST /upload/customer-media (Cloudinary-backed customer image upload, multipart field \"images\"). Reached from the profile avatar picker and from order-support evidence photos. Stubbed in tests (T4 compares the multipart shape); never the real backend.",
+    "web/lib/orders-page.ts": "orders.html — POST /orders/:id/review (submit rating). Stubbed in the account harness (T4); never the real backend.",
+    "web/lib/profile-page.ts": "profile.html — PUT /users/profile (save name/email). Stubbed in the account harness (T4); never the real backend.",
+    "web/lib/push.ts": "push.js — POST /devices (FCM token registration). Guarded by NEXT_PUBLIC_FIREBASE_ENABLED; stubbed in tests; never the real backend.",
+    "web/lib/track-order-page.ts": "track-order.html — PUT /orders/:id/cancel (cancel order) and POST /orders/:id/review (rating). Stubbed in the account harness (T4); never the real backend.",
+    "web/lib/order-support-page.ts": "order-support.html L262-1180. POST /support/tickets {orderId,category,subject,message,items[],issueCategory?,evidencePhotos?} (create ticket) and POST /support/tickets/:id/messages {message} (send chat message). Stubbed in the 3d interaction harness (T4); never the real backend.",
+    "web/lib/privacy-data-page.ts": "privacy-data.html inline script. POST /privacy/requests {type,message} (correction/grievance), PUT /privacy/me/nominee {name,email,phone,relationship}, DELETE /privacy/me/nominee, DELETE /privacy/me {confirmation}. Stubbed in the 3d interaction harness (T4); never the real backend.",
+    "web/lib/rate-us-page.ts": "rate-us.html inline script. POST /ratings {score,comment} (submit rating). Stubbed in the 3d interaction harness (T4); never the real backend.",
+    "web/lib/apply-page.ts": "apply.html inline script. POST {vendor-applications} and PATCH {vendor-applications}/mine with the restaurant application payload (ownerName,email,phone,businessType,restaurantName,cuisine,description,address,fssaiLicenseNumber,deliveryMode,openingHours,location). Stubbed in the 3d interaction harness (T4); never the real backend."
+  }
+}

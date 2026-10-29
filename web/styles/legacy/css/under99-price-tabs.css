@@ -1,0 +1,144 @@
+/* =====================================================================
+   99 STORE — PRICE RANGE  (segmented capsule with sliding pink thumb)
+   One continuous rounded track holds three segments. A single pink pill
+   (.u99-price-thumb) slides between them; segment text flips to white when
+   active. Selected state is exposed via aria-selected in JS.
+   ===================================================================== */
+.u99-price-seg{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  height:52px;
+  margin:0 var(--u99-gutter) 18px;
+  padding:4px;
+  background:#f0f0f2;
+  border:1px solid #e7e7ea;
+  border-radius:999px;
+  isolation:isolate;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* The sliding indicator — width = one segment, moves in 100% steps. */
+.u99-price-thumb{
+  position:absolute;
+  top:4px;
+  left:4px;
+  bottom:4px;
+  width:calc((100% - 8px) / 3);
+  border-radius:999px;
+  background:var(--u99-primary);
+  box-shadow:0 5px 14px rgba(15,23,42,.32);
+  transform:translateX(0);
+  transition:transform .26s cubic-bezier(.22,1,.36,1);
+  z-index:0;
+  pointer-events:none;
+}
+
+.u99-price-tab{
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  min-width:0;
+  padding:0 4px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:#3a3f49;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:var(--u99-fw-bold);
+  letter-spacing:-.1px;
+  white-space:nowrap;
+  transition:color .2s ease, transform .12s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-price-tab.active{color:#fff}
+.u99-price-tab:active{transform:scale(.97)}
+
+/* Hairline dividers between resting segments; hidden around the thumb. */
+.u99-price-tab + .u99-price-tab::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  height:18px;
+  width:1px;
+  transform:translateY(-50%);
+  background:#d9d9dd;
+  transition:opacity .2s ease;
+}
+.u99-price-tab.active::before,
+.u99-price-tab.active + .u99-price-tab::before{opacity:0}
+
+@media(max-width:390px){
+  .u99-price-seg{height:50px;margin-left:18px;margin-right:18px}
+  .u99-price-tab{font-size:12px}
+}
+@media(max-width:360px){
+  .u99-price-tab{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .u99-price-thumb{transition:none}
+  .u99-price-tab{transition:color .2s ease}
+  .u99-price-tab:active{transform:none}
+}
+
+
+/* PHASE 1.1 — SLIM PRICE CAPSULE */
+.u99-price-seg{height:44px;margin-bottom:16px;padding:3px}
+.u99-price-thumb{top:3px;left:3px;bottom:3px;width:calc((100% - 6px) / 3);box-shadow:0 4px 11px rgba(15,23,42,.24)}
+.u99-price-tab{font-size:12.5px}
+.u99-price-tab + .u99-price-tab::before{height:15px}
+@media(max-width:390px){.u99-price-seg{height:42px;margin-left:18px;margin-right:18px;margin-bottom:15px}.u99-price-tab{font-size:11.5px}}
+@media(max-width:360px){.u99-price-seg{height:40px}.u99-price-tab{font-size:11px}}
+
+
+/* FINAL POSITION FIX — price capsule follows the independent filter rail */
+.u99-price-seg{
+  margin-top:2px;
+}
+@media(max-width:390px){
+  .u99-price-seg{margin-top:1px}
+}
+
+/* ================================================================
+   PHASE 1 FINAL — THIN PRICE CAPSULE
+   ================================================================ */
+.u99-price-seg{
+  height:40px;
+  margin-top:1px;
+  margin-bottom:15px;
+  padding:3px;
+  border-radius:999px;
+}
+.u99-price-thumb{
+  top:3px;left:3px;bottom:3px;
+  width:calc((100% - 6px)/3);
+  box-shadow:0 3px 9px rgba(15,23,42,.22);
+}
+.u99-price-tab{font-size:11.5px}
+.u99-price-tab + .u99-price-tab::before{height:14px}
+@media(max-width:390px){
+  .u99-price-seg{height:39px;margin-top:1px;margin-bottom:14px}
+  .u99-price-tab{font-size:11px}
+}
+@media(max-width:360px){.u99-price-seg{height:38px}.u99-price-tab{font-size:10.5px}}
+
+
+/* ================================================================
+   PHASE 2 — SEGMENTED TAB MOTION POLISH
+   ================================================================ */
+.u99-price-seg{overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.035)}
+.u99-price-thumb{
+  will-change:transform;
+  transition:transform .34s cubic-bezier(.16,1,.3,1),box-shadow .22s ease;
+}
+.u99-price-tab{will-change:color,transform;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.u99-price-tab.active{font-weight:800}
+.u99-price-tab:active{transform:scale(.965)}
+@media(prefers-reduced-motion:reduce){
+  .u99-price-thumb{transition:none}
+  .u99-price-tab:active{transform:none}
+}

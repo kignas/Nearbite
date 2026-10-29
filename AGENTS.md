@@ -98,3 +98,66 @@ Compare result: phone x.x% / desktop x.x%
 Tested behaviours: ...
 Open questions / TODOs: ...
 ```
+
+## STANDARD TASK PROTOCOL (read this before starting any task)
+
+This is the LAST section and it overrides any older brief that contradicts it.
+
+### 0. The prompt in front of you wins
+Ignore stale briefs, older phase names and old `deliverables/` instructions. Whatever the current
+task message says about the output file name, the folders and the steps is what you follow.
+If a brief and this file disagree, the brief wins for that task only; ask if unsure.
+
+### 1. Shared files are FROZEN
+These files must stay **byte-identical** across every task. Do NOT edit them unless the task
+explicitly says to (and then say so in PROGRESS.md):
+
+```
+web/lib/cart.ts   web/lib/api.ts   web/lib/safe-html.ts
+web/components/CartBar.tsx   web/components/Header.tsx
+every file in web/styles/legacy/**   every file in web/public/**
+```
+
+Their sha256 hashes live in `tools/frozen-hashes.json`. Prove them unchanged with:
+
+```
+node tools/preflight.mjs              # SHARED must PASS (byte-identical)
+node tools/preflight.mjs --update-shared   # ONLY to re-baseline after an allowed change
+```
+
+Run `--update-shared` at most once per task, and only when the task itself changes a frozen file.
+`web/public/robots.txt` was deliberately edited in Phase 2h; the baseline already includes that edit.
+
+### 2. Output rules (one cumulative zip)
+- Produce **exactly ONE** zip, named exactly as the task prompt says (e.g.
+  `eatswada-web-phase-2m.zip`). Never a second name, never a second zip.
+- Contents: `web/` `tools/` `notes/` `PROGRESS.md` `AGENTS.md` `preflight-report.txt`.
+- Exclude: `web/node_modules/`, `web/.next/`, any `.env*`, `*.tsbuildinfo`, `compare-out/`, `.git`.
+- `zip` and `unzip` are absent in this sandbox — build/inspect the zip with Python `zipfile`.
+- Never include `.env.local`. List the env variable NAMES the owner must set in PROGRESS.md.
+
+### 3. PROGRESS entry format
+- The newest entry goes at the **TOP**, directly below the `# EatSwada migration — PROGRESS`
+  title (nothing between them).
+- Keep it **<= 60 lines**. Real numbers only (compare %, pass/fail counts). No placeholders.
+- Include a **legacy → port table** (which legacy lines/functions became which new file) and a
+  short **uncertainties / open questions** list. Quirks go in `notes/post-migration-fixes.md`.
+
+### 4. Regression list (run before every delivery)
+Legacy server: `python3 -m http.server 8080` at the repo root (serves `/foo.html`; use the
+clean-URL shim on :8090 for `/search` `/category`). New app: `npx next start -p 3000`.
+**ALWAYS restart `next start` after `npm run build`** — a stale server 404s its own chunks and
+makes every compare bogus.
+- `cd web && npm run build` then `npx tsc --noEmit` (both must be clean).
+- `npm run compare` for every ported page (target 0.00%).
+- The parity harnesses: `cart-money-parity`, `cart-c5c6-parity`, `cart-c1c6-masked-compare`,
+  `cart-boot-parity`, `cart-css-leak`, `shell-money-parity`, `shell-chunk5-parity`,
+  `shell-chunks67-parity`, `shell-chunks89-parity`, `shell-chunk10-parity` (needs the legacy
+  `restaurant-shell.html` URL), `shell-chunk11-parity`, `shell-chunk12-parity`, and the
+  seo / sitemap / headers / boot scripts. Every one must stay green.
+- Finish with `node tools/preflight.mjs --zip deliverables/<name>.zip` — all checks PASS.
+
+### 5. Gated steps: STOP, don't improvise
+If a gated step fails (a check, a compare, a test, the build), **STOP and report** it. Never
+continue past a failure, and never do work the prompt does not list. If the prompt gates Part 2
+on Part 1 being all-PASS, Part 2 does not start until Part 1 is all-PASS.

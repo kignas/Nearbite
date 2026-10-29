@@ -1,0 +1,73 @@
+/* STEP 1 — GEOMETRY ONLY
+   Header → restaurant info → delivery banner → tabs → filters.
+   No typography, colors, menu layout, API, cart or JS changes. */
+
+/* 1) Header footprint: keep the existing controls; only lock the section height. */
+.top-bar{
+  height:58px!important;
+  min-height:58px!important;
+  padding:7px 16px!important;
+  box-sizing:border-box!important;
+}
+
+/* 2) Restaurant info block: reduce accumulated vertical padding. */
+.res-card-body{
+  padding:8px 16px 4px!important;
+  box-sizing:border-box!important;
+}
+
+.res-meta-row{
+  margin-top:7px!important;
+}
+
+/* 3) Delivery banner: compact height and no extra external vertical gap. */
+.delivery-strip{
+  height:44px!important;
+  min-height:44px!important;
+  max-height:44px!important;
+  margin:4px 14px 0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+
+/* Keep the rider inside the shorter banner. */
+.delivery-rider{
+  right:6px!important;
+  bottom:0!important;
+  width:78px!important;
+  height:44px!important;
+}
+
+.delivery-copy{
+  top:0!important;
+  bottom:0!important;
+}
+
+/* 4) Tabs: directly follow the banner with a compact fixed footprint. */
+.menu-tabs{
+  height:46px!important;
+  min-height:46px!important;
+  margin-top:0!important;
+  padding:0 16px!important;
+  box-sizing:border-box!important;
+}
+
+.menu-tab:not(:last-child)::after{
+  top:13px!important;
+  height:20px!important;
+}
+
+/* 5) Filters: small, consistent gap after tabs. */
+.filter-bar{
+  margin:0!important;
+  padding:7px 16px 6px!important;
+  gap:8px!important;
+  box-sizing:border-box!important;
+}
+
+@media(max-width:380px){
+  .res-card-body{padding-left:14px!important;padding-right:14px!important}
+  .delivery-strip{margin-left:12px!important;margin-right:12px!important}
+  .menu-tabs,.filter-bar{padding-left:14px!important;padding-right:14px!important}
+}

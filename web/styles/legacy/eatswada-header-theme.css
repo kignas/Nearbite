@@ -1,0 +1,214 @@
+/* ═══════════════════════════════════════════════════════════════════
+   EATSWADA — CENTRALIZED COLOR HIERARCHY
+   ------------------------------------------------------------------
+   One shared neutral UI + one interchangeable header/UI color family.
+
+   This is a COLOR SYSTEM, not a redesign. Layout, typography, spacing,
+   cards, borders, shadows, icons, imagery and interactions are shared.
+
+   Hierarchy (see .agents/skills/eatswada-multi-header-color-system/):
+     PRIMARY    raspberry   — header, primary CTAs, cart bar, checkout
+     SECONDARY  food red    — strong secondary actions / active controls
+     ACCENT     burgundy    — offers, badges, promotional emphasis
+     NEUTRAL    vanilla/white/charcoal — the majority of the app
+     SUPPORTING misty sage  — soft banners, decorative surfaces
+     DEAL       warm gold   — discount/deal labels
+     SEMANTIC   green/red/amber/blue — independent of the color theme
+
+   The header color family is swappable via html[data-ew-header]. Every
+   other token below is shared and theme-independent. Adding a header
+   theme = one [data-ew-header] block; components are never rewritten.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Shared foundation: neutrals, supporting + semantic colors ──────
+   Theme-independent. Never derived from the header color family. */
+:root {
+  /* Neutral foundation — warm, premium, dominates content areas. */
+  --ew-bg: #FAF9F6;
+  --ew-surface: #FFFFFF;
+  --ew-cream: #FFF9EB;
+  --ew-text: #17191B;
+  --ew-text-soft: #697178;
+  --ew-border: #E6E5E2;
+
+  /* Misty sage supporting surfaces (soft banners, decorative areas). */
+  --ew-sage: #9FB2AC;
+  --ew-sage-soft: #EFF3F1;
+  --ew-sage-ink: #46564F;
+
+  /* Deal / discount accent — used sparingly. */
+  --ew-deal: #F2C94C;
+  --ew-deal-soft: #FDF3D6;
+
+  /* Semantic — independent of the header theme. */
+  --ew-success: #23956D;
+  --ew-success-soft: #E7F6EE;
+  --ew-error: #D64545;
+  --ew-error-soft: #FBEDEB;
+  --ew-warning: #D99A2B;
+  --ew-warning-soft: #FFF7ED;
+  --ew-info: #4C7FF0;
+  --ew-info-soft: #EEF3FE;
+}
+
+/* ── Header / UI color family tokens ────────────────────────────────
+   primary     base header/hero + primary action color
+   hover       interaction hover
+   active      pressed state
+   soft        soft themed wash for subtle themed surfaces
+   ink         readable text/icon color on primary
+   muted       secondary text on primary
+   accent      small controlled highlight (badge/dot/chip)
+   accent-ink  readable text on accent
+   on-light    readable theme color on neutral/white surfaces
+   line        themed hairline border
+   cta-bg/ink  primary hero call-to-action pair
+
+   The primary family intentionally covers the whole Eatswada UI color
+   hierarchy (raspberry primary, food-red secondary, burgundy accent,
+   deal gold), so a future header theme can shift all of them together
+   without any component rewrite.                                       */
+
+/* Default = the Eatswada raspberry hierarchy (also used when the
+   attribute is missing or unknown). */
+:root,
+html[data-ew-header="raspberry"] {
+  --hd-primary: #E9546B;
+  --hd-hover: #D8435C;
+  --hd-active: #C13A50;
+  --hd-soft: #FDEBEE;
+  --hd-ink: #FFFFFF;
+  --hd-muted: rgba(255, 255, 255, .82);
+  --hd-accent: #9E1535;
+  --hd-accent-ink: #FFFFFF;
+  --hd-on-light: #C13A50;
+  --hd-line: #F6CDD4;
+  --hd-cta-bg: #9E1535;
+  --hd-cta-ink: #FFFFFF;
+  --hd-secondary: #E23744;
+  --hd-secondary-soft: #FCE9EA;
+  --hd-deal: #F2C94C;
+
+  /* Stable aliases used by shared components. They resolve to the active
+     color family, so components never hard-code a brand color. */
+  --ew-theme: var(--hd-on-light);
+  --ew-theme-soft: var(--hd-soft);
+  --ew-theme-line: var(--hd-line);
+}
+
+/* Reserved future header color families. Add one block each; no component
+   or page rewrite is required. Do not invent colors until needed. */
+html[data-ew-header="future-theme-4"] { /* --hd-primary:#...; ... */ }
+html[data-ew-header="future-theme-5"] { /* --hd-primary:#...; ... */ }
+html[data-ew-header="future-theme-6"] { /* --hd-primary:#...; ... */ }
+
+/* ── Header/hero surface ──────────────────────────────────────────────
+   Only elements that opt in via .ew-themed-header (or the home hero)
+   receive the header color. Shared app headers stay neutral by default. */
+.ew-themed-header {
+  background: var(--hd-primary);
+  color: var(--hd-ink);
+}
+
+/* Home hero shell: solid header color with the rounded bottom edge. */
+.hero-header::before { background: var(--hd-primary); }
+
+/* Hero carousel slide uses the same color as the shell so they match. */
+.header-slide { background: var(--hd-primary); }
+
+/* Header text/icons. */
+.loc-name { color: var(--hd-ink); }
+.loc-sub,
+.loc-chevron { color: var(--hd-muted); }
+.loc-left { color: var(--hd-ink); }
+
+/* Location pin: white chip whose icon uses the theme accent. */
+.loc-pin-wrap { background: rgba(255, 255, 255, .94); }
+.loc-pin-wrap i,
+.loc-pin-icon { color: var(--hd-accent-ink); }
+
+/* Under-99 + profile chips stay white for legibility on any theme. */
+.btn-store { background: rgba(255, 255, 255, .94); border-color: rgba(255, 255, 255, .9); }
+.store-top { color: var(--hd-muted); }
+.store-bot { color: var(--hd-on-light); }
+.btn-profile { background: #FFFFFF; }
+.profile-initial { color: var(--hd-on-light); }
+
+/* Search + veg pills stay white; icons use the readable theme color. */
+.search-box,
+.veg-box { background: #FFFFFF; }
+.search-icon,
+.search-mic { color: var(--hd-on-light); }
+
+/* Hero banner copy + call to action. */
+.banner-badge { background: rgba(255, 255, 255, .22); color: var(--hd-ink); }
+.banner-title { color: var(--hd-ink); }
+.banner-title-accent { color: var(--hd-accent); }
+.banner-subtitle { color: var(--hd-muted); }
+.banner-offer { color: var(--hd-ink); }
+.banner-cta { background: var(--hd-cta-bg); color: var(--hd-cta-ink); }
+.banner-cta__chev { background: rgba(127, 127, 127, .22); }
+.banner-heart { color: var(--hd-accent); }
+.banner-dot { background: rgba(127, 127, 127, .38); }
+.banner-dot.is-active { background: var(--hd-accent); }
+
+/* ── Primary / secondary / accent interactive controls ────────────────
+   Shared buttons consume the tokens instead of hard-coded colors. */
+.ew-btn-theme {
+  background: var(--hd-primary);
+  color: var(--hd-ink);
+  border: 0;
+}
+.ew-btn-theme:hover { background: var(--hd-hover); }
+.ew-btn-theme:active { background: var(--hd-active); }
+.ew-btn-theme.is-soft {
+  background: var(--hd-soft);
+  color: var(--hd-on-light);
+}
+.ew-chip-theme { background: var(--hd-soft); color: var(--hd-on-light); }
+.ew-text-theme { color: var(--hd-on-light); }
+.ew-border-theme { border-color: var(--hd-primary); }
+
+/* Secondary food-red + burgundy accent helpers. */
+.ew-btn-secondary { background: var(--hd-secondary); color: #FFFFFF; border: 0; }
+.ew-btn-secondary:hover { background: var(--hd-hover); }
+.ew-accent-burgundy { background: var(--hd-accent); color: var(--hd-accent-ink); }
+.ew-text-burgundy { color: var(--hd-accent); }
+.ew-deal-chip { background: var(--ew-deal); color: #6B4E00; }
+
+/* ── Theme-related page surfaces that opt in ─────────────────────────
+   Cart bottom bar, checkout primary CTA and orders header use the
+   primary color; surrounding content stays neutral. */
+.ct-footer-bar,
+.cart-bottom-bar,
+.checkout-bar { background: var(--hd-primary); color: var(--hd-ink); }
+
+/* Orders header (opts in via .ew-themed-header): readable controls on the
+   theme color. Body content below stays neutral. */
+.orders-header.ew-themed-header { background: var(--hd-primary); }
+.orders-header .header-back-btn { color: var(--hd-ink); }
+.orders-header .header-back-btn:active { background: rgba(127, 127, 127, .16); }
+.orders-header .header-titles h1 { color: var(--hd-ink); }
+.orders-header .header-stats { color: var(--hd-muted); }
+.orders-header .stat-live { color: var(--hd-ink); }
+.orders-header .stat-live::before { background: var(--hd-muted); }
+.orders-header .pulse-dot-sm { background: var(--hd-ink); }
+
+/* ── Dark mode ────────────────────────────────────────────────────────
+   Same hierarchy, not an inversion. Neutral foundation only; the primary
+   color family stays the same and remains controlled. */
+html[data-ew-theme="dark"] {
+  --ew-bg: #111315;
+  --ew-surface: #181B1D;
+  --ew-cream: #1E1C18;
+  --ew-text: #F5F5F2;
+  --ew-text-soft: #A8ADB2;
+  --ew-border: #2A2E31;
+
+  --ew-sage-soft: #222927;
+  --ew-sage-ink: #B7C6C0;
+  --ew-deal-soft: #2E2716;
+}
+
+/* Shared focus ring uses the theme accent so it tracks the header color. */
+:focus-visible { outline-color: var(--hd-on-light); }

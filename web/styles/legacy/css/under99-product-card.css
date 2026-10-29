@@ -1,0 +1,307 @@
+/* 99 STORE — PRODUCT CARD
+   Same visual language as the Eatswada homepage. Food image is the primary
+   visual, typography follows the homepage scale, and controls stay compact. */
+.u99-product-card{min-width:0;cursor:default}
+.u99-product-image{position:relative;aspect-ratio:1/1;border-radius:18px;overflow:hidden;background:#f5f5f6}
+.u99-product-image img{width:100%;height:100%;object-fit:cover;object-position:center}
+.u99-badge{position:absolute;top:9px;left:9px;max-width:calc(100% - 60px);padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.96);font-size:10px;line-height:1;font-weight:800;white-space:nowrap;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+.u99-badge.bestseller{background:var(--u99-primary);color:var(--hd-ink,#fff)}
+.u99-food-marker{position:absolute;right:9px;top:9px;width:21px;height:21px;border-radius:6px;padding:2px;background:#fff;display:grid;place-items:center;color:var(--u99-green);box-shadow:0 2px 6px rgba(15,23,42,.10)}
+.u99-food-marker.nonveg{color:var(--u99-nonveg)}
+.u99-food-marker svg{display:block}
+.u99-add-control{position:absolute;right:8px;bottom:8px;z-index:3}
+.u99-add-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--u99-primary);background:#fff;color:var(--u99-primary);display:grid;place-items:center;box-shadow:0 4px 14px rgba(15,23,42,.20);transition:transform var(--u99-t-fast)}
+.u99-add-btn:active{transform:scale(.92)}
+.u99-add-btn svg{display:block}
+.u99-stepper{display:flex;align-items:center;height:44px;border-radius:999px;overflow:hidden;background:var(--u99-primary);box-shadow:var(--u99-shadow-pink)}
+.u99-step-btn{width:34px;height:100%;border:0;background:transparent;color:#fff;display:grid;place-items:center}
+.u99-step-btn svg{display:block}
+.u99-step-qty{min-width:20px;padding:0 2px;text-align:center;color:#fff;font-size:13px;font-weight:900}
+.u99-product-body{padding:9px 2px 0}
+.u99-restaurant-name{margin:0;color:var(--u99-muted);font-size:13px;line-height:1.25;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u99-product-name{margin:2px 0 0;font-size:17px;line-height:1.24;font-weight:800;letter-spacing:-.35px;min-height:42px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.u99-product-meta{display:flex;align-items:center;gap:5px;min-width:0;margin-top:5px;color:var(--u99-muted);font-size:11px;line-height:1.25;font-weight:600;white-space:nowrap;overflow:hidden}
+.u99-rating{display:inline-flex;align-items:center;gap:3px;color:var(--u99-green);font-weight:800}
+.u99-rating-count{color:var(--u99-muted);font-weight:600}
+.u99-meta-dot{color:#b2b5bc}
+.u99-product-price-row{display:flex;align-items:center;gap:6px;margin-top:8px;min-height:25px;flex-wrap:nowrap}
+.u99-current-price{padding:5px 7px;border-radius:6px;background:var(--u99-yellow);font-size:15px;line-height:1;font-weight:900}
+.u99-old-price{color:#9297a0;font-size:12px;text-decoration:line-through}
+.u99-discount{padding:4px 6px;border-radius:6px;background:var(--u99-primary-soft);color:var(--u99-primary);font-size:10px;line-height:1;font-weight:900;white-space:nowrap}
+@media(max-width:350px){
+  .u99-product-name{font-size:15px;min-height:38px}
+  .u99-add-btn{width:44px;height:44px}
+  .u99-current-price{font-size:14px}
+}
+/* ================================================================
+   VISUAL PASS 01 — PREMIUM ITEM CARDS
+   Consistent 1:1 image geometry, restrained radii and a single floating
+   action language across the page.
+   ================================================================ */
+.u99-product-card{min-width:0}
+.u99-product-image{aspect-ratio:1/1;border-radius:15px;background:#f5f5f6;box-shadow:0 1px 0 rgba(20,22,30,.02)}
+.u99-product-image img{object-fit:cover;object-position:center}
+.u99-badge{top:8px;left:8px;padding:4px 7px;border-radius:6px;font-size:9.5px}
+.u99-food-marker{top:8px;right:8px;width:20px;height:20px;border-radius:6px}
+.u99-add-control{right:7px;bottom:7px}
+.u99-add-btn{width:42px;height:42px;border-width:1.25px;box-shadow:0 4px 12px rgba(15,23,42,.17)}
+.u99-stepper{height:40px}
+.u99-step-btn{width:31px}
+.u99-step-qty{font-size:12px}
+.u99-product-body{padding:8px 1px 0}
+.u99-restaurant-name{font-size:11.5px;line-height:1.2}
+.u99-product-name{font-size:15px;line-height:1.22;letter-spacing:-.25px;min-height:37px;margin-top:2px}
+.u99-product-meta{margin-top:4px;font-size:10.5px;gap:4px}
+.u99-product-price-row{margin-top:7px;gap:5px;min-height:23px}
+.u99-current-price{padding:5px 6px;font-size:14px;border-radius:6px}
+.u99-old-price{font-size:11px}
+.u99-discount{padding:4px 5px;font-size:9px;border-radius:5px}
+@media(max-width:370px){
+  .u99-product-grid{column-gap:10px}
+  .u99-product-name{font-size:14px;min-height:35px}
+  .u99-add-btn{width:40px;height:40px}
+  .u99-current-price{font-size:13px}
+}
+
+/* ================================================================
+   VISUAL PASS 02 — 99 STORE BENCHMARK
+   Aligns the card to the reference screenshot: on-image rating badge,
+   inline veg/non-veg mark before the item name, solid-pink add button /
+   outlined stepper, and a text-based (non-badged) pink price row.
+   ================================================================ */
+
+/* Popular badge reads green on white (bestseller stays solid pink). */
+.u99-badge{
+  background:#fff;
+  color:var(--u99-green);
+  font-weight:900;
+  box-shadow:0 2px 8px rgba(15,23,42,.12);
+}
+.u99-badge.bestseller{background:var(--u99-primary);color:var(--hd-ink,#fff)}
+
+/* Rating badge — sits on the image, bottom-left, above the food. */
+.u99-rating-badge{
+  position:absolute;
+  left:8px;
+  bottom:8px;
+  z-index:3;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:4px 7px 4px 6px;
+  border-radius:9px;
+  background:#fff;
+  color:var(--u99-green);
+  font-size:12px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.2px;
+  box-shadow:0 2px 8px rgba(15,23,42,.14);
+}
+.u99-rating-badge svg{display:block;color:var(--u99-green)}
+
+/* Add button — white circle, pink outline, pink glyph (reference design). */
+.u99-add-btn{
+  border:1.5px solid var(--u99-primary);
+  background:#fff;
+  color:var(--u99-primary);
+  box-shadow:0 4px 12px rgba(15,23,42,.20);
+}
+.u99-add-btn:active{transform:scale(.9)}
+
+/* Stepper — white pill with a pink outline and pink controls. */
+.u99-stepper{
+  background:#fff;
+  border:1.5px solid var(--u99-primary);
+  box-shadow:0 4px 12px rgba(15,23,42,.18);
+}
+.u99-step-btn{color:var(--u99-primary)}
+.u99-step-qty{color:var(--u99-primary)}
+
+/* Inline veg / non-veg mark before the item name. */
+.u99-name-row{display:flex;align-items:flex-start;gap:6px;margin-top:2px}
+.u99-name-marker{
+  flex:0 0 auto;
+  margin-top:3px;
+  width:14px;height:14px;
+  display:grid;place-items:center;
+  color:var(--u99-green);
+}
+.u99-name-marker.nonveg{color:var(--u99-nonveg)}
+.u99-name-marker svg{display:block}
+.u99-name-row .u99-product-name{margin-top:0}
+
+/* Price row — struck original, strong price, compact discount pill.
+   Discounted price reads pink; a regular (undiscounted) price reads ink. */
+.u99-product-price-row{margin-top:7px;gap:6px;align-items:baseline}
+.u99-current-price{
+  padding:0;
+  background:transparent;
+  color:var(--u99-ink);
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:-.4px;
+}
+.u99-current-price.deal{color:var(--u99-primary)}
+.u99-old-price{color:#9aa0a9;font-size:12.5px;font-weight:700;text-decoration:line-through}
+.u99-discount{
+  padding:3px 7px;
+  border-radius:6px;
+  background:var(--u99-primary-soft);
+  color:var(--u99-primary);
+  font-size:10.5px;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+}
+
+@media(max-width:360px){
+  .u99-current-price{font-size:15px}
+  .u99-old-price{font-size:11.5px}
+  .u99-discount{padding:3px 6px;font-size:9.5px}
+}
+
+/* ================================================================
+   VISUAL PASS 03 — ADD CONTROL MOTION (UI only; cart untouched)
+   +  press → expands into stepper → number rolls on ±  → collapses to +
+   ================================================================ */
+.u99-add-btn{transition:transform .19s cubic-bezier(.34,1.56,.64,1),box-shadow .18s ease}
+.u99-add-btn:active{transform:scale(.88)}
+.u99-step-btn{transition:transform .12s ease}
+.u99-step-btn:active{transform:scale(.86)}
+
+/* + → stepper : grows from the button's corner (transform/opacity only) */
+@keyframes u99-stepper-in{from{transform:scale(.62);opacity:.35}to{transform:scale(1);opacity:1}}
+@keyframes u99-stepper-out{from{transform:scale(1);opacity:1}to{transform:scale(.62);opacity:0}}
+.u99-stepper{transform-origin:right center;animation:u99-stepper-in .2s cubic-bezier(.22,1,.36,1)}
+.u99-stepper.u99-collapsing{animation:u99-stepper-out .16s cubic-bezier(.22,1,.36,1) forwards}
+
+/* quantity counter : new value slides in (down on +, up on −) */
+.u99-step-qty{display:inline-grid;place-items:center;min-width:20px;overflow:hidden}
+@keyframes u99-num-up{from{transform:translateY(70%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes u99-num-down{from{transform:translateY(-70%);opacity:0}to{transform:translateY(0);opacity:1}}
+.u99-step-qty.roll-up{animation:u99-num-up .17s cubic-bezier(.22,1,.36,1)}
+.u99-step-qty.roll-down{animation:u99-num-down .17s cubic-bezier(.22,1,.36,1)}
+
+@media(prefers-reduced-motion:reduce){
+  .u99-add-btn,.u99-step-btn{transition:none}
+  .u99-add-btn:active,.u99-step-btn:active{transform:none}
+  .u99-stepper,.u99-stepper.u99-collapsing,.u99-step-qty.roll-up,.u99-step-qty.roll-down{animation:none}
+}
+
+/* ================================================================
+   VISUAL PASS 03.1 — ANDROID / WEBKIT TAP-HIGHLIGHT CLEANUP
+   Suppresses the native blue tap/focus flash on the add + stepper
+   controls only. The custom :active scale animation is untouched;
+   an accessible pink :focus-visible ring is kept for keyboard users.
+   ================================================================ */
+.u99-add-btn,
+.u99-step-btn{
+  -webkit-tap-highlight-color:transparent;
+  tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+  outline:none;
+}
+.u99-add-btn:focus,
+.u99-step-btn:focus{outline:none}
+.u99-add-btn:focus-visible,
+.u99-step-btn:focus-visible{
+  outline:2px solid var(--u99-primary);
+  outline-offset:2px;
+}
+
+
+/* ================================================================
+   FINAL MICRO-POLISH — 99 STORE MOBILE CARD / ADD UX
+   ================================================================ */
+.u99-product-body{padding:8px 1px 0}
+.u99-restaurant-name{font-size:12px;line-height:1.2;font-weight:600}
+.u99-name-row{align-items:center;gap:5px;margin-top:2px}
+.u99-name-marker{width:14px;height:14px;margin-top:0;align-self:center}
+.u99-product-name{font-size:16px;line-height:1.2;min-height:0;margin:0;font-weight:800;letter-spacing:-.28px}
+.u99-product-price-row{margin-top:7px;min-height:21px;gap:6px;align-items:baseline}
+.u99-current-price{font-size:16px}
+.u99-old-price{font-size:12px}
+.u99-discount{font-size:10px;padding:4px 6px}
+
+/* Real expansion: the control grows from the circular + into the stepper.
+   The right edge stays anchored to the same image corner. */
+.u99-add-control{
+  width:42px;
+  height:42px;
+  overflow:visible;
+  transition:width .22s cubic-bezier(.22,1,.36,1),height .18s ease;
+}
+.u99-add-control.has-qty{width:96px;height:40px}
+.u99-add-control .u99-add-btn{position:absolute;right:0;bottom:0}
+.u99-add-control .u99-stepper{position:absolute;right:0;bottom:0;width:96px;height:40px;transform-origin:right center}
+.u99-add-control.has-qty .u99-stepper{width:96px}
+.u99-add-control.has-qty .u99-stepper-initial{}
+.u99-add-btn,
+.u99-step-btn{
+  -webkit-tap-highlight-color:transparent;
+  tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.u99-add-btn:focus,.u99-step-btn:focus{outline:none}
+.u99-add-btn:focus-visible,.u99-step-btn:focus-visible{outline:2px solid rgba(15,23,42,.3);outline-offset:2px}
+.u99-stepper{animation:u99-stepper-in .22s cubic-bezier(.22,1,.36,1)}
+.u99-stepper.u99-collapsing{animation:u99-stepper-out .18s cubic-bezier(.22,1,.36,1) forwards}
+.u99-step-qty{min-width:22px}
+
+@media(max-width:370px){
+  .u99-product-body{padding-top:7px}
+  .u99-restaurant-name{font-size:11.5px}
+  .u99-product-name{font-size:15px}
+  .u99-add-control{width:40px;height:40px}
+  .u99-add-control.has-qty{width:92px}
+  .u99-add-control .u99-add-btn{width:40px;height:40px}
+  .u99-add-control .u99-stepper,.u99-add-control.has-qty .u99-stepper{width:92px;height:38px}
+}
+@media(prefers-reduced-motion:reduce){
+  .u99-add-control,.u99-add-btn,.u99-step-btn{transition:none}
+}
+
+
+/* PHASE 1.1 — IMAGE REVEAL SAFETY */
+.u99-product-image .u99-item-img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;background:#f5f5f6}
+.u99-product-image .u99-item-img.is-loaded{opacity:1}
+
+/* ================================================================
+   PHASE 1 FINAL — HOMEPAGE-LIKE ITEM IMAGE GEOMETRY
+   The homepage item image uses a compact landscape rectangle rather than a
+   square. Keeping that same geometry makes the 99 Store grid denser and
+   restores the intended food-first hierarchy.
+   ================================================================ */
+.u99-product-image{
+  aspect-ratio:1.44/1;
+  border-radius:14px;
+}
+.u99-product-image img{object-fit:cover;object-position:center}
+.u99-add-control{right:7px;bottom:7px}
+@media(max-width:370px){
+  .u99-product-image{aspect-ratio:1.44/1;border-radius:13px}
+}
+
+
+/* ================================================================
+   PHASE 2 — ADD → STEPPER MOTION POLISH
+   ================================================================ */
+.u99-add-control{will-change:width,transform}
+.u99-add-btn{will-change:transform;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.u99-add-btn::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(circle at center,rgba(15,23,42,.12) 0 18%,transparent 19% 100%);
+  transform:scale(.2);opacity:0;pointer-events:none;
+}
+.u99-add-btn.is-adding::after{animation:u99-add-ripple .34s ease-out}
+.u99-add-control.is-changing{animation:u99-control-pop .28s cubic-bezier(.22,1,.36,1)}
+@keyframes u99-add-ripple{0%{transform:scale(.2);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+@keyframes u99-control-pop{0%{transform:scale(1)}38%{transform:scale(1.045)}100%{transform:scale(1)}}
+.u99-stepper{will-change:width,transform;backface-visibility:hidden}
+.u99-step-qty{will-change:transform,opacity}
+@media(prefers-reduced-motion:reduce){
+  .u99-add-btn.is-adding::after,.u99-add-control.is-changing{animation:none}
+}

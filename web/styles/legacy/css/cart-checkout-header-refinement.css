@@ -1,0 +1,146 @@
+/* Checkout header refinements: shared navigation control, ETA, and one address line. */
+body.ct-page .ct-delivery-head {
+  gap: 10px;
+  align-items: center;
+}
+body.ct-page .ct-dh-main {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+body.ct-page .ct-dh-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+body.ct-page .ct-dh-delivery-line,
+body.ct-page .ct-dh-address-line {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  gap: 6px;
+  line-height: 1.3;
+}
+body.ct-page .ct-dh-delivery-line {
+  color: var(--ct-primary, #690D27);
+  font-size: 12px;
+  font-weight: 750;
+}
+body.ct-page .ct-dh-delivery-icon {
+  flex: 0 0 15px;
+  color: var(--ct-primary, #690D27);
+}
+body.ct-page .ct-dh-eta {
+  display: block;
+  min-width: 0;
+  color: var(--ct-primary, #690D27);
+  font-size: 12px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+body.ct-page .ct-dh-address-line {
+  color: var(--ct-muted, #727984);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+body.ct-page .ct-dh-address-icon {
+  flex: 0 0 15px;
+  color: var(--ct-muted, #727984);
+}
+body.ct-page .ct-dh-tag {
+  flex: 0 0 auto;
+  color: var(--ct-ink, #252A32);
+  font-size: 11.5px;
+  font-weight: 750;
+}
+body.ct-page .ct-dh-divider {
+  flex: 0 0 auto;
+  color: var(--ct-muted, #727984);
+}
+body.ct-page .ct-dh-addr {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ct-muted, #727984);
+  font-size: 11.5px;
+}
+body.ct-page .ct-dh-chevron {
+  flex: 0 0 15px;
+}
+@media (max-width: 380px) {
+  body.ct-page .ct-delivery-head { gap: 8px; }
+  body.ct-page .ct-dh-copy { gap: 3px; }
+  body.ct-page .ct-dh-restaurant { font-size: 14px; }
+  body.ct-page .ct-dh-delivery-line,
+  body.ct-page .ct-dh-eta { font-size: 11.5px; }
+  body.ct-page .ct-dh-address-line,
+  body.ct-page .ct-dh-tag,
+  body.ct-page .ct-dh-addr { font-size: 10.5px; }
+}
+
+
+/* Dedicated delivery estimate card: ETA lives below the compact header,
+   never inside the restaurant/address row. */
+body.ct-page .ct-delivery-estimate {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 10px 14px 12px;
+  padding: 12px 14px;
+  min-height: 64px;
+  box-sizing: border-box;
+  border: 1px solid rgba(225, 229, 235, .9);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff 0%, #fbfcfb 100%);
+  box-shadow: 0 4px 14px rgba(24, 32, 42, .035);
+}
+body.ct-page .ct-delivery-estimate-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: var(--ew-success, #23956D);
+  background: var(--ew-success-soft, #EAF6F0);
+}
+body.ct-page .ct-delivery-estimate-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+}
+body.ct-page .ct-delivery-estimate-title {
+  color: var(--ct-muted, #727984);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: .15px;
+}
+body.ct-page .ct-delivery-estimate .ct-dh-eta {
+  color: var(--ct-ink, #252A32);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 380px) {
+  body.ct-page .ct-delivery-estimate {
+    margin: 8px 10px 10px;
+    padding: 10px 12px;
+    min-height: 58px;
+  }
+  body.ct-page .ct-delivery-estimate-icon {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+  }
+}

@@ -1,0 +1,99 @@
+{
+ "/payments/66f0000000000000000000a1/status": {
+  "success": true,
+  "data": {
+   "paymentStatus": "pending",
+   "paymentMethod": "upi"
+  }
+ },
+ "WRITES": {
+  "retryAlreadyPaid": {
+   "alreadyPaid": true,
+   "success": true
+  },
+  "retrySuccess": {
+   "success": true,
+   "payment": {
+    "orderId": "order_TEST123",
+    "keyId": "rzp_test_KEY",
+    "amount": 50000,
+    "currency": "INR"
+   }
+  },
+  "retryNoPayment": {
+   "success": true
+  },
+  "retry500": {
+   "__status": 500,
+   "body": {
+    "success": false,
+    "message": "Server error"
+   }
+  },
+  "retryDefiniteFail": {
+   "__status": 400,
+   "body": {
+    "success": false,
+    "paymentStatus": "failed",
+    "message": "This payment could not be retried."
+   }
+  },
+  "verifyPaid": {
+   "success": true,
+   "paymentStatus": "paid",
+   "data": {
+    "paymentStatus": "paid",
+    "total": 500
+   }
+  },
+  "verifyFailed": {
+   "success": true,
+   "paymentStatus": "failed",
+   "message": "Payment was not completed."
+  },
+  "verify500ThenPaid": {
+   "__status": 500,
+   "body": {
+    "success": false,
+    "message": "Server error"
+   }
+  },
+  "verify401ThenPending": {
+   "__status": 401,
+   "body": {
+    "success": false,
+    "message": "Unauthorised"
+   }
+  },
+  "verifyNetworkThenPending": "__networkerror__",
+  "statusPending": {
+   "success": true,
+   "data": {
+    "paymentStatus": "pending",
+    "paymentMethod": "upi"
+   }
+  },
+  "statusPaid": {
+   "success": true,
+   "data": {
+    "paymentStatus": "paid",
+    "paymentMethod": "upi",
+    "total": 500
+   }
+  },
+  "statusFailed": {
+   "success": true,
+   "data": {
+    "paymentStatus": "failed",
+    "paymentMethod": "upi"
+   }
+  },
+  "status500": {
+   "__status": 500,
+   "body": {
+    "success": false,
+    "message": "Server error"
+   }
+  }
+ }
+}

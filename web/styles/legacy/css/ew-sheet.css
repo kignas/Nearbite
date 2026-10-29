@@ -1,0 +1,147 @@
+/* ==========================================================
+   ew-sheet.css  -  ONE look for every Eatswada popup (bottom sheet)
+   Load LAST in <head>, after restaurant-search-page.css:
+   <link rel="stylesheet" href="css/ew-sheet.css?v=1">
+
+   It only changes looks (size, corners, title, buttons, colors).
+   It does NOT change how popups open, close or add to cart.
+   Covers: customise sheet (.ewcs-*), dish details (.ds-*),
+           filter sheet (.filter-sheet*)
+   ========================================================== */
+
+/* ---------- 1. THE ONLY PLACE TO CHANGE POPUP LOOKS ---------- */
+:root {
+  --ews-accent: var(--hd-primary, #C13A50);   /* main button colour */
+  --ews-radius: 24px;                         /* sheet top corners */
+  --ews-radius-btn: 14px;                     /* buttons */
+  --ews-radius-card: 16px;                    /* white cards */
+  --ews-max-h: 90dvh;                         /* tallest a sheet can be */
+  --ews-max-w: 520px;                         /* widest (for big screens) */
+  --ews-backdrop: rgba(23, 27, 36, .52);
+  --ews-bg: #F7F8FA;                          /* grey behind cards */
+  --ews-line: #EFF1F5;
+  --ews-ink: #101828;
+  --ews-ink-2: #697077;
+  --ews-title: 20px;                          /* every popup title */
+  --ews-card-title: 15px;                     /* every group heading */
+  --ews-time: .3s;
+  --ews-ease: cubic-bezier(.2, .8, .2, 1);
+  --ews-shadow: 0 -12px 40px rgba(23, 27, 36, .2);
+}
+
+/* ---------- 2. DARK BACKGROUND BEHIND THE SHEET ---------- */
+.ewcs-backdrop { background: var(--ews-backdrop); }
+.filter-sheet-backdrop { background: var(--ews-backdrop); }
+.ds-bd { background: var(--ews-backdrop); }
+
+/* ---------- 3. THE SHEET ITSELF ---------- */
+.ewcs-sheet,
+.filter-sheet,
+.ds-sheet {
+  border-radius: var(--ews-radius) var(--ews-radius) 0 0;
+  max-height: var(--ews-max-h);
+  box-shadow: var(--ews-shadow);
+}
+.filter-sheet,
+.ds-sheet {
+  max-width: var(--ews-max-w);
+  margin-left: auto;
+  margin-right: auto;
+}
+.ewcs-sheet,
+.filter-sheet {
+  transition-duration: var(--ews-time);
+  transition-timing-function: var(--ews-ease);
+}
+.ds-sheet {
+  transition-duration: var(--ews-time);
+  transition-timing-function: var(--ews-ease);
+}
+
+/* little grey handle on top */
+.ewcs-handle,
+.filter-sheet-handle {
+  width: 40px; height: 4px; border-radius: 99px;
+  background: #D4D9E1; margin: 10px auto 2px;
+}
+
+/* ---------- 4. HEADER (title + close) ---------- */
+.ewcs-head,
+.filter-sheet-head {
+  padding: 8px 18px 14px;
+  background: #fff;
+  border-bottom: 1px solid var(--ews-line);
+}
+.ewcs-head h3,
+.filter-sheet-head h2 {
+  margin: 0;
+  font-size: var(--ews-title) !important;
+  line-height: 1.25 !important;
+  font-weight: 800;
+  letter-spacing: -.3px;
+  color: var(--ews-ink);
+}
+.ewcs-close,
+.filter-sheet-close {
+  width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: #EEF1F5; color: #344050; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ds-x { width: 36px; height: 36px; }
+
+/* dish name inside dish details = same title size */
+.ds-name { font-size: var(--ews-title); letter-spacing: -.3px; }
+
+/* ---------- 5. BODY + CARDS ---------- */
+.ewcs-body { background: #fff; }
+.ewcs-group { border-bottom: 8px solid var(--ews-bg); }
+.ewcs-group:last-child { border-bottom: 0; }
+
+.filter-sheet-body { padding: 14px 18px 20px; background: var(--ews-bg); }
+.filter-group {
+  border-radius: var(--ews-radius-card);
+  padding: 16px;
+}
+.filter-group h3 { font-size: var(--ews-card-title); font-weight: 800; color: var(--ews-ink); }
+
+.ds-info { padding: 18px; }
+
+/* ---------- 6. FOOTER + MAIN BUTTON ---------- */
+.ewcs-foot,
+.filter-sheet-footer,
+.ds-foot {
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 1px solid var(--ews-line);
+}
+
+.ewcs-add,
+.apply-filter-btn {
+  height: 50px;
+  border-radius: var(--ews-radius-btn);
+  font-size: 15px; font-weight: 800;
+  background: var(--ews-accent); color: #fff;
+}
+.ewcs-add:disabled,
+.apply-filter-btn:disabled {
+  background: #E5E7EB; color: #AAB2BF; box-shadow: none;
+}
+.clear-filter-btn {
+  height: 50px;
+  border-radius: var(--ews-radius-btn);
+  font-size: 15px;
+}
+.ewcs-qty { height: 50px; border-radius: var(--ews-radius-btn); }
+
+.ds-cta .nb-add-btn,
+.ds-cta .nb-qty { height: 50px; border-radius: var(--ews-radius-btn); }
+.ds-cta .nb-qty-btn { height: 50px; }
+
+/* ---------- 7. SMALL SCREENS ---------- */
+@media (max-width: 380px) {
+  :root { --ews-title: 19px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ewcs-sheet, .filter-sheet, .ds-sheet { transition: none; }
+}

@@ -1,0 +1,39 @@
+/* STEP 3 FIX — navigation layout only */
+.menu-tabs{
+  display:grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  grid-template-rows: 1fr !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:56px !important;
+  align-items:stretch !important;
+  position:relative !important;
+  overflow:hidden !important;
+}
+
+.menu-tabs > .menu-tab{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100% !important;
+  min-width:0 !important;
+  grid-row:1 !important;
+  margin:0 !important;
+}
+
+.menu-tabs > .menu-tab:nth-child(1){
+  grid-column:1 !important;
+}
+
+.menu-tabs > .menu-tab:nth-child(2){
+  grid-column:2 !important;
+  border-right:0 !important;
+}
+
+.menu-tabs > .menu-tab:nth-child(n+3){
+  display:none !important;
+}
+
+.menu-tabs::after{
+  display:none !important;
+}

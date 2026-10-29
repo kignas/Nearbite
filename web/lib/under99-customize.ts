@@ -1,0 +1,313 @@
+/* =====================================================================
+   99 STORE — ITEM CUSTOMIZATION / DETAIL SHEET
+   TypeScript port of legacy `js/under99-customize.js`.
+   Opens on "+" of a customizable item or on tapping any product card.
+   Reads the item's real `customizations`, computes the add-on price, and
+   adds the configured variant through the canonical cart.
+   ===================================================================== */
+
+interface Group {
+  name: string;
+  required: boolean;
+  multiple: boolean;
+  max: number;
+  options: { name: string; price: number }[];
+}
+
+export function installUnder99Customize(): void {
+  if (typeof window === "undefined") return;
+  const E = (window as any).Eatswada99;
+  const I = (window as any).U99Icons;
+  if (!E || !I) return;
+  const esc = E.esc;
+  const num = E.num;
+  const backdrop = () => document.getElementById("u99-item-backdrop");
+  const sheet = () => document.getElementById("u99-item-sheet") as HTMLElement | null;
+
+  let ctx: { item: any; r: any; groups: Group[]; selection: Set<number>[]; qty: number } | null = null;
+
+  /* ---- read a flexible customization group shape from the API ---- */
+  function readGroups(item: any): Group[] {
+    return (item.customizations || [])
+      .map((g: any) => {
+        const options = (g.options || g.choices || g.items || []).map((o: any) => ({
+          name: o.name || o.label || o.title || "Option",
+          price: num(o.price ?? o.extraPrice ?? o.amount ?? 0),
+        }));
+        const required = Boolean(g.required || g.isRequired || num(g.min) > 0);
+        const max = num(g.max ?? (g.type === "single" || g.single ? 1 : options.length), options.length);
+        const multiple = !(g.type === "single" || g.single) && max > 1;
+        return {
+          name: g.name || g.title || (required ? "Required" : "Options"),
+          required,
+          multiple,
+          max: Math.max(1, max),
+          options,
+        };
+      })
+      .filter((g: Group) => g.options.length);
+  }
+
+  function defaultSelection(groups: Group[]): Set<number>[] {
+    return groups.map((g) => {
+      const set = new Set<number>();
+      if (g.required && !g.multiple && g.options.length) set.add(0); // preselect first required single
+      return set;
+    });
+  }
+
+  function addonTotal(): number {
+    let sum = 0;
+    ctx!.groups.forEach((g, gi) => ctx!.selection[gi].forEach((oi) => (sum += g.options[oi].price)));
+    return sum;
+  }
+  function selectedOptions(): any[] {
+    const out: any[] = [];
+    ctx!.groups.forEach((g, gi) =>
+      ctx!.selection[gi].forEach((oi) =>
+        out.push({ group: g.name, name: g.options[oi].name, price: g.options[oi].price })
+      )
+    );
+    return out;
+  }
+  function requiredSatisfied(): boolean {
+    return ctx!.groups.every((g, gi) => !g.required || ctx!.selection[gi].size > 0);
+  }
+
+  /* ---------- render ---------- */
+  function optionRow(g: Group, gi: number, oi: number): string {
+    const o = g.options[oi];
+    const on = ctx!.selection[gi].has(oi);
+    const control = g.multiple
+      ? '<span class="u99-choice-box' + (on ? " on" : "") + '">' + (on ? I.icon("check", { size: 14 }) : "") + "</span>"
+      : '<span class="u99-choice-radio' + (on ? " on" : "") + '"></span>';
+    const price = o.price > 0 ? "+ \u20B9" + Math.round(o.price) : "+ \u20B90";
+    return (
+      '<button type="button" class="u99-choice" data-g="' +
+      gi +
+      '" data-o="' +
+      oi +
+      '">' +
+      '<span class="u99-choice-name">' +
+      esc(o.name) +
+      "</span>" +
+      '<span class="u99-choice-right"><span class="u99-choice-price">' +
+      price +
+      "</span>" +
+      control +
+      "</span>" +
+      "</button>"
+    );
+  }
+
+  function groupBlock(g: Group, gi: number): string {
+    const req = g.required
+      ? '<span class="u99-group-flag req">Required</span>'
+      : g.multiple
+        ? '<span class="u99-group-flag">Choose up to ' + g.max + "</span>"
+        : "";
+    const chosen = ctx!.selection[gi].size
+      ? '<span class="u99-group-sel">' + ctx!.selection[gi].size + " selected</span>"
+      : "";
+    return (
+      '<section class="u99-group"><div class="u99-group-head">' +
+      '<span class="u99-group-title">' +
+      esc(g.name) +
+      "</span>" +
+      req +
+      chosen +
+      "</div>" +
+      '<div class="u99-group-options">' +
+      g.options.map((_, oi) => optionRow(g, gi, oi)).join("") +
+      "</div>" +
+      "</section>"
+    );
+  }
+
+  function priceBlock(): string {
+    const item = ctx!.item;
+    const base = num(item.price);
+    const old = item.originalPrice && item.originalPrice > base ? item.originalPrice : null;
+    const off =
+      item.discountPercent != null ? Math.round(item.discountPercent) : old ? Math.round((1 - base / old) * 100) : null;
+    return (
+      '<div class="u99-item-priceRow">' +
+      '<span class="u99-item-price">\u20B9' +
+      Math.round(base) +
+      "</span>" +
+      (old ? '<span class="u99-item-old">\u20B9' + Math.round(old) + "</span>" : "") +
+      (off ? '<span class="u99-item-off">' + off + "% OFF</span>" : "") +
+      "</div>"
+    );
+  }
+
+  function total(): number {
+    return Math.round((num(ctx!.item.price) + addonTotal()) * ctx!.qty);
+  }
+
+  function render(): void {
+    const { item, r } = ctx!;
+    const rating = r.rating
+      ? '<span class="u99-item-rating">' +
+        I.icon("star", { size: 12 }) +
+        " " +
+        esc(r.rating) +
+        (r.ratingCount ? " (" + esc(r.ratingCount) + ")" : "") +
+        "</span>"
+      : "";
+    const time = r.deliveryTime
+      ? '<span class="u99-item-time">' + I.icon("clock", { size: 12 }) + " " + esc(r.deliveryTime) + "</span>"
+      : "";
+    const desc = item.description ? '<p class="u99-item-desc">' + esc(item.description) + "</p>" : "";
+    const groupsHtml = ctx!.groups.length
+      ? '<div class="u99-choose"><div class="u99-choose-head">Choose your options</div>' +
+        ctx!.groups.map(groupBlock).join("") +
+        "</div>"
+      : "";
+
+    sheet()!.innerHTML =
+      '<div class="u99-item-grab"></div>' +
+      '<div class="u99-item-scroll">' +
+      '<div class="u99-item-hero">' +
+      '<button type="button" class="u99-item-back" data-item-action="close" aria-label="Close">' +
+      I.icon("back", { size: 20 }) +
+      "</button>" +
+      '<img class="u99-item-img" src="' +
+      esc(item.image) +
+      '" alt="' +
+      esc(item.name) +
+      '">' +
+      "</div>" +
+      '<div class="u99-item-info">' +
+      '<div class="u99-item-titleRow"><h2 class="u99-item-name">' +
+      esc(item.name) +
+      "</h2>" +
+      '<span class="u99-food-marker ' +
+      (item.isVeg ? "veg" : "nonveg") +
+      '">' +
+      I.icon(item.isVeg ? "veg" : "nonveg", { size: 18 }) +
+      "</span></div>" +
+      priceBlock() +
+      '<div class="u99-item-restaurant">' +
+      esc(r.name) +
+      "</div>" +
+      '<div class="u99-item-meta">' +
+      rating +
+      time +
+      "</div>" +
+      desc +
+      "</div>" +
+      groupsHtml +
+      "</div>" +
+      '<div class="u99-item-foot">' +
+      '<div class="u99-qty">' +
+      '<button type="button" class="u99-qty-btn" data-item-action="dec" aria-label="Decrease quantity">' +
+      I.icon("minus", { size: 18 }) +
+      "</button>" +
+      '<span class="u99-qty-n" aria-live="polite">' +
+      ctx!.qty +
+      "</span>" +
+      '<button type="button" class="u99-qty-btn" data-item-action="inc" aria-label="Increase quantity">' +
+      I.icon("plus", { size: 18 }) +
+      "</button>" +
+      "</div>" +
+      '<button type="button" class="u99-item-add" data-item-action="add">' +
+      "<span>Add to cart</span><span class=\"u99-item-addTotal\">\u20B9" +
+      total() +
+      "</span>" +
+      "</button>" +
+      "</div>";
+    updateFoot();
+  }
+
+  function updateFoot(): void {
+    const add = sheet()!.querySelector(".u99-item-add") as any;
+    const totalEl = sheet()!.querySelector(".u99-item-addTotal");
+    if (totalEl) totalEl.textContent = "\u20B9" + total();
+    if (add) {
+      const ok = requiredSatisfied();
+      add.disabled = !ok;
+      add.classList.toggle("is-disabled", !ok);
+    }
+  }
+
+  function toggleChoice(gi: number, oi: number): void {
+    const g = ctx!.groups[gi];
+    const set = ctx!.selection[gi];
+    if (g.multiple) {
+      if (set.has(oi)) set.delete(oi);
+      else if (set.size < g.max) set.add(oi);
+      else {
+        (window as any).showToast?.("Up to " + g.max + " only");
+        return;
+      }
+    } else {
+      set.clear();
+      set.add(oi);
+    }
+    // re-render just this group's option rows + the selection counters
+    render();
+  }
+
+  /* ---------- open / close ---------- */
+  function open(menuItemId: string, restaurantId: string): void {
+    const hit = E.findItem(menuItemId, restaurantId);
+    if (!hit) return;
+    const groups = readGroups(hit.item);
+    ctx = { item: hit.item, r: hit.r, groups, selection: defaultSelection(groups), qty: 1 };
+    render();
+    backdrop()!.classList.add("open");
+    document.body.classList.add("u99-modal-open");
+    backdrop()!.setAttribute("aria-hidden", "false");
+  }
+  const reduce = (): boolean =>
+    !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  function close(): void {
+    const bd = backdrop()!;
+    bd.classList.remove("open");
+    bd.setAttribute("aria-hidden", "true");
+    ctx = null;
+    // Keep the cart bar beneath the sheet (via body.u99-modal-open) until the
+    // sheet has finished sliding down, so it can't flash above during close.
+    const unlock = () => document.body.classList.remove("u99-modal-open");
+    if (reduce()) unlock();
+    else setTimeout(unlock, 300);
+  }
+
+  document.addEventListener("eatswada99:open-customize", (e: any) =>
+    open(e.detail.menuItemId, e.detail.restaurantId)
+  );
+
+  document.addEventListener("click", (e) => {
+    if (e.target === backdrop()) return close();
+    const choice = (e.target as HTMLElement).closest(".u99-choice") as HTMLElement | null;
+    if (choice && ctx) {
+      toggleChoice(Number((choice as any).dataset.g), Number((choice as any).dataset.o));
+      return;
+    }
+    const act = (e.target as HTMLElement).closest("[data-item-action]") as HTMLElement | null;
+    if (!act || !ctx) return;
+    const a = (act as any).dataset.itemAction;
+    if (a === "close") return close();
+    if (a === "inc") {
+      ctx.qty++;
+      render();
+    }
+    if (a === "dec") {
+      ctx.qty = Math.max(1, ctx.qty - 1);
+      render();
+    }
+    if (a === "add") {
+      if (!requiredSatisfied()) {
+        (window as any).showToast?.("Please choose the required options");
+        return;
+      }
+      E.addWithOptions(ctx.item, ctx.r, { options: selectedOptions(), addonTotal: addonTotal() }, ctx.qty);
+      (window as any).showToast?.("Added to cart");
+      close();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && backdrop()?.classList.contains("open")) close();
+  });
+}

@@ -1,0 +1,111 @@
+/* ============================================================
+   EATSWADA CUSTOMER UI SYSTEM — TYPOGRAPHY HARMONIZER
+   Reference: Home page (Manrope)
+   Scope: typography + text rhythm only.
+   IMPORTANT: no color tokens are defined here. Existing page colors
+   and functional styles remain authoritative.
+   ============================================================ */
+:root {
+  --ew-ui-font: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ew-ui-display: 800;
+  --ew-ui-heading: 700;
+  --ew-ui-body: 500;
+  --ew-ui-label: 700;
+  --ew-ui-h1: 28px;
+  --ew-ui-h2: 20px;
+  --ew-ui-h3: 16px;
+  --ew-ui-body-size: 14px;
+  --ew-ui-label-size: 13px;
+  --ew-ui-caption-size: 12px;
+  --ew-ui-lh-tight: 1.2;
+  --ew-ui-lh-ui: 1.35;
+  --ew-ui-lh-body: 1.5;
+  --ew-ui-ls-display: -0.6px;
+  --ew-ui-ls-heading: -0.3px;
+  --ew-ui-ls-body: 0;
+}
+
+/* Same font family as Home across customer pages. */
+html, body {
+  font-family: var(--ew-ui-font) !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input, textarea, select {
+  font-family: var(--ew-ui-font) !important;
+}
+
+/* Shared type hierarchy. Existing explicit component sizes can remain
+   more specific; these rules establish the common product language. */
+h1 {
+  font-size: var(--ew-ui-h1);
+  line-height: var(--ew-ui-lh-tight);
+  font-weight: var(--ew-ui-display);
+  letter-spacing: var(--ew-ui-ls-display);
+}
+h2 {
+  font-size: var(--ew-ui-h2);
+  line-height: var(--ew-ui-lh-tight);
+  font-weight: var(--ew-ui-heading);
+  letter-spacing: var(--ew-ui-ls-heading);
+}
+h3 {
+  font-size: var(--ew-ui-h3);
+  line-height: var(--ew-ui-lh-tight);
+  font-weight: var(--ew-ui-heading);
+  letter-spacing: var(--ew-ui-ls-heading);
+}
+
+p, li {
+  font-size: var(--ew-ui-body-size);
+  line-height: var(--ew-ui-lh-body);
+  font-weight: var(--ew-ui-body);
+  letter-spacing: var(--ew-ui-ls-body);
+}
+
+/* Controls use the same compact app-like rhythm as Home. */
+button, input, textarea, select {
+  line-height: var(--ew-ui-lh-ui);
+}
+
+/* Common utility classes already used by parts of Eatswada. */
+.page-title, .ew-display {
+  font-size: var(--ew-ui-h1) !important;
+  line-height: var(--ew-ui-lh-tight) !important;
+  font-weight: var(--ew-ui-display) !important;
+  letter-spacing: var(--ew-ui-ls-display) !important;
+}
+.section-title, .ew-heading {
+  font-size: var(--ew-ui-h2) !important;
+  line-height: var(--ew-ui-lh-tight) !important;
+  font-weight: var(--ew-ui-heading) !important;
+  letter-spacing: var(--ew-ui-ls-heading) !important;
+}
+.body-text, .ew-body {
+  font-size: var(--ew-ui-body-size) !important;
+  line-height: var(--ew-ui-lh-body) !important;
+  font-weight: var(--ew-ui-body) !important;
+  letter-spacing: var(--ew-ui-ls-body) !important;
+}
+.ew-label, .chip, .badge, .filter-button {
+  font-weight: var(--ew-ui-label);
+  letter-spacing: -0.1px;
+}
+.ew-caption, .caption, .helper-text {
+  font-size: var(--ew-ui-caption-size);
+  line-height: 1.35;
+  font-weight: var(--ew-ui-body);
+  letter-spacing: 0;
+}
+
+/* Preserve the Home page's handwritten banner font on pages where this
+   class is reused. */
+.banner-subtitle--default {
+  font-family: "Caveat", "Manrope", cursive !important;
+}
+
+/* Prevent browser default heading margins from creating a different
+   typographic rhythm when a page does not already define them. */
+h1, h2, h3, h4, h5, h6 {
+  margin-block-start: 0;
+}

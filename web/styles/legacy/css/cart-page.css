@@ -1,0 +1,3241 @@
+/* Extracted cart-page styles. Visual work should happen here. */
+
+  /* ==========================================================================
+     EATSWADA — CART / CHECKOUT  (Phase 3.1 · Final visual polish)
+     Single consolidated block. Replaces the two duplicate cart CSS blocks.
+
+     Namespacing note: style.css defines global .item-name (nowrap + ellipsis
+     + !important sizing), .discount-badge / [class*="discount"] (amber),
+     .header-title / .header-sub (!important), .card / .card-body (!important)
+     and body{background:#fff}. Cart-specific classes are therefore prefixed
+     `ct-` and the page is scoped with body.ct-page. No !important is used.
+
+     Deliberate exception: money elements keep "total"/"price" in their class
+     stems so they inherit tabular-nums from style.css [class*="total"].
+     ========================================================================== */
+
+  :root{
+    /* Primary actions follow the active header theme (see eatswada-header-theme.css). */
+    --ct-primary:      var(--hd-on-light,#C13A50);
+    --ct-primary-deep: var(--hd-active,#C13A50);
+    --ct-primary-soft: var(--hd-soft,#FDEBEE);
+    
+    /* Text colors */
+    --ct-ink:        #1F2937;   /* Primary text */
+    --ct-ink-2:      #4B5563;   /* Secondary text (prices, info) */
+    --ct-muted:      #6B7280;   /* Tertiary text (labels, helpers) */
+    
+    /* Structure colors */
+    --ct-line:       #E5E7EB;   /* Borders */
+    --ct-line-soft:  #F3F4F6;   /* Subtle dividers */
+    --ct-surface:    #FFFFFF;   /* Cards, surfaces */
+    --ct-bg:         #F9FAFB;   /* Page background */
+    
+    /* Semantic colors */
+    --ct-save:       var(--ew-success,#23956D);   /* Success / savings (semantic) */
+    --ct-save-bg:    var(--ew-success-soft,#E7F6EE);   /* Success background */
+    --ct-danger:     #D64545;
+    --ct-danger-bg:  #FEF2F2;
+    
+    /* Radius & transitions */
+    --ct-r-sm: 8px;
+    --ct-r-md: 12px;
+    --ct-r-lg: 16px;
+    --ct-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --ct-ease: cubic-bezier(.25,1,.5,1);
+
+    --ct-footer-h: 176px;       /* measured at runtime, see syncFooterOffset */
+    --ct-media: 56px;
+    --ct-right: 96px;
+    --ct-kb: 0px;               /* visual-viewport keyboard inset, see ctSyncKeyboardInset */
+  }
+
+  /* body{background:#fff} in style.css beats a bare `body` selector here,
+     so the page is scoped with a class to raise specificity legitimately. */
+  body.ct-page{
+    background: var(--ct-bg);
+    color: var(--ct-ink);
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: calc(var(--ct-footer-h) + 12px);
+    overflow-x: hidden;
+  }
+
+  .tap{ cursor:pointer; transition: transform .1s var(--ct-ease); }
+  .tap:active{ transform: scale(.97); }
+
+  .ct-num{ font-family: var(--font-micro); font-variant-numeric: tabular-nums; }
+
+
+  /* ── Smart checkout recommendations ─────────────────────────────── */
+
+  /* Premium line icons: consistent optical size and stroke across checkout. */
+  .ct-line-ic svg,.ct-dh-meta-icon,.ct-strip-icon,.ct-group-chev,.ct-bill-hero-ic svg{stroke-linecap:round;stroke-linejoin:round;}
+  .ct-line-ic{box-shadow:inset 0 0 0 1px rgba(28,32,36,.035);}
+
+  /* ── Header ───────────────────────────────────────────────────────── */
+  .ct-header{
+    position: sticky; top: 0; z-index: 50;
+    background: var(--ct-surface);
+    padding: 12px 14px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--ct-line);
+  }
+  .ct-header-left{ display:flex; align-items:center; gap:11px; min-width:0; flex:1; }
+  .ct-back{
+    width:36px; height:36px; flex:0 0 36px;
+    background:#F6F7F8; border:1px solid var(--ct-line); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--ct-ink);
+  }
+  .ct-head-copy{ min-width:0; }
+  .ct-head-title{
+    font-size:17px; font-weight:800; letter-spacing:-.3px;
+    line-height:1.15; color:var(--ct-ink);
+  }
+  .ct-head-sub{
+    font-size:11.5px; font-weight:600; color:var(--ct-muted);
+    line-height:1.3; margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-clear{
+    flex:0 0 auto;
+    font-size:12px; font-weight:700; color:var(--ct-danger);
+    background:var(--ct-danger-bg); border:1px solid #FCDCDC;
+    padding:7px 13px; border-radius:9px;
+  }
+
+  /* ── Card shell (NOT .card — that carries !important in style.css) ── */
+  .ct-card{
+    background: var(--ct-surface);
+    margin: 8px 14px;
+    border: 1px solid var(--ct-line);
+    border-radius: var(--ct-r-lg);
+    padding: 14px;
+    box-shadow: var(--ct-shadow);
+  }
+
+  /* ── Address ──────────────────────────────────────────────────────── */
+  .ct-addr{ display:grid; grid-template-columns:28px 1fr auto; gap:0 10px; align-items:start; }
+  .ct-addr-pin{
+    width:28px; height:28px; border-radius:9px;
+    background:var(--ct-primary-soft); color:var(--ct-primary);
+    display:flex; align-items:center; justify-content:center; font-size:12px;
+  }
+  .ct-addr-eyebrow{
+    font-size:10.5px; font-weight:700; letter-spacing:.4px;
+    color:var(--ct-muted); text-transform:uppercase; line-height:1;
+  }
+  .ct-addr-tag{
+    display:block; margin-top:5px;
+    font-size:14.5px; font-weight:800; color:var(--ct-ink);
+    line-height:1.2; overflow-wrap:anywhere;
+  }
+  .ct-addr-text{
+    grid-column:2 / -1; margin-top:4px;
+    font-size:12.5px; font-weight:500; line-height:1.5; color:var(--ct-muted);
+    overflow-wrap:anywhere;
+  }
+  .ct-addr-text.ct-prompt{ color:var(--ct-primary); font-weight:700; }
+  .ct-change{
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:11.5px; font-weight:800; letter-spacing:.3px;
+    color:var(--ct-primary); background:var(--ct-primary-soft);
+    border:1px solid rgba(15,23,42,0.12);
+    padding:6px 10px; border-radius:999px; white-space:nowrap;
+  }
+
+  /* ── Section heading inside cards ─────────────────────────────────── */
+  .ct-card-head{
+    display:flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--ct-muted);
+    padding-bottom:11px; margin-bottom:2px;
+    border-bottom:1px solid var(--ct-line-soft);
+  }
+
+  /* ── Item rows ────────────────────────────────────────────────────── */
+  #cart-items-list{ padding-top:2px; padding-bottom:2px; }
+
+  .ct-row{
+    display:grid;
+    grid-template-columns:1fr var(--ct-right);
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid var(--ct-line-soft);
+    align-items:start;
+  }
+  .ct-row.has-media{ grid-template-columns:var(--ct-media) 1fr var(--ct-right); }
+  .ct-row:last-child{ border-bottom:none; padding-bottom:2px; }
+
+  .ct-media{
+    width:var(--ct-media); height:var(--ct-media);
+    border-radius:var(--ct-r-md); overflow:hidden;
+    background:#F5F6F7; border:1px solid rgba(28,32,36,.06);
+    position:relative; flex:0 0 var(--ct-media);
+  }
+  .ct-media img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    position:relative; z-index:1;
+  }
+  .ct-media-fallback{
+    position:absolute; inset:0; display:flex;
+    align-items:center; justify-content:center;
+    color:#C2C8CE; font-size:16px; background:#F5F6F7;
+  }
+
+  .ct-info{ min-width:0; }
+  .ct-name-row{ display:flex; align-items:flex-start; gap:6px; }
+  .ct-name-row .nb-veg-mark{ margin-top:2px; }
+  /* Wraps, unlike the global .item-name which is nowrap + ellipsis. */
+  .ct-name{
+    font-size:14px; font-weight:600; line-height:1.3;
+    color:var(--ct-ink); letter-spacing:0;
+    min-width:0; overflow-wrap:anywhere;
+  }
+  .ct-custom{
+    margin-top:4px; font-size:11px; font-weight:500; line-height:1.4;
+    color:var(--ct-muted); overflow-wrap:anywhere;
+  }
+  .ct-price-line{
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    margin-top:6px;
+  }
+  .ct-unit-price{ font-size:12.5px; font-weight:800; color:var(--ct-ink-2); }
+  .ct-was-price{ font-size:11px; font-weight:600; color:#9CA3AF; text-decoration:line-through; }
+  /* Named ct-off-badge, not *discount*, to escape the global amber rule. */
+  .ct-off-badge{
+    display:inline-flex; align-items:center; height:17px; padding:0 6px;
+    border-radius:5px; background:var(--ct-save-bg); color:var(--ct-save);
+    font-size:9.5px; font-weight:800; letter-spacing:.2px;
+    font-family:var(--font-micro);
+  }
+
+  .ct-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .ct-item-total{ font-size:14.5px; font-weight:800; color:var(--ct-ink); line-height:1.1; }
+  .ct-item-save{ font-size:9.5px; font-weight:800; color:var(--ct-save); margin-top:3px; text-align:right; }
+
+  .ct-stepper{
+    display:inline-flex; align-items:center;
+    background:var(--ct-primary-soft);
+    border:1px solid rgba(15,23,42,0.17);
+    border-radius:10px; overflow:hidden;
+  }
+  .ct-stepper button{
+    width:32px; height:32px; flex:0 0 32px;
+    background:transparent; border:none; padding:0;
+    color:var(--ct-primary); font-size:16px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease;
+  }
+  .ct-stepper button:active{ background:rgba(15,23,42,0.08); }
+  .ct-stepper button:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:-2px; }
+  .ct-qty{
+    min-width:26px; text-align:center;
+    font-size:13px; font-weight:800; color:var(--ct-primary);
+    font-family:var(--font-micro); font-variant-numeric:tabular-nums;
+  }
+
+  /* ── Delivery status strip ────────────────────────────────────────── */
+  .ct-strip{
+    display:flex; align-items:center; gap:8px;
+    margin:0 14px 8px; padding:8px 11px;
+    border-radius:10px;
+    background:#EAF7F0;
+    border:1px solid rgba(21,154,98,.16);
+    font-size:11.5px; font-weight:700; line-height:1.35; color:#0F5F3D;
+  }
+  .ct-strip i{ font-size:13px; flex:0 0 auto; color:var(--ew-success,#23956D); }
+  .ct-strip.is-error{ background:var(--ct-danger-bg); border-color:#F6C9C9; color:#9F1D1D; }
+  .ct-strip.is-error i{ color:var(--ct-danger); }
+  .ct-strip.is-neutral{ background:#F6F7F8; border-color:var(--ct-line); color:var(--ct-muted); }
+  .ct-strip.is-neutral i{ color:var(--ct-muted); }
+  .ct-strip.has-sub{ align-items:flex-start; }
+  .ct-strip.has-sub i{ margin-top:1px; }
+  .ct-strip-copy{ min-width:0; }
+  .ct-strip-sub{ display:block; margin-top:3px; font-weight:600; opacity:.92; }
+  .ct-strip-sub[hidden]{ display:none; }
+
+  /* ── Bill ─────────────────────────────────────────────────────────── */
+  .ct-bill-row{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:12px; font-size:13px; margin-top:11px;
+  }
+  .ct-bill-label{ color:var(--ct-muted); font-weight:500; }
+  .ct-bill-val{ font-weight:700; color:var(--ct-ink-2); font-variant-numeric:tabular-nums; }
+  .ct-bill-val.is-free{ color:var(--ct-save); font-weight:800; }
+  .ct-bill-val.is-off{ color:var(--ct-danger); font-weight:800; }
+  .ct-bill-row.is-saving .ct-bill-label,
+  .ct-bill-row.is-saving .ct-bill-val{ color:var(--ct-save); font-weight:800; }
+
+  .ct-bill-total{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    margin-top:13px; padding-top:13px;
+    border-top:1px dashed var(--ct-line);
+  }
+  .ct-total-label{ font-size:14.5px; font-weight:800; color:var(--ct-ink); }
+  .ct-total-val{ font-size:18px; font-weight:800; color:var(--ct-ink); letter-spacing:-.4px; }
+
+  /* .skeleton (shimmer + reduced-motion) comes from style.css; this is the
+     flat fallback if that sheet ever fails to load. */
+  .ct-skel{
+    display:inline-block; width:58px; height:13px;
+    border-radius:5px; vertical-align:middle;
+    background:#EDEFF1;
+  }
+
+  /* ── Empty state ──────────────────────────────────────────────────── */
+  .ct-empty{ display:none; padding:64px 32px 40px; text-align:center; }
+  .ct-empty-art{ width:104px; height:104px; margin:0 auto 20px; display:block; }
+  .ct-empty-title{ font-size:19px; font-weight:800; letter-spacing:-.3px; color:var(--ct-ink); }
+  .ct-empty-sub{
+    font-size:13px; font-weight:500; color:var(--ct-muted);
+    line-height:1.55; margin:8px auto 24px; max-width:36ch;
+  }
+  .ct-empty-btn{
+    background:var(--ct-primary); color:var(--hd-ink,#fff); border:none;
+    padding:14px 26px; border-radius:13px;
+    font-size:14.5px; font-weight:800; letter-spacing:.2px;
+    box-shadow:0 6px 16px rgba(15,23,42,0.16);
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────────── */
+  .ct-footer{
+    position:fixed; left:0; right:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column; gap:11px;
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--ct-line);
+    box-shadow:0 -8px 28px rgba(28,32,36,.10);
+    padding:13px 14px calc(13px + env(safe-area-inset-bottom));
+  }
+
+  .ct-pay{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ct-pay.is-single{ grid-template-columns:1fr; }
+  .ct-pay-label{
+    grid-column:1 / -1; margin:0 2px;
+    font-size:11px; font-weight:700; color:var(--ct-muted); line-height:1;
+  }
+
+  .payment-method-option{
+    position:relative;
+    display:flex; flex-direction:column; gap:7px;
+    padding:11px 12px;
+    background:var(--ct-surface);
+    border:1.5px solid var(--ct-line);
+    border-radius:var(--ct-r-md);
+    cursor:pointer; min-width:0;
+    transition:border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .12s ease;
+  }
+  .payment-method-option:active{ transform:scale(.985); }
+  .payment-method-option.selected{
+    border-color:var(--ct-primary);
+    background:var(--ct-primary-soft);
+    box-shadow:0 3px 12px rgba(15,23,42,0.08);
+  }
+  .ct-pay-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .upi-icon{
+    width:30px; height:30px; flex:0 0 30px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .upi-icon{ background:var(--hd-soft,#FDEBEE); color:var(--hd-on-light,#C13A50); }
+  .payment-check{ font-size:16px; color:var(--ct-muted); flex:0 0 auto; }
+  .payment-method-option.selected .payment-check{ color:var(--ct-primary); }
+  .payment-title{ font-size:12.5px; font-weight:800; color:var(--ct-ink); line-height:1.25; }
+  .payment-sub{ font-size:10px; font-weight:600; color:var(--ct-muted); line-height:1.3; margin-top:2px; }
+
+  .ct-cta{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; min-height:54px; padding:13px 18px;
+    background:var(--ct-primary); color:var(--hd-ink,#fff); border:none;
+    border-radius:var(--ct-r-md);
+    box-shadow:0 6px 18px rgba(15,23,42,0.17);
+    cursor:pointer;
+    transition:transform .1s var(--ct-ease), background .2s ease, box-shadow .2s ease;
+  }
+  .ct-cta:active{ transform:scale(.98); background:var(--ct-primary-deep); }
+  .ct-cta:focus-visible{ outline:3px solid rgba(15,23,42,0.26); outline-offset:2px; }
+  .ct-cta-text{
+    font-size:14px; font-weight:800; letter-spacing:.3px;
+    text-align:left; line-height:1.2;
+  }
+  .ct-cta-sub{
+    display:block; font-size:10px; font-weight:600;
+    letter-spacing:.2px; opacity:.85; margin-top:2px;
+  }
+  .ct-cta-val{ font-size:17px; font-weight:800; letter-spacing:-.2px; }
+
+  .ct-cta.locked{
+    background:#E3E6E9; color:#98A0A8; box-shadow:none; cursor:not-allowed;
+  }
+  .ct-cta.locked .ct-cta-val{ color:#98A0A8; }
+  .ct-cta.locked:active{ transform:none; background:#E3E6E9; }
+
+  @keyframes ctShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(6px); }
+    60%{ transform:translateX(-4px); }
+    80%{ transform:translateX(4px); }
+  }
+  .ct-shake{ animation:ctShake .4s ease; }
+
+  /* ── Toast ────────────────────────────────────────────────────────── */
+  #addr-toast{
+    position:fixed; left:50%; z-index:9999;
+    bottom:calc(var(--ct-footer-h) + 14px);
+    transform:translateX(-50%) translateY(14px);
+    display:flex; align-items:center; gap:9px;
+    max-width:calc(100vw - 40px);
+    background:#1C2024; color:#fff;
+    font-size:12.5px; font-weight:700; line-height:1.35;
+    padding:11px 18px; border-radius:14px;
+    box-shadow:0 10px 30px rgba(28,32,36,.3);
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  #addr-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #addr-toast i{ color:#5BD39B; flex:0 0 auto; }
+  #addr-toast.is-error i{ color:#FCA5A5; }
+
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 3.1 ADDITIONS — note / instructions / tip / coupon
+     Same `ct-` namespace, same tokens, no !important, no new colours.
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── Tappable line cards (restaurant note, instructions, coupon) ─── */
+  .ct-line-card{
+    display:flex; align-items:center; gap:12px;
+    width:auto; box-sizing:border-box;
+    margin:8px 14px; padding:14px;
+    font:inherit; text-align:left; color:inherit;
+    background:var(--ct-surface);
+    border:1px solid var(--ct-line);
+    border-radius:var(--ct-r-lg);
+    box-shadow:var(--ct-shadow);
+    min-height:66px;
+  }
+  .ct-line-card:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+  .ct-line-ic{
+    width:34px; height:34px; flex:0 0 34px; border-radius:11px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; background:#F3F5F6; color:var(--ct-ink-2);
+    transition:background .18s ease, color .18s ease;
+  }
+  .ct-line-card.is-set .ct-line-ic{ background:var(--ct-primary-soft); color:var(--ct-primary); }
+  .ct-line-copy{ flex:1; min-width:0; }
+  .ct-line-title{
+    display:block; font-size:13.5px; font-weight:800;
+    color:var(--ct-ink); line-height:1.25; letter-spacing:-.1px;
+  }
+  .ct-line-sub{
+    margin-top:3px; font-size:11.5px; font-weight:500; line-height:1.45;
+    color:var(--ct-muted); overflow-wrap:anywhere;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .ct-line-act{
+    flex:0 0 auto; white-space:nowrap;
+    font-size:11.5px; font-weight:800; letter-spacing:.3px; color:var(--ct-primary);
+  }
+  .ct-line-act[hidden]{ display:none; }
+  .ct-line-chev{ flex:0 0 auto; font-size:11px; color:#B6BDC4; }
+  .ct-restaurant-notes{display:block;}
+  .ct-restaurant-note-label{margin:12px 14px 0;font-size:12px;font-weight:800;color:var(--ct-muted);text-transform:uppercase;letter-spacing:.4px;}
+
+  /* ── Tip ──────────────────────────────────────────────────────────── */
+  .ct-tip-note{
+    margin:5px 0 0; font-size:11.5px; font-weight:500;
+    line-height:1.5; color:var(--ct-muted);
+  }
+  .ct-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .ct-chip{
+    font:inherit; font-size:12.5px; font-weight:800;
+    color:var(--ct-ink-2); background:var(--ct-surface);
+    border:1.5px solid var(--ct-line); border-radius:999px;
+    padding:9px 15px; min-height:40px;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition:border-color .16s ease, background .16s ease, color .16s ease;
+  }
+  .ct-chip:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+  .ct-chip[aria-pressed="true"]{
+    border-color:var(--ct-primary);
+    background:var(--ct-primary-soft);
+    color:var(--ct-primary-deep);
+  }
+
+  /* ── Add more items (primary action → header theme) ─────────────── */
+  .ct-addmore{
+    display:inline-flex; align-items:center; gap:8px;
+    margin:12px 14px 0; padding:10px 15px;
+    background:var(--ct-primary-soft); color:var(--ct-primary);
+    border:1px solid rgba(15,23,42,0.12); border-radius:11px;
+    font-size:12.5px; font-weight:800; letter-spacing:.2px;
+    text-decoration:none;
+  }
+  .ct-addmore i{ font-size:12px; }
+
+  /* ── Section label (small heading between compact rows) ───────────── */
+  .ct-section-label{
+    margin:14px 16px 0; font-size:11px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--ct-muted);
+  }
+
+  /* ── Compact restaurant note / cooking request (in cart area) ─────── */
+  .ct-notes-compact{ margin-top:2px; }
+  .ct-notes-compact .ct-restaurant-note-label{ margin:12px 16px 0; }
+  .ct-notes-compact .ct-line-card{
+    margin:6px 14px 0; padding:11px 14px; min-height:0; border-radius:var(--ct-r-md);
+  }
+  .ct-notes-compact .ct-line-ic{ width:30px; height:30px; flex-basis:30px; font-size:13px; }
+
+  /* ── Complete your meal (same-restaurant recommendations) ─────────── */
+
+  /* ── Delivery header (top of page, replaces old title bar) ────────── */
+  .ct-delivery-head{
+    display:flex; align-items:stretch; gap:8px;
+    padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
+    background:var(--ct-surface); border-bottom:1px solid var(--ct-line);
+    position:sticky; top:0; z-index:50;
+  }
+  .ct-dh-back{ flex:0 0 40px; width:40px; border:0; background:transparent; color:var(--ct-ink); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .ct-dh-main{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:transparent; border:0; text-align:left; font:inherit; color:inherit; cursor:pointer; padding:0; }
+  .ct-dh-ic{ flex:0 0 34px; width:34px; height:34px; border-radius:10px; background:var(--ct-primary-soft); color:var(--ct-primary); display:flex; align-items:center; justify-content:center; }
+  .ct-dh-copy{ flex:1; min-width:0; display:block; }
+  .ct-dh-eta{ display:block; font-size:14px; font-weight:800; color:var(--ct-ink); letter-spacing:-.2px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-dh-tag{ font-weight:700; color:var(--ct-ink-2); }
+  .ct-dh-addr{ display:block; margin-top:1px; font-size:12px; font-weight:500; color:var(--ct-muted); line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-dh-addr.ct-prompt{ color:var(--ct-primary); font-weight:700; }
+  .ct-dh-change{ flex:0 0 auto; align-self:center; display:inline-flex; align-items:center; gap:2px; font-size:11px; font-weight:800; letter-spacing:.3px; color:var(--ct-primary); }
+  .ct-dh-hidden{ display:none; }
+
+  /* ── Item card + inline action pills ──────────────────────────────── */
+  .ct-item-card{ padding-bottom:10px; }
+  .ct-item-actions{ display:flex; gap:8px; flex-wrap:wrap; padding-top:12px; margin-top:2px; border-top:1px solid var(--ct-line-soft); }
+  .ct-pill-btn{
+    display:inline-flex; align-items:center; gap:7px; text-decoration:none;
+    font:inherit; font-size:12px; font-weight:700; color:var(--ct-primary);
+    background:var(--ct-primary-soft); border:1px solid rgba(15,23,42,0.11);
+    border-radius:999px; padding:8px 14px; cursor:pointer;
+  }
+  .ct-pill-btn svg{ color:var(--ct-primary); }
+  .ct-pill-btn.is-set{ background:var(--ct-primary); border-color:var(--ct-primary); color:var(--hd-ink,#fff); }
+  .ct-pill-btn.is-set svg{ color:#fff; }
+
+  /* ── Grouped expandable section (delivery instructions + rider tip) ── */
+  .ct-group{ background:var(--ct-surface); margin:8px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
+  .ct-group-head{ display:flex; align-items:center; gap:12px; width:100%; padding:14px; background:transparent; border:0; font:inherit; text-align:left; color:inherit; cursor:pointer; }
+  .ct-group-copy{ flex:1; min-width:0; }
+  .ct-group-title{ display:block; min-width:0; font-size:13.5px; font-weight:800; color:var(--ct-ink); letter-spacing:-.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-group-sub{ display:block; margin-top:2px; font-size:11.5px; font-weight:500; color:var(--ct-muted); line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ct-group-chev{ flex:0 0 auto; color:#98A0A8; transition:transform .2s var(--ct-ease); }
+  .ct-group.is-open .ct-group-chev{ transform:rotate(180deg); }
+  .ct-group-body{ padding:0 14px 14px; }
+  .ct-di-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ct-di-pill{
+    display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:12px; font-weight:700;
+    color:var(--ct-ink-2); background:var(--ct-surface); border:1.5px solid var(--ct-line);
+    border-radius:999px; padding:9px 13px; min-height:38px; cursor:pointer;
+    transition:border-color .16s ease, background .16s ease, color .16s ease;
+  }
+  .ct-di-pill svg{ color:var(--ct-muted); }
+  .ct-di-pill[aria-pressed="true"]{ border-color:var(--ct-primary); background:var(--ct-primary-soft); color:var(--ct-primary-deep); }
+  .ct-di-pill[aria-pressed="true"] svg{ color:var(--ct-primary); }
+  .ct-tip-block{ margin-top:16px; padding-top:14px; border-top:1px solid var(--ct-line-soft); }
+  .ct-tip-title{ font-size:12px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ct-muted); }
+
+  /* ── Always-visible bill summary ──────────────────────────────────── */
+  .ct-bill{ background:var(--ct-surface); margin:8px 14px; border:1px solid var(--ct-line); border-radius:var(--ct-r-lg); box-shadow:var(--ct-shadow); overflow:hidden; }
+  .ct-bill-hero{ display:flex; align-items:flex-start; gap:11px; padding:15px 14px; border-bottom:1px solid var(--ct-line-soft); }
+  .ct-bill-hero-ic{ flex:0 0 30px; width:30px; height:30px; border-radius:8px; background:var(--ct-save-bg); color:var(--ct-save); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .ct-bill-hero-copy{ flex:1; min-width:0; }
+  .ct-bill-hero-top{ font-size:16px; font-weight:800; color:var(--ct-ink); letter-spacing:-.3px; }
+  .ct-bill-hero-top s{ color:var(--ct-muted); font-weight:600; margin:0 3px 0 4px; }
+  .ct-bill-hero-top strong{ font-weight:800; }
+  .ct-bill-hero-saved{ margin-top:3px; font-size:12.5px; font-weight:800; color:var(--ct-save); letter-spacing:-.1px; }
+  /* Pink "lowest prices" ribbon (Eatswada accent) */
+  .ct-bill-hero-badge{
+    flex:0 0 auto; align-self:flex-start; text-align:center; transform:rotate(3deg);
+    font-size:8.5px; font-weight:900; letter-spacing:.5px; line-height:1.25;
+    color:var(--hd-ink,#fff); background:linear-gradient(135deg,var(--hd-primary,#E9546B),var(--hd-hover,#D8435C));
+    border-radius:5px; padding:6px 10px; text-transform:uppercase;
+    box-shadow:0 3px 8px rgba(15,23,42,0.18);
+  }
+  .ct-bill-hero-badge span{ display:block; font-size:7px; font-weight:800; letter-spacing:1px; opacity:.9; }
+
+  .ct-bill-rows{ padding:6px 14px 4px; }
+  .ct-bill .ct-bill-row{ margin-top:0; padding:9px 0; font-size:13.5px; }
+  .ct-bill-label{ color:var(--ct-ink-2); font-weight:600; }
+  .ct-bill-label.is-dashed{ border-bottom:1px dashed #C4CBD1; padding-bottom:2px; }
+  .ct-bill-val s{ color:var(--ct-muted); font-weight:600; margin-right:5px; }
+  .ct-now.is-save{ color:var(--ct-save); font-weight:800; }
+  .ct-bill-sep{ height:1px; border-top:1px dashed var(--ct-line); margin:2px 0; }
+  .ct-bill-cap{ padding:0 0 6px; font-size:11.5px; font-weight:500; color:var(--ct-muted); }
+  .ct-bill-val.is-save{ color:var(--ct-save); font-weight:800; }
+
+  /* "THAT'S IT" pink reassurance band — full-bleed, Eatswada accent */
+  .ct-bill-band{
+    margin:2px 0 0; padding:11px 14px;
+    background:linear-gradient(90deg,#FDE9F2,#FDF3F8);
+    color:var(--ct-primary); font-size:13px; font-weight:800; letter-spacing:-.1px;
+  }
+  .ct-bill .ct-bill-total{ margin:0 14px; padding:13px 0 15px; border-top:0; }
+  .ct-bill .ct-total-val{ font-size:17px; }
+
+  /* ── Cancellation policy ──────────────────────────────────────────── */
+  .ct-cancel{ margin:14px 18px 6px; }
+  .ct-cancel-title{ font-size:12.5px; font-weight:800; color:var(--ct-ink-2); }
+  .ct-cancel p{ margin:4px 0 0; font-size:11.5px; font-weight:500; line-height:1.55; color:var(--ct-muted); }
+
+  /* ── Footer savings line (green) ──────────────────────────────────── */
+  .ct-footer-save{
+    display:none; align-items:center; justify-content:center; gap:7px;
+    margin:-2px 2px 0; font-size:12px; font-weight:800; color:var(--ct-save);
+    letter-spacing:.2px;
+  }
+  .ct-footer-save.show{ display:flex; }
+  .ct-footer-save i{ font-size:11px; }
+
+  /* ── Honest no-fees reassurance (true for Eatswada; green) ────────── */
+  .ct-nofees{
+    margin:12px 0 2px; padding:10px 12px; border-radius:11px;
+    background:#ECFDF3; color:#0F5F3D;
+    font-size:11.5px; font-weight:800; letter-spacing:.1px; text-align:center;
+  }
+
+  /* ── Compact delivery summary (ETA + address + contact in one card) ─── */
+  .ct-summary{
+    background:var(--ct-surface); margin:10px 14px;
+    border:1px solid var(--ct-line); border-radius:var(--ct-r-lg);
+    box-shadow:var(--ct-shadow); overflow:hidden;
+  }
+  .ct-summary-row{
+    display:flex; align-items:center; gap:11px; width:100%;
+    padding:12px 14px; background:transparent; border:0; text-align:left;
+    font:inherit; color:inherit;
+  }
+  .ct-summary-main{ cursor:pointer; }
+  .ct-summary-contact{ border-top:1px solid var(--ct-line-soft); }
+  .ct-summary-ic{
+    width:32px; height:32px; flex:0 0 32px; border-radius:9px;
+    background:var(--ct-primary-soft); color:var(--ct-primary);
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .ct-summary-copy{ flex:1; min-width:0; display:block; }
+  .ct-summary-title{
+    display:block; font-size:13.5px; font-weight:800; color:var(--ct-ink);
+    letter-spacing:-.2px; line-height:1.3;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-summary-sub{
+    display:block; margin-top:2px; font-size:12px; font-weight:500; color:var(--ct-muted);
+    line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-summary-sub.ct-prompt{ color:var(--ct-primary); font-weight:700; }
+  .ct-summary-change{
+    flex:0 0 auto; font-size:11px; font-weight:800; letter-spacing:.3px;
+    color:var(--ct-primary); background:var(--ct-primary-soft); border-radius:999px; padding:6px 11px;
+  }
+  .ct-summary-name{
+    display:block; font-size:13px; font-weight:700; color:var(--ct-ink); line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-summary-phone{ display:block; margin-top:1px; font-size:11.5px; font-weight:500; color:var(--ct-muted); }
+
+  /* ── Bottom pay bar (amount + view detailed bill | Proceed to Pay) ──── */
+  .ct-paybar{ display:flex; align-items:stretch; gap:12px; }
+  .ct-paybar-left{
+    flex:0 0 auto; display:flex; flex-direction:column; justify-content:center; gap:1px;
+    background:transparent; border:0; padding:0 2px; text-align:left; font:inherit; color:inherit; cursor:pointer;
+  }
+  .ct-paybar-amt{
+    font-size:19px; font-weight:800; color:var(--ct-ink); letter-spacing:-.4px;
+    line-height:1.1; font-variant-numeric:tabular-nums;
+  }
+  .ct-paybar-link{ display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; color:var(--ct-primary); letter-spacing:.2px; }
+  .ct-paybar .ct-cta{ flex:1; min-height:54px; border-radius:999px; justify-content:center; background:var(--ct-primary); box-shadow:0 5px 14px rgba(15,23,42,.18); }
+  .ct-paybar .ct-cta:active{ background:var(--ct-primary-deep); }
+  .ct-pay-note{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin-top:1px; font-size:10.5px; font-weight:600; color:var(--ct-muted);
+  }
+  .ct-pay-note i{ font-size:10px; }
+
+  /* ── Bottom sheets ────────────────────────────────────────────────── */
+  body.ct-sheet-open{ overflow:hidden; }
+
+  .ct-sheet-root{
+    position:fixed; inset:0; z-index:1200;
+    display:flex; align-items:flex-end; justify-content:center;
+    padding-bottom:var(--ct-kb, 0px);
+  }
+  .ct-sheet-root[hidden]{ display:none; }
+  .ct-scrim{
+    position:absolute; inset:0; background:rgba(16,20,24,.5);
+    opacity:0; transition:opacity .22s var(--ct-ease);
+  }
+  .ct-sheet-root.is-open .ct-scrim{ opacity:1; }
+  .ct-sheet{
+    position:relative; width:100%; max-width:520px;
+    background:var(--ct-surface);
+    border-radius:22px 22px 0 0;
+    padding:8px 16px calc(14px + env(safe-area-inset-bottom));
+    max-height:88vh;
+    max-height:calc(88dvh - var(--ct-kb, 0px));
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    box-shadow:0 -14px 40px rgba(16,20,24,.22);
+    transform:translateY(100%);
+    transition:transform .26s var(--ct-ease);
+  }
+  .ct-sheet-root.is-open .ct-sheet{ transform:translateY(0); }
+  .ct-sheet-grab{
+    width:40px; height:4px; border-radius:999px;
+    background:#DDE1E5; margin:6px auto 12px;
+  }
+  .ct-sheet-head{
+    display:flex; align-items:flex-start; gap:12px;
+    padding-bottom:12px; border-bottom:1px solid var(--ct-line-soft);
+  }
+  .ct-sheet-title{
+    flex:1; margin:0; font-size:16px; font-weight:800;
+    letter-spacing:-.2px; line-height:1.3; color:var(--ct-ink);
+  }
+  .ct-sheet-x{
+    flex:0 0 32px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--ct-line); background:#F6F7F8;
+    color:var(--ct-ink-2); font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ct-sheet-x:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+  .ct-sheet-body{ padding:14px 0 2px; }
+
+  .ct-field-label{
+    display:block; margin-bottom:7px;
+    font-size:11px; font-weight:800; letter-spacing:.4px;
+    text-transform:uppercase; color:var(--ct-muted);
+  }
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  .ct-textarea, .ct-input{
+    width:100%; box-sizing:border-box; font:inherit;
+    font-size:16px; font-weight:500; line-height:1.5; color:var(--ct-ink);
+    background:#FAFBFB; border:1.5px solid var(--ct-line);
+    border-radius:var(--ct-r-md); padding:12px 13px; resize:none;
+  }
+  .ct-textarea:focus, .ct-input:focus{
+    outline:none; border-color:var(--ct-primary); background:#fff;
+    box-shadow:0 0 0 3px rgba(15,23,42,0.08);
+  }
+  .ct-field-foot{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:12px; margin-top:7px;
+  }
+  .ct-field-help{ font-size:11.5px; font-weight:500; line-height:1.45; color:var(--ct-muted); }
+  .ct-count{
+    flex:0 0 auto; font-family:var(--font-micro); font-variant-numeric:tabular-nums;
+    font-size:11px; font-weight:700; color:var(--ct-muted);
+  }
+  .ct-count.is-max{ color:var(--ct-danger); }
+
+  .ct-sug-row{ display:flex; flex-wrap:wrap; gap:7px; margin-top:13px; }
+  .ct-sug{
+    font:inherit; font-size:12px; font-weight:700; color:var(--ct-ink-2);
+    background:#F4F6F7; border:1px solid var(--ct-line);
+    border-radius:999px; padding:8px 12px; min-height:36px;
+  }
+  .ct-sug:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+
+  .ct-sheet-err{ margin:11px 0 0; font-size:12px; font-weight:700; color:var(--ct-danger); }
+  .ct-sheet-err[hidden]{ display:none; }
+
+  .ct-sheet-foot{ display:grid; grid-template-columns:1fr 1.4fr; gap:9px; margin-top:16px; }
+  .ct-sheet-foot.is-single{ grid-template-columns:1fr; }
+  .ct-btn{
+    font:inherit; font-size:14px; font-weight:800;
+    min-height:48px; padding:13px 16px;
+    border:1.5px solid transparent; border-radius:var(--ct-r-md);
+  }
+  .ct-btn:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+  .ct-btn-ghost{ background:#F4F6F7; border-color:var(--ct-line); color:var(--ct-ink-2); }
+  .ct-btn-primary{
+    background:var(--ct-primary); color:var(--hd-ink,#fff);
+    box-shadow:0 5px 14px rgba(15,23,42,0.15);
+  }
+  .ct-btn-primary:active{ background:var(--ct-primary-deep); }
+  .ct-btn-remove{
+    display:block; width:100%; margin-top:9px; min-height:44px;
+    font:inherit; font-size:13px; font-weight:800;
+    color:var(--ct-danger); background:transparent;
+    border:none; border-radius:var(--ct-r-md);
+  }
+  .ct-btn-remove[hidden]{ display:none; }
+
+  /* ── Checkout delivery summary ─────────────────────────────────────── */
+  .ct-delivery-eta-card{
+    display:flex; align-items:center; gap:13px;
+    min-height:72px;
+    padding:14px 16px;
+  }
+  .ct-delivery-eta-icon,
+  .ct-customer-icon{
+    width:40px; height:40px; flex:0 0 40px;
+    border-radius:13px;
+    background:var(--ct-primary-soft);
+    color:var(--ct-primary);
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px;
+  }
+  .ct-delivery-eta-copy{ min-width:0; }
+  .ct-delivery-eta-title{
+    font-size:15px; line-height:1.35; color:var(--ct-ink);
+    font-weight:600;
+  }
+  .ct-delivery-eta-title strong{ font-weight:800; }
+  .ct-delivery-eta-sub{
+    margin-top:3px; font-size:11.5px; color:var(--ct-muted); font-weight:500;
+  }
+  .ct-customer-card{
+    display:flex; align-items:center; gap:12px;
+    min-height:70px;
+    padding:13px 16px;
+  }
+  .ct-customer-copy{ min-width:0; flex:1; }
+  .ct-customer-name{
+    font-size:14px; font-weight:800; color:var(--ct-ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-customer-phone{
+    margin-top:3px; font-size:12px; font-weight:600; color:var(--ct-muted);
+  }
+  .ct-customer-chevron{
+    color:#aeb6bd; font-size:12px; padding-left:4px;
+  }
+
+  /* ── Compact bill row ───────────────────────────────────────────────── */
+  .ct-bill-peek{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .ct-bill-peek-val{
+    font-size:14.5px; font-weight:800; letter-spacing:-.2px; color:var(--ct-ink);
+    font-family:var(--font-micro); font-variant-numeric:tabular-nums;
+  }
+  .ct-bill-peek-val.is-pending{ color:var(--ct-muted); }
+
+  /* ── Coupon empty state ───────────────────────────────────────────── */
+  .ct-empty-mini{ text-align:center; padding:20px 8px 4px; }
+  .ct-empty-mini-ic{
+    width:56px; height:56px; margin:0 auto 14px; border-radius:18px;
+    background:var(--ct-primary-soft); color:var(--ct-primary);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .ct-empty-mini-title{ font-size:15px; font-weight:800; color:var(--ct-ink); }
+  .ct-empty-mini-sub{
+    margin:7px auto 0; max-width:34ch;
+    font-size:12.5px; font-weight:500; line-height:1.55; color:var(--ct-muted);
+  }
+
+  /* ── Narrow phones (360 / 375) ────────────────────────────────────── */
+  @media (max-width:380px){
+    :root{ --ct-media:50px; --ct-right:92px; }
+    .ct-card{ margin:12px 12px; padding:13px; }
+    .ct-strip{ margin:0 12px 12px; }
+    .ct-footer{ padding-left:12px; padding-right:12px; }
+    .ct-pay{ gap:7px; }
+    .ct-stepper button{ width:30px; flex:0 0 30px; }
+    .ct-cta{ padding:13px 15px; }
+    .ct-cta-text{ font-size:13px; }
+    .ct-cta-val{ font-size:16px; }
+    .ct-line-card{ margin:12px 12px; padding:13px; }
+    .ct-chip{ padding:9px 13px; font-size:12px; }
+    .ct-sheet{ padding-left:14px; padding-right:14px; }
+    .ct-sheet-foot{ grid-template-columns:1fr 1.3fr; gap:8px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    body.ct-page{ animation:none; }
+    .tap, .ct-cta, .payment-method-option, .ct-stepper button{ transition:none; }
+    .tap:active, .ct-cta:active, .payment-method-option:active{ transform:none; }
+    .ct-shake{ animation:none; }
+    #addr-toast{ transition:opacity .01s linear; }
+    .ct-scrim, .ct-chip, .ct-line-ic, .ct-btn{ transition:none; }
+    .ct-sheet{ transition:none; transform:translateY(0); }
+  }
+  
+  /* ================================================================
+     EATSWADA — FINAL VISUAL POLISH
+     Compact benchmark header · restrained type · premium iconography
+     · tighter offers · quieter cancellation policy.
+     ================================================================ */
+
+  body.ct-page{
+    background:#F5F5F8;
+    color:#202124;
+    font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+
+  /* Delivery-first checkout header: ETA + destination only. */
+  .ct-delivery-head{
+    min-height:62px;
+    padding:8px 13px 8px 10px;
+    gap:5px;
+    background:#fff;
+    border-bottom:1px solid #ECEDEF;
+    box-shadow:none;
+  }
+  .ct-dh-back{
+    width:38px;
+    flex:0 0 38px;
+    color:#26282B;
+  }
+  .ct-dh-main{
+    gap:8px;
+    align-items:center;
+  }
+  .ct-dh-copy{min-width:0;}
+  .ct-dh-restaurant{
+    display:block;
+    max-width:calc(100vw - 92px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:12.5px;
+    line-height:1.15;
+    font-weight:600;
+    color:#7B8086;
+  }
+  .ct-dh-meta{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    min-width:0;
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:12.5px;
+    line-height:1.25;
+    color:#27292C;
+  }
+  .ct-dh-meta-icon{flex:0 0 auto;color:#25282B;margin-right:1px;}
+  .ct-dh-eta{
+    display:inline;
+    font-size:12.5px;
+    font-weight:800;
+    color:#222427;
+    letter-spacing:-.12px;
+  }
+  .ct-dh-to{color:#4B5055;font-weight:600;}
+  .ct-dh-tag{color:#222427;font-weight:800;}
+  .ct-dh-divider{color:#A3A7AC;padding:0 1px;font-weight:500;}
+  .ct-dh-addr{
+    display:inline;
+    margin:0;
+    min-width:0;
+    max-width:46vw;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:12.5px;
+    font-weight:600;
+    color:#3E4348;
+    line-height:1.25;
+  }
+  .ct-dh-addr.ct-prompt{color:#777D83;font-weight:600;}
+  .ct-dh-chevron{flex:0 0 auto;color:#777C82;margin-right:1px;}
+
+  /* Overall type scale. */
+  .ct-card{
+    margin:8px 14px;
+    padding:12px;
+    border-radius:16px;
+    box-shadow:0 1px 2px rgba(20,24,28,.035);
+  }
+  .ct-name{font-size:13.5px;font-weight:750;}
+  .ct-custom{font-size:10.5px;margin-top:3px;}
+  .ct-unit-price{font-size:11.5px;}
+  .ct-item-total{font-size:13.5px;}
+  .ct-stepper button{width:30px;height:30px;flex-basis:30px;font-size:15px;}
+  .ct-qty{font-size:12.5px;}
+  .ct-pill-btn{font-size:11.5px;padding:7px 13px;gap:6px;}
+  .ct-item-actions{padding-top:10px;}
+
+  /* Free-delivery status strip. */
+  .ct-strip{
+    margin:5px 14px 7px;
+    min-height:0;
+    padding:7px 10px;
+    border-radius:9px;
+    font-size:11px;
+    font-weight:750;
+    gap:7px;
+  }
+  .ct-strip-icon{flex:0 0 auto;color:#198754;}
+  .ct-strip.is-error .ct-strip-icon{color:#D64545;}
+  .ct-strip.is-neutral .ct-strip-icon{color:#697077;}
+  .ct-strip-sub{font-size:10.5px;}
+
+  /* ── Production restaurant grouping ───────────────────────────────── */
+  .ct-restaurant-group{
+    padding:0;
+    border-bottom:1px solid #ECEDEF;
+  }
+  .ct-restaurant-group:last-child{border-bottom:0;}
+  .ct-restaurant-head{
+    display:flex;align-items:center;gap:10px;
+    padding:13px 0 8px;
+  }
+  .ct-restaurant-copy{min-width:0;}
+  .ct-restaurant-name{
+    font-size:14px;font-weight:800;color:var(--ct-ink);
+    line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .ct-restaurant-meta{
+    margin-top:3px;font-size:10.5px;font-weight:600;color:var(--ct-muted);
+  }
+  .ct-restaurant-items .ct-row:first-child{padding-top:8px;}
+  .ct-restaurant-items .ct-row:last-child{padding-bottom:10px;}
+  .ct-group-actions{padding-top:10px;margin-top:0;}
+  .ct-restaurant-note-btn.is-set{background:var(--ct-primary);border-color:var(--ct-primary);color:var(--hd-ink,#fff);}
+  .ct-restaurant-note-btn.is-set svg{color:#fff;}
+  .ct-restaurant-note-preview{
+    margin:8px 0 0;padding:9px 11px;border-radius:10px;
+    background:#FAF1F6;color:#6B334F;font-size:10.5px;font-weight:600;line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+
+  /* Complete-your-meal. */
+  /* Vertical stack of per-restaurant strips (keeps recommendations from
+     one restaurant from ever mixing with another's). */
+
+  /* Payment offers now reuses the .ct-group shell (see the unified
+     #ct-payment-group / #ct-di-group rules below), so it needs no dedicated
+     sizing here — both offer cards stay pixel-for-pixel identical. */
+
+  /* Premium line-icon treatment. */
+  .ct-line-ic{
+    width:32px;height:32px;flex-basis:32px;
+    border-radius:9px;
+    background:#F6F7F8;
+    color:#5E656C;
+  }
+  .ct-line-ic.ct-line-ic-accent,
+  .ct-line-card.is-set .ct-line-ic{
+    background:#ECF8F1;
+    color:#16864E;
+  }
+  .ct-line-ic svg{width:17px;height:17px;stroke-linecap:round;}
+
+  /* Delivery instructions. */
+  .ct-group{
+    margin:7px 14px;
+    border-radius:15px;
+    box-shadow:0 1px 2px rgba(20,24,28,.035);
+  }
+  .ct-group-head{padding:11px 12px;gap:10px;}
+  .ct-group-title{font-size:12.5px;font-weight:750;}
+  .ct-group-sub{font-size:10.5px;margin-top:1px;}
+  .ct-group-body{padding:0 12px 12px;}
+  .ct-di-pills{gap:7px;}
+  .ct-di-pill{
+    font-size:11px;
+    padding:8px 11px;
+    min-height:35px;
+    border-radius:10px;
+    gap:6px;
+  }
+  .ct-tip-block{margin-top:13px;padding-top:12px;}
+  .ct-tip-title{font-size:10.5px;letter-spacing:.65px;}
+  .ct-tip-note{font-size:10.5px;margin-top:3px;}
+  .ct-chip-row{gap:7px;margin-top:8px;}
+  .ct-chip{font-size:11px;padding:7px 12px;min-height:35px;}
+
+  /* Bill hierarchy. */
+  .ct-bill{
+    margin:7px 14px;
+    border-radius:16px;
+    box-shadow:0 1px 2px rgba(20,24,28,.035);
+  }
+  .ct-bill-hero{padding:13px 13px;gap:9px;}
+  .ct-bill-hero-ic{width:28px;height:28px;flex-basis:28px;border-radius:8px;}
+  .ct-bill-hero-top{font-size:14px;font-weight:750;letter-spacing:-.2px;}
+  .ct-bill-hero-saved{font-size:11px;margin-top:2px;}
+  .ct-bill-hero-badge{font-size:7.5px;padding:5px 8px;}
+  .ct-bill-hero-badge span{font-size:6px;}
+  .ct-bill-rows{padding:5px 13px 3px;}
+  .ct-bill .ct-bill-row{padding:8px 0;font-size:12px;}
+  .ct-bill-label,.ct-bill-val{font-size:12px;}
+  .ct-bill-cap{font-size:10.5px;padding:0 0 5px;}
+  .ct-bill-band{padding:9px 13px;font-size:11.5px;font-weight:750;}
+  .ct-bill .ct-bill-total{margin:0 13px;padding:12px 0 13px;}
+  .ct-total-label{font-size:13.5px;}
+  .ct-bill .ct-total-val{font-size:16px;}
+
+  /* Cancellation policy: no card, no heavy black text. */
+  .ct-cancel{
+    margin:14px 18px 9px;
+    padding:0 2px;
+  }
+  .ct-cancel-title{
+    font-size:12.5px;
+    font-weight:700;
+    color:#858A90;
+    letter-spacing:-.05px;
+  }
+  .ct-cancel p{
+    margin:5px 0 0;
+    font-size:11px;
+    font-weight:500;
+    line-height:1.55;
+    color:#A1A5AA;
+    max-width:58ch;
+  }
+
+  /* Bottom bar. */
+  .ct-footer{
+    gap:8px;
+    padding:11px 14px calc(10px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 24px rgba(25,29,34,.08);
+  }
+  .ct-paybar{gap:10px;}
+  .ct-paybar-amt{font-size:17px;}
+  .ct-paybar-link{font-size:10.5px;}
+  .ct-paybar .ct-cta{min-height:54px;padding:12px 18px;border-radius:999px;background:var(--ct-primary);box-shadow:0 5px 14px rgba(15,23,42,.18);}
+  .ct-cta-text{font-size:14px;font-weight:800;}
+  .ct-cta-sub{font-size:9.5px;}
+  .ct-pay-note{font-size:9.5px;color:#7B8187;gap:5px;}
+  .ct-pay-note svg{flex:0 0 auto;}
+
+  @media (max-width:380px){
+    .ct-dh-meta,.ct-dh-eta,.ct-dh-addr{font-size:11.5px;}
+    .ct-dh-restaurant{font-size:12px;}
+    .ct-group,.ct-bill{margin-left:12px;margin-right:12px;}
+  }
+
+
+  /* ── Final user-requested checkout adjustments ─────────────────────── */
+  /* Header: restaurant name removed; delivery ETA/address remain. */
+
+  /* Payment offers & Delivery instructions are ONE component system:
+     the same .ct-group shell, the same margins, the same collapsed height.
+     The collapsed-height match lives on the HEAD, never on the group — a
+     fixed height on #ct-di-group plus .ct-group{overflow:hidden} was clipping
+     the delivery-instructions body so tapping it appeared to do nothing.
+     With no fixed group height the group grows freely when it expands. */
+  #ct-payment-group,
+  #ct-di-group{
+    box-sizing:border-box;
+    margin:8px 14px;
+  }
+  #ct-payment-group .ct-group-head,
+  #ct-di-group .ct-group-head{
+    min-height:62px;
+    box-sizing:border-box;
+    padding:13px 14px;
+  }
+  /* Payment offers opens a sheet, so its chevron points forward and never rotates. */
+  .ct-group-chev--nav{ transform:none; }
+
+  /* Free-delivery strip + Proceed to Pay use the header theme accent. */
+  .ct-strip:not(.is-error):not(.is-neutral){
+    background:var(--ct-primary-soft);
+    border-color:rgba(15,23,42,0.12);
+    color:var(--ct-primary-deep);
+  }
+  .ct-strip:not(.is-error):not(.is-neutral) i,
+  .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{
+    color:var(--ct-primary);
+  }
+
+  .ct-paybar .ct-cta{
+    background:var(--ct-primary);
+    box-shadow:0 5px 14px rgba(15,23,42,0.15);
+  }
+  .ct-paybar .ct-cta:active{
+    background:var(--ct-primary-deep);
+  }
+
+  /* Checkout CTA follows the selected header theme. */
+  .ct-paybar .ct-cta{
+    background:var(--ct-primary);
+    box-shadow:0 5px 14px rgba(15,23,42,0.15);
+    border-radius:999px;
+  }
+  .ct-paybar .ct-cta:active{background:var(--ct-primary-deep);}
+
+  /* Delivery status uses the same restrained pink accent. */
+  .ct-strip:not(.is-error):not(.is-neutral){
+    background:var(--ct-primary-soft);
+    border-color:rgba(15,23,42,0.12);
+    color:var(--ct-primary-deep);
+  }
+  .ct-strip:not(.is-error):not(.is-neutral) .ct-strip-icon{color:var(--ct-primary);}
+
+  /* Do not show the normal free-delivery nudge strip. */
+  #free-delivery-nudge{
+    display:none;
+  }
+
+
+  /* =====================================================================
+     EATSWADA CHECKOUT — PREMIUM PRODUCT POLISH
+     Visual-only layer. Existing IDs, JS hooks, data flow and payment flow
+     are intentionally untouched.
+     ===================================================================== */
+  .ct-page{
+    --ct-r-sm: 12px;
+    --ct-r-md: 14px;
+    --ct-r-lg: 20px;
+  }
+
+  .ct-delivery-head{
+    padding: calc(9px + env(safe-area-inset-top)) 14px 10px;
+    border-bottom: 1px solid var(--ct-line-soft);
+    box-shadow: 0 1px 0 rgba(28,32,36,.025);
+  }
+  .ct-dh-back{
+    width:40px;height:40px;flex-basis:40px;border-radius:13px;
+    background:#F7F8F9;border:1px solid var(--ct-line-soft);
+  }
+  .ct-dh-main{
+    min-height:40px;padding:7px 10px;border-radius:14px;
+    background:#FAFBFC;border:1px solid var(--ct-line-soft);
+  }
+  .ct-dh-meta{display:flex;align-items:center;gap:5px;min-width:0;}
+  .ct-dh-meta-icon{color:var(--ct-muted);flex:0 0 auto;}
+  .ct-dh-eta{font-size:13.5px;letter-spacing:-.25px;}
+  .ct-dh-to,.ct-dh-divider{color:#A0A6AC;font-size:12px;}
+  .ct-dh-tag{font-size:13px;}
+  .ct-dh-addr{margin-top:1px;font-size:11.5px;}
+  .ct-dh-chevron{color:#8F969D;flex:0 0 auto;}
+
+  .ct-card,.ct-group,.ct-bill,.ct-cym{
+    border-color:var(--ct-line-soft);
+    box-shadow:0 2px 12px rgba(28,32,36,.035);
+  }
+  .ct-card{margin:10px 14px;padding:16px;border-radius:20px;}
+  .ct-item-card{padding-bottom:12px;}
+
+  .ct-row{padding:14px 0;gap:13px;}
+  .ct-row.has-media{grid-template-columns:58px 1fr 88px;}
+  .ct-media{width:58px;height:58px;border-radius:15px;}
+  .ct-name{font-size:14.5px;font-weight:750;line-height:1.28;}
+  .ct-custom{font-size:11.5px;line-height:1.4;}
+  .ct-price-line{margin-top:7px;gap:7px;}
+  .ct-unit-price{font-size:13px;}
+  .ct-was-price{font-size:11px;}
+  .ct-off-badge{height:19px;padding:0 7px;border-radius:6px;font-size:9.5px;}
+  .ct-item-total{font-size:15px;}
+  .ct-item-save{font-size:10px;}
+  .ct-stepper{border-radius:12px;}
+  .ct-stepper button{width:34px;height:34px;flex-basis:34px;}
+  .ct-qty{min-width:28px;font-size:13px;}
+
+  .ct-item-actions{padding-top:13px;margin-top:2px;gap:8px;}
+  .ct-pill-btn{
+    min-height:38px;padding:8px 13px;border-radius:12px;
+    font-size:12.5px;font-weight:750;
+  }
+  .ct-pill-btn svg{width:17px;height:17px;}
+
+  .ct-strip{
+    margin:0 14px 10px;padding:10px 12px;border-radius:13px;
+    font-size:11.5px;
+  }
+
+  /* Smart picks: make this feel like a first-class merchandising module. */
+
+  .ct-group{margin:10px 14px;border-radius:18px;}
+  .ct-group-head{padding:15px;gap:12px;min-height:68px;}
+  .ct-line-ic{
+    width:38px;height:38px;flex:0 0 38px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--ct-primary-soft);color:var(--ct-primary);
+    box-shadow:none;
+  }
+  .ct-line-ic svg{width:20px;height:20px;}
+  .ct-group-title{font-size:14px;font-weight:800;letter-spacing:-.2px;}
+  .ct-group-sub{font-size:11.5px;margin-top:3px;}
+  .ct-group-chev{width:18px;height:18px;}
+  .ct-group-body{padding:0 15px 15px;}
+
+  .ct-bill{margin:10px 14px;border-radius:20px;}
+  .ct-bill-hero{padding:16px 15px;gap:12px;}
+  .ct-bill-hero-ic{width:36px;height:36px;flex-basis:36px;border-radius:11px;}
+  .ct-bill-hero-ic svg{width:19px;height:19px;}
+  .ct-bill-hero-top{font-size:17px;letter-spacing:-.35px;}
+  .ct-bill-hero-saved{font-size:12px;margin-top:4px;}
+  .ct-bill-rows{padding:7px 15px 5px;}
+  .ct-bill .ct-bill-row{padding:10px 0;font-size:13.5px;}
+  .ct-bill-band{padding:11px 15px;font-size:12px;}
+  .ct-bill .ct-bill-total{margin:0 15px;padding:14px 0 16px;}
+  .ct-bill .ct-total-label{font-size:15px;}
+  .ct-bill .ct-total-val{font-size:19px;}
+
+  .ct-cancel{margin:14px 18px 8px;}
+  .ct-cancel-title{font-size:12.5px;}
+  .ct-cancel p{font-size:11.5px;line-height:1.5;}
+
+  /* Premium sticky payment bar: clear hierarchy, no new brand colors. */
+  .ct-footer{
+    gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--ct-line-soft);
+    box-shadow:0 -10px 30px rgba(28,32,36,.10);
+  }
+  .ct-footer-save{font-size:11.5px;margin:-1px 2px 1px;}
+  .ct-paybar{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;}
+  .ct-paybar-left{min-width:0;padding:4px 0;background:transparent;border:0;text-align:left;}
+  .ct-paybar-amt{display:block;font-size:18px;font-weight:800;line-height:1.1;color:var(--ct-ink);}
+  .ct-paybar-link{display:block;margin-top:3px;font-size:10.5px;font-weight:750;color:var(--ct-primary);}
+  .ct-cta{min-height:56px;padding:12px 18px;border-radius:16px;box-shadow:0 7px 20px rgba(15,23,42,0.15);}
+  .ct-cta-text{font-size:15px;letter-spacing:-.15px;}
+  .ct-pay-note{font-size:10.5px;color:var(--ct-muted);}
+
+  @media (max-width:380px){
+    .ct-card,.ct-group,.ct-bill,.ct-cym{margin-left:11px;margin-right:11px;}
+    .ct-strip{margin-left:11px;margin-right:11px;}
+    .ct-row.has-media{grid-template-columns:54px 1fr 82px;gap:10px;}
+    .ct-media{width:54px;height:54px;}
+    .ct-paybar{grid-template-columns:88px 1fr;gap:8px;}
+    .ct-cta{padding-left:14px;padding-right:14px;}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes ctPremiumIn{from{opacity:.7;transform:translateY(4px)}to{opacity:1;transform:none}}
+  }
+
+  /* ==========================================================================
+     COMPLETE YOUR MEAL + DELIVERY DETAILS  (2026-09-23)
+     One block; replaces the three stacked .ct-meal / .ct-smart-picks layers.
+     Colours: existing checkout tokens only. Type: shared --ew-ui-* tokens
+     from css/eatswada-ui-system.css (h3 16 · label 13 · caption 12).
+     ========================================================================== */
+  .ct-cym{ padding-bottom:14px; overflow:hidden; }
+  .ct-cym-head{ display:flex; align-items:center; gap:12px; }
+  .ct-cym-headcopy{ flex:1; min-width:0; }
+  .ct-cym-title{
+    margin:0; font-size:var(--ew-ui-h3); line-height:var(--ew-ui-lh-tight);
+    font-weight:var(--ew-ui-heading); letter-spacing:var(--ew-ui-ls-heading); color:var(--ct-ink);
+  }
+  .ct-cym-from{
+    margin:0; min-width:0; font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-body);
+    line-height:var(--ew-ui-lh-ui); color:var(--ct-muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* Category capsules — same visual language as the tip chips. */
+  .ct-cym-tabs{
+    display:flex; gap:8px; margin:12px -16px 0; padding:0 16px 2px;
+    overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; scroll-padding-inline:16px;
+  }
+  .ct-cym-tabs::-webkit-scrollbar{ display:none; }
+  .ct-cym-tab{
+    flex:0 0 auto; min-height:34px; padding:0 14px; border-radius:999px;
+    display:grid; place-items:center;
+    border:1.5px solid var(--ct-line); background:var(--ct-surface); color:var(--ct-ink-2);
+    font-size:var(--ew-ui-label-size); font-weight:var(--ew-ui-body); line-height:1; white-space:nowrap;
+    cursor:pointer; transition:border-color .18s var(--ct-ease), background-color .18s var(--ct-ease), color .18s var(--ct-ease);
+  }
+  .ct-cym-tab-l{ grid-area:1 / 1; }
+  /* Hidden bold twin: reserves the active width so selecting a capsule never
+     nudges the ones beside it. */
+  .ct-cym-tab::after{
+    content:attr(data-label); grid-area:1 / 1;
+    height:0; overflow:hidden; visibility:hidden; pointer-events:none;
+    font-weight:var(--ew-ui-label);
+  }
+  .ct-cym-tab.is-active{
+    border-color:var(--ct-primary); background:var(--ct-primary-soft); color:var(--ct-primary-deep);
+    font-weight:var(--ew-ui-label);
+  }
+  .ct-cym-tab:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+
+  /* Horizontally scrolling cards, edge-to-edge inside the card. */
+  .ct-cym-track{
+    display:flex; gap:12px; margin:12px -16px 0; padding:2px 16px 4px;
+    overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity; scroll-padding-inline:16px; scrollbar-width:none;
+  }
+  .ct-cym-track::-webkit-scrollbar{ display:none; }
+  .ct-cym-card{
+    flex:0 0 124px; width:124px; min-width:0; scroll-snap-align:start;
+    transition:opacity .24s var(--ct-ease), transform .24s var(--ct-ease);
+  }
+  .ct-cym-media{
+    position:relative; width:124px; height:124px; border-radius:14px;
+    background:var(--ct-line-soft); display:grid; place-items:center;
+  }
+  /* The glyph sits in flow and the image covers it, so onerror="this.remove()"
+     reveals the fallback with no extra scripting. */
+  .ct-cym-fallback{ color:#C2C8CE; line-height:0; }   /* same grey as .ct-media-fallback */
+  .ct-cym-media img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; border-radius:14px; }
+  .ct-cym-veg{
+    position:absolute; left:6px; bottom:6px; display:inline-flex; padding:2px;
+    border-radius:6px; background:var(--ct-surface); box-shadow:0 1px 3px rgba(28,32,36,.18);
+  }
+  .ct-cym-veg .nb-veg-mark{ display:block; }
+  .ct-cym-badge{
+    position:absolute; left:6px; top:6px; max-width:calc(100% - 12px); padding:3px 7px; border-radius:7px;
+    background:var(--ct-surface); color:var(--ct-primary-deep);
+    font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-label); line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 4px rgba(28,32,36,.14);
+  }
+  .ct-cym-add{
+    position:absolute; right:6px; bottom:-12px; width:34px; height:34px; border-radius:50%;
+    display:grid; place-items:center; padding:0; cursor:pointer;
+    border:1px solid var(--ct-line); background:var(--ct-surface); color:var(--ct-primary);
+    box-shadow:0 2px 8px rgba(28,32,36,.14);
+    transition:transform .16s var(--ct-ease), background-color .2s var(--ct-ease), color .2s var(--ct-ease);
+  }
+  .ct-cym-add:active{ transform:scale(.9); }
+  .ct-cym-add:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+  .ct-cym-add svg{ display:block; }
+  .ct-cym-name{
+    margin-top:18px; min-height:34px;
+    font-size:var(--ew-ui-label-size); font-weight:var(--ew-ui-label); line-height:var(--ew-ui-lh-ui); color:var(--ct-ink);
+  }
+  .ct-cym-name span{
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere;
+  }
+  .ct-cym-price{ display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .ct-cym-now{ font-size:var(--ew-ui-label-size); font-weight:var(--ew-ui-display); color:var(--ct-ink); }
+  .ct-cym-price s{ font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-body); color:var(--ct-muted); }
+  .ct-cym-off{ font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-label); color:var(--ct-save); }
+  /* Meta row: only rendered when the menu record actually carries a rating
+     and/or the card has a real note. Never both-empty, never padded. */
+  .ct-cym-meta{ display:flex; align-items:center; gap:6px; margin-top:3px; min-width:0; }
+  .ct-cym-rating{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:3px;
+    font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-label);
+    color:var(--ct-save); font-variant-numeric:tabular-nums;
+  }
+  .ct-cym-rating svg{ width:11px; height:11px; display:block; }
+  .ct-cym-note{
+    min-width:0; font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-body); color:var(--ct-muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* Feedback: capsule switch, add-to-cart. */
+  .ct-cym-track.is-in .ct-cym-card{ animation:ctCymIn .26s var(--ct-ease) both; }
+  .ct-cym-track.is-in .ct-cym-card:nth-child(2){ animation-delay:.03s; }
+  .ct-cym-track.is-in .ct-cym-card:nth-child(3){ animation-delay:.06s; }
+  .ct-cym-track.is-in .ct-cym-card:nth-child(n+4){ animation-delay:.09s; }
+  @keyframes ctCymIn{ from{ opacity:0; transform:translateX(8px); } to{ opacity:1; transform:none; } }
+  .ct-cym-card.is-added{ opacity:.45; transform:scale(.97); }
+  .ct-cym-card.is-added .ct-cym-add{ background:var(--ct-primary); color:var(--hd-ink,#fff); border-color:var(--ct-primary); transform:scale(1.06); }
+
+  /* Delivery details — address + contact. */
+  .ct-details{ padding-top:4px; padding-bottom:4px; }
+  .ct-details-row{
+    display:flex; align-items:center; gap:12px; width:100%; min-height:56px; padding:10px 0;
+    border:0; background:none; text-align:left; color:inherit; font:inherit;
+  }
+  .ct-details-row + .ct-details-row{ border-top:1px solid var(--ct-line-soft); }
+  .ct-details-row .ct-line-ic{ flex:0 0 auto; display:grid; place-items:center; }
+  .ct-details-copy{ flex:1; min-width:0; }
+  .ct-details-label{
+    display:block; font-size:var(--ew-ui-label-size); font-weight:var(--ew-ui-label); line-height:var(--ew-ui-lh-ui);
+    color:var(--ct-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ct-details-text{
+    display:block; margin-top:1px; font-size:var(--ew-ui-caption-size); font-weight:var(--ew-ui-body);
+    line-height:var(--ew-ui-lh-ui); color:var(--ct-muted); overflow:hidden; display:-webkit-box;
+    -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere;
+  }
+  .ct-details-text.is-empty{ color:var(--ct-primary-deep); font-weight:var(--ew-ui-label); }
+  .ct-details-action{ flex:0 0 auto; font-size:var(--ew-ui-label-size); font-weight:var(--ew-ui-label); color:var(--ct-primary); }
+
+  @media (max-width:380px){
+    .ct-cym-tabs, .ct-cym-track{ margin-left:-16px; margin-right:-16px; }
+    .ct-cym-card{ flex-basis:116px; width:116px; }
+    .ct-cym-media{ width:116px; height:116px; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .ct-cym-track.is-in .ct-cym-card{ animation:none; }
+    .ct-cym-card, .ct-cym-tab, .ct-cym-add{ transition:none; }
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .ct-cym{ animation:ctPremiumIn .32s var(--ct-ease) both; }
+  }
+
+  /* ==========================================================================
+     EATSWADA CHECKOUT — REFINEMENT PASS (2026-09-24)
+     Visual + interaction only. Appended last so it wins on source order alone:
+     no !important, no selector inflation, nothing deleted above.
+     Colour: every value is an existing checkout token or a shade already used
+     in this sheet. Type: Manrope + the shared --ew-ui-* scale, unchanged.
+     ========================================================================== */
+
+  /* ── 1 · Delivery header ─────────────────────────────────────────────────
+     Restaurant name leads, ETA + destination sit under it on one line. The
+     address is printed once, here; the details card below carries the full
+     address and the contact, not a second copy of this line. */
+  .ct-dh-restaurant{
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:-.2px;
+    line-height:1.2;
+    color:var(--ct-ink);
+  }
+  .ct-dh-restaurant:empty{ display:none; }
+  .ct-dh-meta{ margin-top:2px; }
+  .ct-dh-main{ padding:8px 10px; }
+  /* The ETA is the one thing in this row that must always be readable, so the
+     address is the only flex item allowed to give up width. */
+  .ct-dh-meta-icon,
+  .ct-dh-eta,
+  .ct-dh-to,
+  .ct-dh-tag,
+  .ct-dh-divider{ flex:0 0 auto; }
+  .ct-dh-addr{ flex:1 1 auto; min-width:0; max-width:none; }
+
+  /* ── 2 · Zero-fee line ───────────────────────────────────────────────────
+     Deliberately a line, not a banner: one row, no illustration, no gradient. */
+  .ct-fees{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    margin:8px 14px 0; padding:7px 12px;
+    border-radius:999px;
+    background:var(--ct-save-bg);
+    border:1px solid rgba(21,128,61,.14);
+    color:#14663F;
+    font-size:11.5px; font-weight:700; line-height:1.2; letter-spacing:-.05px;
+  }
+  .ct-fees-ic{ flex:0 0 auto; color:var(--ct-save); }
+  .ct-fees-copy{ display:inline-flex; align-items:center; min-width:0; }
+  .ct-fees strong{ font-weight:800; color:#0F5132; margin-right:3px; }
+  .ct-fees-dot{
+    width:3px; height:3px; margin:0 8px; border-radius:50%;
+    background:currentColor; opacity:.4; flex:0 0 auto;
+  }
+
+  /* ── 3 · Cart rows ───────────────────────────────────────────────────────
+     Tighter rhythm, and the last unit's "−" becomes a delete. */
+  .ct-row{ padding:12px 0; }
+  /* The stepper was overflowing its grid column into the name; size the two
+     to each other instead. */
+  .ct-row.has-media{ grid-template-columns:58px 1fr 92px; }
+  .ct-stepper button{ width:32px; height:32px; flex-basis:32px; }
+  .ct-qty{ min-width:24px; }
+  .ct-media-fallback svg{ display:block; }
+  .ct-stepper button{ transition:background-color .15s ease, transform .12s var(--ct-ease); }
+  .ct-stepper button:active{ transform:scale(.92); }
+  .ct-step-glyph{ line-height:1; }
+  .ct-stepper .ct-step-down svg{ display:block; }
+  /* At one unit the glyph changes, not the whole capsule: most carts are full
+     of single items and a red row each would shout. */
+  .ct-stepper.is-last .ct-step-down:active{ background:rgba(220,38,38,.10); color:var(--ct-danger); }
+  .ct-qty.is-bump{ animation:ctQtyBump .26s var(--ct-ease); }
+  @keyframes ctQtyBump{ 0%{ transform:scale(1); } 45%{ transform:scale(1.16); } 100%{ transform:scale(1); } }
+
+  /* Veg / non-veg mark: the shared component from style.css, sized and
+     coloured for checkout only — the markup is untouched. */
+  body.ct-page .nb-veg-mark{
+    box-sizing:border-box; width:14px; height:14px; flex:0 0 14px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1.6px solid var(--ct-save); border-radius:4px; background:var(--ct-surface);
+  }
+  body.ct-page .nb-veg-mark > span{
+    width:7px; height:7px; border-radius:50%; background:var(--ct-save); display:block;
+  }
+  body.ct-page .nb-veg-mark.nonveg{ border-color:var(--ct-danger); }
+  body.ct-page .nb-veg-mark.nonveg > span{ background:var(--ct-danger); }
+
+  .ct-pill-btn{ transition:transform .12s var(--ct-ease), background-color .18s ease; }
+  .ct-pill-btn:active{ transform:scale(.97); }
+
+  /* ── 4 · Complete your meal ──────────────────────────────────────────────
+     The capsules become one rail with a single pill that slides between them;
+     the pill is a real element, so the labels never move. */
+  .ct-cym-tabs{
+    position:relative;
+    margin:14px 0 0;
+    padding:4px;
+    gap:2px;
+    background:#F2F3F5;
+    border-radius:999px;
+    scroll-padding-inline:4px;
+    -ms-overflow-style:none;
+  }
+  /* .ct-cym-tabs sets display:flex, which outranks the UA rule for [hidden]. */
+  .ct-cym-tabs[hidden]{ display:none; }
+  .ct-cym-ind{
+    position:absolute; top:4px; left:0;
+    width:0; height:calc(100% - 8px);
+    border-radius:999px;
+    background:var(--ct-primary);
+    opacity:0; pointer-events:none; z-index:0;
+    transform:translate3d(0,0,0);
+    transition:transform .26s var(--ct-ease), width .26s var(--ct-ease), opacity .18s linear;
+  }
+  .ct-cym-tab{
+    position:relative; z-index:1;
+    min-height:36px; padding:0 15px;
+    border:0; background:transparent;
+    color:var(--ct-muted);
+    font-weight:var(--ew-ui-label);
+    /* Slight delay so the label flips colour as the pill passes under it,
+       not before it has left. */
+    transition:color .22s var(--ct-ease) .05s;
+  }
+  /* Before the pill has been measured (and if scripting ever fails to place
+     it) the active capsule is simply tinted — never white on the bare rail. */
+  .ct-cym-tab.is-active{
+    border:0; background:transparent;
+    color:var(--ct-primary-deep);
+    font-weight:var(--ew-ui-label);
+  }
+  .ct-cym-tabs.is-ready .ct-cym-tab.is-active{ color:var(--ct-surface); }
+
+  /* Carousel: native inertia on touch, pointer drag on desktop. */
+  .ct-cym-track{
+    -ms-overflow-style:none;
+    transition:opacity .18s var(--ct-ease);
+    cursor:grab;
+  }
+  .ct-cym-track.is-swapping{ opacity:0; }
+  .ct-cym-track.is-dragging{
+    cursor:grabbing; scroll-snap-type:none;
+    user-select:none; -webkit-user-select:none;
+  }
+  .ct-cym-track.is-dragging img,
+  .ct-cym-track.is-dragging .ct-cym-card{ pointer-events:none; }
+  .ct-cym-card{ scroll-snap-align:start; }
+  .ct-cym-add{
+    border-color:rgba(15,23,42,0.12);
+    box-shadow:0 3px 10px rgba(28,32,36,.16);
+  }
+
+  /* ── 5 · Payment offers ──────────────────────────────────────────────────
+     The applied state is rendered only after the backend validates a code. */
+  .ct-group-flag{
+    display:none; align-items:center; gap:4px; flex:0 0 auto;
+    margin-right:2px;
+    font-size:11.5px; font-weight:800; letter-spacing:-.05px;
+    color:var(--ct-save);
+  }
+  #ct-payment-group.is-applied .ct-group-flag{ display:inline-flex; }
+  #ct-payment-group.is-applied .ct-group-chev--nav{ display:none; }
+
+  /* ── 6 · Delivery instructions ───────────────────────────────────────────
+     Height is animated around the existing `hidden` attribute (see
+     ctAnimateGroupBody), so the collapsed state is still the attribute. */
+  .ct-group-body{ box-sizing:border-box; overflow:hidden; }
+  .ct-group-body.is-anim{
+    transition:height .26s var(--ct-ease), padding-bottom .26s var(--ct-ease);
+  }
+  .ct-group-head{ transition:background-color .16s ease; }
+  .ct-group-head:active{ background-color:#FAFBFC; }
+  .ct-di-pill{ transition:border-color .16s ease, background-color .16s ease, color .16s ease, transform .12s var(--ct-ease); }
+  .ct-di-pill:active,
+  .ct-chip:active{ transform:scale(.97); }
+
+  /* ── 7 · Delivery details ────────────────────────────────────────────── */
+  .ct-details-row{ min-height:52px; }
+  .ct-details-action{
+    padding:5px 10px; border-radius:999px;
+    background:var(--ct-primary-soft);
+    font-size:11px; letter-spacing:.2px;
+  }
+
+  /* ── 8 · Bill ────────────────────────────────────────────────────────────
+     Hero carries the comparison, the rows stay quiet, the total is the anchor. */
+  .ct-bill-hero-top strong{ font-size:19px; letter-spacing:-.4px; }
+  .ct-bill-hero-top s{ font-size:13.5px; font-weight:600; }
+  .ct-bill .ct-bill-total{ border-top:1px solid var(--ct-line-soft); }
+
+  /* ── 9 · Sticky pay bar ─────────────────────────────────────────────────
+     One savings strip, flush to the top edge of the bar. Nothing else repeats
+     the figure. */
+  .ct-footer-save{
+    margin:-10px -14px 0;
+    padding:7px 14px;
+    background:var(--ct-save-bg);
+    color:#14663F;
+    font-size:11.5px; font-weight:800; gap:6px;
+  }
+  .ct-footer-save svg{ flex:0 0 auto; color:var(--ct-save); }
+  /* Content-sized, so "View detailed bill" never wraps at any font metric. */
+  .ct-paybar{ grid-template-columns:auto minmax(0,1fr); }
+  .ct-paybar-link{ white-space:nowrap; }
+  .ct-paybar-chev{ margin-left:1px; }
+  .ct-paybar .ct-cta{
+    justify-content:center; gap:9px;
+    min-height:52px; padding:10px 16px;
+  }
+  .ct-paybar .ct-cta-text{ text-align:center; }
+  .ct-cta-arrow{ flex:0 0 auto; opacity:.9; transition:transform .18s var(--ct-ease); }
+  .ct-cta:active .ct-cta-arrow{ transform:translateX(2px); }
+  .ct-cta.locked .ct-cta-arrow{ display:none; }
+
+  @media (max-width:380px){
+    .ct-fees{ margin-left:11px; margin-right:11px; font-size:11px; }
+    .ct-fees-dot{ margin:0 6px; }
+    .ct-cym-tab{ padding:0 13px; }
+    .ct-dh-restaurant{ font-size:13px; }
+    .ct-row.has-media{ grid-template-columns:54px 1fr 92px; gap:9px; }
+  }
+
+  /* ── 10 · Motion ─────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion:reduce){
+    .ct-cym-ind,
+    .ct-cym-track,
+    .ct-cym-tab,
+    .ct-group-body,
+    .ct-group-body.is-anim,
+    .ct-cta-arrow,
+    .ct-pill-btn,
+    .ct-di-pill,
+    .ct-stepper button{ transition:none; }
+    .ct-cym-track.is-swapping{ opacity:1; }
+    .ct-qty.is-bump{ animation:none; }
+    .ct-pill-btn:active,
+    .ct-di-pill:active,
+    .ct-chip:active,
+    .ct-stepper button:active,
+    .ct-cta:active .ct-cta-arrow{ transform:none; }
+  }
+
+
+/* ── Pixel refinement: touch-safe meal carousel + premium line icons ─────── */
+/* A vertical swipe that begins over the recommendation rail must continue
+   scrolling the checkout page. Horizontal swipes remain native carousel drags. */
+.ct-cym-track{
+  touch-action:pan-y;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;
+}
+.ct-cym-track.is-dragging{
+  touch-action:none;
+}
+
+/* Remove the heavy pastel icon tiles. The reference uses quiet, optical line
+   icons; the glyph itself carries the visual weight rather than a rounded box. */
+body.ct-page .ct-line-ic{
+  width:24px; height:24px; flex:0 0 24px;
+  border-radius:0;
+  background:transparent;
+  color:var(--ct-primary-deep);
+  box-shadow:none;
+  display:grid; place-items:center;
+}
+body.ct-page .ct-line-ic.ct-line-ic-accent,
+body.ct-page .ct-line-card.is-set .ct-line-ic{
+  background:transparent;
+  color:var(--ct-primary-deep);
+}
+body.ct-page .ct-line-ic svg{
+  width:21px; height:21px;
+  stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round;
+}
+body.ct-page .ct-group-head{ gap:12px; }
+body.ct-page .ct-details-row{ gap:12px; }
+body.ct-page .ct-bill-hero{ gap:11px; }
+
+/* With only two real recommendations there is no horizontal overflow. Keep
+   the section visually balanced instead of leaving a large dead white area. */
+body.ct-page .ct-cym-track{ min-height:0; }
+body.ct-page .ct-cym-card{ flex-basis:132px; width:132px; }
+body.ct-page .ct-cym-media{ width:132px; height:132px; }
+@media (max-width:380px){
+  body.ct-page .ct-cym-card{ flex-basis:116px; width:116px; }
+  body.ct-page .ct-cym-media{ width:116px; height:116px; }
+}
+
+/* ==========================================================================
+   EATSWADA — FINAL VISUAL POLISH v2
+   VISUAL ONLY.
+   JS, data attributes, IDs, DOM hooks, scrolling, category switching,
+   quantity controls, payment/address/bill logic are intentionally untouched.
+   Uses only existing checkout tokens/colors.
+   ========================================================================== */
+
+/* ── 1. PAGE + SECTION RHYTHM ─────────────────────────────────────────── */
+body.ct-page{
+  background:var(--ct-bg);
+  color:var(--ct-ink);
+  font-family:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+
+body.ct-page .ct-card,
+body.ct-page .ct-group,
+body.ct-page .ct-bill,
+body.ct-page .ct-cym{
+  background:var(--ct-surface);
+  border:1px solid var(--ct-line-soft);
+  border-radius:18px;
+  box-shadow:0 1px 2px rgba(28,32,36,.035), 0 5px 18px rgba(28,32,36,.025);
+}
+
+body.ct-page .ct-card{
+  margin:9px 14px;
+  padding:14px;
+}
+
+body.ct-page .ct-group{
+  margin:9px 14px;
+  overflow:hidden;
+}
+
+body.ct-page .ct-bill{
+  margin:9px 14px;
+}
+
+body.ct-page .ct-cym{
+  margin:10px 14px;
+  padding:14px 14px 15px;
+  overflow:hidden;
+}
+
+/* Keep the page visually connected without making sections float too far apart. */
+body.ct-page .ct-item-card{ margin-bottom:9px; }
+body.ct-page .ct-details{ margin-top:9px; }
+body.ct-page .ct-cancel{ margin-top:13px; }
+
+/* ── 2. DELIVERY HEADER — flatter, cleaner reference language ───────── */
+body.ct-page .ct-delivery-head{
+  padding:8px 12px 9px;
+  background:var(--ct-surface);
+  border-bottom:1px solid var(--ct-line-soft);
+  box-shadow:none;
+  gap:4px;
+}
+
+body.ct-page .ct-dh-back{
+  width:38px;
+  height:38px;
+  flex-basis:38px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+}
+
+body.ct-page .ct-dh-main{
+  min-height:40px;
+  padding:5px 5px 5px 7px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+
+body.ct-page .ct-dh-restaurant{
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:-.15px;
+  color:var(--ct-muted);
+}
+
+body.ct-page .ct-dh-meta{
+  margin-top:2px;
+  gap:4px;
+}
+
+body.ct-page .ct-dh-eta{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:-.2px;
+}
+
+body.ct-page .ct-dh-to,
+body.ct-page .ct-dh-divider{
+  font-size:12px;
+  color:var(--ct-muted);
+}
+
+body.ct-page .ct-dh-tag{
+  font-size:13px;
+  font-weight:800;
+}
+
+body.ct-page .ct-dh-addr{
+  font-size:11.5px;
+  font-weight:600;
+}
+
+body.ct-page .ct-dh-chevron{
+  color:var(--ct-muted);
+}
+
+/* ── 3. ₹0 FEE LINE — quiet, factual, not a promotional banner ───────── */
+body.ct-page .ct-fees{
+  margin:7px 14px 0;
+  min-height:30px;
+  padding:6px 11px;
+  border-radius:999px;
+  background:var(--ct-save-bg);
+  border:1px solid rgba(21,128,61,.12);
+  color:#14663F;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:-.05px;
+}
+
+body.ct-page .ct-fees-ic{
+  width:14px;
+  height:14px;
+}
+
+body.ct-page .ct-fees-dot{
+  width:3px;
+  height:3px;
+  margin:0 7px;
+}
+
+/* ── 4. CART ITEMS — compact premium density ─────────────────────────── */
+body.ct-page .ct-item-card{
+  padding:12px 14px 10px;
+}
+
+body.ct-page .ct-row{
+  padding:12px 0;
+  gap:11px;
+}
+
+body.ct-page .ct-row.has-media{
+  grid-template-columns:56px minmax(0,1fr) 88px;
+}
+
+body.ct-page .ct-media{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+}
+
+body.ct-page .ct-name{
+  font-size:13.5px;
+  font-weight:750;
+  line-height:1.3;
+  letter-spacing:-.1px;
+}
+
+body.ct-page .ct-unit-price{
+  font-size:12px;
+  font-weight:800;
+}
+
+body.ct-page .ct-was-price{
+  font-size:10.5px;
+}
+
+body.ct-page .ct-off-badge{
+  height:18px;
+  padding:0 6px;
+  border-radius:6px;
+  font-size:9px;
+}
+
+body.ct-page .ct-item-total{
+  font-size:14px;
+}
+
+body.ct-page .ct-item-save{
+  font-size:9.5px;
+}
+
+body.ct-page .ct-stepper{
+  border-radius:11px;
+}
+
+body.ct-page .ct-stepper button{
+  width:31px;
+  height:31px;
+  flex-basis:31px;
+  font-size:15px;
+}
+
+body.ct-page .ct-qty{
+  min-width:25px;
+  font-size:12.5px;
+}
+
+body.ct-page .ct-item-actions{
+  padding-top:10px;
+  margin-top:1px;
+  gap:8px;
+}
+
+body.ct-page .ct-pill-btn{
+  min-height:36px;
+  padding:7px 12px;
+  border-radius:11px;
+  font-size:11.5px;
+  font-weight:750;
+}
+
+/* ── 5. ONE ICON LANGUAGE ACROSS THE WHOLE CHECKOUT ─────────────────── */
+body.ct-page .ct-line-ic{
+  width:23px;
+  height:23px;
+  flex:0 0 23px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:var(--ct-primary-deep);
+  box-shadow:none;
+  display:grid;
+  place-items:center;
+}
+
+body.ct-page .ct-line-ic.ct-line-ic-accent,
+body.ct-page .ct-line-card.is-set .ct-line-ic{
+  background:transparent;
+  color:var(--ct-primary-deep);
+}
+
+body.ct-page .ct-line-ic svg{
+  width:20px;
+  height:20px;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.ct-page .ct-group-head,
+body.ct-page .ct-details-row{
+  gap:11px;
+}
+
+/* ── 6. COMPLETE YOUR MEAL — compact recommendation rail ───────────── */
+body.ct-page .ct-cym{
+  padding:14px 14px 15px;
+}
+
+body.ct-page .ct-cym-head{
+  gap:9px;
+  min-height:24px;
+}
+
+body.ct-page .ct-cym-head .ct-line-ic{
+  width:21px;
+  height:21px;
+  flex-basis:21px;
+}
+
+body.ct-page .ct-cym-head .ct-line-ic svg{
+  width:19px;
+  height:19px;
+}
+
+body.ct-page .ct-cym-title{
+  margin:0;
+  font-size:12.5px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ct-ink);
+}
+
+body.ct-page .ct-cym-from{
+  margin-top:2px;
+  font-size:10.5px;
+  line-height:1.25;
+  font-weight:600;
+  color:var(--ct-muted);
+}
+
+/* The JS still owns the moving indicator. This only changes its appearance. */
+body.ct-page .ct-cym-tabs{
+  position:relative;
+  display:flex;
+  gap:0;
+  margin:11px 0 0;
+  padding:4px;
+  min-height:38px;
+  background:#F2F3F5;
+  border-radius:999px;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scroll-padding-inline:4px;
+}
+
+body.ct-page .ct-cym-ind{
+  top:4px;
+  height:calc(100% - 8px);
+  border-radius:999px;
+  background:var(--ct-surface);
+  box-shadow:0 1px 3px rgba(28,32,36,.08);
+}
+
+body.ct-page .ct-cym-tab{
+  min-height:30px;
+  padding:0 14px;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--ct-muted);
+  font-size:11.5px;
+  font-weight:700;
+  line-height:1;
+}
+
+body.ct-page .ct-cym-tab.is-active{
+  border:0;
+  background:transparent;
+  color:var(--ct-primary-deep);
+  font-weight:800;
+}
+
+body.ct-page .ct-cym-tabs.is-ready .ct-cym-tab.is-active{
+  color:var(--ct-primary-deep);
+}
+
+/* Cards stay compact even when there are only 1–2 real recommendations. */
+body.ct-page .ct-cym-track{
+  display:flex;
+  gap:10px;
+  margin:12px -14px 0;
+  padding:2px 14px 4px;
+  min-height:0;
+  overflow-x:auto;
+  scroll-snap-type:x proximity;
+  scroll-padding-inline:14px;
+  touch-action:pan-y;
+  overscroll-behavior-x:contain;
+}
+
+body.ct-page .ct-cym-card{
+  flex:0 0 116px;
+  width:116px;
+  min-width:116px;
+  scroll-snap-align:start;
+}
+
+body.ct-page .ct-cym-media{
+  width:116px;
+  height:116px;
+  border-radius:13px;
+  overflow:hidden;
+  background:var(--ct-line-soft);
+}
+
+body.ct-page .ct-cym-media img{
+  border-radius:13px;
+}
+
+body.ct-page .ct-cym-badge{
+  left:5px;
+  top:5px;
+  max-width:calc(100% - 10px);
+  padding:3px 6px;
+  border-radius:6px;
+  font-size:9.5px;
+  font-weight:800;
+  line-height:1.15;
+  box-shadow:0 1px 3px rgba(28,32,36,.10);
+}
+
+body.ct-page .ct-cym-veg{
+  left:5px;
+  bottom:5px;
+  padding:2px;
+  border-radius:5px;
+  box-shadow:0 1px 3px rgba(28,32,36,.12);
+}
+
+body.ct-page .ct-cym-add{
+  right:5px;
+  bottom:-10px;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  border:1px solid rgba(15,23,42,0.12);
+  background:var(--ct-surface);
+  color:var(--ct-primary);
+  box-shadow:0 3px 9px rgba(28,32,36,.14);
+}
+
+body.ct-page .ct-cym-add svg{
+  width:17px;
+  height:17px;
+}
+
+body.ct-page .ct-cym-name{
+  margin-top:15px;
+  min-height:31px;
+  font-size:11.5px;
+  font-weight:750;
+  line-height:1.35;
+  letter-spacing:-.05px;
+}
+
+body.ct-page .ct-cym-price{
+  margin-top:3px;
+  gap:2px 5px;
+}
+
+body.ct-page .ct-cym-now{
+  font-size:11.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-cym-price s,
+body.ct-page .ct-cym-off{
+  font-size:9.5px;
+}
+
+body.ct-page .ct-cym-meta{
+  margin-top:2px;
+  gap:5px;
+}
+
+body.ct-page .ct-cym-note,
+body.ct-page .ct-cym-rating{
+  font-size:9.5px;
+}
+
+/* ── 7. PAYMENT + DELIVERY INSTRUCTIONS — same component family ─────── */
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  margin:9px 14px;
+  border-radius:18px;
+}
+
+body.ct-page #ct-payment-group .ct-group-head,
+body.ct-page #ct-di-group .ct-group-head{
+  min-height:58px;
+  padding:12px 14px;
+}
+
+body.ct-page .ct-group-title{
+  font-size:13px;
+  font-weight:750;
+  line-height:1.25;
+  letter-spacing:-.08px;
+}
+
+body.ct-page .ct-group-sub{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:600;
+  line-height:1.3;
+}
+
+body.ct-page .ct-group-chev{
+  width:17px;
+  height:17px;
+}
+
+body.ct-page .ct-group-flag{
+  font-size:10.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-group-body{
+  padding:0 14px 14px;
+}
+
+/* ── 8. DELIVERY DETAILS ────────────────────────────────────────────── */
+body.ct-page .ct-details{
+  padding:3px 14px;
+}
+
+body.ct-page .ct-details-row{
+  min-height:50px;
+  padding:9px 0;
+}
+
+body.ct-page .ct-details-label{
+  font-size:12.5px;
+  font-weight:750;
+  line-height:1.3;
+}
+
+body.ct-page .ct-details-text{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:600;
+  line-height:1.4;
+}
+
+body.ct-page .ct-details-action{
+  padding:5px 10px;
+  font-size:10.5px;
+  font-weight:800;
+  border-radius:999px;
+}
+
+/* ── 9. BILL — hierarchy without making it oversized ───────────────── */
+body.ct-page .ct-bill{
+  border-radius:18px;
+}
+
+body.ct-page .ct-bill-hero{
+  padding:14px 14px;
+  gap:10px;
+}
+
+body.ct-page .ct-bill-hero-ic{
+  width:30px;
+  height:30px;
+  flex-basis:30px;
+  border-radius:9px;
+  background:transparent;
+  color:var(--ct-primary-deep);
+}
+
+body.ct-page .ct-bill-hero-ic svg{
+  width:19px;
+  height:19px;
+  stroke-width:1.8;
+}
+
+body.ct-page .ct-bill-hero-top{
+  font-size:15.5px;
+  font-weight:800;
+  line-height:1.25;
+  letter-spacing:-.25px;
+}
+
+body.ct-page .ct-bill-hero-top strong{
+  font-size:18px;
+  font-weight:800;
+}
+
+body.ct-page .ct-bill-hero-top s{
+  font-size:12px;
+  font-weight:600;
+}
+
+body.ct-page .ct-bill-hero-saved{
+  margin-top:3px;
+  font-size:11px;
+  font-weight:750;
+}
+
+body.ct-page .ct-bill-hero-badge{
+  font-size:7px;
+  padding:5px 7px;
+  border-radius:7px;
+}
+
+body.ct-page .ct-bill-rows{
+  padding:5px 14px 3px;
+}
+
+body.ct-page .ct-bill .ct-bill-row{
+  padding:8px 0;
+  font-size:12.5px;
+}
+
+body.ct-page .ct-bill-label,
+body.ct-page .ct-bill-val{
+  font-size:12.5px;
+}
+
+body.ct-page .ct-bill-band{
+  padding:9px 14px;
+  font-size:11.5px;
+  font-weight:750;
+}
+
+body.ct-page .ct-bill .ct-bill-total{
+  margin:0 14px;
+  padding:12px 0 13px;
+}
+
+body.ct-page .ct-total-label{
+  font-size:14px;
+  font-weight:800;
+}
+
+body.ct-page .ct-bill .ct-total-val{
+  font-size:18px;
+  font-weight:800;
+}
+
+/* ── 10. CANCELLATION POLICY — quiet secondary information ───────────── */
+body.ct-page .ct-cancel{
+  margin:12px 18px 9px;
+  padding:0 2px;
+}
+
+body.ct-page .ct-cancel-title{
+  font-size:12px;
+  font-weight:700;
+  color:var(--ct-muted);
+}
+
+body.ct-page .ct-cancel p{
+  margin:4px 0 0;
+  font-size:10.5px;
+  font-weight:600;
+  line-height:1.5;
+  color:#A1A5AA;
+}
+
+/* ── 11. STICKY PAYMENT BAR — strong CTA, quiet chrome ───────────────── */
+body.ct-page .ct-footer{
+  gap:7px;
+  padding:9px 14px calc(9px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--ct-line-soft);
+  box-shadow:0 -8px 24px rgba(28,32,36,.08);
+}
+
+body.ct-page .ct-footer-save{
+  margin:-9px -14px 0;
+  padding:6px 14px;
+  background:var(--ct-save-bg);
+  color:#14663F;
+  font-size:11px;
+  font-weight:800;
+}
+
+body.ct-page .ct-paybar{
+  gap:9px;
+}
+
+body.ct-page .ct-paybar-amt{
+  font-size:18px;
+  font-weight:800;
+}
+
+body.ct-page .ct-paybar-link{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-paybar .ct-cta{
+  min-height:52px;
+  padding:10px 16px;
+  border-radius:999px;
+  box-shadow:0 6px 17px rgba(15,23,42,0.12);
+}
+
+body.ct-page .ct-paybar .ct-cta-text{
+  font-size:14.5px;
+  font-weight:800;
+}
+
+body.ct-page .ct-pay-note{
+  font-size:9.5px;
+  font-weight:600;
+}
+
+/* ── 12. RESPONSIVE OPTICAL TUNING ──────────────────────────────────── */
+@media (max-width:380px){
+  body.ct-page .ct-card,
+  body.ct-page .ct-group,
+  body.ct-page .ct-bill,
+  body.ct-page .ct-cym{
+    margin-left:12px;
+    margin-right:12px;
+  }
+
+  body.ct-page .ct-row.has-media{
+    grid-template-columns:52px minmax(0,1fr) 82px;
+    gap:9px;
+  }
+
+  body.ct-page .ct-media{
+    width:52px;
+    height:52px;
+  }
+
+  body.ct-page .ct-cym{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  body.ct-page .ct-cym-track{
+    margin-left:-12px;
+    margin-right:-12px;
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  body.ct-page .ct-cym-card{
+    flex-basis:112px;
+    width:112px;
+    min-width:112px;
+  }
+
+  body.ct-page .ct-cym-media{
+    width:112px;
+    height:112px;
+  }
+
+  body.ct-page .ct-cym-tab{
+    padding-left:12px;
+    padding-right:12px;
+    font-size:11px;
+  }
+}
+
+@media (min-width:381px) and (max-width:412px){
+  body.ct-page .ct-cym-card{
+    flex-basis:116px;
+    width:116px;
+    min-width:116px;
+  }
+
+  body.ct-page .ct-cym-media{
+    width:116px;
+    height:116px;
+  }
+}
+
+@media (min-width:413px){
+  body.ct-page .ct-cym-card{
+    flex-basis:120px;
+    width:120px;
+    min-width:120px;
+  }
+
+  body.ct-page .ct-cym-media{
+    width:120px;
+    height:120px;
+  }
+}
+
+/* Respect reduced-motion without changing any interaction behaviour. */
+@media (prefers-reduced-motion:reduce){
+  body.ct-page .ct-cym-ind,
+  body.ct-page .ct-cym-tab,
+  body.ct-page .ct-cym-add,
+  body.ct-page .ct-group-body,
+  body.ct-page .ct-di-pill,
+  body.ct-page .ct-stepper button{
+    transition:none;
+  }
+}
+
+
+/* PAYMENT PROCESSING STATE — same checkout design tokens. */
+.ct-cta.is-processing{cursor:wait;opacity:.92}
+.ct-cta.is-processing:active{transform:none}
+.ct-cta.is-processing .fa-spin{font-size:13px}
+
+/* ==========================================================================
+   CHECKOUT REFERENCE REFINEMENT (Phase 3.2)
+   Presentation only. Appended last and scoped with body.ct-page so it wins on
+   specificity without !important. Every ID / data-* hook the JS uses is
+   unchanged. Colours: --ct-* tokens above (sampled from the reference).
+   Type: Manrope (already loaded) at 400 / 500 / 600 — no 700+ in this layer.
+   Spacing scale: 4 · 8 · 12 · 16 · 20 · 24.
+   ========================================================================== */
+body.ct-page{
+  --ct-line:#E5E7EB; --ct-line-soft:#EDEFF3;
+  --ct-ink:#1F2937; --ct-ink-2:#374151; --ct-muted:#6B7280;
+  --ct-offer:#D99A2B;
+  --ct-rr:16px;
+  background:var(--ct-bg);
+  color:var(--ct-ink);
+  font-weight:400;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────── */
+body.ct-page .ct-card,
+body.ct-page .ct-bill,
+body.ct-page .ct-cym{
+  margin:8px 12px;
+  border:1px solid var(--ct-line-soft);
+  border-radius:var(--ct-rr);
+  box-shadow:none;
+}
+body.ct-page .ct-card{ padding:12px; }
+body.ct-page .ct-sec-title,
+body.ct-page .ct-cym-title{
+  margin:0;
+  font-size:18px; font-weight:600; line-height:1.25; letter-spacing:-.2px;
+  text-transform:none; color:var(--ct-ink);
+}
+
+/* ── Header: name, then "Tag | address" (ETA / "to" hidden: same info is not repeated) ── */
+body.ct-page .ct-delivery-head{
+  min-height:0; gap:4px;
+  padding:calc(8px + env(safe-area-inset-top)) 12px 8px 8px;
+  background:var(--ct-surface);
+  border-bottom:0;
+}
+body.ct-page .ct-dh-back{
+  width:40px; height:40px; flex:0 0 40px; align-self:center;
+  border:1px solid var(--ct-line); border-radius:50%; background:var(--ct-surface);
+  color:var(--ct-ink);
+}
+body.ct-page .ct-dh-main{ padding:0 0 0 4px; min-height:40px; align-items:center; }
+body.ct-page .ct-dh-restaurant{
+  max-width:none;
+  font-size:16px; font-weight:600; line-height:1.25; letter-spacing:-.1px; color:var(--ct-ink);
+}
+body.ct-page .ct-dh-meta{ margin-top:2px; gap:4px; font-size:12px; font-weight:400; }
+body.ct-page .ct-dh-eta,
+body.ct-page .ct-dh-to{ display:none; }
+body.ct-page .ct-dh-meta-icon{ color:var(--ct-ink); }
+body.ct-page .ct-dh-tag{ font-size:13px; font-weight:600; color:var(--ct-ink); }
+body.ct-page .ct-dh-divider{ font-size:12px; font-weight:400; color:#9CA3AF; }
+body.ct-page .ct-dh-addr{ font-size:12px; font-weight:400; color:var(--ct-muted); max-width:none; }
+body.ct-page .ct-dh-addr.ct-prompt{ color:var(--ct-primary); font-weight:500; }
+body.ct-page .ct-dh-chevron{ color:var(--ct-muted); }
+
+/* ── Savings strip under the header ────────────────────────────────────── */
+body.ct-page .ct-save-strip{
+  display:none; width:calc(100% - 24px); margin:0 12px 4px; box-sizing:border-box;
+  align-items:center; gap:8px; padding:0 12px; min-height:40px;
+  background:var(--ct-save-bg); border:1px solid rgba(21,158,97,.18); border-radius:10px;
+  color:var(--ct-save); font:inherit; font-size:14px; font-weight:500; text-align:left; cursor:pointer;
+}
+body.ct-page .ct-save-strip.show{ display:flex; }
+body.ct-page .ct-save-strip .ct-save-text{ flex:1; min-width:0; font-size:14px; font-weight:500; letter-spacing:0; }
+body.ct-page .ct-save-strip .ct-save-spark,
+body.ct-page .ct-save-strip .ct-save-chev{ flex:0 0 auto; color:var(--ct-save); }
+/* The header block is white in the reference; the strip sits inside it. */
+body.ct-page .ct-delivery-head + .ct-save-strip{ margin-top:0; }
+
+/* ₹0 packaging / platform fee line: kept (it is true and static), just quiet */
+body.ct-page .ct-fees{
+  margin:4px 12px 0; padding:0 4px; min-height:0; justify-content:flex-start;
+  background:transparent; border:0; border-radius:0;
+  color:var(--ct-muted); font-size:12px; font-weight:400;
+}
+body.ct-page .ct-fees strong{ font-weight:500; color:var(--ct-ink-2); }
+body.ct-page .ct-fees-ic{ color:var(--ct-save); }
+
+/* ── Cart items: compact text rows ─────────────────────────────────────── */
+body.ct-page .ct-item-card{ padding:4px 12px 12px; }
+body.ct-page #cart-items-list{ padding:0; }
+body.ct-page .ct-restaurant-group + .ct-restaurant-group{ margin-top:8px; }
+/* One restaurant → its name is already in the header; multi-restaurant carts keep their headings. */
+body.ct-page .ct-restaurant-group:only-child .ct-restaurant-head{ display:none; }
+body.ct-page .ct-restaurant-head{ padding:12px 0 0; }
+body.ct-page .ct-restaurant-name{ font-size:14px; font-weight:600; }
+body.ct-page .ct-restaurant-meta{ font-size:12px; font-weight:400; color:var(--ct-muted); }
+
+body.ct-page .ct-row,
+body.ct-page .ct-row.has-media{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center;
+  gap:8px 12px; padding:12px 0;
+  border-bottom:1px solid var(--ct-line-soft);
+}
+body.ct-page .ct-row:last-child{ border-bottom:0; padding-bottom:12px; }
+body.ct-page .ct-name-row{ align-items:flex-start; gap:8px; }
+body.ct-page .ct-name-row .nb-veg-mark{ margin-top:2px; }
+body.ct-page .ct-info{ padding-left:0; }
+body.ct-page .ct-name{ font-size:14px; font-weight:500; line-height:1.35; letter-spacing:0; color:var(--ct-ink); }
+body.ct-page .ct-custom{ margin:2px 0 0 22px; font-size:12px; font-weight:400; line-height:1.4; color:var(--ct-muted); }
+body.ct-page .ct-price-line{ margin:2px 0 0 22px; gap:8px; flex-wrap:wrap; }
+body.ct-page .ct-unit-price{ font-size:14px; font-weight:500; color:var(--ct-ink); }
+body.ct-page .ct-was-price{ font-size:13px; font-weight:400; color:#9CA3AF; }
+body.ct-page .ct-off-badge{
+  height:auto; padding:0; background:transparent; border-radius:0;
+  font-size:13px; font-weight:500; color:var(--ct-save); text-transform:none; letter-spacing:0;
+}
+/* stepper first, line total last (reference order) */
+body.ct-page .ct-right{ display:flex; flex-direction:row-reverse; align-items:center; gap:8px; }
+body.ct-page .ct-right > div:first-child{ min-width:40px; text-align:right; }
+body.ct-page .ct-item-total{ font-size:14px; font-weight:500; color:var(--ct-ink); }
+body.ct-page .ct-item-save{ display:none; }
+body.ct-page .ct-stepper{
+  display:inline-flex; align-items:center;
+  background:var(--ct-primary-soft); border:1px solid var(--hd-line,#F6CDD4); border-radius:8px; box-shadow:none;
+}
+body.ct-page .ct-stepper button{
+  width:28px; height:32px; flex:0 0 28px; background:transparent; border:0;
+  color:var(--ct-primary); font-size:16px; font-weight:500;
+}
+body.ct-page .ct-qty{ min-width:22px; text-align:center; font-size:14px; font-weight:500; color:var(--ct-ink); }
+body.ct-page .ct-stepper.is-last .ct-step-down{ color:var(--ct-primary); }
+
+/* Add Items / Cooking requests */
+body.ct-page .ct-item-actions{ display:flex; gap:8px; padding-top:4px; margin:0; }
+body.ct-page .ct-pill-btn{
+  flex:1 1 0; min-width:0; min-height:40px; padding:0 12px; justify-content:center; gap:8px;
+  border:1px solid var(--ct-line); border-radius:10px; background:#F9FAFB; color:var(--ct-ink-2);
+  font-size:14px; font-weight:500; white-space:nowrap; box-shadow:none;
+}
+body.ct-page .ct-item-actions .ct-pill-btn:first-child{ flex:0 0 38%; background:var(--ct-primary-soft); border-color:var(--hd-line,#F6CDD4); color:var(--ct-primary); }
+body.ct-page .ct-pill-btn svg{ flex:0 0 auto; }
+body.ct-page .ct-pill-btn.is-set{ color:var(--ct-primary); border-color:var(--hd-line,#F6CDD4); background:var(--ct-primary-soft); }
+body.ct-page .ct-note-btn-text{ overflow:hidden; text-overflow:ellipsis; }
+body.ct-page .ct-restaurant-note-preview{ margin-top:8px; font-size:12px; font-weight:400; color:var(--ct-muted); }
+
+/* ── Complete your meal ────────────────────────────────────────────────── */
+body.ct-page .ct-cym{ padding:12px 12px 12px; }
+body.ct-page .ct-cym-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:0; }
+body.ct-page .ct-cym-from{ font-size:12px; font-weight:400; }
+body.ct-page .ct-cym-all{
+  flex:0 0 auto; display:inline-flex; align-items:center; gap:4px;
+  color:var(--ct-primary); font-size:14px; font-weight:500; text-decoration:none;
+}
+body.ct-page .ct-cym-tabs{
+  margin:12px 0 0; padding:4px; min-height:0; gap:0;
+  background:var(--ct-bg); border-radius:999px;
+}
+body.ct-page .ct-cym-ind{ background:var(--ct-primary-soft); box-shadow:none; }
+body.ct-page .ct-cym-tab{
+  flex:1 0 auto; min-height:34px; padding:0 14px; border:0; background:transparent;
+  color:var(--ct-ink-2); font-size:14px; font-weight:500;
+}
+body.ct-page .ct-cym-tab::after{ font-weight:500; }
+body.ct-page .ct-cym-tab.is-active,
+body.ct-page .ct-cym-tabs.is-ready .ct-cym-tab.is-active{ background:transparent; color:var(--ct-primary); font-weight:500; }
+/* Until the sliding pill is measured, an active tab still reads as selected. */
+body.ct-page .ct-cym-tabs:not(.is-ready) .ct-cym-tab.is-active{ background:var(--ct-primary-soft); }
+
+body.ct-page .ct-cym-track{ gap:12px; margin:12px -12px 0; padding:2px 12px 8px; scroll-padding-inline:12px; }
+body.ct-page .ct-cym-card,
+body.ct-page .ct-cym-media{ width:104px; }
+body.ct-page .ct-cym-card{ flex:0 0 104px; min-width:104px; }
+body.ct-page .ct-cym-media{ height:80px; border-radius:10px; overflow:visible; }
+body.ct-page .ct-cym-media img{ border-radius:10px; }
+body.ct-page .ct-cym-add{
+  right:4px; bottom:-14px; width:28px; height:28px;
+  border:1px solid rgba(15,23,42,0.23); background:var(--ct-surface); color:var(--ct-primary);
+  box-shadow:0 1px 3px rgba(31,41,55,.12);
+}
+body.ct-page .ct-cym-add svg{ width:15px; height:15px; }
+body.ct-page .ct-cym-badge{ font-size:11px; font-weight:500; }
+body.ct-page .ct-cym-name{
+  display:flex; align-items:flex-start; gap:6px; margin-top:20px; min-height:32px;
+  font-size:12px; font-weight:500; line-height:1.35; letter-spacing:0; color:var(--ct-ink);
+}
+body.ct-page .ct-cym-name .nb-veg-mark{ margin-top:1px; width:12px; height:12px; flex:0 0 12px; }
+body.ct-page .ct-cym-name .nb-veg-mark > span{ width:6px; height:6px; }
+body.ct-page .ct-cym-name span:not(.nb-veg-mark):not(:only-child){ min-width:0; }
+body.ct-page .ct-cym-price{ margin:4px 0 0 18px; }
+body.ct-page .ct-cym-now{ font-size:12px; font-weight:500; }
+body.ct-page .ct-cym-price s,
+body.ct-page .ct-cym-off,
+body.ct-page .ct-cym-note,
+body.ct-page .ct-cym-rating{ font-size:11px; font-weight:400; }
+body.ct-page .ct-cym-off{ font-weight:500; }
+body.ct-page .ct-cym-meta{ margin-left:18px; }
+
+/* Earlier layers set margins on these two IDs; keep the cards on the same 12px gutter as every other card. */
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{ margin:8px 12px; border-radius:var(--ct-rr); }
+
+/* ── Savings corner ────────────────────────────────────────────────────── */
+body.ct-page .ct-savings{ padding:12px 12px 4px; }
+body.ct-page .ct-savings .ct-sec-title{ padding-bottom:4px; }
+body.ct-page .ct-sav-row{
+  display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box;
+  min-height:52px; padding:8px 0; margin:0;
+  background:transparent; border:0; border-top:1px solid var(--ct-line-soft); border-radius:0;
+  font:inherit; text-align:left; color:inherit;
+}
+body.ct-page .ct-sav-row[hidden]{ display:none; }
+body.ct-page .ct-sav-coupon{ cursor:pointer; }
+body.ct-page .ct-sav-ic{
+  flex:0 0 32px; width:32px; height:32px; border-radius:8px;
+  display:grid; place-items:center; color:#fff;
+}
+body.ct-page .ct-sav-ic--offer{ background:var(--ct-offer); }
+body.ct-page .ct-sav-ic--pct{ background:var(--ct-primary); }
+body.ct-page .ct-sav-copy{ flex:1; min-width:0; display:block; }
+body.ct-page .ct-sav-title{ display:block; font-size:15px; font-weight:500; line-height:1.3; color:var(--ct-ink); overflow-wrap:anywhere; }
+body.ct-page .ct-sav-sub{ display:block; margin-top:2px; font-size:13px; font-weight:400; line-height:1.35; color:var(--ct-muted); }
+body.ct-page .ct-sav-sub:empty{ display:none; }
+body.ct-page .ct-sav-chev{ flex:0 0 auto; color:var(--ct-muted); }
+body.ct-page .ct-sav-flag{
+  flex:0 0 auto; display:none; align-items:center; gap:4px;
+  font-size:14px; font-weight:500; color:var(--ct-save);
+}
+body.ct-page .ct-sav-flag.is-static{ display:inline-flex; }
+/* coupon flag + swap chevron only once the backend has validated a code */
+body.ct-page #ct-payment-group.is-applied #coupon-applied-flag{ display:inline-flex; }
+body.ct-page #ct-payment-group.is-applied .ct-sav-chev{ display:none; }
+
+/* ── Rider tip / Delivery instructions ─────────────────────────────────── */
+body.ct-page .ct-tipcard{ padding:12px; }
+body.ct-page .ct-tabs{ display:flex; gap:0; padding:4px; background:var(--ct-bg); border-radius:999px; }
+body.ct-page .ct-tab{
+  flex:1 1 0; min-width:0; min-height:36px; padding:0 8px; border:0; border-radius:999px; background:transparent;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  font:inherit; font-size:14px; font-weight:500; color:var(--ct-ink-2); white-space:nowrap; cursor:pointer;
+  transition:background-color .18s ease, color .18s ease;
+}
+body.ct-page .ct-tab.is-active{ background:var(--ct-primary); color:var(--hd-ink,#fff); }
+body.ct-page .ct-tab:focus-visible{ outline:2px solid var(--ct-primary); outline-offset:2px; }
+body.ct-page .ct-tab > span:first-child{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+body.ct-page .ct-tab-count{
+  min-width:18px; height:18px; padding:0 5px; border-radius:9px; box-sizing:border-box;
+  display:inline-grid; place-items:center; font-size:11px; font-weight:600; line-height:1;
+  background:var(--ct-primary-soft); color:var(--ct-primary);
+}
+body.ct-page .ct-tab.is-active .ct-tab-count{ background:rgba(255,255,255,.9); }
+body.ct-page .ct-tab-count[hidden]{ display:none; }
+body.ct-page .ct-tab-panel{ padding-top:12px; }
+body.ct-page .ct-tab-panel[hidden]{ display:none; }
+
+body.ct-page .ct-chip-row{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.25fr); gap:6px; margin:0; }
+body.ct-page .ct-chip{
+  flex-direction:column; gap:2px; min-height:52px; padding:6px 0; min-width:0;
+  border:1px solid var(--ct-line); border-radius:8px; background:#F9FAFB; color:var(--ct-ink);
+  text-align:center;
+}
+body.ct-page .ct-chip-amt{ display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; font-weight:600; line-height:1.2; }
+body.ct-page .ct-chip-sub{ display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; font-weight:400; line-height:1.2; color:var(--ct-muted); }
+body.ct-page .ct-chip[aria-pressed="true"]{ border-color:var(--ct-primary); background:var(--ct-primary-soft); color:var(--ct-primary); }
+body.ct-page .ct-chip[aria-pressed="true"] .ct-chip-sub{ color:var(--ct-primary); }
+body.ct-page .ct-tip-note{
+  display:flex; align-items:center; gap:8px; margin:12px 0 0; padding:8px 12px;
+  background:var(--ct-primary-soft); border-radius:8px; color:var(--ct-primary);
+  font-size:13px; font-weight:400; line-height:1.3;
+}
+body.ct-page .ct-tip-note-text{ flex:1; min-width:0; }
+body.ct-page .ct-tip-gift,
+body.ct-page .ct-tip-info{ flex:0 0 auto; }
+body.ct-page .ct-tip-info{ color:var(--ct-muted); }
+
+body.ct-page .ct-di-pills{ gap:8px; }
+body.ct-page .ct-di-pill{
+  min-height:36px; padding:0 12px; gap:8px; border:1px solid var(--ct-line); border-radius:8px; background:#F9FAFB;
+  font-size:13px; font-weight:500; color:var(--ct-ink-2);
+}
+body.ct-page .ct-di-pill[aria-pressed="true"]{ border-color:var(--ct-primary); background:var(--ct-primary-soft); color:var(--ct-primary); }
+body.ct-page .ct-di-pill[aria-pressed="true"] svg{ color:var(--ct-primary); }
+
+/* ── Delivery details (dedicated address + contact section) ────────────── */
+body.ct-page .ct-details{ padding:0 12px; }
+body.ct-page .ct-details-row{ min-height:52px; padding:8px 0; gap:12px; }
+body.ct-page .ct-details-row + .ct-details-row{ border-top:1px solid var(--ct-line-soft); }
+body.ct-page .ct-details-label{ font-size:14px; font-weight:500; }
+body.ct-page .ct-details-text{ font-size:12px; font-weight:400; }
+body.ct-page .ct-details-action{ font-size:13px; font-weight:500; background:transparent; color:var(--ct-primary); padding:4px 0; }
+body.ct-page .ct-line-ic,
+body.ct-page .ct-line-ic.ct-line-ic-accent{ color:var(--ct-primary); }
+
+/* ── Bill ──────────────────────────────────────────────────────────────── */
+body.ct-page .ct-bill-hero-ic{ color:var(--ct-save); }
+body.ct-page .ct-bill-hero-top{ font-size:15px; font-weight:500; }
+body.ct-page .ct-bill-hero-top strong{ font-size:15px; font-weight:600; }
+body.ct-page .ct-bill-hero-saved{ font-size:13px; font-weight:400; color:var(--ct-save); }
+body.ct-page .ct-bill-hero-badge{ font-weight:600; transform:none; background:var(--ct-primary); box-shadow:none; }
+body.ct-page .ct-bill-band{ background:var(--ct-primary-soft); }
+body.ct-page .ct-bill-hero-top s,
+body.ct-page .ct-bill-val s{ font-weight:400; color:#9CA3AF; }
+body.ct-page .ct-strip:not(.is-error):not(.is-neutral){ background:var(--ct-primary-soft); border-color:var(--hd-line,#F6CDD4); color:var(--ct-primary); }
+body.ct-page .ct-bill-label,
+body.ct-page .ct-bill-val{ font-size:13px; font-weight:400; }
+body.ct-page .ct-bill .ct-bill-row .ct-now{ font-weight:500; }
+body.ct-page .ct-bill-band{ font-size:12px; font-weight:500; }
+body.ct-page .ct-total-label{ font-size:15px; font-weight:500; }
+body.ct-page .ct-bill .ct-total-val{ font-size:16px; font-weight:600; }
+body.ct-page .ct-cancel-title{ font-size:13px; font-weight:500; }
+body.ct-page .ct-cancel p{ font-size:12px; font-weight:400; }
+
+/* ── Sticky pay bar ────────────────────────────────────────────────────── */
+body.ct-page .ct-footer{
+  gap:8px; padding:12px 12px calc(8px + env(safe-area-inset-bottom));
+  background:var(--ct-surface); backdrop-filter:none; -webkit-backdrop-filter:none;
+  border-top:1px solid var(--ct-line-soft);
+  box-shadow:0 -4px 16px rgba(31,41,55,.06);
+}
+body.ct-page .ct-paybar{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:center; }
+body.ct-page .ct-paybar-left{ padding:0; }
+body.ct-page .ct-paybar-amt{ font-size:22px; font-weight:600; line-height:1.15; letter-spacing:-.3px; color:var(--ct-ink); }
+body.ct-page .ct-paybar-link{
+  display:inline-flex; align-items:center; gap:4px; margin-top:4px;
+  font-size:13px; font-weight:500; color:var(--ct-primary); white-space:nowrap;
+}
+body.ct-page .ct-paybar .ct-cta{
+  display:block; text-align:center; min-height:52px; padding:8px 12px;
+  border-radius:12px; background:var(--ct-primary); color:var(--hd-ink,#fff); box-shadow:none;
+}
+body.ct-page .ct-paybar .ct-cta:active{ background:var(--ct-primary-deep); }
+body.ct-page .ct-paybar .ct-cta.locked{ background:#E3E6E9; color:#98A0A8; }
+body.ct-page .ct-paybar .ct-cta-text{ display:block; font-size:16px; font-weight:500; line-height:1.25; letter-spacing:0; text-align:center; }
+body.ct-page .ct-cta-text .ct-cta-arrow{ display:inline-block; vertical-align:-3px; margin-left:4px; }
+body.ct-page .ct-cta-sub{ display:block; margin-top:2px; font-size:12px; font-weight:400; opacity:.9; letter-spacing:0; }
+body.ct-page .ct-pay-note{ gap:6px; margin:0; font-size:12px; font-weight:400; color:var(--ct-muted); }
+
+/* ── 360 / 375 phones ──────────────────────────────────────────────────── */
+@media (max-width:380px){
+  body.ct-page .ct-card,
+  body.ct-page .ct-bill,
+  body.ct-page .ct-cym{ margin-left:10px; margin-right:10px; }
+  body.ct-page .ct-save-strip{ width:calc(100% - 20px); margin-left:10px; margin-right:10px; }
+  body.ct-page #ct-payment-group,
+  body.ct-page #ct-di-group{ margin-left:10px; margin-right:10px; }
+  body.ct-page .ct-tab{ font-size:13px; padding:0 4px; gap:4px; }
+  body.ct-page .ct-chip-row{ gap:6px; }
+  body.ct-page .ct-chip-sub{ font-size:11px; }
+  body.ct-page .ct-chip-amt{ font-size:13px; }
+  body.ct-page .ct-paybar-amt{ font-size:20px; }
+  body.ct-page .ct-paybar .ct-cta-text{ font-size:15px; }
+  body.ct-page .ct-cym-tab{ padding:0 10px; }
+}
+
+/* ── Tablet / desktop: slightly larger meal cards ──────────────────────── */
+@media (min-width:768px){
+  body.ct-page .ct-cym-card,
+  body.ct-page .ct-cym-media{ width:124px; }
+  body.ct-page .ct-cym-card{ flex-basis:124px; min-width:124px; }
+  body.ct-page .ct-cym-media{ height:96px; }
+}
+
+/* ==========================================================================
+   CHECKOUT REFERENCE — TYPOGRAPHY + SPACING ONLY
+   No colours, behaviour, DOM hooks, icons, or interaction rules are changed.
+   ========================================================================== */
+body.ct-page,
+body.ct-page button,
+body.ct-page input,
+body.ct-page textarea,
+body.ct-page select{
+  font-family:'Manrope','Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Reference rhythm: compact outer gutters with a little more breathing room
+   inside the main content cards. */
+body.ct-page .ct-card,
+body.ct-page .ct-bill,
+body.ct-page .ct-cym,
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  margin-top:10px;
+  margin-bottom:10px;
+}
+
+body.ct-page .ct-card{ padding:14px; }
+body.ct-page .ct-item-card{ padding:8px 14px 12px; }
+
+/* Header typography */
+body.ct-page .ct-dh-restaurant{
+  font-size:14px;
+  font-weight:600;
+  line-height:1.2;
+  letter-spacing:-.1px;
+}
+body.ct-page .ct-dh-meta{
+  margin-top:3px;
+  gap:5px;
+  font-size:13px;
+  line-height:1.3;
+}
+body.ct-page .ct-dh-tag{ font-size:14px; font-weight:600; }
+body.ct-page .ct-dh-addr{ font-size:12.5px; font-weight:400; }
+
+/* Cart item rhythm + type */
+body.ct-page .ct-row,
+body.ct-page .ct-row.has-media{
+  gap:10px 12px;
+  padding:14px 0;
+}
+body.ct-page .ct-name{
+  font-size:15px;
+  font-weight:600;
+  line-height:1.32;
+  letter-spacing:-.05px;
+}
+body.ct-page .ct-custom{
+  margin-top:3px;
+  font-size:12.5px;
+  font-weight:400;
+  line-height:1.4;
+}
+body.ct-page .ct-price-line{ margin-top:4px; gap:7px; }
+body.ct-page .ct-unit-price{ font-size:13.5px; font-weight:500; }
+body.ct-page .ct-was-price{ font-size:12px; font-weight:400; }
+body.ct-page .ct-off-badge{ font-size:12px; font-weight:500; }
+body.ct-page .ct-item-total{ font-size:15px; font-weight:600; }
+body.ct-page .ct-qty{ font-size:13.5px; font-weight:600; }
+body.ct-page .ct-stepper button{ font-size:15px; }
+
+body.ct-page .ct-item-actions{
+  gap:9px;
+  padding-top:7px;
+  margin-top:1px;
+}
+body.ct-page .ct-pill-btn{
+  min-height:42px;
+  padding:0 12px;
+  font-size:13.5px;
+  font-weight:500;
+}
+
+/* Section titles: match the spaced uppercase reference labels. */
+body.ct-page .ct-sec-title,
+body.ct-page .ct-cym-title{
+  font-size:15px;
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+/* Complete-your-meal spacing + labels */
+body.ct-page .ct-cym{ padding:16px 14px 14px; }
+body.ct-page .ct-cym-tabs{ margin-top:11px; }
+body.ct-page .ct-cym-tab{
+  min-height:36px;
+  padding:0 14px;
+  font-size:13.5px;
+  font-weight:600;
+}
+body.ct-page .ct-cym-track{
+  gap:11px;
+  margin-top:13px;
+  padding-top:2px;
+  padding-bottom:7px;
+}
+body.ct-page .ct-cym-name{
+  margin-top:17px;
+  min-height:34px;
+  font-size:13px;
+  font-weight:500;
+  line-height:1.35;
+}
+body.ct-page .ct-cym-price{ margin-top:4px; }
+body.ct-page .ct-cym-now{ font-size:13px; font-weight:600; }
+body.ct-page .ct-cym-price s,
+body.ct-page .ct-cym-off,
+body.ct-page .ct-cym-note,
+body.ct-page .ct-cym-rating{ font-size:11px; }
+
+/* Savings corner: slightly taller rows and clearer type hierarchy. */
+body.ct-page .ct-savings{ padding:16px 14px 6px; }
+body.ct-page .ct-savings .ct-sec-title{ padding-bottom:7px; }
+body.ct-page .ct-sav-row{
+  min-height:58px;
+  padding:9px 0;
+  gap:12px;
+}
+body.ct-page .ct-sav-title{
+  font-size:15px;
+  font-weight:500;
+  line-height:1.3;
+}
+body.ct-page .ct-sav-sub{
+  margin-top:2px;
+  font-size:13px;
+  line-height:1.35;
+}
+body.ct-page .ct-sav-flag{ font-size:13px; font-weight:600; }
+
+/* Tabs / option chips */
+body.ct-page .ct-tab{ font-size:13.5px; font-weight:600; }
+body.ct-page .ct-tab-panel{ padding-top:11px; }
+body.ct-page .ct-chip-row{ gap:6px; }
+body.ct-page .ct-chip{ min-height:50px; }
+body.ct-page .ct-chip-amt{ font-size:13.5px; font-weight:600; }
+body.ct-page .ct-chip-sub{ font-size:11.5px; }
+body.ct-page .ct-tip-note{ margin-top:11px; font-size:12px; }
+
+/* Delivery details + bill copy */
+body.ct-page .ct-details-row{ min-height:54px; padding:9px 0; }
+body.ct-page .ct-details-label{ font-size:13.5px; font-weight:500; }
+body.ct-page .ct-details-text{ margin-top:2px; font-size:11.5px; }
+body.ct-page .ct-details-action{ font-size:12px; }
+body.ct-page .ct-bill .ct-bill-row{ padding:9px 0; font-size:13px; }
+body.ct-page .ct-bill-label,
+body.ct-page .ct-bill-val{ font-size:13px; }
+body.ct-page .ct-total-label{ font-size:15px; font-weight:600; }
+body.ct-page .ct-bill .ct-total-val{ font-size:18px; font-weight:700; }
+
+/* Sticky payment bar */
+body.ct-page .ct-footer{ gap:8px; padding:11px 12px calc(8px + env(safe-area-inset-bottom)); }
+body.ct-page .ct-paybar{ gap:11px; }
+body.ct-page .ct-paybar-amt{ font-size:21px; font-weight:700; line-height:1.15; }
+body.ct-page .ct-paybar-link{ margin-top:3px; font-size:12.5px; font-weight:600; }
+body.ct-page .ct-paybar .ct-cta{ min-height:54px; padding:9px 14px; }
+body.ct-page .ct-paybar .ct-cta-text{ font-size:16px; font-weight:700; line-height:1.25; }
+body.ct-page .ct-cta-sub{ font-size:11px; }
+body.ct-page .ct-pay-note{ font-size:11px; }
+
+@media (max-width:380px){
+  body.ct-page .ct-card,
+  body.ct-page .ct-bill,
+  body.ct-page .ct-cym,
+  body.ct-page #ct-payment-group,
+  body.ct-page #ct-di-group{
+    margin-left:12px;
+    margin-right:12px;
+  }
+  body.ct-page .ct-name{ font-size:14.5px; }
+  body.ct-page .ct-pill-btn{ font-size:13px; }
+  body.ct-page .ct-sec-title,
+  body.ct-page .ct-cym-title{ font-size:14px; }
+  body.ct-page .ct-cym-tab{ font-size:13px; padding-left:10px; padding-right:10px; }
+}
+
+
+
+/* ==========================================================================
+   EATSWADA — FINAL PREMIUM REFINEMENT
+   Visual-only overrides: card elevation, typography polish, image consistency,
+   and safe scroll positioning beneath the sticky delivery header.
+   Existing markup, IDs, JavaScript hooks, calculations and interactions remain
+   unchanged.
+   ========================================================================== */
+body.ct-page{
+  --ct-bg:#F4F5F8;
+  --ct-line:#E9EBEF;
+  --ct-line-soft:#F0F1F4;
+  --ct-shadow:0 1px 2px rgba(24,32,42,.025), 0 7px 22px rgba(24,32,42,.045);
+  background:var(--ct-bg);
+}
+
+/* Give the major surfaces quiet depth instead of relying on hard outlines. */
+body.ct-page .ct-card,
+body.ct-page .ct-bill,
+body.ct-page .ct-cym,
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group{
+  border-color:rgba(225,229,235,.78);
+  box-shadow:var(--ct-shadow);
+}
+
+/* Keep the cart card and its rows visually calm and consistently separated. */
+body.ct-page .ct-item-card{
+  border-color:rgba(225,229,235,.78);
+  box-shadow:var(--ct-shadow);
+}
+body.ct-page .ct-row{
+  border-bottom-color:#F0F1F4;
+}
+body.ct-page .ct-name{
+  color:#252B33;
+  font-weight:600;
+  letter-spacing:-.12px;
+}
+body.ct-page .ct-unit-price,
+body.ct-page .ct-item-total{
+  font-variant-numeric:tabular-nums;
+}
+body.ct-page .ct-custom,
+body.ct-page .ct-sav-sub,
+body.ct-page .ct-cym-from,
+body.ct-page .ct-details-text{
+  color:#858C96;
+}
+
+/* Section labels: refined tracking without the overly wide all-caps effect. */
+body.ct-page .ct-sec-title,
+body.ct-page .ct-cym-title{
+  color:#68717C;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.105em;
+  line-height:1.35;
+}
+body.ct-page .ct-cym-title{
+  color:#303741;
+  font-size:17px;
+  letter-spacing:-.25px;
+  font-weight:650;
+  text-transform:none;
+}
+
+/* Recommendation images share one clean crop and a quiet neutral frame. */
+body.ct-page .ct-cym-media{
+  background:#F6F7F8;
+  border:1px solid rgba(226,230,235,.8);
+  box-shadow:0 1px 3px rgba(24,32,42,.045);
+}
+body.ct-page .ct-cym-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+body.ct-page .ct-cym-add{
+  box-shadow:0 3px 10px rgba(24,32,42,.12);
+}
+
+/* Savings rows and selected controls use softer tinted surfaces. */
+body.ct-page .ct-save-strip{
+  background:#EAF7F1;
+  border-color:#D4EEE2;
+}
+body.ct-page .ct-chip,
+body.ct-page .ct-tab-panel{
+  border-color:#E9EBEF;
+}
+body.ct-page .ct-chip[aria-pressed="true"]{
+  background:#FFF1F4;
+  border-color:#F1D5DD;
+}
+body.ct-page .ct-tip-note{
+  background:#FFF5F7;
+}
+
+/* Sticky-header-aware anchor positioning prevents sections landing underneath it. */
+html:has(body.ct-page){
+  scroll-padding-top:calc(76px + env(safe-area-inset-top));
+}
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group,
+body.ct-page .ct-bill{
+  scroll-margin-top:calc(76px + env(safe-area-inset-top));
+}
+
+/* Keep the sticky delivery header crisp while content scrolls beneath it. */
+body.ct-page .ct-delivery-head{
+  background:rgba(255,255,255,.98);
+  border-bottom:1px solid rgba(230,233,238,.9);
+  box-shadow:0 2px 10px rgba(24,32,42,.035);
+}
+
+/* Small-screen safeguard: retain the existing dimensions and prevent clipping. */
+@media (max-width:380px){
+  body.ct-page .ct-sec-title{ letter-spacing:.09em; }
+  body.ct-page .ct-cym-title{ letter-spacing:-.2px; }
+}
+
+/* =====================================================================
+   EATSWADA CART REDESIGN — PART 02
+   Savings strip: softer tint, clearer hierarchy and calm elevation.
+   Keeps the existing #ct-footer-save / paintFooterSavings behavior intact.
+   ===================================================================== */
+body.ct-page .ct-save-strip{
+  min-height:46px;
+  margin:0 14px 8px;
+  width:calc(100% - 28px);
+  padding:0 13px;
+  gap:9px;
+  border:1px solid #D8EEE4;
+  border-radius:12px;
+  background:#EFF8F3;
+  color:#39866D;
+  box-shadow:0 2px 8px rgba(31,91,68,.045);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:-.12px;
+  -webkit-tap-highlight-color:transparent;
+}
+body.ct-page .ct-save-strip .ct-save-text{
+  font-size:13px;
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:-.12px;
+  color:#39866D;
+}
+body.ct-page .ct-save-strip .ct-save-spark{
+  width:17px;
+  height:17px;
+  color:#399477;
+  opacity:.9;
+}
+body.ct-page .ct-save-strip .ct-save-chev{
+  width:15px;
+  height:15px;
+  color:#6B9D88;
+  opacity:.9;
+}
+body.ct-page .ct-save-strip:focus-visible{
+  outline:2px solid rgba(57,134,109,.42);
+  outline-offset:2px;
+}
+body.ct-page .ct-save-strip:active{
+  background:#E8F4ED;
+  box-shadow:0 1px 4px rgba(31,91,68,.05);
+}
+@media(max-width:380px){
+  body.ct-page .ct-save-strip{
+    min-height:44px;
+    margin-left:12px;
+    margin-right:12px;
+    width:calc(100% - 24px);
+    padding-left:11px;
+    padding-right:11px;
+  }
+  body.ct-page .ct-save-strip .ct-save-text{font-size:12.5px;}
+}
+
+

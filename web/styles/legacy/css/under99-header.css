@@ -1,0 +1,207 @@
+/* =====================================================================
+   99 STORE — HEADER  (reference-matched: floats on the pink hero sheet)
+
+   The header IS the pink sheet: the hero gradient runs from the very top
+   (behind the status bar) down through the hero art and is rounded at the
+   bottom. Back / Search are white circles and the location is a white pill,
+   all floating on the pink — exactly as in the reference.
+
+   Font is inherited from the app (Manrope, via --u99-font on <body>); no new
+   font is introduced. Colours use the locked 99-store tokens.
+   ===================================================================== */
+
+/* Pink sheet — one continuous surface for the top bar + hero. */
+.u99-header{
+  position:relative;
+  margin:0 0 12px;
+  background:linear-gradient(112deg,
+    var(--u99-hero-1) 0%,
+    var(--u99-hero-2) 58%,
+    var(--u99-hero-3) 100%);
+  border-radius:0 0 var(--u99-radius-xl) var(--u99-radius-xl);
+  overflow:hidden;
+}
+
+/* Top bar — transparent over the pink, no divider, safe-area aware. */
+.u99-topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px var(--u99-gutter);
+  padding-top:calc(12px + env(safe-area-inset-top, 0px));
+  position:relative;
+  z-index:3;
+  background:transparent;
+  border:0;
+}
+
+/* Back + Search — matching white circles, soft pink-tinted lift. */
+.u99-circle-btn{
+  width:52px;height:52px;flex:0 0 52px;
+  border:0;
+  border-radius:50%;
+  background:#fff;
+  color:var(--u99-ink);
+  display:grid;place-items:center;
+  box-shadow:0 2px 10px rgba(120,40,80,.12);
+  transition:transform var(--u99-t-fast), background var(--u99-t-fast);
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-circle-btn:active{transform:scale(.95);background:#f7f7f8}
+.u99-circle-btn svg{width:22px;height:22px;display:block}
+
+/* Location capsule — white pill; grows to fill spare space but is capped so
+   Search stays pinned to the right edge (reference composition). */
+.u99-location{
+  flex:1 1 auto;
+  min-width:0;
+  max-width:205px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  height:52px;
+  padding:0 15px 0 13px;
+  border:0;
+  border-radius:var(--u99-radius-pill);
+  background:#fff;
+  text-align:left;
+  box-shadow:0 2px 10px rgba(120,40,80,.12);
+  transition:transform var(--u99-t-fast), background var(--u99-t-fast);
+  -webkit-tap-highlight-color:transparent;
+}
+.u99-location:active{transform:scale(.985);background:#fcfcfd}
+
+.u99-location-pin{
+  width:20px;height:20px;flex:0 0 20px;
+  color:var(--u99-primary);
+  display:grid;place-items:center;
+}
+.u99-location-pin svg{width:20px;height:20px;display:block}
+
+.u99-location-copy{flex:1 1 auto;min-width:0;display:block}
+
+/* Line 1 — location name (strong, dark) + chevron. */
+.u99-location-line{display:flex;align-items:center;gap:5px;min-width:0}
+.u99-location-name{
+  min-width:0;
+  font-size:16px;
+  font-weight:var(--u99-fw-bold);
+  letter-spacing:-.02em;
+  line-height:1.12;
+  color:var(--u99-ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.u99-location-chevron{flex:0 0 auto;color:var(--u99-muted);display:grid;place-items:center}
+.u99-location-chevron svg{display:block}
+
+/* Line 2 — delivery time (smaller, muted). */
+.u99-location-sub{
+  display:block;
+  margin-top:2px;
+  font-size:12.5px;
+  font-weight:var(--u99-fw-medium);
+  letter-spacing:-.005em;
+  line-height:1.12;
+  color:var(--u99-muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.u99-search-btn{margin-left:auto}
+
+/* ── Responsive: shrink gracefully, never overflow, never overlap ── */
+@media (max-width:380px){
+  .u99-topbar{gap:10px;padding:12px;padding-top:calc(12px + env(safe-area-inset-top, 0px));}
+  .u99-circle-btn{width:50px;height:50px;flex-basis:50px}
+  .u99-circle-btn svg{width:20px;height:20px}
+  .u99-location{height:50px;max-width:180px;padding:0 13px 0 11px;gap:8px}
+  .u99-location-pin,.u99-location-pin svg{width:18px;height:18px;flex-basis:18px}
+  .u99-location-name{font-size:15px}
+  .u99-location-sub{font-size:12px}
+}
+@media (max-width:340px){
+  .u99-location{max-width:150px}
+  .u99-location-name{font-size:14.5px}
+  .u99-location-sub{font-size:11.5px}
+}
+
+/* ================================================================
+   VISUAL PASS 01 — BENCHMARK COMPOSITION
+   Keep the header compact and make the location block read as two clear
+   typographic lines on small phones.
+   ================================================================ */
+.u99-topbar{gap:10px;padding-left:16px;padding-right:16px}
+.u99-circle-btn{width:44px;height:44px;flex-basis:44px;box-shadow:0 2px 9px rgba(120,40,80,.10)}
+.u99-circle-btn svg{width:20px;height:20px}
+.u99-location{height:44px;max-width:none;padding:0 13px 0 11px;gap:8px;box-shadow:0 2px 9px rgba(120,40,80,.10)}
+.u99-location-pin,.u99-location-pin svg{width:19px;height:19px;flex-basis:19px}
+.u99-location-line{gap:4px}
+.u99-location-name{font-size:15px;line-height:1.05}
+.u99-location-sub{margin-top:3px;font-size:10.5px;line-height:1.1}
+.u99-location-chevron svg{width:13px;height:13px}
+@media(max-width:380px){
+  .u99-topbar{gap:8px;padding-left:14px;padding-right:14px}
+  .u99-circle-btn{width:42px;height:42px;flex-basis:42px}
+  .u99-location{height:42px;padding-left:10px;padding-right:11px}
+  .u99-location-name{font-size:14px}
+  .u99-location-sub{font-size:10px}
+}
+
+
+/* ================================================================
+   PHASE 1 — SLIM PRODUCTION MOBILE HEADER
+   Filter rail is now outside the pink header surface.
+   ================================================================ */
+.u99-header{
+  margin:0;
+  border-radius:0;
+}
+.u99-topbar{
+  gap:10px;
+  padding-top:calc(9px + env(safe-area-inset-top, 0px));
+  padding-bottom:9px;
+}
+.u99-circle-btn{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+}
+.u99-location{
+  height:48px;
+  max-width:none;
+  padding-left:12px;
+  padding-right:13px;
+}
+.u99-location-name{font-size:15.5px}
+.u99-location-sub{font-size:11.5px}
+
+@media(max-width:380px){
+  .u99-topbar{
+    gap:8px;
+    padding-left:12px;
+    padding-right:12px;
+    padding-top:calc(8px + env(safe-area-inset-top,0px));
+    padding-bottom:8px;
+  }
+  .u99-circle-btn{width:46px;height:46px;flex-basis:46px}
+  .u99-location{height:46px;max-width:none;padding-left:11px;padding-right:11px}
+}
+
+/* ================================================================
+   PHASE 1 FINAL — SLIM HEADER / CLEAR FILTER SEPARATION
+   Keeps the same structure; only tightens vertical rhythm.
+   ================================================================ */
+.u99-header{
+  margin:0 0 8px;
+  border-radius:0 0 20px 20px;
+}
+.u99-topbar{
+  padding-top:calc(7px + env(safe-area-inset-top,0px));
+  padding-bottom:7px;
+}
+.u99-circle-btn{width:44px;height:44px;flex-basis:44px}
+.u99-location{height:44px}
+@media(max-width:380px){
+  .u99-topbar{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:7px}
+  .u99-circle-btn{width:42px;height:42px;flex-basis:42px}
+  .u99-location{height:42px}
+}
