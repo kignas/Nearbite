@@ -354,8 +354,8 @@
 </script>
 
 <link rel="stylesheet" href="style.css">
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" integrity="sha384-I1LYojsZ5RM1cOda44Z2h42Qa6YfsQ1XkXxREnhp4ueYBR/4d1pG1K+NZM537Vsj" crossorigin="anonymous"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" integrity="sha384-ZaR6mWzmJtrRibZ1Vm7SoHFr8OXjyAuGAXalGDKqbxFT18oi/z+oZLIRFkpeNor1" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" crossorigin="anonymous"></script>
 <script src="js/auth-token.js?v=20261025"></script>
 <script src="config.js"></script>
 <link rel="stylesheet" href="eatswada-theme.css">
@@ -706,9 +706,18 @@
     function firebaseEnabled(){
       return !!(window.CONFIG?.FIREBASE?.enabled && window.CONFIG.FIREBASE.apiKey && window.CONFIG.FIREBASE.projectId && window.CONFIG.FIREBASE.appId && window.firebase);
     }
+    let firebaseIssue='';
     function initFirebase(){
-      if(!firebaseEnabled()) return false;
-      try{ if(!firebase.apps.length) firebase.initializeApp(CONFIG.FIREBASE); return true; }catch(e){ console.error(e); return false; }
+      firebaseIssue='';
+      const fb=window.CONFIG?.FIREBASE;
+      if(!(fb?.enabled && fb.apiKey && fb.projectId && fb.appId)){ firebaseIssue='config'; return false; }
+      if(!window.firebase){ firebaseIssue='sdk'; console.warn('Firebase SDK did not load (blocked or offline).'); return false; }
+      try{ if(!firebase.apps.length) firebase.initializeApp(CONFIG.FIREBASE); return true; }catch(e){ firebaseIssue='init'; console.error(e); return false; }
+    }
+    function firebaseIssueMessage(){
+      if(firebaseIssue==='sdk') return 'Google Sign-In could not load. Check your internet and refresh the page.';
+      if(firebaseIssue==='init') return 'Google Sign-In could not start. Please refresh and try again.';
+      return 'Google Sign-In is not configured yet.';
     }
     function persistSession(data){
       const token=data?.token || data?.data?.token;
@@ -782,7 +791,7 @@
     }
     async function signInWithGoogle(){
       const banner=document.getElementById('step1Banner'),text=document.getElementById('step1BannerText'); hideBanner(banner);
-      if(!initFirebase()){ showBanner(banner,text,'Google Sign-In is not configured yet.'); return; }
+      if(!initFirebase()){ showBanner(banner,text,firebaseIssueMessage()); return; }
       const btn=document.getElementById('googleSignInBtn'); if(btn)btn.disabled=true;
       // Show the callback gate BEFORE the popup opens so the login form is not
       // painted while getIdToken() + POST /api/auth/firebase + navigation run.
