@@ -1,0 +1,220 @@
+/* ================================================================
+   Eatswada dynamic-pricing customer UI — additive styles.
+   Loaded LAST on the pages that use it, so it only ever adds new
+   classes (.u99-badge-*, .ew-fd-*, .ew-quote-*, .ew-bill-*) and never
+   restyles an existing rule. Design tokens come from eatswada-theme.css.
+   ================================================================ */
+
+/* ── Sponsored / Featured badges on restaurant cards ─────────────── */
+.u99-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-left:6px;
+  padding:1px 6px;
+  border-radius:5px;
+  font-size:9.5px;
+  font-weight:800;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  line-height:1.5;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+.u99-badge-sponsored{
+  color:#7A4A00;
+  background:#FFF0D1;
+  border:1px solid #F2CE85;
+}
+.u99-badge-featured{
+  color:#8A1F53;
+  background:#FFE7F1;
+  border:1px solid #F6B7D4;
+}
+
+/* ── Free-delivery progress on restaurant cards ──────────────────── */
+.u99-free-row.is-unlocked{ color:#1E8A5B; }
+.u99-free-row.is-unlocked .u99-free-icon svg path[style]{ fill:#1E8A5B; }
+
+/* ── Menu page free-delivery banner ──────────────────────────────── */
+.ew-fd-banner{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 12px;
+  padding:9px 12px;
+  border-radius:12px;
+  background:#F1F7F3;
+  border:1px solid #CFE7DA;
+  color:#1E5B41;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.3;
+}
+.ew-fd-banner.is-unlocked{ background:#E7F6EE; border-color:#A9DFC3; color:#15653F; }
+.ew-fd-banner .ew-fd-banner__bar{
+  position:relative;
+  flex:1 1 auto;
+  height:6px;
+  border-radius:999px;
+  background:#DCE7E1;
+  overflow:hidden;
+  min-width:60px;
+}
+.ew-fd-banner .ew-fd-banner__fill{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:0;
+  border-radius:999px;
+  background:#2C9A6A;
+  transition:width .3s cubic-bezier(.22,1,.36,1);
+}
+.ew-fd-banner .ew-fd-banner__text{ flex:0 1 auto; }
+.ew-fd-banner.is-unlocked .ew-fd-banner__bar{ display:none; }
+@media (prefers-reduced-motion: reduce){
+  .ew-fd-banner .ew-fd-banner__fill{ transition:none; }
+}
+
+/* ── Cart / checkout quote area ──────────────────────────────────── */
+.ew-quote-block{ margin-top:10px; }
+.ew-quote-note{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:#6B7280;
+  margin-top:6px;
+}
+.ew-quote-expiry{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:#FFF7E8;
+  border:1px solid #F3DFB4;
+  color:#7A5A12;
+  font-size:12.5px;
+  font-weight:600;
+}
+.ew-quote-expiry.is-expiring{ background:#FDECEC; border-color:#F2BEBE; color:#9B2C2C; }
+.ew-quote-expiry button{
+  border:0; background:transparent; color:inherit; font:inherit; font-weight:800;
+  text-decoration:underline; cursor:pointer; padding:0;
+}
+
+/* Decision banners (repricing / not-serviceable) */
+.ew-decision{
+  margin-top:10px;
+  padding:11px 12px;
+  border-radius:12px;
+  font-size:13px;
+  line-height:1.4;
+}
+.ew-decision__title{ font-weight:800; margin-bottom:3px; }
+.ew-decision--repricing{ background:#FFF4E5; border:1px solid #F2CE85; color:#7A4A00; }
+.ew-decision--blocked{ background:#FDECEC; border:1px solid #F2BEBE; color:#9B2C2C; }
+.ew-decision__changes{ margin:7px 0 0; padding-left:16px; }
+.ew-decision__changes li{ margin:2px 0; }
+.ew-decision__change-from{ text-decoration:line-through; opacity:.7; margin-right:4px; }
+.ew-decision button.ew-decision__action{
+  margin-top:8px;
+  padding:7px 12px;
+  border-radius:9px;
+  border:1px solid currentColor;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-weight:750;
+  cursor:pointer;
+}
+
+/* Bill rows (additive; the page keeps its own container) */
+.ew-bill-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  padding:3px 0;
+}
+.ew-bill-row__label{ color:#4B5563; }
+.ew-bill-row__label .ew-bill-row__note{ display:block; font-size:11px; color:#8A94A6; font-weight:500; }
+.ew-bill-row--discount .ew-bill-row__value{ color:#1E8A5B; }
+.ew-bill-row--total{
+  margin-top:6px;
+  padding-top:8px;
+  border-top:1px dashed #D7DCE3;
+  font-weight:800;
+}
+
+/* ── 99-store product grid additions (additive classes only) ─────── */
+.u99-product-free{font-size:11px;font-weight:700;color:#1E8A5B;margin-top:3px}
+.u99-add-btn.u99-add-unavailable{
+  width:auto;min-width:64px;padding:0 10px;border-radius:12px;
+  font-size:11px;font-weight:800;opacity:.7;cursor:not-allowed;
+}
+
+/* ── Category page card additions (additive classes only) ────────── */
+.res-free{font-size:12px;font-weight:700;color:#1E8A5B;margin:4px 0 0}
+.res-closed{font-size:12px;font-weight:700;color:#9B2C2C;margin:4px 0 0}
+.res-card.is-closed{opacity:.62;filter:saturate(.6);cursor:not-allowed}
+.res-card.is-closed:active{transform:none}
+
+/* Fee label helper */
+.ew-fee-label{ display:inline-flex; align-items:center; gap:5px; }
+.ew-fee-label__info{
+  width:15px; height:15px; border-radius:50%;
+  border:1px solid currentColor; opacity:.55;
+  display:inline-grid; place-items:center;
+  font-size:10px; font-weight:800; line-height:1;
+}
+
+/* ── Cart quote bill (Phase 3; additive) ─────────────────────────── */
+.ew-quote-bill{ margin:2px 0 4px; }
+.ew-qb-row{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:12px; padding:4px 0; font-size:13.5px;
+}
+.ew-qb-row .ew-qb-label{ color:#4B5563; display:flex; flex-direction:column; }
+.ew-qb-row .ew-qb-note{ font-size:11px; color:#8A94A6; font-weight:500; }
+.ew-qb-row .ew-qb-val{ font-weight:600; color:#1F2430; white-space:nowrap; }
+.ew-qb-row--discount .ew-qb-val{ color:#1E8A5B; }
+.ew-qb-row--total{
+  margin-top:6px; padding-top:9px; border-top:1px dashed #D7DCE3; font-weight:800;
+}
+.ew-qb-row--total .ew-qb-val{ font-weight:800; }
+
+/* While a live backend quote is shown, hide the client-computed preview rows
+   so the itemized bill comes from the backend only. */
+#ct-bill.ew-quote-active .ct-bill-rows{ display:none; }
+
+.ew-qb-countdown{
+  font-size:11.5px; font-weight:600; color:#8A94A6;
+  margin:6px 0 2px; text-align:right;
+}
+.ew-qb-blocked, .ew-qb-reprice{
+  display:flex; gap:10px; align-items:flex-start;
+  background:#FFF6F6; border:1px solid #F3C6C6; border-radius:12px;
+  padding:11px 12px; margin:0 0 10px;
+}
+.ew-qb-reprice{ background:#FFFBF0; border-color:#F0DFB0; }
+.ew-qb-blocked-ic{
+  flex:0 0 auto; width:20px; height:20px; border-radius:50%;
+  background:#D64545; color:#fff; font-weight:800; font-size:12px;
+  display:grid; place-items:center; margin-top:1px;
+}
+.ew-qb-blocked-copy{ display:flex; flex-direction:column; gap:3px; }
+.ew-qb-blocked-copy strong{ font-size:13.5px; color:#8E2B2B; }
+.ew-qb-blocked-copy span{ font-size:12.5px; color:#5B6472; line-height:1.45; }
+.ew-qb-selfdel{ color:#1E8A5B !important; font-weight:600; }
+.ew-qb-reprice{ flex-direction:column; gap:6px; }
+.ew-qb-reprice strong{ font-size:13.5px; color:#8A6D1B; }
+.ew-qb-reprice span{ font-size:12.5px; color:#5B6472; line-height:1.45; }
+.ew-qb-diff{ margin:2px 0 0; padding-left:16px; font-size:12.5px; color:#4B5563; }
+.ew-qb-confirm{
+  align-self:flex-start; margin-top:4px;
+  background:#1F2430; color:#fff; border:0; border-radius:10px;
+  padding:9px 14px; font-size:13px; font-weight:700; cursor:pointer;
+}
+.ew-qb-confirm:active{ transform:scale(.98); }
