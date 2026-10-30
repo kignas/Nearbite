@@ -99,6 +99,11 @@
     if (notes && typeof notes === 'object' && Object.keys(notes).length) {
       payload.restaurantNotes = notes;
     }
+    /* The backend pricing quote this order is based on. Sent verbatim so the
+       order can be tied back to the priced basket. The shipped backend does
+       not read it yet (docs/rebuild/BACKEND_GAPS.md B1); it is included so
+       the order is verifiable the moment it does. */
+    if (o.quoteId) payload.quoteId = String(o.quoteId);
     return payload;
   }
 

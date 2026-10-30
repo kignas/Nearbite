@@ -500,6 +500,9 @@ const ctState = {
 /* Held while a POST /orders is being prepared or a payment is open, so a
    second tap or keyboard submit cannot start a parallel checkout. */
 let ctOrderInFlight = false;
+/* Last payment method a quote was requested for. A change (UPI <-> COD)
+   triggers a re-quote because the COD handling fee applies to COD only. */
+let ctLastQuoteMethod = null;
 
 /* ══════════════════════════════════════════════════════════════════════════
    CART EXTRAS — restaurant note, delivery instructions, tip
@@ -881,6 +884,13 @@ function applyTotals() {
   if (window.CtX && typeof window.CtX.paintBill === 'function') {
     try { window.CtX.paintBill(); } catch (e) { /* never block the cart paint */ }
   }
+
+  /* Live backend quote (additive). Requests POST /pricing/quote debounced and
+     renders the itemized backend bill; a failure leaves the preview above
+     untouched, so the cart never depends on pricing being reachable. */
+  if (window.EWCartQuoteUI && typeof window.EWCartQuoteUI.schedule === 'function') {
+    try { window.EWCartQuoteUI.schedule(); } catch (e) { /* pricing must never block the cart */ }
+  }
 }
 
 /* Collapsed summary of the same figures shown in the sheet. */
@@ -1071,12 +1081,35 @@ function updateCheckoutCta() {
   const label = document.getElementById('checkout-label');
   if (!btn || !label) return;
 
+  /* Switching UPI <-> COD is a materially different bill (the COD handling
+     fee applies to COD only), so the backend is asked to re-quote. CtX calls
+     updateCheckoutCta() on every method switch, which makes this the one
+     reliable place to notice the change without touching the selector. */
+  try {
+    const nowMethod = ctSelectedPaymentMethod();
+    if (nowMethod !== ctLastQuoteMethod) {
+      ctLastQuoteMethod = nowMethod;
+      if (window.EWCartQuoteUI && typeof window.EWCartQuoteUI.onBasketChanged === 'function') {
+        window.EWCartQuoteUI.onBasketChanged();
+      }
+    }
+  } catch (e) { /* pricing must never block the CTA */ }
+
   const plural = ctState.units === 1 ? 'item' : 'items';
 
   if (ctState.unavailable) {
     btn.classList.add('locked');
     btn.setAttribute('aria-disabled', 'true');
     label.innerHTML = 'Delivery unavailable<span class="ct-cta-sub">Change your address to continue</span>';
+    return;
+  }
+  /* The backend quote's own verdict wins: a NOT_ECONOMICALLY_SERVICEABLE
+     quote or an unconfirmed reprice disables Pay (additive; only when the
+     quote module is present). */
+  if (window.EWCartQuoteUI && window.EWCartQuoteUI.isBlocked()) {
+    btn.classList.add('locked');
+    btn.setAttribute('aria-disabled', 'true');
+    label.innerHTML = 'Delivery unavailable<span class="ct-cta-sub">See the message in your bill</span>';
     return;
   }
   if (!ctState.loggedIn) {
@@ -1654,6 +1687,16 @@ async function placeOrder() {
   if (ctOrderInFlight) return;
   ctOrderInFlight = true;
 
+  /* Activity analytics — the customer pressed Order. One event per restaurant
+     per page load (checkoutInitiatedOnce); never blocks the order. */
+  try {
+    if (window.EWAnalytics) {
+      const cartNow = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+      const rid = Object.keys(cartNow).map(k => cartNow[k] && cartNow[k].resId).filter(Boolean)[0];
+      window.EWAnalytics.checkoutInitiatedOnce(rid, { source: 'cart' });
+    }
+  } catch (e) {}
+
   const btn = document.getElementById('btn-checkout');
   const originalHTML = btn.innerHTML;
 
@@ -1662,6 +1705,33 @@ async function placeOrder() {
     '<span class="ct-cta-text" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Preparing your order…</span>',
     true
   );
+
+  /* Live backend quote gate (additive). Re-quotes with the current basket,
+     address and payment method; the returned quoteId is sent with the order.
+     Pay is blocked ONLY when the backend says the order is not serviceable
+     (NOT_ECONOMICALLY_SERVICEABLE) or re-priced and not yet confirmed. A
+     quote outage never blocks ordering — the backend re-prices anyway. */
+  let ctQuoteId = '';
+  if (window.EWCartQuoteUI && typeof window.EWCartQuoteUI.ensureForPay === 'function') {
+    try {
+      const q = await window.EWCartQuoteUI.ensureForPay();
+      if (q && q.blocked) {
+        ctOrderInFlight = false;
+        ctRestoreCheckoutButton(btn, originalHTML);
+        shakeCheckout();
+        showToast(q.message || 'This delivery is not available right now.', 'error');
+        return;
+      }
+      if (q && q.needsConfirmation) {
+        ctOrderInFlight = false;
+        ctRestoreCheckoutButton(btn, originalHTML);
+        shakeCheckout();
+        showToast('Please review the updated bill and confirm before paying.', 'error');
+        return;
+      }
+      ctQuoteId = (q && q.quoteId) || '';
+    } catch (e) { /* pricing must never block ordering */ }
+  }
 
   // Revalidate platform availability (maintenance / rider shortage) and COD
   // eligibility right before creating the order. A stale banner must not let
@@ -1770,7 +1840,8 @@ async function placeOrder() {
       restaurantNotes: Object.keys(ctState.restaurantNotes || {}).length ? ctState.restaurantNotes : undefined,
       deliveryInstructions: ctState.deliveryInstructions || '',
       tipAmount: ctCleanTip(ctState.tipAmount),
-      couponCode: String(ctState.couponCode || '')
+      couponCode: String(ctState.couponCode || ''),
+      quoteId: ctQuoteId
     }) : {
       items: itemsArray,
       deliveryAddress: savedAddress,
@@ -1789,7 +1860,10 @@ async function placeOrder() {
       restaurantNotes: Object.keys(ctState.restaurantNotes || {}).length ? ctState.restaurantNotes : undefined,
       deliveryInstructions: ctState.deliveryInstructions || '',
       tipAmount: ctCleanTip(ctState.tipAmount),
-      couponCode: String(ctState.couponCode || '')
+      couponCode: String(ctState.couponCode || ''),
+      // The backend currently ignores quoteId (see docs/rebuild/BACKEND_GAPS.md
+      // B1); it is sent so the order is verifiable the moment the backend does.
+      quoteId: ctQuoteId
     };
 
     // Idempotency: the key is bound to a fingerprint of the payload above.
@@ -1834,6 +1908,15 @@ async function placeOrder() {
     }
 
     if (!(response.ok && result && result.success)) {
+      /* A quote-specific rejection (expired / price changed / mismatch): the
+         backend wants a fresh quote. Re-quote, show the updated bill, and ask
+         for confirmation rather than showing a generic failure. */
+      if (window.EWQuote && window.EWQuote.isQuoteCode(result && result.code)) {
+        if (window.EWCartQuoteUI && typeof window.EWCartQuoteUI.onBasketChanged === 'function') {
+          try { window.EWCartQuoteUI.onBasketChanged(); } catch (e) {}
+        }
+        throw new Error('Your price was refreshed. Please review the updated bill and confirm before paying.');
+      }
       throw new Error((result && result.message) || 'Failed to place order.');
     }
 

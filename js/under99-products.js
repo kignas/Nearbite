@@ -77,6 +77,21 @@
       (off ? '<span class="u99-discount">' + off + '% OFF</span>' : '') +
     '</div>';
 
+    /* Sponsored / Featured label from the backend ranking fields. */
+    const badges = (() => {
+      if (!window.EWAvailability) return '';
+      if (window.EWAvailability.isSponsored(r)) return '<span class="u99-badge u99-badge-sponsored">' + E.esc(window.EWAvailability.sponsoredLabel(r) || 'Sponsored') + '</span>';
+      if (window.EWAvailability.isFeatured(r)) return '<span class="u99-badge u99-badge-featured">Featured</span>';
+      return '';
+    })();
+    /* Free-delivery line: pricing block first, then the legacy threshold. */
+    const freeLine = (() => {
+      const fd = r.pricing && r.pricing.freeDelivery;
+      if (fd && window.EWFreeDelivery) return window.EWFreeDelivery.line(fd, r.pricing.deliveryFee);
+      if (r.freeDeliveryAbove != null) return 'Free delivery above \u20B9' + Math.round(r.freeDeliveryAbove);
+      return '';
+    })();
+
     return '<article class="u99-product-card">' +
       '<div class="u99-product-image">' +
         '<img class="u99-item-img is-loading" src="' + E.esc(item.image) + '" alt="' + E.esc(item.name) + '" loading="lazy" decoding="async">' +
@@ -84,10 +99,11 @@
         E.renderAddControl(item, r) +
       '</div>' +
       '<div class="u99-product-body">' +
-        '<div class="u99-restaurant-name">' + E.esc(r.name) + '</div>' +
+        '<div class="u99-restaurant-name">' + E.esc(r.name) + badges + '</div>' +
         '<div class="u99-name-row">' + nameMarker +
           '<h3 class="u99-product-name">' + E.esc(item.name) + '</h3></div>' +
         priceRow +
+        (freeLine ? '<div class="u99-product-free">' + E.esc(freeLine) + '</div>' : '') +
       '</div></article>';
   }
 

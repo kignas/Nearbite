@@ -46,6 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSort(); });
 
   window.Eatswada99.loadHero();
+
+  /* Backend pricing (free-delivery / distance) is attached after the grid
+     paints and the card re-rendered, so a slow pricing call never delays
+     browsing. Debounced and stale-safe; failures are swallowed. */
+  let pricingSeq = 0;
+  const enrichPricing = () => {
+    if (!window.EWRestaurantCards || !window.EWPricing) return;
+    let addressId = '';
+    try { addressId = localStorage.getItem('nearbite_selected_address_id') || ''; } catch (e) { addressId = ''; }
+    const list = S.restaurants;
+    if (!addressId || !Array.isArray(list) || !list.length) return;
+    const seq = ++pricingSeq;
+    window.EWRestaurantCards.enrich(list, { addressId })
+      .then(res => { if (seq === pricingSeq && res && res.applied) window.Eatswada99Products?.render(); })
+      .catch(() => {});
+  };
+  document.addEventListener('eatswada99:data-ready', enrichPricing);
+
   window.Eatswada99.load();
 });
 

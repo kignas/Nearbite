@@ -62,6 +62,16 @@
       estimatedDeliveryMax: num(r?.estimatedDeliveryMax),
       cuisine: Array.isArray(r?.cuisine) ? r.cuisine.join(', ') : String(r?.cuisine || ''),
       freeDeliveryAbove: r?.freeDeliveryAbove == null ? null : num(r.freeDeliveryAbove),
+      /* Ranking / availability fields from the backend, preserved so the
+         99-store renders backend order, labels and availability. */
+      availabilityStatus: r?.availabilityStatus || (r?.availability && r.availability.status) || (r?.isOpen === false ? 'temporarily_closed' : ''),
+      orderable: typeof r?.orderable === 'boolean' ? r.orderable : (typeof r?.online === 'boolean' ? r.online : null),
+      sponsored: r?.sponsored === true || r?.isSponsored === true,
+      sponsoredLabel: r?.sponsoredLabel || '',
+      featured: r?.featured === true || r?.isFeatured === true,
+      distanceKm: num(r?.distanceKm),
+      serviceable: typeof r?.serviceable === 'boolean' ? r.serviceable : null,
+      pricing: null,
       menu
     };
   }
@@ -179,7 +189,21 @@
   const hasOptions = item => Array.isArray(item.customizations) && item.customizations.length > 0;
 
   /* ---------- Add control (shared by popular + grid) ---------- */
+  /* Backend availability for a normalized 99-store restaurant. Reads the
+     backend fields only; unknown (no status, no orderable flag) is treated as
+     orderable so nothing is blocked without evidence. */
+  function isOrderable(r) {
+    if (!r) return false;
+    if (typeof r.orderable === 'boolean') return r.orderable;
+    const offline = { temporarily_closed: 1, closed_today: 1, outside_hours: 1, suspended: 1, unapproved: 1, inactive: 1 };
+    if (r.availabilityStatus && offline[r.availabilityStatus]) return false;
+    return true;
+  }
+
   function addControlInner(item, r) {
+    if (!isOrderable(r)) {
+      return '<button type="button" class="u99-add-btn u99-add-unavailable" disabled aria-label="Currently unavailable">Unavailable</button>';
+    }
     const qty = cartQty(item.id, r.id);
     if (qty > 0) {
       return '<div class="u99-stepper" role="group" aria-label="Quantity in cart">' +
@@ -303,6 +327,6 @@
     esc, num, deliveryMax, qs, load, loadHero, state,
     renderAddControl, syncAddControls,
     findItem, cartQty, cartChange, addWithOptions, cartPayload, readCart,
-    hasOptions, iconArt
+    hasOptions, iconArt, isOrderable
   };
 })();
