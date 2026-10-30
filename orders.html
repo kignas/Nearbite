@@ -395,6 +395,8 @@ img{max-width:100%;display:block;}
 <script src="js/auth-token.js?v=20261025"></script>
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
+<script src="js/ew-money.js"></script>
+<script src="js/ew-bill.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" integrity="sha384-AQ3POAMqIhwS81FrUH95ekxqBZHeP5tG2JfEL3+7GuTtfRLWnrRh32UxwzM+//A9" crossorigin="anonymous"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js" integrity="sha384-XtSlZdmg0Ad5zf0AX4W9TGdm+dGjaNK4KG3lNFjfgbnxkCEuT9ugWXkLExgQTJ+6" crossorigin="anonymous"></script>
 <script src="push.js"></script>
@@ -843,19 +845,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalLabel = pc.required
       ? (pc.status === 'paid' ? 'Total (advance paid)' : 'Total')
       : (o.paymentStatus === 'paid' ? 'Total paid' : 'Total payable');
+
+    /* When the backend stored an itemized bill (the dynamic pricing engine
+       writes one), the receipt uses the stored lines — never recomputed. */
+    let linesHtml = '';
+    let grand = o.total;
+    if (o.bill && typeof o.bill === 'object' && window.EWBill && typeof window.EWBill.rowsFromStoredBill === 'function') {
+      const stored = window.EWBill.rowsFromStoredBill(o);
+      if (stored && stored.length) {
+        linesHtml = stored.filter(r => r.key !== 'total').map(r =>
+          `<div class="inv-line${r.kind === 'discount' ? ' disc' : ''}"><span>${escapeHtmlInv(r.label)}</span><span>${escapeHtmlInv(r.display)}</span></div>`
+        ).join('');
+        const g = (o.bill.grandTotal != null && o.bill.grandTotal > 0) ? o.bill.grandTotal
+          : (o.grandTotal != null ? o.grandTotal : o.total);
+        if (g != null) grand = g;
+      }
+    }
+    if (!linesHtml) {
+      linesHtml =
+        `<div class="inv-line"><span>Item total</span><span>${invMoney(o.subtotal)}</span></div>` +
+        (disc>0?`<div class="inv-line disc"><span>Discount${o.coupon&&o.coupon.code?(' ('+escapeHtmlInv(o.coupon.code)+')'):''}</span><span>− ${invMoney(disc)}</span></div>`:'') +
+        `<div class="inv-line"><span>Delivery fee</span><span>${invMoney(o.deliveryFee)}</span></div>` +
+        (tip>0?`<div class="inv-line"><span>Tip</span><span>${invMoney(tip)}</span></div>`:'') +
+        (pc.required && pc.advanceAmount!=null?`<div class="inv-line"><span>${pc.status==='paid'?'Advance paid online':'Advance due online'}</span><span>${invMoney(pc.advanceAmount)}</span></div>`:'') +
+        (pc.required && pc.cashDue!=null?`<div class="inv-line"><span>Cash due on delivery</span><span>${invMoney(pc.cashDue)}</span></div>`:'');
+    }
     document.getElementById('invoice-content').innerHTML =
       `<div class="inv-head"><div class="inv-brand">Eatswada</div><div class="inv-status ${pay.tone}">${escapeHtmlInv(pay.short || pay.label)}</div></div>
        <div class="inv-sub">${escapeHtmlInv(o.restaurantName||'Restaurant')}</div>
        <div class="inv-meta"><span>Invoice #${escapeHtmlInv(idLabel)}</span><span>${dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})} · ${dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span></div>
        ${invAddress(o) ? `<div class="inv-addr">Deliver to: ${escapeHtmlInv(invAddress(o))}</div>` : ''}
        <table class="inv-table"><tbody>${rows}</tbody></table>
-       <div class="inv-line"><span>Item total</span><span>${invMoney(o.subtotal)}</span></div>
-       ${disc>0?`<div class="inv-line disc"><span>Discount${o.coupon&&o.coupon.code?(' ('+escapeHtmlInv(o.coupon.code)+')'):''}</span><span>− ${invMoney(disc)}</span></div>`:''}
-       <div class="inv-line"><span>Delivery fee</span><span>${invMoney(o.deliveryFee)}</span></div>
-       ${tip>0?`<div class="inv-line"><span>Tip</span><span>${invMoney(tip)}</span></div>`:''}
-       ${pc.required && pc.advanceAmount!=null?`<div class="inv-line"><span>${pc.status==='paid'?'Advance paid online':'Advance due online'}</span><span>${invMoney(pc.advanceAmount)}</span></div>`:''}
-       ${pc.required && pc.cashDue!=null?`<div class="inv-line"><span>Cash due on delivery</span><span>${invMoney(pc.cashDue)}</span></div>`:''}
-       <div class="inv-total"><span>${totalLabel}</span><span>${invMoney(o.total)}</span></div>
+       ${linesHtml}
+       <div class="inv-total"><span>${totalLabel}</span><span>${invMoney(grand)}</span></div>
        <div class="inv-foot">${pay.method ? 'Payment: ' + escapeHtmlInv(pay.method) + ' · ' : ''}Thank you for ordering with Eatswada.</div>`;
     document.getElementById('invoice-overlay').classList.add('open');
   };

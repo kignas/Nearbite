@@ -450,7 +450,10 @@
       return;
     }
 
-    var rendered = card.renderList(list, visible);
+    /* preserveOrder: visibleRestaurants() has already applied the backend
+       order for the default sort, or the customer's explicit sort when one is
+       chosen. renderList must not re-rank by distance on top of that. */
+    var rendered = card.renderList(list, visible, { preserveOrder: true });
 
     if (!rendered) {
       state.status = 'empty';
@@ -997,6 +1000,66 @@
     renderSectionTitle();
     renderFilterBar();
     renderRestaurants();
+    /* Backend pricing (free-delivery block, distance) is attached after the
+       list paints, so a slow pricing call never delays the cards. */
+    enrichCards();
+  }
+
+  /* ── Backend pricing enrichment (Phase 1) ───────────────────────
+     Asks GET /pricing/restaurant-cards for the free-delivery block and
+     backend distance for the visible restaurants, then repaints. Debounced
+     and stale-safe. Skipped entirely when there is no address or the pricing
+     client is unavailable, so browsing never depends on it. */
+  var cardsEnrichTimer = null;
+  var cardsEnrichSeq = 0;
+  var cardsEnrichPending = null;
+
+  function currentAddressId() {
+    try {
+      return localStorage.getItem('nearbite_selected_address_id') || '';
+    } catch (e) { return ''; }
+  }
+
+  function currentCartSubtotal() {
+    try {
+      var cart = JSON.parse(localStorage.getItem('nearbite_cart') || '{}') || {};
+      var total = 0;
+      Object.keys(cart).forEach(function (k) {
+        var e = cart[k];
+        if (!e || Number(e.quantity || 0) <= 0) return;
+        total += (Number(e.price) || 0) * Number(e.quantity || 0);
+      });
+      return total;
+    } catch (e) { return 0; }
+  }
+
+  function enrichCards(opts) {
+    var o = opts || {};
+    if (!window.EWRestaurantCards || !window.EWPricing) return;
+    var addressId = currentAddressId();
+    if (!addressId) return;
+    var list = state.restaurants;
+    if (!list || !list.length) return;
+
+    if (cardsEnrichTimer) { clearTimeout(cardsEnrichTimer); cardsEnrichTimer = null; }
+    if (cardsEnrichPending) { var r = cardsEnrichPending; cardsEnrichPending = null; r({ stale: true }); }
+
+    var seq = ++cardsEnrichSeq;
+    var delay = o.immediate ? 0 : 250;
+    cardsEnrichTimer = setTimeout(function () {
+      cardsEnrichTimer = null;
+      cardsEnrichPending = null;
+      window.EWRestaurantCards.enrich(list, {
+        addressId: addressId,
+        eligibleSubtotal: currentCartSubtotal()
+      }).then(function (res) {
+        if (seq !== cardsEnrichSeq) return;         /* stale: a newer call won */
+        if (res && res.applied) {
+          renderRestaurants();
+          maybeRedirectOutsideServiceArea();
+        }
+      }).catch(function () {});
+    }, delay);
   }
 
   function allowOutsideBrowse() {
@@ -1656,6 +1719,16 @@
           event.key === 'nearbite_selected_address_id') {
         onAddressChanged();
       }
+    });
+
+    /* Free-delivery progress / backend distance depend on the address and on
+       the cart subtotal, so both re-run the (debounced, stale-safe)
+       enrichment. Repainting a card on a cart change is additive: the
+       quantity controls are re-derived from the same local cart as before. */
+    window.addEventListener('nearbite:address-changed', function () { enrichCards(); });
+    document.addEventListener('eatswada:cart-updated', function () { enrichCards(); });
+    window.addEventListener('storage', function (event) {
+      if (event.key === 'nearbite_cart' || event.key === null) enrichCards();
     });
   }
 

@@ -206,6 +206,16 @@
     // Notify any page that derives UI from the cart (e.g. homepage product
     // cards) via the existing shared event — no separate cart state.
     try { document.dispatchEvent(new CustomEvent('eatswada:cart-updated', { detail: { source: 'updateCart', itemName: itemName } })); } catch (e) {}
+
+    /* Activity analytics (single helper, fire-and-forget). This is the one
+       choke point every add/remove on the site passes through, so the event
+       is emitted here rather than at each button. Failures are swallowed. */
+    try {
+      if (window.EWAnalytics) {
+        if (change > 0) window.EWAnalytics.addToCart(rId, menuItemId, { source: 'cart' });
+        else if (change < 0) window.EWAnalytics.removeFromCart(rId, menuItemId, { source: 'cart' });
+      }
+    } catch (e) {}
     if (typeof window.updateGlobalCart === 'function') {
       if (!_cartRenderRAF) {
         _cartRenderRAF = requestAnimationFrame(() => {

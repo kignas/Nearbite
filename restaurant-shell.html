@@ -308,6 +308,12 @@ window.ewLoadVisibleImages = function(root, margin){
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
 <script src="api.js"></script>
+<script src="js/ew-tracking.js"></script>
+<script src="js/ew-money.js"></script>
+<script src="js/ew-availability.js"></script>
+<script src="js/ew-freedelivery.js"></script>
+<script src="js/ew-pricing.js"></script>
+<script src="js/ew-bill.js"></script>
 <script src="search-overlay.js"></script>
 <script src="cart-bar.js"></script>
 <script>
@@ -1500,6 +1506,94 @@ window.ewLoadVisibleImages = function(root, margin){
     updateFilterBadge();
   }
 
+  /* ── Free-delivery banner (menu page) ─────────────────────────────
+     Uses the same fields as the restaurant card. The backend's pricing
+     free-delivery block wins when present; otherwise the restaurant's own
+     freeDeliveryAbove threshold is used exactly as before. Nothing here
+     computes a threshold — the line comes from EWFreeDelivery. */
+  let ewFdBannerSeq = 0;
+  function ewCartEligibleSubtotal(resId) {
+    try {
+      const cart = JSON.parse(localStorage.getItem('nearbite_cart')) || {};
+      let sum = 0;
+      Object.keys(cart).forEach(function (name) {
+        const info = cart[name] || {};
+        if (resId && info.resId && String(info.resId) !== String(resId)) return;
+        sum += (Number(info.price) || 0) * (Number(info.quantity) || 0);
+      });
+      return sum;
+    } catch (e) { return 0; }
+  }
+
+  function ewFreeDeliveryLine(res, pricing) {
+    if (pricing && pricing.freeDelivery && window.EWFreeDelivery) {
+      const line = window.EWFreeDelivery.line(pricing.freeDelivery, pricing.deliveryFee);
+      if (line) return { text: line, unlocked: window.EWFreeDelivery.isUnlocked(pricing.freeDelivery) };
+    }
+    if (res && res.freeDeliveryEnabled !== false && Number(res.freeDeliveryAbove) > 0) {
+      return { text: 'Free delivery on orders above ₹' + Number(res.freeDeliveryAbove).toLocaleString('en-IN'), unlocked: false };
+    }
+    return null;
+  }
+
+  async function ewRefreshFreeDeliveryBanner() {
+    const el = document.getElementById('res-free-delivery');
+    if (!el) return;
+    const res = window.__ewRestaurant;
+    if (!res) return;
+
+    /* Fall back immediately so the banner is never blank while the pricing
+       call is in flight (or if it fails). */
+    let pricing = res.pricing || null;
+    const initial = ewFreeDeliveryLine(res, pricing);
+    if (initial) {
+      el.innerHTML = '<i aria-hidden="true" class="fa-solid fa-motorcycle orange"></i><span class="' +
+        (initial.unlocked ? 'is-free' : '') + '">' + escapeMenuHtml(initial.text) + '</span>';
+    }
+
+    const addressId = (function () {
+      try { return localStorage.getItem('nearbite_selected_address_id') || ''; } catch (e) { return ''; }
+    })();
+    if (!addressId || !window.EWPricing) return;
+
+    const rid = String(res._id || res.id || currentResId || '');
+    const subtotal = ewCartEligibleSubtotal(rid);
+    const mySeq = ++ewFdBannerSeq;
+
+    /* Non-blocking: a pricing outage must never break the menu. A stale
+       response (an address or cart change overtook it) is discarded. */
+    try {
+      const result = await window.EWPricing.restaurantCardsNow({
+        addressId: addressId, restaurantIds: [rid], eligibleSubtotal: subtotal
+      });
+      if (mySeq !== ewFdBannerSeq) return;
+      const card = result && result.ok && result.data && Array.isArray(result.data.cards) ? result.data.cards[0] : null;
+      if (!card) return;
+      res.pricing = card;
+      const line = ewFreeDeliveryLine(res, card);
+      if (!line) return;
+      el.innerHTML = '<i aria-hidden="true" class="fa-solid fa-motorcycle orange"></i><span class="' +
+        (line.unlocked ? 'is-free' : '') + '">' + escapeMenuHtml(line.text) + '</span>';
+    } catch (e) { /* keep the fallback line */ }
+  }
+
+  /* Cart changes (from this page, the cart bar, another tab or a bfcache
+     restore) re-quote the banner so the free-delivery progress follows the
+     subtotal. Debounced and stale-safe; a failure leaves the last line. */
+  (function () {
+    let t = null;
+    function schedule() {
+      if (t) clearTimeout(t);
+      t = setTimeout(function () { t = null; ewRefreshFreeDeliveryBanner(); }, 300);
+    }
+    document.addEventListener('eatswada:cart-updated', schedule);
+    window.addEventListener('pageshow', schedule);
+    window.addEventListener('storage', function (e) {
+      if (!e || e.key === 'nearbite_cart' || e.key === 'nearbite_selected_address_id' || e.key === null) schedule();
+    });
+    window.addEventListener('nearbite:address-changed', schedule);
+  })();
+
   async function loadRestaurantPage() {
     const params = new URLSearchParams(window.location.search);
     const resId = params.get('id');
@@ -1520,8 +1614,20 @@ window.ewLoadVisibleImages = function(root, margin){
       isRestaurantOpen = restaurant.isOpen !== false &&
         !(restaurant.availability && restaurant.availability.isOpen === false);
 
+      /* The backend's availability class is authoritative when present: it can
+         distinguish "busy" (still orderable) from a closed/suspended state.
+         EWAvailability only ever narrows the existing decision. */
+      try {
+        if (window.EWAvailability) {
+          const info = window.EWAvailability.classify(restaurant);
+          if (info && typeof info.orderable === 'boolean') isRestaurantOpen = info.orderable === true;
+        }
+      } catch (e) { /* keep the legacy decision */ }
+
+      window.__ewRestaurant = restaurant;
       renderClosedWarning(restaurant);
       renderRestaurantHeader(restaurant);
+      ewRefreshFreeDeliveryBanner();
 
       const groups = normalizeMenu(window.API.unwrap(menuPayload));
 
@@ -1531,6 +1637,9 @@ window.ewLoadVisibleImages = function(root, margin){
 
       window.__ewMenuGroups = groups;
       renderMenu(groups, resId);
+      /* Activity analytics — one menu_view per restaurant per page load.
+         menuViewOnce() collapses re-renders and StrictMode double effects. */
+      try { if (window.EWAnalytics) window.EWAnalytics.menuViewOnce(resId, { source: 'menu' }); } catch (err) {}
       requestAnimationFrame(() => requestAnimationFrame(ewAutoScrollIntoMenu));
       const focusItemId = new URLSearchParams(window.location.search).get('focusItem');
       if (focusItemId) {
@@ -2529,6 +2638,13 @@ window.ewLoadVisibleImages = function(root, margin){
     dsBuild();
     dsHook();
     dsEntry = e;
+    /* Activity analytics — the customer opened a dish detail. Single helper,
+       fire-and-forget; never blocks the sheet. */
+    try {
+      if (window.EWAnalytics && e && e.item) {
+        window.EWAnalytics.itemView(currentResId, e.item._id || e.item.id, { source: 'menu' });
+      }
+    } catch (err) {}
     const root = document.getElementById('ds-root');
     const sheet = root.querySelector('.ds-sheet');
     sheet.innerHTML = dsHTML(e);

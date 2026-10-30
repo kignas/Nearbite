@@ -722,6 +722,8 @@
   <script src="js/auth-token.js?v=20261025"></script>
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
+<script src="js/ew-money.js"></script>
+<script src="js/ew-bill.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" integrity="sha384-AQ3POAMqIhwS81FrUH95ekxqBZHeP5tG2JfEL3+7GuTtfRLWnrRh32UxwzM+//A9" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js" integrity="sha384-XtSlZdmg0Ad5zf0AX4W9TGdm+dGjaNK4KG3lNFjfgbnxkCEuT9ugWXkLExgQTJ+6" crossorigin="anonymous"></script>
   <script src="push.js"></script>
@@ -941,6 +943,31 @@
         const mark = vc ? `<span class="veg-mark ${vc}" aria-label="${vc === 'veg' ? 'Veg' : 'Non-veg'}"><i></i></span>` : '';
         return `<div class="item-row">${mark}<span class="item-name">${esc(i.quantity)} x ${esc(i.name)}</span>${hasPrice ? `<span class="item-price">${fmtMoney(i.price * i.quantity)}</span>` : ''}</div>`;
       }).join('');
+
+      /* When the backend stored an itemized bill on the order (the dynamic
+         pricing engine writes one), render THAT: the stored financial
+         snapshot is authoritative and is never recomputed. Legacy orders
+         without a bill keep the computed summary below, unchanged. */
+      if (order && order.bill && typeof order.bill === 'object' && window.EWBill &&
+          typeof window.EWBill.rowsFromStoredBill === 'function') {
+        const stored = window.EWBill.rowsFromStoredBill(order);
+        if (stored && stored.length) {
+          chargesWrap.innerHTML = stored.map(r =>
+            `<div class="charge-row ${r.kind || ''}"><span class="charge-label">${esc(r.label)}${r.note ? `<span class="charge-note">${esc(r.note)}</span>` : ''}</span><span class="charge-val">${esc(r.display)}</span></div>`
+          ).join('');
+          const grand = (order.bill.grandTotal != null && order.bill.grandTotal > 0)
+            ? order.bill.grandTotal
+            : (order.grandTotal != null ? order.grandTotal : order.total);
+          if (grand != null) document.getElementById('display-total').innerText = money2(grand);
+          const savedStored = (Number(order.bill.discountAmount || 0)) + (Number(order.bill.deliverySubsidy || 0));
+          const bannerStored = document.getElementById('saved-banner');
+          if (bannerStored) {
+            if (savedStored > 0) { bannerStored.textContent = `You saved ${money2(savedStored)} on this order!`; bannerStored.hidden = false; }
+            else bannerStored.hidden = true;
+          }
+          return;
+        }
+      }
 
       // Only rows for fields the backend really sent. Nothing is invented.
       const rows = [];

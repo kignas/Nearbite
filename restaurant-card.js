@@ -240,14 +240,18 @@
       ? customerCoords
       : getSelectedCustomerCoordinates();
 
-    var restaurantCoords = read.coordinates(res);
-    if (customer && restaurantCoords) return haversineKm(customer, restaurantCoords);
+    /* Backend distance wins when the API supplied it (it is the real road
+       distance and the value the delivery fee was based on). The browser
+       haversine is only a fallback for payloads/caches that predate the
+       backend distance fields. */
+    var backendKm = firstNumber(res.distanceKm);
+    if (backendKm != null) return backendKm;
 
     var meters = firstNumber(res.distanceMeters);
     if (meters != null) return meters / 1000;
 
-    var km = firstNumber(res.distanceKm);
-    if (km != null) return km;
+    var restaurantCoords = read.coordinates(res);
+    if (customer && restaurantCoords) return haversineKm(customer, restaurantCoords);
 
     if (typeof res.distance === 'string') {
       var parsed = parseFloat(res.distance.replace(/[^\d.]/g, ''));
@@ -304,6 +308,19 @@
   /* ── Availability ───────────────────────────────────────────── */
 
   function getAvailabilityStatus(res) {
+    /* Prefer the backend's explicit availability class when present. */
+    if (window.EWAvailability) {
+      var info = window.EWAvailability.classify(res);
+      if (info) {
+        if (info.orderable === true) return null;
+        if (info.orderable === false) {
+          if (info.class === 'closed_today') return 'closed_today';
+          if (info.class === 'temporarily_closed' || info.class === 'outside_hours') return 'temporarily_closed';
+          return 'unavailable';
+        }
+      }
+    }
+
     var avail = res.availability || {};
     var isOpen = typeof avail.isOpen === 'boolean' ? avail.isOpen : res.isOpen;
 
@@ -356,6 +373,11 @@
         : 'Closed • Opens at ' + opensAt;
     }
     if (status === 'closed_today') return 'Closed Today';
+    /* Fall back to the backend's own reason label when it supplies one. */
+    if (window.EWAvailability) {
+      var cls = window.EWAvailability.classify(res);
+      if (cls && cls.label) return cls.label;
+    }
     return 'Temporarily Closed';
   }
 
@@ -387,6 +409,12 @@
   function resolveAvailability(res, customerCoords) {
     var status = getAvailabilityStatus(res);
     if (status) return status;
+
+    /* Backend serviceability is authoritative when present: it uses the same
+       distance rule the delivery fee was based on. */
+    if (typeof res.serviceable === 'boolean') {
+      return res.serviceable === false ? 'outside_delivery_area' : null;
+    }
 
     var restaurantCoords = read.coordinates(res);
     if (!customerCoords || !restaurantCoords) return null;
@@ -735,7 +763,32 @@
       return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>New</b></span>';
     }
     var rating=Number(r.rating);var count=homeFormatCount(r.ratingCount);return '<span class="u99-rating">'+home99Icon.ratingBadge+'<b>'+(rating>0?rating.toFixed(1):'—')+'</b>'+(count?'<span class="u99-rating-count">('+esc(count)+')</span>':'')+'</span>';}
-  function homeFreeDeliveryMarkup(r){var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
+  /* Ranking badges (Sponsored / Featured) from the backend. Sponsored is
+     labelled exactly as the backend says (default "Sponsored") so a paid
+     placement is never disguised as an organic one. */
+  function homeBadgesMarkup(r){
+    var out='';
+    if(window.EWAvailability){
+      if(window.EWAvailability.isSponsored(r)){
+        out+='<span class="u99-badge u99-badge-sponsored">'+esc(window.EWAvailability.sponsoredLabel(r)||'Sponsored')+'</span>';
+      } else if(window.EWAvailability.isFeatured(r)){
+        out+='<span class="u99-badge u99-badge-featured">Featured</span>';
+      }
+    }
+    return out;
+  }
+  function homeFreeDeliveryMarkup(r){
+    /* Pricing free-delivery block (from GET /pricing/restaurant-cards) wins
+       when present; otherwise fall back to the restaurant's own
+       freeDeliveryAbove as before. Never computes a threshold here. */
+    var fd=r&&r.pricing&&r.pricing.freeDelivery;
+    if(fd&&window.EWFreeDelivery){
+      var line=window.EWFreeDelivery.line(fd,r.pricing.deliveryFee);
+      if(!line)return '';
+      var unlocked=window.EWFreeDelivery.isUnlocked(fd);
+      return '<div class="u99-free-row'+(unlocked?' is-unlocked':'')+'"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">'+esc(line)+'</span></div>';
+    }
+    var v=r.freeDeliveryAbove!=null?r.freeDeliveryAbove:(r.freeDeliveryThreshold!=null?r.freeDeliveryThreshold:null);if(v==null)return '';return '<div class="u99-free-row"><span class="u99-free-icon">'+home99Icon.offerSeal+'</span><span class="u99-free-text">Free delivery above ₹'+(Number(v)||0)+'</span><button type="button" class="u99-info" data-home99-action="info" aria-label="Free delivery information">'+home99Icon.info+'</button></div>';}
   /* Black verified tick shown after the restaurant name. Hidden only when the
      API explicitly says verified === false (same rule as the restaurant page). */
   function homeVerifiedBadge(r){
@@ -750,7 +803,7 @@
     var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
-      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(distanceText?'<span class="u99-sep">•</span><span class="u99-distance">'+esc(distanceText)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
+      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+homeBadgesMarkup(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(distanceText?'<span class="u99-sep">•</span><span class="u99-distance">'+esc(distanceText)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
       '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?homeRailMarkup(menu,res):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
@@ -780,8 +833,12 @@
     document.addEventListener('click',function(e){
       var el=e.target.closest&&e.target.closest('[data-home99-action]');if(!el)return;var host=el.closest('.u99-card-host');if(!host)return;var id=host.getAttribute('data-home99-restaurant');
       var currentRestaurant=window.__home99Data&&window.__home99Data[id];
-      if(currentRestaurant&&resolveAvailability(currentRestaurant,getSelectedCustomerCoordinates())==='outside_delivery_area'){e.preventDefault();e.stopPropagation();showAvailabilityToast('Not delivering to your location');return;}
-      if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();var selected=window.__home99Data&&window.__home99Data[id];if(selected&&resolveAvailability(selected,getSelectedCustomerCoordinates())==='outside_delivery_area'){showAvailabilityToast('Not delivering to your location');return;}if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
+      /* A restaurant the backend marks unavailable is not orderable: the card
+         is muted (is-unavailable) and every action is refused with the
+         backend's own reason, so nothing here re-derives availability. */
+      var currentStatus=currentRestaurant?resolveAvailability(currentRestaurant,getSelectedCustomerCoordinates()):null;
+      if(currentStatus){e.preventDefault();e.stopPropagation();showAvailabilityToast(getAvailabilityLabel(currentStatus,currentRestaurant));return;}
+      if(el.getAttribute('data-home99-action')==='restaurant'){e.preventDefault();e.stopPropagation();if(id)window.location.href='restaurant.html?id='+encodeURIComponent(id);return;}
       var action=el.getAttribute('data-home99-action');
       if(action==='info'){e.preventDefault();e.stopPropagation();var rr=window.__home99Data&&window.__home99Data[id];if(rr&&typeof window.showToast==='function')window.showToast('Free delivery information');return;}
       if(action==='customize'){e.preventDefault();e.stopPropagation();
@@ -814,13 +871,18 @@
     return homeBuildCard(res,index,customerCoords);
   }
 
-  function renderList(container, restaurants) {
+  /* options.preserveOrder (default false): render in exactly the order given,
+     which is the backend's ranking order. Callers that already applied a
+     user-chosen sort, or that must show the backend order, pass true. */
+  function renderList(container, restaurants, options) {
     if (!container) return 0;
+    var opts = options || {};
     var list = Array.isArray(restaurants) ? restaurants.slice() : [];
     var customerCoords = getSelectedCustomerCoordinates();
     /* Stable availability-first ordering: the nearest restaurant that can
-       serve this address appears first; unavailable restaurants remain visible. */
-    if (customerCoords) {
+       serve this address appears first; unavailable restaurants remain visible.
+       Skipped when the caller wants the backend's own order kept. */
+    if (customerCoords && !opts.preserveOrder) {
       list = list.map(function (res, index) {
         var status = resolveAvailability(res, customerCoords);
         var point = read.coordinates(res);
@@ -1117,6 +1179,8 @@
     getAddressCoordinates: getAddressCoordinates,
     MAX_DELIVERY_KM: MAX_DELIVERY_KM,
     resolveAvailability: resolveAvailability,
+    getAvailabilityStatus: getAvailabilityStatus,
+    getAvailabilityLabel: getAvailabilityLabel,
     showAvailabilityToast: showAvailabilityToast,
     handleImageError: handleImageError,
     syncFavoriteButtons: syncFavoriteButtons,

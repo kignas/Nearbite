@@ -173,6 +173,7 @@
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
 <link rel="stylesheet" href="food-placeholder.css">
+<link rel="stylesheet" href="css/ew-pricing-ui.css?v=20261030">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -237,6 +238,12 @@
 <script src="config.js"></script>
 <script src="safe-html.js"></script>
 <script src="api.js"></script>
+<script src="js/auth-token.js"></script>
+<script src="js/ew-money.js"></script>
+<script src="js/ew-availability.js"></script>
+<script src="js/ew-freedelivery.js"></script>
+<script src="js/ew-pricing.js"></script>
+<script src="js/ew-restaurant-cards.js"></script>
 <script src="restaurant-card.js"></script>
 <script>
 /* ================================================================
@@ -372,6 +379,31 @@
         var offer = read.offer(res);
         var distance = window.RestaurantCard.formatDistance(window.RestaurantCard.getDistanceKm(res));
 
+        /* Availability comes from the backend (never re-derived here). */
+        var status = window.RestaurantCard.resolveAvailability(res);
+        var unavailable = !!status;
+        var label = unavailable && window.RestaurantCard.getAvailabilityLabel
+          ? window.RestaurantCard.getAvailabilityLabel(status, res) : 'Currently unavailable';
+
+        /* Sponsored / Featured badge from the backend ranking fields. */
+        var badges = '';
+        if (window.EWAvailability) {
+          if (window.EWAvailability.isSponsored(res)) {
+            badges = '<span class="u99-badge u99-badge-sponsored">' + esc(window.EWAvailability.sponsoredLabel(res) || 'Sponsored') + '</span>';
+          } else if (window.EWAvailability.isFeatured(res)) {
+            badges = '<span class="u99-badge u99-badge-featured">Featured</span>';
+          }
+        }
+
+        /* Free-delivery line: pricing block first, then the legacy threshold. */
+        var freeLine = '';
+        var fd = res.pricing && res.pricing.freeDelivery;
+        if (fd && window.EWFreeDelivery) {
+          freeLine = window.EWFreeDelivery.line(fd, res.pricing.deliveryFee);
+        } else if (res.freeDeliveryAbove != null) {
+          freeLine = 'Free delivery above ₹' + (Number(res.freeDeliveryAbove) || 0);
+        }
+
         var meta = [];
         if (rating != null) {
           meta.push('<div class="res-rating"><i class="fa-solid fa-star" style="font-size:8px;"></i> ' +
@@ -379,7 +411,7 @@
         }
         if (time) meta.push('<span class="res-time">' + esc(time.text) + '</span>');
 
-        return '<a href="restaurant.html?id=' + encodeURIComponent(id) + '" class="res-card">' +
+        var inner =
           '<div class="res-img-wrap">' +
             '<div class="ew-food-ph" aria-hidden="true"></div>' +
             (images.length
@@ -389,16 +421,37 @@
             (offer ? '<div class="res-offer">' + esc(offer) + '</div>' : '') +
           '</div>' +
           '<div class="res-info">' +
-            '<div class="res-top"><h3 class="res-name">' + esc(name) + '</h3></div>' +
+            '<div class="res-top"><h3 class="res-name">' + esc(name) + badges + '</h3></div>' +
             (meta.length ? '<div class="res-meta-row">' + meta.join(' · ') + '</div>' : '') +
             (cuisine ? '<p class="res-cuisine">' + esc(cuisine) + '</p>' : '') +
+            (freeLine ? '<p class="res-free">' + esc(freeLine) + '</p>' : '') +
             (distance
               ? '<p class="res-loc"><i class="fa-solid fa-location-dot" style="color:#159447; font-size:9px;"></i> ' +
                 esc(distance) + '</p>'
               : '') +
-          '</div>' +
-        '</a>';
+            (unavailable ? '<p class="res-closed">' + esc(label) + '</p>' : '') +
+          '</div>';
+
+        /* Offline restaurants keep their place in the backend order but are
+           not orderable: rendered as a non-clickable card. */
+        if (unavailable) {
+          return '<div class="res-card is-closed" aria-disabled="true">' + inner + '</div>';
+        }
+        return '<a href="restaurant.html?id=' + encodeURIComponent(id) + '" class="res-card">' + inner + '</a>';
       }).join('');
+  }
+
+  /* ── Backend pricing enrichment (free-delivery / distance) ─────── */
+  function currentAddressId() {
+    try { return localStorage.getItem('nearbite_selected_address_id') || ''; } catch (e) { return ''; }
+  }
+  function enrich() {
+    if (!window.EWRestaurantCards || !window.EWPricing) return;
+    var addressId = currentAddressId();
+    if (!addressId || !state.restaurants.length) return;
+    window.EWRestaurantCards.enrich(state.restaurants, { addressId: addressId })
+      .then(function (res) { if (res && res.applied) render(); })
+      .catch(function () {});
   }
 
   function load() {
@@ -409,6 +462,7 @@
       state.status = 'ready';
       syncFilterBar();
       render();
+      enrich();
     }
 
     return window.API.getList(window.API.routes.restaurants)
@@ -420,6 +474,7 @@
         window.API.cache.writeList(window.API.CACHE_KEYS.restaurants, state.restaurants);
         syncFilterBar();
         render();
+        enrich();
       })
       .catch(function (error) {
         console.error('[category] load failed:', error);
