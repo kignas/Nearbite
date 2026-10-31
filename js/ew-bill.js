@@ -53,15 +53,17 @@
     }
 
     /* Food: show the payable food amount; expose the uplift/gross as a note. */
-    push('foodSubtotal', 'Item total', has(b.foodPayable) ? b.foodPayable : b.customerFoodSubtotal, 'food',
-      (num(b.foodUplift) > 0) ? 'Includes ' + money(b.foodUplift) + ' platform food price' : '');
+    push('foodSubtotal', 'Item total', has(b.foodPayable) ? b.foodPayable : b.customerFoodSubtotal, 'food', '');
     /* Funding source is the backend's own label (never inferred client-side). */
     var funded = q.contribution && q.contribution.promotionFundingSource;
     var fundNote = (funded && funded !== 'none') ? 'Funded by ' + String(funded).replace(/_/g, ' ') : '';
     push('discount', 'Discount', b.discount, 'discount', fundNote);
     if (num(b.couponDiscount) > 0) push('couponDiscount', 'Coupon', b.couponDiscount, 'discount', fundNote);
     if (num(b.autoDiscount) > 0) push('autoDiscount', 'Offer discount', b.autoDiscount, 'discount', fundNote);
-    push('deliveryFee', (num(b.deliverySubsidy) > 0 ? 'Delivery (free)' : 'Delivery fee'),
+    /* Distance is read from the quote the backend already sent; nothing is computed. */
+    var km = q.distance && Number(q.distance.restaurantToCustomerKm);
+    var kmText = (Number.isFinite(km) && km > 0) ? ' | ' + km.toFixed(1) + ' kms' : '';
+    push('deliveryFee', (num(b.deliverySubsidy) > 0 ? 'Delivery (free)' : 'Delivery fee') + kmText,
       (num(b.deliverySubsidy) > 0 ? 0 : b.deliveryFee), 'delivery',
       (num(b.deliverySubsidy) > 0) ? 'You save ' + money(b.deliverySubsidy) : '');
     push('smallOrderFee', 'Small order fee', b.smallOrderFee, 'fee');
