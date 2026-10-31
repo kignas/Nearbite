@@ -19,22 +19,20 @@
   if (window.EWOrderSuccess) return;
   var active = false;
 
-  /* [angle°, distance px, kind, colour, size px, delay s, spin°] around the badge. */
+  /* [angle°, distance px, kind, colour, size px, delay s, spin°] around the badge.
+     The badge ring is 54px in radius, so every piece sits 14-22px outside it:
+     a tight, even sprinkle close to the badge rather than a wide scatter. */
   var PIECES = [
-    [-100, 74, 'dot',  '#A855F7', 7, .50, 0],
-    [-52,  80, 'curl', '#F97316', 20, .56, 25],
-    [-8,   86, 'dot',  '#38BDF8', 8, .52, 0],
-    [14,   82, 'tri',  '#B6E02B', 14, .62, 40],
-    [58,   72, 'moon', '#2563EB', 14, .58, -20],
-    [112,  78, 'dot',  '#22C55E', 7, .54, 0],
-    [160,  84, 'wave', '#2F7CE0', 20, .60, 10],
-    [-168, 80, 'dot',  '#FBBF24', 9, .48, 0],
-    [-128, 70, 'bar',  '#EF4444', 12, .64, 55],
-    [-28,  58, 'dot',  '#F472B6', 5, .66, 0],
-    [36,   96, 'dot',  '#FACC15', 5, .70, 0],
-    [-76,  98, 'tri',  '#F97316', 10, .68, -30],
-    [132,  94, 'curl', '#EF4444', 16, .72, 70],
-    [-148, 102, 'dot', '#38BDF8', 5, .74, 0]
+    [-98,  68, 'dot',  '#A855F7', 6,  .50, 0],
+    [-48,  74, 'curl', '#F97316', 16, .56, 25],
+    [-6,   72, 'dot',  '#38BDF8', 7,  .52, 0],
+    [18,   76, 'tri',  '#B6E02B', 11, .60, 40],
+    [56,   70, 'moon', '#2563EB', 11, .58, -20],
+    [112,  68, 'dot',  '#22C55E', 6,  .54, 0],
+    [158,  74, 'wave', '#2F7CE0', 16, .60, 10],
+    [-170, 70, 'dot',  '#FBBF24', 8,  .48, 0],
+    [-128, 70, 'bar',  '#EF4444', 10, .64, 55],
+    [134,  72, 'curl', '#EF4444', 13, .66, 70]
   ];
   var SHAPES = {
     curl: '<svg viewBox="0 0 20 20" fill="none"><path d="M3 12c-1-7 9-8 9-2s-8 3-5-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
@@ -62,7 +60,7 @@
       var a = p[0] * Math.PI / 180;
       var c = el('span', 'ew-os__c' + (p[2] === 'dot' ? ' ew-os__c--dot' : ''));
       c.style.setProperty('--x', Math.round(Math.cos(a) * p[1]) + 'px');
-      c.style.setProperty('--y', Math.round(Math.sin(a) * p[1] * .8) + 'px');
+      c.style.setProperty('--y', Math.round(Math.sin(a) * p[1] * .9) + 'px');
       c.style.setProperty('--sz', p[4] + 'px');
       c.style.setProperty('--d', p[5] + 's');
       c.style.setProperty('--r', p[6] + 'deg');
