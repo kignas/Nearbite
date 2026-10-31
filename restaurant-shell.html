@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="css/restaurant-info-premium.css?v=1">
 <link rel="stylesheet" href="css/restaurant-filter-motion.css?v=1">
 <link rel="stylesheet" href="css/restaurant-search-page.css?v=8">
-<link rel="stylesheet" href="css/ew-sheet.css?v=1">
+<link rel="stylesheet" href="css/ew-sheet.css?v=2">
 
 <meta name="twitter:card" content="summary"/>
 <style id="ew-header-v2">
@@ -3276,7 +3276,7 @@ window.ewLoadVisibleImages = function(root, margin){
     sh.style.zIndex = '100051';
     sh.innerHTML =
       '<div class="ewcs-handle"></div>'+
-      '<div class="ewcs-head"><div class="ewcs-htitle"><span class="ewcs-vegdot"></span><h3 id="ewcs-title"></h3></div><button class="ewcs-close" id="ewcs-close" aria-label="Close">✕</button></div>'+
+      '<div class="ewcs-head"><div class="ewcs-htitle"><img class="ewcs-thumb" id="ewcs-thumb" alt="" hidden><span class="ewcs-vegdot"></span><h3 id="ewcs-title"></h3></div><button class="ewcs-close" id="ewcs-close" aria-label="Close">✕</button></div>'+
       '<div class="ewcs-body" id="ewcs-body"></div>'+
       '<div class="ewcs-foot"><div class="ewcs-qty"><button id="ewcs-minus" aria-label="Decrease">−</button><span id="ewcs-qty">1</span><button id="ewcs-plus" aria-label="Increase">+</button></div><button class="ewcs-add" id="ewcs-add">Add item</button></div>';
     document.body.appendChild(bd); document.body.appendChild(sh);
@@ -3326,6 +3326,8 @@ window.ewLoadVisibleImages = function(root, margin){
     if (cartRoot) cartRoot.style.display = 'none';
     cur = { base:base, qty:1 };
     el.title.textContent = base.name;
+    var th = document.getElementById('ewcs-thumb');
+    if (th) { if (base.image) { th.onerror = function(){ th.hidden = true; }; th.src = base.image; th.hidden = false; } else { th.removeAttribute('src'); th.hidden = true; } }
     document.querySelector('.ewcs-vegdot').className = 'ewcs-vegdot';
     el.qty.textContent = '1';
     // render groups
