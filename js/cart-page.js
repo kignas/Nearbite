@@ -1535,6 +1535,55 @@ async function ctWaitForPaymentStatus(orderId, token, maxMs = 22000) {
   return null;
 }
 
+/* Success pop-up on the checkout page. Called only AFTER the backend has
+   confirmed the order (COD accepted, or payment verified server-side). The
+   sheet is presentation; the cart and checkout key are already cleared by the
+   caller. If the sheet module is missing, fall back to the full-page result. */
+function ctShowOrderSuccess(result, primaryOrderId, kind, amounts) {
+  if (!window.EWOrderSuccess) { ctGoPaymentResult('success'); return; }
+  const money = (v) => {
+    if (v == null || v === '') return '';
+    return window.EWPayment ? window.EWPayment.money(v) : '\u20B9' + v;
+  };
+  const a = amounts || {};
+  const rows = [];
+  let title, message;
+  if (kind === 'cod') {
+    title = 'Order placed!';
+    message = 'Pay cash when your order arrives.';
+    const t = money(a.serverTotal);
+    if (t) rows.push({ label: 'Pay on delivery', value: t });
+  } else if (a.partialCodAdvanceAmount != null) {
+    title = 'Advance paid';
+    message = 'Your order is placed. Pay the rest in cash on delivery.';
+    const adv = money(a.partialCodAdvanceAmount), due = money(a.partialCodCashDue);
+    if (adv) rows.push({ label: 'Advance paid', value: adv, tone: 'good' });
+    if (due) rows.push({ label: 'Cash due on delivery', value: due });
+  } else {
+    title = 'Payment successful';
+    message = 'Your order is confirmed.';
+    const t = money(a.serverTotal);
+    if (t) rows.push({ label: 'Amount paid', value: t, tone: 'good' });
+  }
+  const orderId = primaryOrderId || result?.data?._id || null;
+  const multiple = !!result?.multiple;
+  const shown = window.EWOrderSuccess.show({
+    title: title,
+    message: message,
+    orderNumber: result?.data?.orderNumber || '',
+    rows: rows,
+    buttonText: multiple ? 'View my orders' : 'Track my order',
+    onContinue: function () {
+      // The confirmation has been seen; the payment context is finished with.
+      try { localStorage.removeItem(CT_PAYMENT_CONTEXT_KEY); } catch (_) {}
+      window.location.href = (!orderId || multiple)
+        ? 'orders.html'
+        : 'track-order.html?id=' + encodeURIComponent(orderId);
+    }
+  });
+  if (!shown) ctGoPaymentResult('success');
+}
+
 function ctFinishCodOrder(result, primaryOrderId, serverTotal, btn) {
   // The backend already created the COD order; the cart is cleared only now.
   localStorage.removeItem('nearbite_cart');
@@ -1545,7 +1594,9 @@ function ctFinishCodOrder(result, primaryOrderId, serverTotal, btn) {
     serverTotal: serverTotal != null ? serverTotal : null
   }));
   if (btn) btn.style.pointerEvents = 'none';
-  ctGoPaymentResult('success');
+  ctShowOrderSuccess(result, primaryOrderId, 'cod', {
+    serverTotal: serverTotal != null ? serverTotal : null
+  });
 }
 
 /* Display amounts for the confirmation screen, taken only from the server's
@@ -1578,7 +1629,7 @@ function ctFinishSuccessfulPayment(result, btn, confirmed) {
     ctPaymentDisplayAmounts(result, confirmed)
   ));
   if (btn) btn.style.pointerEvents = 'none';
-  ctGoPaymentResult('success');
+  ctShowOrderSuccess(result, result?.data?._id, 'online', ctPaymentDisplayAmounts(result, confirmed));
 }
 
 function ctHandleFailedPayment(result, primaryOrderId, btn) {
