@@ -11,7 +11,7 @@
 <script src="js/auth-token.js?v=20261025"></script>
 <script src="js/payment-state.js?v=20261025"></script>
 <script src="js/checkout-key.js?v=20261025"></script>
-<link rel="stylesheet" href="css/eatswada-payment.css?v=20261004-pay1">
+<link rel="stylesheet" href="css/eatswada-payment.css?v=20261031-pay2">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
 
@@ -25,57 +25,130 @@
 <meta property="og:url" content="https://eatswada.com/payment-pending.html"/>
 <meta name="twitter:card" content="summary"/>
 </head>
-<body><main class="ew-result ew-pending" aria-live="polite">
+<body><main class="ew-result ew-pending" id="ew-main" data-state="verifying" aria-live="polite">
 
 <div class="ew-icon-wrap">
   <span class="ew-halo" aria-hidden="true"></span>
   <div class="ew-icon" aria-hidden="true">
-    <svg class="ew-svg" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <svg class="ew-svg ew-svg--wait" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <circle cx="24" cy="24" r="19" stroke="currentColor" stroke-opacity=".16" stroke-width="3"/>
       <circle class="ew-arc" cx="24" cy="24" r="19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="30 90"/>
       <circle class="ew-arc ew-arc--b" cx="24" cy="24" r="12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="12 63"/>
     </svg>
+    <svg class="ew-svg ew-svg--ok" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <circle class="ew-ok-ring" cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2.5"/>
+      <path class="ew-ok-check" d="m14.5 24.5 6.2 6.1L34 17.8" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="ew-spark ew-spark--dot" style="--a:15deg;--sd:.46s;--dist:40px;--s:5px"></span>
+    <span class="ew-spark ew-spark--dot" style="--a:72deg;--sd:.54s;--dist:33px;--s:4px"></span>
+    <span class="ew-spark ew-spark--dot" style="--a:128deg;--sd:.48s;--dist:42px;--s:5px"></span>
+    <span class="ew-spark ew-spark--dot" style="--a:182deg;--sd:.56s;--dist:35px;--s:4px"></span>
+    <span class="ew-spark ew-spark--dot" style="--a:236deg;--sd:.50s;--dist:41px;--s:5px"></span>
+    <span class="ew-spark ew-spark--dot" style="--a:302deg;--sd:.58s;--dist:44px;--s:4px"></span>
   </div>
 </div>
 
-<h1 class="ew-title">Checking your payment</h1>
-<p class="ew-copy">Your payment may have reached the bank already. We're checking Eatswada's server before asking you to pay again.</p>
+<h1 class="ew-title" id="ew-title">Confirming your payment</h1>
+<p class="ew-copy" id="ew-copy">This usually takes a few seconds. Please don't close this page.</p>
 
 <div class="ew-order" id="ew-order" hidden>
   <div class="ew-order-row">
     <span class="ew-order-label">Order number</span>
     <span class="ew-order-value" id="ew-order-number"></span>
   </div>
+  <div class="ew-order-row" id="ew-amount-row" hidden>
+    <span class="ew-order-label" id="ew-amount-label">Amount paid</span>
+    <span class="ew-order-value ew-amount-value" id="ew-amount"></span>
+  </div>
+  <div class="ew-order-row" id="ew-cash-row" hidden>
+    <span class="ew-order-label">Cash due on delivery</span>
+    <span class="ew-order-value" id="ew-cash"></span>
+  </div>
 </div>
 
 <ol class="ew-steps" aria-label="Payment verification steps">
   <li class="is-done">
     <span class="ew-step-dot"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    <span class="ew-step-label">Payment attempted</span>
+    <span class="ew-step-label">Payment sent</span>
   </li>
   <li class="is-active">
-    <span class="ew-step-dot"><span class="ew-step-pulse" aria-hidden="true"></span></span>
-    <span class="ew-step-label">Verifying your payment</span>
+    <span class="ew-step-dot"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ew-step-pulse" aria-hidden="true"></span></span>
+    <span class="ew-step-label">Confirming with your bank</span>
   </li>
   <li>
-    <span class="ew-step-dot"></span>
+    <span class="ew-step-dot"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     <span class="ew-step-label">Order confirmed</span>
   </li>
 </ol>
 
-<div class="ew-actions">
-  <button class="ew-btn ew-btn-primary" id="ew-orders">View My Orders</button>
-  <button class="ew-btn ew-btn-ghost" id="ew-refresh">Check again</button>
-</div>
+<div class="ew-foot">
+  <p class="ew-note" id="ew-wait-note" data-show="verifying">Paid with a UPI app? Stay here. We'll move on as soon as your bank confirms.</p>
 
-<p class="ew-note">Keep this page open for a moment if you just completed UPI payment.</p>
+  <div class="ew-linkrow" data-show="verifying" data-late="1">
+    <button type="button" class="ew-link js-refresh" data-needs="verify">Check again</button>
+    <button type="button" class="ew-link js-orders">View my orders</button>
+  </div>
+
+  <div class="ew-actions" data-show="timeout">
+    <button type="button" class="ew-btn ew-btn-primary js-orders">View my orders</button>
+    <button type="button" class="ew-btn ew-btn-ghost js-refresh" data-needs="verify">Check again</button>
+  </div>
+
+  <div data-show="success">
+    <div class="ew-actions">
+      <button type="button" class="ew-btn ew-btn-primary" id="ew-continue">Track my order</button>
+    </div>
+    <div class="ew-redirect">
+      <div class="ew-redirect-bar" aria-hidden="true"><span class="ew-redirect-fill"></span></div>
+    </div>
+  </div>
+</div>
 
 </main>
 <script>
 (function(){
+'use strict';
 const KEY='nearbite_payment_context',token=window.EWAuth?window.EWAuth.getToken():(localStorage.getItem('nearbite_token')||localStorage.getItem('token'));let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
-if(ctx?.orderNumber){document.getElementById('ew-order-number').textContent=ctx.orderNumber;document.getElementById('ew-order').hidden=false}
+const $=id=>document.getElementById(id), main=$('ew-main');
+const canVerify=!!(ctx&&ctx.orderId&&token);
+/* A COD order that needs an online advance reaches this page after the Razorpay
+   advance; plain COD never does (it goes straight to payment-success). */
+const isAdvance=String(ctx&&ctx.method||'').toUpperCase()==='COD';
+const POLL_MS=2500, WAIT_MS=60000, LATE_MS=15000, RESUME_MS=20000, REDIRECT_MS=2200;
+let state='verifying', late=false, done=false, left=false, pollTimer=null, lateTimer=null, deadline=0, inflight=null;
+
+if(ctx?.orderNumber){$('ew-order-number').textContent=ctx.orderNumber;$('ew-order').hidden=false}
+
+/* ---- copy per state ---- */
+const COPY={
+  verifying:{title:isAdvance?'Confirming your advance':'Confirming your payment',copy:"This usually takes a few seconds. Please don't close this page."},
+  timeout:canVerify
+    ?{title:'Still waiting on your bank',copy:"If money was deducted, don't pay again. Your order will update as soon as the bank confirms."}
+    :{title:"We couldn't check this payment",copy:"If money was deducted, don't pay again. Open My Orders to see the latest status."},
+  success:{title:isAdvance?'Advance paid':'Payment confirmed',copy:isAdvance?'Your order is placed. Pay the rest in cash on delivery.':'Your order is placed. Opening it now.'}
+};
+function swap(el,text){el.textContent=text;el.classList.remove('ew-swap');void el.offsetWidth;el.classList.add('ew-swap')}
+function render(){
+  main.dataset.state=state;
+  document.querySelectorAll('[data-show]').forEach(el=>{
+    let on=el.dataset.show.split(' ').indexOf(state)>-1;
+    if(on&&el.dataset.late&&!late)on=false;
+    el.hidden=!on;
+  });
+  document.querySelectorAll('[data-needs="verify"]').forEach(el=>{if(!canVerify)el.hidden=true});
+  const li=document.querySelectorAll('.ew-steps li');
+  const marks=state==='success'?['is-done','is-done','is-done']:['is-done','is-active',''];
+  li.forEach((n,i)=>{n.classList.remove('is-done','is-active');if(marks[i])n.classList.add(marks[i])});
+}
+function setState(next){
+  if(state===next)return;
+  state=next;render();
+  swap($('ew-title'),COPY[next].title);swap($('ew-copy'),COPY[next].copy);
+}
+
+/* ---- navigation (unchanged behaviour) ---- */
 function goToOrder(){
+  if(left)return;left=true;
   /* The backend has authoritatively confirmed the payment/order, so cleanup
      is now warranted: the cart, the checkout attempt key and the payment
      context are all finished with. Nothing is cleared on a pending or
@@ -91,27 +164,94 @@ function goToOrder(){
   if(!ctx?.orderId){location.href='orders.html';return}
   location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId);
 }
-/* Only the server's own fields decide the outcome. A partial-COD advance that
-   the backend reports as settled (cod_pending + partialCodAdvanceStatus:paid)
-   is a success, not a failure. */
+function viewOrders(){location.href=ctx?.multiple?'orders.html':(ctx?.orderId?'track-order.html?id='+encodeURIComponent(ctx.orderId):'orders.html')}
+
+/* ---- server verdict: only the server's own fields decide the outcome. A
+   partial-COD advance that the backend reports as settled (cod_pending +
+   partialCodAdvanceStatus:paid) is a success, not a failure. ---- */
 function classify(data){
   if(window.EWPayment){const s=window.EWPayment.state(data||{});return s.isPaid?'paid':(s.isFailed?'failed':'pending')}
   const st=String(data?.paymentStatus||'').toLowerCase();
   return st==='paid'||st==='refunded'?'paid':(st==='failed'?'failed':'pending');
 }
-async function check(){
-  if(!ctx?.orderId||!token)return;
-  try{
-    const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
-    const j=await r.json();if(!r.ok||!j.success)return;
-    const verdict=classify(j.data||{});
-    if(verdict==='paid'){goToOrder();return}
-    if(verdict==='failed'){location.href='payment-failed.html'}
-  }catch(_){}
+function check(){
+  if(inflight)return inflight;
+  inflight=(async()=>{
+    if(!canVerify)return{verdict:'unknown'};
+    try{
+      const r=await fetch(`${CONFIG.API_BASE_URL}/payments/${encodeURIComponent(ctx.orderId)}/status`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});
+      const j=await r.json();if(!r.ok||!j.success)return{verdict:'unknown'};
+      const d=j.data||{};return{verdict:classify(d),data:d};
+    }catch(_){return{verdict:'unknown'}}
+  })().finally(()=>{inflight=null});
+  return inflight;
 }
-const refreshBtn=document.getElementById('ew-refresh');
-refreshBtn.addEventListener('click',()=>{refreshBtn.disabled=true;refreshBtn.classList.add('is-busy');Promise.resolve(check()).finally(()=>{refreshBtn.disabled=false;refreshBtn.classList.remove('is-busy')})});
-document.getElementById('ew-orders').addEventListener('click',()=>location.href=ctx?.multiple?'orders.html':(ctx?.orderId?'track-order.html?id='+encodeURIComponent(ctx.orderId):'orders.html'));
-check();const timer=setInterval(check,3000);setTimeout(()=>clearInterval(timer),30000)
+
+/* ---- success moment ---- */
+const num=v=>{if(v==null||v==='')return null;const n=Number(v);return isFinite(n)?n:null};
+const money=v=>{const n=num(v);return n==null?'':'₹'+n.toLocaleString('en-IN',{maximumFractionDigits:2})};
+function onPaid(data){
+  if(done)return;done=true;stopPolling();clearTimeout(lateTimer);
+  const P=window.EWPayment,st=P?P.state(data||{}):{};
+  let paid,cash=null;
+  if(isAdvance||st.advanceSettled){
+    paid=st.paidAmount!=null?st.paidAmount:ctx?.partialCodAdvanceAmount;
+    cash=st.cashDue!=null?st.cashDue:ctx?.partialCodCashDue;
+  }else{
+    paid=P?P.authoritativeTotal(data||{}):null;
+    if(paid==null)paid=ctx?.serverTotal;
+  }
+  if(money(paid)){
+    $('ew-amount-label').textContent=(isAdvance||st.advanceSettled)?'Advance paid':'Amount paid';
+    $('ew-amount').textContent=money(paid);$('ew-amount-row').hidden=false;$('ew-order').hidden=false;
+  }
+  if(money(cash)){$('ew-cash').textContent=money(cash);$('ew-cash-row').hidden=false;$('ew-order').hidden=false}
+  setState('success');
+  try{if(navigator.vibrate)navigator.vibrate([18,40,22])}catch(_){}
+  setTimeout(goToOrder,REDIRECT_MS);
+}
+/* true when the verdict was final and handled */
+function settle(res){
+  if(done)return true;
+  if(res.verdict==='paid'){onPaid(res.data);return true}
+  if(res.verdict==='failed'){done=true;stopPolling();location.href='payment-failed.html';return true}
+  return false;
+}
+
+/* ---- polling: auto-advances, no button needed ---- */
+function stopPolling(){if(pollTimer){clearTimeout(pollTimer);pollTimer=null}}
+function startPolling(ms){
+  stopPolling();deadline=Date.now()+ms;
+  const tick=async()=>{
+    pollTimer=null;
+    const res=await check();
+    if(done||settle(res))return;
+    if(Date.now()>=deadline){setState('timeout');return}
+    pollTimer=setTimeout(tick,POLL_MS);
+  };
+  tick();
+}
+
+/* ---- wiring ---- */
+document.querySelectorAll('.js-orders').forEach(b=>b.addEventListener('click',viewOrders));
+$('ew-continue').addEventListener('click',goToOrder);
+const refreshBtns=[...document.querySelectorAll('.js-refresh')];
+function busy(on){refreshBtns.forEach(b=>{b.disabled=on;b.classList.toggle('is-busy',on)})}
+refreshBtns.forEach(b=>b.addEventListener('click',async()=>{
+  if(done||b.disabled)return;busy(true);
+  if(state==='timeout'){setState('verifying');startPolling(RESUME_MS);setTimeout(()=>busy(false),700);return}
+  try{settle(await check())}finally{busy(false)}
+}));
+/* Back from a UPI app: check straight away instead of waiting for the next tick. */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!done)check().then(settle)});
+
+$('ew-title').textContent=COPY.verifying.title;
+render();
+if(canVerify){
+  lateTimer=setTimeout(()=>{late=true;render()},LATE_MS);
+  startPolling(WAIT_MS);
+}else{
+  setState('timeout');
+}
 })();
 </script></body></html>
