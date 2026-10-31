@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="css/track-order.bundle.css?v=634b8972aa">
+  <link rel="stylesheet" href="css/track-order.bundle.css?v=8c484632fd">
   
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -250,12 +250,11 @@
 
       <textarea class="review-box" id="review-text" maxlength="500" placeholder="Tell us more about your experience (optional)"></textarea>
 
-      <!-- Photo upload stays hidden until the review-photo field name and
-           validation rules are confirmed against the backend contract. The
-           handler below is wired to the authenticated media endpoint, so
-           enabling the picker is a one-line change once verified. -->
-      <label class="photo-upload-label" for="review-photo-input" hidden><i class="fa-solid fa-camera"></i> Add a photo</label>
-      <input type="file" accept="image/*" id="review-photo-input" hidden disabled>
+      <!-- Review photo: picked here, downscaled and uploaded by customer-upload.js
+           (POST /upload/customer-media); the returned https URLs are sent as `photos`
+           with the review. The label needs no `hidden`: it is the visible tap target. -->
+      <label class="photo-upload-label" for="review-photo-input"><i class="fa-solid fa-camera"></i> Add a photo</label>
+      <input type="file" accept="image/*" id="review-photo-input" hidden>
       <div class="photo-preview-row" id="photo-preview-row" hidden></div>
 
       <button class="rating-submit tap" id="rating-submit" disabled>Submit rating</button>
@@ -1378,6 +1377,8 @@
             thumb.classList.remove('is-uploading');
             thumb.classList.add('is-failed');
             thumb.title = (err && err.message) || 'Upload failed';
+            const msg = document.getElementById('rating-thanks');
+            if (msg) { msg.textContent = ((err && err.message) || 'Photo upload failed') + ' Tap the photo to remove it, or try again.'; msg.style.display = 'block'; }
           });
         });
       }
