@@ -121,3 +121,68 @@ body.ct-page{
   background:var(--ew-co-accent);color:#fff;border:0}
 #ct-note-sheet.is-cooking .ct-btn-primary:disabled{background:#e3e5ec;color:#6b7280;cursor:not-allowed;box-shadow:none}
 @media (prefers-reduced-motion:reduce){#ct-note-sheet.is-cooking .ct-cook-x{transition:none}}
+
+/* ================= v2 — fixes from device screenshots ================= */
+
+/* Payment is chosen in a sheet on "Proceed to Pay" — no inline section */
+.ct-page #ct-pay-card{display:none !important}
+#ct-pay-sheet .ct-pay-opt{border-radius:16px;border:1.5px solid #dcdfe8;margin-bottom:10px}
+#ct-pay-sheet .ct-pay-opt.is-selected{border-color:var(--ew-co-accent,#0b7a2a);background:var(--ew-co-accent-soft,#e7f5ec)}
+#ct-pay-sheet .ct-pay-opt.is-selected .ct-pay-radio{border-color:var(--ew-co-accent,#0b7a2a)}
+#ct-pay-sheet .ct-pay-opt.is-selected .ct-pay-radio::after{background:var(--ew-co-accent,#0b7a2a)}
+
+/* chips: all three fit on one row, white pills (no green Add Items) */
+.ct-page .ct-item-actions{flex-wrap:nowrap;gap:8px;overflow:visible;padding-top:12px}
+.ct-page .ct-item-actions .ct-pill-btn{flex:0 1 auto;min-width:0;min-height:44px;padding:0 11px;gap:6px;font-size:13px;font-weight:600;
+  background:#fff;border:1.5px solid #d9dce6;color:#2a2f3b;box-shadow:none}
+.ct-page .ct-item-actions .ct-pill-btn svg{width:14px;height:14px;color:#2a2f3b}
+.ct-page .ct-item-actions .ct-pill-btn .ct-note-btn-text{overflow:visible;text-overflow:clip}
+.ct-page .ct-item-actions .ct-pill-btn.is-set{background:var(--ew-co-accent-soft);border-color:var(--ew-co-accent);color:var(--ew-co-accent-deep)}
+.ct-page .ct-cutlery-chip .ct-cutlery-box{width:20px;height:20px;border-radius:6px}
+@media (min-width:400px){.ct-page .ct-item-actions .ct-pill-btn{font-size:14px;padding:0 14px;gap:8px}}
+
+/* Delivery instructions card — like the reference; rider tip below it, no tabs */
+.ct-page #ct-di-group{display:flex;flex-direction:column;padding:16px 16px 14px}
+.ct-page #ct-di-group .ct-tabs{display:none}
+.ct-page #ct-di-body{display:block !important;order:1}
+.ct-page #ct-tip-panel{display:block !important;order:2;margin-top:12px;padding-top:14px;border-top:1px solid #eceef3}
+.ct-page #ct-di-body::before{content:"Add Delivery Instructions";display:block;margin:0 0 12px;font-size:17px;font-weight:700;color:#1f2430}
+.ct-page #ct-tip-panel::before{content:"Tip your delivery partner";display:block;margin:0 0 10px;font-size:15px;font-weight:700;color:#1f2430}
+.ct-page #ct-tip-panel .ct-chip{border-radius:14px;background:#fff;border:1.5px solid #dcdfe8}
+.ct-page #ct-tip-panel .ct-chip[aria-pressed="true"]{border-color:var(--ew-co-accent);background:var(--ew-co-accent-soft)}
+.ct-page .ct-tip-note{background:#f3f8f4;color:#14552b}
+
+/* Bill summary: reference layout, one "To Pay" total */
+.ct-page .ct-bill{border-radius:22px;overflow:hidden}
+.ct-page .ct-bill-hero{padding:18px 18px 14px;background:#fff;border-bottom:1px solid #eceef3}
+.ct-page .ct-bill-hero-badge{background:#fdeaf6;border:0;color:#d6247f;transform:rotate(-4deg);border-radius:6px}
+.ct-page .ct-bill-hero-top s{color:#8a909c}
+.ct-page #ew-quote-bill{padding:6px 18px 4px}
+.ct-page #ew-quote-bill .ew-qb-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;font-size:16px;color:#3a3f4b}
+.ct-page #ew-quote-bill .ew-qb-label{display:flex;flex-direction:column;gap:2px;font-size:16px;color:#3a3f4b}
+.ct-page #ew-quote-bill .ew-qb-note{font-size:12px;color:#7b8190}
+.ct-page #ew-quote-bill .ew-qb-val{font-weight:700;color:#1f2430;white-space:nowrap}
+.ct-page #ew-quote-bill .ew-qb-row--discount .ew-qb-val{color:var(--ew-co-accent)}
+.ct-page #ew-quote-bill .ew-qb-row:last-child{border-top:1px dashed #d9dce6;margin-top:4px;padding-top:14px;font-weight:800}
+.ct-page #ew-quote-bill .ew-qb-row:last-child .ew-qb-label,.ct-page #ew-quote-bill .ew-qb-row:last-child .ew-qb-val{font-weight:800;color:#1f2430}
+.ct-page .ew-qb-countdown{padding:0 18px 12px;text-align:right;font-size:12px;color:#7b8190}
+/* the standalone "Grand Total" block repeats the To Pay row once the quote bill is shown */
+.ct-page .ct-bill:has(#ew-quote-bill .ew-qb-row) .ct-bill-total{display:none}
+.ct-page .ct-bill-band{margin:0;padding:12px 18px;font-size:14px}
+
+/* Apply coupon sheet — same style as Add cooking requests */
+#ct-coupon-sheet{flex-direction:column;align-items:center;justify-content:flex-end}
+#ct-coupon-sheet .ct-cook-x{display:grid;place-items:center;position:relative;z-index:2;flex:0 0 auto;width:60px;height:60px;margin-bottom:16px;
+  border:0;border-radius:50%;background:#12141a;color:#fff;font-size:22px;cursor:pointer;opacity:0;transform:translateY(10px);
+  transition:opacity .22s ease,transform .26s cubic-bezier(.25,1,.5,1)}
+#ct-coupon-sheet.is-open .ct-cook-x{opacity:1;transform:none}
+#ct-coupon-sheet .ct-sheet{border-radius:26px 26px 0 0;padding:26px 20px calc(18px + env(safe-area-inset-bottom))}
+#ct-coupon-sheet .ct-sheet-grab,#ct-coupon-sheet .ct-sheet-head,#ct-coupon-sheet .ct-field-label,#ct-coupon-sheet .ct-sheet-foot{display:none}
+#ct-coupon-sheet .ct-sheet-body{padding:0}
+#ct-coupon-sheet .ct-input{min-height:48px;padding:6px 0 8px;border:0;border-bottom:2px solid var(--ew-co-accent,#0b7a2a);border-radius:0;
+  background:transparent;font-size:22px;font-weight:500;box-shadow:none;outline:0;caret-color:var(--ew-co-accent,#0b7a2a)}
+#ct-coupon-sheet .ct-input::placeholder{color:#8a909c}
+#ct-coupon-sheet #coupon-apply{display:block;width:100%;min-height:58px;margin-top:22px;border:0;border-radius:999px;font-size:20px;font-weight:800;
+  background:var(--ew-co-accent,#0b7a2a);color:#fff;box-shadow:none}
+#ct-coupon-sheet .ct-empty-mini{margin-top:22px}
+@media (prefers-reduced-motion:reduce){#ct-coupon-sheet .ct-cook-x{transition:none}}
