@@ -284,3 +284,109 @@ body.ct-page #ct-tip-panel .ct-tip-note {
 body.ct-page #ct-tip-panel .ct-tip-note-text { font-size: 11px !important; font-weight: 500 !important; }
 body.ct-page #ct-tip-panel .ct-tip-gift { width: 15px; height: 15px; }
 body.ct-page #ct-tip-panel .ct-tip-info { width: 14px; height: 14px; }
+
+/* ==========================================================
+   6. BILL SUMMARY + NAME/PHONE CARD + CANCELLATION POLICY
+   Same scale as "Complete your meal". Flat white card, small green
+   icon tile, light rows, dashed line, bold "To Pay".
+   ========================================================== */
+
+/* name + phone card */
+body.ct-page .ct-details { padding: 14px 16px !important; }
+body.ct-page .ct-details-label { font-size: 13px !important; font-weight: 700 !important; color: #17181c !important; letter-spacing: -.1px; }
+body.ct-page .ct-details-text { font-size: 12px !important; font-weight: 500 !important; color: #7a7f8a !important; }
+
+/* bill card */
+body.ct-page .ct-bill {
+  border: 0 !important; border-radius: 20px !important;
+  background: #fff !important; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(20, 25, 45, .06) !important;
+}
+
+/* top: icon tile + "To Pay  ₹233  ₹215" + green saved line + badge */
+body.ct-page .ct-bill-hero {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px !important;
+  background: #fff !important;
+  border-bottom: 1px solid #eceef3 !important;
+}
+body.ct-page .ct-bill-hero-ic {
+  width: 34px !important; height: 34px !important; border-radius: 10px !important;
+  flex: 0 0 34px;
+  background: var(--ew-co-accent-soft, #e7f5ec) !important;
+  color: var(--ew-co-accent, #0b7a2a) !important;
+}
+body.ct-page .ct-bill-hero-ic svg { width: 17px; height: 17px; }
+body.ct-page .ct-bill-hero-top {
+  font-size: 14px !important; font-weight: 600 !important;
+  color: #17181c !important; letter-spacing: -.1px;
+}
+body.ct-page .ct-bill-hero-top strong { font-size: 14px !important; font-weight: 800 !important; letter-spacing: -.1px; color: #17181c !important; }
+body.ct-page .ct-bill-hero-top s { font-size: 12px !important; font-weight: 500 !important; color: #8a909c !important; }
+body.ct-page .ct-bill-hero-saved {
+  margin-top: 2px; font-size: 12px !important; font-weight: 600 !important;
+  color: var(--ew-co-accent, #0b7a2a) !important;
+}
+body.ct-page .ct-bill-hero-badge {
+  margin-left: auto; padding: 5px 8px !important; border-radius: 6px !important;
+  font-size: 9px !important; font-weight: 800 !important; line-height: 1.25;
+  letter-spacing: .02em; text-align: center;
+  background: #fdeaf6 !important; color: #d6247f !important; border: 0 !important;
+  transform: rotate(-3deg);
+}
+body.ct-page .ct-bill-hero-badge span { display: block; font-size: 8px !important; font-weight: 700; letter-spacing: .08em; opacity: .85; }
+
+/* rows from the backend quote */
+body.ct-page #ew-quote-bill { padding: 4px 16px 2px !important; }
+body.ct-page #ew-quote-bill .ew-qb-row {
+  padding: 11px 0 !important; gap: 12px;
+  font-size: 13px !important; font-weight: 500 !important; color: #3a3f4b !important;
+}
+body.ct-page #ew-quote-bill .ew-qb-label { font-size: 13px !important; font-weight: 500 !important; color: #3a3f4b !important; }
+body.ct-page #ew-quote-bill .ew-qb-note { font-size: 11px !important; font-weight: 500 !important; color: #7a7f8a !important; }
+body.ct-page #ew-quote-bill .ew-qb-val { font-size: 13px !important; font-weight: 700 !important; color: #17181c !important; }
+body.ct-page #ew-quote-bill .ew-qb-row--discount .ew-qb-val,
+body.ct-page #ew-quote-bill .ew-qb-row--delivery .ew-qb-note { color: var(--ew-co-accent, #0b7a2a) !important; }
+/* dashed line under the item total, and above the final total */
+body.ct-page #ew-quote-bill .ew-qb-row--food { border-bottom: 1px dashed #d9dce6; }
+body.ct-page #ew-quote-bill .ew-qb-row:last-child {
+  border-top: 1px dashed #d9dce6 !important; margin-top: 4px; padding: 13px 0 !important;
+}
+body.ct-page #ew-quote-bill .ew-qb-row:last-child .ew-qb-label,
+body.ct-page #ew-quote-bill .ew-qb-row:last-child .ew-qb-val {
+  font-size: 14px !important; font-weight: 800 !important; color: #17181c !important;
+}
+body.ct-page .ew-qb-countdown { padding: 0 16px 12px !important; font-size: 11px !important; font-weight: 500 !important; color: #7a7f8a !important; }
+
+/* same look for the preview rows shown before a quote arrives */
+body.ct-page .ct-bill-rows { padding: 4px 16px 6px !important; }
+body.ct-page .ct-bill-row { min-height: 40px; padding: 8px 0; }
+body.ct-page .ct-bill-label { font-size: 13px !important; font-weight: 500 !important; color: #3a3f4b !important; }
+body.ct-page .ct-bill-val { font-size: 13px !important; font-weight: 700 !important; color: #17181c !important; }
+body.ct-page .ct-bill-val s { font-size: 11px !important; font-weight: 500 !important; color: #8a909c !important; }
+body.ct-page .ct-bill-cap { font-size: 11px !important; font-weight: 500 !important; }
+
+/* pink strip + To Pay row */
+body.ct-page .ct-bill-band { padding: 10px 16px !important; font-size: 11px !important; font-weight: 700 !important; letter-spacing: .01em; }
+body.ct-page .ct-bill-total { padding: 13px 16px !important; }
+body.ct-page .ct-bill-total .ct-bill-label,
+body.ct-page .ct-bill-total .ct-bill-val { font-size: 14px !important; font-weight: 800 !important; color: #17181c !important; }
+
+/* cancellation policy */
+body.ct-page .ct-cancel { padding: 4px 18px 0 !important; }
+body.ct-page .ct-cancel-title { font-size: 12px !important; font-weight: 700 !important; color: #7a7f8a !important; }
+body.ct-page .ct-cancel p { font-size: 11px !important; font-weight: 500 !important; line-height: 1.5 !important; color: #8a909c !important; margin: 3px 0 0; }
+
+/* ==========================================================
+   7. REMOVED FROM THE TOP OF CHECKOUT (hidden, not deleted)
+   - "Estimated delivery 30-40 mins" card
+   - "₹X saved on this order" strip
+   The page code still fills them; they just do not show.
+   Delete this block to bring them back.
+   ========================================================== */
+body.ct-page #ct-delivery-estimate,
+body.ct-page #ct-footer-save,
+body.ct-page .ct-footer-save.show,
+body.ct-page .ct-save-strip.show {
+  display: none !important;
+}
