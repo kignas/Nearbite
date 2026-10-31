@@ -896,38 +896,31 @@ function applyTotals() {
     else taxRow.style.display = 'none';
   }
 
-  // Once a backend quote is active, it is the single source of truth for
-  // every payable amount. applyTotals() continues to refresh the preview state
-  // and schedule a new quote, but must not overwrite a live quote while that
-  // request is pending (this caused the visible ₹215 ↔ ₹187 flicker).
-  const backendQuoteActive = !!document.getElementById('ct-bill')?.classList.contains('ew-quote-active');
-  if (!backendQuoteActive) {
-    document.getElementById('bill-total').innerText = '₹' + total;
-    document.getElementById('checkout-total').innerText = '₹' + total;
-    updateBillCompact(total);
-    paintSavingsHero();
-    paintFooterSavings();
-    paintSavingsCorner();
-  }
+  // One number, written everywhere it appears: the sheet's "To pay", the
+  // compact row and the checkout CTA can never disagree.
+  document.getElementById('bill-total').innerText = '₹' + total;
+  document.getElementById('checkout-total').innerText = '₹' + total;
+  updateBillCompact(total);
+  paintSavingsHero();
+  paintFooterSavings();
+  paintSavingsCorner();
   try { if (window.EWOffers) window.EWOffers.evaluate(); } catch (e) { /* offers are cosmetic */ }
 
   // Let the checkout-upgrades layer add the itemized extras (packaging,
   // handling, surge, tax) it previews from the platform settings, so the
   // "To Pay" figure includes every charge the backend will apply. The backend
   // remains authoritative; this only mirrors it.
-  if (!backendQuoteActive && window.CtX && typeof window.CtX.paintBill === 'function') {
+  if (window.CtX && typeof window.CtX.paintBill === 'function') {
     try { window.CtX.paintBill(); } catch (e) { /* never block the cart paint */ }
   }
 
-  // Keep preview totals synchronized only while no authoritative backend
-  // quote is active. Quote rendering updates all payable locations atomically.
-  if (!backendQuoteActive) {
-    const finalBillText = document.getElementById('bill-total')?.textContent?.trim();
-    const heroTotal = document.getElementById('bill-hero-total');
-    if (heroTotal && finalBillText) heroTotal.textContent = finalBillText;
-    const footerTotal = document.getElementById('checkout-total');
-    if (footerTotal && finalBillText) footerTotal.textContent = finalBillText;
-  }
+  // Keep every prominent payable amount synchronized after the pricing
+  // extension adds handling/packaging/tax rows to the detailed bill.
+  const finalBillText = document.getElementById('bill-total')?.textContent?.trim();
+  const heroTotal = document.getElementById('bill-hero-total');
+  if (heroTotal && finalBillText) heroTotal.textContent = finalBillText;
+  const footerTotal = document.getElementById('checkout-total');
+  if (footerTotal && finalBillText) footerTotal.textContent = finalBillText;
 
   if (ctState.missingLocation) {
     ['bill-total', 'checkout-total', 'bill-hero-total'].forEach(id => {
@@ -1547,7 +1540,6 @@ async function ctWaitForPaymentStatus(orderId, token, maxMs = 22000) {
    sheet is presentation; the cart and checkout key are already cleared by the
    caller. If the sheet module is missing, fall back to the full-page result. */
 function ctShowOrderSuccess(result, primaryOrderId, kind, amounts) {
-  if (!window.EWOrderSuccess) { ctGoPaymentResult('success'); return; }
   const money = (v) => {
     if (v == null || v === '') return '';
     return window.EWPayment ? window.EWPayment.money(v) : '\u20B9' + v;
@@ -1557,7 +1549,7 @@ function ctShowOrderSuccess(result, primaryOrderId, kind, amounts) {
   let title, message;
   if (kind === 'cod') {
     title = 'Order placed!';
-    message = 'Pay cash when your order arrives.';
+    message = 'Your order has been successfully placed. Pay cash when your order arrives.';
     const t = money(a.serverTotal);
     if (t) rows.push({ label: 'Pay on delivery', value: t });
   } else if (a.partialCodAdvanceAmount != null) {
@@ -1572,25 +1564,84 @@ function ctShowOrderSuccess(result, primaryOrderId, kind, amounts) {
     const t = money(a.serverTotal);
     if (t) rows.push({ label: 'Amount paid', value: t, tone: 'good' });
   }
+
   const orderId = primaryOrderId || result?.data?._id || null;
   const multiple = !!result?.multiple;
+  const continueToOrder = function () {
+    try { localStorage.removeItem(CT_PAYMENT_CONTEXT_KEY); } catch (_) {}
+    window.location.href = (!orderId || multiple)
+      ? 'orders.html'
+      : 'track-order.html?id=' + encodeURIComponent(orderId);
+  };
+
+  // Normal COD must confirm in-place on the checkout page. If the shared
+  // success-sheet script is unavailable, use a small local fallback instead
+  // of redirecting to the legacy payment-success page.
+  if (!window.EWOrderSuccess || typeof window.EWOrderSuccess.show !== 'function') {
+    if (kind !== 'cod') { ctGoPaymentResult('success'); return; }
+
+    const existing = document.getElementById('ct-cod-success-fallback');
+    if (existing) return;
+    const root = document.createElement('div');
+    root.id = 'ct-cod-success-fallback';
+    root.setAttribute('role', 'dialog');
+    root.setAttribute('aria-modal', 'true');
+    root.setAttribute('aria-labelledby', 'ct-cod-success-title');
+    root.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.58);';
+    const sheet = document.createElement('section');
+    sheet.style.cssText = 'position:relative;box-sizing:border-box;width:min(100%,460px);padding:34px 24px 24px;border-radius:28px;background:#fff;color:#171717;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.24);font-family:inherit;';
+    const close = document.createElement('button');
+    close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', 'Close');
+    close.style.cssText = 'position:absolute;right:18px;top:12px;border:0;background:transparent;font-size:30px;color:#555;cursor:pointer;';
+    const mark = document.createElement('div');
+    mark.textContent = '✓';
+    mark.style.cssText = 'width:82px;height:82px;margin:8px auto 22px;border-radius:50%;display:grid;place-items:center;background:#16a34a;color:white;font-size:54px;font-weight:700;box-shadow:0 0 0 12px #dcfce7;';
+    const heading = document.createElement('h2');
+    heading.id = 'ct-cod-success-title'; heading.textContent = title;
+    heading.style.cssText = 'margin:12px 0;font-size:28px;line-height:1.2;font-weight:800;';
+    const copy = document.createElement('p'); copy.textContent = message;
+    copy.style.cssText = 'margin:0 0 22px;color:#6b7280;font-size:16px;line-height:1.5;';
+    sheet.append(close, mark, heading, copy);
+    if (result?.data?.orderNumber) {
+      const number = document.createElement('p');
+      number.textContent = 'ORDER NUMBER  ' + result.data.orderNumber;
+      number.style.cssText = 'margin:0 0 12px;padding:14px;border-radius:14px;background:#f3f4f6;font-weight:700;';
+      sheet.appendChild(number);
+    }
+    rows.forEach(function (r) {
+      const row = document.createElement('p');
+      row.textContent = r.label + ': ' + r.value;
+      row.style.cssText = 'margin:8px 0;color:#374151;font-weight:700;';
+      sheet.appendChild(row);
+    });
+    const button = document.createElement('button');
+    button.type = 'button'; button.textContent = multiple ? 'View my orders' : 'Track my order';
+    button.style.cssText = 'width:100%;margin-top:20px;padding:16px;border:0;border-radius:999px;background:#111;color:#fff;font-size:17px;font-weight:700;cursor:pointer;';
+    sheet.appendChild(button);
+    root.appendChild(sheet);
+    document.body.appendChild(root);
+    const closeFallback = function () {
+      if (root.parentNode) root.parentNode.removeChild(root);
+      continueToOrder();
+    };
+    close.addEventListener('click', closeFallback);
+    button.addEventListener('click', closeFallback);
+    return;
+  }
+
   const shown = window.EWOrderSuccess.show({
     title: title,
     message: message,
     orderNumber: result?.data?.orderNumber || '',
     rows: rows,
     buttonText: multiple ? 'View my orders' : 'Track my order',
-    onContinue: function () {
-      // The confirmation has been seen; the payment context is finished with.
-      try { localStorage.removeItem(CT_PAYMENT_CONTEXT_KEY); } catch (_) {}
-      window.location.href = (!orderId || multiple)
-        ? 'orders.html'
-        : 'track-order.html?id=' + encodeURIComponent(orderId);
-    }
+    onContinue: continueToOrder
   });
-  if (!shown) ctGoPaymentResult('success');
-}
 
+  // A false return means the shared sheet is already active. Do not send a
+  // normal COD customer to the old full-page confirmation in that case.
+  if (!shown && kind !== 'cod') ctGoPaymentResult('success');
+}
 function ctFinishCodOrder(result, primaryOrderId, serverTotal, btn) {
   // The backend already created the COD order; the cart is cleared only now.
   localStorage.removeItem('nearbite_cart');
