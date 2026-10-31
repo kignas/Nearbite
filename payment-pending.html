@@ -11,7 +11,9 @@
 <script src="js/auth-token.js?v=20261025"></script>
 <script src="js/payment-state.js?v=20261025"></script>
 <script src="js/checkout-key.js?v=20261025"></script>
+<script src="js/order-success-sheet.js?v=20261031-os1"></script>
 <link rel="stylesheet" href="css/eatswada-payment.css?v=20261031-pay2">
+<link rel="stylesheet" href="css/order-success-sheet.css?v=20261031-os1">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
 
@@ -125,7 +127,7 @@ const COPY={
   timeout:canVerify
     ?{title:'Still waiting on your bank',copy:"If money was deducted, don't pay again. Your order will update as soon as the bank confirms."}
     :{title:"We couldn't check this payment",copy:"If money was deducted, don't pay again. Open My Orders to see the latest status."},
-  success:{title:isAdvance?'Advance paid':'Payment confirmed',copy:isAdvance?'Your order is placed. Pay the rest in cash on delivery.':'Your order is placed. Opening it now.'}
+  success:{title:isAdvance?'Advance paid':'Payment confirmed',copy:isAdvance?'Your order is placed. Pay the rest in cash on delivery.':'Your order is confirmed. Opening it now.'}
 };
 function swap(el,text){el.textContent=text;el.classList.remove('ew-swap');void el.offsetWidth;el.classList.add('ew-swap')}
 function render(){
@@ -193,20 +195,38 @@ const money=v=>{const n=num(v);return n==null?'':'₹'+n.toLocaleString('en-IN',
 function onPaid(data){
   if(done)return;done=true;stopPolling();clearTimeout(lateTimer);
   const P=window.EWPayment,st=P?P.state(data||{}):{};
+  const advance=isAdvance||st.advanceSettled;
   let paid,cash=null;
-  if(isAdvance||st.advanceSettled){
+  if(advance){
     paid=st.paidAmount!=null?st.paidAmount:ctx?.partialCodAdvanceAmount;
     cash=st.cashDue!=null?st.cashDue:ctx?.partialCodCashDue;
   }else{
     paid=P?P.authoritativeTotal(data||{}):null;
     if(paid==null)paid=ctx?.serverTotal;
   }
+  const rows=[];
   if(money(paid)){
-    $('ew-amount-label').textContent=(isAdvance||st.advanceSettled)?'Advance paid':'Amount paid';
+    const label=advance?'Advance paid':'Amount paid';
+    $('ew-amount-label').textContent=label;
     $('ew-amount').textContent=money(paid);$('ew-amount-row').hidden=false;$('ew-order').hidden=false;
+    rows.push({label:label,value:money(paid),tone:'good'});
   }
-  if(money(cash)){$('ew-cash').textContent=money(cash);$('ew-cash-row').hidden=false;$('ew-order').hidden=false}
+  if(money(cash)){
+    $('ew-cash').textContent=money(cash);$('ew-cash-row').hidden=false;$('ew-order').hidden=false;
+    rows.push({label:'Cash due on delivery',value:money(cash)});
+  }
   setState('success');
+  /* Same confirmation pop-up as the checkout page, so every success looks the
+     same. It owns the redirect (button, close, or its own timer). */
+  const shown=window.EWOrderSuccess&&window.EWOrderSuccess.show({
+    title:COPY.success.title,
+    message:COPY.success.copy.replace(' Opening it now.',''),
+    orderNumber:ctx?.orderNumber||'',
+    rows:rows,
+    buttonText:ctx?.multiple?'View my orders':'Track my order',
+    onContinue:goToOrder
+  });
+  if(shown)return;
   try{if(navigator.vibrate)navigator.vibrate([18,40,22])}catch(_){}
   setTimeout(goToOrder,REDIRECT_MS);
 }

@@ -8,6 +8,7 @@
 <title>Payment Successful – Eatswada | EatSwada</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/eatswada-payment.css?v=20261004-pay1">
+<link rel="stylesheet" href="css/order-success-sheet.css?v=20261031-os1">
 <link rel="stylesheet" href="eatswada-theme.css">
 <link rel="stylesheet" href="eatswada-header-theme.css">
 
@@ -71,6 +72,7 @@
 <script src="js/auth-token.js?v=20261025"></script>
 <script src="config.js"></script>
 <script src="js/payment-state.js?v=20261025"></script>
+<script src="js/order-success-sheet.js?v=20261031-os1"></script>
 <script>
 (function(){
 const KEY='nearbite_payment_context';let ctx=null;try{ctx=JSON.parse(localStorage.getItem(KEY)||'null')}catch(_){}
@@ -102,6 +104,27 @@ if(!ctx?.orderId)return;
    the order; only clear it once we navigate to the order view. */
 try{localStorage.removeItem(KEY)}catch(_){}
 location.href=ctx.multiple?'orders.html':'track-order.html?id='+encodeURIComponent(ctx.orderId)}
-document.getElementById('ew-continue').addEventListener('click',go);setTimeout(go,3600)
+document.getElementById('ew-continue').addEventListener('click',go);
+/* Same confirmation pop-up as the checkout page; the card below is only the
+   fallback when the pop-up module is unavailable. */
+const card=document.querySelector('.ew-result');
+const isCod=String(qp.get('method')||ctx?.method||'').toUpperCase()==='COD';
+const hasAdv=ctx&&ctx.partialCodAdvanceAmount!=null;
+const rows=[];
+if(hasAdv){
+  if(money(ctx.partialCodAdvanceAmount))rows.push({label:'Advance paid',value:money(ctx.partialCodAdvanceAmount),tone:'good'});
+  if(ctx.partialCodCashDue!=null&&money(ctx.partialCodCashDue))rows.push({label:'Cash due on delivery',value:money(ctx.partialCodCashDue)});
+}else if(ctx&&ctx.serverTotal!=null&&money(ctx.serverTotal)){
+  rows.push(isCod?{label:'Pay on delivery',value:money(ctx.serverTotal)}:{label:'Amount paid',value:money(ctx.serverTotal),tone:'good'});
+}
+const popup=!!(window.EWOrderSuccess&&window.EWOrderSuccess.show({
+  title:hasAdv?'Advance paid':(isCod?'Order placed!':'Payment successful'),
+  message:hasAdv?'Your order is placed. Pay the rest in cash on delivery.':(isCod?'Pay cash when your order arrives.':'Your order is confirmed.'),
+  orderNumber:ctx?.orderNumber||'',
+  rows:rows,
+  buttonText:ctx?.multiple?'View my orders':'Track my order',
+  onContinue:function(){if(!ctx?.orderId){if(card)card.style.visibility='';return}go()}
+}));
+if(popup){if(card)card.style.visibility='hidden'}else setTimeout(go,3600)
 })();
 </script></body></html>
