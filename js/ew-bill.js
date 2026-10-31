@@ -66,7 +66,8 @@
     push('deliveryFee', (num(b.deliverySubsidy) > 0 ? 'Delivery (free)' : 'Delivery fee') + kmText,
       (num(b.deliverySubsidy) > 0 ? 0 : b.deliveryFee), 'delivery',
       (num(b.deliverySubsidy) > 0) ? 'You save ' + money(b.deliverySubsidy) : '');
-    push('smallOrderFee', 'Small order fee', b.smallOrderFee, 'fee');
+    push('smallOrderFee', 'Small order fee', b.smallOrderFee, 'fee',
+      num(b.smallOrderFee) > 0 ? 'Helps keep smaller baskets serviceable' : '');
     push('codFee', 'COD handling fee', b.codFee, 'fee');
     push('taxes', 'Taxes', b.taxAmount, 'tax');
     push('tip', 'Delivery partner tip', b.tipAmount, 'tip');
@@ -103,7 +104,8 @@
       push('deliveryFee', 'Delivery fee', b.deliveryFee, 'delivery');
     }
     push('platformHandlingFee', 'Platform fee', b.platformHandlingFee, 'fee');
-    push('smallCartFee', 'Small order fee', b.smallCartFee, 'fee');
+    push('smallCartFee', 'Small order fee', b.smallCartFee, 'fee',
+      num(b.smallCartFee) > 0 ? 'Helps keep smaller baskets serviceable' : '');
     push('rainSurgeFee', 'Rain surge fee', b.rainSurgeFee, 'fee');
     push('codFee', 'COD handling fee', b.codFee, 'fee');
     push('discountAmount', 'Discount', b.discountAmount, 'discount');

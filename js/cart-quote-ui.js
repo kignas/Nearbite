@@ -43,6 +43,7 @@
   var lastQuote = null;
   var blocked = false;
   var blockedReason = '';   /* 'unserviceable' | 'reprice' | 'error' | '' */
+  var engineDisabled = false;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -162,6 +163,7 @@
   }
 
   function renderQuote(quote, result) {
+    engineDisabled = false;
     var host = panel();
     if (!host || !quote) return;
 
@@ -225,6 +227,7 @@
   }
 
   function engineOff() {
+    engineDisabled = true;
     clearEngineBill();
     hideBlock();
     if (typeof updateCheckoutCta === 'function') { try { updateCheckoutCta(); } catch (e) {} }
@@ -416,6 +419,11 @@
 
   window.EWCartQuoteUI = {
     schedule: schedule,
+    /* A single-restaurant cart with a saved address is priced by the backend.
+       In that case legacy restaurant minimums must not override the quote's
+       distance-aware platform/contractual minimum decision. */
+    isQuoteEligible: function () { return !!basket(); },
+    isEngineDisabled: function () { return engineDisabled === true; },
     resetBaseline: resetBaseline,
     onBasketChanged: onBasketChanged,
     ensureForPay: ensureForPay,

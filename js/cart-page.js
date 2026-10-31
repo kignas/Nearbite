@@ -492,6 +492,20 @@ function syncPaymentOptions(_codEnabled) {
   }
 }
 
+/* A saved-address, single-restaurant basket is governed by the backend
+   pricing quote. Do not let cached restaurant minOrder values conflict with
+   the live distance-aware minimum returned by that quote. Multi-restaurant
+   and legacy/engine-off carts retain the existing client-side guard. */
+function ctUsesAuthoritativePricingQuote() {
+  try {
+    return !!(window.EWCartQuoteUI &&
+      typeof window.EWCartQuoteUI.isQuoteEligible === 'function' &&
+      window.EWCartQuoteUI.isQuoteEligible() &&
+      !(typeof window.EWCartQuoteUI.isEngineDisabled === 'function' &&
+        window.EWCartQuoteUI.isEngineDisabled()));
+  } catch (e) { return false; }
+}
+
 /* ── Shared UI state ────────────────────────────────────────────────────── */
 const ctState = {
   subtotal: 0,
@@ -1188,7 +1202,7 @@ function updateCheckoutCta() {
     label.innerHTML = `Add ₹${remaining.toLocaleString('en-IN')} more<span class="ct-cta-sub">${esc(r.name)} · min ₹${r.minOrder.toLocaleString('en-IN')}</span>`;
     return;
   }
-  if (ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
+  if (!ctUsesAuthoritativePricingQuote() && ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
     const remaining = Math.ceil(ctState.minOrder - ctState.subtotal);
     btn.classList.add('locked');
     btn.setAttribute('aria-disabled', 'true');
@@ -1840,7 +1854,7 @@ async function placeOrder() {
     return;
   }
 
-  if (ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
+  if (!ctUsesAuthoritativePricingQuote() && ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
     const remaining = Math.ceil(ctState.minOrder - ctState.subtotal);
     showToast('Add ₹' + remaining.toLocaleString('en-IN') + ' more to reach the minimum order.');
     shakeCheckout();
@@ -1909,6 +1923,14 @@ async function placeOrder() {
         return;
       }
       ctQuoteId = (q && q.quoteId) || '';
+      if (q && q.engineOff && ctState.minOrder > 0 && ctState.subtotal < ctState.minOrder) {
+        const remaining = Math.ceil(ctState.minOrder - ctState.subtotal);
+        ctOrderInFlight = false;
+        ctRestoreCheckoutButton(btn, originalHTML);
+        shakeCheckout();
+        showToast('Add ₹' + remaining.toLocaleString('en-IN') + ' more to reach the minimum order.');
+        return;
+      }
     } catch (e) { /* pricing must never block ordering */ }
   }
 
