@@ -189,6 +189,13 @@
    so the itemized bill comes from the backend only. */
 #ct-bill.ew-quote-active .ct-bill-rows{ display:none; }
 
+/* When serviceability fails, do not leave a stale local estimate, FREE
+   delivery row or grand total visible underneath the blocking message. */
+#ct-bill.ew-quote-blocked .ct-bill-hero,
+#ct-bill.ew-quote-blocked .ct-bill-rows,
+#ct-bill.ew-quote-blocked .ct-bill-band,
+#ct-bill.ew-quote-blocked .ct-bill-total{ display:none !important; }
+
 .ew-qb-countdown{
   font-size:11.5px; font-weight:600; color:#8A94A6;
   margin:6px 0 2px; text-align:right;
