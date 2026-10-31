@@ -353,7 +353,7 @@
 </svg>
 </span>
 </button>
-<button class="ct-cta locked" id="btn-checkout" onclick="placeOrder()">
+<button class="ct-cta locked" id="btn-checkout" onclick="window.CtX ? CtX.startPayment() : placeOrder()">
 <span class="ct-cta-text" id="checkout-label">Proceed to Pay</span>
 </button>
 </div>
@@ -418,8 +418,20 @@
 <button class="ct-btn-remove" hidden="" id="tip-remove" type="button">Remove tip</button>
 </div>
 </div>
+<div class="ct-sheet-root" hidden="" id="ct-pay-sheet">
+<div class="ct-scrim" data-sheet-close=""></div>
+<div aria-labelledby="pay-sheet-title" aria-modal="true" class="ct-sheet" role="dialog">
+<div aria-hidden="true" class="ct-sheet-grab"></div>
+<div class="ct-sheet-head">
+<h2 class="ct-sheet-title" id="pay-sheet-title">Select payment method</h2>
+<button aria-label="Close" class="ct-sheet-x" data-sheet-close="" type="button"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
+</div>
+<div class="ct-sheet-body"><div class="ct-pay-opts" id="ct-pay-sheet-opts" role="radiogroup" aria-label="Payment method"></div></div>
+</div>
+</div>
 <div class="ct-sheet-root" hidden="" id="ct-coupon-sheet">
 <div class="ct-scrim" data-sheet-close=""></div>
+<button aria-label="Close" class="ct-cook-x" data-sheet-close="" type="button"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
 <div aria-labelledby="coupon-sheet-title" aria-modal="true" class="ct-sheet" role="dialog">
 <div aria-hidden="true" class="ct-sheet-grab"></div>
 <div class="ct-sheet-head">
