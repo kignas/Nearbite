@@ -717,11 +717,18 @@ function paintItems(savedCart) {
     // data-step="-1", same cartAdjust() path — only the glyph and label change.
     const last = quantity <= 1;
     const custom = customLine(info.customizations);
+    // Display only: the cart key keeps the full name. If "(Half)" at the end of the
+    // name is already shown on the custom line, don't print it twice.
+    let shownName = name;
+    const tail = custom ? /\s*\(([^()]*)\)\s*$/.exec(name) : null;
+    if (tail && tail[1].split(',').every(part => custom.toLowerCase().includes(part.trim().toLowerCase()))) {
+      shownName = name.slice(0, tail.index) || name;
+    }
     return `
       <div class="ct-row${anyMedia ? ' has-media' : ''}" data-name="${esc(name)}">
         ${media}
         <div class="ct-info">
-          <div class="ct-name-row">${vegMark(info)}<span class="ct-name">${esc(name)}</span></div>
+          <div class="ct-name-row">${vegMark(info)}<span class="ct-name">${esc(shownName)}</span></div>
           ${custom ? `<div class="ct-custom">${esc(custom)}</div>` : ''}
           <div class="ct-price-line">
             <span class="ct-unit-price ct-num">₹${price}</span>
@@ -730,6 +737,7 @@ function paintItems(savedCart) {
         </div>
         <div class="ct-right">
           <div>
+            ${hasDiscount ? `<div class="ct-item-was ct-num">₹${quantity * original}</div>` : ''}
             <div class="ct-item-total ct-num">₹${itemTotal}</div>
             ${hasDiscount ? `<div class="ct-item-save ct-num">Save ₹${itemSavings.toFixed(0)}</div>` : ''}
           </div>
