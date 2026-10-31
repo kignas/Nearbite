@@ -39,6 +39,9 @@
   <!-- Phase 3 backend-quote bill styling (additive; loads last). -->
   <link href="css/ew-pricing-ui.css?v=20261030" rel="stylesheet"/>
   <link href="css/cart-premium-v2.css?v=20261031" rel="stylesheet"/>
+  <!-- Delivery-app redesign + offer popup (visual layer; load last). -->
+  <link href="css/cart-toing-redesign.css?v=20261031" rel="stylesheet"/>
+  <link href="css/ew-offer-popup.css?v=20261031" rel="stylesheet"/>
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -196,6 +199,17 @@
 <svg aria-hidden="true" fill="none" height="13" viewbox="0 0 24 24" width="13">
 <path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
 </svg>Applied</span>
+</div>
+<!-- Offer rows painted by js/ew-offer-popup.js from real cart/quote state; hidden otherwise. -->
+<div class="ct-sav-row ct-sav-static" hidden="" id="ct-sav-discount">
+<span aria-hidden="true" class="ct-sav-ic ct-sav-ic--pct"><svg fill="none" height="16" viewBox="0 0 24 24"><path d="M18 6 6 18" stroke="currentColor" stroke-linecap="round" stroke-width="2.4"></path><circle cx="7.6" cy="7.6" r="2" stroke="currentColor" stroke-width="2.2"></circle><circle cx="16.4" cy="16.4" r="2" stroke="currentColor" stroke-width="2.2"></circle></svg></span>
+<span class="ct-sav-copy"><span class="ct-sav-title" id="ct-sav-discount-text"></span></span>
+<span class="ct-sav-flag is-static"><svg aria-hidden="true" fill="none" height="13" viewBox="0 0 24 24" width="13"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path></svg>Applied</span>
+</div>
+<div class="ct-sav-row ct-sav-static" hidden="" id="ct-sav-delivery">
+<span aria-hidden="true" class="ct-sav-ic ct-sav-ic--ride"><svg fill="none" height="18" viewBox="0 0 24 24"><circle cx="6.5" cy="17.5" r="2.4" stroke="currentColor" stroke-width="1.8"></circle><circle cx="17.5" cy="17.5" r="2.4" stroke="currentColor" stroke-width="1.8"></circle><path d="M8.7 17.5h4.1l2-6.1h3.1l1.7 3.2h-3.2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path></svg></span>
+<span class="ct-sav-copy"><span class="ct-sav-title" id="ct-sav-delivery-text"></span></span>
+<span class="ct-sav-flag is-static"><svg aria-hidden="true" fill="none" height="13" viewBox="0 0 24 24" width="13"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path></svg>Applied</span>
 </div>
 </section>
 <!-- ═══ 5. RIDER TIP + DELIVERY INSTRUCTIONS — two tabs over the SAME ctState values (tipAmount / deliveryInstructions); switching tabs only shows/hides panels, nothing is reset ═══ -->
@@ -358,6 +372,7 @@
        ══════════════════════════════════════════════════════════════════ -->
 <div class="ct-sheet-root" hidden="" id="ct-note-sheet">
 <div class="ct-scrim" data-sheet-close=""></div>
+<button aria-label="Close" class="ct-cook-x" data-sheet-close="" type="button"><i aria-hidden="true" class="fa-solid fa-xmark"></i></button>
 <div aria-labelledby="note-sheet-title" aria-modal="true" class="ct-sheet" role="dialog">
 <div aria-hidden="true" class="ct-sheet-grab"></div>
 <div class="ct-sheet-head">
@@ -447,6 +462,7 @@
 <script src="js/order-payload.js?v=20261025"></script>
 <script src="platform-status.js?v=20261023"></script>
 <script src="js/cart-checkout-upgrades.js?v=20261025"></script>
+<script src="js/ew-offer-popup.js?v=20261031"></script>
 <script src="cart-bar.js"></script>
 <script src="js/cart-page.js?v=20261031-location-guard"></script>
 <script src="navigation.js"></script>
