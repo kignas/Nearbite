@@ -38,15 +38,20 @@
 
   /* Fields the backend returns for a partial-COD (advance) order.
      `required` is only true on evidence the server actually produced:
-     a positive advance amount, or an advance status it reported. A bare
+     a positive advance amount, or one of the real advance statuses
+     (pending | paid | failed). Any other status text — "not_required",
+     "none", "n/a" — means NO advance, so a normal COD order is confirmed
+     in place instead of being sent to the payment-pending page. A bare
      partialCodCashDue is NOT treated as proof on its own — guessing here
      could invent an advance the backend never asked for. */
+  var ADVANCE_STATUSES = ['pending', 'paid', 'failed'];
+
   function partialCod(order) {
     var o = order || {};
     var advance = numOrNull(o.partialCodAdvanceAmount);
     var cashDue = numOrNull(o.partialCodCashDue);
     var status = norm(o.partialCodAdvanceStatus);
-    var required = (advance !== null && advance > 0) || !!status;
+    var required = (advance !== null && advance > 0) || ADVANCE_STATUSES.indexOf(status) > -1;
     return {
       required: required,
       advanceAmount: advance,
