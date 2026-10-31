@@ -41,7 +41,7 @@
     moon: '<svg viewBox="0 0 14 14" fill="none"><path d="M1.5 5a6 6 0 0 0 11 0" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
     bar:  '<svg viewBox="0 0 12 12"><rect x="1" y="4.5" width="10" height="3" rx="1.5" fill="currentColor"/></svg>'
   };
-  var NS_CHECK = '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path class="ew-os__check" d="M8 16.8 13.8 22.5 24.5 10.5" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var NS_CHECK = '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path class="ew-os__check" d="M9.5 16.4 14.3 21l8.4-9.6" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var NS_X = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 3 10 10M13 3 3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
   function el(tag, cls, text) {
@@ -54,7 +54,7 @@
   function confetti() {
     var wrap = el('div', 'ew-os__mark');
     wrap.setAttribute('aria-hidden', 'true');
-    ['ew-os__ripple', 'ew-os__ring ew-os__ring--3', 'ew-os__ring ew-os__ring--2'].forEach(function (c) { wrap.appendChild(el('span', c)); });
+    ['ew-os__ring ew-os__ring--3', 'ew-os__ring ew-os__ring--2'].forEach(function (c) { wrap.appendChild(el('span', c)); });
     var core = el('span', 'ew-os__core'); core.innerHTML = NS_CHECK; wrap.appendChild(core);
     PIECES.forEach(function (p, i) {
       var a = p[0] * Math.PI / 180;
