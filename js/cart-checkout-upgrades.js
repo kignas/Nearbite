@@ -398,14 +398,52 @@
         (m.st.ok ? '' : '<span class="ct-pay-badge">' + (m.st.note === 'Unavailable' ? 'Unavailable' : 'Not eligible') + '</span>') +
         '<span class="ct-pay-radio" aria-hidden="true"></span></button>';
     }).join('');
+    /* Confirm step: choosing a method only selects it. The order is placed
+       by the button below, so an accidental tap on an option never orders. */
+    var wrap = el('ct-pay-confirm');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'ct-pay-confirm';
+      wrap.style.cssText = 'margin-top:16px;padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px))';
+      var cb = document.createElement('button');
+      cb.type = 'button';
+      cb.id = 'ct-pay-confirm-btn';
+      cb.className = 'ct-btn ct-btn-primary';
+      cb.style.cssText = 'width:100%;min-height:54px;border-radius:999px;font-weight:800';
+      wrap.appendChild(cb);
+      box.parentNode.appendChild(wrap);
+    }
+    paintPayConfirm();
     openSheet('ct-pay-sheet');
   }
+
+  /* Label follows the selected method; option highlight follows it too. */
+  function paintPayConfirm() {
+    var cur = getPaymentMethod();
+    var btn = el('ct-pay-confirm-btn');
+    if (btn) btn.textContent = cur === 'cod' ? 'Place Order (Pay on delivery)' : 'Pay & Place Order';
+    var box = el('ct-pay-sheet-opts');
+    if (!box) return;
+    Array.prototype.forEach.call(box.querySelectorAll('[data-ct-pick]'), function (b) {
+      var on = b.getAttribute('data-ct-pick') === cur;
+      b.classList.toggle('is-selected', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
   function onPick(e) {
-    var b = e.target.closest && e.target.closest('[data-ct-pick]');
+    var t = e.target;
+    if (!t || !t.closest) return;
+    // Confirm button: close the sheet and place the order with the chosen method.
+    if (t.closest('#ct-pay-confirm-btn')) {
+      try { closeSheet(true); } catch (err) { /* ignore */ }
+      setTimeout(function () { placeOrder(); }, 120);
+      return;
+    }
+    // Option tap: select only. The customer confirms with the button.
+    var b = t.closest('[data-ct-pick]');
     if (!b || b.getAttribute('aria-disabled') === 'true') return;
     selectMethod(b.getAttribute('data-ct-pick'));
-    try { closeSheet(true); } catch (err) { /* ignore */ }
-    setTimeout(function () { placeOrder(); }, 120);
+    paintPayConfirm();
   }
 
   function paintPayNote() {
