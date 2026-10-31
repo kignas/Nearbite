@@ -106,6 +106,10 @@ async function t(name, fn) {
   try { await fn(); console.log(`PASS ${name}`); } catch (err) { failed += 1; console.log(`FAIL ${name}: ${String(err.message).split('\n')[0]}`); }
 }
 const blockText = (env) => (env.reg['ew-quote-block'] ? env.reg['ew-quote-block'].innerHTML : '');
+const envBillRows = (bill) => {
+  const api = require('../js/ew-bill.js');
+  return api.rowsFromQuote({ bill: bill, distance: { restaurantToCustomerKm: 1 } });
+};
 
 (async () => {
   // ── request payload ────────────────────────────────────────────────
@@ -129,6 +133,17 @@ const blockText = (env) => (env.reg['ew-quote-block'] ? env.reg['ew-quote-block'
     assert.strictEqual(env.ui.isBlocked(), false);
   });
 
+  await t('A3b a single-restaurant saved-address basket is eligible for authoritative pricing', async () => {
+    const env = makeEnv({ quoteImpl: async () => okQuote() });
+    assert.strictEqual(env.ui.isQuoteEligible(), true);
+    assert.strictEqual(env.ui.isEngineDisabled(), false);
+  });
+  await t('D1b engine-off response restores the legacy pricing path', async () => {
+    const env = makeEnv({ quoteImpl: async () => fail(503, 'PRICING_ENGINE_DISABLED', 'Pricing is disabled') });
+    const result = await env.ui.ensureForPay();
+    assert.strictEqual(result.engineOff, true);
+    assert.strictEqual(env.ui.isEngineDisabled(), true);
+  });
   await t('A4 EWQuote.buildPayload forwards a positive tip and drops a zero / invalid one', async () => {
     const env = makeEnv({ quoteImpl: async () => okQuote() });
     const bp = (tipAmount) => env.ctx.window.EWQuote.buildPayload({ restaurantId: REST, addressId: ADDR, items: [{ menuItem: MENU, quantity: 1 }], tipAmount });
@@ -274,6 +289,12 @@ const blockText = (env) => (env.reg['ew-quote-block'] ? env.reg['ew-quote-block'
   });
 
   // ── bill rows ──────────────────────────────────────────────────────
+  await t('F0 the itemised bill explains a backend small-order fee', async () => {
+    const rows = envBillRows({ foodPayable: 150, deliveryFee: 8, smallOrderFee: 1.7, total: 159.7, grandTotal: 159.7 });
+    const fee = rows.find((r) => r.key === 'smallOrderFee');
+    assert.ok(fee);
+    assert.ok(/smaller baskets/i.test(fee.note));
+  });
   await t('F1 the itemised bill shows a tip row so the lines add up to the total', async () => {
     const env = makeEnv({ tip: 20, quoteImpl: async () => okQuote() });
     await env.ui.ensureForPay();
