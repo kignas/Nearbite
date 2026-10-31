@@ -281,12 +281,16 @@ async function calculateCurrentDelivery(options) {
   }
 
   if (!customerCoords || !restaurantCoords) {
-    const freeDelivery = Number(restaurantInfo?.freeDeliveryAbove || 0) > 0 && subtotal >= Number(restaurantInfo.freeDeliveryAbove);
+    // A location-less estimate must never be treated as a real delivery quote.
+    // In particular, a free-delivery threshold cannot bypass the need to know
+    // the customer's delivery coordinates and serviceability.
     return {
-      fee: freeDelivery ? 0 : 30,
+      fee: null,
       distance: null,
-      source: 'fallback',
-      freeDelivery,
+      source: 'location-required',
+      missingLocation: !customerCoords,
+      missingRestaurantLocation: !restaurantCoords,
+      freeDelivery: false,
       freeDeliveryEnabled: restaurantInfo?.freeDeliveryEnabled !== false,
       freeDeliveryAbove: restaurantInfo?.freeDeliveryAbove || 0,
       minOrder: restaurantInfo?.minOrder || 0,
@@ -351,10 +355,11 @@ async function ctComputeBreakdown(groups, force) {
         fee = freeDelivery ? 0 : deliveryFeeForDistance(distance);
       }
     } else {
-      freeDelivery = freeAbove > 0 && g.subtotal >= freeAbove;
-      fee = freeDelivery ? 0 : 30;
+      // Do not fabricate a delivery fee or unlock free delivery without
+      // customer coordinates. The checkout remains blocked until location is set.
+      fee = null;
     }
-    return { ...g, distance, outsideRadius, radius, fee, freeDelivery, freeAbove, freeEnabled, minOrder, codEnabled: info?.codEnabled === true };
+    return { ...g, distance, outsideRadius, missingLocation: !customerCoords, missingRestaurantLocation: !coords, radius, fee, freeDelivery, freeAbove, freeEnabled, minOrder, codEnabled: info?.codEnabled === true };
   });
 }
 
@@ -364,9 +369,11 @@ function renderMultiBreakdown(rows) {
   const muted = 'font-size:11px;color:#6b7280;';
   const html = ['<div style="' + muted + 'font-weight:800;letter-spacing:.3px;text-transform:uppercase;margin:2px 0 6px;">Bill by restaurant</div>'];
   rows.forEach(r => {
-    const feeText = r.outsideRadius ? 'Unavailable' : (Number(r.fee) === 0 ? 'FREE' : '₹' + r.fee);
+    const feeText = (r.missingLocation || r.missingRestaurantLocation) ? 'Location required' : (r.outsideRadius ? 'Unavailable' : (Number(r.fee) === 0 ? 'FREE' : '₹' + r.fee));
     let note = '';
-    if (r.minOrder > 0 && r.subtotal < r.minOrder) {
+    if (r.missingLocation || r.missingRestaurantLocation) {
+      note = 'Set a precise delivery location to calculate charges';
+    } else if (r.minOrder > 0 && r.subtotal < r.minOrder) {
       note = 'Add ₹' + Math.ceil(r.minOrder - r.subtotal).toLocaleString('en-IN') + ' (min ₹' + r.minOrder.toLocaleString('en-IN') + ')';
     } else if (r.outsideRadius) {
       note = 'Outside ' + r.radius.toFixed(1).replace(/\.0$/, '') + ' km delivery range';
@@ -380,7 +387,7 @@ function renderMultiBreakdown(rows) {
       '<div class="ct-bill-row" style="flex-direction:column;align-items:stretch;gap:2px;">' +
         '<div style="display:flex;justify-content:space-between;gap:10px;">' +
           '<span class="ct-bill-label">' + esc(r.name) + '</span>' +
-          '<span class="ct-bill-val' + (r.outsideRadius ? ' is-off' : (Number(r.fee) === 0 ? ' is-free' : '')) + '">' + feeText + '</span>' +
+          '<span class="ct-bill-val' + ((r.outsideRadius || r.missingLocation || r.missingRestaurantLocation) ? ' is-off' : (Number(r.fee) === 0 ? ' is-free' : '')) + '">' + feeText + '</span>' +
         '</div>' +
         '<div style="display:flex;justify-content:space-between;gap:10px;' + muted + '">' +
           '<span>Item total ₹' + r.subtotal.toLocaleString('en-IN') + '</span>' +
@@ -394,13 +401,17 @@ function renderMultiBreakdown(rows) {
 }
 
 function applyMultiDelivery(rows) {
+  const missingLocation = rows.some(r => r.missingLocation || r.missingRestaurantLocation);
+  const needsCustomerLocation = rows.some(r => r.missingLocation);
+  if (!needsCustomerLocation) ctShowLocationPrompt(false);
   const anyOutside = rows.some(r => r.outsideRadius);
-  const deliveryTotal = rows.reduce((sum, r) => sum + (r.outsideRadius ? 0 : Number(r.fee || 0)), 0);
+  const deliveryTotal = rows.reduce((sum, r) => sum + (r.outsideRadius || r.missingLocation || r.missingRestaurantLocation ? 0 : Number(r.fee || 0)), 0);
   const belowMin = rows.filter(r => r.minOrder > 0 && r.subtotal < r.minOrder);
 
   ctState.deliveryFee = deliveryTotal;
   ctState.deliveryFeeEstimated = false;
-  ctState.unavailable = anyOutside;
+  ctState.missingLocation = missingLocation;
+  ctState.unavailable = anyOutside || missingLocation;
   ctState.deliveryReady = true;
   ctState.multiBelowMin = belowMin;
   // Free-delivery is per-restaurant now; the single aggregate free-delivery row
@@ -417,7 +428,8 @@ function applyMultiDelivery(rows) {
   const feeEl = document.getElementById('bill-delivery-val');
   const feeLabel = document.getElementById('bill-delivery-label');
   if (feeLabel) feeLabel.textContent = 'Delivery fee (' + rows.length + ' restaurants)';
-  if (anyOutside) { feeEl.className = 'ct-bill-val is-off'; feeEl.textContent = 'Unavailable'; }
+  if (missingLocation) { feeEl.className = 'ct-bill-val is-off'; feeEl.textContent = 'Location required'; }
+  else if (anyOutside) { feeEl.className = 'ct-bill-val is-off'; feeEl.textContent = 'Unavailable'; }
   else if (deliveryTotal === 0) { feeEl.className = 'ct-bill-val is-free'; feeEl.textContent = 'FREE'; }
   else { feeEl.className = 'ct-bill-val'; feeEl.textContent = '₹' + deliveryTotal; }
 
@@ -429,7 +441,13 @@ function applyMultiDelivery(rows) {
   const stripIcon = document.getElementById('nudge-icon');
   if (strip) {
     strip.style.display = 'flex';
-    if (anyOutside) {
+    if (missingLocation) {
+      strip.className = 'ct-strip is-error';
+      if (stripIcon) stripIcon.className = 'fa-solid fa-location-crosshairs';
+      if (stripText) stripText.textContent = 'Delivery location required';
+      if (stripSub) { stripSub.textContent = 'Set a precise address to calculate delivery charges'; stripSub.hidden = false; }
+      ctShowLocationPrompt(needsCustomerLocation);
+    } else if (anyOutside) {
       strip.className = 'ct-strip is-error';
       if (stripIcon) stripIcon.className = 'ct-strip-icon';
       if (stripText) stripText.textContent = 'One or more restaurants can’t deliver to this address';
@@ -885,6 +903,21 @@ function applyTotals() {
     try { window.CtX.paintBill(); } catch (e) { /* never block the cart paint */ }
   }
 
+  // Keep every prominent payable amount synchronized after the pricing
+  // extension adds handling/packaging/tax rows to the detailed bill.
+  const finalBillText = document.getElementById('bill-total')?.textContent?.trim();
+  const heroTotal = document.getElementById('bill-hero-total');
+  if (heroTotal && finalBillText) heroTotal.textContent = finalBillText;
+  const footerTotal = document.getElementById('checkout-total');
+  if (footerTotal && finalBillText) footerTotal.textContent = finalBillText;
+
+  if (ctState.missingLocation) {
+    ['bill-total', 'checkout-total', 'bill-hero-total'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+  }
+
   /* Live backend quote (additive). Requests POST /pricing/quote debounced and
      renders the itemized backend bill; a failure leaves the preview above
      untouched, so the cart never depends on pricing being reachable. */
@@ -945,10 +978,13 @@ function setDeliveryPending() {
 }
 
 function applyDelivery(delivery) {
+  if (!delivery.missingLocation) ctShowLocationPrompt(false);
   // Fee resolution is byte-for-byte the previous rule set.
   let deliveryFee = delivery.fee;
   if (delivery.outsideRadius) {
     deliveryFee = 0;
+  } else if (delivery.missingLocation) {
+    deliveryFee = 0; // display-only neutral value; checkout is blocked below
   } else if (deliveryFee == null) {
     deliveryFee = 30;
   }
@@ -969,7 +1005,8 @@ function applyDelivery(delivery) {
   ctState.minOrder = Number(delivery.minOrder || ctState.minOrder || 0);
   ctState.freeDeliveryAbove = Number(delivery.freeDeliveryAbove || ctState.freeDeliveryAbove || 0);
   ctState.freeDeliveryEnabled = Number(delivery.freeDeliveryAbove || 0) > 0;
-  ctState.unavailable = !!delivery.outsideRadius;
+  ctState.missingLocation = !!delivery.missingLocation;
+  ctState.unavailable = !!delivery.outsideRadius || !!delivery.missingLocation || !!delivery.missingRestaurantLocation;
   ctState.deliveryReady = true;
 
   const feeEl = document.getElementById('bill-delivery-val');
@@ -991,7 +1028,16 @@ function applyDelivery(delivery) {
     }
   };
 
-  if (delivery.outsideRadius) {
+  if (delivery.missingLocation || delivery.missingRestaurantLocation) {
+    feeEl.className = 'ct-bill-val is-off';
+    feeEl.textContent = 'Location required';
+    setStrip('is-error', 'fa-solid fa-location-crosshairs',
+      'Set your delivery location',
+      delivery.missingLocation
+        ? 'Allow location access or choose a precise map pin to calculate delivery distance and charges.'
+        : 'This restaurant has no verified delivery coordinates. Please contact support.');
+    ctShowLocationPrompt(!!delivery.missingLocation);
+  } else if (delivery.outsideRadius) {
     // ₹0 here means "not deliverable", never "free". Say so.
     // The limit shown is the restaurant's real deliveryRadiusKm from the
     // backend (15 km by default) — it is not a hardcoded frontend number.
@@ -1807,6 +1853,10 @@ async function placeOrder() {
       // ctComputeBreakdown() already refreshes every restaurant in parallel-safe
       // order. Do not refresh the first restaurant a second time here.
       const deliveryRows = await ctComputeBreakdown(cartGroupsForOrder, true);
+      const missingCoordinatesRow = deliveryRows.find(r => r.missingLocation || r.missingRestaurantLocation);
+      if (missingCoordinatesRow) {
+        throw new Error('Set a precise delivery location before placing your order. Allow location access or choose a map pin.');
+      }
       const unavailableRow = deliveryRows.find(r => r.outsideRadius);
       if (unavailableRow) {
         throw new Error(`${unavailableRow.name} does not deliver to your selected address (${unavailableRow.distance.toFixed(1)} km away; limit ${unavailableRow.radius.toFixed(1).replace(/\.0$/, '')} km).`);
@@ -1821,6 +1871,9 @@ async function placeOrder() {
       const delivery = await calculateCurrentDelivery({ force: true });
       if (delivery.outsideRadius) {
         throw new Error(`This restaurant does not deliver to your selected address (${delivery.distance.toFixed(1)} km away; limit ${delivery.radius.toFixed(1).replace(/\.0$/, '')} km).`);
+      }
+      if (delivery.missingLocation || delivery.missingRestaurantLocation) {
+        throw new Error('Set a precise delivery location before placing your order. Allow location access or choose a map pin.');
       }
       deliveryFee = delivery.fee == null ? 30 : delivery.fee;
     }
@@ -3401,6 +3454,22 @@ document.getElementById('tip-input').addEventListener('keydown', (event) => {
   if (event.key === 'Enter') { event.preventDefault(); saveTipSheet(); }
 });
 
+
+/* Location-required modal: precise coordinates are needed for a valid quote.
+   A manually selected map pin is an accepted alternative to browser GPS. */
+function ctShowLocationPrompt(show) {
+  const modal = document.getElementById('ct-location-modal');
+  if (!modal) return;
+  if (show) {
+    modal.hidden = false;
+    document.body.classList.add('ct-location-modal-open');
+  } else {
+    modal.hidden = true;
+    document.body.classList.remove('ct-location-modal-open');
+  }
+}
+window.ctShowLocationPrompt = ctShowLocationPrompt;
+
 /* ── Lifecycle (listeners preserved) ────────────────────────────────────── */
 window.addEventListener('pageshow',(e)=>{
   // On a fresh load or a full navigation the DOMContentLoaded handler below
@@ -3453,4 +3522,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // renderCart() paints the checkout summary as part of its pipeline, so a
   // separate paintCheckoutDeliverySummary() here would just repaint the same state.
   await renderCart();
+  const selected = ctSelectedAddress();
+  if (!normalizeCoords(selected && (selected.location || selected))) {
+    ctShowLocationPrompt(true);
+  }
 });
