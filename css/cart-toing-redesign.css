@@ -1,0 +1,123 @@
+/* ==================================================================
+   EATSWADA CHECKOUT — "delivery-app" redesign (visual layer only)
+   Loads LAST on cart.html. No markup or logic depends on this file:
+   delete the <link> and the page returns to the previous look.
+   One accent: change --ew-co-accent* below to re-colour everything.
+   ================================================================== */
+body.ct-page{
+  --ew-co-accent:#0b7a2a;
+  --ew-co-accent-deep:#086621;
+  --ew-co-accent-soft:#e7f5ec;
+  --ew-co-bg:#eef0f6;
+  --ct-primary:var(--ew-co-accent);
+  --ct-primary-deep:var(--ew-co-accent-deep);
+  --ct-primary-soft:var(--ew-co-accent-soft);
+  --ct-bg:var(--ew-co-bg);
+  background:var(--ew-co-bg);
+}
+.ct-page{background:var(--ew-co-bg)}
+
+/* header: restaurant + delivery line on white, like the reference */
+.ct-page .ct-delivery-head{background:#fff;box-shadow:none;border-bottom:0}
+.ct-page .ct-dh-restaurant{color:#7b8190;font-weight:600}
+
+/* ₹0 packaging · ₹0 platform banner → solid green pill */
+.ct-page .ct-fees{
+  display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin:8px 14px 12px;padding:0 18px;
+  border-radius:18px;background:var(--ew-co-accent);color:#fff;font-size:17px;font-weight:800;letter-spacing:-.1px;border:0}
+.ct-page .ct-fees strong{color:#ffe36e;font-weight:850}
+.ct-page .ct-fees-ic{display:none}
+.ct-page .ct-fees-dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.7);margin:0 6px}
+
+/* cards: soft, borderless, big radius */
+.ct-page .ct-card,.ct-page .ct-bill{border:0;border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(20,25,45,.04)}
+.ct-page .ct-restaurant-name{font-weight:800}
+
+/* action chips under the items: Add Items · Cooking requests · Cutlery Needed */
+.ct-page .ct-item-actions{border-top:0;padding-top:14px;gap:10px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.ct-page .ct-item-actions::-webkit-scrollbar{display:none}
+.ct-page .ct-pill-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;border-radius:999px;
+  background:#fff;border:1.5px solid #d9dce6;color:#2a2f3b;font-size:15px;font-weight:600;white-space:nowrap}
+.ct-page .ct-pill-btn svg{color:#2a2f3b}
+.ct-page .ct-pill-btn.is-set{background:var(--ew-co-accent-soft);border-color:var(--ew-co-accent);color:var(--ew-co-accent-deep)}
+.ct-page .ct-pill-btn.is-set svg{color:var(--ew-co-accent)}
+.ct-cutlery-chip{cursor:pointer;position:relative}
+.ct-cutlery-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.ct-cutlery-chip .ct-cutlery-box{width:24px;height:24px;border-radius:7px;border:2px solid #cfd3de;background:#fff;display:grid;place-items:center}
+.ct-cutlery-chip input:checked+.ct-cutlery-box{background:var(--ew-co-accent);border-color:var(--ew-co-accent)}
+.ct-cutlery-chip input:checked+.ct-cutlery-box::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.ct-cutlery-chip:has(input:checked){border-color:var(--ew-co-accent);background:var(--ew-co-accent-soft)}
+.ct-cutlery-chip:has(input:focus-visible){outline:3px solid rgba(11,122,42,.3);outline-offset:2px}
+
+/* Savings corner → green tile icons + "✓ Applied" */
+.ct-page .ct-savings{padding:6px 0}
+.ct-page .ct-savings .ct-sec-title{display:none}
+.ct-page .ct-sav-row{display:flex;align-items:center;gap:14px;padding:16px 18px;min-height:60px;border-radius:0;background:transparent;border:0}
+.ct-page .ct-sav-row+.ct-sav-row{border-top:1px solid #eceef3}
+.ct-page .ct-sav-row[hidden]{display:none}
+.ct-page .ct-sav-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--ew-co-accent);color:#fff;flex:0 0 auto}
+.ct-page .ct-sav-title{font-size:16px;font-weight:600;color:#1f2430}
+.ct-page .ct-sav-sub{color:#6b7280}
+.ct-page .ct-sav-flag,.ct-page .ct-group-flag{color:var(--ew-co-accent);font-weight:700;background:transparent;font-size:15px}
+.ct-page .ct-sav-chev{color:#2a2f3b}
+
+/* delivery instructions → icon tiles in a swipe row */
+.ct-page .ct-di-pills{display:flex;flex-wrap:nowrap;gap:12px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.ct-page .ct-di-pills::-webkit-scrollbar{display:none}
+.ct-page .ct-di-pill{flex:0 0 92px;min-height:92px;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;
+  padding:14px;border-radius:16px;border:1.5px solid #dcdfe8;background:#fff;color:#4b5160;font-size:14px;font-weight:500;line-height:1.25;text-align:left;white-space:normal}
+.ct-page .ct-di-pill svg{width:26px;height:26px;color:#3a3f4b}
+.ct-page .ct-di-pill[aria-pressed="true"]{border-color:var(--ew-co-accent);background:var(--ew-co-accent-soft);color:var(--ew-co-accent-deep)}
+.ct-page .ct-di-pill[aria-pressed="true"] svg{color:var(--ew-co-accent)}
+
+/* payment method card */
+.ct-page .ct-paycard{margin:12px 14px 0;padding:16px;border-radius:22px;background:#fff;border:0}
+.ct-page .ct-pay-opt{border-radius:16px;border:1.5px solid #dcdfe8}
+.ct-page .ct-pay-opt.is-selected{border-color:var(--ew-co-accent);background:var(--ew-co-accent-soft)}
+.ct-page .ct-pay-opt.is-selected .ct-pay-radio{border-color:var(--ew-co-accent)}
+.ct-page .ct-pay-opt.is-selected .ct-pay-radio::after{background:var(--ew-co-accent)}
+.ct-page .ct-pay-opt+.ct-pay-opt{margin-top:10px}
+.ct-page .ct-paycard.is-single .ct-pay-radio{display:none}
+
+/* bill */
+.ct-page .ct-bill-hero{background:#fff}
+.ct-page .ct-bill-hero-ic{background:var(--ew-co-accent-soft);color:var(--ew-co-accent)}
+.ct-page .ct-bill-hero-saved,.ct-page .ct-bill-val.is-save,.ct-page .ct-bill-val.is-free{color:var(--ew-co-accent)}
+.ct-page .ct-bill-band{background:#fdeaf6;color:#d6247f;font-weight:800}
+
+/* savings strip + footer */
+.ct-page .ct-footer-save.show,.ct-page .ct-save-strip.show{justify-content:center;background:#e7f5ec;color:#14552b;border-radius:0;font-weight:800}
+.ct-page .ct-paybar{background:#fff;box-shadow:0 -6px 24px rgba(20,25,45,.06);border-top:0}
+.ct-page .ct-paybar-amt{color:#10131a}
+.ct-page .ct-paybar-link{color:var(--ew-co-accent)}
+.ct-page .ct-paybar .ct-cta{min-height:58px;border-radius:999px;background:var(--ew-co-accent);color:#fff;font-size:20px;font-weight:800;box-shadow:0 6px 16px rgba(11,122,42,.25)}
+.ct-page .ct-paybar .ct-cta:active{background:var(--ew-co-accent-deep)}
+.ct-page .ct-paybar .ct-cta.locked{background:#e3e6ec;color:#98a0a8;box-shadow:none}
+.ct-page .ct-pay-note{color:#6b7280}
+
+/* ── "Add cooking requests" sheet (restaurant note) ───────────────── */
+.ct-cook-x{display:none}
+#ct-note-sheet.is-cooking{flex-direction:column;align-items:center;justify-content:flex-end}
+#ct-note-sheet.is-cooking .ct-cook-x{
+  display:grid;place-items:center;position:relative;z-index:2;flex:0 0 auto;width:60px;height:60px;margin-bottom:16px;
+  border:0;border-radius:50%;background:#12141a;color:#fff;font-size:22px;cursor:pointer;
+  opacity:0;transform:translateY(10px);transition:opacity .22s ease,transform .26s cubic-bezier(.25,1,.5,1)}
+#ct-note-sheet.is-cooking.is-open .ct-cook-x{opacity:1;transform:none}
+#ct-note-sheet.is-cooking .ct-sheet{border-radius:26px 26px 0 0;padding:26px 20px calc(18px + env(safe-area-inset-bottom))}
+#ct-note-sheet.is-cooking .ct-sheet-grab,
+#ct-note-sheet.is-cooking .ct-sheet-head,
+#ct-note-sheet.is-cooking .ct-field-label,
+#ct-note-sheet.is-cooking .ct-sheet-foot .ct-btn-ghost{display:none}
+#ct-note-sheet.is-cooking .ct-sheet-body{padding:0}
+#ct-note-sheet.is-cooking .ct-textarea{min-height:48px;padding:6px 52px 8px 0;border:0;border-bottom:2px solid var(--ew-co-accent);border-radius:0;
+  background:transparent;font-size:22px;font-weight:500;line-height:1.3;resize:none;box-shadow:none;outline:0;caret-color:var(--ew-co-accent)}
+#ct-note-sheet.is-cooking .ct-textarea::placeholder{color:#8a909c;font-weight:500}
+#ct-note-sheet.is-cooking .ct-field-foot{position:relative;display:block;margin-top:0}
+#ct-note-sheet.is-cooking .ct-count{position:absolute;right:0;top:-40px;color:#2a2f3b;font-weight:700;font-size:15px}
+#ct-note-sheet.is-cooking .ct-field-help{display:block;margin-top:14px;color:#6b7280;font-size:16px;line-height:1.45}
+#ct-note-sheet.is-cooking .ct-sug-row{margin-top:14px}
+#ct-note-sheet.is-cooking .ct-sheet-foot{display:block;padding:18px 0 0;border:0}
+#ct-note-sheet.is-cooking .ct-btn-primary{width:100%;min-height:58px;border-radius:999px;font-size:20px;font-weight:800;
+  background:var(--ew-co-accent);color:#fff;border:0}
+#ct-note-sheet.is-cooking .ct-btn-primary:disabled{background:#e3e5ec;color:#6b7280;cursor:not-allowed;box-shadow:none}
+@media (prefers-reduced-motion:reduce){#ct-note-sheet.is-cooking .ct-cook-x{transition:none}}
