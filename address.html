@@ -18,16 +18,9 @@
 
 <!-- Shared stylesheet loads first so the page-scoped rules below win
      without any global change to style.css. -->
-<link rel="stylesheet" href="style.css">
-<script src="js/auth-token.js?v=20261025"></script>
-<script src="config.js"></script>
-<script src="address-store.js?v=20260922-4"></script>
-<script src="address-api.js"></script>
-<script src="address-model.js?v=20260922-4"></script>
-<script src="safe-html.js"></script>
+<link rel="stylesheet" href="css/address.bundle.css?v=68f1da814b"/>
 <!-- The address flow is styled only by address-flow.css (scoped to
      body.ea). address-v3.css is no longer loaded by this page. -->
-<link rel="stylesheet" href="address-flow.css?v=20260923-refine">
 <script>
 /* Chooses the screen before first paint so the wrong view never flashes.
    Homepage / Cart → "Select Your Location"; Profile → "Addresses". */
@@ -38,10 +31,6 @@
   document.documentElement.classList.add('ea-html');
 })();
 </script>
-<link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
-<link rel="stylesheet" href="eatswada-theme.css">
-<link rel="stylesheet" href="eatswada-header-theme.css">
-  <link href="css/eatswada-back-button.css?v=20260928-back" rel="stylesheet">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -263,6 +252,12 @@
 
 <div class="ea-toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="js/auth-token.js?v=20261025"></script>
+<script src="config.js"></script>
+<script src="address-store.js?v=20260922-4"></script>
+<script src="address-api.js"></script>
+<script src="address-model.js?v=20260922-4"></script>
+<script src="safe-html.js"></script>
 <script src="address.js?v=20260922-4"></script>
 
 <script src="navigation.js"></script>

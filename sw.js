@@ -1,4 +1,4 @@
-const CACHE='eatswada-shell-v9';
+const CACHE='eatswada-shell-v10';
 const SHELL=['./','./index.html','./profile.html','./orders.html','./cart.html','./address.html','./address-new.html','./search.html','./category.html','./restaurant.html','./complete-profile.html','./location-onboarding.html','./config.js','./api.js','./navigation.js','./cart-bar.js','./favorites.js','./restaurant-card.js','./home.js','./safe-html.js','./seo.js','./style.css','./restaurant-card.css'];
 const INDEX=new URL('./index.html',self.location.href).href;
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})).then(()=>self.skipWaiting()))});

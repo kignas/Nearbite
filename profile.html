@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
 <script>(function(){try{var t=localStorage.getItem('eatswada_theme');t=t==='dark'?'dark':'light';var d=document.documentElement;d.dataset.ewTheme=t;d.style.colorScheme=t;var h=localStorage.getItem('eatswada_header_theme');var ok=['raspberry'];d.dataset.ewHeader=ok.indexOf(h)>-1?h:'raspberry';}catch(e){document.documentElement.dataset.ewHeader='raspberry';}})();</script>
-<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
+<script defer src="https://cdn.jsdelivr.net/npm/darkreader@4.9.133/darkreader.js" integrity="sha384-AedAbrPK4eWaaSPBT+dKFGQo5T4+1QHnJe+Fc+dIDhMw1VVtmvovU4qTfPCuI3KP" crossorigin="anonymous" data-ew-dark-reader></script>
 <script src="eatswada-theme.js"></script>
 <script src="eatswada-header-theme.js"></script>
 <meta name="theme-color" content="#ffffff">
@@ -203,12 +203,7 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
   .icon-btn,.quick-tile,.row,.chev,.toast{transition:none}
 }
 </style>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="restaurant-card.css?v=20261007-cardheight">
-<link rel="stylesheet" href="food-placeholder.css">
-<script src="js/auth-token.js?v=20261025"></script>
-<script src="config.js"></script>
-<script src="safe-html.js"></script>
+<link rel="stylesheet" href="css/profile.bundle.css?v=6c36c4ca3e"/>
 
 <!-- Eatswada profile icons: one line family, geometry only
      (stroke settings come from .pf-ico). -->
@@ -231,9 +226,6 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
     <symbol id="ew-offline" viewBox="0 0 24 24"><path d="M3.5 3.5l17 17M8.5 16.5a4.8 4.8 0 0 1 7-.4M5 12.9a9.5 9.5 0 0 1 3.4-2.2M19 12.9a9.6 9.6 0 0 0-4.6-2.6M2 9.3a14 14 0 0 1 4-2.6M22 9.3A14 14 0 0 0 10.5 5.6"/><path d="M12 19.6v.1"/></symbol>
   </defs>
 </svg>
-<link rel="stylesheet" href="css/eatswada-ui-system.css?v=20260923-typography">
-<link rel="stylesheet" href="eatswada-theme.css">
-<link rel="stylesheet" href="eatswada-header-theme.css">
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -432,6 +424,9 @@ a.row:focus-visible,button.row:focus-visible{outline:2px solid var(--brand);outl
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="js/auth-token.js?v=20261025"></script>
+<script src="config.js"></script>
+<script src="safe-html.js"></script>
 <script>
 'use strict';
 const API_BASE=CONFIG.API_BASE_URL;
