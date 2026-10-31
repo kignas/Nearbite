@@ -896,31 +896,38 @@ function applyTotals() {
     else taxRow.style.display = 'none';
   }
 
-  // One number, written everywhere it appears: the sheet's "To pay", the
-  // compact row and the checkout CTA can never disagree.
-  document.getElementById('bill-total').innerText = '₹' + total;
-  document.getElementById('checkout-total').innerText = '₹' + total;
-  updateBillCompact(total);
-  paintSavingsHero();
-  paintFooterSavings();
-  paintSavingsCorner();
+  // Once a backend quote is active, it is the single source of truth for
+  // every payable amount. applyTotals() continues to refresh the preview state
+  // and schedule a new quote, but must not overwrite a live quote while that
+  // request is pending (this caused the visible ₹215 ↔ ₹187 flicker).
+  const backendQuoteActive = !!document.getElementById('ct-bill')?.classList.contains('ew-quote-active');
+  if (!backendQuoteActive) {
+    document.getElementById('bill-total').innerText = '₹' + total;
+    document.getElementById('checkout-total').innerText = '₹' + total;
+    updateBillCompact(total);
+    paintSavingsHero();
+    paintFooterSavings();
+    paintSavingsCorner();
+  }
   try { if (window.EWOffers) window.EWOffers.evaluate(); } catch (e) { /* offers are cosmetic */ }
 
   // Let the checkout-upgrades layer add the itemized extras (packaging,
   // handling, surge, tax) it previews from the platform settings, so the
   // "To Pay" figure includes every charge the backend will apply. The backend
   // remains authoritative; this only mirrors it.
-  if (window.CtX && typeof window.CtX.paintBill === 'function') {
+  if (!backendQuoteActive && window.CtX && typeof window.CtX.paintBill === 'function') {
     try { window.CtX.paintBill(); } catch (e) { /* never block the cart paint */ }
   }
 
-  // Keep every prominent payable amount synchronized after the pricing
-  // extension adds handling/packaging/tax rows to the detailed bill.
-  const finalBillText = document.getElementById('bill-total')?.textContent?.trim();
-  const heroTotal = document.getElementById('bill-hero-total');
-  if (heroTotal && finalBillText) heroTotal.textContent = finalBillText;
-  const footerTotal = document.getElementById('checkout-total');
-  if (footerTotal && finalBillText) footerTotal.textContent = finalBillText;
+  // Keep preview totals synchronized only while no authoritative backend
+  // quote is active. Quote rendering updates all payable locations atomically.
+  if (!backendQuoteActive) {
+    const finalBillText = document.getElementById('bill-total')?.textContent?.trim();
+    const heroTotal = document.getElementById('bill-hero-total');
+    if (heroTotal && finalBillText) heroTotal.textContent = finalBillText;
+    const footerTotal = document.getElementById('checkout-total');
+    if (footerTotal && finalBillText) footerTotal.textContent = finalBillText;
+  }
 
   if (ctState.missingLocation) {
     ['bill-total', 'checkout-total', 'bill-hero-total'].forEach(id => {

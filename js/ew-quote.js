@@ -215,7 +215,13 @@
         return (pricing.quoteNow ? pricing.quoteNow(body) : Promise.resolve({ ok: false, status: 0 }))
           .then(function (r) { return handleResult(r, body); });
       }
-      return qc.requestNow(body).then(function (r) { return handleResult(r, body); });
+      return qc.requestNow(body).then(function (r) {
+        // A cart/address/payment change may supersede this pay-time request
+        // while it is in flight. Never let an older response repaint the bill
+        // or replace the quoteId for the newer basket.
+        if (key !== state.lastPayloadKey || (r && r.stale)) return { stale: true };
+        return handleResult(r, body);
+      });
     }
 
     function cancel() { clearExpiry(); if (qc) qc.cancel(); }
