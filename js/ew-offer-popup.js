@@ -20,6 +20,10 @@
    Each offer pops up once per browser session per restaurant, so
    changing quantity never re-triggers it.
 
+   Offer fields: kind, key, amount, big (headline), sub (one line under it),
+   chip (optional green pill, e.g. "You saved ₹26 on delivery"),
+   eyebrow (optional small line above the headline), row (Savings-corner text).
+
    Requires: nothing (reads ctState / CtX / EWCartQuoteUI if present).
    ================================================================ */
 (function () {
@@ -74,6 +78,22 @@
     } catch (e) { return null; }
   }
 
+  /* The free-delivery threshold, only ever from real data: the backend quote
+     first, then the platform rule, then the restaurant's own setting. */
+  function freeThreshold(p, platformFree, s) {
+    var q = null;
+    try {
+      var c = window.EWCartQuoteUI && window.EWCartQuoteUI._controller && window.EWCartQuoteUI._controller();
+      var qt = c && c.quote && c.quote();
+      q = qt && qt.freeDelivery;
+    } catch (e) { q = null; }
+    var t = q && n(q.threshold);
+    if (t > 0) return t;
+    if (platformFree && p && p.freeReason === 'global' && n(p.minFree) > 0) return n(p.minFree);
+    if (!platformFree && n(s.freeDeliveryAbove) > 0) return n(s.freeDeliveryAbove);
+    return 0;
+  }
+
   function collect() {
     var s = cs();
     if (!s || !s.deliveryReady || s.unavailable || n(s.units) <= 0) return [];
@@ -87,12 +107,14 @@
     var restaurantFree = n(s.deliveryFee) === 0;
     if (platformFree || restaurantFree) {
       var saved = platformFree ? n(p.baseDelivery) : 0;
-      var why = '';
-      if (platformFree && p.freeReason === 'first') why = 'Your first order ships free';
+      var above = freeThreshold(p, platformFree, s);
+      var sub = 'No delivery charge on this order';
+      if (platformFree && p.freeReason === 'first') sub = 'Your first order ships free';
+      else if (above > 0) sub = 'Applied directly on bill, above ' + money(above);
       out.push({
         kind: 'delivery', key: 'delivery|' + scope, amount: saved,
-        big: saved > 0 ? money(saved) + ' saved on delivery!' : 'Free delivery!',
-        sub: why || 'No delivery charge on this order',
+        big: 'Hurray! Free delivery unlocked!', sub: sub,
+        chip: saved > 0 ? 'You saved ' + money(saved) + ' on delivery' : '',
         row: saved > 0 ? money(saved) + ' saved with free delivery' : 'Free delivery applied'
       });
     }
@@ -142,8 +164,39 @@
   }
 
   /* ── popup DOM ───────────────────────────────────────────────── */
-  var ART =
-    '<svg viewBox="0 0 120 110" width="104" height="96" aria-hidden="true" focusable="false">' +
+  /* Original vector art. `rider` = scooter rider with a FREE DELIVERY bag
+     (free delivery); `badge` = the % badge used for every other offer. */
+  var ART_RIDER =
+    '<svg viewBox="0 0 160 160" width="150" height="150" aria-hidden="true" focusable="false">' +
+    '<defs><clipPath id="ew-offer-clip"><circle cx="80" cy="80" r="78"/></clipPath></defs>' +
+    '<circle cx="80" cy="80" r="78" fill="#dff3e6"/>' +
+    '<g clip-path="url(#ew-offer-clip)">' +
+    '<ellipse cx="80" cy="136" rx="48" ry="5" fill="#0b3d1c" opacity=".12"/>' +
+    '<circle cx="114" cy="122" r="14" fill="#262a31"/><circle cx="114" cy="122" r="5.5" fill="#aab2bc"/>' +
+    '<circle cx="42" cy="122" r="14" fill="#262a31"/><circle cx="42" cy="122" r="5.5" fill="#aab2bc"/>' +
+    '<path d="M42 122 L50 84" stroke="#2f7d4f" stroke-width="5" stroke-linecap="round"/>' +
+    '<path d="M42 80h14" stroke="#1f2430" stroke-width="4.5" stroke-linecap="round"/>' +
+    '<path d="M52 112h60c7 0 11-4 11-10v-6H68c-5 0-9 2-11 7z" fill="#2f7d4f"/>' +
+    '<rect x="99" y="46" width="40" height="48" rx="6" fill="#d6246e"/>' +
+    '<rect x="99" y="46" width="40" height="9" rx="4" fill="#b81a5a"/>' +
+    '<text x="119" y="71" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="Manrope,system-ui,sans-serif">FREE</text>' +
+    '<text x="119" y="82" text-anchor="middle" font-size="6.4" font-weight="800" fill="#fff" font-family="Manrope,system-ui,sans-serif">DELIVERY</text>' +
+    '<path d="M74 98 L62 106 L54 114" stroke="#262a31" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '<path d="M86 98 L80 108" stroke="#262a31" stroke-width="10" stroke-linecap="round" fill="none"/>' +
+    '<path d="M66 56 Q80 47 94 56 L97 96 Q80 102 64 96 Z" fill="#2f8f56"/>' +
+    '<path d="M88 60 L64 74 L50 80" stroke="#27794a" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '<circle cx="49" cy="80" r="4.6" fill="#e0a878"/>' +
+    '<path d="M72 60 L56 66 L55 52" stroke="#2f8f56" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '<rect x="51.5" y="39" width="5.6" height="12" rx="2.8" fill="#e0a878" transform="rotate(-14 54 50)"/>' +
+    '<rect x="47" y="46" width="17" height="14" rx="6" fill="#e0a878"/>' +
+    '<path d="M49.5 51h12M49.5 55h12" stroke="#c98d5c" stroke-width="1.3" stroke-linecap="round"/>' +
+    '<circle cx="82" cy="40" r="11.5" fill="#e0a878"/>' +
+    '<path d="M70.5 39 Q71 26 83 26.5 Q95 27 93.5 40 Q88 33 70.5 39z" fill="#1b1b1f"/>' +
+    '<path d="M72 43 Q82 58 93 43 Q91 51 82 52 Q74 51 72 43z" fill="#1b1b1f"/>' +
+    '<rect x="75" y="36" width="19" height="6.4" rx="3.2" fill="#d6246e"/>' +
+    '</g></svg>';
+  var ART_BADGE =
+    '<svg viewBox="0 0 120 110" width="112" height="102" aria-hidden="true" focusable="false">' +
     '<path d="M60 8l7 5 8-1 4 7 8 3-1 8 5 7-5 6 1 8-8 3-4 7-8-1-7 5-7-5-8 1-4-7-8-3 1-8-5-6 5-7-1-8 8-3 4-7 8 1z" fill="#2f7d4f" transform="translate(0 -2) scale(.96) translate(2.5 0)"/>' +
     '<text x="60" y="44" text-anchor="middle" font-size="26" font-weight="800" fill="#fff" font-family="Manrope,system-ui,sans-serif">%</text>' +
     '<path d="M16 62h88c0 20-16 34-44 34S16 82 16 62z" fill="#f4b13d"/>' +
@@ -152,6 +205,17 @@
     '<path d="M100 8l2.5 5.5L108 16l-5.5 2.5L100 24l-2.5-5.5L92 16l5.5-2.5z" fill="#3b82d6"/>' +
     '<path d="M18 14l1.8 3.7L23.5 19l-3.7 1.8L18 24.5l-1.8-3.7L12.5 19l3.7-1.3z" fill="#3b82d6"/>' +
     '</svg>';
+  var CONFETTI_COLORS = ['#0b7a2a', '#f4b13d', '#d6246e', '#3b82d6', '#ee8a3a', '#7ac28f'];
+  function confettiHtml() {
+    var h = '';
+    for (var i = 0; i < 16; i++) {
+      var ang = (i / 16) * 360 + (i % 2 ? 8 : -8);
+      var dist = 92 + (i % 4) * 16;
+      h += '<i style="--a:' + ang + 'deg;--d:' + dist + 'px;--c:' + CONFETTI_COLORS[i % CONFETTI_COLORS.length] +
+        ';--dl:' + (i % 5) * 28 + 'ms' + (i % 3 === 0 ? ';border-radius:50%' : '') + '"></i>';
+    }
+    return h;
+  }
 
   function build() {
     if (root) return root;
@@ -163,10 +227,12 @@
       '<div class="ew-offer-card" role="dialog" aria-modal="true" aria-labelledby="ew-offer-big" aria-describedby="ew-offer-sub">' +
       '<button type="button" class="ew-offer-x" data-offer-close aria-label="Close">' +
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>' +
-      '<div class="ew-offer-art" id="ew-offer-art">' + ART + '</div>' +
-      '<p class="ew-offer-eyebrow">Congratulations!</p>' +
+      '<div class="ew-offer-art" id="ew-offer-art"></div>' +
+      '<div class="ew-offer-confetti" id="ew-offer-confetti" aria-hidden="true">' + confettiHtml() + '</div>' +
+      '<p class="ew-offer-eyebrow" id="ew-offer-eyebrow">Congratulations!</p>' +
       '<h2 class="ew-offer-big" id="ew-offer-big"></h2>' +
       '<p class="ew-offer-sub" id="ew-offer-sub"></p>' +
+      '<p class="ew-offer-chip" id="ew-offer-chip" hidden></p>' +
       '<ul class="ew-offer-list" id="ew-offer-list" hidden></ul>' +
       '<button type="button" class="ew-offer-btn" data-offer-close id="ew-offer-ok">YAY!</button>' +
       '<span class="ew-offer-timer" aria-hidden="true"><i id="ew-offer-bar"></i></span>' +
@@ -174,10 +240,24 @@
     root.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('[data-offer-close]')) close();
     });
-    root.addEventListener('mouseenter', pauseTimer, true);
-    root.addEventListener('mouseleave', function () { if (!root.hidden) startTimer(); }, true);
+    /* Holding a finger (or hovering) on the card pauses the auto-close. */
+    var card = root.querySelector('.ew-offer-card');
+    card.addEventListener('pointerdown', pauseTimer);
+    card.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') pauseTimer(); });
+    card.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && !root.hidden) startTimer(); });
+    ['pointerup', 'pointercancel'].forEach(function (t) {
+      card.addEventListener(t, function (e) { if (e.pointerType !== 'mouse' && !root.hidden) startTimer(); });
+    });
     document.addEventListener('keydown', function (e) {
-      if (root && !root.hidden && e.key === 'Escape') close();
+      if (!root || root.hidden) return;
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'Tab') {            // keep keyboard focus inside the dialog
+        var f = root.querySelectorAll('button');
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     });
     document.body.appendChild(root);
     return root;
@@ -209,10 +289,20 @@
     var big = document.getElementById('ew-offer-big');
     var sub = document.getElementById('ew-offer-sub');
     var list = document.getElementById('ew-offer-list');
+    var eyebrow = document.getElementById('ew-offer-eyebrow');
+    var chip = document.getElementById('ew-offer-chip');
+    var art = document.getElementById('ew-offer-art');
+    var one = offers.length === 1 ? offers[0] : null;
+    art.innerHTML = (one && one.kind === 'delivery') ? ART_RIDER : ART_BADGE;
+    art.className = 'ew-offer-art' + ((one && one.kind === 'delivery') ? ' is-rider' : '');
+    eyebrow.textContent = one && one.kind === 'delivery' ? '' : 'Congratulations!';
+    eyebrow.hidden = !eyebrow.textContent;
+    chip.hidden = true; chip.textContent = '';
     if (offers.length === 1) {
       big.textContent = offers[0].big;
       sub.textContent = offers[0].sub || '';
       sub.hidden = !offers[0].sub;
+      if (offers[0].chip) { chip.textContent = offers[0].chip; chip.hidden = false; }
       list.hidden = true; list.innerHTML = '';
     } else {
       var sum = offers.reduce(function (t, o) { return t + n(o.amount); }, 0);
@@ -225,7 +315,10 @@
     }
     lastFocus = document.activeElement;
     root.hidden = false;
+    root.classList.remove('is-open');
+    void root.offsetWidth;              // restart the pop + confetti animation
     requestAnimationFrame(function () { root.classList.add('is-open'); });
+    try { if (!reducedMotion() && navigator.vibrate) navigator.vibrate(16); } catch (e) { /* optional */ }
     var ok = document.getElementById('ew-offer-ok');
     if (ok) setTimeout(function () { try { ok.focus({ preventScroll: true }); } catch (e) { ok.focus(); } }, 60);
     startTimer();
