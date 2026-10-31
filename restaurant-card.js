@@ -94,8 +94,11 @@
 
     minimumOrder: function (res) {
       // Intentionally separated from lowestItemPrice.
+      // The pricing engine's distance-aware minimum (res.pricing.minimumOrder)
+      // wins; the restaurant's own minimum is already folded into it.
+      var priced = res.pricing && res.pricing.minimumOrder ? res.pricing.minimumOrder.amount : null;
       return firstNumber(
-        res.minimumOrder, res.minimumOrderAmount, res.minOrder, res.minOrderAmount
+        priced, res.minimumOrder, res.minimumOrderAmount, res.minOrder, res.minOrderAmount
       );
     },
 
@@ -244,6 +247,11 @@
        distance and the value the delivery fee was based on). The browser
        haversine is only a fallback for payloads/caches that predate the
        backend distance fields. */
+    /* The pricing engine's road distance (GET /pricing/restaurant-cards,
+       stored on res.pricing) is the single authoritative distance. */
+    var pricedKm = res.pricing ? firstNumber(res.pricing.distanceKm) : null;
+    if (pricedKm != null) return pricedKm;
+
     var backendKm = firstNumber(res.distanceKm);
     if (backendKm != null) return backendKm;
 

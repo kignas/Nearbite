@@ -754,6 +754,12 @@ window.ewLoadVisibleImages = function(root, margin){
   }
 
   function formatRestaurantDistance(restaurant) {
+    /* Pricing-engine road distance first: the same number the delivery fee,
+       free-delivery unlock and checkout bill are based on. */
+    const pricedKm = restaurant && restaurant.pricing ? Number(restaurant.pricing.distanceKm) : NaN;
+    if (Number.isFinite(pricedKm) && pricedKm >= 0) {
+      return pricedKm < 1 ? Math.round(pricedKm * 1000) + ' m' : pricedKm.toFixed(1) + ' km';
+    }
     const customer = selectedCustomerCoords();
     const target = restaurantCoords(restaurant);
     if (customer && target) {
@@ -1536,6 +1542,19 @@ window.ewLoadVisibleImages = function(root, margin){
     return null;
   }
 
+  /* Re-draw the distance chip once the pricing engine's road distance arrives. */
+  function ewRefreshDistanceChip(res) {
+    try {
+      const base = formatRestaurantDistance(res);
+      if (!base) return;
+      const area = String(res.area || res.locality || res.neighbourhood || res.neighborhood || '').trim();
+      setMetaChip('res-distance', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>', base + (area ? ' \u00b7 ' + area : ''));
+      const node = document.getElementById('res-distance');
+      const dot = node && node.previousElementSibling;
+      if (dot && dot.classList.contains('meta-dot')) dot.style.display = '';
+    } catch (e) { /* distance chip is cosmetic; never break the menu */ }
+  }
+
   async function ewRefreshFreeDeliveryBanner() {
     const el = document.getElementById('res-free-delivery');
     if (!el) return;
@@ -1570,6 +1589,7 @@ window.ewLoadVisibleImages = function(root, margin){
       const card = result && result.ok && result.data && Array.isArray(result.data.cards) ? result.data.cards[0] : null;
       if (!card) return;
       res.pricing = card;
+      ewRefreshDistanceChip(res);
       const line = ewFreeDeliveryLine(res, card);
       if (!line) return;
       el.innerHTML = '<i aria-hidden="true" class="fa-solid fa-motorcycle orange"></i><span class="' +
@@ -3004,8 +3024,10 @@ window.ewLoadVisibleImages = function(root, margin){
 
     // Minimum order is measured on the food subtotal only — no delivery fee,
     // no tip. The backend stays the final authority at checkout.
+    const pricedMinimum = restaurant.pricing && restaurant.pricing.minimumOrder
+      ? restaurant.pricing.minimumOrder.amount : null;
     const minimum = firstPositiveNumber(
-      restaurant.minimumOrder, restaurant.minOrder,
+      pricedMinimum, restaurant.minimumOrder, restaurant.minOrder,
       restaurant.minimumOrderAmount, restaurant.minOrderValue
     );
 
