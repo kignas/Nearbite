@@ -222,6 +222,7 @@ const blockText = (env) => (env.reg['ew-quote-block'] ? env.reg['ew-quote-block'
     const r = await env.ui.ensureForPay();
     assert.strictEqual(r.ok, true);
     assert.strictEqual(env.ui.isBlocked(), false);
+    assert.strictEqual(env.reg['ct-bill'].classList.contains('ew-quote-blocked'), false);
   });
 
   await t('C9 the error box has a Try again button that re-quotes', async () => {
@@ -262,11 +263,14 @@ const blockText = (env) => (env.reg['ew-quote-block'] ? env.reg['ew-quote-block'
   });
 
   // ── existing verdicts still hold ───────────────────────────────────
-  await t('E1 NOT_ECONOMICALLY_SERVICEABLE still blocks with the backend message', async () => {
-    const env = makeEnv({ quoteImpl: async () => ({ ok: false, status: 409, code: 'NOT_ECONOMICALLY_SERVICEABLE', message: 'Too far for this order.', quote: { serviceable: false, message: 'Too far for this order.' } }) });
+  await t('E1 out-of-radius quote blocks checkout and shows the backend road distance', async () => {
+    const env = makeEnv({ quoteImpl: async () => ({ ok: false, status: 409, code: 'NOT_ECONOMICALLY_SERVICEABLE', message: 'Outside delivery area.', quote: { serviceable: false, message: 'Outside delivery area.', distance: { restaurantToCustomerKm: 10.2 } } }) });
     const r = await env.ui.ensureForPay();
     assert.strictEqual(r.blocked, true);
-    assert.ok(blockText(env).includes('Too far for this order.'));
+    assert.ok(blockText(env).includes('Outside delivery area.'));
+    assert.ok(blockText(env).includes('10.2 km'));
+    assert.strictEqual(env.reg['ct-bill'].classList.contains('ew-quote-blocked'), true);
+    assert.strictEqual(env.reg['ct-bill'].classList.contains('ew-quote-active'), true);
   });
 
   // ── bill rows ──────────────────────────────────────────────────────
