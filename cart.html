@@ -38,6 +38,7 @@
   <link href="css/platform-status.css?v=20261023" rel="stylesheet"/>
   <!-- Phase 3 backend-quote bill styling (additive; loads last). -->
   <link href="css/ew-pricing-ui.css?v=20261030" rel="stylesheet"/>
+  <link href="css/cart-premium-v2.css?v=20261031" rel="stylesheet"/>
 
 <meta name="description" content="Explore EatSwada, your local food ordering platform in Maynaguri, West Bengal."/>
 <meta name="robots" content="noindex, nofollow"/>
@@ -309,6 +310,25 @@
 <div aria-live="polite" id="addr-toast" role="status">
 <i class="fa-solid fa-circle-info"></i><span id="addr-toast-text">Add a delivery address first</span>
 </div>
+
+<!-- Location guard: checkout needs verified coordinates for distance-based pricing. -->
+<div class="ct-location-modal" id="ct-location-modal" role="dialog" aria-modal="true" aria-labelledby="ct-location-title" aria-describedby="ct-location-copy" hidden>
+  <div class="ct-location-backdrop"></div>
+  <section class="ct-location-dialog">
+    <div class="ct-location-art" aria-hidden="true"><i class="fa-solid fa-location-dot"></i><span></span></div>
+    <p class="ct-location-eyebrow">PRECISE DELIVERY PRICING</p>
+    <h2 id="ct-location-title">Where should we deliver?</h2>
+    <p id="ct-location-copy">Eatswada needs your delivery location to check the restaurant's service area and calculate the correct delivery charge. Without a precise location, the price may be wrong.</p>
+    <div class="ct-location-points">
+      <div><i class="fa-solid fa-route"></i><span>Accurate restaurant distance</span></div>
+      <div><i class="fa-solid fa-indian-rupee-sign"></i><span>Correct delivery charges</span></div>
+      <div><i class="fa-solid fa-shield-halved"></i><span>Confirm delivery availability</span></div>
+    </div>
+    <a class="ct-location-primary" href="address.html?return=cart">Allow location / Set delivery address <i class="fa-solid fa-arrow-right"></i></a>
+    <p class="ct-location-footnote">You can allow device location or select your exact spot on the map. We use it to calculate delivery, not to change your order.</p>
+  </section>
+</div>
+
 <div class="ct-footer" id="checkout-footer">
 <div class="ct-paybar">
 <button aria-label="View detailed bill" class="ct-paybar-left tap" id="ct-view-bill" type="button">
@@ -428,7 +448,7 @@
 <script src="platform-status.js?v=20261023"></script>
 <script src="js/cart-checkout-upgrades.js?v=20261025"></script>
 <script src="cart-bar.js"></script>
-<script src="js/cart-page.js?v=20261025-checkout"></script>
+<script src="js/cart-page.js?v=20261031-location-guard"></script>
 <script src="navigation.js"></script>
 </body>
 </html>
