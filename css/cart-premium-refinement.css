@@ -489,3 +489,52 @@ body.ct-page .ct-pay-note { color: #818A95; font-size: 10px; font-weight: 550; }
     animation: none !important;
   }
 }
+
+/* ============================================================================
+   FIRST-PAINT GATE
+   cart.html ships a static placeholder layout (₹0, "Applied", empty instruction
+   pills, "Proceed to Pay"…). cart-page.js replaces it a moment later, which made
+   the old-looking placeholders flash on refresh. Until the first real render
+   these blocks stay invisible (layout space is kept, so nothing jumps), then
+   fade in. They use the body classes the page already toggles:
+     ct-loading-cart     removed once the items and bill are painted
+     ct-loading-delivery removed once the delivery quote has settled
+   FAILSAFE: if the script is slow, blocked or throws, the animation below
+   reveals everything after 3.5s so the page can never stay blank.
+   ============================================================================ */
+@keyframes ct-reveal-failsafe { to { opacity: 1; } }
+
+body.ct-page #ct-payment-group,
+body.ct-page #ct-di-group,
+body.ct-page #ct-delivery-contact,
+body.ct-page #ct-bill,
+body.ct-page #checkout-footer .ct-paybar,
+body.ct-page #checkout-footer .ct-pay-note {
+  transition: opacity .3s ease;
+}
+body.ct-page.ct-loading-cart #ct-payment-group,
+body.ct-page.ct-loading-cart #ct-di-group,
+body.ct-page.ct-loading-cart #ct-delivery-contact,
+body.ct-page.ct-loading-cart #ct-bill,
+body.ct-page.ct-loading-delivery #checkout-footer .ct-paybar,
+body.ct-page.ct-loading-delivery #checkout-footer .ct-pay-note {
+  opacity: 0;
+  pointer-events: none;
+  animation: ct-reveal-failsafe .01s linear 3.5s forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.ct-page #ct-payment-group,
+  body.ct-page #ct-di-group,
+  body.ct-page #ct-delivery-contact,
+  body.ct-page #ct-bill,
+  body.ct-page #checkout-footer .ct-paybar,
+  body.ct-page #checkout-footer .ct-pay-note { transition: none; }
+}
+
+/* Header address line: "Home | Add delivery address" is placeholder text and is
+   wrong for anyone who already has an address, so hold it back as well. */
+body.ct-page .ct-dh-address-line { transition: opacity .3s ease; }
+body.ct-page.ct-loading-delivery .ct-dh-address-line {
+  opacity: 0;
+  animation: ct-reveal-failsafe .01s linear 3.5s forwards;
+}
