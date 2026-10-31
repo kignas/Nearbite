@@ -183,7 +183,12 @@
     /* Engine switched off: orders use the legacy price, so there is nothing
        to show and nothing to block. Not an error. */
     if (code === 'PRICING_ENGINE_DISABLED') { engineOff(); return; }
-    if (code === 'NOT_ECONOMICALLY_SERVICEABLE' || code === 'out_of_delivery_radius' || code === 'route_unavailable') {
+    /* The backend sends the specific reason as `code` (e.g. below_minimum_order,
+       target_unreachable_within_permitted_rules). Any non-serviceable quote is a
+       "blocked" state with the backend's own message, never a generic failure. */
+    if (code === 'NOT_ECONOMICALLY_SERVICEABLE' || code === 'out_of_delivery_radius' || code === 'route_unavailable'
+      || code === 'MINIMUM_ORDER_NOT_MET'
+      || (result && result.quote && result.quote.serviceable === false)) {
       renderBlocked(result && result.quote, result);
       return;
     }
@@ -237,9 +242,10 @@
     var msg = (quote && quote.message) || (result && result.message) ||
       'This delivery is not available right now. Please try a closer restaurant or a larger order.';
     var selfDelivery = (quote && quote.selfDeliveryAvailable === true) || (result && result.selfDeliveryAvailable === true);
+    var belowMin = !!(quote && quote.minimumOrder && quote.minimumOrder.met === false);
     var html = '<div class="ew-qb-blocked" role="alert">' +
       '<span class="ew-qb-blocked-ic" aria-hidden="true">!</span>' +
-      '<div class="ew-qb-blocked-copy"><strong>Delivery unavailable</strong>' +
+      '<div class="ew-qb-blocked-copy"><strong>' + (belowMin ? 'Minimum order not met' : 'Delivery unavailable') + '</strong>' +
       '<span>' + esc(msg) + '</span>' +
       (selfDelivery ? '<span class="ew-qb-selfdel">This restaurant can arrange its own delivery — ask them directly.</span>' : '') +
       '</div></div>';
