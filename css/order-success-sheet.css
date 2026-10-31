@@ -9,7 +9,7 @@
   --os-ink:#16191E; --os-muted:#68717E; --os-line:#E9EAEE; --os-soft:#F7F8FA;
   --os-accent:var(--hd-on-light,#C13A50);
   --os-ease:cubic-bezier(.22,1,.36,1);
-  position:fixed; inset:0; z-index:100000;
+  position:fixed; top:0; right:0; bottom:0; left:0; width:100%; margin:0; padding:0; box-sizing:border-box; z-index:100000;
   display:flex; align-items:flex-end; justify-content:center;
   font-family:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
   -webkit-font-smoothing:antialiased;
@@ -21,8 +21,8 @@
   opacity:0; transition:opacity .35s ease;
 }
 .ew-os__sheet{
-  position:relative; width:min(100%,440px);
-  padding:34px 24px calc(24px + env(safe-area-inset-bottom));
+  position:relative; box-sizing:border-box; width:100%; max-width:none; margin:0;
+  padding:34px 20px calc(22px + env(safe-area-inset-bottom));
   background:#fff; border-radius:28px 28px 0 0; text-align:center;
   box-shadow:0 -12px 40px -16px rgba(16,24,40,.28);
   transform:translateY(105%); transition:transform .55s var(--os-ease);
@@ -34,6 +34,7 @@
 .ew-os.is-leaving .ew-os__sheet{ transform:translateY(105%); transition-duration:.28s; transition-timing-function:ease-in; }
 @media (min-width:560px){
   .ew-os{ align-items:center; }
+  .ew-os__sheet{ width:min(100%,440px); padding-left:24px; padding-right:24px; }
   .ew-os__grab{ display:none; }
   .ew-os__sheet{ border-radius:28px; transform:translateY(24px) scale(.97); opacity:0; transition:transform .5s var(--os-ease),opacity .3s ease; }
   .ew-os.is-open .ew-os__sheet{ transform:none; opacity:1; }
