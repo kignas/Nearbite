@@ -1532,6 +1532,10 @@ window.ewLoadVisibleImages = function(root, margin){
   }
 
   function ewFreeDeliveryLine(res, pricing) {
+    /* The route-based pricing response is authoritative for the selected
+       address. Do not fall back to a restaurant promotion when that address
+       is outside the delivery radius. */
+    if (pricing && pricing.serviceable === false) return null;
     if (pricing && pricing.freeDelivery && window.EWFreeDelivery) {
       const line = window.EWFreeDelivery.line(pricing.freeDelivery, pricing.deliveryFee);
       if (line) return { text: line, unlocked: window.EWFreeDelivery.isUnlocked(pricing.freeDelivery) };
@@ -1565,7 +1569,9 @@ window.ewLoadVisibleImages = function(root, margin){
        call is in flight (or if it fails). */
     let pricing = res.pricing || null;
     const initial = ewFreeDeliveryLine(res, pricing);
-    if (initial) {
+    if (pricing && pricing.serviceable === false) {
+      el.innerHTML = '<span>Delivery unavailable at this address</span>';
+    } else if (initial) {
       el.innerHTML = '<i aria-hidden="true" class="fa-solid fa-motorcycle orange"></i><span class="' +
         (initial.unlocked ? 'is-free' : '') + '">' + escapeMenuHtml(initial.text) + '</span>';
     }
@@ -1591,7 +1597,12 @@ window.ewLoadVisibleImages = function(root, margin){
       res.pricing = card;
       ewRefreshDistanceChip(res);
       const line = ewFreeDeliveryLine(res, card);
-      if (!line) return;
+      if (!line) {
+        el.innerHTML = card.serviceable === false
+          ? '<span>Delivery unavailable at this address</span>'
+          : '<span>Delivery available</span>';
+        return;
+      }
       el.innerHTML = '<i aria-hidden="true" class="fa-solid fa-motorcycle orange"></i><span class="' +
         (line.unlocked ? 'is-free' : '') + '">' + escapeMenuHtml(line.text) + '</span>';
     } catch (e) { /* keep the fallback line */ }

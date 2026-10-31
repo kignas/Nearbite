@@ -786,6 +786,9 @@
     return out;
   }
   function homeFreeDeliveryMarkup(r){
+    /* Never advertise a delivery promotion for an address the authoritative
+       road-route pricing endpoint has marked unserviceable. */
+    if (r && r.pricing && r.pricing.serviceable === false) return '';
     /* Pricing free-delivery block (from GET /pricing/restaurant-cards) wins
        when present; otherwise fall back to the restaurant's own
        freeDeliveryAbove as before. Never computes a threshold here. */
