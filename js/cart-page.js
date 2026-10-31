@@ -534,6 +534,7 @@ let ctLastQuoteMethod = null;
    ═══════════════════════════════════════════════════════════════════════ */
 const CT_EXTRAS_KEY  = 'nearbite_cart_extras';
 const CT_NOTE_MAX    = 250;
+const CT_COOKING_MAX = 100;     // cooking requests are short, like the kitchen ticket they print on
 const CT_TIP_MIN     = 1;
 const CT_TIP_MAX     = 1000;     // frontend sanity bound; the backend validates too
 const CT_TIP_PRESETS = [10, 20, 30];   // ₹0 = "No tip"; anything else is shown on the Custom chip
@@ -543,10 +544,10 @@ const CT_NOTE_CFG = {
     idleTitle:    'Add cooking request or note',
     idleSub:      'Spice level, allergies, packaging — anything the kitchen should know',
     setTitle:     'Cooking request added',
-    sheetTitle:   'Cooking request / note',
+    sheetTitle:   'Add cooking requests',
     fieldLabel:   'Your cooking request or note',
-    help:         'Example: Please make it less spicy',
-    saveLabel:    'Save',
+    help:         'Restaurant will try their best to fulfil your requests, but refund requests in this regard will not be possible.',
+    saveLabel:    'Add request',
     removeLabel:  'Remove',
     savedToast:   'Cooking request saved',
     removedToast: 'Cooking request removed',
@@ -766,6 +767,7 @@ function paintItems(savedCart) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19h14M7 15l9-9 2 2-9 9H7v-2z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="ct-note-btn-text">${esc(note ? 'Request added' : 'Cooking requests')}</span>
           </button>
+          ${groupIndex === 0 ? `<label class="ct-pill-btn ct-cutlery-chip tap"><input type="checkbox" id="ct-cutlery-input"${(window.CtX && window.CtX.getSendCutlery && window.CtX.getSendCutlery()) ? ' checked' : ''}/><span class="ct-cutlery-box" aria-hidden="true"></span><span>Cutlery Needed</span></label>` : ''}
         </div>
         ${note ? `<div class="ct-restaurant-note-preview" data-note-preview="${esc(group.resId)}">${esc(note)}</div>` : ''}
       </section>`;
@@ -894,6 +896,7 @@ function applyTotals() {
   paintSavingsHero();
   paintFooterSavings();
   paintSavingsCorner();
+  try { if (window.EWOffers) window.EWOffers.evaluate(); } catch (e) { /* offers are cosmetic */ }
 
   // Let the checkout-upgrades layer add the itemized extras (packaging,
   // handling, surge, tax) it previews from the platform settings, so the
@@ -3009,8 +3012,14 @@ function updateNoteCount() {
   const count = document.getElementById('note-count');
   if (!input || !count) return;
   const length = input.value.length;
-  count.textContent = length + '/' + CT_NOTE_MAX;
-  count.classList.toggle('is-max', length >= CT_NOTE_MAX);
+  const max = Number(input.getAttribute('maxlength')) || CT_NOTE_MAX;
+  count.textContent = length + '/' + max;
+  count.classList.toggle('is-max', length >= max);
+  // Cooking-request sheet: "Add request" stays disabled until there is text
+  // (an existing request is removed with the Remove button instead).
+  const saveBtn = document.getElementById('note-save');
+  const sheet = document.getElementById('ct-note-sheet');
+  if (saveBtn && sheet) saveBtn.disabled = sheet.classList.contains('is-cooking') && !input.value.trim();
 }
 
 function openNoteSheet(field) {
@@ -3020,7 +3029,8 @@ function openNoteSheet(field) {
   if (!cfg) return;
   ctNoteField = field;
 
-  openSheet('ct-note-sheet', () => {
+  openSheet('ct-note-sheet', (sheetRoot) => {
+    if (sheetRoot) sheetRoot.classList.toggle('is-cooking', isRestaurantNote);
     document.getElementById('note-sheet-title').textContent = cfg.sheetTitle;
     document.getElementById('note-field-label').textContent = cfg.fieldLabel;
     document.getElementById('note-help').textContent = cfg.help;
@@ -3028,7 +3038,9 @@ function openNoteSheet(field) {
 
     const input = document.getElementById('note-input');
     input.value = isRestaurantNote ? (restaurantId === 'legacy' ? ctState.restaurantNote : getRestaurantNote(restaurantId)) : (ctState[field] || '');
-    input.setAttribute('maxlength', String(CT_NOTE_MAX));
+    input.setAttribute('maxlength', String(isRestaurantNote ? CT_COOKING_MAX : CT_NOTE_MAX));
+    input.setAttribute('placeholder', isRestaurantNote ? 'Add cooking requests' : '');
+    input.setAttribute('rows', isRestaurantNote ? '1' : '3');
     updateNoteCount();
 
     const removeBtn = document.getElementById('note-remove');

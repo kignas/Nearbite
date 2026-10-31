@@ -118,6 +118,7 @@
 
   function getPaymentMethod() {
     if (method === 'cod' && !codState().ok) method = 'upi';
+    else if (method === 'upi' && !upiState().ok && codState().ok) method = 'cod';
     return method;
   }
 
@@ -336,9 +337,15 @@
   function paintPayment(force) {
     var card = el('ct-pay-card');
     if (!card) return;
+    var cfg = S();
     var cod = codState(), upi = upiState();
+    // Admin controls (Platform settings): COD is shown only while isCodEnabled
+    // is on; otherwise the customer sees UPI alone. UPI is only hidden when the
+    // admin turned it off AND COD is on, so there is never an empty selector.
+    var showCod = cfg.isCodEnabled === true;
+    var showUpi = cfg.isUpiEnabled !== false || !showCod;
     var cur = getPaymentMethod();
-    var sig = [cur, cod.ok, cod.note, upi.ok, upi.note, sendCutlery].join('|');
+    var sig = [cur, showCod, showUpi, cod.ok, cod.note, upi.ok, upi.note].join('|');
     if (!force && sig === paySig) return;
     paySig = sig;
 
@@ -351,16 +358,14 @@
         (state.ok ? '' : '<span class="ct-pay-badge">' + (state.note === 'Unavailable' ? 'Unavailable' : 'Not eligible') + '</span>') +
         '<span class="ct-pay-radio" aria-hidden="true"></span></button>';
     }
+    var single = (showCod ? 1 : 0) + (showUpi ? 1 : 0) === 1;
+    card.classList.toggle('is-single', single);
     card.innerHTML =
       '<h2 class="ct-sec-title">Payment method</h2>' +
       '<div class="ct-pay-opts" role="radiogroup" aria-label="Payment method">' +
-      opt('upi', 'fa-solid fa-mobile-screen-button', 'UPI / Online Payment', upi, cur === 'upi') +
-      opt('cod', 'fa-solid fa-hand-holding-dollar', 'Cash on Delivery (COD)', cod, cur === 'cod') +
-      '</div>' +
-      '<label class="ct-cutlery"><input type="checkbox" id="ct-cutlery-input"' + (sendCutlery ? ' checked' : '') + '/>' +
-      '<span class="ct-cutlery-box" aria-hidden="true"></span>' +
-      '<span class="ct-cutlery-copy"><span class="ct-cutlery-title">Send cutlery (spoons/forks)</span>' +
-      '<span class="ct-cutlery-sub">Skip it to reduce plastic waste</span></span></label>';
+      (showUpi ? opt('upi', 'fa-solid fa-mobile-screen-button', 'UPI / Online Payment', upi, cur === 'upi') : '') +
+      (showCod ? opt('cod', 'fa-solid fa-hand-holding-dollar', 'Cash on Delivery (COD)', cod, cur === 'cod') : '') +
+      '</div>';
   }
 
   function paintPayNote() {
@@ -415,6 +420,8 @@
     if (window.EWPlatform) {
       window.EWPlatform.onChange(function () {
         try { if (typeof applyTotals === 'function') applyTotals(); } catch (e) { /* ignore */ }
+        paintPayment(false);
+        paintPayNote();
         refreshCta();
       });
     }
