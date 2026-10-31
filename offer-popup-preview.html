@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow"/>
 <title>Offer popup preview – Eatswada</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap" rel="stylesheet"/>
-<link href="css/ew-offer-popup.css?v=20261031" rel="stylesheet"/>
+<link href="css/ew-offer-popup.css?v=20261031-op2" rel="stylesheet"/>
 <style>
   body{margin:0;padding:24px 18px;font-family:Manrope,system-ui,sans-serif;background:#eef0f6;color:#1f2430}
   h1{font-size:20px;margin:0 0 6px} p{margin:0 0 18px;color:#6b7280;font-size:14px;line-height:1.5}
@@ -16,20 +16,26 @@
 <body>
 <h1>Offer popup preview</h1>
 <p>Developer preview only. The amounts below are sample numbers to check the design; on cart.html the popup uses the real cart, coupon and backend-quote values.</p>
+<button class="demo" id="d-above">Free delivery above a minimum (like the reference)</button>
 <button class="demo" id="d-delivery">Free delivery (with saved amount)</button>
+<button class="demo" id="d-first">Free delivery on first order</button>
 <button class="demo" id="d-free">Free delivery (no amount known)</button>
 <button class="demo" id="d-discount">Extra discount</button>
 <button class="demo" id="d-coupon">Coupon applied</button>
 <button class="demo" id="d-many">Several offers at once</button>
-<script src="js/ew-offer-popup.js?v=20261031"></script>
+<script src="js/ew-offer-popup.js?v=20261031-op2"></script>
 <script>
   var D = {
-    delivery: { kind:'delivery', amount:26, big:'₹26 saved on delivery!', sub:'No delivery charge on this order', row:'₹26 saved with free delivery' },
-    free:     { kind:'delivery', amount:0,  big:'Free delivery!', sub:'No delivery charge on this order', row:'Free delivery applied' },
+    above:    { kind:'delivery', amount:0,  big:'Hurray! Free delivery unlocked!', sub:'Applied directly on bill, above ₹49', chip:'', row:'Free delivery applied' },
+    delivery: { kind:'delivery', amount:26, big:'Hurray! Free delivery unlocked!', sub:'Applied directly on bill, above ₹199', chip:'You saved ₹26 on delivery', row:'₹26 saved with free delivery' },
+    first:    { kind:'delivery', amount:26, big:'Hurray! Free delivery unlocked!', sub:'Your first order ships free', chip:'You saved ₹26 on delivery', row:'₹26 saved with free delivery' },
+    free:     { kind:'delivery', amount:0,  big:'Hurray! Free delivery unlocked!', sub:'No delivery charge on this order', chip:'', row:'Free delivery applied' },
     discount: { kind:'discount', amount:40, big:'Instant ₹40 off!', sub:'Extra discount applied to your bill', row:'₹40 extra off' },
     coupon:   { kind:'coupon',   amount:75, big:'₹75 off!', sub:'Coupon SAMPLE applied', row:'₹75 saved with coupon' },
     items:    { kind:'items',    amount:324, big:'₹324 saved!', sub:'with item offers on your cart', row:'₹324 saved on item discounts' }
   };
+  document.getElementById('d-above').onclick    = function(){ EWOffers.show(D.above); };
+  document.getElementById('d-first').onclick    = function(){ EWOffers.show(D.first); };
   document.getElementById('d-delivery').onclick = function(){ EWOffers.show(D.delivery); };
   document.getElementById('d-free').onclick     = function(){ EWOffers.show(D.free); };
   document.getElementById('d-discount').onclick = function(){ EWOffers.show(D.discount); };
