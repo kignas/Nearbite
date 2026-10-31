@@ -16,8 +16,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" href="css/track-order.bundle.css?v=634b8972aa">
   
@@ -608,8 +606,37 @@
       moveCamera.t = setTimeout(function(){ programmaticMove = false; }, 700);
     }
 
+    /* Leaflet is only needed once a rider location exists, so it is fetched on
+       demand instead of blocking every page open. The pinned version and SRI
+       hashes are unchanged. If it fails to load, the next poll tries again
+       (after a short pause). */
+    const LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    const LEAFLET_JS_SRI = 'sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH';
+    const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    const LEAFLET_CSS_SRI = 'sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H';
+    let leafletLoading = false, leafletRetryAt = 0, latestOrder = null;
+    function loadLeaflet(){
+      if (leafletLoading) return;
+      if (typeof L !== 'undefined' || Date.now() < leafletRetryAt) return;
+      leafletLoading = true;
+      const css = document.createElement('link');
+      css.rel = 'stylesheet'; css.href = LEAFLET_CSS; css.integrity = LEAFLET_CSS_SRI; css.crossOrigin = 'anonymous';
+      css.onload = function(){ if (liveMap) liveMap.invalidateSize(); };
+      const js = document.createElement('script');
+      js.src = LEAFLET_JS; js.integrity = LEAFLET_JS_SRI; js.crossOrigin = 'anonymous'; js.async = true;
+      js.onload = function(){ leafletLoading = false; if (latestOrder) updateLiveMap(latestOrder); };
+      js.onerror = function(){
+        leafletLoading = false; leafletRetryAt = Date.now() + 15000;
+        if (css.parentNode) css.parentNode.removeChild(css);
+        if (js.parentNode) js.parentNode.removeChild(js);
+        console.warn('[Map] Leaflet could not be loaded; will retry.');
+      };
+      document.head.appendChild(css); document.head.appendChild(js);
+    }
+
     function ensureMap(){
-      if (liveMap || typeof L === 'undefined') return liveMap;
+      if (liveMap) return liveMap;
+      if (typeof L === 'undefined') { loadLeaflet(); return liveMap; }
       liveMap = L.map('live-map', { zoomControl:true, attributionControl:true });
       liveMap.on('movestart', function(){
         if (!programmaticMove){ userMovedMap = true; showRecenter(true); }
@@ -658,6 +685,7 @@
     }
 
     function updateLiveMap(order){
+      latestOrder = order;
       const card = document.getElementById('map-card');
       const footer = document.getElementById('map-card-footer');
       const rl = order && order.riderLocation;
