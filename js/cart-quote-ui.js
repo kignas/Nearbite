@@ -151,11 +151,22 @@
     bill.classList.toggle('ew-quote-active', !!hidden);
   }
 
+  /* A rejected route quote is not a payable bill. Hide the client-side
+     estimate (including its total and promotional fee rows) while the backend
+     says the address is outside the delivery area. */
+  function setBlockedPreview(blockedState) {
+    var bill = document.getElementById('ct-bill');
+    if (bill) bill.classList.toggle('ew-quote-blocked', !!blockedState);
+    var nudge = document.getElementById('free-delivery-nudge');
+    if (nudge) nudge.style.display = blockedState ? 'none' : '';
+  }
+
   function renderQuote(quote, result) {
     var host = panel();
     if (!host || !quote) return;
 
     if (quote.serviceable === false) { renderBlocked(quote, result); return; }
+    setBlockedPreview(false);
     hideBlock();
 
     var rows = window.EWQuote.renderBill(host, quote, { escape: esc });
@@ -201,6 +212,7 @@
     if (host) host.innerHTML = '';
     stopCountdown();
     setPreviewHidden(false);
+    setBlockedPreview(false);
     lastQuote = null;
   }
 
@@ -239,8 +251,14 @@
   function renderBlocked(quote, result) {
     var host = blockHost();
     if (!host) return;
+    /* Remove any previously valid quote before showing the blocked state. */
+    clearEngineBill();
     var msg = (quote && quote.message) || (result && result.message) ||
       'This delivery is not available right now. Please try a closer restaurant or a larger order.';
+    var routeKm = quote && quote.distance ? Number(quote.distance.restaurantToCustomerKm) : NaN;
+    if (Number.isFinite(routeKm) && routeKm > 0) {
+      msg += ' Calculated road distance: ' + routeKm.toFixed(1) + ' km.';
+    }
     var selfDelivery = (quote && quote.selfDeliveryAvailable === true) || (result && result.selfDeliveryAvailable === true);
     var belowMin = !!(quote && quote.minimumOrder && quote.minimumOrder.met === false);
     var html = '<div class="ew-qb-blocked" role="alert">' +
@@ -251,7 +269,8 @@
       '</div></div>';
     host.innerHTML = html;
     host.hidden = false;
-    setPreviewHidden(false);
+    setPreviewHidden(true);
+    setBlockedPreview(true);
     stopCountdown();
     /* Disable Pay through the existing CTA guard. */
     blocked = true;
