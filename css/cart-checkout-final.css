@@ -390,3 +390,74 @@ body.ct-page .ct-footer-save.show,
 body.ct-page .ct-save-strip.show {
   display: none !important;
 }
+
+/* ==========================================================
+   8. SMALLER POPUPS: "Add cooking requests" + "Apply coupon"
+   Same small scale as the rest of checkout. Looks only.
+   ========================================================== */
+
+/* floating close button: 60px -> 44px */
+#ct-note-sheet.is-cooking .ct-cook-x,
+#ct-coupon-sheet .ct-cook-x {
+  width: 44px !important; height: 44px !important;
+  margin-bottom: 12px !important;
+  font-size: 17px !important;
+}
+
+/* sheet itself: tighter padding, smaller top corners */
+#ct-note-sheet.is-cooking .ct-sheet,
+#ct-coupon-sheet .ct-sheet {
+  border-radius: 22px 22px 0 0 !important;
+  padding: 20px 18px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* text field (kept at 16px so phones do not zoom in) */
+#ct-note-sheet.is-cooking .ct-textarea {
+  min-height: 38px !important;
+  padding: 4px 56px 8px 0 !important;
+  border-bottom-width: 1.5px !important;
+  font-size: 16px !important; font-weight: 500 !important; line-height: 1.3 !important;
+}
+#ct-coupon-sheet .ct-input {
+  min-height: 40px !important;
+  padding: 4px 0 8px !important;
+  border-bottom-width: 1.5px !important;
+  font-size: 16px !important; font-weight: 500 !important;
+}
+#ct-note-sheet.is-cooking .ct-textarea::placeholder,
+#ct-coupon-sheet .ct-input::placeholder { font-size: 16px !important; font-weight: 500 !important; }
+
+/* counter + help text */
+#ct-note-sheet.is-cooking .ct-count { top: -30px !important; font-size: 12px !important; font-weight: 600 !important; color: #5c616c !important; }
+#ct-note-sheet.is-cooking .ct-field-help {
+  margin-top: 10px !important;
+  font-size: 12px !important; font-weight: 500 !important; line-height: 1.45 !important;
+  color: #7a7f8a !important;
+}
+
+/* quick suggestion chips */
+#ct-note-sheet.is-cooking .ct-sug-row { gap: 8px !important; margin-top: 12px !important; }
+#ct-note-sheet.is-cooking .ct-sug {
+  min-height: 0 !important; padding: 7px 12px !important;
+  font-size: 12px !important; font-weight: 500 !important; line-height: 1.3 !important;
+  border-radius: 999px !important;
+}
+
+/* main buttons: 58px -> 48px, 20px text -> 15px */
+#ct-note-sheet.is-cooking .ct-sheet-foot { padding: 14px 0 0 !important; }
+#ct-note-sheet.is-cooking .ct-btn-primary,
+#ct-coupon-sheet #coupon-apply {
+  min-height: 48px !important;
+  font-size: 15px !important; font-weight: 700 !important;
+}
+#ct-coupon-sheet #coupon-apply { margin-top: 16px !important; }
+
+/* coupon sheet: small empty state */
+#ct-coupon-sheet .ct-empty-mini { margin-top: 16px !important; padding: 8px 8px 0 !important; }
+#ct-coupon-sheet .ct-empty-mini-ic {
+  width: 48px !important; height: 48px !important; border-radius: 14px !important;
+  margin: 0 auto 10px !important; font-size: 18px !important;
+}
+#ct-coupon-sheet .ct-empty-mini-title { font-size: 14px !important; font-weight: 700 !important; }
+#ct-coupon-sheet .ct-empty-mini-sub { font-size: 12px !important; font-weight: 500 !important; line-height: 1.45 !important; color: #7a7f8a !important; margin-top: 4px !important; }
+#ct-coupon-sheet .ct-sheet-err { font-size: 12px !important; margin: 8px 0 0 !important; }
