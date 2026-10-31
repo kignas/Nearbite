@@ -8,7 +8,9 @@
    Endpoint (routes/pricingRoutes.js -> controllers/pricingController.js):
      POST {API_BASE}/pricing/quote
        body { restaurantId, addressId, items:[{menuItem,quantity}],
-              paymentMethod:'upi'|'cod', couponCode? }
+              paymentMethod:'upi'|'cod', couponCode?, tipAmount? }
+       (the backend resolves the coupon itself and bill.grandTotal includes
+        the tip, so the quote total equals what the order will charge)
        200 -> { success:true, data:<quote> }
        409 -> { success:false, code, message, data:<quote> }  (not serviceable)
        400 -> no address with verified coordinates / bad item
@@ -49,9 +51,8 @@
     NOT_ECONOMICALLY_SERVICEABLE: 'NOT_ECONOMICALLY_SERVICEABLE'
   };
 
-  /* Quote-specific error codes the backend MAY return. The shipped backend
-     does not emit them yet (see docs/rebuild/BACKEND_GAPS.md B1); the
-     handling is in place so a re-quote happens the moment it does. */
+  /* Quote-specific rejections POST /orders returns (QUOTE_EXPIRED,
+     QUOTE_PRICE_CHANGED, QUOTE_MISMATCH): the backend wants a fresh quote. */
   var QUOTE_ERROR_CODES = {
     QUOTE_EXPIRED: true,
     QUOTE_PRICE_CHANGED: true,
@@ -85,6 +86,8 @@
       paymentMethod: String(o.paymentMethod || 'upi').toLowerCase() === 'cod' ? 'cod' : 'upi'
     };
     if (o.couponCode) body.couponCode = String(o.couponCode);
+    var tip = Number(o.tipAmount);
+    if (Number.isFinite(tip) && tip > 0) body.tipAmount = tip;
     return body;
   }
 
@@ -175,8 +178,12 @@
         armExpiry(body);
         if (state.onQuote) { try { state.onQuote(quote, result, state); } catch (e) {} }
       } else if (result && !result.ok) {
-        /* Not serviceable / no address / network: keep the last quote for
-           display but let the caller show the backend's own message. */
+        /* Not serviceable / no address / network / invalid coupon: there is
+           NO valid quote any more. Drop the previous one (and its quoteId and
+           expiry timer) so a stale price can never be shown or sent, and let
+           the caller show the backend's own message. */
+        state.quote = null;
+        clearExpiry();
         if (state.onError) { try { state.onError(result, state); } catch (e) {} }
       }
       return result;
@@ -252,6 +259,7 @@
   function renderBill(container, quote, options) {
     if (!container) return [];
     var opt = options || {};
+    var bill = opt.bill || EWBill;
     var doc = container.ownerDocument || (typeof document !== 'undefined' ? document : null);
     if (!doc) return [];
     var rows = (bill && typeof bill.rowsFromQuote === 'function') ? bill.rowsFromQuote(quote) : [];

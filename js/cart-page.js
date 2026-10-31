@@ -1109,7 +1109,12 @@ function updateCheckoutCta() {
   if (window.EWCartQuoteUI && window.EWCartQuoteUI.isBlocked()) {
     btn.classList.add('locked');
     btn.setAttribute('aria-disabled', 'true');
-    label.innerHTML = 'Delivery unavailable<span class="ct-cta-sub">See the message in your bill</span>';
+    const why = window.EWCartQuoteUI.blockReason();
+    label.innerHTML = why === 'error'
+      ? 'Price unavailable<span class="ct-cta-sub">Tap Try again in your bill</span>'
+      : why === 'reprice'
+        ? 'Review updated price<span class="ct-cta-sub">Accept the new total to continue</span>'
+        : 'Delivery unavailable<span class="ct-cta-sub">See the message in your bill</span>';
     return;
   }
   if (!ctState.loggedIn) {
@@ -1709,8 +1714,10 @@ async function placeOrder() {
   /* Live backend quote gate (additive). Re-quotes with the current basket,
      address and payment method; the returned quoteId is sent with the order.
      Pay is blocked ONLY when the backend says the order is not serviceable
-     (NOT_ECONOMICALLY_SERVICEABLE) or re-priced and not yet confirmed. A
-     quote outage never blocks ordering — the backend re-prices anyway. */
+     (NOT_ECONOMICALLY_SERVICEABLE), re-priced and not yet confirmed, or the
+     quote request FAILED (network / 4xx / 5xx / invalid coupon): no valid
+     quote, no Pay. Engine switched off, multi-restaurant baskets and
+     customers with no saved address are not quoted and are not blocked. */
   let ctQuoteId = '';
   if (window.EWCartQuoteUI && typeof window.EWCartQuoteUI.ensureForPay === 'function') {
     try {
@@ -1720,6 +1727,13 @@ async function placeOrder() {
         ctRestoreCheckoutButton(btn, originalHTML);
         shakeCheckout();
         showToast(q.message || 'This delivery is not available right now.', 'error');
+        return;
+      }
+      if (q && q.failed) {
+        ctOrderInFlight = false;
+        ctRestoreCheckoutButton(btn, originalHTML);
+        shakeCheckout();
+        showToast(q.message || 'We could not price your order right now. Please try again.', 'error');
         return;
       }
       if (q && q.needsConfirmation) {
@@ -1861,8 +1875,8 @@ async function placeOrder() {
       deliveryInstructions: ctState.deliveryInstructions || '',
       tipAmount: ctCleanTip(ctState.tipAmount),
       couponCode: String(ctState.couponCode || ''),
-      // The backend currently ignores quoteId (see docs/rebuild/BACKEND_GAPS.md
-      // B1); it is sent so the order is verifiable the moment the backend does.
+      // The backend verifies quoteId (signed, bound to this customer, restaurant,
+      // payment method, coupon and total) and answers QUOTE_* codes when stale.
       quoteId: ctQuoteId
     };
 

@@ -17,8 +17,13 @@
                                           offer self-delivery when the
                                           backend says it is available
      • Keeps the latest quoteId for POST /orders.
-     • A quote/network failure never blocks the cart: the legacy preview
-       stays and Pay remains available (the backend re-prices anyway).
+     • Pay needs a valid quote: when the backend answers a quote request with
+       a failure (network, 4xx/5xx, invalid coupon) the reason is shown with a
+       Try again button and Pay is blocked until a quote succeeds. The old
+       quote and its quoteId are dropped, never reused.
+     • Legacy path (no quote, never blocked): engine switched off
+       (PRICING_ENGINE_DISABLED), multi-restaurant baskets, and a customer
+       with no saved address (GPS-only; see audit F5).
 
    Requires: js/ew-pricing.js, js/ew-quote.js, js/ew-bill.js, js/ew-money.js
    ================================================================ */
@@ -37,6 +42,7 @@
   var countdownTimer = null;
   var lastQuote = null;
   var blocked = false;
+  var blockedReason = '';   /* 'unserviceable' | 'reprice' | 'error' | '' */
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -68,18 +74,28 @@
     var cart = readCart();
     var ids = restaurantIds();
     if (ids.length !== 1) return null;          /* multi-restaurant: legacy path */
+    var addressId = readAddressId();
+    if (!addressId) return null;                /* GPS-only: no saved address to price against (legacy path) */
     var items = window.EWOrderPayload ? window.EWOrderPayload.buildItems(cart) : [];
     items = items.filter(function (it) { return it.menuItem && Number(it.quantity) > 0; });
     if (!items.length) return null;
     var couponCode = '';
     try { if (typeof ctState === 'object' && ctState) couponCode = String(ctState.couponCode || ''); } catch (e) {}
-    return {
+    var tipAmount = 0;
+    try {
+      if (typeof ctState === 'object' && ctState) {
+        tipAmount = typeof ctCleanTip === 'function' ? ctCleanTip(ctState.tipAmount) : (Number(ctState.tipAmount) || 0);
+      }
+    } catch (e) {}
+    var body = {
       restaurantId: ids[0],
-      addressId: readAddressId() || null,
+      addressId: addressId,
       items: items,
       paymentMethod: readMethod(),
       couponCode: couponCode
     };
+    if (tipAmount > 0) body.tipAmount = tipAmount;
+    return body;
   }
 
   function payloadKey(body) {
@@ -159,13 +175,60 @@
     lastQuote = quote;
   }
 
+  var FALLBACK_ERROR = 'We could not price your order right now. Please try again.';
+
   function renderError(result) {
-    /* Keep the last quote visible; only surface a hard block for a real
-       not-serviceable answer. Network/400 failures leave the preview. */
     var code = result && result.code;
+    if (code === 'NO_BASKET') return;
+    /* Engine switched off: orders use the legacy price, so there is nothing
+       to show and nothing to block. Not an error. */
+    if (code === 'PRICING_ENGINE_DISABLED') { engineOff(); return; }
     if (code === 'NOT_ECONOMICALLY_SERVICEABLE' || code === 'out_of_delivery_radius' || code === 'route_unavailable') {
       renderBlocked(result && result.quote, result);
+      return;
     }
+    renderFailure(result);
+  }
+
+  /* Drop everything the engine drew: panel, countdown, preview override. */
+  function clearEngineBill() {
+    var host = document.getElementById(PANEL_ID);
+    if (host) host.innerHTML = '';
+    stopCountdown();
+    setPreviewHidden(false);
+    lastQuote = null;
+  }
+
+  function engineOff() {
+    clearEngineBill();
+    hideBlock();
+    if (typeof updateCheckoutCta === 'function') { try { updateCheckoutCta(); } catch (e) {} }
+  }
+
+  /* Any other failed quote (network, 400/404/429/5xx, invalid coupon): the
+     customer sees the backend's reason, can retry, and cannot pay until a
+     quote succeeds. */
+  function failureMessage(result) {
+    var m = result && result.message ? String(result.message).trim() : '';
+    return m || FALLBACK_ERROR;
+  }
+
+  function renderFailure(result) {
+    var host = blockHost();
+    if (!host) return;
+    clearEngineBill();
+    host.innerHTML = '<div class="ew-qb-blocked" role="alert">' +
+      '<span class="ew-qb-blocked-ic" aria-hidden="true">!</span>' +
+      '<div class="ew-qb-blocked-copy"><strong>We couldn’t price your order</strong>' +
+      '<span>' + esc(failureMessage(result)) + '</span></div>' +
+      '<button type="button" class="ew-qb-confirm" id="ew-quote-retry">Try again</button>' +
+      '</div>';
+    host.hidden = false;
+    var btn = document.getElementById('ew-quote-retry');
+    if (btn) btn.addEventListener('click', function () { onBasketChanged(); });
+    blocked = true;
+    blockedReason = 'error';
+    if (typeof updateCheckoutCta === 'function') { try { updateCheckoutCta(); } catch (e) {} }
   }
 
   function renderBlocked(quote, result) {
@@ -186,6 +249,7 @@
     stopCountdown();
     /* Disable Pay through the existing CTA guard. */
     blocked = true;
+    blockedReason = 'unserviceable';
     if (typeof updateCheckoutCta === 'function') { try { updateCheckoutCta(); } catch (e) {} }
   }
 
@@ -193,6 +257,7 @@
     var host = document.getElementById(BLOCK_ID);
     if (host) { host.hidden = true; host.innerHTML = ''; }
     blocked = false;
+    blockedReason = '';
   }
 
   function renderConfirmationIfNeeded(quote) {
@@ -224,6 +289,7 @@
       if (typeof updateCheckoutCta === 'function') { try { updateCheckoutCta(); } catch (e) {} }
     });
     blocked = true;
+    blockedReason = 'reprice';
     if (typeof updateCheckoutCta === 'function') { try { updateCheckoutCta(); } catch (e) {} }
   }
 
@@ -298,9 +364,15 @@
     if (!c) return { ok: false, skipped: true };
     var result = await c.requestNow(body);
     if (!result || result.stale) return { ok: false, skipped: true };
+    /* Engine off: the order is priced the legacy way. Not a failure. */
+    if (result.code === 'PRICING_ENGINE_DISABLED') return { ok: false, skipped: true, engineOff: true };
     if (result.code === 'NOT_ECONOMICALLY_SERVICEABLE' || (result.quote && result.quote.serviceable === false)) {
       renderBlocked(result.quote, result);
       return { ok: false, blocked: true, message: (result.quote && result.quote.message) || result.message };
+    }
+    /* No valid quote => no Pay. (The error is already on screen via onError.) */
+    if (!result.ok || !result.quote) {
+      return { ok: false, failed: true, message: failureMessage(result) };
     }
     if (c.needsConfirmation()) {
       renderConfirmationIfNeeded(c.quote());
@@ -315,6 +387,7 @@
     onBasketChanged: onBasketChanged,
     ensureForPay: ensureForPay,
     isBlocked: function () { return blocked === true; },
+    blockReason: function () { return blocked === true ? blockedReason : ''; },
     quoteId: function () { return controller ? controller.quoteId() : ''; },
     _controller: function () { return controller; },
     _basket: basket,

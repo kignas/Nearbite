@@ -8,8 +8,8 @@
    Quote bill shape (services/pricing/pricingOrchestrator.js `bill`):
      baseFoodSubtotal, foodUplift, customerFoodSubtotal, discount,
      couponDiscount, autoDiscount, foodPayable, deliveryFee,
-     baseDeliveryFee, deliverySubsidy, smallOrderFee, codFee, total,
-     grandTotal
+     baseDeliveryFee, deliverySubsidy, smallOrderFee, codFee, tipAmount,
+     total (before tip), grandTotal (what the order charges, incl. tip)
 
    Stored order bill shape (models/Order.js `bill`):
      itemSubtotal, packagingCharge, deliveryFee, baseDeliveryFee,
@@ -67,6 +67,7 @@
     push('smallOrderFee', 'Small order fee', b.smallOrderFee, 'fee');
     push('codFee', 'COD handling fee', b.codFee, 'fee');
     push('taxes', 'Taxes', b.taxAmount, 'tax');
+    push('tip', 'Delivery partner tip', b.tipAmount, 'tip');
     push('total', 'To pay', has(b.grandTotal) ? b.grandTotal : b.total, 'total');
     return rows;
   }
