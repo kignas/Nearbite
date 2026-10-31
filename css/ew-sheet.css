@@ -295,3 +295,25 @@
 .ewcs-add:disabled {
   background: #E5E7EB; color: #9AA3B2; box-shadow: none;
 }
+
+/* ---- fix: floating close button must not show when popup is closed ---- */
+.ewcs-sheet {
+  visibility: hidden;
+  transition: transform .26s var(--ews-ease), visibility 0s linear .26s;
+}
+.ewcs-sheet.show {
+  visibility: visible;
+  transition: transform .26s var(--ews-ease), visibility 0s linear 0s;
+}
+.ewcs-close {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+.ewcs-sheet.show .ewcs-close {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ewcs-sheet, .ewcs-sheet.show { transition: none; }
+}
