@@ -785,6 +785,12 @@
     }
     return out;
   }
+  function homeMinimumOrderMarkup(r){
+    var minimum = r && r.pricing && r.pricing.minimumOrder;
+    var amount = minimum && Number(minimum.amount);
+    if (!Number.isFinite(amount) || amount <= 0) return '';
+    return '<div class="u99-free-row u99-minimum-row"><span class="u99-free-icon" aria-hidden="true">'+home99Icon.info+'</span><span class="u99-free-text">Minimum basket ₹'+Math.ceil(amount).toLocaleString('en-IN')+'</span></div>';
+  }
   function homeFreeDeliveryMarkup(r){
     /* Never advertise a delivery promotion for an address the authoritative
        road-route pricing endpoint has marked unserviceable. */
@@ -814,7 +820,7 @@
     var card='<div class="u99-card-host" data-home99-restaurant="'+esc(id)+'" style="animation:cardFadeUp .28s ease forwards '+(Math.min(index,6)*.045)+'s;opacity:0">'+
       '<article class="u99-restaurant-card'+(unavailable?' is-unavailable':'')+'">'+
       '<div class="u99-restaurant-head" data-home99-action="restaurant" role="button" tabindex="0" aria-label="Open '+esc(name)+'">'+
-      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+homeBadgesMarkup(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(distanceText?'<span class="u99-sep">•</span><span class="u99-distance">'+esc(distanceText)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+'</div></div>'+
+      '<div class="u99-card-copy"><div class="u99-discount-line">'+esc(homeRestaurantOffer(res))+'</div><h2 class="u99-restaurant-name"><span class="u99-name-text">'+esc(name)+'</span>'+homeVerifiedBadge(res)+homeBadgesMarkup(res)+'</h2><div class="u99-meta">'+homeRatingMarkup(res)+(delivery?'<span class="u99-sep">•</span><span class="u99-delivery">'+home99Icon.clock+esc(delivery)+'</span>':'')+(distanceText?'<span class="u99-sep">•</span><span class="u99-distance">'+esc(distanceText)+'</span>':'')+(cuisine?'<span class="u99-sep">•</span><span class="u99-cuisine">'+esc(formatCuisineDisplay(cuisine))+'</span>':'')+'</div>'+homeFreeDeliveryMarkup(res)+homeMinimumOrderMarkup(res)+'</div></div>'+
       '<div class="u99-carousel-wrap"><div class="u99-carousel'+(menu.length?'':' u99-carousel-empty')+'" tabindex="0" aria-label="'+esc(name)+' menu">'+(menu.length?homeRailMarkup(menu,res):'<div class="u99-no-items">Menu unavailable</div>')+'</div></div>'+
       (unavailable?'<div class="u99-availability-overlay"><span>'+esc(label)+'</span></div>':'')+
       '</article></div>';
