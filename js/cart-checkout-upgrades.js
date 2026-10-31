@@ -359,6 +359,7 @@
         '<span class="ct-pay-radio" aria-hidden="true"></span></button>';
     }
     var single = (showCod ? 1 : 0) + (showUpi ? 1 : 0) === 1;
+    card.hidden = true; // chosen in the payment sheet when the customer taps Proceed to Pay
     card.classList.toggle('is-single', single);
     card.innerHTML =
       '<h2 class="ct-sec-title">Payment method</h2>' +
@@ -368,16 +369,57 @@
       '</div>';
   }
 
+
+  /* ── Payment choice happens on "Proceed to Pay" ──────────────── */
+  function visibleMethods() {
+    var cfg = S(), out = [];
+    var showCod = cfg.isCodEnabled === true;
+    var showUpi = cfg.isUpiEnabled !== false || !showCod;
+    if (showUpi) out.push({ id: 'upi', icon: 'fa-solid fa-mobile-screen-button', title: 'UPI / Online Payment', st: upiState() });
+    if (showCod) out.push({ id: 'cod', icon: 'fa-solid fa-hand-holding-dollar', title: 'Cash on Delivery (COD)', st: codState() });
+    return out;
+  }
+  function hasChoice() {
+    return visibleMethods().filter(function (m) { return m.st.ok; }).length > 1;
+  }
+  function startPayment() {
+    var btn = el('btn-checkout');
+    var locked = !btn || btn.classList.contains('locked') || btn.getAttribute('aria-disabled') === 'true';
+    if (locked || !hasChoice() || typeof openSheet !== 'function') { placeOrder(); return; }
+    var cur = getPaymentMethod();
+    var box = el('ct-pay-sheet-opts');
+    if (!box) { placeOrder(); return; }
+    box.innerHTML = visibleMethods().map(function (m) {
+      return '<button type="button" role="radio" class="ct-pay-opt' + (m.id === cur ? ' is-selected' : '') + (m.st.ok ? '' : ' is-disabled') + '"' +
+        ' data-ct-pick="' + m.id + '" aria-checked="' + (m.id === cur ? 'true' : 'false') + '"' + (m.st.ok ? '' : ' aria-disabled="true"') + '>' +
+        '<span class="ct-pay-ic" aria-hidden="true"><i class="' + m.icon + '"></i></span>' +
+        '<span class="ct-pay-copy"><span class="ct-pay-title">' + m.title + '</span>' +
+        '<span class="ct-pay-sub' + (m.st.ok ? '' : ' is-warn') + '">' + esc(m.st.note) + '</span></span>' +
+        (m.st.ok ? '' : '<span class="ct-pay-badge">' + (m.st.note === 'Unavailable' ? 'Unavailable' : 'Not eligible') + '</span>') +
+        '<span class="ct-pay-radio" aria-hidden="true"></span></button>';
+    }).join('');
+    openSheet('ct-pay-sheet');
+  }
+  function onPick(e) {
+    var b = e.target.closest && e.target.closest('[data-ct-pick]');
+    if (!b || b.getAttribute('aria-disabled') === 'true') return;
+    selectMethod(b.getAttribute('data-ct-pick'));
+    try { closeSheet(true); } catch (err) { /* ignore */ }
+    setTimeout(function () { placeOrder(); }, 120);
+  }
+
   function paintPayNote() {
     var t = el('ct-pay-note-text');
     if (!t) return;
-    t.textContent = getPaymentMethod() === 'cod'
-      ? 'Cash on Delivery · keep the exact amount ready'
-      : 'Secure UPI payment · GPay, PhonePe & more';
+    t.textContent = hasChoice()
+      ? 'Pay with UPI or Cash on Delivery'
+      : (getPaymentMethod() === 'cod'
+        ? 'Cash on Delivery · keep the exact amount ready'
+        : 'Secure UPI payment · GPay, PhonePe & more');
   }
 
   function ctaLabel() {
-    return getPaymentMethod() === 'cod' ? 'Place Order (COD)' : 'Proceed to Pay';
+    return (!hasChoice() && getPaymentMethod() === 'cod') ? 'Place Order (COD)' : 'Proceed to Pay';
   }
 
   function ensureMounts() {
@@ -416,6 +458,7 @@
   function init() {
     ensureMounts();
     document.addEventListener('click', onClick);
+    document.addEventListener('click', onPick);
     document.addEventListener('change', onChange);
     if (window.EWPlatform) {
       window.EWPlatform.onChange(function () {
@@ -452,6 +495,8 @@
     selectMethod: selectMethod,
     refreshPayment: refreshPayment,
     resetMethod: resetMethod,
+    startPayment: startPayment,
+    hasChoice: hasChoice,
     getSendCutlery: function () { return sendCutlery; },
     handleOrderFailure: handleOrderFailure,
     codState: codState,

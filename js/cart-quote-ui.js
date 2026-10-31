@@ -179,6 +179,14 @@
       var ct = document.getElementById('checkout-total');
       if (bt) bt.textContent = txt;
       if (ct) ct.textContent = txt;
+      // Keep the "To Pay" hero on the same backend figure as the bill and the CTA.
+      var hero = document.getElementById('bill-hero-total');
+      if (hero) hero.textContent = txt;
+      try {
+        var hs = Number(ctState.itemSavings || 0);
+        var ho = document.getElementById('bill-hero-orig');
+        if (ho) { if (hs > 0) { ho.textContent = window.EWMoney.format(total + hs); ho.hidden = false; } else ho.hidden = true; }
+      } catch (e) { /* hero strike-through is cosmetic */ }
     }
 
     renderConfirmationIfNeeded(quote);

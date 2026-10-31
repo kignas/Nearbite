@@ -1195,8 +1195,7 @@ function updateCheckoutCta() {
   }
   btn.classList.remove('locked');
   btn.setAttribute('aria-disabled', 'false');
-  const isCod = ctSelectedPaymentMethod() === 'cod';
-  const ctaMain = isCod ? 'Place Order (COD)' : 'Proceed to Pay';
+  const ctaMain = (window.CtX && window.CtX.ctaLabel) ? window.CtX.ctaLabel() : (ctSelectedPaymentMethod() === 'cod' ? 'Place Order (COD)' : 'Proceed to Pay');
   label.innerHTML = `${ctaMain} ${CT_ICON_ARROW}<span class="ct-cta-sub">${ctState.units} ${plural}</span>`;
 }
 
