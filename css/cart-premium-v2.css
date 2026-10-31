@@ -1,0 +1,91 @@
+
+/* Eatswada checkout premium refinement — additive, cart-page scoped. */
+.ct-page { background:#f5f6f8; color:#20232b; }
+.ct-page #cart-has-items { max-width:760px; margin:0 auto; padding-bottom:18px; }
+.ct-page .ct-card,
+.ct-page .ct-bill,
+.ct-page .ct-meal-card,
+.ct-page .ct-savings-card {
+  border:1px solid rgba(24,31,43,.075);
+  border-radius:24px;
+  background:#fff;
+  box-shadow:0 8px 26px rgba(23,30,43,.045),0 1px 3px rgba(23,30,43,.035);
+}
+.ct-page .ct-delivery-head {
+  background:rgba(255,255,255,.97);
+  border-bottom:1px solid rgba(28,34,46,.07);
+  box-shadow:0 4px 18px rgba(20,25,35,.035);
+}
+.ct-page .ct-bill { overflow:hidden; }
+.ct-page .ct-bill-hero {
+  padding:22px 22px 19px;
+  background:linear-gradient(135deg,#fff9f7 0%,#fff 68%);
+  border-bottom:1px solid #f0edf0;
+}
+.ct-page .ct-bill-hero-ic {
+  width:48px;height:48px;border-radius:16px;
+  background:#fcebef;color:#a72e4b;
+}
+.ct-page .ct-bill-hero-top { color:#4a4d57;font-weight:700; }
+.ct-page .ct-bill-hero-top strong { color:#191c24;font-size:30px;letter-spacing:-.8px; }
+.ct-page .ct-bill-rows { padding:8px 22px 18px; }
+.ct-page .ct-bill-row { min-height:48px; }
+.ct-page .ct-bill-label { color:#717782;font-size:14px; }
+.ct-page .ct-bill-val { color:#272b34;font-weight:750;font-size:15px; }
+.ct-page .ct-bill-sep { margin:6px 0 10px; background:#eef0f3; }
+.ct-page .ct-paybar {
+  background:rgba(255,255,255,.97);
+  border-top:1px solid rgba(25,30,40,.08);
+  box-shadow:0 -8px 28px rgba(22,27,38,.07);
+  backdrop-filter:blur(18px);
+}
+.ct-page .ct-paybar-left { padding-left:20px; }
+.ct-page .ct-paybar-amt { font-size:24px;font-weight:850;letter-spacing:-.5px; }
+.ct-page .ct-paybar-link { color:#a72e4b;font-weight:750; }
+.ct-page .ct-details,
+.ct-page .ct-rider-options,
+.ct-page .ct-payment-method { padding:20px; }
+.ct-page .ct-section-title { letter-spacing:-.3px; }
+.ct-page .ct-strip { border-radius:15px; }
+.ct-page button, .ct-page a { -webkit-tap-highlight-color:transparent; }
+.ct-page .ct-location-modal[hidden] { display:none !important; }
+.ct-location-modal {
+  position:fixed; inset:0; z-index:10050; display:grid; place-items:center;
+  padding:22px; padding-top:max(22px,env(safe-area-inset-top));
+  padding-bottom:max(22px,env(safe-area-inset-bottom));
+}
+.ct-location-backdrop { position:absolute; inset:0; background:rgba(17,20,28,.62); backdrop-filter:blur(7px); }
+.ct-location-dialog {
+  position:relative; width:min(100%,430px); max-height:min(88dvh,720px); overflow:auto;
+  padding:28px 24px 23px; border-radius:28px; background:#fff;
+  box-shadow:0 28px 90px rgba(0,0,0,.25); text-align:center;
+  animation:ctLocationIn .22s ease-out;
+}
+@keyframes ctLocationIn { from{opacity:0;transform:translateY(12px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+.ct-location-art {
+  width:76px;height:76px;margin:0 auto 18px;border-radius:25px;
+  display:grid;place-items:center;position:relative;
+  background:linear-gradient(145deg,#fff0f2,#fce2e8);color:#a72e4b;font-size:30px;
+}
+.ct-location-art span { position:absolute;width:11px;height:11px;border-radius:50%;background:#2c9a75;right:12px;top:12px;border:3px solid #fff; }
+.ct-location-eyebrow { margin:0 0 8px;color:#a72e4b;font-size:10px;font-weight:850;letter-spacing:1.3px; }
+.ct-location-dialog h2 { margin:0 0 10px;color:#1d2028;font-size:24px;line-height:1.2;letter-spacing:-.7px;font-weight:850; }
+.ct-location-dialog > p:not(.ct-location-eyebrow):not(.ct-location-footnote) { margin:0 auto;color:#69717d;font-size:14px;line-height:1.6;max-width:340px; }
+.ct-location-points { display:grid;gap:11px;text-align:left;margin:21px 0;padding:16px;border-radius:17px;background:#f8f8fa; }
+.ct-location-points div { display:flex;align-items:center;gap:11px;color:#434955;font-size:13px;font-weight:700; }
+.ct-location-points i { width:20px;text-align:center;color:#a72e4b; }
+.ct-location-primary {
+  min-height:54px;padding:0 18px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:12px;
+  background:#a72e4b;color:#fff;text-decoration:none;font-size:14px;font-weight:800;
+  box-shadow:0 8px 18px rgba(167,46,75,.22);
+}
+.ct-location-primary:active { transform:scale(.985); }
+.ct-location-footnote { margin:14px 2px 0;color:#8b929c;font-size:11px;line-height:1.5; }
+body.ct-location-modal-open { overflow:hidden; }
+@media (min-width:700px) {
+  .ct-page #cart-has-items { padding:18px 18px 30px; }
+  .ct-page .ct-bill, .ct-page .ct-card { margin-bottom:16px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .ct-location-dialog { animation:none; }
+}
