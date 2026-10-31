@@ -89,6 +89,7 @@
     root.setAttribute('aria-labelledby', 'ew-os-title');
     var scrim = el('div', 'ew-os__scrim');
     var sheet = el('div', 'ew-os__sheet'); sheet.tabIndex = -1;
+    sheet.appendChild(el('span', 'ew-os__grab'));
 
     var close = el('button', 'ew-os__close'); close.type = 'button';
     close.setAttribute('aria-label', 'Close'); close.innerHTML = NS_X;
@@ -99,18 +100,31 @@
     sheet.appendChild(close); sheet.appendChild(hero); sheet.appendChild(title);
     if (opts.message) sheet.appendChild(msg);
 
-    var rows = (opts.rows || []).filter(function (r) { return r && r.value; });
-    if (opts.orderNumber) rows.unshift({ label: 'Order number', value: opts.orderNumber });
-    if (rows.length) {
-      var box = el('div', 'ew-os__rows');
-      rows.forEach(function (r) {
-        var row = el('div', 'ew-os__row');
+    var now = new Date();
+    var timeTxt = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    var dateTxt = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    var meta = [{ label: 'Status', value: 'Confirmed', tone: 'status' }];
+    if (opts.orderNumber) meta.push({ label: 'Order number', value: opts.orderNumber });
+    meta.push({ label: 'Time', value: timeTxt }, { label: 'Date', value: dateTxt });
+    var amounts = (opts.rows || []).filter(function (r) { return r && r.value; });
+
+    function group(list, totalLast) {
+      var g = el('div', 'ew-os__group');
+      list.forEach(function (r, i) {
+        var isTotal = totalLast && i === list.length - 1;
+        var row = el('div', 'ew-os__row' + (isTotal ? ' ew-os__row--total' : ''));
         row.appendChild(el('span', 'ew-os__label', r.label));
-        row.appendChild(el('span', 'ew-os__value' + (r.tone === 'good' ? ' ew-os__value--good' : ''), r.value));
-        box.appendChild(row);
+        var cls = 'ew-os__value' + (r.tone === 'good' ? ' ew-os__value--good' : '') + (r.tone === 'status' ? ' ew-os__value--status' : '');
+        row.appendChild(el('span', cls, r.value));
+        g.appendChild(row);
       });
-      sheet.appendChild(box);
+      return g;
     }
+    var box = el('div', 'ew-os__rows');
+    box.appendChild(el('h3', 'ew-os__head', 'Order details'));
+    box.appendChild(group(meta, false));
+    if (amounts.length) { box.appendChild(el('div', 'ew-os__dash')); box.appendChild(group(amounts, true)); }
+    sheet.appendChild(box);
 
     var actions = el('div', 'ew-os__actions');
     var btn = el('button', 'ew-os__btn', opts.buttonText || 'Track my order'); btn.type = 'button';
